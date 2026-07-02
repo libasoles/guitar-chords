@@ -19,6 +19,7 @@ const ROOT = path.join(__dirname, '..');
 const SRC_SITE = path.join(ROOT, 'src', 'site');
 const SRC_SHARED = path.join(ROOT, 'src', 'shared');
 const SRC_I18N = path.join(ROOT, 'src', 'i18n');
+const SRC_EXT = path.join(ROOT, 'src', 'extension');
 const SRC_VENDOR = path.join(ROOT, 'vendor');
 const DIST_SITE = path.join(ROOT, 'dist', 'site');
 
@@ -140,6 +141,7 @@ ensureDir(VENDOR_DIST);
 // Site-specific JS and CSS.
 copyFile(path.join(SRC_SITE, 'chord-finder.js'), path.join(ASSETS_DIST, 'chord-finder.js'));
 copyFile(path.join(SRC_SITE, 'site.css'), path.join(ASSETS_DIST, 'site.css'));
+copyFile(path.join(SRC_EXT, 'icon-source.svg'), path.join(ASSETS_DIST, 'favicon.svg'));
 // Vendored svguitar and fuzzysort.
 copyFile(path.join(SRC_VENDOR, 'svguitar.umd.js'), path.join(VENDOR_DIST, 'svguitar.umd.js'));
 copyFile(path.join(SRC_VENDOR, 'fuzzysort.js'), path.join(VENDOR_DIST, 'fuzzysort.js'));
