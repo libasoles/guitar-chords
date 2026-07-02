@@ -26,7 +26,7 @@ Look up a guitar chord diagram instantly — Cmaj7, Am7, D/F♯ and more. 100+ o
 You're looking at the guitar neck face-on. The thinnest string (high E, 1st) is on the right; the thickest (low E, 6th) is on the left. Numbers indicate the finger to use (1=index, 2=middle, 3=ring, 4=pinky). ○ = open string, ✕ = muted string.
 
 **Also available as a web app**
-https://libasoles.github.io/guitar-chords/
+https://acordesdeguitarra.com.ar/
 
 ---
 
@@ -54,4 +54,4 @@ Buscá diagramas de acordes de guitarra al instante — Cmaj7, Am7, D/F♯ y má
 Mirás el mástil de frente. La cuerda más fina (mi agudo, 1ª) está a la derecha; la más gruesa (mi grave, 6ª) a la izquierda. Los números indican el dedo (1=índice, 2=mayor, 3=anular, 4=meñique). ○ = cuerda al aire, ✕ = cuerda silenciada.
 
 **También disponible como app web**
-https://libasoles.github.io/guitar-chords/
+https://acordesdeguitarra.com.ar/

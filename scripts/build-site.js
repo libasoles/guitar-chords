@@ -8,7 +8,7 @@
    Assets are shared via dist/site/assets/.
 
    Env vars:
-     SITE_BASE_URL         Base URL without trailing slash (default: https://libasoles.github.io/guitar-chords)
+     SITE_BASE_URL         Base URL without trailing slash (default: https://acordesdeguitarra.com.ar)
      EXTENSION_STORE_URL   Chrome Web Store URL — enables the "Add to Chrome" button
 */
 
@@ -23,7 +23,7 @@ const SRC_VENDOR = path.join(ROOT, 'vendor');
 const DIST_SITE = path.join(ROOT, 'dist', 'site');
 
 // Base URL for canonical/OG tags (no trailing slash).
-const SITE_BASE_URL = (process.env.SITE_BASE_URL || 'https://libasoles.github.io/guitar-chords').replace(/\/$/, '');
+const SITE_BASE_URL = (process.env.SITE_BASE_URL || 'https://acordesdeguitarra.com.ar').replace(/\/$/, '');
 
 // ---- helpers ---------------------------------------------------------------
 
@@ -57,7 +57,7 @@ const LOCALES = ['es', 'en'];
 
 // Build the chord-finder i18n subset (only the cfXxx keys).
 function finderI18N(strings) {
-  const keys = ['cfFilters', 'cfEmpty', 'cfPinLabel', 'cfPinnedLabel', 'cfPinnedTitle', 'cfToolbarAriaLabel', 'cfUnpinAriaLabel'];
+  const keys = ['cfFilters', 'cfEmpty', 'cfPinLabel', 'cfPinnedLabel', 'cfPinnedTitle', 'cfToolbarAriaLabel', 'cfUnpinAriaLabel', 'cfNotationToggleToSpanish', 'cfNotationToggleToEnglish'];
   const out = {};
   keys.forEach(function (k) { if (strings[k] !== undefined) out[k] = strings[k]; });
   return out;
@@ -133,7 +133,7 @@ ensureDir(ASSETS_DIST);
 ensureDir(VENDOR_DIST);
 
 // Shared JS.
-['chords-db.js', 'chord-diagram.js', 'chord-search.js'].forEach(function (f) {
+['chords-db.js', 'chord-diagram.js', 'chord-search.js', 'note-names.js'].forEach(function (f) {
   copyFile(path.join(SRC_SHARED, f), path.join(ASSETS_DIST, f));
 });
 // Site-specific JS and CSS.

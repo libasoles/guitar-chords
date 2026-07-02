@@ -2,7 +2,7 @@
 
 Instant guitar chord diagrams for any chord name — Cmaj7, Am7, D/F♯ and more.
 
-**Live site →** https://libasoles.github.io/guitar-chords/
+**Live site →** https://acordesdeguitarra.com.ar/
 
 Available in English and Spanish. Open-position diagrams for 100+ chords.
 Built with vanilla JS, no framework, no build step beyond a Node.js assembly script.
@@ -48,7 +48,7 @@ npm run build:ext   # → dist/extension/ + dist/extension.zip
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `SITE_BASE_URL` | `https://libasoles.github.io/guitar-chords` | Canonical URLs, og:url, sitemap |
+| `SITE_BASE_URL` | `https://acordesdeguitarra.com.ar` | Canonical URLs, og:url, sitemap |
 | `EXTENSION_STORE_URL` | *(empty)* | Enables "Add to Chrome" button on the site when set |
 
 ### OG / social image
