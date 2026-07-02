@@ -21,6 +21,7 @@ const SRC_SHARED = path.join(ROOT, 'src', 'shared');
 const SRC_I18N = path.join(ROOT, 'src', 'i18n');
 const SRC_EXT = path.join(ROOT, 'src', 'extension');
 const SRC_VENDOR = path.join(ROOT, 'vendor');
+const SRC_STORE = path.join(ROOT, 'store');
 const DIST_SITE = path.join(ROOT, 'dist', 'site');
 
 // Base URL for canonical/OG tags (no trailing slash).
@@ -152,6 +153,10 @@ if (fs.existsSync(ogImageSrc)) {
 } else {
   say('(src/site/og-image.png not found — og:image will 404 until added)');
 }
+// Store-facing static pages.
+const storeDist = path.join(DIST_SITE, 'store');
+ensureDir(storeDist);
+copyFile(path.join(SRC_STORE, 'privacy-policy.html'), path.join(storeDist, 'privacy-policy.html'));
 
 console.log('==> Rendering locale pages...');
 
@@ -219,6 +224,12 @@ const sitemapXml = [
   '    <priority>0.9</priority>',
   '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/"/>',
   '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en"/>',
+  '  </url>',
+  '  <url>',
+  '    <loc>' + SITE_BASE_URL + '/store/privacy-policy.html</loc>',
+  '    <lastmod>' + today + '</lastmod>',
+  '    <changefreq>yearly</changefreq>',
+  '    <priority>0.3</priority>',
   '  </url>',
   '</urlset>',
   '',
