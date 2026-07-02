@@ -182,7 +182,7 @@ fs.rmSync(DIST_EXT, { recursive: true, force: true });
 ensureDir(DIST_EXT);
 
 console.log('==> Copying shared sources...');
-['chords-db.js', 'chord-diagram.js', 'chord-search.js'].forEach(function (f) {
+['chords-db.js', 'chord-diagram.js', 'chord-search.js', 'note-names.js'].forEach(function (f) {
   copyFile(path.join(SRC_SHARED, f), path.join(DIST_EXT, f));
 });
 

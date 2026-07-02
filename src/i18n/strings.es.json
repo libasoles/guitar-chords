@@ -11,7 +11,7 @@
   "wordmarkSmall": "para la guitarra",
 
   "h1": "Buscador de acordes",
-  "lead": "Tipeá un nombre (Cmaj7, Bm7b5, D/F#…) o filtrá por familia. Diagramas en posición abierta para guitarra.",
+  "lead": "Tipeá un nombre (Cmaj7, Bm7b5, D/F#…) o filtrá por familia.",
 
   "h2Decoder": "Cómo se decodifica un nombre de acorde",
   "decoderIntro": "Cualquier cifrado se arma como: <strong>Raíz</strong> + <strong>calidad</strong> + <strong>tensiones</strong> + <strong>/bajo opcional</strong>. Esta tabla te alcanza para leer el 95% de lo que aparece en una tablatura web.",
@@ -48,5 +48,7 @@
   "cfPinnedLabel": "Pineado",
   "cfPinnedTitle": "Acordes pineados",
   "cfToolbarAriaLabel": "Filtros y búsqueda",
-  "cfUnpinAriaLabel": "Despinear {name}"
+  "cfUnpinAriaLabel": "Despinear {name}",
+  "cfNotationToggleToSpanish": "Cambiar a cifrado en español (Do Re Mi)",
+  "cfNotationToggleToEnglish": "Cambiar a cifrado americano (C D E)"
 }

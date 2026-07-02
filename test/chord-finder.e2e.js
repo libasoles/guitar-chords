@@ -145,6 +145,54 @@ async function run() {
 
     console.log('OK: chord-finder mounts, filters by query, shows empty state.');
     console.log('OK: pinnable pins/unpins (persists across queries); plain has no pin affordance.');
+
+    // ---- Notation toggle (cifrado americano ⇄ español) ----
+
+    await page.fill(input, 'Am7');
+    await page.waitForFunction(() =>
+      document.querySelector('#pin').shadowRoot.querySelectorAll('.card:not(.hidden)').length > 0
+    );
+    let names = await visibleNames(page);
+    assert.ok(names.includes('Am7'), `expected English "Am7" by default, got: ${names.join(', ')}`);
+
+    const clickNotationToggle = (sel) => page.evaluate((s) => {
+      document.querySelector(s).shadowRoot.querySelector('.notation-toggle').click();
+    }, sel);
+
+    await clickNotationToggle('#pin');
+    await page.waitForFunction(() => {
+      const f = document.querySelector('#pin');
+      const card = Array.from(f.shadowRoot.querySelectorAll('.card')).find((c) => !c.classList.contains('hidden'));
+      return card && card.querySelector('.name').textContent === 'Lam7';
+    });
+    names = await visibleNames(page);
+    assert.ok(names.includes('Lam7'), `expected Spanish "Lam7" after toggle, got: ${names.join(', ')}`);
+
+    // Search still works in Spanish notation regardless of display toggle.
+    await page.fill(input, 'sol7');
+    await page.waitForFunction(() =>
+      document.querySelector('#pin').shadowRoot.querySelectorAll('.card:not(.hidden)').length > 0
+    );
+    names = await visibleNames(page);
+    assert.ok(names.includes('Sol7'), `expected "sol7" query to match G7 (shown as "Sol7"), got: ${names.join(', ')}`);
+
+    // Search still works in English notation too, after switching display to Spanish.
+    await page.fill(input, 'G7');
+    await page.waitForFunction(() =>
+      document.querySelector('#pin').shadowRoot.querySelectorAll('.card:not(.hidden)').length > 0
+    );
+    names = await visibleNames(page);
+    assert.ok(names.includes('Sol7'), `expected "G7" query to still match, got: ${names.join(', ')}`);
+
+    // Toggle back to English.
+    await clickNotationToggle('#pin');
+    await page.waitForFunction(() => {
+      const f = document.querySelector('#pin');
+      const card = Array.from(f.shadowRoot.querySelectorAll('.card')).find((c) => !c.classList.contains('hidden'));
+      return card && card.querySelector('.name').textContent === 'G7';
+    });
+
+    console.log('OK: notation toggle switches chord names between American and Spanish (cifrado); search accepts both regardless of toggle.');
   } catch (err) {
     failures.push(err);
   } finally {

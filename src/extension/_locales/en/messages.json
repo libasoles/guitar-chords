@@ -32,5 +32,13 @@
     "placeholders": {
       "chord": { "content": "$1", "example": "Am7" }
     }
+  },
+  "notationToggleToSpanish": {
+    "message": "Switch to Spanish notation (Do Re Mi)",
+    "description": "Aria label/title for the notation toggle button when currently showing American notation"
+  },
+  "notationToggleToEnglish": {
+    "message": "Switch to American notation (C D E)",
+    "description": "Aria label/title for the notation toggle button when currently showing Spanish notation"
   }
 }

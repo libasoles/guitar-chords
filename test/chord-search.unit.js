@@ -128,3 +128,33 @@ test('matchChords con lista vacía o ausente → []', () => {
   assert.deepEqual(matchChords('a', []), []);
   assert.deepEqual(matchChords('a', undefined), []);
 });
+
+test('normalize: nota inicial en español → letra americana', () => {
+  assert.equal(normalize('Do'), 'c');
+  assert.equal(normalize('Re'), 'd');
+  assert.equal(normalize('Mi'), 'e');
+  assert.equal(normalize('Fa'), 'f');
+  assert.equal(normalize('Sol'), 'g');
+  assert.equal(normalize('La'), 'a');
+  assert.equal(normalize('Si'), 'b');
+});
+
+test('normalize: cifrado español con calidad y alteraciones', () => {
+  assert.equal(normalize('Dom'), 'cm');
+  assert.equal(normalize('Sol7'), 'g7');
+  assert.equal(normalize('Do♯m'), 'c#m');
+  assert.equal(normalize('Reb'), 'db');
+  assert.equal(normalize('Sim7b5'), 'bm7b5');
+});
+
+test('cifrado español "do" matchea lo mismo que "c"', () => {
+  assert.deepEqual(names('do'), names('c'));
+});
+
+test('cifrado español "solm7" matchea "Gm7"', () => {
+  assert.ok(names('solm7').includes('Gm7'));
+});
+
+test('cifrado español "la" matchea lo mismo que "a"', () => {
+  assert.deepEqual(names('la'), names('a'));
+});

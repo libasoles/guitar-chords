@@ -23,9 +23,49 @@
   const resultsShell = document.getElementById('results-shell');
   const pinned = document.getElementById('pinned');
   const pinnedShell = document.getElementById('pinned-shell');
+  const notationToggle = document.getElementById('notation-toggle');
   const { matchChords } = window.ChordSearch;
   const MAX_POPUP_HEIGHT = 600;
   const pinnedChordNames = [];
+  const NOTATION_STORAGE_KEY = 'chordNotation';
+
+  function loadNotation() {
+    try {
+      return window.localStorage.getItem(NOTATION_STORAGE_KEY) === 'es' ? 'es' : 'en';
+    } catch (e) {
+      return 'en';
+    }
+  }
+
+  function saveNotation(notation) {
+    try {
+      window.localStorage.setItem(NOTATION_STORAGE_KEY, notation);
+    } catch (e) {
+      // localStorage puede no estar disponible; ignorar.
+    }
+  }
+
+  let notation = loadNotation();
+
+  function displayName(chord) {
+    if (notation === 'es' && window.NoteNames) return window.NoteNames.toSpanishName(chord.name);
+    return chord.name;
+  }
+
+  function displayNotes(chord) {
+    if (notation === 'es' && window.NoteNames) return window.NoteNames.toSpanishNotes(chord.notes || '');
+    return chord.notes || '';
+  }
+
+  function syncNotationToggle() {
+    notationToggle.textContent = notation === 'es' ? 'Do' : 'C';
+    notationToggle.setAttribute('aria-pressed', String(notation === 'es'));
+    const label = notation === 'es'
+      ? i18n('notationToggleToEnglish', 'Switch to American notation (C D E)')
+      : i18n('notationToggleToSpanish', 'Switch to Spanish notation (Do Re Mi)');
+    notationToggle.title = label;
+    notationToggle.setAttribute('aria-label', label);
+  }
 
   function drawDiagram(target, chord) {
     try {
@@ -87,12 +127,12 @@
 
     const name = document.createElement('div');
     name.className = 'name';
-    name.textContent = chord.name;
+    name.textContent = displayName(chord);
     card.appendChild(name);
 
     const notes = document.createElement('div');
     notes.className = 'notes';
-    notes.textContent = chord.notes;
+    notes.textContent = displayNotes(chord);
     card.appendChild(notes);
 
     results.appendChild(card);
@@ -120,7 +160,7 @@
 
     const name = document.createElement('div');
     name.className = 'pinned-name';
-    name.textContent = chord.name;
+    name.textContent = displayName(chord);
     item.appendChild(name);
 
     pinned.appendChild(item);
@@ -178,6 +218,13 @@
   window.addEventListener('resize', () => { syncPopupHeight(); syncResultsFade(); });
   results.addEventListener('scroll', syncResultsFade, { passive: true });
   input.addEventListener('input', render);
+  notationToggle.addEventListener('click', () => {
+    notation = notation === 'es' ? 'en' : 'es';
+    saveNotation(notation);
+    syncNotationToggle();
+    render();
+  });
+  syncNotationToggle();
   input.focus();
   render();
 })();

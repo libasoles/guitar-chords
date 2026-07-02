@@ -67,7 +67,15 @@ body {
 
 /* ----- Searchbox (espejo del .finder-controls input del sitio) ----- */
 
+.search-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 #q {
+  flex: 1 1 auto;
+  min-width: 0;
   width: 100%;
   font-family: var(--mono);
   font-size: 1rem;
@@ -82,6 +90,30 @@ body {
   outline: 2px solid var(--accent);
   outline-offset: -1px;
   border-color: var(--accent);
+}
+
+.notation-toggle {
+  flex: 0 0 auto;
+  min-height: 2.35rem;
+  padding: 0.45rem 0.6rem;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.notation-toggle:hover { border-color: var(--ink-soft); }
+.notation-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.notation-toggle[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
 }
 
 /* ----- Pines ----- */

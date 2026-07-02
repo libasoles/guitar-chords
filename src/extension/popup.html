@@ -20,7 +20,10 @@
     <span class="wordmark" id="wordmark">Guitar Chords</span>
   </header>
 
-  <input type="search" id="q" autocomplete="off" spellcheck="false" autofocus>
+  <div class="search-row">
+    <input type="search" id="q" autocomplete="off" spellcheck="false" autofocus>
+    <button type="button" id="notation-toggle" class="notation-toggle" aria-pressed="false">C</button>
+  </div>
   <div class="pinned-shell" id="pinned-shell" hidden>
     <div class="pinned-header">
       <span id="pinned-header-label">Pinned chords</span>
@@ -37,6 +40,7 @@
   <script src="chords-db.js"></script>
   <script src="chord-diagram.js"></script>
   <script src="chord-search.js"></script>
+  <script src="note-names.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

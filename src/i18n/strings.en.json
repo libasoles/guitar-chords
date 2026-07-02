@@ -48,5 +48,7 @@
   "cfPinnedLabel": "Pinned",
   "cfPinnedTitle": "Pinned chords",
   "cfToolbarAriaLabel": "Filters and search",
-  "cfUnpinAriaLabel": "Unpin {name}"
+  "cfUnpinAriaLabel": "Unpin {name}",
+  "cfNotationToggleToSpanish": "Switch to Spanish notation (Do Re Mi)",
+  "cfNotationToggleToEnglish": "Switch to American notation (C D E)"
 }

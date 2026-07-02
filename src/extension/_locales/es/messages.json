@@ -32,5 +32,13 @@
     "placeholders": {
       "chord": { "content": "$1", "example": "Am7" }
     }
+  },
+  "notationToggleToSpanish": {
+    "message": "Cambiar a cifrado en español (Do Re Mi)",
+    "description": "Aria label/title del botón de cifrado cuando se muestra en notación americana"
+  },
+  "notationToggleToEnglish": {
+    "message": "Cambiar a cifrado americano (C D E)",
+    "description": "Aria label/title del botón de cifrado cuando se muestra en notación española"
   }
 }

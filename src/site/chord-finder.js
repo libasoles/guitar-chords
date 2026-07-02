@@ -77,6 +77,20 @@
     '.advanced-toggle-label { font-weight: 600; }',
     '.advanced-toggle-value { color: var(--ink-soft, #555); }',
     '.advanced-toggle[aria-expanded="true"] .advanced-toggle-value { color: var(--accent, #8b0000); }',
+    '.notation-toggle {',
+    '  flex: 0 0 auto; min-height: 2.5rem; min-width: 2.8rem; padding: 0.45rem 0.7rem;',
+    '  font-family: var(--mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);',
+    '  font-size: 0.9rem; font-weight: 600;',
+    '  border: 1px solid var(--rule, #d8d2c4); border-radius: 999px;',
+    '  background: var(--paper, #fdfaf5); color: var(--ink-soft, #555); cursor: pointer;',
+    '}',
+    '.notation-toggle:hover { border-color: var(--ink-soft, #555); }',
+    '.notation-toggle:focus-visible {',
+    '  outline: 2px solid var(--accent, #8b0000); outline-offset: 2px;',
+    '}',
+    '.notation-toggle[aria-pressed="true"] {',
+    '  background: var(--ink, #1a1a1a); color: var(--paper, #fdfaf5); border-color: var(--ink, #1a1a1a);',
+    '}',
     '.advanced-panel {',
     '  display: flex; flex-wrap: wrap; gap: 0.6rem;',
     '  padding-top: 0.1rem;',
@@ -204,6 +218,7 @@
     this._activeFilter = 'all';
     this._cards = [];
     this._pinnedNames = [];
+    this._notation = this._loadNotation();
     this._buildUI();
     this._renderCards();
     this._renderPinned();
@@ -229,6 +244,34 @@
     }
     if (typeof window.svguitar === 'undefined') missing.push('svguitar');
     return missing;
+  };
+
+  var NOTATION_STORAGE_KEY = 'chordNotation';
+
+  ChordFinder.prototype._loadNotation = function () {
+    try {
+      return window.localStorage.getItem(NOTATION_STORAGE_KEY) === 'es' ? 'es' : 'en';
+    } catch (e) {
+      return 'en';
+    }
+  };
+
+  ChordFinder.prototype._saveNotation = function (notation) {
+    try {
+      window.localStorage.setItem(NOTATION_STORAGE_KEY, notation);
+    } catch (e) {
+      // localStorage puede no estar disponible (modo privado, etc.); ignorar.
+    }
+  };
+
+  ChordFinder.prototype._displayName = function (chord) {
+    if (this._notation === 'es' && window.NoteNames) return window.NoteNames.toSpanishName(chord.name);
+    return chord.name;
+  };
+
+  ChordFinder.prototype._displayNotes = function (chord) {
+    if (this._notation === 'es' && window.NoteNames) return window.NoteNames.toSpanishNotes(chord.notes || '');
+    return chord.notes || '';
   };
 
   ChordFinder.prototype._renderError = function (missing) {
@@ -262,6 +305,31 @@
     input.autocomplete = 'off';
     input.spellcheck = false;
     mainRow.appendChild(input);
+
+    var notationToggle = document.createElement('button');
+    notationToggle.type = 'button';
+    notationToggle.className = 'notation-toggle';
+    var self0 = this;
+    function notationLabel() {
+      return self0._notation === 'es'
+        ? t('cfNotationToggleToEnglish', 'Cambiar a cifrado americano (C D E)')
+        : t('cfNotationToggleToSpanish', 'Cambiar a cifrado en español (Do Re Mi)');
+    }
+    function syncNotationToggle() {
+      notationToggle.textContent = self0._notation === 'es' ? 'Do' : 'C';
+      notationToggle.setAttribute('aria-pressed', String(self0._notation === 'es'));
+      var label = notationLabel();
+      notationToggle.title = label;
+      notationToggle.setAttribute('aria-label', label);
+    }
+    syncNotationToggle();
+    notationToggle.addEventListener('click', function () {
+      self0._notation = self0._notation === 'es' ? 'en' : 'es';
+      self0._saveNotation(self0._notation);
+      syncNotationToggle();
+      self0._applyNotation();
+    });
+    mainRow.appendChild(notationToggle);
 
     var panelId = 'advanced-filters-' + Math.random().toString(36).slice(2, 9);
     var advancedToggle = document.createElement('button');
@@ -375,13 +443,15 @@
 
       var name = document.createElement('div');
       name.className = 'name';
-      name.textContent = chord.name;
+      name.textContent = self._displayName(chord);
       card.appendChild(name);
+      card._nameEl = name;
 
       var aka = document.createElement('div');
       aka.className = 'aka';
-      aka.textContent = chord.notes || '';
+      aka.textContent = self._displayNotes(chord);
       card.appendChild(aka);
+      card._akaEl = aka;
 
       grid.appendChild(card);
 
@@ -482,7 +552,7 @@
 
       var nm = document.createElement('div');
       nm.className = 'name';
-      nm.textContent = chord.name;
+      nm.textContent = self._displayName(chord);
       item.appendChild(nm);
 
       list.appendChild(item);
@@ -494,6 +564,15 @@
         if (window.console) console.error('svguitar error for', chord.name, err);
       }
     });
+  };
+
+  ChordFinder.prototype._applyNotation = function () {
+    var self = this;
+    this._cards.forEach(function (card) {
+      card._nameEl.textContent = self._displayName(card._chord);
+      card._akaEl.textContent = self._displayNotes(card._chord);
+    });
+    this._renderPinned();
   };
 
   ChordFinder.prototype._bindKeyboardShortcut = function () {
