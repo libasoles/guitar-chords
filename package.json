@@ -2,6 +2,9 @@
   "name": "guitar-chords",
   "private": true,
   "description": "Guitar chord finder — public site + Chrome extension",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "vendor": "node scripts/vendor.js",
     "build:site": "node scripts/build-site.js",
