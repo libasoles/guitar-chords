@@ -4,6 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>%%pageTitle%%</title>
+  <meta name="description" content="%%metaDescription%%">
+  <link rel="canonical" href="%%canonicalUrl%%">
+  <link rel="alternate" hreflang="es" href="%%hreflangEs%%">
+  <link rel="alternate" hreflang="en" href="%%hreflangEn%%">
+  <link rel="alternate" hreflang="x-default" href="%%hreflangEs%%">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="%%pageTitle%%">
+  <meta property="og:description" content="%%metaDescription%%">
+  <meta property="og:url" content="%%canonicalUrl%%">
+  <meta property="og:image" content="%%ogImage%%">
+  <meta property="og:site_name" content="Guitar Chords">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="%%pageTitle%%">
+  <meta name="twitter:description" content="%%metaDescription%%">
+  <meta name="twitter:image" content="%%ogImage%%">
   <link rel="stylesheet" href="%%ASSETS_PREFIX%%site.css">
 </head>
 <body>
@@ -64,6 +79,7 @@
 
 <script>window.CHORD_FINDER_I18N = %%CHORD_FINDER_I18N%%;</script>
 <script src="%%ASSETS_PREFIX%%vendor/svguitar.umd.js"></script>
+<script src="%%ASSETS_PREFIX%%vendor/fuzzysort.js"></script>
 <script src="%%ASSETS_PREFIX%%chords-db.js"></script>
 <script src="%%ASSETS_PREFIX%%chord-diagram.js"></script>
 <script src="%%ASSETS_PREFIX%%chord-search.js"></script>

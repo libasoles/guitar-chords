@@ -5,7 +5,12 @@
      dist/site/index.html       (ES, at /)
      dist/site/en.html          (EN, at /en)
      dist/site/en/index.html    (EN, at /en/)
-   Assets are shared via dist/site/assets/. */
+   Assets are shared via dist/site/assets/.
+
+   Env vars:
+     SITE_BASE_URL         Base URL without trailing slash (default: https://libasoles.github.io/guitar-chords)
+     EXTENSION_STORE_URL   Chrome Web Store URL — enables the "Add to Chrome" button
+*/
 
 const fs = require('fs');
 const path = require('path');
@@ -16,6 +21,9 @@ const SRC_SHARED = path.join(ROOT, 'src', 'shared');
 const SRC_I18N = path.join(ROOT, 'src', 'i18n');
 const SRC_VENDOR = path.join(ROOT, 'vendor');
 const DIST_SITE = path.join(ROOT, 'dist', 'site');
+
+// Base URL for canonical/OG tags (no trailing slash).
+const SITE_BASE_URL = (process.env.SITE_BASE_URL || 'https://libasoles.github.io/guitar-chords').replace(/\/$/, '');
 
 // ---- helpers ---------------------------------------------------------------
 
@@ -36,6 +44,10 @@ function copyFile(src, dst) {
 const SVGUITAR = path.join(SRC_VENDOR, 'svguitar.umd.js');
 if (!fs.existsSync(SVGUITAR)) {
   fail('vendor/svguitar.umd.js not found. Run: npm run vendor');
+}
+const FUZZYSORT = path.join(SRC_VENDOR, 'fuzzysort.js');
+if (!fs.existsSync(FUZZYSORT)) {
+  fail('vendor/fuzzysort.js not found. Run: npm run vendor');
 }
 
 // ---- template rendering ----------------------------------------------------
@@ -75,13 +87,18 @@ function altLangHref(locale, outputMode) {
   return outputMode === 'clean' ? './' : '../';
 }
 
+function canonicalUrl(locale) {
+  return locale === 'es' ? SITE_BASE_URL + '/' : SITE_BASE_URL + '/en';
+}
+
 function render(template, strings, locale, assetsPrefix, outputMode) {
   const resolvedAssetsPrefix = assetsPrefix || (locale === 'es' ? 'assets/' : '../assets/');
+  const ogImage = SITE_BASE_URL + '/assets/og-image.png';
   let html = template;
 
   // Simple key substitutions.
   const simpleKeys = [
-    'htmlLang', 'pageTitle', 'wordmark', 'wordmarkSmall',
+    'htmlLang', 'pageTitle', 'metaDescription', 'wordmark', 'wordmarkSmall',
     'altLangLabel',
     'h1', 'lead', 'h2Decoder', 'decoderIntro',
     'thPart', 'thSymbols', 'thMeaning', 'thExample',
@@ -94,6 +111,10 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   // Computed substitutions.
   html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
   html = html.split('%%altLangHref%%').join(altLangHref(locale, outputMode));
+  html = html.split('%%canonicalUrl%%').join(canonicalUrl(locale));
+  html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + '/');
+  html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + '/en');
+  html = html.split('%%ogImage%%').join(ogImage);
   html = html.split('%%DECODER_ROWS%%').join(decoderRows(strings));
   html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
   html = html.split('%%CHORD_FINDER_I18N%%').join(JSON.stringify(finderI18N(strings)));
@@ -118,8 +139,16 @@ ensureDir(VENDOR_DIST);
 // Site-specific JS and CSS.
 copyFile(path.join(SRC_SITE, 'chord-finder.js'), path.join(ASSETS_DIST, 'chord-finder.js'));
 copyFile(path.join(SRC_SITE, 'site.css'), path.join(ASSETS_DIST, 'site.css'));
-// Vendored svguitar.
+// Vendored svguitar and fuzzysort.
 copyFile(path.join(SRC_VENDOR, 'svguitar.umd.js'), path.join(VENDOR_DIST, 'svguitar.umd.js'));
+copyFile(path.join(SRC_VENDOR, 'fuzzysort.js'), path.join(VENDOR_DIST, 'fuzzysort.js'));
+// OG image (optional — skip silently if not present yet).
+const ogImageSrc = path.join(SRC_SITE, 'og-image.png');
+if (fs.existsSync(ogImageSrc)) {
+  copyFile(ogImageSrc, path.join(ASSETS_DIST, 'og-image.png'));
+} else {
+  say('(src/site/og-image.png not found — og:image will 404 until added)');
+}
 
 console.log('==> Rendering locale pages...');
 
@@ -149,6 +178,53 @@ LOCALES.forEach(function (locale) {
   fs.writeFileSync(outFile, html, 'utf8');
   say(path.relative(ROOT, outFile));
 });
+
+// ---- robots.txt ------------------------------------------------------------
+
+console.log('==> Writing robots.txt...');
+const robotsTxt = [
+  'User-agent: *',
+  'Allow: /',
+  '',
+  'Sitemap: ' + SITE_BASE_URL + '/sitemap.xml',
+  '',
+].join('\n');
+const robotsFile = path.join(DIST_SITE, 'robots.txt');
+fs.writeFileSync(robotsFile, robotsTxt, 'utf8');
+say(path.relative(ROOT, robotsFile));
+
+// ---- sitemap.xml -----------------------------------------------------------
+
+console.log('==> Writing sitemap.xml...');
+const today = new Date().toISOString().slice(0, 10);
+const sitemapXml = [
+  '<?xml version="1.0" encoding="UTF-8"?>',
+  '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"',
+  '        xmlns:xhtml="http://www.w3.org/1999/xhtml">',
+  '  <url>',
+  '    <loc>' + SITE_BASE_URL + '/</loc>',
+  '    <lastmod>' + today + '</lastmod>',
+  '    <changefreq>monthly</changefreq>',
+  '    <priority>1.0</priority>',
+  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/"/>',
+  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en"/>',
+  '  </url>',
+  '  <url>',
+  '    <loc>' + SITE_BASE_URL + '/en</loc>',
+  '    <lastmod>' + today + '</lastmod>',
+  '    <changefreq>monthly</changefreq>',
+  '    <priority>0.9</priority>',
+  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/"/>',
+  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en"/>',
+  '  </url>',
+  '</urlset>',
+  '',
+].join('\n');
+const sitemapFile = path.join(DIST_SITE, 'sitemap.xml');
+fs.writeFileSync(sitemapFile, sitemapXml, 'utf8');
+say(path.relative(ROOT, sitemapFile));
+
+// ---- .nojekyll (GitHub Pages) ----------------------------------------------
 
 const noJekyll = path.join(DIST_SITE, '.nojekyll');
 fs.writeFileSync(noJekyll, '', 'utf8');
