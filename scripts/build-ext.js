@@ -172,6 +172,8 @@ function drawIcon(size, outFile) {
 
 const SVGUITAR = path.join(SRC_VENDOR, 'svguitar.umd.js');
 if (!fs.existsSync(SVGUITAR)) fail('vendor/svguitar.umd.js not found. Run: npm run vendor');
+const FUZZYSORT = path.join(SRC_VENDOR, 'fuzzysort.js');
+if (!fs.existsSync(FUZZYSORT)) fail('vendor/fuzzysort.js not found. Run: npm run vendor');
 
 // ---- assemble dist/extension -----------------------------------------------
 
@@ -190,9 +192,10 @@ console.log('==> Copying extension sources...');
 });
 copyDir(path.join(SRC_EXT, '_locales'), path.join(DIST_EXT, '_locales'));
 
-console.log('==> Copying vendored svguitar...');
+console.log('==> Copying vendored svguitar and fuzzysort...');
 ensureDir(path.join(DIST_EXT, 'vendor'));
 copyFile(SVGUITAR, path.join(DIST_EXT, 'vendor', 'svguitar.umd.js'));
+copyFile(FUZZYSORT, path.join(DIST_EXT, 'vendor', 'fuzzysort.js'));
 
 // ---- icons (rsvg-convert if available) -------------------------------------
 

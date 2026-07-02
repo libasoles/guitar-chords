@@ -4,10 +4,16 @@
    y como módulo importado en Node (module.exports) para los tests.
 
    Es la MISMA normalización que usa el buscador web (reference/chord-finder.html):
-   minúsculas; ♭→b, ♯→#, △/Δ→maj, ø→m7b5; sin espacios. */
+   minúsculas; ♭→b, ♯→#, △/Δ→maj, ø→m7b5; sin espacios.
+
+   El ranking de relevancia usa fuzzysort (vendor/fuzzysort.js), cargado
+   como <script> global en el navegador y vía require() en Node. */
 
 (function (root, factory) {
-  const api = factory();
+  const fuzzysort = typeof module !== 'undefined' && module.exports
+    ? require('../../vendor/fuzzysort.js')
+    : root.fuzzysort;
+  const api = factory(fuzzysort);
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = api;           // Node (tests)
   }
@@ -17,7 +23,7 @@
     window.normalize = window.normalize || api.normalize;
     window.matchChords = window.matchChords || api.matchChords;
   }
-})(typeof self !== 'undefined' ? self : this, function () {
+})(typeof self !== 'undefined' ? self : this, function (fuzzysort) {
   'use strict';
 
   // Normaliza un string de acorde/query a una forma comparable.
@@ -36,18 +42,30 @@
   }
 
   // Devuelve los acordes cuyo nombre o algún alias, normalizados,
-  // EMPIEZAN CON la query normalizada. Orden estable de la base.
+  // EMPIEZAN CON la query normalizada, ordenados por relevancia
+  // (match más cercano al exacto primero, vía fuzzysort). Ante empate
+  // de score se conserva el orden estable de la base.
   // Query vacía (o sólo espacios/símbolos que colapsan a '') → [].
   function matchChords(query, chords) {
     const q = normalize(query);
     if (q === '') return [];
     const list = chords || [];
-    return list.filter(function (chord) {
+    const scored = [];
+    list.forEach(function (chord, index) {
       const candidates = [chord.name].concat(chord.aliases || []);
-      return candidates.some(function (candidate) {
-        return normalize(candidate).startsWith(q);
+      let bestScore = null;
+      candidates.forEach(function (candidate) {
+        const normalized = normalize(candidate);
+        if (!normalized.startsWith(q)) return;
+        const score = fuzzysort.single(q, normalized).score;
+        if (bestScore === null || score > bestScore) bestScore = score;
       });
+      if (bestScore !== null) scored.push({ chord: chord, score: bestScore, index: index });
     });
+    scored.sort(function (a, b) {
+      return b.score - a.score || a.index - b.index;
+    });
+    return scored.map(function (s) { return s.chord; });
   }
 
   return { normalize: normalize, matchChords: matchChords };

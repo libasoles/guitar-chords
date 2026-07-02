@@ -100,22 +100,28 @@ test('query sin match → []', () => {
   assert.deepEqual(matchChords('x9', CHORDS), []);
 });
 
-test('"a" devuelve varios en orden estable de la base', () => {
+test('"a" devuelve varios, con el match exacto primero', () => {
   const r = names('a');
   assert.ok(r.length > 1);
-  const orderInDb = CHORDS.filter((c) => r.includes(c.name)).map((c) => c.name);
-  assert.deepEqual(r, orderInDb);
+  assert.equal(r[0], 'A');
   ['A', 'Am', 'A7', 'Am7', 'Asus2', 'Asus4'].forEach((n) => {
     assert.ok(r.includes(n), `"a" debería incluir ${n}`);
   });
 });
 
-test('"d" devuelve varios en orden estable de la base', () => {
+test('"d" devuelve varios, con el match exacto primero', () => {
   const r = names('d');
   assert.ok(r.length > 1);
-  const orderInDb = CHORDS.filter((c) => r.includes(c.name)).map((c) => c.name);
-  assert.deepEqual(r, orderInDb);
-  assert.ok(r.includes('D') && r.includes('Dm') && r.includes('D/F#'));
+  assert.equal(r[0], 'D');
+  assert.ok(r.includes('Dm') && r.includes('D/F#'));
+});
+
+test('"cmaj" prioriza el match exacto (C, alias "Cmaj") sobre el prefijo más largo (Cmaj7)', () => {
+  const r = names('cmaj');
+  assert.ok(r.includes('C'));
+  assert.ok(r.includes('Cmaj7'));
+  assert.equal(r[0], 'C');
+  assert.ok(r.indexOf('C') < r.indexOf('Cmaj7'));
 });
 
 test('matchChords con lista vacía o ausente → []', () => {
