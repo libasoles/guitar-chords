@@ -3,6 +3,7 @@
 /* build-site.js — Generates dist/site from src/site + src/shared + src/i18n.
    Produces two locales:
      dist/site/index.html       (ES, at /)
+     dist/site/en.html          (EN, at /en)
      dist/site/en/index.html    (EN, at /en/)
    Assets are shared via dist/site/assets/. */
 
@@ -69,8 +70,8 @@ function ctaButton(strings) {
 }
 
 // Replace all %%KEY%% placeholders in the template.
-function render(template, strings, locale) {
-  const assetsPrefix = locale === 'es' ? 'assets/' : '../assets/';
+function render(template, strings, locale, assetsPrefix) {
+  const resolvedAssetsPrefix = assetsPrefix || (locale === 'es' ? 'assets/' : '../assets/');
   let html = template;
 
   // Simple key substitutions.
@@ -87,7 +88,7 @@ function render(template, strings, locale) {
   });
 
   // Computed substitutions.
-  html = html.split('%%ASSETS_PREFIX%%').join(assetsPrefix);
+  html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
   html = html.split('%%DECODER_ROWS%%').join(decoderRows(strings));
   html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
   html = html.split('%%CHORD_FINDER_I18N%%').join(JSON.stringify(finderI18N(strings)));
@@ -121,11 +122,24 @@ LOCALES.forEach(function (locale) {
   if (!fs.existsSync(stringsPath)) fail('Missing: ' + stringsPath);
   const strings = JSON.parse(fs.readFileSync(stringsPath, 'utf8'));
 
-  const outDir = locale === 'es' ? DIST_SITE : path.join(DIST_SITE, 'en');
-  ensureDir(outDir);
+  if (locale === 'es') {
+    const html = render(template, strings, locale, 'assets/');
+    const outFile = path.join(DIST_SITE, 'index.html');
+    fs.writeFileSync(outFile, html, 'utf8');
+    say(path.relative(ROOT, outFile));
+    return;
+  }
 
-  const html = render(template, strings, locale);
-  const outFile = path.join(outDir, 'index.html');
+  const localeDir = path.join(DIST_SITE, locale);
+  ensureDir(localeDir);
+
+  const cleanHtml = render(template, strings, locale, 'assets/');
+  const cleanUrlFile = path.join(DIST_SITE, locale + '.html');
+  fs.writeFileSync(cleanUrlFile, cleanHtml, 'utf8');
+  say(path.relative(ROOT, cleanUrlFile));
+
+  const html = render(template, strings, locale, '../assets/');
+  const outFile = path.join(localeDir, 'index.html');
   fs.writeFileSync(outFile, html, 'utf8');
   say(path.relative(ROOT, outFile));
 });
