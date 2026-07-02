@@ -7,6 +7,10 @@ Instant guitar chord diagrams for any chord name — Cmaj7, Am7, D/F♯ and more
 Available in English and Spanish. Open-position diagrams for 100+ chords.
 Built with vanilla JS, no framework, no build step beyond a Node.js assembly script.
 
+| Search | Pinned chords |
+|:---:|:---:|
+| ![Search](store/screenshots/01-search.png) | ![Pinned chords](store/screenshots/02-pinned.png) |
+
 ---
 
 ## Project structure

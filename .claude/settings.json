@@ -4,7 +4,13 @@
       "Bash(node scripts/vendor.js)",
       "Bash(npm run *)",
       "Bash(npm test *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(npx playwright *)",
+      "Read(//tmp/**)",
+      "Read(//private/tmp/**)"
+    ],
+    "additionalDirectories": [
+      "/tmp"
     ]
   }
 }
