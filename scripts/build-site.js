@@ -24,6 +24,7 @@ const DIST_SITE = path.join(ROOT, 'dist', 'site');
 
 // Base URL for canonical/OG tags (no trailing slash).
 const SITE_BASE_URL = (process.env.SITE_BASE_URL || 'https://acordesdeguitarra.com.ar').replace(/\/$/, '');
+const SITE_HOSTNAME = new URL(SITE_BASE_URL).hostname;
 
 // ---- helpers ---------------------------------------------------------------
 
@@ -223,6 +224,12 @@ const sitemapXml = [
 const sitemapFile = path.join(DIST_SITE, 'sitemap.xml');
 fs.writeFileSync(sitemapFile, sitemapXml, 'utf8');
 say(path.relative(ROOT, sitemapFile));
+
+// ---- CNAME (GitHub Pages custom domain) -----------------------------------
+
+const cnameFile = path.join(DIST_SITE, 'CNAME');
+fs.writeFileSync(cnameFile, SITE_HOSTNAME + '\n', 'utf8');
+say(path.relative(ROOT, cnameFile));
 
 // ---- .nojekyll (GitHub Pages) ----------------------------------------------
 
