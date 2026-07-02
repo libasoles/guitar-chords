@@ -30,19 +30,27 @@
     return labels[index] || DEFAULT_FILTER_LABELS[index];
   }
 
+  function filterDisplayName(filter) {
+    var match = FILTER_DEFS.find(function (item) { return item.filter === filter; });
+    return match ? filterLabel(match.i18n) : filterLabel(0);
+  }
+
   var STYLES = [
     ':host { display: block; }',
     '*, *::before, *::after { box-sizing: border-box; }',
     '',
     '.controls {',
-    '  display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center;',
+    '  display: flex; flex-direction: column; gap: 0.75rem;',
     '  margin: 1rem 0 1.5rem; padding: 0.8rem 1rem;',
     '  background: #fff;',
     '  border: 1px solid var(--rule, #d8d2c4);',
     '  border-radius: 6px; position: sticky; top: 0; z-index: 10;',
     '}',
+    '.controls-main {',
+    '  display: flex; gap: 0.75rem; align-items: center;',
+    '}',
     '.search {',
-    '  flex: 1 1 200px;',
+    '  flex: 1 1 auto; min-width: 0;',
     '  font-family: var(--mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);',
     '  font-size: 1rem; padding: 0.45rem 0.6rem;',
     '  border: 1px solid var(--rule, #d8d2c4); border-radius: 4px;',
@@ -53,6 +61,27 @@
     '  outline: 2px solid var(--accent, #8b0000); outline-offset: -1px;',
     '  border-color: var(--accent, #8b0000);',
     '}',
+    '.advanced-toggle {',
+    '  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 0.55rem;',
+    '  min-height: 2.5rem; padding: 0.45rem 0.8rem;',
+    '  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif);',
+    '  font-size: 0.9rem; white-space: nowrap;',
+    '  border: 1px solid var(--rule, #d8d2c4); border-radius: 999px;',
+    '  background: var(--paper, #fdfaf5); color: var(--ink, #1a1a1a); cursor: pointer;',
+    '}',
+    '.advanced-toggle:hover { border-color: var(--ink-soft, #555); }',
+    '.advanced-toggle:focus-visible {',
+    '  outline: 2px solid var(--accent, #8b0000); outline-offset: 2px;',
+    '}',
+    '.advanced-toggle svg { width: 1rem; height: 1rem; stroke: currentColor; }',
+    '.advanced-toggle-label { font-weight: 600; }',
+    '.advanced-toggle-value { color: var(--ink-soft, #555); }',
+    '.advanced-toggle[aria-expanded="true"] .advanced-toggle-value { color: var(--accent, #8b0000); }',
+    '.advanced-panel {',
+    '  display: flex; flex-wrap: wrap; gap: 0.6rem;',
+    '  padding-top: 0.1rem;',
+    '}',
+    '.advanced-panel[hidden] { display: none; }',
     '.pill {',
     '  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif);',
     '  font-size: 0.78rem; padding: 0.3rem 0.65rem;',
@@ -92,7 +121,7 @@
     '',
     '.empty {',
     '  grid-column: 1 / -1; text-align: center;',
-    '  color: var(--ink-soft, #555); font-style: italic; padding: 2rem 1rem;',
+    '  color: var(--ink-soft, #555); padding: 2rem 1rem;',
     '}',
     '.error {',
     '  border: 1px solid var(--accent, #8b0000);',
@@ -151,6 +180,10 @@
     ':host([pinnable]) .card .pin-button[aria-pressed="true"] {',
     '  background: var(--accent, #8b0000); color: #fff;',
     '  border-color: var(--accent, #8b0000);',
+    '}',
+    '@media (max-width: 700px) {',
+    '  .controls-main { flex-direction: column; align-items: stretch; }',
+    '  .advanced-toggle { justify-content: center; }',
     '}',
   ].join('\n');
 
@@ -219,13 +252,44 @@
     controls.setAttribute('role', 'toolbar');
     controls.setAttribute('aria-label', t('cfToolbarAriaLabel', 'Filtros y búsqueda'));
 
+    var mainRow = document.createElement('div');
+    mainRow.className = 'controls-main';
+
     var input = document.createElement('input');
     input.type = 'search';
     input.className = 'search';
     input.placeholder = 'Cmaj7, Am7, D/F#…';
     input.autocomplete = 'off';
     input.spellcheck = false;
-    controls.appendChild(input);
+    mainRow.appendChild(input);
+
+    var panelId = 'advanced-filters-' + Math.random().toString(36).slice(2, 9);
+    var advancedToggle = document.createElement('button');
+    advancedToggle.type = 'button';
+    advancedToggle.className = 'advanced-toggle';
+    advancedToggle.setAttribute('aria-expanded', 'false');
+    advancedToggle.setAttribute('aria-controls', panelId);
+    advancedToggle.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<line x1="21" y1="4" x2="14" y2="4"></line>' +
+      '<line x1="10" y1="4" x2="3" y2="4"></line>' +
+      '<line x1="21" y1="12" x2="12" y2="12"></line>' +
+      '<line x1="8" y1="12" x2="3" y2="12"></line>' +
+      '<line x1="21" y1="20" x2="16" y2="20"></line>' +
+      '<line x1="12" y1="20" x2="3" y2="20"></line>' +
+      '<line x1="14" y1="2" x2="14" y2="6"></line>' +
+      '<line x1="8" y1="10" x2="8" y2="14"></line>' +
+      '<line x1="16" y1="18" x2="16" y2="22"></line>' +
+      '</svg>' +
+      '<span class="advanced-toggle-label">' + t('cfAdvancedFiltersLabel', 'Filtros') + '</span>' +
+      '<span class="advanced-toggle-value">' + filterDisplayName(this._activeFilter) + '</span>';
+    mainRow.appendChild(advancedToggle);
+    controls.appendChild(mainRow);
+
+    var advancedPanel = document.createElement('div');
+    advancedPanel.className = 'advanced-panel';
+    advancedPanel.id = panelId;
+    advancedPanel.hidden = true;
 
     var self = this;
     this._pills = FILTER_DEFS.map(function (f) {
@@ -239,11 +303,13 @@
         self._pills.forEach(function (p) { p.setAttribute('aria-pressed', 'false'); });
         pill.setAttribute('aria-pressed', 'true');
         self._activeFilter = f.filter;
+        self._syncAdvancedToggle();
         self._applyFilter();
       });
-      controls.appendChild(pill);
+      advancedPanel.appendChild(pill);
       return pill;
     });
+    controls.appendChild(advancedPanel);
 
     var strip = document.createElement('div');
     strip.className = 'pinned-strip';
@@ -268,8 +334,21 @@
     this._grid = grid;
     this._strip = strip;
     this._stripList = stripList;
+    this._advancedPanel = advancedPanel;
+    this._advancedToggle = advancedToggle;
 
     input.addEventListener('input', function () { self._applyFilter(); });
+    advancedToggle.addEventListener('click', function () {
+      var isOpen = advancedToggle.getAttribute('aria-expanded') === 'true';
+      advancedToggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+      advancedPanel.hidden = isOpen;
+    });
+  };
+
+  ChordFinder.prototype._syncAdvancedToggle = function () {
+    if (!this._advancedToggle) return;
+    var value = this._advancedToggle.querySelector('.advanced-toggle-value');
+    if (value) value.textContent = filterDisplayName(this._activeFilter);
   };
 
   ChordFinder.prototype._renderCards = function () {
