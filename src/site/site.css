@@ -124,18 +124,6 @@ code { font-family: var(--mono); font-size: 0.9em; background: rgba(0,0,0,0.05);
 .decoder-table th { background: rgba(0,0,0,0.03); font-weight: 600; }
 .decoder-table code { background: transparent; padding: 0; }
 
-/* ----- Callout ----- */
-
-.callout {
-  background: #fff;
-  border: 1px solid var(--rule);
-  border-left: 3px solid var(--accent);
-  padding: 0.8rem 1rem;
-  margin: 1.2rem 0;
-  font-size: 0.95em;
-}
-.callout strong { color: var(--accent); }
-
 /* ----- Footer ----- */
 
 footer {
@@ -170,20 +158,22 @@ footer {
 .extension-cta .ext-btn {
   display: inline-block;
   font-family: var(--sans);
+  font-weight: 600;
   font-size: 0.85rem;
   padding: 0.4rem 0.9rem;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--accent);
   border-radius: 4px;
-  color: var(--ink-soft);
-  text-decoration: none;
-  border-bottom: 1px solid var(--rule);
-}
-.extension-cta .ext-btn[href] {
   background: var(--accent);
   color: #fff;
-  border-color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent);
+  cursor: pointer;
 }
 .extension-cta .ext-btn[href]:hover { opacity: 0.88; border-bottom-color: var(--accent); }
+.extension-cta .ext-btn[disabled] {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
 
 @media print {
   .site-header { display: none; }

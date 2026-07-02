@@ -66,21 +66,25 @@ function ctaButton(strings) {
   if (storeUrl) {
     return '<a class="ext-btn" href="' + storeUrl + '" target="_blank" rel="noopener">' + strings.extensionAddButton + '</a>';
   }
-  return '<span class="ext-btn">' + strings.extensionComingSoon + '</span>';
+  return '<button class="ext-btn" type="button" disabled aria-disabled="true">' + strings.extensionComingSoon + '</button>';
 }
 
 // Replace all %%KEY%% placeholders in the template.
-function render(template, strings, locale, assetsPrefix) {
+function altLangHref(locale, outputMode) {
+  if (locale === 'es') return 'en';
+  return outputMode === 'clean' ? './' : '../';
+}
+
+function render(template, strings, locale, assetsPrefix, outputMode) {
   const resolvedAssetsPrefix = assetsPrefix || (locale === 'es' ? 'assets/' : '../assets/');
   let html = template;
 
   // Simple key substitutions.
   const simpleKeys = [
     'htmlLang', 'pageTitle', 'wordmark', 'wordmarkSmall',
-    'altLangLabel', 'altLangHref',
+    'altLangLabel',
     'h1', 'lead', 'h2Decoder', 'decoderIntro',
     'thPart', 'thSymbols', 'thMeaning', 'thExample',
-    'callout',
     'extensionHeading', 'extensionDescription',
   ];
   simpleKeys.forEach(function (key) {
@@ -89,6 +93,7 @@ function render(template, strings, locale, assetsPrefix) {
 
   // Computed substitutions.
   html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
+  html = html.split('%%altLangHref%%').join(altLangHref(locale, outputMode));
   html = html.split('%%DECODER_ROWS%%').join(decoderRows(strings));
   html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
   html = html.split('%%CHORD_FINDER_I18N%%').join(JSON.stringify(finderI18N(strings)));
@@ -123,7 +128,7 @@ LOCALES.forEach(function (locale) {
   const strings = JSON.parse(fs.readFileSync(stringsPath, 'utf8'));
 
   if (locale === 'es') {
-    const html = render(template, strings, locale, 'assets/');
+    const html = render(template, strings, locale, 'assets/', 'root');
     const outFile = path.join(DIST_SITE, 'index.html');
     fs.writeFileSync(outFile, html, 'utf8');
     say(path.relative(ROOT, outFile));
@@ -133,12 +138,12 @@ LOCALES.forEach(function (locale) {
   const localeDir = path.join(DIST_SITE, locale);
   ensureDir(localeDir);
 
-  const cleanHtml = render(template, strings, locale, 'assets/');
+  const cleanHtml = render(template, strings, locale, 'assets/', 'clean');
   const cleanUrlFile = path.join(DIST_SITE, locale + '.html');
   fs.writeFileSync(cleanUrlFile, cleanHtml, 'utf8');
   say(path.relative(ROOT, cleanUrlFile));
 
-  const html = render(template, strings, locale, '../assets/');
+  const html = render(template, strings, locale, '../assets/', 'nested');
   const outFile = path.join(localeDir, 'index.html');
   fs.writeFileSync(outFile, html, 'utf8');
   say(path.relative(ROOT, outFile));
