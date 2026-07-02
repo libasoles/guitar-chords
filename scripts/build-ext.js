@@ -63,6 +63,7 @@ function pngChunk(type, data) {
 }
 
 function writePng(filePath, width, height, rgba) {
+  ensureDir(path.dirname(filePath));
   const rows = Buffer.alloc((width * 4 + 1) * height);
   for (let y = 0; y < height; y += 1) {
     const rowStart = y * (width * 4 + 1);
