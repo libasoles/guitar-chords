@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Guitar Chords</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="site-header">
+    <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
+      <rect class="frame" x="8" y="8" width="32" height="32" rx="3"/>
+      <line class="string" x1="18" y1="8" x2="18" y2="40"/>
+      <line class="string" x1="24" y1="8" x2="24" y2="40"/>
+      <line class="string" x1="30" y1="8" x2="30" y2="40"/>
+      <line class="string" x1="8" y1="20" x2="40" y2="20"/>
+      <line class="string" x1="8" y1="30" x2="40" y2="30"/>
+      <circle class="dot" cx="18" cy="25" r="3.2"/>
+      <circle class="dot" cx="30" cy="15" r="3.2"/>
+    </svg>
+    <span class="wordmark" id="wordmark">Guitar Chords</span>
+  </header>
+
+  <input type="search" id="q" autocomplete="off" spellcheck="false" autofocus>
+  <div class="pinned-shell" id="pinned-shell" hidden>
+    <div class="pinned-header">
+      <span id="pinned-header-label">Pinned chords</span>
+    </div>
+    <div id="pinned" aria-live="polite"></div>
+  </div>
+  <div class="results-shell" id="results-shell">
+    <div id="results" aria-live="polite"></div>
+  </div>
+
+  <!-- All local: MV3 CSP forbids inline scripts and CDN. -->
+  <script src="vendor/svguitar.umd.js"></script>
+  <script src="chords-db.js"></script>
+  <script src="chord-diagram.js"></script>
+  <script src="chord-search.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "appName": {
+    "message": "Acordes para la guitarra",
+    "description": "Nombre de la extensión en el toolbar y el Web Store"
+  },
+  "appDescription": {
+    "message": "Buscá el diagrama de un acorde al instante, sin salir de lo que estás tocando.",
+    "description": "Descripción de la extensión en el Web Store"
+  },
+  "searchPlaceholder": {
+    "message": "Tipeá Cmaj7, Am7, D/F#…",
+    "description": "Placeholder del input de búsqueda"
+  },
+  "pinnedHeader": {
+    "message": "Acordes pineados",
+    "description": "Label de la sección de acordes pineados"
+  },
+  "noResults": {
+    "message": "No hay acordes que coincidan.",
+    "description": "Mensaje cuando la búsqueda no devuelve resultados"
+  },
+  "pinAriaLabel": {
+    "message": "Pinear $CHORD$",
+    "description": "Aria label del botón pinear",
+    "placeholders": {
+      "chord": { "content": "$1", "example": "Am7" }
+    }
+  },
+  "unpinAriaLabel": {
+    "message": "Despinear $CHORD$",
+    "description": "Aria label del botón despinear",
+    "placeholders": {
+      "chord": { "content": "$1", "example": "Am7" }
+    }
+  }
+}

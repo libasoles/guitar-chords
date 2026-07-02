@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Fixture: chord-finder</title>
+  <script>
+    window.svguitar = { SVGuitarChord: function () {} };
+    window.ChordDiagram = {
+      render: function (target, chord) {
+        target.setAttribute('data-chord', chord.name);
+        target.textContent = chord.name;
+      }
+    };
+    window.CHORD_FINDER_I18N = {};
+  </script>
+  <script src="../src/shared/chords-db.js"></script>
+  <script src="../src/shared/chord-search.js"></script>
+  <script src="../src/site/chord-finder.js"></script>
+</head>
+<body>
+  <chord-finder id="pin" pinnable></chord-finder>
+  <chord-finder id="plain"></chord-finder>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="%%htmlLang%%">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>%%pageTitle%%</title>
+  <link rel="stylesheet" href="%%ASSETS_PREFIX%%site.css">
+</head>
+<body>
+
+<header class="site-header">
+  <span class="brand">
+    <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
+      <rect class="frame" x="8" y="8" width="32" height="32" rx="3"/>
+      <line class="string" x1="18" y1="8" x2="18" y2="40"/>
+      <line class="string" x1="24" y1="8" x2="24" y2="40"/>
+      <line class="string" x1="30" y1="8" x2="30" y2="40"/>
+      <line class="string" x1="8" y1="20" x2="40" y2="20"/>
+      <line class="string" x1="8" y1="30" x2="40" y2="30"/>
+      <circle class="dot" cx="18" cy="25" r="3.2"/>
+      <circle class="dot" cx="30" cy="15" r="3.2"/>
+    </svg>
+    <span class="wordmark">%%wordmark%%<small>%%wordmarkSmall%%</small></span>
+  </span>
+  <a class="lang-toggle" href="%%altLangHref%%">%%altLangLabel%%</a>
+</header>
+
+<h1>%%h1%%</h1>
+<p class="lead">%%lead%%</p>
+
+<chord-finder pinnable></chord-finder>
+
+<h2 id="decoder">%%h2Decoder%%</h2>
+<p>%%decoderIntro%%</p>
+
+<table class="decoder-table">
+  <thead>
+    <tr><th>%%thPart%%</th><th>%%thSymbols%%</th><th>%%thMeaning%%</th><th>%%thExample%%</th></tr>
+  </thead>
+  <tbody>
+    %%DECODER_ROWS%%
+  </tbody>
+</table>
+
+<div class="callout">%%callout%%</div>
+
+<footer>
+  <div class="extension-cta">
+    <svg class="ext-icon" viewBox="0 0 48 48" aria-hidden="true">
+      <rect class="frame" x="8" y="8" width="32" height="32" rx="3" fill="none" stroke="#d8d2c4" stroke-width="4"/>
+      <line class="string" x1="18" y1="8" x2="18" y2="40" stroke="#1a1a1a" stroke-width="2" opacity="0.4"/>
+      <line class="string" x1="24" y1="8" x2="24" y2="40" stroke="#1a1a1a" stroke-width="2" opacity="0.4"/>
+      <line class="string" x1="30" y1="8" x2="30" y2="40" stroke="#1a1a1a" stroke-width="2" opacity="0.4"/>
+      <line class="string" x1="8" y1="20" x2="40" y2="20" stroke="#1a1a1a" stroke-width="2" opacity="0.4"/>
+      <line class="string" x1="8" y1="30" x2="40" y2="30" stroke="#1a1a1a" stroke-width="2" opacity="0.4"/>
+      <circle cx="18" cy="25" r="3.2" fill="#8b0000"/>
+      <circle cx="30" cy="15" r="3.2" fill="#8b0000"/>
+    </svg>
+    <div class="ext-body">
+      <p class="ext-heading">%%extensionHeading%%</p>
+      <p class="ext-desc">%%extensionDescription%%</p>
+      %%EXTENSION_CTA_BUTTON%%
+    </div>
+  </div>
+</footer>
+
+<script>window.CHORD_FINDER_I18N = %%CHORD_FINDER_I18N%%;</script>
+<script src="%%ASSETS_PREFIX%%vendor/svguitar.umd.js"></script>
+<script src="%%ASSETS_PREFIX%%chords-db.js"></script>
+<script src="%%ASSETS_PREFIX%%chord-diagram.js"></script>
+<script src="%%ASSETS_PREFIX%%chord-search.js"></script>
+<script src="%%ASSETS_PREFIX%%chord-finder.js"></script>
+</body>
+</html>

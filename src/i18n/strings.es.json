@@ -1,0 +1,51 @@
+{
+  "lang": "es",
+  "htmlLang": "es",
+  "dir": ".",
+  "altLangLabel": "EN",
+  "altLangHref": "/en/",
+
+  "pageTitle": "Buscador de acordes · Acordes para la guitarra",
+  "wordmark": "Acordes",
+  "wordmarkSmall": "para la guitarra",
+
+  "h1": "Buscador de acordes",
+  "lead": "Tipeá un nombre (Cmaj7, Bm7b5, D/F#…) o filtrá por familia. Diagramas en posición abierta para guitarra.",
+
+  "h2Decoder": "Cómo se decodifica un nombre de acorde",
+  "decoderIntro": "Cualquier cifrado se arma como: <strong>Raíz</strong> + <strong>calidad</strong> + <strong>tensiones</strong> + <strong>/bajo opcional</strong>. Esta tabla te alcanza para leer el 95% de lo que aparece en una tablatura web.",
+
+  "thPart": "Pieza",
+  "thSymbols": "Símbolos",
+  "thMeaning": "Qué significa",
+  "thExample": "Ejemplo",
+
+  "rowRoot":    ["Raíz",           "<code>C D E F G A B</code> ± <code>#</code>/<code>b</code>", "La nota fundamental.",                                                          "<code>F#</code> = Fa sostenido"],
+  "rowMajor":   ["Mayor",          "(nada)",                                                       "Tríada mayor: 1 – 3 – 5",                                                       "<code>C</code> = Do mayor"],
+  "rowMinor":   ["Menor",          "<code>m</code>, <code>min</code>, <code>-</code>",             "Tríada menor: 1 – ♭3 – 5",                                                     "<code>Am</code> = La menor"],
+  "rowDom7":    ["Dominante 7ª",   "<code>7</code>",                                               "Tríada mayor + 7ª menor (♭7). El motor del folklore.",                          "<code>G7</code> = G B D F"],
+  "rowMinor7":  ["Menor con 7ª",   "<code>m7</code>",                                              "Tríada menor + 7ª menor",                                                       "<code>Em7</code> = E G B D"],
+  "rowMaj7":    ["Mayor con 7ª",   "<code>maj7</code>, <code>M7</code>, <code>Δ</code>",           "Tríada mayor + 7ª mayor (suena \"jazzero\", reposado)",                         "<code>Cmaj7</code> = C E G B"],
+  "rowDim":     ["Disminuido",     "<code>dim</code>, <code>°</code>",                             "1 – ♭3 – ♭5",                                                                  "<code>B°</code>"],
+  "rowHalfDim": ["Semi-disminuido","<code>m7♭5</code>, <code>ø</code>",                            "Menor con la 5ª bajada + ♭7. Típico del II° menor.",                            "<code>Bm7b5</code>"],
+  "rowAug":     ["Aumentado",      "<code>aug</code>, <code>+</code>",                             "1 – 3 – ♯5",                                                                   "<code>C+</code>"],
+  "rowSus":     ["Suspendido",     "<code>sus2</code>, <code>sus4</code>",                         "La 3ª se reemplaza por la 2ª o 4ª (queda \"abierto\", sin color mayor/menor)", "<code>Dsus4</code>"],
+  "rowAdd":     ["Añadidos",       "<code>add9</code>, <code>6</code>",                            "Suma la nota indicada sin agregar 7ª.",                                         "<code>Cadd9</code>"],
+  "rowExt":     ["Extensiones",    "<code>9 11 13</code> ± <code>♭/♯</code>",                     "Siempre incluyen la 7ª. <code>C9</code> = C7 + 9ª.",                            "<code>G13</code>"],
+  "rowSlash":   ["Bajo invertido", "<code>/X</code>",                                              "Tocás el acorde pero ponés <code>X</code> en el bajo.",                         "<code>D/F#</code> = D con F♯ abajo"],
+
+  "callout": "<strong>Convención de los diagramas:</strong> mirás el mástil de frente. La cuerda más fina (mi agudo, 1ª) está a la derecha; la más gruesa (mi grave, 6ª) a la izquierda. Los números arriba indican el dedo (1=índice, 2=mayor, 3=anular, 4=meñique). <code>○</code> = cuerda al aire, <code>✕</code> = cuerda que no se toca.",
+
+  "extensionHeading": "Extensión para Chrome",
+  "extensionComingSoon": "Próximamente en Chrome Web Store",
+  "extensionDescription": "Buscá el diagrama de un acorde al instante, sin salir de lo que estás tocando.",
+  "extensionAddButton": "Agregar a Chrome",
+
+  "cfFilters": ["Todos", "Mayores", "Menores", "Con 7ª (dom.)", "Menor 7ª", "Mayor 7ª", "Sus", "Con bajo (/)", "Otros"],
+  "cfEmpty": "No hay acordes que coincidan.",
+  "cfPinLabel": "Pinear",
+  "cfPinnedLabel": "Pineado",
+  "cfPinnedTitle": "Acordes pineados",
+  "cfToolbarAriaLabel": "Filtros y búsqueda",
+  "cfUnpinAriaLabel": "Despinear {name}"
+}

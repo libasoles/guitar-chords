@@ -1,0 +1,17 @@
+{
+  "name": "guitar-chords",
+  "private": true,
+  "description": "Guitar chord finder — public site + Chrome extension",
+  "scripts": {
+    "vendor": "node scripts/vendor.js",
+    "build:site": "node scripts/build-site.js",
+    "build:ext": "node scripts/build-ext.js",
+    "build": "npm run build:site && npm run build:ext",
+    "test:unit": "node test/chord-search.unit.js",
+    "test:e2e": "node test/chord-finder.e2e.js",
+    "test": "npm run test:unit && npm run test:e2e"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1"
+  }
+}

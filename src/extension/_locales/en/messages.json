@@ -1,0 +1,36 @@
+{
+  "appName": {
+    "message": "Guitar Chords",
+    "description": "Extension name shown in the Chrome toolbar and Web Store"
+  },
+  "appDescription": {
+    "message": "Look up a chord diagram instantly, without leaving what you're playing.",
+    "description": "Extension description in the Web Store"
+  },
+  "searchPlaceholder": {
+    "message": "Type Cmaj7, Am7, D/F#…",
+    "description": "Placeholder text in the search input"
+  },
+  "pinnedHeader": {
+    "message": "Pinned chords",
+    "description": "Label above the pinned chords section"
+  },
+  "noResults": {
+    "message": "No matching chords.",
+    "description": "Message shown when search returns no results"
+  },
+  "pinAriaLabel": {
+    "message": "Pin $CHORD$",
+    "description": "Aria label for the pin button",
+    "placeholders": {
+      "chord": { "content": "$1", "example": "Am7" }
+    }
+  },
+  "unpinAriaLabel": {
+    "message": "Unpin $CHORD$",
+    "description": "Aria label for the unpin button",
+    "placeholders": {
+      "chord": { "content": "$1", "example": "Am7" }
+    }
+  }
+}

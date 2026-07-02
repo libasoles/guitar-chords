@@ -1,0 +1,284 @@
+/* popup.css — tema papel/tinta/bordó del sitio "acordes", copiado a la extensión.
+   La extensión no puede depender de assets del sitio en runtime, así que las
+   variables y tipografías viven acá. Espejo de assets/lesson.css. */
+
+:root {
+  --ink: #1a1a1a;
+  --ink-soft: #555;
+  --paper: #fdfaf5;
+  --rule: #d8d2c4;
+  --accent: #8b0000;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  width: 360px;
+  margin: 0;
+}
+
+body {
+  font-family: var(--serif);
+  color: var(--ink);
+  background: var(--paper);
+  padding: 12px 14px 14px;
+  line-height: 1.5;
+}
+
+/* ----- Header / logo (espejo del .site-header del sitio) ----- */
+
+.site-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding-bottom: 0.7rem;
+  margin-bottom: 0.8rem;
+  border-bottom: 1px solid var(--rule);
+}
+.site-header .logo {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  display: block;
+  color: var(--ink);
+}
+.site-header .logo .frame { fill: none; stroke: currentColor; stroke-width: 4; }
+.site-header .logo .string { stroke: currentColor; stroke-width: 2; opacity: 0.5; }
+.site-header .logo .dot { fill: var(--accent); }
+.site-header .wordmark {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+.site-header .wordmark small {
+  display: block;
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+}
+
+/* ----- Searchbox (espejo del .finder-controls input del sitio) ----- */
+
+#q {
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 1rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--ink);
+}
+#q::placeholder { color: var(--ink-soft); opacity: 0.7; }
+#q:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+  border-color: var(--accent);
+}
+
+/* ----- Pines ----- */
+
+.pinned-shell {
+  margin-top: 0.8rem;
+}
+
+.pinned-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.45rem;
+  padding: 0 0.15rem;
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+
+#pinned {
+  display: flex;
+  gap: 0.55rem;
+  overflow-x: auto;
+  padding: 0.1rem 0.1rem 0.35rem;
+  scrollbar-gutter: stable both-edges;
+}
+
+.pinned-card {
+  position: relative;
+  flex: 0 0 auto;
+  width: 92px;
+  padding: 0.45rem 0.35rem 0.4rem;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: #fff;
+  text-align: center;
+}
+
+.pinned-remove {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.2rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pinned-remove:hover,
+.pinned-remove:focus-visible {
+  color: var(--accent);
+  background: rgba(139, 0, 0, 0.08);
+  outline: none;
+}
+
+.pinned-diagram {
+  width: 68px;
+  height: 82px;
+  margin: 0.1rem auto 0;
+}
+
+.pinned-diagram svg {
+  width: 100%;
+  height: 100%;
+}
+
+.pinned-name {
+  margin-top: 0.2rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* ----- Lista de resultados ----- */
+
+.results-shell {
+  position: relative;
+  margin-top: 0.8rem;
+}
+
+.results-shell::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 36px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(253, 250, 245, 0), var(--paper) 78%);
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+.results-shell[data-has-overflow="true"][data-at-bottom="false"]::after {
+  opacity: 1;
+}
+
+#results {
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  max-height: var(--results-max-height, none);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+/* Un pelín de aire para que la barra de scroll no pise las cards. */
+#results:not(:empty) { padding-right: 2px; }
+
+.card {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0.7rem 0.6rem 0.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pin-button {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.pin-button svg {
+  width: 1.12rem;
+  height: 1.8rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pin-button:hover,
+.pin-button:focus-visible {
+  color: var(--accent);
+  background: rgba(139, 0, 0, 0.08);
+  border-color: rgba(139, 0, 0, 0.12);
+  outline: none;
+}
+
+.pin-button[hidden] {
+  display: none;
+}
+
+.card .diagram {
+  width: 150px;
+  height: 176px;
+}
+.card .diagram svg {
+  width: 100%;
+  height: 100%;
+}
+
+.card .name {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 1.15rem;
+  margin-top: 0.25rem;
+}
+.card .notes {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin-top: 0.15rem;
+}
+
+/* ----- Estado sin coincidencias ----- */
+
+.msg {
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  font-style: italic;
+  text-align: center;
+  padding: 1.4rem 1rem;
+}
