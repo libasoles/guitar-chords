@@ -105,6 +105,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
 
 console.log('==> Building site assets...');
 
+fs.rmSync(DIST_SITE, { recursive: true, force: true });
 const ASSETS_DIST = path.join(DIST_SITE, 'assets');
 const VENDOR_DIST = path.join(ASSETS_DIST, 'vendor');
 ensureDir(ASSETS_DIST);
@@ -148,5 +149,9 @@ LOCALES.forEach(function (locale) {
   fs.writeFileSync(outFile, html, 'utf8');
   say(path.relative(ROOT, outFile));
 });
+
+const noJekyll = path.join(DIST_SITE, '.nojekyll');
+fs.writeFileSync(noJekyll, '', 'utf8');
+say(path.relative(ROOT, noJekyll));
 
 console.log('==> Done. Site output: dist/site/');
