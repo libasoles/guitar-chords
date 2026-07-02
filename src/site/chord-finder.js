@@ -49,6 +49,11 @@
     '.controls-main {',
     '  display: flex; gap: 0.75rem; align-items: center;',
     '}',
+    '.title-row {',
+    '  display: flex; align-items: center; justify-content: space-between;',
+    '  gap: 0.75rem; margin-bottom: 0.75rem;',
+    '}',
+    '.title-row ::slotted(h1) { margin: 0; }',
     '.search {',
     '  flex: 1 1 auto; min-width: 0;',
     '  font-family: var(--mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);',
@@ -77,19 +82,23 @@
     '.advanced-toggle-label { font-weight: 600; }',
     '.advanced-toggle-value { color: var(--ink-soft, #555); }',
     '.advanced-toggle[aria-expanded="true"] .advanced-toggle-value { color: var(--accent, #8b0000); }',
-    '.notation-toggle {',
-    '  flex: 0 0 auto; min-height: 2.5rem; min-width: 2.8rem; padding: 0.45rem 0.7rem;',
+    '.notation-group {',
+    '  flex: 0 0 auto; display: inline-flex;',
+    '  border: 1px solid var(--rule, #d8d2c4); border-radius: 999px;',
+    '  background: var(--paper, #fdfaf5); overflow: hidden;',
+    '}',
+    '.notation-option {',
+    '  min-height: 1.9rem; padding: 0.3rem 0.65rem;',
     '  font-family: var(--mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);',
     '  font-size: 0.9rem; font-weight: 600;',
-    '  border: 1px solid var(--rule, #d8d2c4); border-radius: 999px;',
-    '  background: var(--paper, #fdfaf5); color: var(--ink-soft, #555); cursor: pointer;',
+    '  border: none; background: transparent; color: var(--ink-soft, #555); cursor: pointer;',
     '}',
-    '.notation-toggle:hover { border-color: var(--ink-soft, #555); }',
-    '.notation-toggle:focus-visible {',
-    '  outline: 2px solid var(--accent, #8b0000); outline-offset: 2px;',
+    '.notation-option:hover { color: var(--ink, #1a1a1a); }',
+    '.notation-option:focus-visible {',
+    '  outline: 2px solid var(--accent, #8b0000); outline-offset: -2px;',
     '}',
-    '.notation-toggle[aria-pressed="true"] {',
-    '  background: var(--ink, #1a1a1a); color: var(--paper, #fdfaf5); border-color: var(--ink, #1a1a1a);',
+    '.notation-option[aria-pressed="true"] {',
+    '  background: var(--ink, #1a1a1a); color: var(--paper, #fdfaf5);',
     '}',
     '.advanced-panel {',
     '  display: flex; flex-wrap: wrap; gap: 0.6rem;',
@@ -290,6 +299,12 @@
     var root = this.shadowRoot;
     root.innerHTML = '<style>' + STYLES + '</style>';
 
+    var titleRow = document.createElement('div');
+    titleRow.className = 'title-row';
+    var titleSlot = document.createElement('slot');
+    titleSlot.name = 'title';
+    titleRow.appendChild(titleSlot);
+
     var controls = document.createElement('div');
     controls.className = 'controls';
     controls.setAttribute('role', 'toolbar');
@@ -306,30 +321,46 @@
     input.spellcheck = false;
     mainRow.appendChild(input);
 
-    var notationToggle = document.createElement('button');
-    notationToggle.type = 'button';
-    notationToggle.className = 'notation-toggle';
+    var notationGroup = document.createElement('div');
+    notationGroup.className = 'notation-group';
+    notationGroup.setAttribute('role', 'group');
+    notationGroup.setAttribute('aria-label', t('cfNotationGroupLabel', 'Notación de acordes'));
+
     var self0 = this;
-    function notationLabel() {
-      return self0._notation === 'es'
-        ? t('cfNotationToggleToEnglish', 'Cambiar a cifrado americano (C D E)')
-        : t('cfNotationToggleToSpanish', 'Cambiar a cifrado en español (Do Re Mi)');
-    }
+    var americanOption = document.createElement('button');
+    americanOption.type = 'button';
+    americanOption.className = 'notation-option';
+    americanOption.textContent = 'C';
+    americanOption.title = t('cfNotationAmerican', 'Notación americana (C D E)');
+    americanOption.setAttribute('aria-label', americanOption.title);
+
+    var spanishOption = document.createElement('button');
+    spanishOption.type = 'button';
+    spanishOption.className = 'notation-option';
+    spanishOption.textContent = 'Do';
+    spanishOption.title = t('cfNotationSpanish', 'Notación en español (Do Re Mi)');
+    spanishOption.setAttribute('aria-label', spanishOption.title);
+
     function syncNotationToggle() {
-      notationToggle.textContent = self0._notation === 'es' ? 'Do' : 'C';
-      notationToggle.setAttribute('aria-pressed', String(self0._notation === 'es'));
-      var label = notationLabel();
-      notationToggle.title = label;
-      notationToggle.setAttribute('aria-label', label);
+      var isSpanish = self0._notation === 'es';
+      americanOption.setAttribute('aria-pressed', String(!isSpanish));
+      spanishOption.setAttribute('aria-pressed', String(isSpanish));
     }
     syncNotationToggle();
-    notationToggle.addEventListener('click', function () {
-      self0._notation = self0._notation === 'es' ? 'en' : 'es';
-      self0._saveNotation(self0._notation);
+
+    function selectNotation(notation) {
+      if (self0._notation === notation) return;
+      self0._notation = notation;
+      self0._saveNotation(notation);
       syncNotationToggle();
       self0._applyNotation();
-    });
-    mainRow.appendChild(notationToggle);
+    }
+    americanOption.addEventListener('click', function () { selectNotation('en'); });
+    spanishOption.addEventListener('click', function () { selectNotation('es'); });
+
+    notationGroup.appendChild(americanOption);
+    notationGroup.appendChild(spanishOption);
+    titleRow.appendChild(notationGroup);
 
     var panelId = 'advanced-filters-' + Math.random().toString(36).slice(2, 9);
     var advancedToggle = document.createElement('button');
@@ -394,6 +425,7 @@
     grid.className = 'grid';
     grid.setAttribute('aria-live', 'polite');
 
+    root.appendChild(titleRow);
     root.appendChild(controls);
     root.appendChild(strip);
     root.appendChild(grid);

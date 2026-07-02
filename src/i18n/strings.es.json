@@ -49,6 +49,7 @@
   "cfPinnedTitle": "Acordes pineados",
   "cfToolbarAriaLabel": "Filtros y búsqueda",
   "cfUnpinAriaLabel": "Despinear {name}",
-  "cfNotationToggleToSpanish": "Cambiar a cifrado en español (Do Re Mi)",
-  "cfNotationToggleToEnglish": "Cambiar a cifrado americano (C D E)"
+  "cfNotationGroupLabel": "Notación de acordes",
+  "cfNotationAmerican": "Notación americana (C D E)",
+  "cfNotationSpanish": "Notación en español (Do Re Mi)"
 }

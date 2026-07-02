@@ -155,11 +155,12 @@ async function run() {
     let names = await visibleNames(page);
     assert.ok(names.includes('Am7'), `expected English "Am7" by default, got: ${names.join(', ')}`);
 
-    const clickNotationToggle = (sel) => page.evaluate((s) => {
-      document.querySelector(s).shadowRoot.querySelector('.notation-toggle').click();
-    }, sel);
+    const clickNotationOption = (sel, label) => page.evaluate((args) => {
+      const options = document.querySelector(args.sel).shadowRoot.querySelectorAll('.notation-option');
+      Array.from(options).find((el) => el.textContent === args.label).click();
+    }, { sel, label });
 
-    await clickNotationToggle('#pin');
+    await clickNotationOption('#pin', 'Do');
     await page.waitForFunction(() => {
       const f = document.querySelector('#pin');
       const card = Array.from(f.shadowRoot.querySelectorAll('.card')).find((c) => !c.classList.contains('hidden'));
@@ -185,7 +186,7 @@ async function run() {
     assert.ok(names.includes('Sol7'), `expected "G7" query to still match, got: ${names.join(', ')}`);
 
     // Toggle back to English.
-    await clickNotationToggle('#pin');
+    await clickNotationOption('#pin', 'C');
     await page.waitForFunction(() => {
       const f = document.querySelector('#pin');
       const card = Array.from(f.shadowRoot.querySelectorAll('.card')).find((c) => !c.classList.contains('hidden'));

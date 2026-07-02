@@ -23,7 +23,8 @@
   const resultsShell = document.getElementById('results-shell');
   const pinned = document.getElementById('pinned');
   const pinnedShell = document.getElementById('pinned-shell');
-  const notationToggle = document.getElementById('notation-toggle');
+  const notationAmerican = document.getElementById('notation-american');
+  const notationSpanish = document.getElementById('notation-spanish');
   const { matchChords } = window.ChordSearch;
   const MAX_POPUP_HEIGHT = 600;
   const pinnedChordNames = [];
@@ -57,14 +58,14 @@
     return chord.notes || '';
   }
 
+  notationAmerican.title = i18n('notationAmerican', 'American notation (C D E)');
+  notationAmerican.setAttribute('aria-label', notationAmerican.title);
+  notationSpanish.title = i18n('notationSpanish', 'Spanish notation (Do Re Mi)');
+  notationSpanish.setAttribute('aria-label', notationSpanish.title);
+
   function syncNotationToggle() {
-    notationToggle.textContent = notation === 'es' ? 'Do' : 'C';
-    notationToggle.setAttribute('aria-pressed', String(notation === 'es'));
-    const label = notation === 'es'
-      ? i18n('notationToggleToEnglish', 'Switch to American notation (C D E)')
-      : i18n('notationToggleToSpanish', 'Switch to Spanish notation (Do Re Mi)');
-    notationToggle.title = label;
-    notationToggle.setAttribute('aria-label', label);
+    notationAmerican.setAttribute('aria-pressed', String(notation !== 'es'));
+    notationSpanish.setAttribute('aria-pressed', String(notation === 'es'));
   }
 
   function drawDiagram(target, chord) {
@@ -218,12 +219,15 @@
   window.addEventListener('resize', () => { syncPopupHeight(); syncResultsFade(); });
   results.addEventListener('scroll', syncResultsFade, { passive: true });
   input.addEventListener('input', render);
-  notationToggle.addEventListener('click', () => {
-    notation = notation === 'es' ? 'en' : 'es';
+  function selectNotation(next) {
+    if (notation === next) return;
+    notation = next;
     saveNotation(notation);
     syncNotationToggle();
     render();
-  });
+  }
+  notationAmerican.addEventListener('click', () => selectNotation('en'));
+  notationSpanish.addEventListener('click', () => selectNotation('es'));
   syncNotationToggle();
   input.focus();
   render();

@@ -49,6 +49,7 @@
   "cfPinnedTitle": "Pinned chords",
   "cfToolbarAriaLabel": "Filters and search",
   "cfUnpinAriaLabel": "Unpin {name}",
-  "cfNotationToggleToSpanish": "Switch to Spanish notation (Do Re Mi)",
-  "cfNotationToggleToEnglish": "Switch to American notation (C D E)"
+  "cfNotationGroupLabel": "Chord notation",
+  "cfNotationAmerican": "American notation (C D E)",
+  "cfNotationSpanish": "Spanish notation (Do Re Mi)"
 }
