@@ -77,11 +77,8 @@ function decoderRows(strings) {
 
 // Build the extension CTA button.
 function ctaButton(strings) {
-  const storeUrl = process.env.EXTENSION_STORE_URL || '';
-  if (storeUrl) {
-    return '<a class="ext-btn" href="' + storeUrl + '" target="_blank" rel="noopener">' + strings.extensionAddButton + '</a>';
-  }
-  return '<button class="ext-btn" type="button" disabled aria-disabled="true">' + strings.extensionComingSoon + '</button>';
+  const storeUrl = process.env.EXTENSION_STORE_URL || 'https://chromewebstore.google.com/detail/guitar-chords/chigeaalpomifocjjhgcpblcepigajme';
+  return '<a class="ext-btn" href="' + storeUrl + '" target="_blank" rel="noopener">' + strings.extensionAddButton + '</a>';
 }
 
 // Replace all %%KEY%% placeholders in the template.
