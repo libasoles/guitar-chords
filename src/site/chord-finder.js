@@ -164,12 +164,23 @@
     '  border-radius: 6px;',
     '}',
     '.pinned-strip[hidden] { display: none; }',
+    '.pinned-title-row {',
+    '  display: flex; align-items: baseline; justify-content: space-between;',
+    '  margin: 0 0 0.6rem;',
+    '}',
     '.pinned-title {',
     '  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif);',
     '  font-size: 0.78rem; font-weight: 600; text-transform: uppercase;',
     '  letter-spacing: 0.05em; color: var(--accent, #8b0000);',
-    '  margin: 0 0 0.6rem;',
+    '  margin: 0;',
     '}',
+    '.pinned-clear {',
+    '  border: 0; background: transparent; padding: 0; cursor: pointer;',
+    '  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif);',
+    '  font-size: 0.72rem; font-weight: 600; text-transform: uppercase;',
+    '  letter-spacing: 0.05em; color: var(--ink-soft, #555);',
+    '}',
+    '.pinned-clear:hover { color: var(--accent, #8b0000); }',
     '.pinned-list {',
     '  display: flex; flex-wrap: wrap; gap: 0.8rem;',
     '}',
@@ -432,12 +443,21 @@
     var strip = document.createElement('div');
     strip.className = 'pinned-strip';
     strip.hidden = true;
+    var stripTitleRow = document.createElement('div');
+    stripTitleRow.className = 'pinned-title-row';
     var stripTitle = document.createElement('p');
     stripTitle.className = 'pinned-title';
     stripTitle.textContent = t('cfPinnedTitle', 'Acordes pineados');
+    var stripClear = document.createElement('button');
+    stripClear.type = 'button';
+    stripClear.className = 'pinned-clear';
+    stripClear.textContent = t('cfClearPinned', 'Limpiar');
+    stripClear.addEventListener('click', function () { self._clearPinned(); });
+    stripTitleRow.appendChild(stripTitle);
+    stripTitleRow.appendChild(stripClear);
     var stripList = document.createElement('div');
     stripList.className = 'pinned-list';
-    strip.appendChild(stripTitle);
+    strip.appendChild(stripTitleRow);
     strip.appendChild(stripList);
 
     var grid = document.createElement('div');
@@ -558,6 +578,12 @@
     var i = this._pinnedNames.indexOf(chord.name);
     if (i === -1) this._pinnedNames.push(chord.name);
     else this._pinnedNames.splice(i, 1);
+    this._savePinned();
+    this._renderPinned();
+  };
+
+  ChordFinder.prototype._clearPinned = function () {
+    this._pinnedNames.length = 0;
     this._savePinned();
     this._renderPinned();
   };

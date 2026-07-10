@@ -140,7 +140,7 @@ body {
   font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--ink-soft);
+  color: var(--accent);
 }
 
 .pinned-clear {
@@ -156,7 +156,7 @@ body {
 }
 
 .pinned-clear:hover {
-  color: var(--ink);
+  color: var(--accent);
 }
 
 #pinned {
