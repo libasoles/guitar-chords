@@ -7,6 +7,7 @@
   },
   "scripts": {
     "vendor": "node scripts/vendor.js",
+    "dev": "node scripts/dev.js",
     "build:site": "node scripts/build-site.js",
     "build:ext": "node scripts/build-ext.js",
     "build": "npm run build:site && npm run build:ext",
