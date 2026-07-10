@@ -60,7 +60,7 @@ const LOCALES = ['es', 'en'];
 
 // Build the chord-finder i18n subset (only the cfXxx keys).
 function finderI18N(strings) {
-  const keys = ['cfFilters', 'cfEmpty', 'cfPinLabel', 'cfPinnedLabel', 'cfPinnedTitle', 'cfToolbarAriaLabel', 'cfUnpinAriaLabel', 'cfNotationToggleToSpanish', 'cfNotationToggleToEnglish'];
+  const keys = ['cfFilters', 'cfFilterCategoryType', 'cfFilterCategoryKey', 'cfClearFilters', 'cfRootLabels', 'cfEmpty', 'cfPinLabel', 'cfPinnedLabel', 'cfPinnedTitle', 'cfClearPinned', 'cfToolbarAriaLabel', 'cfUnpinAriaLabel', 'cfAdvancedFiltersLabel', 'cfNotationGroupLabel', 'cfNotationAmerican', 'cfNotationSpanish'];
   const out = {};
   keys.forEach(function (k) { if (strings[k] !== undefined) out[k] = strings[k]; });
   return out;

@@ -36,6 +36,37 @@
     return match ? filterLabel(match.i18n) : filterLabel(0);
   }
 
+  var ROOT_DEFS = [
+    { root: 'all' },
+    { root: 0 }, { root: 1 }, { root: 2 }, { root: 3 },
+    { root: 4 }, { root: 5 }, { root: 6 }, { root: 7 },
+    { root: 8 }, { root: 9 }, { root: 10 }, { root: 11 },
+  ];
+
+  var DEFAULT_ROOT_LABELS = ['C', 'C♯/D♭', 'D', 'D♯/E♭', 'E', 'F', 'F♯/G♭', 'G', 'G♯/A♭', 'A', 'A♯/B♭', 'B'];
+
+  var ROOT_PITCH_CLASS = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+
+  // Extracts the root note (leading letter + optional accidental) from a chord
+  // name and maps it to a pitch class 0-11, ignoring quality and slash bass.
+  function rootPitchClass(name) {
+    var m = /^([A-G])([♯♭]?)/.exec(String(name || ''));
+    if (!m) return -1;
+    var base = ROOT_PITCH_CLASS[m[1]];
+    if (m[2] === '♯') base += 1;
+    else if (m[2] === '♭') base -= 1;
+    return ((base % 12) + 12) % 12;
+  }
+
+  function rootLabel(root) {
+    var labels = t('cfRootLabels', DEFAULT_ROOT_LABELS);
+    return labels[root] || DEFAULT_ROOT_LABELS[root];
+  }
+
+  function rootDisplayName(root) {
+    return root === 'all' ? filterLabel(0) : rootLabel(root);
+  }
+
   var STYLES = [
     ':host { display: block; }',
     '*, *::before, *::after { box-sizing: border-box; }',
@@ -102,10 +133,21 @@
     '  background: var(--ink, #1a1a1a); color: var(--paper, #fdfaf5);',
     '}',
     '.advanced-panel {',
-    '  display: flex; flex-wrap: wrap; gap: 0.6rem;',
+    '  display: flex; flex-direction: column; gap: 0.6rem;',
     '  padding-top: 0.1rem;',
     '}',
     '.advanced-panel[hidden] { display: none; }',
+    '.filter-group {',
+    '  display: flex; flex-direction: column; gap: 0.35rem;',
+    '}',
+    '.filter-group-label {',
+    '  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif);',
+    '  font-size: 0.72rem; font-weight: 600; text-transform: uppercase;',
+    '  letter-spacing: 0.05em; color: var(--ink-soft, #555); margin: 0;',
+    '}',
+    '.filter-group-pills {',
+    '  display: flex; flex-wrap: wrap; gap: 0.6rem;',
+    '}',
     '.pill {',
     '  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif);',
     '  font-size: 0.78rem; padding: 0.3rem 0.65rem;',
@@ -117,6 +159,16 @@
     '  background: var(--ink, #1a1a1a); color: var(--paper, #fdfaf5);',
     '  border-color: var(--ink, #1a1a1a);',
     '}',
+    '.filter-panel-header {',
+    '  display: flex; justify-content: flex-end;',
+    '}',
+    '.clear-filters {',
+    '  border: 0; background: transparent; padding: 0; cursor: pointer;',
+    '  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif);',
+    '  font-size: 0.72rem; font-weight: 600; text-transform: uppercase;',
+    '  letter-spacing: 0.05em; color: var(--ink-soft, #555);',
+    '}',
+    '.clear-filters:hover { color: var(--accent, #8b0000); }',
     '',
     '.grid {',
     '  display: grid;',
@@ -237,6 +289,7 @@
     }
 
     this._activeFilter = 'all';
+    this._activeRoot = 'all';
     this._cards = [];
     this._pinnedNames = this._loadPinned();
     this._notation = this._loadNotation();
@@ -421,24 +474,83 @@
     advancedPanel.hidden = true;
 
     var self = this;
-    this._pills = FILTER_DEFS.map(function (f) {
+
+    var panelHeader = document.createElement('div');
+    panelHeader.className = 'filter-panel-header';
+    var clearFiltersBtn = document.createElement('button');
+    clearFiltersBtn.type = 'button';
+    clearFiltersBtn.className = 'clear-filters';
+    clearFiltersBtn.textContent = t('cfClearFilters', 'Limpiar filtros');
+    clearFiltersBtn.addEventListener('click', function () {
+      self._activeFilter = 'all';
+      self._activeRoot = 'all';
+      self._syncPillStates();
+      self._syncAdvancedToggle();
+      self._applyFilter();
+    });
+    panelHeader.appendChild(clearFiltersBtn);
+    advancedPanel.appendChild(panelHeader);
+
+    var typeGroup = document.createElement('div');
+    typeGroup.className = 'filter-group';
+    var typeLabel = document.createElement('p');
+    typeLabel.className = 'filter-group-label';
+    typeLabel.textContent = t('cfFilterCategoryType', 'Tipo');
+    var typePills = document.createElement('div');
+    typePills.className = 'filter-group-pills';
+    typeGroup.appendChild(typeLabel);
+    typeGroup.appendChild(typePills);
+
+    this._pills = FILTER_DEFS.filter(function (f) { return f.filter !== 'all'; }).map(function (f) {
       var pill = document.createElement('button');
       pill.type = 'button';
       pill.className = 'pill';
       pill.dataset.filter = f.filter;
       pill.textContent = filterLabel(f.i18n);
-      pill.setAttribute('aria-pressed', f.filter === 'all' ? 'true' : 'false');
+      pill.setAttribute('aria-pressed', 'false');
       pill.addEventListener('click', function () {
-        self._pills.forEach(function (p) { p.setAttribute('aria-pressed', 'false'); });
-        pill.setAttribute('aria-pressed', 'true');
         self._activeFilter = f.filter;
+        self._activeRoot = 'all';
+        self._syncPillStates();
         self._syncAdvancedToggle();
         self._applyFilter();
       });
-      advancedPanel.appendChild(pill);
+      typePills.appendChild(pill);
       return pill;
     });
+    advancedPanel.appendChild(typeGroup);
+
+    var keyGroup = document.createElement('div');
+    keyGroup.className = 'filter-group';
+    var keyLabel = document.createElement('p');
+    keyLabel.className = 'filter-group-label';
+    keyLabel.textContent = t('cfFilterCategoryKey', 'Tonalidad');
+    var keyPills = document.createElement('div');
+    keyPills.className = 'filter-group-pills';
+    keyGroup.appendChild(keyLabel);
+    keyGroup.appendChild(keyPills);
+
+    this._rootPills = ROOT_DEFS.filter(function (r) { return r.root !== 'all'; }).map(function (r) {
+      var pill = document.createElement('button');
+      pill.type = 'button';
+      pill.className = 'pill';
+      pill.dataset.root = String(r.root);
+      pill.textContent = rootDisplayName(r.root);
+      pill.setAttribute('aria-pressed', 'false');
+      pill.addEventListener('click', function () {
+        self._activeRoot = r.root;
+        self._activeFilter = 'all';
+        self._syncPillStates();
+        self._syncAdvancedToggle();
+        self._applyFilter();
+      });
+      keyPills.appendChild(pill);
+      return pill;
+    });
+    advancedPanel.appendChild(keyGroup);
+
     controls.appendChild(advancedPanel);
+    this._syncPillStates();
 
     var strip = document.createElement('div');
     strip.className = 'pinned-strip';
@@ -484,10 +596,28 @@
     });
   };
 
+  ChordFinder.prototype._syncPillStates = function () {
+    var self = this;
+    if (this._pills) {
+      this._pills.forEach(function (p) {
+        p.setAttribute('aria-pressed', p.dataset.filter === self._activeFilter ? 'true' : 'false');
+      });
+    }
+    if (this._rootPills) {
+      this._rootPills.forEach(function (p) {
+        p.setAttribute('aria-pressed', p.dataset.root === String(self._activeRoot) ? 'true' : 'false');
+      });
+    }
+  };
+
   ChordFinder.prototype._syncAdvancedToggle = function () {
     if (!this._advancedToggle) return;
     var value = this._advancedToggle.querySelector('.advanced-toggle-value');
-    if (value) value.textContent = filterDisplayName(this._activeFilter);
+    if (!value) return;
+    var parts = [];
+    if (this._activeFilter !== 'all') parts.push(filterDisplayName(this._activeFilter));
+    if (this._activeRoot !== 'all') parts.push(rootDisplayName(this._activeRoot));
+    value.textContent = parts.length ? parts.join(' · ') : filterLabel(0);
   };
 
   ChordFinder.prototype._renderCards = function () {
@@ -498,6 +628,7 @@
       card.className = 'card';
       card._chord = chord;
       card._families = chord.families || [];
+      card._root = rootPitchClass(chord.name);
 
       var pin = document.createElement('button');
       pin.type = 'button';
@@ -540,6 +671,7 @@
   ChordFinder.prototype._applyFilter = function () {
     var q = this._input.value || '';
     var fam = this._activeFilter;
+    var key = this._activeRoot;
 
     var matched = window.ChordSearch.matchChords(q, window.CHORDS);
     var matchedSet = null;
@@ -549,8 +681,9 @@
     var visible = 0;
     this._cards.forEach(function (card) {
       var matchesFamily = fam === 'all' || card._families.indexOf(fam) !== -1;
+      var matchesKey = key === 'all' || card._root === key;
       var matchesSearch = !hasQuery || matchedSet.has(card._chord);
-      var show = matchesFamily && matchesSearch;
+      var show = matchesFamily && matchesKey && matchesSearch;
       card.classList.toggle('hidden', !show);
       card.classList.toggle('match', show && hasQuery);
       if (show) visible++;
