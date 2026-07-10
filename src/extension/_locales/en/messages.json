@@ -15,6 +15,10 @@
     "message": "Pinned chords",
     "description": "Label above the pinned chords section"
   },
+  "clearPinned": {
+    "message": "Clear",
+    "description": "Button to remove all pinned chords"
+  },
   "noResults": {
     "message": "No matching chords.",
     "description": "Message shown when search returns no results"

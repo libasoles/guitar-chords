@@ -16,6 +16,7 @@
   // Apply i18n strings to static DOM elements.
   document.getElementById('q').placeholder = i18n('searchPlaceholder', 'Type Cmaj7, Am7, D/F#…');
   document.getElementById('pinned-header-label').textContent = i18n('pinnedHeader', 'Pinned chords');
+  document.getElementById('pinned-clear').textContent = i18n('clearPinned', 'Clear');
   document.title = i18n('appName', 'Guitar Chords');
 
   const input = document.getElementById('q');
@@ -23,6 +24,7 @@
   const resultsShell = document.getElementById('results-shell');
   const pinned = document.getElementById('pinned');
   const pinnedShell = document.getElementById('pinned-shell');
+  const pinnedClear = document.getElementById('pinned-clear');
   const notationAmerican = document.getElementById('notation-american');
   const notationSpanish = document.getElementById('notation-spanish');
   const { matchChords } = window.ChordSearch;
@@ -114,6 +116,14 @@
     savePinned();
     render();
   }
+
+  function clearPinned() {
+    pinnedChordNames.length = 0;
+    savePinned();
+    render();
+  }
+
+  pinnedClear.addEventListener('click', clearPinned);
 
   function getPinnedChords() {
     return pinnedChordNames

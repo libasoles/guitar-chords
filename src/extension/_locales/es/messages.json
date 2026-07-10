@@ -15,6 +15,10 @@
     "message": "Acordes pineados",
     "description": "Label de la sección de acordes pineados"
   },
+  "clearPinned": {
+    "message": "Limpiar",
+    "description": "Botón para quitar todos los acordes pineados"
+  },
   "noResults": {
     "message": "No hay acordes que coincidan.",
     "description": "Mensaje cuando la búsqueda no devuelve resultados"
