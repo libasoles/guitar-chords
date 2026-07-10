@@ -52,6 +52,7 @@
   "cfPinnedLabel": "Pineado",
   "cfPinnedTitle": "Acordes pineados",
   "cfClearPinned": "Limpiar",
+  "cfExportPdf": "Exportar PDF",
   "cfToolbarAriaLabel": "Filtros y búsqueda",
   "cfAdvancedFiltersLabel": "Filtros",
   "cfUnpinAriaLabel": "Despinear {name}",

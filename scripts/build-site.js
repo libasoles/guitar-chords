@@ -52,6 +52,10 @@ const FUZZYSORT = path.join(SRC_VENDOR, 'fuzzysort.js');
 if (!fs.existsSync(FUZZYSORT)) {
   fail('vendor/fuzzysort.js not found. Run: npm run vendor');
 }
+const JSPDF = path.join(SRC_VENDOR, 'jspdf.umd.min.js');
+if (!fs.existsSync(JSPDF)) {
+  fail('vendor/jspdf.umd.min.js not found. Run: npm run vendor');
+}
 
 // ---- template rendering ----------------------------------------------------
 
@@ -60,7 +64,7 @@ const LOCALES = ['es', 'en'];
 
 // Build the chord-finder i18n subset (only the cfXxx keys).
 function finderI18N(strings) {
-  const keys = ['cfFilters', 'cfFilterCategoryType', 'cfFilterCategoryKey', 'cfClearFilters', 'cfRootLabels', 'cfEmpty', 'cfPinLabel', 'cfPinnedLabel', 'cfPinnedTitle', 'cfClearPinned', 'cfToolbarAriaLabel', 'cfUnpinAriaLabel', 'cfAdvancedFiltersLabel', 'cfNotationGroupLabel', 'cfNotationAmerican', 'cfNotationSpanish'];
+  const keys = ['cfFilters', 'cfFilterCategoryType', 'cfFilterCategoryKey', 'cfClearFilters', 'cfRootLabels', 'cfEmpty', 'cfPinLabel', 'cfPinnedLabel', 'cfPinnedTitle', 'cfClearPinned', 'cfExportPdf', 'cfToolbarAriaLabel', 'cfUnpinAriaLabel', 'cfAdvancedFiltersLabel', 'cfNotationGroupLabel', 'cfNotationAmerican', 'cfNotationSpanish'];
   const out = {};
   keys.forEach(function (k) { if (strings[k] !== undefined) out[k] = strings[k]; });
   return out;
@@ -140,9 +144,10 @@ ensureDir(VENDOR_DIST);
 copyFile(path.join(SRC_SITE, 'chord-finder.js'), path.join(ASSETS_DIST, 'chord-finder.js'));
 copyFile(path.join(SRC_SITE, 'site.css'), path.join(ASSETS_DIST, 'site.css'));
 copyFile(path.join(SRC_EXT, 'icon-source.svg'), path.join(ASSETS_DIST, 'favicon.svg'));
-// Vendored svguitar and fuzzysort.
+// Vendored svguitar, fuzzysort, and jsPDF.
 copyFile(path.join(SRC_VENDOR, 'svguitar.umd.js'), path.join(VENDOR_DIST, 'svguitar.umd.js'));
 copyFile(path.join(SRC_VENDOR, 'fuzzysort.js'), path.join(VENDOR_DIST, 'fuzzysort.js'));
+copyFile(path.join(SRC_VENDOR, 'jspdf.umd.min.js'), path.join(VENDOR_DIST, 'jspdf.umd.min.js'));
 // OG image (optional — skip silently if not present yet).
 const ogImageSrc = path.join(SRC_SITE, 'og-image.png');
 if (fs.existsSync(ogImageSrc)) {

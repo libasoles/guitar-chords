@@ -52,6 +52,7 @@
   "cfPinnedLabel": "Pinned",
   "cfPinnedTitle": "Pinned chords",
   "cfClearPinned": "Clear",
+  "cfExportPdf": "Export PDF",
   "cfToolbarAriaLabel": "Filters and search",
   "cfAdvancedFiltersLabel": "Filters",
   "cfUnpinAriaLabel": "Unpin {name}",

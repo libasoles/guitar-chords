@@ -15,6 +15,7 @@ const VENDOR = path.join(ROOT, 'vendor');
 const LIBS = [
   { url: 'https://omnibrain.github.io/svguitar/js/svguitar.umd.js', out: path.join(VENDOR, 'svguitar.umd.js') },
   { url: 'https://cdn.jsdelivr.net/npm/fuzzysort@3.1.0/fuzzysort.js', out: path.join(VENDOR, 'fuzzysort.js') },
+  { url: 'https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js', out: path.join(VENDOR, 'jspdf.umd.min.js') },
 ];
 
 function say(msg) { process.stdout.write('  ' + msg + '\n'); }

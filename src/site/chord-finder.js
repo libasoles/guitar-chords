@@ -255,6 +255,21 @@
     '  background: var(--accent, #8b0000); color: #fff;',
     '  border: none; border-radius: 999px;',
     '}',
+    '.pinned-actions {',
+    '  display: flex; justify-content: flex-end; margin: 0.6rem 0 0;',
+    '}',
+    '.pinned-actions[hidden] { display: none; }',
+    '.pinned-export {',
+    '  display: inline-flex; align-items: center; gap: 0.35rem;',
+    '  border: 1px solid var(--accent, #8b0000); background: transparent;',
+    '  color: var(--accent, #8b0000); border-radius: 4px; cursor: pointer;',
+    '  padding: 0.35rem 0.6rem;',
+    '  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif);',
+    '  font-size: 0.72rem; font-weight: 600; text-transform: uppercase;',
+    '  letter-spacing: 0.05em;',
+    '}',
+    '.pinned-export:hover { background: var(--accent, #8b0000); color: #fff; }',
+    '.pinned-export svg { width: 14px; height: 14px; flex: none; }',
     '.card .pin-button { display: none; }',
     ':host([pinnable]) .card .pin-button {',
     '  display: inline-block; align-self: flex-end;',
@@ -569,8 +584,19 @@
     stripTitleRow.appendChild(stripClear);
     var stripList = document.createElement('div');
     stripList.className = 'pinned-list';
+    var stripActions = document.createElement('div');
+    stripActions.className = 'pinned-actions';
+    stripActions.hidden = true;
+    var stripExport = document.createElement('button');
+    stripExport.type = 'button';
+    stripExport.className = 'pinned-export';
+    stripExport.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M12 11v6"></path><path d="M9.5 14.5 12 17l2.5-2.5"></path></svg><span></span>';
+    stripExport.querySelector('span').textContent = t('cfExportPdf', 'Exportar PDF');
+    stripExport.addEventListener('click', function () { self._exportPinnedPdf(); });
+    stripActions.appendChild(stripExport);
     strip.appendChild(stripTitleRow);
     strip.appendChild(stripList);
+    strip.appendChild(stripActions);
 
     var grid = document.createElement('div');
     grid.className = 'grid';
@@ -585,6 +611,7 @@
     this._grid = grid;
     this._strip = strip;
     this._stripList = stripList;
+    this._stripActions = stripActions;
     this._advancedPanel = advancedPanel;
     this._advancedToggle = advancedToggle;
 
@@ -735,9 +762,11 @@
     if (!this.hasAttribute('pinnable') || this._pinnedNames.length === 0) {
       list.textContent = '';
       strip.hidden = true;
+      this._stripActions.hidden = true;
       return;
     }
     strip.hidden = false;
+    this._stripActions.hidden = this._pinnedNames.length < 2;
 
     list.textContent = '';
     this._pinnedNames.forEach(function (name) {
@@ -774,6 +803,85 @@
         target.innerHTML = '<small style="color:#999">(error)</small>';
         if (window.console) console.error('svguitar error for', chord.name, err);
       }
+    });
+  };
+
+  function svgToPngDataUrl(svg) {
+    return new Promise(function (resolve) {
+      var clone = svg.cloneNode(true);
+      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      var svgStr = new XMLSerializer().serializeToString(clone);
+      var svgUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+      var img = new Image();
+      img.onload = function () {
+        var scale = 3;
+        var w = img.width || 110;
+        var h = img.height || 130;
+        var canvas = document.createElement('canvas');
+        canvas.width = w * scale;
+        canvas.height = h * scale;
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve({ dataUrl: canvas.toDataURL('image/png'), width: w, height: h });
+      };
+      img.onerror = function () { resolve(null); };
+      img.src = svgUrl;
+    });
+  }
+
+  ChordFinder.prototype._exportPinnedPdf = function () {
+    var self = this;
+    if (!window.jspdf || !window.jspdf.jsPDF) return;
+    var items = this._pinnedNames
+      .map(function (name) { return window.CHORDS.find(function (c) { return c.name === name; }); })
+      .filter(Boolean);
+    if (items.length < 2) return;
+
+    var cards = Array.prototype.slice.call(this._stripList.querySelectorAll('.pinned-card'));
+
+    Promise.all(cards.map(function (card) {
+      var svg = card.querySelector('.diagram svg');
+      return svg ? svgToPngDataUrl(svg) : Promise.resolve(null);
+    })).then(function (images) {
+      var doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
+      var pageWidth = doc.internal.pageSize.getWidth();
+      var pageHeight = doc.internal.pageSize.getHeight();
+      var margin = 15;
+      var cols = 3;
+      var cellW = (pageWidth - margin * 2) / cols;
+      var cellH = 55;
+      var imgSize = 35;
+      var startY = margin + 10;
+
+      doc.setFontSize(16);
+      doc.text(t('cfPinnedTitle', 'Acordes pineados'), margin, margin);
+
+      var row = 0;
+      var col = 0;
+      items.forEach(function (chord, i) {
+        var x = margin + col * cellW;
+        var y = startY + row * cellH;
+        if (y + cellH > pageHeight - margin) {
+          doc.addPage();
+          row = 0;
+          col = 0;
+          y = startY;
+          x = margin;
+        }
+        var img = images[i];
+        if (img) {
+          doc.addImage(img.dataUrl, 'PNG', x + (cellW - imgSize) / 2, y, imgSize, imgSize);
+        }
+        doc.setFontSize(11);
+        doc.text(self._displayName(chord), x + cellW / 2, y + imgSize + 6, { align: 'center' });
+
+        col += 1;
+        if (col >= cols) { col = 0; row += 1; }
+      });
+
+      doc.save('acordes-pineados.pdf');
     });
   };
 
