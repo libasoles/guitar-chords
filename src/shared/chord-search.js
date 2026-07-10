@@ -54,14 +54,34 @@
     return normalized.replace(ES_NOTE_PREFIX, function (m) { return ES_TO_EN_NOTE[m]; });
   }
 
-  // Devuelve los acordes cuyo nombre o algún alias, normalizados,
-  // EMPIEZAN CON la query normalizada, ordenados por relevancia
-  // (match más cercano al exacto primero, vía fuzzysort). Ante empate
-  // de score se conserva el orden estable de la base.
+  // Nota inicial de un nombre/alias normalizado (letra + # o b opcional).
+  const ROOT_RE = /^[a-g](?:#|b)?/;
+
+  // Separa un string normalizado en { root, rest }: la nota inicial (si la
+  // tiene) y el resto (calidad/extensión). "cmaj9" → { root: 'c', rest: 'maj9' }.
+  function splitRoot(s) {
+    const m = s.match(ROOT_RE);
+    return m ? { root: m[0], rest: s.slice(m[0].length) } : { root: '', rest: s };
+  }
+
+  // Devuelve los acordes cuyo nombre o algún alias, normalizados, matchean
+  // la query normalizada, ordenados por relevancia (match más cercano al
+  // exacto primero, vía fuzzysort). Ante empate de score se conserva el
+  // orden estable de la base.
+  //
+  // Si la query empieza con una nota (p. ej. "c9", "cmaj"), la nota debe
+  // matchear EXACTO (no alcanza con "c" para matchear "c#") y el resto de
+  // la query sólo necesita aparecer como subsecuencia en el resto del
+  // candidato: "c9" matchea "Cmaj9" (resto "9" es subsecuencia de "maj9").
+  // Si la query no empieza con una nota (p. ej. "9", "sus4"), se busca esa
+  // subsecuencia en el candidato completo, sin restricción de nota: "9"
+  // matchea cualquier acorde de novena, sin importar la raíz.
+  //
   // Query vacía (o sólo espacios/símbolos que colapsan a '') → [].
   function matchChords(query, chords) {
     const q = normalize(query);
     if (q === '') return [];
+    const qSplit = splitRoot(q);
     const list = chords || [];
     const scored = [];
     list.forEach(function (chord, index) {
@@ -69,7 +89,15 @@
       let bestScore = null;
       candidates.forEach(function (candidate) {
         const normalized = normalize(candidate);
-        if (!normalized.startsWith(q)) return;
+        let included;
+        if (qSplit.root !== '') {
+          const cSplit = splitRoot(normalized);
+          included = cSplit.root === qSplit.root &&
+            (qSplit.rest === '' || !!fuzzysort.single(qSplit.rest, cSplit.rest));
+        } else {
+          included = !!fuzzysort.single(q, normalized);
+        }
+        if (!included) return;
         const score = fuzzysort.single(q, normalized).score;
         if (bestScore === null || score > bestScore) bestScore = score;
       });

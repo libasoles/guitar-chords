@@ -158,3 +158,18 @@ test('cifrado español "solm7" matchea "Gm7"', () => {
 test('cifrado español "la" matchea lo mismo que "a"', () => {
   assert.deepEqual(names('la'), names('a'));
 });
+
+test('"C9" matchea "Cmaj9" (novena sin "maj" explícito)', () => {
+  assert.ok(names('C9').includes('Cmaj9'));
+});
+
+test('"9" sola matchea todos los acordes de novena, de cualquier raíz', () => {
+  const r = names('9');
+  assert.ok(r.includes('Cmaj9'));
+  assert.ok(r.includes('Dmaj9'));
+  assert.ok(r.includes('Em(add9)'));
+});
+
+test('"cmaj7" no matchea "D♭maj7" vía su alias enarmónico "C♯maj7"', () => {
+  assert.ok(!names('cmaj7').includes('D♭maj7'));
+});
