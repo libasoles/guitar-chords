@@ -42,7 +42,7 @@
   "extensionDescription": "Look up a chord diagram in an instant, without leaving what you're playing.",
   "extensionAddButton": "Add to Chrome",
 
-  "cfFilters": ["All", "Major", "Minor", "Dom. 7th", "Minor 7th", "Major 7th", "6th", "Sus", "Slash bass (/)", "Others"],
+  "cfFilters": ["All", "Major", "Minor", "Dom. 7th", "Minor 7th", "Major 7th", "6th", "Sus", "Slash bass (/)", "Major 9th", "Others"],
   "cfFilterCategoryType": "Type",
   "cfFilterCategoryKey": "Key",
   "cfClearFilters": "Clear filters",

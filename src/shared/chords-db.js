@@ -2,7 +2,7 @@
    Única fuente de verdad de acordes para el workspace "acordes":
    la consume el buscador web (reference/chord-finder.html) y la extensión de Chrome.
 
-   Cobertura: para las 12 fundamentales — mayor, menor, 7, m7, maj7, 6, sus2, sus4 —
+   Cobertura: para las 12 fundamentales — mayor, menor, 7, m7, maj7, 6, maj9, sus2, sus4 —
    más dim7 (los 12), aug, slash y tensiones de folklore. Posiciones abiertas donde
    existen; formas movibles con cejilla para el resto.
 
@@ -314,6 +314,44 @@ window.CHORDS = [
   { name: 'E♭6', families: ['6ta'], aliases: ['D♯6'],
     notes: 'E♭ B♭ E♭ G C', position: 6, barres: [{fromString:4,toString:1,fret:8}],
     fingers: [[6,'x'],[5,6,'1']] },
+
+  // ----- NOVENAS MAYORES (maj9) -----
+  { name: 'Cmaj9', families: ['maj9'], aliases: ['CM9','CΔ9'],
+    notes: 'C E B D',
+    fingers: [[6,'x'],[5,3,'2'],[4,2,'1'],[3,4,'4'],[2,3,'3'],[1,'x']] },
+  { name: 'Dmaj9', families: ['maj9'], aliases: ['DM9','DΔ9'], position: 4,
+    notes: 'D F♯ C♯ E',
+    fingers: [[6,'x'],[5,5,'2'],[4,4,'1'],[3,6,'4'],[2,5,'3'],[1,'x']] },
+  { name: 'Emaj9', families: ['maj9'], aliases: ['EM9','EΔ9'], position: 6,
+    notes: 'E G♯ D♯ F♯',
+    fingers: [[6,'x'],[5,7,'2'],[4,6,'1'],[3,8,'4'],[2,7,'3'],[1,'x']] },
+  { name: 'Gmaj9', families: ['maj9'], aliases: ['GM9','GΔ9'], position: 9,
+    notes: 'G B F♯ A',
+    fingers: [[6,'x'],[5,10,'2'],[4,9,'1'],[3,11,'4'],[2,10,'3'],[1,'x']] },
+  { name: 'Amaj9', families: ['maj9'], aliases: ['AM9','AΔ9'], position: 4,
+    notes: 'A C♯ G♯ B',
+    fingers: [[6,5,'3'],[5,4,'1'],[4,6,'4'],[3,4,'2'],[2,'x'],[1,'x']] },
+  { name: 'Fmaj9', families: ['maj9'], aliases: ['FM9','FΔ9'], position: 7,
+    notes: 'F A E G',
+    fingers: [[6,'x'],[5,8,'2'],[4,7,'1'],[3,9,'4'],[2,8,'3'],[1,'x']] },
+  { name: 'F♯maj9', families: ['maj9'], aliases: ['G♭maj9'], position: 8,
+    notes: 'F♯ A♯ F G♯',
+    fingers: [[6,'x'],[5,9,'2'],[4,8,'1'],[3,10,'4'],[2,9,'3'],[1,'x']] },
+  { name: 'A♭maj9', families: ['maj9'], aliases: ['G♯maj9'], position: 10,
+    notes: 'A♭ C G B♭',
+    fingers: [[6,'x'],[5,11,'2'],[4,10,'1'],[3,12,'4'],[2,11,'3'],[1,'x']] },
+  { name: 'B♭maj9', families: ['maj9'], aliases: ['A♯maj9'],
+    notes: 'B♭ D F C',
+    fingers: [[6,'x'],[5,1,'1'],[4,'o'],[3,2,'3'],[2,1,'2'],[1,'x']] },
+  { name: 'Bmaj9', families: ['maj9'], aliases: [],
+    notes: 'B D♯ A♯ C♯',
+    fingers: [[6,'x'],[5,2,'2'],[4,1,'1'],[3,3,'4'],[2,2,'3'],[1,'x']] },
+  { name: 'D♭maj9', families: ['maj9'], aliases: ['C♯maj9'], position: 3,
+    notes: 'D♭ F C E♭',
+    fingers: [[6,'x'],[5,4,'2'],[4,3,'1'],[3,5,'4'],[2,4,'3'],[1,'x']] },
+  { name: 'E♭maj9', families: ['maj9'], aliases: ['D♯maj9'], position: 5,
+    notes: 'E♭ G D F',
+    fingers: [[6,'x'],[5,6,'2'],[4,5,'1'],[3,7,'4'],[2,6,'3'],[1,'x']] },
 
   // ----- SLASH (bajo invertido) -----
   { name: 'D/F#', families: ['slash'], aliases: ['D/F♯'],

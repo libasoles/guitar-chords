@@ -42,7 +42,7 @@
   "extensionDescription": "Buscá el diagrama de un acorde al instante, sin salir de lo que estás tocando.",
   "extensionAddButton": "Agregar a Chrome",
 
-  "cfFilters": ["Todos", "Mayores", "Menores", "Con 7ª (dom.)", "Menor 7ª", "Mayor 7ª", "Con 6ª", "Sus", "Con bajo (/)", "Otros"],
+  "cfFilters": ["Todos", "Mayores", "Menores", "Con 7ª (dom.)", "Menor 7ª", "Mayor 7ª", "Con 6ª", "Sus", "Con bajo (/)", "Mayor 9ª", "Otros"],
   "cfFilterCategoryType": "Tipo",
   "cfFilterCategoryKey": "Tonalidad",
   "cfClearFilters": "Limpiar filtros",
