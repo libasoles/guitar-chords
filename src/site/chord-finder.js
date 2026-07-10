@@ -227,7 +227,7 @@
 
     this._activeFilter = 'all';
     this._cards = [];
-    this._pinnedNames = [];
+    this._pinnedNames = this._loadPinned();
     this._notation = this._loadNotation();
     this._buildUI();
     this._renderCards();
@@ -257,6 +257,24 @@
   };
 
   var NOTATION_STORAGE_KEY = 'chordNotation';
+  var PINNED_STORAGE_KEY = 'pinnedChords';
+
+  ChordFinder.prototype._loadPinned = function () {
+    try {
+      var stored = window.localStorage.getItem(PINNED_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  };
+
+  ChordFinder.prototype._savePinned = function () {
+    try {
+      window.localStorage.setItem(PINNED_STORAGE_KEY, JSON.stringify(this._pinnedNames));
+    } catch (e) {
+      // localStorage puede no estar disponible; ignorar.
+    }
+  };
 
   ChordFinder.prototype._loadNotation = function () {
     try {
@@ -540,6 +558,7 @@
     var i = this._pinnedNames.indexOf(chord.name);
     if (i === -1) this._pinnedNames.push(chord.name);
     else this._pinnedNames.splice(i, 1);
+    this._savePinned();
     this._renderPinned();
   };
 
