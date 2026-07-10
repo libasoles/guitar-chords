@@ -27,8 +27,27 @@
   const notationSpanish = document.getElementById('notation-spanish');
   const { matchChords } = window.ChordSearch;
   const MAX_POPUP_HEIGHT = 600;
-  const pinnedChordNames = [];
   const NOTATION_STORAGE_KEY = 'chordNotation';
+  const PINNED_STORAGE_KEY = 'pinnedChords';
+
+  function loadPinned() {
+    try {
+      const stored = window.localStorage.getItem(PINNED_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function savePinned() {
+    try {
+      window.localStorage.setItem(PINNED_STORAGE_KEY, JSON.stringify(pinnedChordNames));
+    } catch (e) {
+      // localStorage puede no estar disponible; ignorar.
+    }
+  }
+
+  const pinnedChordNames = loadPinned();
 
   function loadNotation() {
     try {
@@ -84,6 +103,7 @@
   function pinChord(chord) {
     if (isPinned(chord)) return;
     pinnedChordNames.push(chord.name);
+    savePinned();
     render();
   }
 
@@ -91,6 +111,7 @@
     const index = pinnedChordNames.indexOf(chordName);
     if (index === -1) return;
     pinnedChordNames.splice(index, 1);
+    savePinned();
     render();
   }
 
