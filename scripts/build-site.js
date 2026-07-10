@@ -67,6 +67,8 @@ function finderI18N(strings) {
   const keys = ['cfFilters', 'cfFilterCategoryType', 'cfFilterCategoryKey', 'cfClearFilters', 'cfRootLabels', 'cfEmpty', 'cfPinLabel', 'cfPinnedLabel', 'cfPinnedTitle', 'cfClearPinned', 'cfExportPdf', 'cfToolbarAriaLabel', 'cfUnpinAriaLabel', 'cfAdvancedFiltersLabel', 'cfNotationGroupLabel', 'cfNotationAmerican', 'cfNotationSpanish'];
   const out = {};
   keys.forEach(function (k) { if (strings[k] !== undefined) out[k] = strings[k]; });
+  out.cfWordmark = strings.wordmark;
+  out.cfWordmarkSmall = strings.wordmarkSmall;
   return out;
 }
 

@@ -831,6 +831,35 @@
     });
   }
 
+  function escapeXml(str) {
+    return String(str).replace(/[&<>"']/g, function (ch) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[ch];
+    });
+  }
+
+  var LOGO_W = 260;
+  var LOGO_H = 48;
+
+  function buildLogoSvg(wordmark, wordmarkSmall) {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.setAttribute('width', String(LOGO_W));
+    svg.setAttribute('height', String(LOGO_H));
+    svg.setAttribute('viewBox', '0 0 ' + LOGO_W + ' ' + LOGO_H);
+    svg.innerHTML =
+      '<rect x="8" y="8" width="32" height="32" rx="3" fill="none" stroke="#1a1a1a" stroke-width="4"></rect>' +
+      '<line x1="18" y1="8" x2="18" y2="40" stroke="#1a1a1a" stroke-width="2" opacity="0.5"></line>' +
+      '<line x1="24" y1="8" x2="24" y2="40" stroke="#1a1a1a" stroke-width="2" opacity="0.5"></line>' +
+      '<line x1="30" y1="8" x2="30" y2="40" stroke="#1a1a1a" stroke-width="2" opacity="0.5"></line>' +
+      '<line x1="8" y1="20" x2="40" y2="20" stroke="#1a1a1a" stroke-width="2" opacity="0.5"></line>' +
+      '<line x1="8" y1="30" x2="40" y2="30" stroke="#1a1a1a" stroke-width="2" opacity="0.5"></line>' +
+      '<circle cx="18" cy="25" r="3.2" fill="#8b0000"></circle>' +
+      '<circle cx="30" cy="15" r="3.2" fill="#8b0000"></circle>' +
+      '<text x="56" y="24" font-family="Georgia, \'Times New Roman\', serif" font-weight="700" font-size="19" fill="#1a1a1a">' + escapeXml(wordmark) + '</text>' +
+      '<text x="56" y="39" font-family="Arial, Helvetica, sans-serif" font-weight="400" font-size="10" letter-spacing="1.5" fill="#555555">' + escapeXml(String(wordmarkSmall).toUpperCase()) + '</text>';
+    return svg;
+  }
+
   ChordFinder.prototype._exportPinnedPdf = function () {
     var self = this;
     if (!window.jspdf || !window.jspdf.jsPDF) return;
@@ -840,11 +869,17 @@
     if (items.length < 2) return;
 
     var cards = Array.prototype.slice.call(this._stripList.querySelectorAll('.pinned-card'));
+    var logoSvg = buildLogoSvg(t('cfWordmark', 'Acordes'), t('cfWordmarkSmall', 'para la guitarra'));
 
-    Promise.all(cards.map(function (card) {
-      var svg = card.querySelector('.diagram svg');
-      return svg ? svgToPngDataUrl(svg) : Promise.resolve(null);
-    })).then(function (images) {
+    Promise.all(
+      cards.map(function (card) {
+        var svg = card.querySelector('.diagram svg');
+        return svg ? svgToPngDataUrl(svg) : Promise.resolve(null);
+      }).concat([svgToPngDataUrl(logoSvg)])
+    ).then(function (results) {
+      var images = results.slice(0, cards.length);
+      var logoImg = results[results.length - 1];
+
       var doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
       var pageWidth = doc.internal.pageSize.getWidth();
       var pageHeight = doc.internal.pageSize.getHeight();
@@ -853,10 +888,13 @@
       var cellW = (pageWidth - margin * 2) / cols;
       var cellH = 55;
       var imgSize = 35;
-      var startY = margin + 10;
 
-      doc.setFontSize(16);
-      doc.text(t('cfPinnedTitle', 'Acordes pineados'), margin, margin);
+      var logoH = 12;
+      var logoW = logoH * (LOGO_W / LOGO_H);
+      if (logoImg) {
+        doc.addImage(logoImg.dataUrl, 'PNG', margin, margin - 6, logoW, logoH);
+      }
+      var startY = margin + logoH + 4;
 
       var row = 0;
       var col = 0;
