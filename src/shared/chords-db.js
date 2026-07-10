@@ -2,7 +2,7 @@
    Única fuente de verdad de acordes para el workspace "acordes":
    la consume el buscador web (reference/chord-finder.html) y la extensión de Chrome.
 
-   Cobertura: para las 12 fundamentales — mayor, menor, 7, m7, maj7, sus2, sus4 —
+   Cobertura: para las 12 fundamentales — mayor, menor, 7, m7, maj7, 6, sus2, sus4 —
    más dim7 (los 12), aug, slash y tensiones de folklore. Posiciones abiertas donde
    existen; formas movibles con cejilla para el resto.
 
@@ -276,6 +276,44 @@ window.CHORDS = [
   { name: 'Esus2', families: ['sus'], aliases: [],
     notes: 'E B F♯ B E',
     fingers: [[6,'o'],[5,2,'1'],[4,4,'3'],[3,4,'4'],[2,'o'],[1,'o']] },
+
+  // ----- SEXTAS (6) -----
+  { name: 'C6', families: ['6ta'], aliases: [],
+    notes: 'C E A C E',
+    fingers: [[6,'x'],[5,3,'4'],[4,2,'3'],[3,2,'2'],[2,1,'1'],[1,'o']] },
+  { name: 'D6', families: ['6ta'], aliases: [],
+    notes: 'D A B F♯',
+    fingers: [[6,'x'],[5,'x'],[4,'o'],[3,2,'1'],[2,'o'],[1,2,'2']] },
+  { name: 'E6', families: ['6ta'], aliases: [],
+    notes: 'E B E G♯ C♯ E',
+    fingers: [[6,'o'],[5,2,'2'],[4,2,'3'],[3,1,'1'],[2,2,'4'],[1,'o']] },
+  { name: 'G6', families: ['6ta'], aliases: [],
+    notes: 'G B D G B E',
+    fingers: [[6,3,'2'],[5,2,'1'],[4,'o'],[3,'o'],[2,'o'],[1,'o']] },
+  { name: 'A6', families: ['6ta'], aliases: [],
+    notes: 'A E A C♯ F♯', barres: [{fromString:4,toString:1,fret:2}],
+    fingers: [[6,'x'],[5,'o']] },
+  { name: 'F6', families: ['6ta'], aliases: [],
+    notes: 'F A D F',
+    fingers: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,3,'4'],[1,1,'1']] },
+  { name: 'F♯6', families: ['6ta'], aliases: ['G♭6'],
+    notes: 'F♯ A♯ D♯ F♯', position: 2,
+    fingers: [[6,'x'],[5,'x'],[4,4,'3'],[3,3,'2'],[2,4,'4'],[1,2,'1']] },
+  { name: 'A♭6', families: ['6ta'], aliases: ['G♯6'],
+    notes: 'A♭ C F A♭', position: 4,
+    fingers: [[6,'x'],[5,'x'],[4,6,'3'],[3,5,'2'],[2,6,'4'],[1,4,'1']] },
+  { name: 'B♭6', families: ['6ta'], aliases: ['A♯6'],
+    notes: 'B♭ F B♭ D G', position: 1, barres: [{fromString:4,toString:1,fret:3}],
+    fingers: [[6,'x'],[5,1,'1']] },
+  { name: 'B6', families: ['6ta'], aliases: [],
+    notes: 'B F♯ B D♯ G♯', position: 2, barres: [{fromString:4,toString:1,fret:4}],
+    fingers: [[6,'x'],[5,2,'1']] },
+  { name: 'D♭6', families: ['6ta'], aliases: ['C♯6'],
+    notes: 'D♭ A♭ D♭ F B♭', position: 4, barres: [{fromString:4,toString:1,fret:6}],
+    fingers: [[6,'x'],[5,4,'1']] },
+  { name: 'E♭6', families: ['6ta'], aliases: ['D♯6'],
+    notes: 'E♭ B♭ E♭ G C', position: 6, barres: [{fromString:4,toString:1,fret:8}],
+    fingers: [[6,'x'],[5,6,'1']] },
 
   // ----- SLASH (bajo invertido) -----
   { name: 'D/F#', families: ['slash'], aliases: ['D/F♯'],
