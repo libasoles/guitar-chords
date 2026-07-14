@@ -288,6 +288,60 @@
     '  .controls-main { flex-direction: column; align-items: stretch; }',
     '  .advanced-toggle { justify-content: center; }',
     '}',
+    '.export-overlay {',
+    '  position: fixed; inset: 0; z-index: 1000;',
+    '  display: flex; align-items: center; justify-content: center;',
+    '  padding: 1rem;',
+    '  background: rgba(0, 0, 0, 0.5);',
+    '}',
+    '.export-dialog {',
+    '  width: 100%; max-width: 30rem;',
+    '  box-sizing: border-box;',
+    '  background: var(--paper, #fdfaf5); color: var(--ink, #222);',
+    '  border: 1px solid var(--rule, #d8d2c4); border-radius: 8px;',
+    '  padding: 1.4rem; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);',
+    '  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif);',
+    '}',
+    '.export-dialog h2 {',
+    '  margin: 0 0 1rem; font-size: 1.1rem; font-weight: 700;',
+    '  color: var(--ink, #222);',
+    '}',
+    '.export-field { display: flex; flex-direction: column; margin-bottom: 1rem; }',
+    '.export-field label {',
+    '  font-size: 0.72rem; font-weight: 600; text-transform: uppercase;',
+    '  letter-spacing: 0.05em; color: var(--ink-soft, #555);',
+    '  margin-bottom: 0.35rem;',
+    '}',
+    '.export-field input, .export-field textarea {',
+    '  box-sizing: border-box; width: 100%;',
+    '  font-family: inherit; font-size: 0.95rem; color: var(--ink, #222);',
+    '  background: var(--paper, #fff);',
+    '  border: 1px solid var(--rule, #d8d2c4); border-radius: 4px;',
+    '  padding: 0.5rem 0.6rem;',
+    '}',
+    '.export-field textarea { min-height: 7rem; resize: vertical; line-height: 1.4; }',
+    '.export-field input:focus, .export-field textarea:focus {',
+    '  outline: 2px solid var(--accent, #8b0000); outline-offset: 0;',
+    '  border-color: var(--accent, #8b0000);',
+    '}',
+    '.export-buttons {',
+    '  display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.4rem;',
+    '}',
+    '.export-buttons button {',
+    '  font-family: inherit; font-size: 0.72rem; font-weight: 600;',
+    '  text-transform: uppercase; letter-spacing: 0.05em;',
+    '  border-radius: 4px; padding: 0.5rem 0.9rem; cursor: pointer;',
+    '}',
+    '.export-cancel {',
+    '  background: transparent; color: var(--ink-soft, #555);',
+    '  border: 1px solid var(--rule, #d8d2c4);',
+    '}',
+    '.export-cancel:hover { background: var(--rule, #d8d2c4); }',
+    '.export-confirm {',
+    '  background: var(--accent, #8b0000); color: #fff;',
+    '  border: 1px solid var(--accent, #8b0000);',
+    '}',
+    '.export-confirm:hover { opacity: 0.9; }',
   ].join('\n');
 
   class ChordFinder extends HTMLElement {}
@@ -593,7 +647,7 @@
     stripExport.className = 'pinned-export';
     stripExport.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M12 11v6"></path><path d="M9.5 14.5 12 17l2.5-2.5"></path></svg><span></span>';
     stripExport.querySelector('span').textContent = t('cfExportPdf', 'Exportar PDF');
-    stripExport.addEventListener('click', function () { self._exportPinnedPdf(); });
+    stripExport.addEventListener('click', function () { self._openExportDialog(); });
     stripActions.appendChild(stripExport);
     strip.appendChild(stripTitleRow);
     strip.appendChild(stripList);
@@ -861,7 +915,93 @@
     return svg;
   }
 
-  ChordFinder.prototype._exportPinnedPdf = function () {
+  ChordFinder.prototype._openExportDialog = function () {
+    var self = this;
+    if (this._pinnedNames.length < 2) return;
+    if (this._exportOverlay) return;
+
+    var overlay = document.createElement('div');
+    overlay.className = 'export-overlay';
+
+    var dialog = document.createElement('div');
+    dialog.className = 'export-dialog';
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+
+    var heading = document.createElement('h2');
+    heading.textContent = t('cfExportDialogTitle', 'Exportar a PDF');
+    dialog.appendChild(heading);
+
+    var titleField = document.createElement('div');
+    titleField.className = 'export-field';
+    var titleLabel = document.createElement('label');
+    var titleId = 'export-title-' + Math.random().toString(36).slice(2, 8);
+    titleLabel.setAttribute('for', titleId);
+    titleLabel.textContent = t('cfExportTitleLabel', 'Título de la página');
+    var titleInput = document.createElement('input');
+    titleInput.type = 'text';
+    titleInput.id = titleId;
+    titleInput.placeholder = t('cfExportTitlePlaceholder', 'Opcional');
+    titleField.appendChild(titleLabel);
+    titleField.appendChild(titleInput);
+    dialog.appendChild(titleField);
+
+    var notesField = document.createElement('div');
+    notesField.className = 'export-field';
+    var notesLabel = document.createElement('label');
+    var notesId = 'export-notes-' + Math.random().toString(36).slice(2, 8);
+    notesLabel.setAttribute('for', notesId);
+    notesLabel.textContent = t('cfExportNotesLabel', 'Notas');
+    var notesInput = document.createElement('textarea');
+    notesInput.id = notesId;
+    notesInput.placeholder = t('cfExportNotesPlaceholder', '');
+    notesField.appendChild(notesLabel);
+    notesField.appendChild(notesInput);
+    dialog.appendChild(notesField);
+
+    var buttons = document.createElement('div');
+    buttons.className = 'export-buttons';
+    var cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'export-cancel';
+    cancelBtn.textContent = t('cfExportCancel', 'Cancelar');
+    var confirmBtn = document.createElement('button');
+    confirmBtn.type = 'button';
+    confirmBtn.className = 'export-confirm';
+    confirmBtn.textContent = t('cfExportConfirm', 'Exportar');
+    buttons.appendChild(cancelBtn);
+    buttons.appendChild(confirmBtn);
+    dialog.appendChild(buttons);
+
+    overlay.appendChild(dialog);
+
+    function close() {
+      if (!self._exportOverlay) return;
+      document.removeEventListener('keydown', onKeydown);
+      self.shadowRoot.removeChild(overlay);
+      self._exportOverlay = null;
+    }
+    function onKeydown(e) {
+      if (e.key === 'Escape') { e.preventDefault(); close(); }
+    }
+    cancelBtn.addEventListener('click', close);
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) close();
+    });
+    document.addEventListener('keydown', onKeydown);
+    confirmBtn.addEventListener('click', function () {
+      var title = titleInput.value.trim();
+      var notes = notesInput.value;
+      close();
+      self._exportPinnedPdf(title, notes);
+    });
+
+    this._exportOverlay = overlay;
+    this.shadowRoot.appendChild(overlay);
+    titleInput.focus();
+  };
+
+  ChordFinder.prototype._exportPinnedPdf = function (title, notes) {
     var self = this;
     if (!window.jspdf || !window.jspdf.jsPDF) return;
     var items = this._pinnedNames
@@ -897,6 +1037,15 @@
       }
       var startY = margin + logoH + 4;
 
+      if (title) {
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(18);
+        var titleLines = doc.splitTextToSize(title, pageWidth - margin * 2);
+        doc.text(titleLines, margin, startY);
+        startY += titleLines.length * 8 + 4;
+        doc.setFont(undefined, 'normal');
+      }
+
       var row = 0;
       var col = 0;
       items.forEach(function (chord, i) {
@@ -919,6 +1068,26 @@
         col += 1;
         if (col >= cols) { col = 0; row += 1; }
       });
+
+      if (notes && notes.trim()) {
+        var notesY = startY + (col > 0 ? row + 1 : row) * cellH;
+        var lineHeight = 5;
+        doc.setFontSize(11);
+        // Preserve the user's line breaks; wrap long lines to fit the page.
+        notes.replace(/\r\n/g, '\n').split('\n').forEach(function (paragraph) {
+          var wrapped = paragraph.length
+            ? doc.splitTextToSize(paragraph, pageWidth - margin * 2)
+            : [''];
+          wrapped.forEach(function (line) {
+            if (notesY + lineHeight > pageHeight - margin) {
+              doc.addPage();
+              notesY = margin;
+            }
+            doc.text(line, margin, notesY);
+            notesY += lineHeight;
+          });
+        });
+      }
 
       doc.save('acordes-pineados.pdf');
     });
