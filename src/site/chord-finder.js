@@ -182,7 +182,6 @@
     '  display: flex; flex-direction: column; align-items: center;',
     '}',
     '.card.hidden { display: none; }',
-    '.card.match { box-shadow: 0 0 0 2px var(--accent, #8b0000); }',
     '.card .name {',
     '  font-family: var(--mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);',
     '  font-weight: 600; font-size: 1.05rem; margin-top: 0.3rem;',
@@ -821,7 +820,6 @@
       var show = pass && (!limited || passCount < self._visibleLimit);
       if (pass) passCount++;
       card.classList.toggle('hidden', !show);
-      card.classList.toggle('match', show && hasQuery);
     });
 
     this._moreRow.hidden = !(limited && passCount > this._visibleLimit);
