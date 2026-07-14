@@ -147,5 +147,6 @@
   "cfUnpinAriaLabel": "Despinear {name}",
   "cfNotationGroupLabel": "Notación de acordes",
   "cfNotationAmerican": "Notación americana (C D E)",
-  "cfNotationSpanish": "Notación en español (Do Re Mi)"
+  "cfNotationSpanish": "Notación en español (Do Re Mi)",
+  "cfLoadMore": "Más"
 }

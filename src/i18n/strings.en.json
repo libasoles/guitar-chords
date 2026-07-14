@@ -147,5 +147,6 @@
   "cfUnpinAriaLabel": "Unpin {name}",
   "cfNotationGroupLabel": "Chord notation",
   "cfNotationAmerican": "American notation (C D E)",
-  "cfNotationSpanish": "Spanish notation (Do Re Mi)"
+  "cfNotationSpanish": "Spanish notation (Do Re Mi)",
+  "cfLoadMore": "More"
 }

@@ -35,6 +35,22 @@ async function run() {
 
     const input = '#pin .search';
 
+    // 1b. Initial view is paginated to 12 with a "More" button.
+    const moreSel = '#pin .load-more';
+    const initialVisible = (await visibleNames(page)).length;
+    assert.strictEqual(initialVisible, 12, `initial view should show 12 cards, got ${initialVisible}`);
+    const moreShownInitially = await page.evaluate((s) =>
+      !document.querySelector(s).shadowRoot.querySelector('.load-more').hidden, '#pin');
+    assert.ok(moreShownInitially, 'More button should be visible initially');
+
+    // 1c. Clicking "More" reveals 12 more.
+    await page.evaluate((s) =>
+      document.querySelector(s).shadowRoot.querySelector('.load-more-btn').click(), '#pin');
+    await page.waitForFunction(() =>
+      document.querySelector('#pin').shadowRoot.querySelectorAll('.card:not(.hidden)').length === 24);
+    const afterMore = (await visibleNames(page)).length;
+    assert.strictEqual(afterMore, 24, `expected 24 after one More click, got ${afterMore}`);
+
     // 2. "Am7" query.
     await page.fill(input, 'Am7');
     await page.waitForFunction(() =>
