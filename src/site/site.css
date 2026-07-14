@@ -108,11 +108,18 @@ code { font-family: var(--mono); font-size: 0.9em; background: rgba(0,0,0,0.05);
 
 /* ----- Decoder table ----- */
 
+.decoder-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1rem 0;
+}
 .decoder-table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1rem 0;
   font-size: 0.98rem;
+}
+.decoder-table-wrap .decoder-table {
+  margin: 0;
 }
 .decoder-table th, .decoder-table td {
   border-bottom: 1px solid var(--rule);
