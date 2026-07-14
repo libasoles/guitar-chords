@@ -233,7 +233,7 @@
     '.pinned-strip[hidden] { display: none; }',
     '.pinned-title-row {',
     '  display: flex; align-items: baseline; justify-content: space-between;',
-    '  margin: 0 0 0.6rem;',
+    '  margin: 0 0 1.4rem;',
     '}',
     '.pinned-title {',
     '  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif);',
