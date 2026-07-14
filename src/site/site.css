@@ -8,18 +8,21 @@
   --accent: #8b0000;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-  --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --sans:
+    -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
   --max-width: 760px;
 }
 
-html { background: var(--paper); }
+html {
+  background: var(--paper);
+}
 
 body {
   font-family: var(--serif);
   color: var(--ink);
   background: var(--paper);
   max-width: var(--max-width);
-  margin: 3rem auto 6rem;
+  margin: 1.5rem auto 6rem;
   padding: 0 1.5rem;
   line-height: 1.55;
   font-size: 19px;
@@ -45,12 +48,24 @@ body {
   flex: 1;
 }
 .site-header .logo {
-  width: 40px; height: 40px;
-  flex: none; display: block;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: block;
 }
-.site-header .logo .frame { fill: none; stroke: currentColor; stroke-width: 4; }
-.site-header .logo .string { stroke: currentColor; stroke-width: 2; opacity: 0.5; }
-.site-header .logo .dot { fill: var(--accent); }
+.site-header .logo .frame {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 4;
+}
+.site-header .logo .string {
+  stroke: currentColor;
+  stroke-width: 2;
+  opacity: 0.5;
+}
+.site-header .logo .dot {
+  fill: var(--accent);
+}
 .site-header .wordmark {
   font-family: var(--serif);
   font-weight: 600;
@@ -79,32 +94,55 @@ body {
   padding: 0.2rem 0.55rem;
   flex: none;
 }
-.lang-toggle:hover { color: var(--accent); border-color: var(--accent); }
+.lang-toggle:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
 
 /* ----- Typography ----- */
 
-h1, h2, h3 { font-weight: 600; letter-spacing: -0.01em; }
-h1 { font-size: 2.2rem; margin: 0 0 0.2rem; }
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+h1 {
+  font-size: 2.2rem;
+  margin: 0 0 0.2rem;
+}
 h2 {
-  font-size: 1.4rem; margin: 2.5rem 0 0.8rem;
-  border-bottom: 1px solid var(--rule); padding-bottom: 0.3rem;
+  font-size: 1.4rem;
+  margin: 2.5rem 0 0.8rem;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.3rem;
 }
 
-p { margin: 0.6rem 0; }
+p {
+  margin: 0.6rem 0;
+}
 
 a {
   color: var(--accent);
   text-decoration: none;
-  border-bottom: 1px solid rgba(139,0,0,0.3);
+  border-bottom: 1px solid rgba(139, 0, 0, 0.3);
 }
-a:hover { border-bottom-color: var(--accent); }
+a:hover {
+  border-bottom-color: var(--accent);
+}
 
 .lead {
   color: var(--ink-soft);
   margin: 0.4rem 0 1.6rem;
 }
 
-code { font-family: var(--mono); font-size: 0.9em; background: rgba(0,0,0,0.05); padding: 0.1em 0.35em; border-radius: 3px; }
+code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
 
 /* ----- Decoder table ----- */
 
@@ -114,14 +152,21 @@ code { font-family: var(--mono); font-size: 0.9em; background: rgba(0,0,0,0.05);
   margin: 1rem 0;
   font-size: 0.98rem;
 }
-.decoder-table th, .decoder-table td {
+.decoder-table th,
+.decoder-table td {
   border-bottom: 1px solid var(--rule);
   padding: 0.4rem 0.6rem;
   text-align: left;
   vertical-align: top;
 }
-.decoder-table th { background: rgba(0,0,0,0.03); font-weight: 600; }
-.decoder-table code { background: transparent; padding: 0; }
+.decoder-table th {
+  background: rgba(0, 0, 0, 0.03);
+  font-weight: 600;
+}
+.decoder-table code {
+  background: transparent;
+  padding: 0;
+}
 
 /* ----- Footer ----- */
 
@@ -141,9 +186,12 @@ footer {
   flex-wrap: wrap;
 }
 .extension-cta .ext-icon {
-  width: 48px; height: 48px; flex: none;
+  width: 48px;
+  height: 48px;
+  flex: none;
 }
-.extension-cta .ext-body {}
+.extension-cta .ext-body {
+}
 .extension-cta .ext-heading {
   font-weight: 600;
   color: var(--ink);
@@ -168,15 +216,29 @@ footer {
   border-bottom: 1px solid var(--accent);
   cursor: pointer;
 }
-.extension-cta .ext-btn[href]:hover { opacity: 0.88; border-bottom-color: var(--accent); }
+.extension-cta .ext-btn[href]:hover {
+  opacity: 0.88;
+  border-bottom-color: var(--accent);
+}
 .extension-cta .ext-btn[disabled] {
   opacity: 0.8;
   cursor: not-allowed;
 }
 
 @media print {
-  .site-header { display: none; }
-  body { background: #fff; max-width: none; font-size: 14px; }
-  a { color: var(--ink); border: none; }
-  footer { display: none; }
+  .site-header {
+    display: none;
+  }
+  body {
+    background: #fff;
+    max-width: none;
+    font-size: 14px;
+  }
+  a {
+    color: var(--ink);
+    border: none;
+  }
+  footer {
+    display: none;
+  }
 }
