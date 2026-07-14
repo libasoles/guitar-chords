@@ -172,6 +172,19 @@ code {
   padding: 0;
 }
 
+/* On phones, shrink the table so it fits within the viewport without
+   forcing horizontal scroll. The wrapper's overflow-x stays as a safety
+   net for extremely narrow screens. */
+@media (max-width: 420px) {
+  .decoder-table {
+    font-size: 0.72rem;
+  }
+  .decoder-table th,
+  .decoder-table td {
+    padding: 0.28rem 0.22rem;
+  }
+}
+
 /* ----- Footer ----- */
 
 footer {
