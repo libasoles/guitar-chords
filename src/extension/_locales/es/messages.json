@@ -7,9 +7,9 @@
     "message": "Buscá el diagrama de un acorde al instante, sin salir de lo que estás tocando.",
     "description": "Descripción de la extensión en el Web Store"
   },
-  "searchPlaceholder": {
-    "message": "Tipeá Cmaj7, Am7, D/F#…",
-    "description": "Placeholder del input de búsqueda"
+  "searchPlaceholderPrefix": {
+    "message": "Tipeá",
+    "description": "Palabra inicial del placeholder del input de búsqueda, seguida de acordes de ejemplo"
   },
   "pinnedHeader": {
     "message": "Acordes pineados",

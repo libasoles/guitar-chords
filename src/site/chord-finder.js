@@ -422,6 +422,7 @@
 
   var NOTATION_STORAGE_KEY = 'chordNotation';
   var PINNED_STORAGE_KEY = 'pinnedChords';
+  var SEARCH_EXAMPLE_CHORDS = ['Cmaj7', 'Am7', 'D/F#'];
 
   ChordFinder.prototype._loadPinned = function () {
     try {
@@ -454,6 +455,14 @@
     } catch (e) {
       // localStorage puede no estar disponible (modo privado, etc.); ignorar.
     }
+  };
+
+  ChordFinder.prototype._searchPlaceholder = function () {
+    var self = this;
+    var examples = SEARCH_EXAMPLE_CHORDS.map(function (chord) {
+      return self._notation === 'es' && window.NoteNames ? window.NoteNames.toSpanishName(chord) : chord;
+    });
+    return examples.join(', ') + '…';
   };
 
   ChordFinder.prototype._displayName = function (chord) {
@@ -499,7 +508,7 @@
     var input = document.createElement('input');
     input.type = 'search';
     input.className = 'search';
-    input.placeholder = 'Cmaj7, Am7, D/F#…';
+    input.placeholder = this._searchPlaceholder();
     input.autocomplete = 'off';
     input.spellcheck = false;
     mainRow.appendChild(input);
@@ -1157,6 +1166,7 @@
 
   ChordFinder.prototype._applyNotation = function () {
     var self = this;
+    this._input.placeholder = this._searchPlaceholder();
     this._cards.forEach(function (card) {
       card._nameEl.textContent = self._displayName(card._chord);
       card._akaEl.textContent = self._displayNotes(card._chord);
