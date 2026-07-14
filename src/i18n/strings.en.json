@@ -11,7 +11,6 @@
   "wordmarkSmall": "finder",
 
   "h1": "Chord Finder",
-  "lead": "Type a name (Cmaj7, Bm7b5, D/F#…) or filter by family. Open position diagrams for guitar.",
 
   "h2Decoder": "How to decode a chord name",
   "decoderIntro": "Any chord symbol is built as: <strong>Root</strong> + <strong>quality</strong> + <strong>extensions</strong> + <strong>/optional bass</strong>. This table covers 95% of what you'll find in guitar tabs online.",
@@ -21,19 +20,84 @@
   "thMeaning": "What it means",
   "thExample": "Example",
 
-  "rowRoot":    ["Root",           "<code>C D E F G A B</code> ± <code>#</code>/<code>b</code>", "The fundamental note.",                                                                "<code>F#</code> = F sharp"],
-  "rowMajor":   ["Major",          "(nothing)",                                                    "Major triad: 1 – 3 – 5",                                                               "<code>C</code> = C major"],
-  "rowMinor":   ["Minor",          "<code>m</code>, <code>min</code>, <code>-</code>",             "Minor triad: 1 – ♭3 – 5",                                                             "<code>Am</code> = A minor"],
-  "rowDom7":    ["Dominant 7th",   "<code>7</code>",                                               "Major triad + minor 7th (♭7). The engine of blues and jazz.",                          "<code>G7</code> = G B D F"],
-  "rowMinor7":  ["Minor 7th",      "<code>m7</code>",                                              "Minor triad + minor 7th",                                                              "<code>Em7</code> = E G B D"],
-  "rowMaj7":    ["Major 7th",      "<code>maj7</code>, <code>M7</code>, <code>Δ</code>",           "Major triad + major 7th (mellow, jazz-flavored)",                                      "<code>Cmaj7</code> = C E G B"],
-  "rowDim":     ["Diminished",     "<code>dim</code>, <code>°</code>",                             "1 – ♭3 – ♭5",                                                                         "<code>B°</code>"],
-  "rowHalfDim": ["Half-diminished","<code>m7♭5</code>, <code>ø</code>",                            "Minor with lowered 5th + ♭7. Typical ii° chord.",                                      "<code>Bm7b5</code>"],
-  "rowAug":     ["Augmented",      "<code>aug</code>, <code>+</code>",                             "1 – 3 – ♯5",                                                                          "<code>C+</code>"],
-  "rowSus":     ["Suspended",      "<code>sus2</code>, <code>sus4</code>",                         "The 3rd is replaced by the 2nd or 4th (open sound, no major/minor color)",             "<code>Dsus4</code>"],
-  "rowAdd":     ["Added",          "<code>add9</code>, <code>6</code>",                            "Adds the indicated note without a 7th.",                                               "<code>Cadd9</code>"],
-  "rowExt":     ["Extensions",     "<code>9 11 13</code> ± <code>♭/♯</code>",                     "Always include the 7th. <code>C9</code> = C7 + 9th.",                                  "<code>G13</code>"],
-  "rowSlash":   ["Slash bass",     "<code>/X</code>",                                              "Play the chord but put <code>X</code> in the bass.",                                   "<code>D/F#</code> = D with F♯ in bass"],
+  "rowRoot": [
+    "Root",
+    "<code>C D E F G A B</code> ± <code>#</code>/<code>b</code>",
+    "The fundamental note.",
+    "<code>F#</code> = F sharp"
+  ],
+  "rowMajor": [
+    "Major",
+    "(nothing)",
+    "Major triad: 1 – 3 – 5",
+    "<code>C</code> = C major"
+  ],
+  "rowMinor": [
+    "Minor",
+    "<code>m</code>, <code>min</code>, <code>-</code>",
+    "Minor triad: 1 – ♭3 – 5",
+    "<code>Am</code> = A minor"
+  ],
+  "rowDom7": [
+    "Dominant 7th",
+    "<code>7</code>",
+    "Major triad + minor 7th (♭7). The engine of blues and jazz.",
+    "<code>G7</code> = G B D F"
+  ],
+  "rowMinor7": [
+    "Minor 7th",
+    "<code>m7</code>",
+    "Minor triad + minor 7th",
+    "<code>Em7</code> = E G B D"
+  ],
+  "rowMaj7": [
+    "Major 7th",
+    "<code>maj7</code>, <code>M7</code>, <code>Δ</code>",
+    "Major triad + major 7th (mellow, jazz-flavored)",
+    "<code>Cmaj7</code> = C E G B"
+  ],
+  "rowDim": [
+    "Diminished",
+    "<code>dim</code>, <code>°</code>",
+    "1 – ♭3 – ♭5",
+    "<code>B°</code>"
+  ],
+  "rowHalfDim": [
+    "Half-diminished",
+    "<code>m7♭5</code>, <code>ø</code>",
+    "Minor with lowered 5th + ♭7. Typical ii° chord.",
+    "<code>Bm7b5</code>"
+  ],
+  "rowAug": [
+    "Augmented",
+    "<code>aug</code>, <code>+</code>",
+    "1 – 3 – ♯5",
+    "<code>C+</code>"
+  ],
+  "rowSus": [
+    "Suspended",
+    "<code>sus2</code>, <code>sus4</code>",
+    "The 3rd is replaced by the 2nd or 4th (open sound, no major/minor color)",
+    "<code>Dsus4</code>"
+  ],
+  "rowAdd": [
+    "Added",
+    "<code>add9</code>, <code>6</code>",
+    "Adds the indicated note without a 7th.",
+    "<code>Cadd9</code>"
+  ],
+  "rowExt": [
+    "Extensions",
+    "<code>9 11 13</code> ± <code>♭/♯</code>",
+    "Always include the 7th. <code>C9</code> = C7 + 9th.",
+    "<code>G13</code>"
+  ],
+  "rowSlash": [
+    "Slash bass",
+    "<code>/X</code>",
+    "Play the chord but put <code>X</code> in the bass.",
+    "<code>D/F#</code> = D with F♯ in bass"
+  ],
 
   "callout": "<strong>Diagram convention:</strong> you're looking at the neck face-on. The thinnest string (high E, 1st) is on the right; the thickest (low E, 6th) is on the left. Numbers above indicate the finger (1=index, 2=middle, 3=ring, 4=pinky). <code>○</code> = open string, <code>✕</code> = muted string.",
 
@@ -42,11 +106,36 @@
   "extensionDescription": "Look up a chord diagram in an instant, without leaving what you're playing.",
   "extensionAddButton": "Add to Chrome",
 
-  "cfFilters": ["All", "Major", "Minor", "Dom. 7th", "Minor 7th", "Major 7th", "6th", "Sus", "Slash bass (/)", "Major 9th", "Others"],
+  "cfFilters": [
+    "All",
+    "Major",
+    "Minor",
+    "Dom. 7th",
+    "Minor 7th",
+    "Major 7th",
+    "6th",
+    "Sus",
+    "Slash bass (/)",
+    "Major 9th",
+    "Others"
+  ],
   "cfFilterCategoryType": "Type",
   "cfFilterCategoryKey": "Key",
   "cfClearFilters": "Clear filters",
-  "cfRootLabels": ["C", "C♯/D♭", "D", "D♯/E♭", "E", "F", "F♯/G♭", "G", "G♯/A♭", "A", "A♯/B♭", "B"],
+  "cfRootLabels": [
+    "C",
+    "C♯/D♭",
+    "D",
+    "D♯/E♭",
+    "E",
+    "F",
+    "F♯/G♭",
+    "G",
+    "G♯/A♭",
+    "A",
+    "A♯/B♭",
+    "B"
+  ],
   "cfEmpty": "No matching chords.",
   "cfPinLabel": "Pin",
   "cfPinnedLabel": "Pinned",
