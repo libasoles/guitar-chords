@@ -317,7 +317,9 @@
     '  background: rgba(0, 0, 0, 0.5);',
     '}',
     '.export-dialog {',
-    '  width: 100%; max-width: 30rem;',
+    '  width: 100%; max-width: 34rem;',
+    '  max-height: 90vh; overflow-y: auto;',
+    '  display: flex; flex-direction: column;',
     '  box-sizing: border-box;',
     '  background: var(--paper, #fdfaf5); color: var(--ink, #222);',
     '  border: 1px solid var(--rule, #d8d2c4); border-radius: 8px;',
@@ -341,7 +343,8 @@
     '  border: 1px solid var(--rule, #d8d2c4); border-radius: 4px;',
     '  padding: 0.5rem 0.6rem;',
     '}',
-    '.export-field textarea { min-height: 7rem; resize: vertical; line-height: 1.4; }',
+    '.export-field textarea { min-height: 16rem; resize: vertical; line-height: 1.4; flex: 1; }',
+    '.export-field:has(textarea) { flex: 1; }',
     '.export-field input:focus, .export-field textarea:focus {',
     '  outline: 2px solid var(--accent, #8b0000); outline-offset: 0;',
     '  border-color: var(--accent, #8b0000);',
@@ -1008,10 +1011,10 @@
     var notesLabel = document.createElement('label');
     var notesId = 'export-notes-' + Math.random().toString(36).slice(2, 8);
     notesLabel.setAttribute('for', notesId);
-    notesLabel.textContent = t('cfExportNotesLabel', 'Notas');
+    notesLabel.textContent = t('cfExportNotesLabel', 'Letra');
     var notesInput = document.createElement('textarea');
     notesInput.id = notesId;
-    notesInput.placeholder = t('cfExportNotesPlaceholder', '');
+    notesInput.placeholder = t('cfExportNotesPlaceholder', 'Opcional');
     notesField.appendChild(notesLabel);
     notesField.appendChild(notesInput);
     dialog.appendChild(notesField);
@@ -1090,7 +1093,7 @@
       var logoH = 12;
       var logoW = logoH * (LOGO_W / LOGO_H);
       if (logoImg) {
-        doc.addImage(logoImg.dataUrl, 'PNG', margin, margin - 6, logoW, logoH);
+        doc.addImage(logoImg.dataUrl, 'PNG', margin - 4, margin - 6, logoW, logoH);
       }
       var startY = margin + logoH + 4;
 
