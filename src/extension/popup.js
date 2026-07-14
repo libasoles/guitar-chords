@@ -14,7 +14,6 @@
   }
 
   // Apply i18n strings to static DOM elements.
-  document.getElementById('q').placeholder = i18n('searchPlaceholder', 'Type Cmaj7, Am7, D/F#…');
   document.getElementById('pinned-header-label').textContent = i18n('pinnedHeader', 'Pinned chords');
   document.getElementById('pinned-clear').textContent = i18n('clearPinned', 'Clear');
   document.title = i18n('appName', 'Guitar Chords');
@@ -31,6 +30,7 @@
   const MAX_POPUP_HEIGHT = 600;
   const NOTATION_STORAGE_KEY = 'chordNotation';
   const PINNED_STORAGE_KEY = 'pinnedChords';
+  const SEARCH_EXAMPLE_CHORDS = ['Cmaj7', 'Am7', 'D/F#'];
 
   function loadPinned() {
     try {
@@ -68,6 +68,14 @@
   }
 
   let notation = loadNotation();
+
+  function searchPlaceholder() {
+    const examples = SEARCH_EXAMPLE_CHORDS.map((chord) =>
+      notation === 'es' && window.NoteNames ? window.NoteNames.toSpanishName(chord) : chord
+    );
+    return i18n('searchPlaceholderPrefix', 'Type') + ' ' + examples.join(', ') + '…';
+  }
+  input.placeholder = searchPlaceholder();
 
   function displayName(chord) {
     if (notation === 'es' && window.NoteNames) return window.NoteNames.toSpanishName(chord.name);
@@ -255,6 +263,7 @@
     notation = next;
     saveNotation(notation);
     syncNotationToggle();
+    input.placeholder = searchPlaceholder();
     render();
   }
   notationAmerican.addEventListener('click', () => selectNotation('en'));

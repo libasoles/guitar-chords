@@ -7,9 +7,9 @@
     "message": "Look up a chord diagram instantly, without leaving what you're playing.",
     "description": "Extension description in the Web Store"
   },
-  "searchPlaceholder": {
-    "message": "Type Cmaj7, Am7, D/F#…",
-    "description": "Placeholder text in the search input"
+  "searchPlaceholderPrefix": {
+    "message": "Type",
+    "description": "Prefix word in the search input placeholder, followed by example chord names"
   },
   "pinnedHeader": {
     "message": "Pinned chords",
