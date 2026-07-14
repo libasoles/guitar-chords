@@ -273,16 +273,23 @@
     '.pinned-export svg { width: 14px; height: 14px; flex: none; }',
     '.card .pin-button { display: none; }',
     ':host([pinnable]) .card .pin-button {',
-    '  display: inline-block; align-self: flex-end;',
-    '  margin: 0 0 -0.2rem; padding: 0.15rem 0.4rem;',
-    '  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif);',
-    '  font-size: 0.7rem; cursor: pointer;',
-    '  background: var(--paper, #fdfaf5); color: var(--ink-soft, #555);',
-    '  border: 1px solid var(--rule, #d8d2c4); border-radius: 999px;',
+    '  display: inline-flex; align-items: center; justify-content: center;',
+    '  align-self: flex-end; margin: 0 0 -0.2rem; padding: 0;',
+    '  width: 1.9rem; height: 1.9rem; cursor: pointer;',
+    '  background: transparent; color: var(--ink-soft, #555);',
+    '  border: 1px solid transparent; border-radius: 999px;',
+    '}',
+    ':host([pinnable]) .card .pin-button svg {',
+    '  width: 0.85rem; height: 1.35rem; fill: none; stroke: currentColor;',
+    '  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;',
+    '}',
+    ':host([pinnable]) .card .pin-button:hover,',
+    ':host([pinnable]) .card .pin-button:focus-visible {',
+    '  color: var(--accent, #8b0000); background: rgba(139, 0, 0, 0.08);',
+    '  border-color: rgba(139, 0, 0, 0.12); outline: none;',
     '}',
     ':host([pinnable]) .card .pin-button[aria-pressed="true"] {',
-    '  background: var(--accent, #8b0000); color: #fff;',
-    '  border-color: var(--accent, #8b0000);',
+    '  color: var(--accent, #8b0000);',
     '}',
     '@media (max-width: 700px) {',
     '  .controls-main { flex-direction: column; align-items: stretch; }',
@@ -661,7 +668,13 @@
       var pin = document.createElement('button');
       pin.type = 'button';
       pin.className = 'pin-button';
-      pin.textContent = t('cfPinLabel', 'Pinear');
+      pin.innerHTML = [
+        '<svg viewBox="0 0 24 24" aria-hidden="true">',
+        '<path d="M9 3.5h6"/><path d="M10 3.5v5.2l-2.8 3.1v0.9h9.6v-0.9L14 8.7V3.5"/><path d="M12 12.7v7.8"/>',
+        '</svg>'
+      ].join('');
+      pin.setAttribute('aria-label', t('cfPinLabel', 'Pinear'));
+      pin.title = t('cfPinLabel', 'Pinear');
       pin.setAttribute('aria-pressed', 'false');
       pin.addEventListener('click', function () { self._togglePin(chord); });
       card._pinBtn = pin;
@@ -757,7 +770,9 @@
     this._cards.forEach(function (card) {
       var pinned = self._isPinned(card._chord);
       card._pinBtn.setAttribute('aria-pressed', pinned ? 'true' : 'false');
-      card._pinBtn.textContent = pinned ? t('cfPinnedLabel', 'Pineado') : t('cfPinLabel', 'Pinear');
+      var pinLabel = pinned ? t('cfPinnedLabel', 'Pineado') : t('cfPinLabel', 'Pinear');
+      card._pinBtn.setAttribute('aria-label', pinLabel);
+      card._pinBtn.title = pinLabel;
     });
 
     if (!this.hasAttribute('pinnable') || this._pinnedNames.length === 0) {
