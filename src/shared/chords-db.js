@@ -3,7 +3,7 @@
    la consume el buscador web (reference/chord-finder.html) y la extensión de Chrome.
 
    Cobertura: para las 12 fundamentales — mayor, menor, 7, m7, maj7, 6, maj9, sus2, sus4 —
-   más dim7 (los 12), aug, slash y tensiones de folklore. Posiciones abiertas donde
+   más dim7 (los 12), aug, slash y tensiones comunes. Posiciones abiertas donde
    existen; formas movibles con cejilla para el resto.
 
    Voicings notation per svguitar: fingers = [[string, fret|'x'|'o', fingerLabel?], ...]
