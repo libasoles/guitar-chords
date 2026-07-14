@@ -200,6 +200,21 @@
     '  grid-column: 1 / -1; text-align: center;',
     '  color: var(--ink-soft, #555); padding: 2rem 1rem;',
     '}',
+    '.load-more {',
+    '  display: flex; justify-content: center; margin: 1.5rem 0 0.5rem;',
+    '}',
+    '.load-more[hidden] { display: none; }',
+    '.load-more-btn {',
+    '  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif);',
+    '  font-size: 0.85rem; font-weight: 600;',
+    '  padding: 0.5rem 1.4rem;',
+    '  border: 1px solid var(--rule, #d8d2c4); border-radius: 999px;',
+    '  background: var(--paper, #fdfaf5); color: var(--ink, #1a1a1a); cursor: pointer;',
+    '}',
+    '.load-more-btn:hover { border-color: var(--ink-soft, #555); }',
+    '.load-more-btn:focus-visible {',
+    '  outline: 2px solid var(--accent, #8b0000); outline-offset: 2px;',
+    '}',
     '.error {',
     '  border: 1px solid var(--accent, #8b0000);',
     '  border-left: 3px solid var(--accent, #8b0000);',
@@ -306,6 +321,8 @@
 
     this._activeFilter = 'all';
     this._activeRoot = 'all';
+    this._pageSize = 12;
+    this._visibleLimit = this._pageSize;
     this._cards = [];
     this._pinnedNames = this._loadPinned();
     this._notation = this._loadNotation();
@@ -500,6 +517,7 @@
     clearFiltersBtn.addEventListener('click', function () {
       self._activeFilter = 'all';
       self._activeRoot = 'all';
+      self._visibleLimit = self._pageSize;
       self._syncPillStates();
       self._syncAdvancedToggle();
       self._applyFilter();
@@ -527,6 +545,7 @@
       pill.addEventListener('click', function () {
         self._activeFilter = f.filter;
         self._activeRoot = 'all';
+        self._visibleLimit = self._pageSize;
         self._syncPillStates();
         self._syncAdvancedToggle();
         self._applyFilter();
@@ -556,6 +575,7 @@
       pill.addEventListener('click', function () {
         self._activeRoot = r.root;
         self._activeFilter = 'all';
+        self._visibleLimit = self._pageSize;
         self._syncPillStates();
         self._syncAdvancedToggle();
         self._applyFilter();
@@ -603,20 +623,35 @@
     grid.className = 'grid';
     grid.setAttribute('aria-live', 'polite');
 
+    var moreRow = document.createElement('div');
+    moreRow.className = 'load-more';
+    moreRow.hidden = true;
+    var moreBtn = document.createElement('button');
+    moreBtn.type = 'button';
+    moreBtn.className = 'load-more-btn';
+    moreBtn.textContent = t('cfLoadMore', 'Más');
+    moreBtn.addEventListener('click', function () {
+      self._visibleLimit += self._pageSize;
+      self._applyFilter();
+    });
+    moreRow.appendChild(moreBtn);
+
     root.appendChild(titleRow);
     root.appendChild(controls);
     root.appendChild(strip);
     root.appendChild(grid);
+    root.appendChild(moreRow);
 
     this._input = input;
     this._grid = grid;
+    this._moreRow = moreRow;
     this._strip = strip;
     this._stripList = stripList;
     this._stripActions = stripActions;
     this._advancedPanel = advancedPanel;
     this._advancedToggle = advancedToggle;
 
-    input.addEventListener('input', function () { self._applyFilter(); });
+    input.addEventListener('input', function () { self._visibleLimit = self._pageSize; self._applyFilter(); });
     advancedToggle.addEventListener('click', function () {
       var isOpen = advancedToggle.getAttribute('aria-expanded') === 'true';
       advancedToggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
@@ -706,19 +741,26 @@
     var hasQuery = q.trim() !== '';
     if (hasQuery) matchedSet = new Set(matched);
 
-    var visible = 0;
+    // Only paginate the pristine initial view; searches and filters show all matches.
+    var limited = !hasQuery && fam === 'all' && key === 'all';
+    var self = this;
+
+    var passCount = 0;
     this._cards.forEach(function (card) {
       var matchesFamily = fam === 'all' || card._families.indexOf(fam) !== -1;
       var matchesKey = key === 'all' || card._root === key;
       var matchesSearch = !hasQuery || matchedSet.has(card._chord);
-      var show = matchesFamily && matchesKey && matchesSearch;
+      var pass = matchesFamily && matchesKey && matchesSearch;
+      var show = pass && (!limited || passCount < self._visibleLimit);
+      if (pass) passCount++;
       card.classList.toggle('hidden', !show);
       card.classList.toggle('match', show && hasQuery);
-      if (show) visible++;
     });
 
+    this._moreRow.hidden = !(limited && passCount > this._visibleLimit);
+
     var empty = this._grid.querySelector('.empty');
-    if (visible === 0) {
+    if (passCount === 0) {
       if (!empty) {
         empty = document.createElement('div');
         empty.className = 'empty';
