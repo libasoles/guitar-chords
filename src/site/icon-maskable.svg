@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Icono maskable para la PWA: mismo logo del header (diapason con dos puntos)
+  que icon-source.svg, pero con el fondo papel #fdfaf5 cubriendo TODO el lienzo
+  (sin esquinas transparentes) y el logo reducido dentro de la zona segura del
+  80% que exige el formato "maskable" (Android recorta con formas variables).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Fondo papel a sangre completa -->
+  <rect x="0" y="0" width="48" height="48" fill="#fdfaf5"/>
+  <!-- Logo del header, escalado al ~78% alrededor del centro (zona segura) -->
+  <g transform="translate(24 24) scale(0.78) translate(-24 -24)" fill="none" stroke-linecap="round">
+    <rect x="8" y="8" width="32" height="32" rx="3" fill="none" stroke="#1a1a1a" stroke-width="4"/>
+    <line x1="18" y1="8" x2="18" y2="40" stroke="#1a1a1a" stroke-width="2" opacity="0.5"/>
+    <line x1="24" y1="8" x2="24" y2="40" stroke="#1a1a1a" stroke-width="2" opacity="0.5"/>
+    <line x1="30" y1="8" x2="30" y2="40" stroke="#1a1a1a" stroke-width="2" opacity="0.5"/>
+    <line x1="8" y1="20" x2="40" y2="20" stroke="#1a1a1a" stroke-width="2" opacity="0.5"/>
+    <line x1="8" y1="30" x2="40" y2="30" stroke="#1a1a1a" stroke-width="2" opacity="0.5"/>
+    <circle cx="18" cy="25" r="3.2" fill="#8b0000" stroke="none"/>
+    <circle cx="30" cy="15" r="3.2" fill="#8b0000" stroke="none"/>
+  </g>
+</svg>

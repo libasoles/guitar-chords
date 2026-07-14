@@ -20,6 +20,9 @@
   <meta name="twitter:description" content="%%metaDescription%%">
   <meta name="twitter:image" content="%%ogImage%%">
   <link rel="icon" type="image/svg+xml" href="%%ASSETS_PREFIX%%favicon.svg">
+  <link rel="manifest" href="%%MANIFEST_HREF%%">
+  <meta name="theme-color" content="#fdfaf5">
+  <link rel="apple-touch-icon" href="%%ASSETS_PREFIX%%icons/icon-192.png">
   <link rel="stylesheet" href="%%ASSETS_PREFIX%%site.css">
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-0S8GH7ZFHT"></script>
   <script>
@@ -95,5 +98,12 @@
 <script src="%%ASSETS_PREFIX%%chord-search.js"></script>
 <script src="%%ASSETS_PREFIX%%note-names.js"></script>
 <script src="%%ASSETS_PREFIX%%chord-finder.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('%%SW_PATH%%').catch(function () {});
+    });
+  }
+</script>
 </body>
 </html>

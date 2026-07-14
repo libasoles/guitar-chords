@@ -14,6 +14,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
+const { drawIcon } = require('./lib/icon-png');
 
 const ROOT = path.join(__dirname, '..');
 const SRC_SITE = path.join(ROOT, 'src', 'site');
@@ -124,6 +126,8 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html.split('%%DECODER_ROWS%%').join(decoderRows(strings));
   html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
   html = html.split('%%CHORD_FINDER_I18N%%').join(JSON.stringify(finderI18N(strings)));
+  html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
+  html = html.split('%%SW_PATH%%').join('/sw.js');
 
   return html;
 }
@@ -162,12 +166,92 @@ const storeDist = path.join(DIST_SITE, 'store');
 ensureDir(storeDist);
 copyFile(path.join(SRC_STORE, 'privacy-policy.html'), path.join(storeDist, 'privacy-policy.html'));
 
+// ---- PWA: icons ------------------------------------------------------------
+// PNG icons for the web app manifest, generated from the site logo. Prefer
+// rsvg-convert (crisp, anti-aliased) and fall back to the pure-JS renderer so
+// the build works on CI runners without librsvg installed.
+
+console.log('==> Generating PWA icons...');
+const ICONS_DIST = path.join(ASSETS_DIST, 'icons');
+ensureDir(ICONS_DIST);
+const PWA_ICON_SIZES = [192, 512];
+const maskableSvg = path.join(SRC_SITE, 'icon-maskable.svg');
+const hasRsvg = (() => {
+  try { execSync('rsvg-convert --version', { stdio: 'ignore' }); return true; } catch { return false; }
+})();
+PWA_ICON_SIZES.forEach(function (size) {
+  const out = path.join(ICONS_DIST, 'icon-' + size + '.png');
+  if (hasRsvg && fs.existsSync(maskableSvg)) {
+    execSync('rsvg-convert -w ' + size + ' -h ' + size + ' "' + maskableSvg + '" -o "' + out + '"');
+  } else {
+    drawIcon(size, out);
+  }
+  say('assets/icons/icon-' + size + '.png' + (hasRsvg ? '' : ' (js fallback)'));
+});
+
+// ---- PWA: web app manifest (one per locale) --------------------------------
+
+console.log('==> Writing web app manifests...');
+function writeManifest(locale, strings) {
+  const name = locale === 'es' ? 'Acordes para la guitarra' : 'Guitar Chords';
+  const shortName = strings.wordmark || name;
+  const manifest = {
+    name: name,
+    short_name: shortName,
+    description: strings.metaDescription || '',
+    lang: strings.htmlLang || locale,
+    start_url: locale === 'es' ? '/' : '/en',
+    scope: '/',
+    display: 'standalone',
+    background_color: '#fdfaf5',
+    theme_color: '#fdfaf5',
+    icons: [
+      { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+      { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+      { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+    ],
+  };
+  const out = path.join(ASSETS_DIST, 'manifest.' + locale + '.webmanifest');
+  fs.writeFileSync(out, JSON.stringify(manifest, null, 2) + '\n', 'utf8');
+  say(path.relative(ROOT, out));
+}
+
+// ---- PWA: service worker (root scope, offline app-shell) -------------------
+
+console.log('==> Writing service worker...');
+const swTemplate = fs.readFileSync(path.join(SRC_SITE, 'sw.js'), 'utf8');
+const cacheVersion = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14);
+const precacheUrls = [
+  '/', '/en',
+  '/assets/site.css',
+  '/assets/favicon.svg',
+  '/assets/chords-db.js',
+  '/assets/chord-diagram.js',
+  '/assets/chord-search.js',
+  '/assets/note-names.js',
+  '/assets/chord-finder.js',
+  '/assets/vendor/svguitar.umd.js',
+  '/assets/vendor/fuzzysort.js',
+  '/assets/vendor/jspdf.umd.min.js',
+  '/assets/icons/icon-192.png',
+  '/assets/icons/icon-512.png',
+];
+const swOut = swTemplate
+  .split('%%CACHE_VERSION%%').join(cacheVersion)
+  .split('%%PRECACHE_URLS%%').join(JSON.stringify(precacheUrls))
+  .split('%%START_URL%%').join('/');
+const swFile = path.join(DIST_SITE, 'sw.js');
+fs.writeFileSync(swFile, swOut, 'utf8');
+say(path.relative(ROOT, swFile));
+
 console.log('==> Rendering locale pages...');
 
 LOCALES.forEach(function (locale) {
   const stringsPath = path.join(SRC_I18N, 'strings.' + locale + '.json');
   if (!fs.existsSync(stringsPath)) fail('Missing: ' + stringsPath);
   const strings = JSON.parse(fs.readFileSync(stringsPath, 'utf8'));
+
+  writeManifest(locale, strings);
 
   if (locale === 'es') {
     const html = render(template, strings, locale, 'assets/', 'root');
