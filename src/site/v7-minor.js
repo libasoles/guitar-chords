@@ -6,6 +6,15 @@
 (function () {
   'use strict';
 
+  // Cm sits at fret 3 (barred, A-shape). chords-db's default G7 is the open
+  // first-position voicing, a big jump down the neck. This barred G7 (E-shape
+  // dom7, the same shape as F7/B♭7's overrides) keeps the hand near fret 3-5.
+  var G7_NEAR_CM = {
+    name: 'G7', families: ['dom7'], aliases: [],
+    notes: 'G D F B D G', position: 3, barres: [{ fromString: 6, toString: 1, fret: 3 }],
+    fingers: [[5, 5, '3'], [3, 4, '2']]
+  };
+
   var PAIRS = [
     ['Am', 'E7'],
     ['Em', 'B7'],
@@ -16,7 +25,7 @@
     ['E♭m', 'B♭7'],
     ['B♭m', 'F7'],
     ['Fm', 'C7'],
-    ['Cm', 'G7'],
+    ['Cm', G7_NEAR_CM],
     ['Gm', 'D7'],
     ['Dm', 'A7']
   ];

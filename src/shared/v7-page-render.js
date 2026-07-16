@@ -1,12 +1,16 @@
 /* v7-page-render.js — Shared renderer for the "chords and their V7" pages
    (major and minor). Each page's script just supplies its own list of
-   [tonicName, v7Name] pairs and calls window.V7GuidePage.render(gridId, pairs). */
+   [tonicRef, v7Ref] pairs and calls window.V7GuidePage.render(gridId, pairs).
+   Each ref is either a chord name (looked up in window.CHORDS, falling back
+   to window.V7_CHORD_OVERRIDES for a page-wide fret preference) or a chord
+   object literal for a one-off voicing that only applies to that pair. */
 (function () {
   'use strict';
 
-  function findChord(name) {
+  function resolveChord(ref) {
+    if (typeof ref === 'object') return ref;
     var overrides = window.V7_CHORD_OVERRIDES || {};
-    return overrides[name] || window.CHORDS.find(function (c) { return c.name === name; });
+    return overrides[ref] || window.CHORDS.find(function (c) { return c.name === ref; });
   }
 
   function buildCard(chord) {
@@ -38,8 +42,8 @@
       if (!grid || !window.CHORDS || !window.ChordDiagram) return;
 
       pairs.forEach(function (pair) {
-        var tonic = findChord(pair[0]);
-        var dominant = findChord(pair[1]);
+        var tonic = resolveChord(pair[0]);
+        var dominant = resolveChord(pair[1]);
         if (!tonic || !dominant) return;
 
         var row = document.createElement('div');
