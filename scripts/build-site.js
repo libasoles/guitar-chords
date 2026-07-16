@@ -100,17 +100,36 @@ function canonicalUrl(locale) {
   return locale === 'es' ? SITE_BASE_URL + '/' : SITE_BASE_URL + '/en';
 }
 
-function v7PageHref(locale) {
-  return locale === 'es' ? '/v7' : '/en/v7';
+function v7PageHref(locale, slug) {
+  const s = slug || 'v7';
+  return locale === 'es' ? '/' + s : '/en/' + s;
 }
 
-function v7CanonicalUrl(locale) {
-  return SITE_BASE_URL + v7PageHref(locale);
+function v7CanonicalUrl(locale, slug) {
+  return SITE_BASE_URL + v7PageHref(locale, slug);
 }
 
 function homeHref(locale) {
   return locale === 'es' ? '/' : '/en';
 }
+
+// Pages rendered from the shared src/site/v7-guide.html template — one for
+// major chords, one for minor chords. Same layout, different i18n keys,
+// data script, and cross-link to the other page.
+const V7_PAGES = [
+  {
+    slug: 'v7',
+    scriptFile: 'v7-guide.js',
+    titleKey: 'v7PageTitle', metaKey: 'v7MetaDescription', h1Key: 'v7H1', leadKey: 'v7Lead',
+    otherSlug: 'v7-menor', otherLabelKey: 'v7SeeMinorLink',
+  },
+  {
+    slug: 'v7-menor',
+    scriptFile: 'v7-minor.js',
+    titleKey: 'v7mPageTitle', metaKey: 'v7mMetaDescription', h1Key: 'v7mH1', leadKey: 'v7mLead',
+    otherSlug: 'v7', otherLabelKey: 'v7SeeMajorLink',
+  },
+];
 
 function render(template, strings, locale, assetsPrefix, outputMode) {
   const resolvedAssetsPrefix = assetsPrefix || (locale === 'es' ? 'assets/' : '../assets/');
@@ -147,27 +166,36 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   return html;
 }
 
-// Render the "chords and their V7" page (src/site/v7-guide.html).
-function renderV7(template, strings, locale) {
+// Render a "chords and their V7" page (src/site/v7-guide.html, shared by all
+// entries in V7_PAGES) for one locale.
+function renderV7Page(template, strings, locale, page) {
   const resolvedAssetsPrefix = locale === 'es' ? 'assets/' : '../assets/';
   const ogImage = SITE_BASE_URL + '/assets/og-image.png';
   let html = template;
 
   const simpleKeys = [
-    'htmlLang', 'v7PageTitle', 'v7MetaDescription', 'wordmark', 'wordmarkSmall',
-    'altLangLabel', 'v7H1', 'v7Lead', 'v7ColTonic', 'v7ColDominant', 'v7HomeLink',
+    'htmlLang', 'wordmark', 'wordmarkSmall', 'altLangLabel',
+    'v7ColTonic', 'v7ColDominant',
     'extensionHeading', 'extensionDescription',
   ];
   simpleKeys.forEach(function (key) {
     html = html.split('%%' + key + '%%').join(strings[key] || '');
   });
 
+  html = html.split('%%PAGE_TITLE%%').join(strings[page.titleKey] || '');
+  html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings[page.metaKey] || '');
+  html = html.split('%%PAGE_H1%%').join(strings[page.h1Key] || '');
+  html = html.split('%%PAGE_LEAD%%').join(strings[page.leadKey] || '');
+  html = html.split('%%OTHER_PAGE_HREF%%').join(v7PageHref(locale, page.otherSlug));
+  html = html.split('%%OTHER_PAGE_LABEL%%').join(strings[page.otherLabelKey] || '');
+  html = html.split('%%PAGE_SCRIPT%%').join(resolvedAssetsPrefix + page.scriptFile);
+
   html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
   html = html.split('%%homeHref%%').join(homeHref(locale));
-  html = html.split('%%altLangHref%%').join(locale === 'es' ? v7PageHref('en') : v7PageHref('es'));
-  html = html.split('%%canonicalUrl%%').join(v7CanonicalUrl(locale));
-  html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es'));
-  html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en'));
+  html = html.split('%%altLangHref%%').join(locale === 'es' ? v7PageHref('en', page.slug) : v7PageHref('es', page.slug));
+  html = html.split('%%canonicalUrl%%').join(v7CanonicalUrl(locale, page.slug));
+  html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es', page.slug));
+  html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en', page.slug));
   html = html.split('%%ogImage%%').join(ogImage);
   html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
   html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
@@ -193,6 +221,9 @@ ensureDir(VENDOR_DIST);
 // Site-specific JS and CSS.
 copyFile(path.join(SRC_SITE, 'chord-finder.js'), path.join(ASSETS_DIST, 'chord-finder.js'));
 copyFile(path.join(SRC_SITE, 'v7-guide.js'), path.join(ASSETS_DIST, 'v7-guide.js'));
+copyFile(path.join(SRC_SITE, 'v7-minor.js'), path.join(ASSETS_DIST, 'v7-minor.js'));
+copyFile(path.join(SRC_SHARED, 'v7-page-render.js'), path.join(ASSETS_DIST, 'v7-page-render.js'));
+copyFile(path.join(SRC_SHARED, 'v7-chord-overrides.js'), path.join(ASSETS_DIST, 'v7-chord-overrides.js'));
 copyFile(path.join(SRC_SITE, 'site.css'), path.join(ASSETS_DIST, 'site.css'));
 copyFile(path.join(SRC_EXT, 'icon-source.svg'), path.join(ASSETS_DIST, 'favicon.svg'));
 // Vendored svguitar, fuzzysort, and jsPDF.
@@ -304,10 +335,12 @@ LOCALES.forEach(function (locale) {
     fs.writeFileSync(outFile, html, 'utf8');
     say(path.relative(ROOT, outFile));
 
-    const v7Html = renderV7(v7Template, strings, locale);
-    const v7OutFile = path.join(DIST_SITE, 'v7.html');
-    fs.writeFileSync(v7OutFile, v7Html, 'utf8');
-    say(path.relative(ROOT, v7OutFile));
+    V7_PAGES.forEach(function (page) {
+      const v7Html = renderV7Page(v7Template, strings, locale, page);
+      const v7OutFile = path.join(DIST_SITE, page.slug + '.html');
+      fs.writeFileSync(v7OutFile, v7Html, 'utf8');
+      say(path.relative(ROOT, v7OutFile));
+    });
     return;
   }
 
@@ -324,10 +357,12 @@ LOCALES.forEach(function (locale) {
   fs.writeFileSync(outFile, html, 'utf8');
   say(path.relative(ROOT, outFile));
 
-  const v7Html = renderV7(v7Template, strings, locale);
-  const v7OutFile = path.join(localeDir, 'v7.html');
-  fs.writeFileSync(v7OutFile, v7Html, 'utf8');
-  say(path.relative(ROOT, v7OutFile));
+  V7_PAGES.forEach(function (page) {
+    const v7Html = renderV7Page(v7Template, strings, locale, page);
+    const v7OutFile = path.join(localeDir, page.slug + '.html');
+    fs.writeFileSync(v7OutFile, v7Html, 'utf8');
+    say(path.relative(ROOT, v7OutFile));
+  });
 });
 
 // ---- robots.txt ------------------------------------------------------------
@@ -383,6 +418,22 @@ const sitemapXml = [
   '    <priority>0.5</priority>',
   '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/v7"/>',
   '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/v7"/>',
+  '  </url>',
+  '  <url>',
+  '    <loc>' + SITE_BASE_URL + '/v7-menor</loc>',
+  '    <lastmod>' + today + '</lastmod>',
+  '    <changefreq>monthly</changefreq>',
+  '    <priority>0.5</priority>',
+  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/v7-menor"/>',
+  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/v7-menor"/>',
+  '  </url>',
+  '  <url>',
+  '    <loc>' + SITE_BASE_URL + '/en/v7-menor</loc>',
+  '    <lastmod>' + today + '</lastmod>',
+  '    <changefreq>monthly</changefreq>',
+  '    <priority>0.4</priority>',
+  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/v7-menor"/>',
+  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/v7-menor"/>',
   '  </url>',
   '  <url>',
   '    <loc>' + SITE_BASE_URL + '/store/privacy-policy.html</loc>',

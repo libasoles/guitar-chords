@@ -162,7 +162,14 @@
   "v7MetaDescription": "Los 12 acordes mayores junto a su V7 —el acorde dominante que resuelve en ellos— en la posición más natural para cada uno. Diagramas listos para tocar.",
   "v7H1": "Acordes y su V7",
   "v7Lead": "El V7 es el acorde dominante de la tonalidad: el que genera más tensión y quiere resolver en la tónica. Acá tenés los 12 acordes mayores junto a su V7.",
+  "v7SeeMinorLink": "Ver también: acordes menores y su V7 →",
+
+  "v7mPageTitle": "Acordes menores y su V7 (dominante) · Acordes para la guitarra",
+  "v7mMetaDescription": "Los 12 acordes menores junto a su V7 —el acorde dominante que resuelve en ellos— en la posición más natural para cada uno. Diagramas listos para tocar.",
+  "v7mH1": "Acordes menores y su V7",
+  "v7mLead": "En tonalidad menor, el V7 se arma sobre la 5ª del acorde menor (la misma relación de quinta que en mayor). Acá tenés los 12 acordes menores junto a su V7.",
+  "v7SeeMajorLink": "Ver también: acordes mayores y su V7 →",
+
   "v7ColTonic": "Tónica",
-  "v7ColDominant": "V7 (dominante)",
-  "v7HomeLink": "← Volver al buscador de acordes"
+  "v7ColDominant": "V7 (dominante)"
 }

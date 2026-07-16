@@ -3,21 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>%%v7PageTitle%%</title>
-    <meta name="description" content="%%v7MetaDescription%%" />
+    <title>%%PAGE_TITLE%%</title>
+    <meta name="description" content="%%PAGE_META_DESCRIPTION%%" />
     <link rel="canonical" href="%%canonicalUrl%%" />
     <link rel="alternate" hreflang="es" href="%%hreflangEs%%" />
     <link rel="alternate" hreflang="en" href="%%hreflangEn%%" />
     <link rel="alternate" hreflang="x-default" href="%%hreflangEs%%" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="%%v7PageTitle%%" />
-    <meta property="og:description" content="%%v7MetaDescription%%" />
+    <meta property="og:title" content="%%PAGE_TITLE%%" />
+    <meta property="og:description" content="%%PAGE_META_DESCRIPTION%%" />
     <meta property="og:url" content="%%canonicalUrl%%" />
     <meta property="og:image" content="%%ogImage%%" />
     <meta property="og:site_name" content="Guitar Chords" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="%%v7PageTitle%%" />
-    <meta name="twitter:description" content="%%v7MetaDescription%%" />
+    <meta name="twitter:title" content="%%PAGE_TITLE%%" />
+    <meta name="twitter:description" content="%%PAGE_META_DESCRIPTION%%" />
     <meta name="twitter:image" content="%%ogImage%%" />
     <link rel="icon" type="image/svg+xml" href="%%ASSETS_PREFIX%%favicon.svg" />
     <link rel="manifest" href="%%MANIFEST_HREF%%" />
@@ -57,9 +57,9 @@
       <a class="lang-toggle" href="%%altLangHref%%">%%altLangLabel%%</a>
     </header>
 
-    <h1>%%v7H1%%</h1>
-    <p class="v7-back-link"><a href="%%homeHref%%">%%v7HomeLink%%</a></p>
-    <p class="lead">%%v7Lead%%</p>
+    <h1>%%PAGE_H1%%</h1>
+    <p class="lead">%%PAGE_LEAD%%</p>
+    <p class="v7-nav"><a href="%%OTHER_PAGE_HREF%%">%%OTHER_PAGE_LABEL%%</a></p>
 
     <div class="v7-grid" id="v7Grid">
       <div class="v7-grid-head">
@@ -146,7 +146,9 @@
     <script src="%%ASSETS_PREFIX%%vendor/svguitar.umd.js"></script>
     <script src="%%ASSETS_PREFIX%%chords-db.js"></script>
     <script src="%%ASSETS_PREFIX%%chord-diagram.js"></script>
-    <script src="%%ASSETS_PREFIX%%v7-guide.js"></script>
+    <script src="%%ASSETS_PREFIX%%v7-chord-overrides.js"></script>
+    <script src="%%ASSETS_PREFIX%%v7-page-render.js"></script>
+    <script src="%%PAGE_SCRIPT%%"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {

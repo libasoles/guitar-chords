@@ -142,13 +142,7 @@ a:hover {
   font-size: 0.9rem;
 }
 
-/* ----- V7 guide page ----- */
-
-.v7-back-link {
-  font-family: var(--sans);
-  font-size: 0.85rem;
-  margin: -0.6rem 0 1.6rem;
-}
+/* ----- V7 guide pages ----- */
 
 .v7-grid {
   margin: 1rem 0 2rem;
@@ -165,6 +159,9 @@ a:hover {
   color: var(--ink-soft);
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--rule);
+}
+.v7-grid-head span {
+  text-align: center;
 }
 .v7-row {
   display: grid;
