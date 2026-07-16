@@ -15,6 +15,17 @@
     fingers: [[5, 5, '3'], [3, 4, '2']]
   };
 
+  // chords-db's Cm has `position: 1` even though its barre sits at fret 3 —
+  // that mismatch just means the diagram draws from the nut without a
+  // fret-number label. That reads fine on its own, but next to G7_NEAR_CM
+  // (explicitly windowed from fret 3) it looks like a different position.
+  // This override only fixes the label/window for this pairing.
+  var CM_AT_FRET3 = {
+    name: 'Cm', families: ['minor'], aliases: [],
+    notes: 'C G C D♯ G', position: 3, barres: [{ fromString: 5, toString: 1, fret: 3 }],
+    fingers: [[6, 'x'], [4, 5, '3'], [3, 5, '4'], [2, 4, '2']]
+  };
+
   var PAIRS = [
     ['Am', 'E7'],
     ['Em', 'B7'],
@@ -25,7 +36,7 @@
     ['E♭m', 'B♭7'],
     ['B♭m', 'F7'],
     ['Fm', 'C7'],
-    ['Cm', G7_NEAR_CM],
+    [CM_AT_FRET3, G7_NEAR_CM],
     ['Gm', 'D7'],
     ['Dm', 'A7']
   ];
