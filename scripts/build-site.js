@@ -62,6 +62,7 @@ if (!fs.existsSync(JSPDF)) {
 // ---- template rendering ----------------------------------------------------
 
 const template = fs.readFileSync(path.join(SRC_SITE, 'template.html'), 'utf8');
+const v7Template = fs.readFileSync(path.join(SRC_SITE, 'v7-guide.html'), 'utf8');
 const LOCALES = ['es', 'en'];
 
 // Build the chord-finder i18n subset (only the cfXxx keys).
@@ -99,6 +100,18 @@ function canonicalUrl(locale) {
   return locale === 'es' ? SITE_BASE_URL + '/' : SITE_BASE_URL + '/en';
 }
 
+function v7PageHref(locale) {
+  return locale === 'es' ? '/v7' : '/en/v7';
+}
+
+function v7CanonicalUrl(locale) {
+  return SITE_BASE_URL + v7PageHref(locale);
+}
+
+function homeHref(locale) {
+  return locale === 'es' ? '/' : '/en';
+}
+
 function render(template, strings, locale, assetsPrefix, outputMode) {
   const resolvedAssetsPrefix = assetsPrefix || (locale === 'es' ? 'assets/' : '../assets/');
   const ogImage = SITE_BASE_URL + '/assets/og-image.png';
@@ -111,6 +124,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     'h1', 'lead', 'h2Decoder', 'decoderIntro',
     'thPart', 'thSymbols', 'thMeaning', 'thExample',
     'extensionHeading', 'extensionDescription',
+    'v7NavLabel',
   ];
   simpleKeys.forEach(function (key) {
     html = html.split('%%' + key + '%%').join(strings[key] || '');
@@ -126,6 +140,36 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html.split('%%DECODER_ROWS%%').join(decoderRows(strings));
   html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
   html = html.split('%%CHORD_FINDER_I18N%%').join(JSON.stringify(finderI18N(strings)));
+  html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
+  html = html.split('%%SW_PATH%%').join('/sw.js');
+  html = html.split('%%V7_PAGE_HREF%%').join(v7PageHref(locale));
+
+  return html;
+}
+
+// Render the "chords and their V7" page (src/site/v7-guide.html).
+function renderV7(template, strings, locale) {
+  const resolvedAssetsPrefix = locale === 'es' ? 'assets/' : '../assets/';
+  const ogImage = SITE_BASE_URL + '/assets/og-image.png';
+  let html = template;
+
+  const simpleKeys = [
+    'htmlLang', 'v7PageTitle', 'v7MetaDescription', 'wordmark', 'wordmarkSmall',
+    'altLangLabel', 'v7H1', 'v7Lead', 'v7ColTonic', 'v7ColDominant', 'v7HomeLink',
+    'extensionHeading', 'extensionDescription',
+  ];
+  simpleKeys.forEach(function (key) {
+    html = html.split('%%' + key + '%%').join(strings[key] || '');
+  });
+
+  html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
+  html = html.split('%%homeHref%%').join(homeHref(locale));
+  html = html.split('%%altLangHref%%').join(locale === 'es' ? v7PageHref('en') : v7PageHref('es'));
+  html = html.split('%%canonicalUrl%%').join(v7CanonicalUrl(locale));
+  html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es'));
+  html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en'));
+  html = html.split('%%ogImage%%').join(ogImage);
+  html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
   html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
   html = html.split('%%SW_PATH%%').join('/sw.js');
 
@@ -148,6 +192,7 @@ ensureDir(VENDOR_DIST);
 });
 // Site-specific JS and CSS.
 copyFile(path.join(SRC_SITE, 'chord-finder.js'), path.join(ASSETS_DIST, 'chord-finder.js'));
+copyFile(path.join(SRC_SITE, 'v7-guide.js'), path.join(ASSETS_DIST, 'v7-guide.js'));
 copyFile(path.join(SRC_SITE, 'site.css'), path.join(ASSETS_DIST, 'site.css'));
 copyFile(path.join(SRC_EXT, 'icon-source.svg'), path.join(ASSETS_DIST, 'favicon.svg'));
 // Vendored svguitar, fuzzysort, and jsPDF.
@@ -258,6 +303,11 @@ LOCALES.forEach(function (locale) {
     const outFile = path.join(DIST_SITE, 'index.html');
     fs.writeFileSync(outFile, html, 'utf8');
     say(path.relative(ROOT, outFile));
+
+    const v7Html = renderV7(v7Template, strings, locale);
+    const v7OutFile = path.join(DIST_SITE, 'v7.html');
+    fs.writeFileSync(v7OutFile, v7Html, 'utf8');
+    say(path.relative(ROOT, v7OutFile));
     return;
   }
 
@@ -273,6 +323,11 @@ LOCALES.forEach(function (locale) {
   const outFile = path.join(localeDir, 'index.html');
   fs.writeFileSync(outFile, html, 'utf8');
   say(path.relative(ROOT, outFile));
+
+  const v7Html = renderV7(v7Template, strings, locale);
+  const v7OutFile = path.join(localeDir, 'v7.html');
+  fs.writeFileSync(v7OutFile, v7Html, 'utf8');
+  say(path.relative(ROOT, v7OutFile));
 });
 
 // ---- robots.txt ------------------------------------------------------------
@@ -312,6 +367,22 @@ const sitemapXml = [
   '    <priority>0.9</priority>',
   '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/"/>',
   '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en"/>',
+  '  </url>',
+  '  <url>',
+  '    <loc>' + SITE_BASE_URL + '/v7</loc>',
+  '    <lastmod>' + today + '</lastmod>',
+  '    <changefreq>monthly</changefreq>',
+  '    <priority>0.6</priority>',
+  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/v7"/>',
+  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/v7"/>',
+  '  </url>',
+  '  <url>',
+  '    <loc>' + SITE_BASE_URL + '/en/v7</loc>',
+  '    <lastmod>' + today + '</lastmod>',
+  '    <changefreq>monthly</changefreq>',
+  '    <priority>0.5</priority>',
+  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/v7"/>',
+  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/v7"/>',
   '  </url>',
   '  <url>',
   '    <loc>' + SITE_BASE_URL + '/store/privacy-policy.html</loc>',

@@ -155,5 +155,14 @@
   "cfNotationGroupLabel": "Chord notation",
   "cfNotationAmerican": "American notation (C D E)",
   "cfNotationSpanish": "Spanish notation (Do Re Mi)",
-  "cfLoadMore": "More"
+  "cfLoadMore": "More",
+
+  "v7NavLabel": "See chords and their V7 →",
+  "v7PageTitle": "Chords and their V7 (dominant) · Guitar Chords",
+  "v7MetaDescription": "The 12 major chords next to their V7 — the dominant chord that resolves into them — in the most natural fingering for each. Ready-to-play diagrams.",
+  "v7H1": "Chords and their V7",
+  "v7Lead": "The V7 is the dominant chord of a key: the one that builds the most tension and wants to resolve into the tonic. Here are the 12 major chords next to their V7.",
+  "v7ColTonic": "Tonic",
+  "v7ColDominant": "V7 (dominant)",
+  "v7HomeLink": "← Back to the chord finder"
 }

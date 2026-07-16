@@ -155,5 +155,14 @@
   "cfNotationGroupLabel": "Notación de acordes",
   "cfNotationAmerican": "Notación americana (C D E)",
   "cfNotationSpanish": "Notación en español (Do Re Mi)",
-  "cfLoadMore": "Más"
+  "cfLoadMore": "Más",
+
+  "v7NavLabel": "Ver acordes y su V7 →",
+  "v7PageTitle": "Acordes y su V7 (dominante) · Acordes para la guitarra",
+  "v7MetaDescription": "Los 12 acordes mayores junto a su V7 —el acorde dominante que resuelve en ellos— en la posición más natural para cada uno. Diagramas listos para tocar.",
+  "v7H1": "Acordes y su V7",
+  "v7Lead": "El V7 es el acorde dominante de la tonalidad: el que genera más tensión y quiere resolver en la tónica. Acá tenés los 12 acordes mayores junto a su V7.",
+  "v7ColTonic": "Tónica",
+  "v7ColDominant": "V7 (dominante)",
+  "v7HomeLink": "← Volver al buscador de acordes"
 }
