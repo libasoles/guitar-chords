@@ -256,7 +256,10 @@
     '  border: 1px solid var(--rule, #d8d2c4); border-radius: 6px;',
     '  padding: 0.5rem 0.5rem 0.3rem; text-align: center;',
     '  display: flex; flex-direction: column; align-items: center;',
+    '  cursor: grab;',
     '}',
+    '.pinned-card.dragging { opacity: 0.4; cursor: grabbing; }',
+    '.pinned-card.drag-over { border-color: var(--accent, #8b0000); box-shadow: -2px 0 0 var(--accent, #8b0000); }',
     '.pinned-card .diagram { width: 110px; height: 130px; }',
     '.pinned-card .diagram svg { display: block; width: 100%; height: 100%; }',
     '.pinned-card .name {',
@@ -908,6 +911,39 @@
 
       var item = document.createElement('div');
       item.className = 'pinned-card';
+      item.draggable = true;
+      item.addEventListener('dragstart', function (e) {
+        item.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', chord.name);
+      });
+      item.addEventListener('dragend', function () {
+        item.classList.remove('dragging');
+        list.querySelectorAll('.pinned-card.drag-over').forEach(function (el) {
+          el.classList.remove('drag-over');
+        });
+      });
+      item.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        item.classList.add('drag-over');
+      });
+      item.addEventListener('dragleave', function () {
+        item.classList.remove('drag-over');
+      });
+      item.addEventListener('drop', function (e) {
+        e.preventDefault();
+        item.classList.remove('drag-over');
+        var draggedName = e.dataTransfer.getData('text/plain');
+        if (!draggedName || draggedName === chord.name) return;
+        var from = self._pinnedNames.indexOf(draggedName);
+        var to = self._pinnedNames.indexOf(chord.name);
+        if (from === -1 || to === -1) return;
+        self._pinnedNames.splice(from, 1);
+        self._pinnedNames.splice(to, 0, draggedName);
+        self._savePinned();
+        self._renderPinned();
+      });
 
       var remove = document.createElement('button');
       remove.type = 'button';
