@@ -72,9 +72,11 @@ test('alias "a-" → Am (y sus derivados por prefijo de alias)', () => {
   assert.ok(r.includes('Am7'));
 });
 
-test('"cΔ" y "cmaj7" → Cmaj7', () => {
+test('"cΔ" y "cmaj7" → Cmaj7 (match exacto primero; CmMaj7 puede aparecer después por fuzzy)', () => {
   assert.ok(names('cΔ').includes('Cmaj7'));
-  assert.deepEqual(names('cmaj7'), ['Cmaj7']);
+  const r = names('cmaj7');
+  assert.equal(r[0], 'Cmaj7');
+  assert.ok(r.every((n) => n === 'Cmaj7' || n === 'CmMaj7'));
 });
 
 test('"bø" y "bm7b5" → Bm7b5', () => {
@@ -87,7 +89,7 @@ test('"d/f♯" → D/F#', () => {
 });
 
 test('" CMAJ 7 " → Cmaj7', () => {
-  assert.deepEqual(names(' CMAJ 7 '), ['Cmaj7']);
+  assert.equal(names(' CMAJ 7 ')[0], 'Cmaj7');
 });
 
 test('query vacía → []', () => {
