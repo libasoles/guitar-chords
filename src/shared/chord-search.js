@@ -52,16 +52,24 @@
   // "D" ya es la raíz americana de Re, así que por defecto (o en modo
   // americano) "d" se deja tal cual. Sólo cuando el toggle está en "Do"
   // (notation === 'es') sabemos que el usuario está pensando en sílabas
-  // españolas, y ahí "d" debe ganarle a "D" y resolver a Do (c). Se aplica
-  // sólo a la QUERY, nunca a los nombres/alias de la base (siempre en
-  // americano), para no romper el matching interno.
-  const ES_ONLY_NOTE_PREFIX = /^d/;
+  // españolas, y ahí "d" suelta debe ganarle a "D" y resolver a Do (c).
+  //
+  // La resolución del cifrado español debe hacerse en UNA sola pasada: si se
+  // convirtiera "re" → "d" y luego, en un segundo reemplazo, "d" → "c", una
+  // query como "Re7" ("re7" → "d7") terminaría como "c7" (Do7). Por eso en
+  // modo español usamos un prefijo/mapa ampliado que incluye la "d" suelta,
+  // con "do" y "re" listadas antes para que ganen la alternancia ("do7"
+  // matchea "do", "re7" matchea "re", y sólo una "d" sin "o" cae en "d"→c).
+  // Se aplica sólo a la QUERY, nunca a los nombres/alias de la base (siempre
+  // en americano), para no romper el matching interno.
+  const ES_NOTE_PREFIX_WITH_D = /^(sol|do|re|mi|fa|la|si|d|r|m|l|s)/;
+  const ES_TO_EN_NOTE_WITH_D = Object.assign({ d: 'c' }, ES_TO_EN_NOTE);
 
   // Normaliza un string de acorde/query a una forma comparable.
   //   ♭ → b, ♯ → #, △/Δ → maj, ø → m7b5, minúsculas, sin espacios.
   // △ = U+25B3 (triángulo), Δ = U+0394 (delta griega): ambos significan maj7.
   // `notation`: 'es' cuando la query viene del toggle en modo español (ver
-  // ES_ONLY_NOTE_PREFIX arriba); se omite al normalizar nombres/alias.
+  // ES_NOTE_PREFIX_WITH_D arriba); se omite al normalizar nombres/alias.
   function normalize(s, notation) {
     const normalized = String(s == null ? '' : s)
       // Símbolos primero: toLowerCase() mapearía Δ (U+0394) a δ (U+03B4)
@@ -72,9 +80,9 @@
       .replace(/ø/g, 'm7b5')
       .toLowerCase()
       .replace(/\s+/g, '');
-    const withEsNotes = normalized.replace(ES_NOTE_PREFIX, function (m) { return ES_TO_EN_NOTE[m]; });
-    if (notation !== 'es') return withEsNotes;
-    return withEsNotes.replace(ES_ONLY_NOTE_PREFIX, 'c');
+    const prefix = notation === 'es' ? ES_NOTE_PREFIX_WITH_D : ES_NOTE_PREFIX;
+    const map = notation === 'es' ? ES_TO_EN_NOTE_WITH_D : ES_TO_EN_NOTE;
+    return normalized.replace(prefix, function (m) { return map[m]; });
   }
 
   // Nota inicial de un nombre/alias normalizado (letra + # o b opcional).
@@ -104,7 +112,7 @@
   //
   // `notation`: 'es' cuando el buscador está en modo español (toggle "Do"),
   // para que "d" resuelva a Do en vez de a la raíz americana D/Re (ver
-  // ES_ONLY_NOTE_PREFIX). No afecta cómo se normalizan los nombres/alias de
+  // ES_NOTE_PREFIX_WITH_D). No afecta cómo se normalizan los nombres/alias de
   // la base, que siempre están en americano.
   function matchChords(query, chords, notation) {
     const q = normalize(query, notation);

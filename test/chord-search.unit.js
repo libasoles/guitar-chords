@@ -205,3 +205,22 @@ test('modo inglés (sin notation): "d" sigue matcheando D (Re), no Do (C)', () =
   assert.ok(r.includes('D'));
   assert.ok(!r.includes('C'));
 });
+
+test('modo español: "Re7" resuelve a d7 (Re), no a c7 (Do) — la re→d no se re-pisa a c', () => {
+  assert.equal(normalize('Re7', 'es'), 'd7');
+  assert.equal(normalize('re', 'es'), 'd');
+  assert.equal(normalize('Reb', 'es'), 'db');
+});
+
+test('modo español: "Re7" matchea D7 (Re), no D♭7/C7 (Do)', () => {
+  const r = matchChords('Re7', CHORDS, 'es').map((c) => c.name);
+  assert.ok(r.includes('D7'));
+  assert.ok(!r.includes('C7'));
+});
+
+test('modo español: sílabas completas siguen resolviendo con la "d" ampliada', () => {
+  assert.equal(normalize('do', 'es'), 'c');
+  assert.equal(normalize('Do7', 'es'), 'c7');
+  assert.equal(normalize('Mi', 'es'), 'e');
+  assert.equal(normalize('Sol', 'es'), 'g');
+});
