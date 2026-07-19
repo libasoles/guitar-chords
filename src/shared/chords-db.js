@@ -363,6 +363,9 @@ window.CHORDS = [
   { name: 'G/B', families: ['slash'], aliases: [],
     notes: 'B D G B G',
     fingers: [[6,'x'],[5,2,'1'],[4,'o'],[3,'o'],[2,3,'3'],[1,3,'4']] },
+  { name: 'F/E', families: ['slash'], aliases: [],
+    notes: 'E F A C F',
+    fingers: [[6,'o'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']] },
 
   // ----- OTROS (dim7, aug, semidisminuido, tensiones) -----
   { name: 'Bm7b5', families: ['otros'], aliases: ['Bø','Bm7(♭5)','B-7b5'],
