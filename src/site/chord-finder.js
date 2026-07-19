@@ -727,7 +727,14 @@
     this._advancedPanel = advancedPanel;
     this._advancedToggle = advancedToggle;
 
-    input.addEventListener('input', function () { self._visibleLimit = self._pageSize; self._applyFilter(); });
+    input.addEventListener('input', function () {
+      self._activeFilter = 'all';
+      self._activeRoot = 'all';
+      self._visibleLimit = self._pageSize;
+      self._syncPillStates();
+      self._syncAdvancedToggle();
+      self._applyFilter();
+    });
     advancedToggle.addEventListener('click', function () {
       var isOpen = advancedToggle.getAttribute('aria-expanded') === 'true';
       advancedToggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');

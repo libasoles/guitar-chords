@@ -159,7 +159,36 @@ async function run() {
     pins = await pinnedNames('#pin');
     assert.strictEqual(pins.length, 0, `expected nothing pinned after unpin, got: ${pins.join(', ')}`);
 
+    // 4b. Typing a new query resets a sticky TIPO filter (regression: filter
+    // used to stay applied and silently hide non-matching results).
+    await page.fill(input, 'C');
+    await page.waitForFunction(() =>
+      document.querySelector('#pin').shadowRoot.querySelectorAll('.card:not(.hidden)').length > 0
+    );
+    await page.evaluate(() => {
+      const f = document.querySelector('#pin');
+      const advToggle = f.shadowRoot.querySelector('.advanced-toggle');
+      advToggle.click();
+      const pill = f.shadowRoot.querySelector('.filter-group-pills .pill[data-filter="slash"]');
+      pill.click();
+    });
+    const slashOnly = await visibleNames(page);
+    assert.ok(slashOnly.every((n) => n.includes('/')), `expected only slash chords, got: ${slashOnly.join(', ')}`);
+    await page.fill(input, 'C');
+    await page.waitForFunction(() =>
+      document.querySelector('#pin').shadowRoot.querySelectorAll('.card:not(.hidden)').length > 0
+    );
+    const afterRetype = await visibleNames(page);
+    assert.ok(afterRetype.includes('C'), `typing a new query should clear the sticky TIPO filter and show "C", got: ${afterRetype.join(', ')}`);
+    const filterStillActive = await page.evaluate(() => {
+      const f = document.querySelector('#pin');
+      const pill = f.shadowRoot.querySelector('.filter-group-pills .pill[data-filter="slash"]');
+      return pill.getAttribute('aria-pressed') === 'true';
+    });
+    assert.ok(!filterStillActive, 'TIPO filter pill should no longer be pressed after typing a new query');
+
     console.log('OK: chord-finder mounts, filters by query, shows empty state.');
+    console.log('OK: typing a new query clears a sticky TIPO filter.');
     console.log('OK: pinnable pins/unpins (persists across queries); plain has no pin affordance.');
 
     // ---- Notation toggle (cifrado americano ⇄ español) ----
