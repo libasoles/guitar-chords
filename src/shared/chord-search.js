@@ -35,8 +35,18 @@
   // Nota inicial en español → letra americana equivalente. Ninguna candidata
   // (nombre/alias en la base) empieza con estas sílabas, así que aplicar esto
   // siempre es seguro: sólo puede matchear queries en cifrado español.
-  const ES_NOTE_PREFIX = /^(sol|do|re|mi|fa|la|si)/;
-  const ES_TO_EN_NOTE = { sol: 'g', do: 'c', re: 'd', mi: 'e', fa: 'f', la: 'a', si: 'b' };
+  //
+  // También se acepta la abreviatura de una sola letra (r/m/l/s) para quien
+  // busca "R" esperando Re, como con las letras americanas ("f" ya funciona
+  // sin cambios: Fa y F son la misma letra). "d" y "do" quedan fuera: "d" ya
+  // es la letra americana de Re, así que abreviar Do como "d" chocaría con
+  // eso. "s" es ambigua entre Sol y Si; se prioriza Sol por ser la más
+  // buscada, y Si sigue accesible escribiendo "si" completo.
+  const ES_NOTE_PREFIX = /^(sol|do|re|mi|fa|la|si|r|m|l|s)/;
+  const ES_TO_EN_NOTE = {
+    sol: 'g', do: 'c', re: 'd', mi: 'e', fa: 'f', la: 'a', si: 'b',
+    r: 'd', m: 'e', l: 'a', s: 'g',
+  };
 
   // Normaliza un string de acorde/query a una forma comparable.
   //   ♭ → b, ♯ → #, △/Δ → maj, ø → m7b5, minúsculas, sin espacios.

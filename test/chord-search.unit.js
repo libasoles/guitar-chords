@@ -173,3 +173,16 @@ test('"9" sola matchea todos los acordes de novena, de cualquier raíz', () => {
 test('"cmaj7" no matchea "D♭maj7" vía su alias enarmónico "C♯maj7"', () => {
   assert.ok(!names('cmaj7').includes('D♭maj7'));
 });
+
+test('normalize: abreviatura de una sola letra en español (r/m/l/s)', () => {
+  assert.equal(normalize('R'), 'd');
+  assert.equal(normalize('M'), 'e');
+  assert.equal(normalize('L'), 'a');
+  assert.equal(normalize('S'), 'g');
+  assert.equal(normalize('Rm'), 'dm');
+});
+
+test('cifrado español "r" matchea lo mismo que "d" (buscar acordes de Re)', () => {
+  assert.deepEqual(names('r'), names('d'));
+  assert.ok(names('r').includes('D'));
+});
