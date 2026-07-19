@@ -186,3 +186,22 @@ test('cifrado español "r" matchea lo mismo que "d" (buscar acordes de Re)', () 
   assert.deepEqual(names('r'), names('d'));
   assert.ok(names('r').includes('D'));
 });
+
+test('normalize: "d" es D (Re) por defecto, pero Do (c) en modo español', () => {
+  assert.equal(normalize('d'), 'd');
+  assert.equal(normalize('d', 'es'), 'c');
+  assert.equal(normalize('dm', 'es'), 'cm');
+  assert.equal(normalize('do', 'es'), 'c');
+});
+
+test('modo español: "d" matchea Do (C), no D (Re)', () => {
+  const r = matchChords('d', CHORDS, 'es').map((c) => c.name);
+  assert.ok(r.includes('C'));
+  assert.ok(!r.includes('D'));
+});
+
+test('modo inglés (sin notation): "d" sigue matcheando D (Re), no Do (C)', () => {
+  const r = names('d');
+  assert.ok(r.includes('D'));
+  assert.ok(!r.includes('C'));
+});

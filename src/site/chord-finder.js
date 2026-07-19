@@ -818,7 +818,7 @@
     var fam = this._activeFilter;
     var key = this._activeRoot;
 
-    var matched = window.ChordSearch.matchChords(q, window.CHORDS);
+    var matched = window.ChordSearch.matchChords(q, window.CHORDS, this._notation);
     var matchedSet = null;
     var hasQuery = q.trim() !== '';
     if (hasQuery) matchedSet = new Set(matched);

@@ -48,10 +48,21 @@
     r: 'd', m: 'e', l: 'a', s: 'g',
   };
 
+  // "d" es la única letra española que choca con una letra americana real:
+  // "D" ya es la raíz americana de Re, así que por defecto (o en modo
+  // americano) "d" se deja tal cual. Sólo cuando el toggle está en "Do"
+  // (notation === 'es') sabemos que el usuario está pensando en sílabas
+  // españolas, y ahí "d" debe ganarle a "D" y resolver a Do (c). Se aplica
+  // sólo a la QUERY, nunca a los nombres/alias de la base (siempre en
+  // americano), para no romper el matching interno.
+  const ES_ONLY_NOTE_PREFIX = /^d/;
+
   // Normaliza un string de acorde/query a una forma comparable.
   //   ♭ → b, ♯ → #, △/Δ → maj, ø → m7b5, minúsculas, sin espacios.
   // △ = U+25B3 (triángulo), Δ = U+0394 (delta griega): ambos significan maj7.
-  function normalize(s) {
+  // `notation`: 'es' cuando la query viene del toggle en modo español (ver
+  // ES_ONLY_NOTE_PREFIX arriba); se omite al normalizar nombres/alias.
+  function normalize(s, notation) {
     const normalized = String(s == null ? '' : s)
       // Símbolos primero: toLowerCase() mapearía Δ (U+0394) a δ (U+03B4)
       // y ya no matchearía la clase, así que reemplazamos antes de bajar caso.
@@ -61,7 +72,9 @@
       .replace(/ø/g, 'm7b5')
       .toLowerCase()
       .replace(/\s+/g, '');
-    return normalized.replace(ES_NOTE_PREFIX, function (m) { return ES_TO_EN_NOTE[m]; });
+    const withEsNotes = normalized.replace(ES_NOTE_PREFIX, function (m) { return ES_TO_EN_NOTE[m]; });
+    if (notation !== 'es') return withEsNotes;
+    return withEsNotes.replace(ES_ONLY_NOTE_PREFIX, 'c');
   }
 
   // Nota inicial de un nombre/alias normalizado (letra + # o b opcional).
@@ -88,8 +101,13 @@
   // matchea cualquier acorde de novena, sin importar la raíz.
   //
   // Query vacía (o sólo espacios/símbolos que colapsan a '') → [].
-  function matchChords(query, chords) {
-    const q = normalize(query);
+  //
+  // `notation`: 'es' cuando el buscador está en modo español (toggle "Do"),
+  // para que "d" resuelva a Do en vez de a la raíz americana D/Re (ver
+  // ES_ONLY_NOTE_PREFIX). No afecta cómo se normalizan los nombres/alias de
+  // la base, que siempre están en americano.
+  function matchChords(query, chords, notation) {
+    const q = normalize(query, notation);
     if (q === '') return [];
     const qSplit = splitRoot(q);
     const list = chords || [];

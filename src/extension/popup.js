@@ -233,7 +233,7 @@
   function renderResults() {
     results.textContent = '';
     const query = input.value;
-    const matches = matchChords(query, window.CHORDS);
+    const matches = matchChords(query, window.CHORDS, notation);
 
     if (query.trim() === '') return;
 
