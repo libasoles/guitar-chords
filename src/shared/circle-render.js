@@ -93,6 +93,8 @@
     var wrap = document.createElement('div');
     wrap.className = 'circle-counts';
 
+    var timesWord = labels.times || '';
+
     [
       ['root', counts.root],
       ['third', counts.third],
@@ -102,14 +104,15 @@
       var stat = document.createElement('div');
       stat.className = 'circle-stat circle-stat--' + key;
 
+      // The degree (1ª/3ª/5ª) is the headline; the count is the caption below.
       var num = document.createElement('span');
       num.className = 'circle-stat-num';
-      num.textContent = String(pair[1]);
+      num.textContent = labels[key];
       stat.appendChild(num);
 
       var lab = document.createElement('span');
       lab.className = 'circle-stat-label';
-      lab.textContent = labels[key];
+      lab.textContent = timesWord ? pair[1] + ' ' + timesWord : String(pair[1]);
       stat.appendChild(lab);
 
       wrap.appendChild(stat);

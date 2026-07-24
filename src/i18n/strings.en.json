@@ -174,14 +174,15 @@
   "v7ColTonic": "Tonic",
   "v7ColDominant": "V7 (dominant)",
 
-  "circlePageTitle": "The circle of fifths on guitar · Guitar Chords",
-  "circleMetaDescription": "The 12 major chords in circle-of-fifths order, from E♭ to A♭. For each chord, its diagram and how many roots (1st), thirds (3rd) and fifths (5th) sound on the guitar.",
-  "circleH1": "The circle of fifths",
-  "circleLead": "The 12 major chords walking the circle of fifths, from E♭ to A♭. Next to each diagram you can see how many times the root (1st), the third (3rd) and the fifth (5th) sound in that voicing.",
+  "circlePageTitle": "Chords and their notes · Guitar Chords",
+  "circleMetaDescription": "Major chords are made of 3 degrees. This list shows how many times the root, the third and the fifth sound in each chord.",
+  "circleH1": "Chords and their notes",
+  "circleLead": "Major chords are made of 3 degrees. This list shows how many times the root, the third and the fifth sound in each chord.",
   "circleColChord": "Chord",
-  "circleColNotes": "Notes on the guitar",
-  "circleNavLabel": "See the circle of fifths →",
+  "circleColNotes": "Chord composition",
+  "circleNavLabel": "See chords and their notes →",
   "circleLabelRoot": "1st",
   "circleLabelThird": "3rd",
-  "circleLabelFifth": "5th"
+  "circleLabelFifth": "5th",
+  "circleTimesLabel": "times"
 }

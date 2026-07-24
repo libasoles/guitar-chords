@@ -64,7 +64,7 @@ if (!fs.existsSync(JSPDF)) {
 const template = fs.readFileSync(path.join(SRC_SITE, 'template.html'), 'utf8');
 const v7Template = fs.readFileSync(path.join(SRC_SITE, 'v7-guide.html'), 'utf8');
 const circleTemplate = fs.readFileSync(path.join(SRC_SITE, 'circle-fifths.html'), 'utf8');
-const CIRCLE_SLUG = 'circulo-quintas';
+const CIRCLE_SLUG = 'acordes-y-sus-notas';
 const LOCALES = ['es', 'en'];
 
 // Build the chord-finder i18n subset (only the cfXxx keys).
@@ -228,6 +228,7 @@ function renderCirclePage(template, strings, locale) {
     root: strings.circleLabelRoot || '1ª',
     third: strings.circleLabelThird || '3ª',
     fifth: strings.circleLabelFifth || '5ª',
+    times: strings.circleTimesLabel || 'veces',
   };
 
   html = html.split('%%PAGE_TITLE%%').join(strings.circlePageTitle || '');
@@ -496,20 +497,20 @@ const sitemapXml = [
   '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/v7-menor"/>',
   '  </url>',
   '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/circulo-quintas</loc>',
+  '    <loc>' + SITE_BASE_URL + '/acordes-y-sus-notas</loc>',
   '    <lastmod>' + today + '</lastmod>',
   '    <changefreq>monthly</changefreq>',
   '    <priority>0.5</priority>',
-  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/circulo-quintas"/>',
-  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/circulo-quintas"/>',
+  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/acordes-y-sus-notas"/>',
+  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/acordes-y-sus-notas"/>',
   '  </url>',
   '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/en/circulo-quintas</loc>',
+  '    <loc>' + SITE_BASE_URL + '/en/acordes-y-sus-notas</loc>',
   '    <lastmod>' + today + '</lastmod>',
   '    <changefreq>monthly</changefreq>',
   '    <priority>0.4</priority>',
-  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/circulo-quintas"/>',
-  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/circulo-quintas"/>',
+  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/acordes-y-sus-notas"/>',
+  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/acordes-y-sus-notas"/>',
   '  </url>',
   '  <url>',
   '    <loc>' + SITE_BASE_URL + '/store/privacy-policy.html</loc>',
