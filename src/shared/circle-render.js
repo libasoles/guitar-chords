@@ -47,9 +47,11 @@
     return frets;
   }
 
-  // Count how many *strings* sound the root (0), the major third (4) and the
-  // perfect fifth (7) semitones above the root, for this major-triad voicing.
-  function intervalCounts(chord) {
+  // Count how many *strings* sound the root (0), the third and the perfect
+  // fifth (7) semitones above the root, for this triad voicing. The third is a
+  // major third (4) by default; pass thirdSemitones = 3 for minor triads.
+  function intervalCounts(chord, thirdSemitones) {
+    var third = thirdSemitones || 4;
     var rootPc = pitchClass(chord.name);
     var counts = { root: 0, third: 0, fifth: 0 };
     if (rootPc == null) return counts;
@@ -61,7 +63,7 @@
       var pc = (open + frets[string]) % 12;
       var interval = ((pc - rootPc) % 12 + 12) % 12;
       if (interval === 0) counts.root += 1;
-      else if (interval === 4) counts.third += 1;
+      else if (interval === third) counts.third += 1;
       else if (interval === 7) counts.fifth += 1;
     });
     return counts;
@@ -120,7 +122,8 @@
     return wrap;
   }
 
-  function render(gridId, names, labels) {
+  function render(gridId, names, labels, opts) {
+    var thirdSemitones = (opts && opts.thirdSemitones) || 4;
     function run() {
       var grid = document.getElementById(gridId);
       if (!grid || !window.CHORDS || !window.ChordDiagram) return;
@@ -132,7 +135,7 @@
         var row = document.createElement('div');
         row.className = 'circle-row';
         row.appendChild(buildDiagram(chord));
-        row.appendChild(buildCounts(intervalCounts(chord), labels));
+        row.appendChild(buildCounts(intervalCounts(chord, thirdSemitones), labels));
         grid.appendChild(row);
       });
     }

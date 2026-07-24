@@ -275,7 +275,7 @@ a:hover {
 .circle-stat-num {
   font-family: var(--mono);
   font-weight: 700;
-  font-size: 1.6rem;
+  font-size: 1.15rem;
   line-height: 1;
   color: var(--accent);
 }
@@ -307,7 +307,7 @@ a:hover {
     padding: 0.4rem 0.3rem;
   }
   .circle-stat-num {
-    font-size: 1.3rem;
+    font-size: 1.05rem;
   }
   .circle-stat-label {
     font-size: 0.72rem;
