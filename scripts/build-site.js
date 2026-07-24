@@ -145,7 +145,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     'h1', 'lead', 'h2Decoder', 'decoderIntro',
     'thPart', 'thSymbols', 'thMeaning', 'thExample',
     'extensionHeading', 'extensionDescription',
-    'v7NavLabel',
+    'v7NavLabel', 'circleNavLabel',
   ];
   simpleKeys.forEach(function (key) {
     html = html.split('%%' + key + '%%').join(strings[key] || '');
@@ -164,6 +164,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
   html = html.split('%%SW_PATH%%').join('/sw.js');
   html = html.split('%%V7_PAGE_HREF%%').join(v7PageHref(locale));
+  html = html.split('%%CIRCLE_PAGE_HREF%%').join(v7PageHref(locale, CIRCLE_SLUG));
 
   return html;
 }
