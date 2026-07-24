@@ -172,5 +172,15 @@
   "v7SeeMajorLink": "Ver también: acordes mayores y su V7 →",
 
   "v7ColTonic": "Tónica",
-  "v7ColDominant": "V7 (dominante)"
+  "v7ColDominant": "V7 (dominante)",
+
+  "circlePageTitle": "El círculo de quintas en la guitarra · Acordes para la guitarra",
+  "circleMetaDescription": "Los 12 acordes mayores en orden del círculo de quintas, de Mi♭ a La♭. Para cada acorde, su diagrama y cuántas fundamentales (1ª), terceras (3ª) y quintas (5ª) suenan en la guitarra.",
+  "circleH1": "El círculo de quintas",
+  "circleLead": "Los 12 acordes mayores recorriendo el círculo de quintas, de Mi♭ a La♭. Al lado de cada diagrama ves cuántas veces suenan la fundamental (1ª), la tercera (3ª) y la quinta (5ª) en ese digitado.",
+  "circleColChord": "Acorde",
+  "circleColNotes": "Notas en la guitarra",
+  "circleLabelRoot": "1ª",
+  "circleLabelThird": "3ª",
+  "circleLabelFifth": "5ª"
 }

@@ -63,6 +63,8 @@ if (!fs.existsSync(JSPDF)) {
 
 const template = fs.readFileSync(path.join(SRC_SITE, 'template.html'), 'utf8');
 const v7Template = fs.readFileSync(path.join(SRC_SITE, 'v7-guide.html'), 'utf8');
+const circleTemplate = fs.readFileSync(path.join(SRC_SITE, 'circle-fifths.html'), 'utf8');
+const CIRCLE_SLUG = 'circulo-quintas';
 const LOCALES = ['es', 'en'];
 
 // Build the chord-finder i18n subset (only the cfXxx keys).
@@ -204,6 +206,49 @@ function renderV7Page(template, strings, locale, page) {
   return html;
 }
 
+// Render the "circle of fifths" page (src/site/circle-fifths.html) for one
+// locale. Same head/footer chrome as the V7 pages; a single-column grid of
+// major chords with per-voicing 1ª/3ª/5ª counts (computed client-side).
+function renderCirclePage(template, strings, locale) {
+  const resolvedAssetsPrefix = locale === 'es' ? 'assets/' : '../assets/';
+  const ogImage = SITE_BASE_URL + '/assets/og-image.png';
+  let html = template;
+
+  const simpleKeys = [
+    'htmlLang', 'wordmark', 'wordmarkSmall', 'altLangLabel',
+    'circleColChord', 'circleColNotes',
+    'extensionHeading', 'extensionDescription',
+  ];
+  simpleKeys.forEach(function (key) {
+    html = html.split('%%' + key + '%%').join(strings[key] || '');
+  });
+
+  const labels = {
+    root: strings.circleLabelRoot || '1ª',
+    third: strings.circleLabelThird || '3ª',
+    fifth: strings.circleLabelFifth || '5ª',
+  };
+
+  html = html.split('%%PAGE_TITLE%%').join(strings.circlePageTitle || '');
+  html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings.circleMetaDescription || '');
+  html = html.split('%%PAGE_H1%%').join(strings.circleH1 || '');
+  html = html.split('%%PAGE_LEAD%%').join(strings.circleLead || '');
+  html = html.split('%%CIRCLE_LABELS_JSON%%').join(JSON.stringify(labels));
+
+  html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
+  html = html.split('%%homeHref%%').join(homeHref(locale));
+  html = html.split('%%altLangHref%%').join(locale === 'es' ? v7PageHref('en', CIRCLE_SLUG) : v7PageHref('es', CIRCLE_SLUG));
+  html = html.split('%%canonicalUrl%%').join(v7CanonicalUrl(locale, CIRCLE_SLUG));
+  html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es', CIRCLE_SLUG));
+  html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en', CIRCLE_SLUG));
+  html = html.split('%%ogImage%%').join(ogImage);
+  html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
+  html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
+  html = html.split('%%SW_PATH%%').join('/sw.js');
+
+  return html;
+}
+
 // ---- build -----------------------------------------------------------------
 
 console.log('==> Building site assets...');
@@ -224,6 +269,8 @@ copyFile(path.join(SRC_SITE, 'v7-guide.js'), path.join(ASSETS_DIST, 'v7-guide.js
 copyFile(path.join(SRC_SITE, 'v7-minor.js'), path.join(ASSETS_DIST, 'v7-minor.js'));
 copyFile(path.join(SRC_SHARED, 'v7-page-render.js'), path.join(ASSETS_DIST, 'v7-page-render.js'));
 copyFile(path.join(SRC_SHARED, 'v7-chord-overrides.js'), path.join(ASSETS_DIST, 'v7-chord-overrides.js'));
+copyFile(path.join(SRC_SITE, 'circle-fifths.js'), path.join(ASSETS_DIST, 'circle-fifths.js'));
+copyFile(path.join(SRC_SHARED, 'circle-render.js'), path.join(ASSETS_DIST, 'circle-render.js'));
 copyFile(path.join(SRC_SITE, 'site.css'), path.join(ASSETS_DIST, 'site.css'));
 copyFile(path.join(SRC_EXT, 'icon-source.svg'), path.join(ASSETS_DIST, 'favicon.svg'));
 // Vendored svguitar, fuzzysort, and jsPDF.
@@ -306,6 +353,8 @@ const precacheUrls = [
   '/assets/chord-search.js',
   '/assets/note-names.js',
   '/assets/chord-finder.js',
+  '/assets/circle-render.js',
+  '/assets/circle-fifths.js',
   '/assets/vendor/svguitar.umd.js',
   '/assets/vendor/fuzzysort.js',
   '/assets/vendor/jspdf.umd.min.js',
@@ -341,6 +390,11 @@ LOCALES.forEach(function (locale) {
       fs.writeFileSync(v7OutFile, v7Html, 'utf8');
       say(path.relative(ROOT, v7OutFile));
     });
+
+    const circleHtml = renderCirclePage(circleTemplate, strings, locale);
+    const circleOutFile = path.join(DIST_SITE, CIRCLE_SLUG + '.html');
+    fs.writeFileSync(circleOutFile, circleHtml, 'utf8');
+    say(path.relative(ROOT, circleOutFile));
     return;
   }
 
@@ -363,6 +417,11 @@ LOCALES.forEach(function (locale) {
     fs.writeFileSync(v7OutFile, v7Html, 'utf8');
     say(path.relative(ROOT, v7OutFile));
   });
+
+  const circleHtml = renderCirclePage(circleTemplate, strings, locale);
+  const circleOutFile = path.join(localeDir, CIRCLE_SLUG + '.html');
+  fs.writeFileSync(circleOutFile, circleHtml, 'utf8');
+  say(path.relative(ROOT, circleOutFile));
 });
 
 // ---- robots.txt ------------------------------------------------------------
@@ -434,6 +493,22 @@ const sitemapXml = [
   '    <priority>0.4</priority>',
   '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/v7-menor"/>',
   '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/v7-menor"/>',
+  '  </url>',
+  '  <url>',
+  '    <loc>' + SITE_BASE_URL + '/circulo-quintas</loc>',
+  '    <lastmod>' + today + '</lastmod>',
+  '    <changefreq>monthly</changefreq>',
+  '    <priority>0.5</priority>',
+  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/circulo-quintas"/>',
+  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/circulo-quintas"/>',
+  '  </url>',
+  '  <url>',
+  '    <loc>' + SITE_BASE_URL + '/en/circulo-quintas</loc>',
+  '    <lastmod>' + today + '</lastmod>',
+  '    <changefreq>monthly</changefreq>',
+  '    <priority>0.4</priority>',
+  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/circulo-quintas"/>',
+  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/circulo-quintas"/>',
   '  </url>',
   '  <url>',
   '    <loc>' + SITE_BASE_URL + '/store/privacy-policy.html</loc>',
