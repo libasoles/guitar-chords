@@ -177,12 +177,12 @@
   "circlePageTitle": "Los acordes y sus notas · Acordes para la guitarra",
   "circleMetaDescription": "Los acordes mayores están compuestos por 3 grados. Este listado muestra cuántas veces suenan la fundamental, la tercera y la quinta en cada acorde.",
   "circleH1": "Los acordes y sus notas",
-  "circleLead": "Los acordes mayores están compuestos por 3 grados. Este listado muestra cuántas veces suenan la fundamental, la tercera y la quinta en cada acorde.",
+  "circleLead": "Cada acorde mayor está compuesto por 3 grados. El listado muestra cuántas veces suenan la fundamental, la tercera y la quinta en cada acorde.",
   "circleColChord": "Acorde",
-  "circleColNotes": "Composición de acorde",
+  "circleColNotes": "Composición del acorde",
   "circleNavLabel": "Ver los acordes y sus notas →",
-  "circleLabelRoot": "1ª",
-  "circleLabelThird": "3ª",
-  "circleLabelFifth": "5ª",
+  "circleLabelRoot": "1°",
+  "circleLabelThird": "3°",
+  "circleLabelFifth": "5°",
   "circleTimesLabel": "veces"
 }
