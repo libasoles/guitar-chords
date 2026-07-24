@@ -64,7 +64,6 @@ if (!fs.existsSync(JSPDF)) {
 const template = fs.readFileSync(path.join(SRC_SITE, 'template.html'), 'utf8');
 const v7Template = fs.readFileSync(path.join(SRC_SITE, 'v7-guide.html'), 'utf8');
 const circleTemplate = fs.readFileSync(path.join(SRC_SITE, 'circle-fifths.html'), 'utf8');
-const CIRCLE_SLUG = 'acordes-y-sus-notas';
 const LOCALES = ['es', 'en'];
 
 // Build the chord-finder i18n subset (only the cfXxx keys).
@@ -132,6 +131,26 @@ const V7_PAGES = [
     otherSlug: 'v7', otherLabelKey: 'v7SeeMajorLink',
   },
 ];
+
+// "Chords and their notes" pages rendered from src/site/circle-fifths.html —
+// one for major chords, one for minor. Same layout; each loads its own data
+// script and cross-links to the other below the lesson.
+const CIRCLE_PAGES = [
+  {
+    slug: 'acordes-mayores-y-sus-notas',
+    scriptFile: 'circle-fifths.js',
+    titleKey: 'circlePageTitle', metaKey: 'circleMetaDescription', h1Key: 'circleH1', leadKey: 'circleLead',
+    otherSlug: 'acordes-menores-y-sus-notas', otherLabelKey: 'circleSeeMinorLink',
+  },
+  {
+    slug: 'acordes-menores-y-sus-notas',
+    scriptFile: 'circle-fifths-minor.js',
+    titleKey: 'circleMinorPageTitle', metaKey: 'circleMinorMetaDescription', h1Key: 'circleMinorH1', leadKey: 'circleMinorLead',
+    otherSlug: 'acordes-mayores-y-sus-notas', otherLabelKey: 'circleSeeMajorLink',
+  },
+];
+// Home-nav link points at the major "chords and their notes" page.
+const CIRCLE_SLUG = CIRCLE_PAGES[0].slug;
 
 function render(template, strings, locale, assetsPrefix, outputMode) {
   const resolvedAssetsPrefix = assetsPrefix || (locale === 'es' ? 'assets/' : '../assets/');
@@ -207,10 +226,11 @@ function renderV7Page(template, strings, locale, page) {
   return html;
 }
 
-// Render the "circle of fifths" page (src/site/circle-fifths.html) for one
-// locale. Same head/footer chrome as the V7 pages; a single-column grid of
-// major chords with per-voicing 1ª/3ª/5ª counts (computed client-side).
-function renderCirclePage(template, strings, locale) {
+// Render a "chords and their notes" page (src/site/circle-fifths.html, shared
+// by all entries in CIRCLE_PAGES) for one locale. Same head/footer chrome as
+// the V7 pages; a single-column grid of chords with per-voicing 1ª/3ª/5ª counts
+// (computed client-side by the page's data script).
+function renderCirclePage(template, strings, locale, page) {
   const resolvedAssetsPrefix = locale === 'es' ? 'assets/' : '../assets/';
   const ogImage = SITE_BASE_URL + '/assets/og-image.png';
   let html = template;
@@ -231,18 +251,21 @@ function renderCirclePage(template, strings, locale) {
     times: strings.circleTimesLabel || 'veces',
   };
 
-  html = html.split('%%PAGE_TITLE%%').join(strings.circlePageTitle || '');
-  html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings.circleMetaDescription || '');
-  html = html.split('%%PAGE_H1%%').join(strings.circleH1 || '');
-  html = html.split('%%PAGE_LEAD%%').join(strings.circleLead || '');
+  html = html.split('%%PAGE_TITLE%%').join(strings[page.titleKey] || '');
+  html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings[page.metaKey] || '');
+  html = html.split('%%PAGE_H1%%').join(strings[page.h1Key] || '');
+  html = html.split('%%PAGE_LEAD%%').join(strings[page.leadKey] || '');
   html = html.split('%%CIRCLE_LABELS_JSON%%').join(JSON.stringify(labels));
+  html = html.split('%%CIRCLE_SCRIPT%%').join(resolvedAssetsPrefix + page.scriptFile);
+  html = html.split('%%OTHER_CIRCLE_HREF%%').join(v7PageHref(locale, page.otherSlug));
+  html = html.split('%%OTHER_CIRCLE_LABEL%%').join(strings[page.otherLabelKey] || '');
 
   html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
   html = html.split('%%homeHref%%').join(homeHref(locale));
-  html = html.split('%%altLangHref%%').join(locale === 'es' ? v7PageHref('en', CIRCLE_SLUG) : v7PageHref('es', CIRCLE_SLUG));
-  html = html.split('%%canonicalUrl%%').join(v7CanonicalUrl(locale, CIRCLE_SLUG));
-  html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es', CIRCLE_SLUG));
-  html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en', CIRCLE_SLUG));
+  html = html.split('%%altLangHref%%').join(locale === 'es' ? v7PageHref('en', page.slug) : v7PageHref('es', page.slug));
+  html = html.split('%%canonicalUrl%%').join(v7CanonicalUrl(locale, page.slug));
+  html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es', page.slug));
+  html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en', page.slug));
   html = html.split('%%ogImage%%').join(ogImage);
   html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
   html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
@@ -272,6 +295,7 @@ copyFile(path.join(SRC_SITE, 'v7-minor.js'), path.join(ASSETS_DIST, 'v7-minor.js
 copyFile(path.join(SRC_SHARED, 'v7-page-render.js'), path.join(ASSETS_DIST, 'v7-page-render.js'));
 copyFile(path.join(SRC_SHARED, 'v7-chord-overrides.js'), path.join(ASSETS_DIST, 'v7-chord-overrides.js'));
 copyFile(path.join(SRC_SITE, 'circle-fifths.js'), path.join(ASSETS_DIST, 'circle-fifths.js'));
+copyFile(path.join(SRC_SITE, 'circle-fifths-minor.js'), path.join(ASSETS_DIST, 'circle-fifths-minor.js'));
 copyFile(path.join(SRC_SHARED, 'circle-render.js'), path.join(ASSETS_DIST, 'circle-render.js'));
 copyFile(path.join(SRC_SITE, 'site.css'), path.join(ASSETS_DIST, 'site.css'));
 copyFile(path.join(SRC_EXT, 'icon-source.svg'), path.join(ASSETS_DIST, 'favicon.svg'));
@@ -357,6 +381,7 @@ const precacheUrls = [
   '/assets/chord-finder.js',
   '/assets/circle-render.js',
   '/assets/circle-fifths.js',
+  '/assets/circle-fifths-minor.js',
   '/assets/vendor/svguitar.umd.js',
   '/assets/vendor/fuzzysort.js',
   '/assets/vendor/jspdf.umd.min.js',
@@ -393,10 +418,12 @@ LOCALES.forEach(function (locale) {
       say(path.relative(ROOT, v7OutFile));
     });
 
-    const circleHtml = renderCirclePage(circleTemplate, strings, locale);
-    const circleOutFile = path.join(DIST_SITE, CIRCLE_SLUG + '.html');
-    fs.writeFileSync(circleOutFile, circleHtml, 'utf8');
-    say(path.relative(ROOT, circleOutFile));
+    CIRCLE_PAGES.forEach(function (page) {
+      const circleHtml = renderCirclePage(circleTemplate, strings, locale, page);
+      const circleOutFile = path.join(DIST_SITE, page.slug + '.html');
+      fs.writeFileSync(circleOutFile, circleHtml, 'utf8');
+      say(path.relative(ROOT, circleOutFile));
+    });
     return;
   }
 
@@ -420,10 +447,12 @@ LOCALES.forEach(function (locale) {
     say(path.relative(ROOT, v7OutFile));
   });
 
-  const circleHtml = renderCirclePage(circleTemplate, strings, locale);
-  const circleOutFile = path.join(localeDir, CIRCLE_SLUG + '.html');
-  fs.writeFileSync(circleOutFile, circleHtml, 'utf8');
-  say(path.relative(ROOT, circleOutFile));
+  CIRCLE_PAGES.forEach(function (page) {
+    const circleHtml = renderCirclePage(circleTemplate, strings, locale, page);
+    const circleOutFile = path.join(localeDir, page.slug + '.html');
+    fs.writeFileSync(circleOutFile, circleHtml, 'utf8');
+    say(path.relative(ROOT, circleOutFile));
+  });
 });
 
 // ---- robots.txt ------------------------------------------------------------
@@ -496,22 +525,26 @@ const sitemapXml = [
   '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/v7-menor"/>',
   '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/v7-menor"/>',
   '  </url>',
-  '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/acordes-y-sus-notas</loc>',
-  '    <lastmod>' + today + '</lastmod>',
-  '    <changefreq>monthly</changefreq>',
-  '    <priority>0.5</priority>',
-  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/acordes-y-sus-notas"/>',
-  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/acordes-y-sus-notas"/>',
-  '  </url>',
-  '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/en/acordes-y-sus-notas</loc>',
-  '    <lastmod>' + today + '</lastmod>',
-  '    <changefreq>monthly</changefreq>',
-  '    <priority>0.4</priority>',
-  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/acordes-y-sus-notas"/>',
-  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/acordes-y-sus-notas"/>',
-  '  </url>',
+  ...CIRCLE_PAGES.flatMap(function (page) {
+    return [
+      '  <url>',
+      '    <loc>' + SITE_BASE_URL + '/' + page.slug + '</loc>',
+      '    <lastmod>' + today + '</lastmod>',
+      '    <changefreq>monthly</changefreq>',
+      '    <priority>0.5</priority>',
+      '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + page.slug + '"/>',
+      '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + page.slug + '"/>',
+      '  </url>',
+      '  <url>',
+      '    <loc>' + SITE_BASE_URL + '/en/' + page.slug + '</loc>',
+      '    <lastmod>' + today + '</lastmod>',
+      '    <changefreq>monthly</changefreq>',
+      '    <priority>0.4</priority>',
+      '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + page.slug + '"/>',
+      '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + page.slug + '"/>',
+      '  </url>',
+    ];
+  }),
   '  <url>',
   '    <loc>' + SITE_BASE_URL + '/store/privacy-policy.html</loc>',
   '    <lastmod>' + today + '</lastmod>',
