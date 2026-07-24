@@ -267,7 +267,7 @@ a:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 3rem;
+  min-width: 3.4rem;
   padding: 0.5rem 0.4rem;
   border: 1px solid var(--rule);
   border-radius: 8px;
@@ -285,6 +285,7 @@ a:hover {
   font-weight: 600;
   color: var(--ink-soft);
   margin-top: 0.3rem;
+  white-space: nowrap;
 }
 
 @media (max-width: 480px) {
@@ -302,7 +303,7 @@ a:hover {
     gap: 0.4rem;
   }
   .circle-stat {
-    min-width: 2.4rem;
+    min-width: 2.9rem;
     padding: 0.4rem 0.3rem;
   }
   .circle-stat-num {

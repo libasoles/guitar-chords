@@ -10,7 +10,7 @@
     'E♭', 'B♭', 'F', 'C', 'G', 'D', 'A', 'E', 'B', 'F♯', 'D♭', 'A♭'
   ];
 
-  var LABELS = window.CIRCLE_LABELS || { root: '1ª', third: '3ª', fifth: '5ª' };
+  var LABELS = window.CIRCLE_LABELS || { root: '1ª', third: '3ª', fifth: '5ª', times: 'veces' };
 
   window.CircleFifthsPage.render('circleGrid', NAMES, LABELS);
 })();
