@@ -315,6 +315,65 @@ body {
   height: 100%;
 }
 
+.card .diagram-wrap {
+  position: relative;
+  width: 150px;
+  margin: 0 auto;
+}
+
+.card .pos-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  background: #fff;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.card .pos-prev {
+  left: -0.5rem;
+}
+.card .pos-next {
+  right: -0.5rem;
+}
+.card .pos-nav[hidden] {
+  display: none;
+}
+.card .pos-nav svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.card .pos-nav:hover,
+.card .pos-nav:focus-visible {
+  color: var(--accent);
+  background: rgba(139, 0, 0, 0.08);
+  border-color: rgba(139, 0, 0, 0.12);
+  outline: none;
+}
+
+.card .pos-label {
+  font-family: var(--sans);
+  font-size: 0.66rem;
+  color: var(--ink-soft);
+  margin-top: 0.1rem;
+}
+.card .pos-label[hidden] {
+  display: none;
+}
+
 .card .name {
   font-family: var(--mono);
   font-weight: 600;

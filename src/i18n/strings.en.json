@@ -139,6 +139,11 @@
     "B"
   ],
   "cfEmpty": "No matching chords.",
+  "cfPosPrevLabel": "Previous position",
+  "cfPosNextLabel": "Next position",
+  "cfPosOpen": "Open position",
+  "cfPosBarre6": "Barre on the 6th string",
+  "cfPosBarre5": "Barre on the 5th string",
   "cfPinLabel": "Pin",
   "cfPinnedLabel": "Pinned",
   "cfPinnedTitle": "Pinned chords",

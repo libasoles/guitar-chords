@@ -68,7 +68,7 @@ const LOCALES = ['es', 'en'];
 
 // Build the chord-finder i18n subset (only the cfXxx keys).
 function finderI18N(strings) {
-  const keys = ['cfFilters', 'cfFilterCategoryType', 'cfFilterCategoryKey', 'cfClearFilters', 'cfRootLabels', 'cfEmpty', 'cfPinLabel', 'cfPinnedLabel', 'cfPinnedTitle', 'cfClearPinned', 'cfExportPdf', 'cfToolbarAriaLabel', 'cfUnpinAriaLabel', 'cfAdvancedFiltersLabel', 'cfNotationGroupLabel', 'cfNotationAmerican', 'cfNotationSpanish', 'cfLoadMore'];
+  const keys = ['cfFilters', 'cfFilterCategoryType', 'cfFilterCategoryKey', 'cfClearFilters', 'cfRootLabels', 'cfEmpty', 'cfPinLabel', 'cfPinnedLabel', 'cfPinnedTitle', 'cfClearPinned', 'cfExportPdf', 'cfToolbarAriaLabel', 'cfUnpinAriaLabel', 'cfAdvancedFiltersLabel', 'cfNotationGroupLabel', 'cfNotationAmerican', 'cfNotationSpanish', 'cfLoadMore', 'cfPosPrevLabel', 'cfPosNextLabel', 'cfPosOpen', 'cfPosBarre6', 'cfPosBarre5'];
   const out = {};
   keys.forEach(function (k) { if (strings[k] !== undefined) out[k] = strings[k]; });
   out.cfWordmark = strings.wordmark;
@@ -285,7 +285,7 @@ ensureDir(ASSETS_DIST);
 ensureDir(VENDOR_DIST);
 
 // Shared JS.
-['chords-db.js', 'chord-diagram.js', 'chord-search.js', 'note-names.js'].forEach(function (f) {
+['chords-db.js', 'chord-diagram.js', 'chord-positions.js', 'chord-search.js', 'note-names.js'].forEach(function (f) {
   copyFile(path.join(SRC_SHARED, f), path.join(ASSETS_DIST, f));
 });
 // Site-specific JS and CSS.
@@ -376,6 +376,7 @@ const precacheUrls = [
   '/assets/favicon.svg',
   '/assets/chords-db.js',
   '/assets/chord-diagram.js',
+  '/assets/chord-positions.js',
   '/assets/chord-search.js',
   '/assets/note-names.js',
   '/assets/chord-finder.js',

@@ -139,6 +139,11 @@
     "Si"
   ],
   "cfEmpty": "No hay acordes que coincidan.",
+  "cfPosPrevLabel": "Posición anterior",
+  "cfPosNextLabel": "Posición siguiente",
+  "cfPosOpen": "Posición abierta",
+  "cfPosBarre6": "Cejilla en la 6ª cuerda",
+  "cfPosBarre5": "Cejilla en la 5ª cuerda",
   "cfPinLabel": "Pinear",
   "cfPinnedLabel": "Pineado",
   "cfPinnedTitle": "Acordes pineados",

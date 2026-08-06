@@ -196,6 +196,32 @@
     '  width: 150px; height: 176px; margin: 0 auto;',
     '}',
     '.card .diagram svg { display: block; width: 100%; height: 100%; }',
+    '.card .diagram-wrap {',
+    '  position: relative; width: 150px; margin: 0 auto;',
+    '}',
+    '.card .pos-nav {',
+    '  position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;',
+    '  display: inline-flex; align-items: center; justify-content: center;',
+    '  width: 1.6rem; height: 1.6rem; padding: 0;',
+    '  background: var(--paper, #fdfaf5); color: var(--ink-soft, #555);',
+    '  border: 1px solid var(--rule, #d8d2c4); border-radius: 999px; cursor: pointer;',
+    '}',
+    '.card .pos-prev { left: -0.5rem; }',
+    '.card .pos-next { right: -0.5rem; }',
+    '.card .pos-nav[hidden] { display: none; }',
+    '.card .pos-nav svg {',
+    '  width: 1rem; height: 1rem; fill: none; stroke: currentColor;',
+    '  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;',
+    '}',
+    '.card .pos-nav:hover, .card .pos-nav:focus-visible {',
+    '  color: var(--accent, #8b0000); background: rgba(139, 0, 0, 0.08);',
+    '  border-color: rgba(139, 0, 0, 0.12); outline: none;',
+    '}',
+    '.card .pos-label {',
+    '  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif);',
+    '  font-size: 0.66rem; color: var(--ink-soft, #555); margin-top: 0.1rem;',
+    '}',
+    '.card .pos-label[hidden] { display: none; }',
     '',
     '.empty {',
     '  grid-column: 1 / -1; text-align: center;',
@@ -771,6 +797,19 @@
     value.textContent = parts.length ? parts.join(' · ') : filterLabel(0);
   };
 
+  var POSITION_LABEL_KEYS = {
+    open: ['cfPosOpen', 'Posición abierta'],
+    barre6: ['cfPosBarre6', 'Cejilla en la 6ª cuerda'],
+    barre5: ['cfPosBarre5', 'Cejilla en la 5ª cuerda'],
+  };
+
+  function chordPositions(chord) {
+    if (window.ChordPositions && typeof window.ChordPositions.getPositions === 'function') {
+      return window.ChordPositions.getPositions(chord);
+    }
+    return [{ fingers: chord.fingers, barres: chord.barres || [], position: chord.position || 1, kind: 'open' }];
+  }
+
   ChordFinder.prototype._renderCards = function () {
     var grid = this._grid;
     var self = this;
@@ -780,6 +819,8 @@
       card._chord = chord;
       card._families = chord.families || [];
       card._root = rootPitchClass(chord.name);
+      card._positions = chordPositions(chord);
+      card._positionIndex = 0;
 
       var pin = document.createElement('button');
       pin.type = 'button';
@@ -796,9 +837,40 @@
       card._pinBtn = pin;
       card.appendChild(pin);
 
+      var diagramWrap = document.createElement('div');
+      diagramWrap.className = 'diagram-wrap';
+
+      var prevBtn = document.createElement('button');
+      prevBtn.type = 'button';
+      prevBtn.className = 'pos-nav pos-prev';
+      prevBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4l-8 8 8 8"/></svg>';
+      prevBtn.setAttribute('aria-label', t('cfPosPrevLabel', 'Posición anterior'));
+      prevBtn.title = t('cfPosPrevLabel', 'Posición anterior');
+      prevBtn.addEventListener('click', function () { self._stepPosition(card, -1); });
+      card._prevBtn = prevBtn;
+      diagramWrap.appendChild(prevBtn);
+
       var target = document.createElement('div');
       target.className = 'diagram';
-      card.appendChild(target);
+      diagramWrap.appendChild(target);
+      card._diagramTarget = target;
+
+      var nextBtn = document.createElement('button');
+      nextBtn.type = 'button';
+      nextBtn.className = 'pos-nav pos-next';
+      nextBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8"/></svg>';
+      nextBtn.setAttribute('aria-label', t('cfPosNextLabel', 'Posición siguiente'));
+      nextBtn.title = t('cfPosNextLabel', 'Posición siguiente');
+      nextBtn.addEventListener('click', function () { self._stepPosition(card, 1); });
+      card._nextBtn = nextBtn;
+      diagramWrap.appendChild(nextBtn);
+
+      card.appendChild(diagramWrap);
+
+      var posLabel = document.createElement('div');
+      posLabel.className = 'pos-label';
+      card.appendChild(posLabel);
+      card._posLabel = posLabel;
 
       var name = document.createElement('div');
       name.className = 'name';
@@ -814,15 +886,45 @@
 
       grid.appendChild(card);
 
-      try {
-        window.ChordDiagram.render(target, chord, 'finder');
-      } catch (err) {
-        target.innerHTML = '<small style="color:#999">(error)</small>';
-        if (window.console) console.error('svguitar error for', chord.name, err);
-      }
+      self._renderPosition(card);
 
       return card;
     });
+  };
+
+  ChordFinder.prototype._renderPosition = function (card) {
+    var positions = card._positions;
+    var pos = positions[card._positionIndex];
+    var multi = positions.length > 1;
+
+    card._prevBtn.hidden = !multi;
+    card._nextBtn.hidden = !multi;
+    card._posLabel.hidden = !multi;
+    if (multi) {
+      var labelKey = POSITION_LABEL_KEYS[pos.kind] || POSITION_LABEL_KEYS.open;
+      card._posLabel.textContent = t(labelKey[0], labelKey[1]);
+    }
+
+    var chord = card._chord;
+    var renderChord = {
+      name: chord.name, families: chord.families, aliases: chord.aliases, notes: chord.notes,
+      fingers: pos.fingers, barres: pos.barres, position: pos.position,
+    };
+
+    card._diagramTarget.innerHTML = '';
+    try {
+      window.ChordDiagram.render(card._diagramTarget, renderChord, 'finder');
+    } catch (err) {
+      card._diagramTarget.innerHTML = '<small style="color:#999">(error)</small>';
+      if (window.console) console.error('svguitar error for', chord.name, err);
+    }
+  };
+
+  ChordFinder.prototype._stepPosition = function (card, delta) {
+    var n = card._positions.length;
+    if (n <= 1) return;
+    card._positionIndex = (card._positionIndex + delta + n) % n;
+    this._renderPosition(card);
   };
 
   ChordFinder.prototype._applyFilter = function () {

@@ -98,12 +98,58 @@
   }
 
   function drawDiagram(target, chord) {
+    target.innerHTML = '';
     try {
       window.ChordDiagram.render(target, chord, 'finder');
     } catch (err) {
       target.innerHTML = '<small style="color:#999">(error)</small>';
       console.error('svguitar error for', chord.name, err);
     }
+  }
+
+  // Cards are rebuilt from scratch on every keystroke (renderResults), so the
+  // "which position is showing" state can't live on the DOM node — keep it
+  // here, keyed by chord name, so it survives re-renders.
+  const positionIndexByName = new Map();
+
+  const POSITION_LABELS = {
+    open: ['posOpen', 'Open position'],
+    barre6: ['posBarre6', 'Barre on the 6th string'],
+    barre5: ['posBarre5', 'Barre on the 5th string'],
+  };
+
+  function chordPositions(chord) {
+    if (window.ChordPositions && typeof window.ChordPositions.getPositions === 'function') {
+      return window.ChordPositions.getPositions(chord);
+    }
+    return [{ fingers: chord.fingers, barres: chord.barres || [], position: chord.position || 1, kind: 'open' }];
+  }
+
+  function renderPosition(card, chord, positions) {
+    const idx = positionIndexByName.get(chord.name) || 0;
+    const pos = positions[idx];
+    const multi = positions.length > 1;
+
+    card._prevBtn.hidden = !multi;
+    card._nextBtn.hidden = !multi;
+    card._posLabel.hidden = !multi;
+    if (multi) {
+      const [key, fallback] = POSITION_LABELS[pos.kind] || POSITION_LABELS.open;
+      card._posLabel.textContent = i18n(key, fallback);
+    }
+
+    drawDiagram(card._diagramTarget, {
+      name: chord.name, families: chord.families, aliases: chord.aliases, notes: chord.notes,
+      fingers: pos.fingers, barres: pos.barres, position: pos.position,
+    });
+  }
+
+  function stepPosition(card, chord, positions, delta) {
+    const n = positions.length;
+    if (n <= 1) return;
+    const idx = ((positionIndexByName.get(chord.name) || 0) + delta + n) % n;
+    positionIndexByName.set(chord.name, idx);
+    renderPosition(card, chord, positions);
   }
 
   function isPinned(chord) {
@@ -161,9 +207,42 @@
     }
     card.appendChild(pin);
 
+    const positions = chordPositions(chord);
+
+    const diagramWrap = document.createElement('div');
+    diagramWrap.className = 'diagram-wrap';
+
+    const prevBtn = document.createElement('button');
+    prevBtn.type = 'button';
+    prevBtn.className = 'pos-nav pos-prev';
+    prevBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4l-8 8 8 8"/></svg>';
+    prevBtn.setAttribute('aria-label', i18n('posPrevAriaLabel', 'Previous position'));
+    prevBtn.title = i18n('posPrevAriaLabel', 'Previous position');
+    prevBtn.addEventListener('click', () => stepPosition(card, chord, positions, -1));
+    card._prevBtn = prevBtn;
+    diagramWrap.appendChild(prevBtn);
+
     const diagram = document.createElement('div');
     diagram.className = 'diagram';
-    card.appendChild(diagram);
+    diagramWrap.appendChild(diagram);
+    card._diagramTarget = diagram;
+
+    const nextBtn = document.createElement('button');
+    nextBtn.type = 'button';
+    nextBtn.className = 'pos-nav pos-next';
+    nextBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8"/></svg>';
+    nextBtn.setAttribute('aria-label', i18n('posNextAriaLabel', 'Next position'));
+    nextBtn.title = i18n('posNextAriaLabel', 'Next position');
+    nextBtn.addEventListener('click', () => stepPosition(card, chord, positions, 1));
+    card._nextBtn = nextBtn;
+    diagramWrap.appendChild(nextBtn);
+
+    card.appendChild(diagramWrap);
+
+    const posLabel = document.createElement('div');
+    posLabel.className = 'pos-label';
+    card.appendChild(posLabel);
+    card._posLabel = posLabel;
 
     const name = document.createElement('div');
     name.className = 'name';
@@ -176,7 +255,7 @@
     card.appendChild(notes);
 
     results.appendChild(card);
-    drawDiagram(diagram, chord);
+    renderPosition(card, chord, positions);
     return card;
   }
 

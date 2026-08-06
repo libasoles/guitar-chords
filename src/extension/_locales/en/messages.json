@@ -44,5 +44,25 @@
   "notationSpanish": {
     "message": "Spanish notation (Do Re Mi)",
     "description": "Aria label/title for the Spanish notation option button"
+  },
+  "posPrevAriaLabel": {
+    "message": "Previous position",
+    "description": "Aria label for the button that shows the previous chord position"
+  },
+  "posNextAriaLabel": {
+    "message": "Next position",
+    "description": "Aria label for the button that shows the next chord position"
+  },
+  "posOpen": {
+    "message": "Open position",
+    "description": "Label for a chord's open-position voicing"
+  },
+  "posBarre6": {
+    "message": "Barre on the 6th string",
+    "description": "Label for a chord's barre voicing rooted on the 6th string"
+  },
+  "posBarre5": {
+    "message": "Barre on the 5th string",
+    "description": "Label for a chord's barre voicing rooted on the 5th string"
   }
 }

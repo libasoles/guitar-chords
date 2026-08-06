@@ -44,5 +44,25 @@
   "notationSpanish": {
     "message": "Notación en español (Do Re Mi)",
     "description": "Aria label/title del botón de notación en español"
+  },
+  "posPrevAriaLabel": {
+    "message": "Posición anterior",
+    "description": "Aria label del botón para ver la posición anterior del acorde"
+  },
+  "posNextAriaLabel": {
+    "message": "Posición siguiente",
+    "description": "Aria label del botón para ver la posición siguiente del acorde"
+  },
+  "posOpen": {
+    "message": "Posición abierta",
+    "description": "Etiqueta de la posición abierta de un acorde"
+  },
+  "posBarre6": {
+    "message": "Cejilla en la 6ª cuerda",
+    "description": "Etiqueta de la posición con cejilla apoyada en la 6ª cuerda"
+  },
+  "posBarre5": {
+    "message": "Cejilla en la 5ª cuerda",
+    "description": "Etiqueta de la posición con cejilla apoyada en la 5ª cuerda"
   }
 }
