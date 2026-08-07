@@ -249,6 +249,11 @@ function renderCirclePage(template, strings, locale, page) {
     third: strings.circleLabelThird || '3ª',
     fifth: strings.circleLabelFifth || '5ª',
     times: strings.circleTimesLabel || 'veces',
+    prevLabel: strings.cfPosPrevLabel || 'Posición anterior',
+    nextLabel: strings.cfPosNextLabel || 'Posición siguiente',
+    posOpen: strings.cfPosOpen || 'Posición abierta',
+    posBarre6: strings.cfPosBarre6 || 'Cejilla en la 6ª cuerda',
+    posBarre5: strings.cfPosBarre5 || 'Cejilla en la 5ª cuerda',
   };
 
   html = html.split('%%PAGE_TITLE%%').join(strings[page.titleKey] || '');
