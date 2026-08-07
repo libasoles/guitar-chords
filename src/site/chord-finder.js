@@ -458,7 +458,10 @@
   ChordFinder.prototype._loadPinned = function () {
     try {
       var stored = window.localStorage.getItem(PINNED_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
+      var parsed = stored ? JSON.parse(stored) : [];
+      return parsed.map(function (entry) {
+        return typeof entry === 'string' ? { name: entry, positionIndex: 0 } : entry;
+      });
     } catch (e) {
       return [];
     }
@@ -833,7 +836,7 @@
       pin.setAttribute('aria-label', t('cfPinLabel', 'Pinear'));
       pin.title = t('cfPinLabel', 'Pinear');
       pin.setAttribute('aria-pressed', 'false');
-      pin.addEventListener('click', function () { self._togglePin(chord); });
+      pin.addEventListener('click', function () { self._togglePin(chord, card._positionIndex); });
       card._pinBtn = pin;
       card.appendChild(pin);
 
@@ -967,14 +970,21 @@
     }
   };
 
-  ChordFinder.prototype._isPinned = function (chord) {
-    return this._pinnedNames.indexOf(chord.name) !== -1;
+  ChordFinder.prototype._pinnedIndexOf = function (name) {
+    for (var i = 0; i < this._pinnedNames.length; i++) {
+      if (this._pinnedNames[i].name === name) return i;
+    }
+    return -1;
   };
 
-  ChordFinder.prototype._togglePin = function (chord) {
+  ChordFinder.prototype._isPinned = function (chord) {
+    return this._pinnedIndexOf(chord.name) !== -1;
+  };
+
+  ChordFinder.prototype._togglePin = function (chord, positionIndex) {
     if (!this.hasAttribute('pinnable')) return;
-    var i = this._pinnedNames.indexOf(chord.name);
-    if (i === -1) this._pinnedNames.push(chord.name);
+    var i = this._pinnedIndexOf(chord.name);
+    if (i === -1) this._pinnedNames.push({ name: chord.name, positionIndex: positionIndex || 0 });
     else this._pinnedNames.splice(i, 1);
     this._savePinned();
     this._renderPinned();
@@ -1009,9 +1019,16 @@
     this._stripActions.hidden = this._pinnedNames.length < 2;
 
     list.textContent = '';
-    this._pinnedNames.forEach(function (name) {
+    this._pinnedNames.forEach(function (pinnedEntry) {
+      var name = pinnedEntry.name;
       var chord = window.CHORDS.find(function (c) { return c.name === name; });
       if (!chord) return;
+      var positions = chordPositions(chord);
+      var pos = positions[pinnedEntry.positionIndex] || positions[0];
+      var renderChord = {
+        name: chord.name, families: chord.families, aliases: chord.aliases, notes: chord.notes,
+        fingers: pos.fingers, barres: pos.barres, position: pos.position,
+      };
 
       var item = document.createElement('div');
       item.className = 'pinned-card';
@@ -1040,11 +1057,12 @@
         item.classList.remove('drag-over');
         var draggedName = e.dataTransfer.getData('text/plain');
         if (!draggedName || draggedName === chord.name) return;
-        var from = self._pinnedNames.indexOf(draggedName);
-        var to = self._pinnedNames.indexOf(chord.name);
+        var from = self._pinnedIndexOf(draggedName);
+        var to = self._pinnedIndexOf(chord.name);
         if (from === -1 || to === -1) return;
+        var draggedEntry = self._pinnedNames[from];
         self._pinnedNames.splice(from, 1);
-        self._pinnedNames.splice(to, 0, draggedName);
+        self._pinnedNames.splice(to, 0, draggedEntry);
         self._savePinned();
         self._renderPinned();
       });
@@ -1071,7 +1089,7 @@
       list.appendChild(item);
 
       try {
-        window.ChordDiagram.render(target, chord, 'finder');
+        window.ChordDiagram.render(target, renderChord, 'finder');
       } catch (err) {
         target.innerHTML = '<small style="color:#999">(error)</small>';
         if (window.console) console.error('svguitar error for', chord.name, err);
@@ -1223,7 +1241,7 @@
     var self = this;
     if (!window.jspdf || !window.jspdf.jsPDF) return;
     var items = this._pinnedNames
-      .map(function (name) { return window.CHORDS.find(function (c) { return c.name === name; }); })
+      .map(function (entry) { return window.CHORDS.find(function (c) { return c.name === entry.name; }); })
       .filter(Boolean);
     if (items.length < 2) return;
 

@@ -35,7 +35,8 @@
   function loadPinned() {
     try {
       const stored = window.localStorage.getItem(PINNED_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
+      const parsed = stored ? JSON.parse(stored) : [];
+      return parsed.map((entry) => (typeof entry === 'string' ? { name: entry, positionIndex: 0 } : entry));
     } catch (e) {
       return [];
     }
@@ -152,19 +153,23 @@
     renderPosition(card, chord, positions);
   }
 
+  function pinnedIndexOf(chordName) {
+    return pinnedChordNames.findIndex((entry) => entry.name === chordName);
+  }
+
   function isPinned(chord) {
-    return pinnedChordNames.indexOf(chord.name) !== -1;
+    return pinnedIndexOf(chord.name) !== -1;
   }
 
   function pinChord(chord) {
     if (isPinned(chord)) return;
-    pinnedChordNames.push(chord.name);
+    pinnedChordNames.push({ name: chord.name, positionIndex: positionIndexByName.get(chord.name) || 0 });
     savePinned();
     render();
   }
 
   function unpinChord(chordName) {
-    const index = pinnedChordNames.indexOf(chordName);
+    const index = pinnedIndexOf(chordName);
     if (index === -1) return;
     pinnedChordNames.splice(index, 1);
     savePinned();
@@ -181,7 +186,16 @@
 
   function getPinnedChords() {
     return pinnedChordNames
-      .map((name) => window.CHORDS.find((chord) => chord.name === name))
+      .map((entry) => {
+        const chord = window.CHORDS.find((c) => c.name === entry.name);
+        if (!chord) return null;
+        const positions = chordPositions(chord);
+        const pos = positions[entry.positionIndex] || positions[0];
+        return {
+          name: chord.name, families: chord.families, aliases: chord.aliases, notes: chord.notes,
+          fingers: pos.fingers, barres: pos.barres, position: pos.position,
+        };
+      })
       .filter(Boolean);
   }
 
