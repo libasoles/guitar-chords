@@ -214,5 +214,13 @@
   "pickingTipsH2": "How to practice them",
   "pickingTip1": "Start slow with a metronome and build up speed gradually; the priority is keeping the open E even every time it lands.",
   "pickingTip2": "Use alternate picking (down-up), or alternate pick and finger if you want the pedal note to ring out longer.",
-  "pickingTip3": "Mute the unused strings with your palm or thumb so they don't ring along by accident."
+  "pickingTip3": "Mute the unused strings with your palm or thumb so they don't ring along by accident.",
+
+  "notFoundPageTitle": "Page not found · Guitar Chords",
+  "notFoundMetaDescription": "The page you're looking for doesn't exist or moved. Head back to the chord finder or browse other guitar guides.",
+  "notFoundH1": "Page not found",
+  "notFoundLead": "The link may be broken or the page moved. Pick a destination below.",
+  "notFoundHomeLink": "Go to the chord finder →",
+  "notFoundPickingLink": "Dorian picking over the open low E string →",
+  "notFoundV7Link": "V7 chord guide →"
 }

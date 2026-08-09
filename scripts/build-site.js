@@ -65,6 +65,7 @@ const template = fs.readFileSync(path.join(SRC_SITE, 'template.html'), 'utf8');
 const v7Template = fs.readFileSync(path.join(SRC_SITE, 'v7-guide.html'), 'utf8');
 const circleTemplate = fs.readFileSync(path.join(SRC_SITE, 'circle-fifths.html'), 'utf8');
 const pickingTemplate = fs.readFileSync(path.join(SRC_SITE, 'punteo-dorico.html'), 'utf8');
+const notFoundTemplate = fs.readFileSync(path.join(SRC_SITE, '404.html'), 'utf8');
 const LOCALES = ['es', 'en'];
 
 // Build the chord-finder i18n subset (only the cfXxx keys).
@@ -326,6 +327,40 @@ function renderPickingPage(template, strings, locale) {
   return html;
 }
 
+// Render the site-wide 404 page (src/site/404.html) for GitHub Pages. A
+// single Spanish page at the root — GitHub Pages only serves one 404.html
+// at the domain root, so there's no per-locale variant.
+function render404Page(template, strings) {
+  const resolvedAssetsPrefix = 'assets/';
+  const ogImage = SITE_BASE_URL + '/assets/og-image.png';
+  let html = template;
+
+  const simpleKeys = [
+    'wordmark', 'wordmarkSmall',
+    'extensionHeading', 'extensionDescription',
+    'notFoundHomeLink', 'notFoundPickingLink', 'notFoundV7Link',
+  ];
+  simpleKeys.forEach(function (key) {
+    html = html.split('%%' + key + '%%').join(strings[key] || '');
+  });
+
+  html = html.split('%%PAGE_TITLE%%').join(strings.notFoundPageTitle || '');
+  html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings.notFoundMetaDescription || '');
+  html = html.split('%%PAGE_H1%%').join(strings.notFoundH1 || '');
+  html = html.split('%%PAGE_LEAD%%').join(strings.notFoundLead || '');
+
+  html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
+  html = html.split('%%homeHref%%').join(homeHref('es'));
+  html = html.split('%%V7_PAGE_HREF%%').join(v7PageHref('es'));
+  html = html.split('%%PICKING_PAGE_HREF%%').join(v7PageHref('es', PICKING_SLUG));
+  html = html.split('%%ogImage%%').join(ogImage);
+  html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
+  html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.es.webmanifest');
+  html = html.split('%%SW_PATH%%').join('/sw.js');
+
+  return html;
+}
+
 // ---- build -----------------------------------------------------------------
 
 console.log('==> Building site assets...');
@@ -446,6 +481,7 @@ const precacheUrls = [
   '/assets/punteo-dorico-1.png',
   '/assets/punteo-dorico-2.png',
   '/assets/punteo-dorico-3.png',
+  '/404.html',
 ];
 const swOut = swTemplate
   .split('%%CACHE_VERSION%%').join(cacheVersion)
@@ -523,6 +559,16 @@ LOCALES.forEach(function (locale) {
   fs.writeFileSync(pickingOutFile, pickingHtml, 'utf8');
   say(path.relative(ROOT, pickingOutFile));
 });
+
+console.log('==> Rendering 404 page...');
+{
+  const esStringsPath = path.join(SRC_I18N, 'strings.es.json');
+  const esStrings = JSON.parse(fs.readFileSync(esStringsPath, 'utf8'));
+  const notFoundHtml = render404Page(notFoundTemplate, esStrings);
+  const notFoundOutFile = path.join(DIST_SITE, '404.html');
+  fs.writeFileSync(notFoundOutFile, notFoundHtml, 'utf8');
+  say(path.relative(ROOT, notFoundOutFile));
+}
 
 // ---- robots.txt ------------------------------------------------------------
 

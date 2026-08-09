@@ -538,3 +538,42 @@ footer {
 .picking-tips li {
   margin: 0.4rem 0;
 }
+
+/* ----- 404 page ----- */
+
+.notfound {
+  margin: 2.2rem 0 2.8rem;
+  text-align: center;
+}
+.notfound-code {
+  font-family: var(--mono);
+  font-size: 4.5rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  line-height: 1;
+  margin: 0 0 0.6rem;
+}
+.notfound h1 {
+  margin-bottom: 0.4rem;
+}
+.notfound .lead {
+  margin: 0 auto 1.6rem;
+}
+.notfound-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+.notfound-links a {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 600px) {
+  .notfound-code { font-size: 3.4rem; }
+}
