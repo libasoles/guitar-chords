@@ -306,7 +306,7 @@ function renderPickingPage(template, strings, locale) {
     'metronomeTitle',
     'metronomeBeatsAria', 'metronomeSlowerLabel', 'metronomeFasterLabel',
     'metronomeTempoSliderLabel', 'metronomeStartLabel', 'metronomeStopLabel',
-    'metronomeMeasureLabel', 'metronomeSubdivisionLabel',
+    'metronomeMeasureLabel', 'metronomeSubdivisionLabel', 'metronomePitchLabel',
     'metronomeMuteLabel', 'metronomeUnmuteLabel', 'metronomeVolumeLabel',
     'metronomeVolumeOnIcon', 'metronomeVolumeOffIcon', 'metronomeShortcut',
     'metronomeTempoLargo', 'metronomeTempoAdagio', 'metronomeTempoAndante',

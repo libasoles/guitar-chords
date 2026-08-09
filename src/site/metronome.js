@@ -3,6 +3,20 @@
 
   var MIN_BPM = 30;
   var MAX_BPM = 260;
+  var PITCHES = [
+    { value: 'C', label: 'C', frequency: 523.25 },
+    { value: 'C#', label: 'C#', frequency: 554.37 },
+    { value: 'D', label: 'D', frequency: 587.33 },
+    { value: 'D#', label: 'D#', frequency: 622.25 },
+    { value: 'E', label: 'E', frequency: 659.25 },
+    { value: 'F', label: 'F', frequency: 698.46 },
+    { value: 'F#', label: 'F#', frequency: 739.99 },
+    { value: 'G', label: 'G', frequency: 783.99 },
+    { value: 'G#', label: 'G#', frequency: 830.61 },
+    { value: 'A', label: 'A', frequency: 880.0 },
+    { value: 'A#', label: 'A#', frequency: 932.33 },
+    { value: 'B', label: 'B', frequency: 987.77 },
+  ];
   var SUBDIVISIONS = [
     { value: 1, label: '1', titleKey: 'quarter' },
     { value: 2, label: '2', titleKey: 'eighth' },
@@ -50,6 +64,7 @@
       beatsPerMeasure: 4,
       subdivision: 1,
       volume: 0.8,
+      pitch: 'E',
       muted: false,
       isPlaying: false,
       activeBeat: -1,
@@ -69,6 +84,7 @@
     var volumeSlider = root.querySelector('[data-role="volume-slider"]');
     var beatsWrap = root.querySelector('[data-role="beats-options"]');
     var subdivisionWrap = root.querySelector('[data-role="subdivision-options"]');
+    var pitchSelect = root.querySelector('[data-role="pitch-select"]');
     var beatsDots = root.querySelector('.metronome-beats');
     var startBtn = root.querySelector('[data-action="toggle-play"]');
     var muteBtn = root.querySelector('[data-action="toggle-mute"]');
@@ -83,6 +99,13 @@
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       }
       return audioCtx;
+    }
+
+    function currentPitchFrequency() {
+      var match = PITCHES.find(function (pitch) {
+        return pitch.value === state.pitch;
+      });
+      return match ? match.frequency : 659.25;
     }
 
     function scheduleTick(tick, time) {
@@ -104,14 +127,15 @@
 
       var osc = ctx.createOscillator();
       var gain = ctx.createGain();
-      var freq = 800;
+      var baseFrequency = currentPitchFrequency();
+      var freq = baseFrequency / 2;
       var peak = state.volume * 0.4;
 
       if (isMeasureStart) {
-        freq = 1600;
+        freq = baseFrequency * 2;
         peak = state.volume;
       } else if (isBeatStart) {
-        freq = 1100;
+        freq = baseFrequency;
         peak = state.volume * 0.7;
       }
 
@@ -233,6 +257,18 @@
       });
     }
 
+    function renderPitchOptions() {
+      pitchSelect.innerHTML = '';
+      PITCHES.forEach(function (pitch) {
+        var option = document.createElement('option');
+        option.value = pitch.value;
+        option.textContent = pitch.label;
+        option.selected = pitch.value === state.pitch;
+        pitchSelect.appendChild(option);
+      });
+      pitchSelect.value = state.pitch;
+    }
+
     function render() {
       bpmValue.textContent = String(state.bpm);
       bpmSlider.value = String(state.bpm);
@@ -250,6 +286,7 @@
       renderBeatDots();
       renderMeasureOptions();
       renderSubdivisionOptions();
+      renderPitchOptions();
     }
 
     root.querySelector('[data-action="decrease-bpm"]').addEventListener('click', function () {
@@ -267,6 +304,10 @@
     volumeSlider.addEventListener('input', function (event) {
       state.volume = Number(event.target.value);
       state.muted = false;
+      render();
+    });
+    pitchSelect.addEventListener('change', function (event) {
+      state.pitch = event.target.value;
       render();
     });
     startBtn.addEventListener('click', toggle);

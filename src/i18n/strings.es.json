@@ -224,6 +224,7 @@
   "metronomeStopLabel": "Detener",
   "metronomeMeasureLabel": "Compás (pulsos)",
   "metronomeSubdivisionLabel": "Subdivisión",
+  "metronomePitchLabel": "Afinación",
   "metronomeMuteLabel": "Silenciar",
   "metronomeUnmuteLabel": "Activar sonido",
   "metronomeVolumeLabel": "Volumen",

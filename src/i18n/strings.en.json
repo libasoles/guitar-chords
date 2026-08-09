@@ -224,6 +224,7 @@
   "metronomeStopLabel": "Stop",
   "metronomeMeasureLabel": "Meter (beats)",
   "metronomeSubdivisionLabel": "Subdivision",
+  "metronomePitchLabel": "Pitch",
   "metronomeMuteLabel": "Mute",
   "metronomeUnmuteLabel": "Enable sound",
   "metronomeVolumeLabel": "Volume",
