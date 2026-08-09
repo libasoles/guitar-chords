@@ -504,3 +504,37 @@ footer {
     display: none;
   }
 }
+
+/* ----- Picking pattern pages ----- */
+
+.picking-figures {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  margin: 1.4rem 0 2rem;
+}
+.picking-figure {
+  margin: 0;
+}
+.picking-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+}
+.picking-figure figcaption {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.picking-tips {
+  margin: 0.6rem 0 1.6rem;
+  padding-left: 1.2rem;
+}
+.picking-tips li {
+  margin: 0.4rem 0;
+}

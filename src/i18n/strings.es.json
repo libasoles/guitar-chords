@@ -196,5 +196,23 @@
   "circleLabelRoot": "1°",
   "circleLabelThird": "3°",
   "circleLabelFifth": "5°",
-  "circleTimesLabel": "veces"
+  "circleTimesLabel": "veces",
+
+  "pickingNavLabel": "Ver punteo dórico con la 6ª cuerda al aire →",
+  "pickingPageTitle": "Punteo dórico sobre la 6ª cuerda al aire · Acordes para la guitarra",
+  "pickingMetaDescription": "Tres patrones de punteo en modo dórico usando la 6ª cuerda (Mi grave) al aire como nota pedal. Diagramas de traste listos para practicar.",
+  "pickingH1": "Punteo dórico sobre la 6ª cuerda al aire",
+  "pickingLead": "Tres patrones para practicar el modo dórico intercalando la 6ª cuerda (Mi grave) al aire como nota pedal entre las notas de la escala.",
+  "pickingIntro1": "La nota pedal es una nota fija que se repite entre las demás notas de una frase. Acá usamos la 6ª cuerda al aire (Mi) como pedal mientras la melodía dórica se mueve en las cuerdas de arriba: cada nota de la escala se ataca, se combina con el Mi al aire, y así se arma un sonido tipo cascada muy usado en metal y rock progresivo.",
+  "pickingIntro2": "Cada diagrama de abajo muestra un traste (de izquierda a derecha) con las 6 cuerdas de arriba a abajo. Los símbolos a la izquierda del diapasón indican si la cuerda se toca al aire (○) o no se usa en ese patrón (×). Los puntos marcan dónde pisar; los puntos naranjas señalan la nota que suele coincidir con el pulso fuerte del patrón.",
+  "pickingFig1Alt": "Diagrama de traste: patrón 1 de punteo dórico con la 6ª cuerda al aire",
+  "pickingFig1Caption": "Patrón 1 — posición abierta, cerca del clavijero.",
+  "pickingFig2Alt": "Diagrama de traste: patrón 2 de punteo dórico con la 6ª cuerda al aire",
+  "pickingFig2Caption": "Patrón 2 — misma idea, un salto de cuerdas más arriba.",
+  "pickingFig3Alt": "Diagrama de traste: patrón 3 de punteo dórico con la 6ª cuerda al aire",
+  "pickingFig3Caption": "Patrón 3 — la secuencia se traslada a las cuerdas agudas.",
+  "pickingTipsH2": "Cómo practicarlos",
+  "pickingTip1": "Empezá lento con metrónomo y subí la velocidad de a poco; la prioridad es que el Mi al aire suene parejo cada vez que aparece.",
+  "pickingTip2": "Usá púa alternada (abajo-arriba) o alterná púa y dedo si querés que el pedal resuene más tiempo.",
+  "pickingTip3": "Silenciá con la palma o con el dedo pulgar las cuerdas que no estás usando para evitar que suenen de más."
 }

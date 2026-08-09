@@ -3,21 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>%%pageTitle%%</title>
-    <meta name="description" content="%%metaDescription%%" />
+    <title>%%PAGE_TITLE%%</title>
+    <meta name="description" content="%%PAGE_META_DESCRIPTION%%" />
     <link rel="canonical" href="%%canonicalUrl%%" />
     <link rel="alternate" hreflang="es" href="%%hreflangEs%%" />
     <link rel="alternate" hreflang="en" href="%%hreflangEn%%" />
     <link rel="alternate" hreflang="x-default" href="%%hreflangEs%%" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="%%pageTitle%%" />
-    <meta property="og:description" content="%%metaDescription%%" />
+    <meta property="og:title" content="%%PAGE_TITLE%%" />
+    <meta property="og:description" content="%%PAGE_META_DESCRIPTION%%" />
     <meta property="og:url" content="%%canonicalUrl%%" />
     <meta property="og:image" content="%%ogImage%%" />
     <meta property="og:site_name" content="Guitar Chords" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="%%pageTitle%%" />
-    <meta name="twitter:description" content="%%metaDescription%%" />
+    <meta name="twitter:title" content="%%PAGE_TITLE%%" />
+    <meta name="twitter:description" content="%%PAGE_META_DESCRIPTION%%" />
     <meta name="twitter:image" content="%%ogImage%%" />
     <link rel="icon" type="image/svg+xml" href="%%ASSETS_PREFIX%%favicon.svg" />
     <link rel="manifest" href="%%MANIFEST_HREF%%" />
@@ -39,7 +39,7 @@
   </head>
   <body>
     <header class="site-header">
-      <span class="brand">
+      <a class="brand" href="%%homeHref%%">
         <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
           <rect class="frame" x="8" y="8" width="32" height="32" rx="3" />
           <line class="string" x1="18" y1="8" x2="18" y2="40" />
@@ -53,36 +53,37 @@
         <span class="wordmark"
           >%%wordmark%%<small>%%wordmarkSmall%%</small></span
         >
-      </span>
+      </a>
       <a class="lang-toggle" href="%%altLangHref%%">%%altLangLabel%%</a>
     </header>
 
-    <chord-finder pinnable>
-      <h1 slot="title">%%h1%%</h1>
-    </chord-finder>
+    <h1>%%PAGE_H1%%</h1>
+    <p class="lead">%%PAGE_LEAD%%</p>
 
-    <p class="v7-nav"><a href="%%V7_PAGE_HREF%%">%%v7NavLabel%%</a></p>
-    <p class="v7-nav"><a href="%%CIRCLE_PAGE_HREF%%">%%circleNavLabel%%</a></p>
-    <p class="v7-nav"><a href="%%PICKING_PAGE_HREF%%">%%pickingNavLabel%%</a></p>
+    <p>%%pickingIntro1%%</p>
+    <p>%%pickingIntro2%%</p>
 
-    <h2 id="decoder">%%h2Decoder%%</h2>
-    <p>%%decoderIntro%%</p>
-
-    <div class="decoder-table-wrap">
-      <table class="decoder-table">
-        <thead>
-          <tr>
-            <th>%%thPart%%</th>
-            <th>%%thSymbols%%</th>
-            <th>%%thMeaning%%</th>
-            <th>%%thExample%%</th>
-          </tr>
-        </thead>
-        <tbody>
-          %%DECODER_ROWS%%
-        </tbody>
-      </table>
+    <div class="picking-figures">
+      <figure class="picking-figure">
+        <img src="%%ASSETS_PREFIX%%punteo-dorico-1.png" alt="%%pickingFig1Alt%%" width="1156" height="257" loading="lazy" />
+        <figcaption>%%pickingFig1Caption%%</figcaption>
+      </figure>
+      <figure class="picking-figure">
+        <img src="%%ASSETS_PREFIX%%punteo-dorico-2.png" alt="%%pickingFig2Alt%%" width="1156" height="257" loading="lazy" />
+        <figcaption>%%pickingFig2Caption%%</figcaption>
+      </figure>
+      <figure class="picking-figure">
+        <img src="%%ASSETS_PREFIX%%punteo-dorico-3.png" alt="%%pickingFig3Alt%%" width="1156" height="257" loading="lazy" />
+        <figcaption>%%pickingFig3Caption%%</figcaption>
+      </figure>
     </div>
+
+    <h2>%%pickingTipsH2%%</h2>
+    <ul class="picking-tips">
+      <li>%%pickingTip1%%</li>
+      <li>%%pickingTip2%%</li>
+      <li>%%pickingTip3%%</li>
+    </ul>
 
     <footer>
       <div class="extension-cta">
@@ -159,18 +160,6 @@
       </div>
     </footer>
 
-    <script>
-      window.CHORD_FINDER_I18N = %%CHORD_FINDER_I18N%%;
-    </script>
-    <script src="%%ASSETS_PREFIX%%vendor/svguitar.umd.js"></script>
-    <script src="%%ASSETS_PREFIX%%vendor/fuzzysort.js"></script>
-    <script src="%%ASSETS_PREFIX%%vendor/jspdf.umd.min.js"></script>
-    <script src="%%ASSETS_PREFIX%%chords-db.js"></script>
-    <script src="%%ASSETS_PREFIX%%chord-diagram.js"></script>
-    <script src="%%ASSETS_PREFIX%%chord-positions.js"></script>
-    <script src="%%ASSETS_PREFIX%%chord-search.js"></script>
-    <script src="%%ASSETS_PREFIX%%note-names.js"></script>
-    <script src="%%ASSETS_PREFIX%%chord-finder.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {

@@ -64,6 +64,7 @@ if (!fs.existsSync(JSPDF)) {
 const template = fs.readFileSync(path.join(SRC_SITE, 'template.html'), 'utf8');
 const v7Template = fs.readFileSync(path.join(SRC_SITE, 'v7-guide.html'), 'utf8');
 const circleTemplate = fs.readFileSync(path.join(SRC_SITE, 'circle-fifths.html'), 'utf8');
+const pickingTemplate = fs.readFileSync(path.join(SRC_SITE, 'punteo-dorico.html'), 'utf8');
 const LOCALES = ['es', 'en'];
 
 // Build the chord-finder i18n subset (only the cfXxx keys).
@@ -152,6 +153,11 @@ const CIRCLE_PAGES = [
 // Home-nav link points at the major "chords and their notes" page.
 const CIRCLE_SLUG = CIRCLE_PAGES[0].slug;
 
+// Static lesson page rendered from src/site/punteo-dorico.html — Dorian
+// picking patterns with the open low E string as a pedal note. No otherSlug
+// pairing (single page, both locales).
+const PICKING_SLUG = 'punteo-dorico-sexta-cuerda-al-aire';
+
 function render(template, strings, locale, assetsPrefix, outputMode) {
   const resolvedAssetsPrefix = assetsPrefix || (locale === 'es' ? 'assets/' : '../assets/');
   const ogImage = SITE_BASE_URL + '/assets/og-image.png';
@@ -164,7 +170,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     'h1', 'lead', 'h2Decoder', 'decoderIntro',
     'thPart', 'thSymbols', 'thMeaning', 'thExample',
     'extensionHeading', 'extensionDescription',
-    'v7NavLabel', 'circleNavLabel',
+    'v7NavLabel', 'circleNavLabel', 'pickingNavLabel',
   ];
   simpleKeys.forEach(function (key) {
     html = html.split('%%' + key + '%%').join(strings[key] || '');
@@ -184,6 +190,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html.split('%%SW_PATH%%').join('/sw.js');
   html = html.split('%%V7_PAGE_HREF%%').join(v7PageHref(locale));
   html = html.split('%%CIRCLE_PAGE_HREF%%').join(v7PageHref(locale, CIRCLE_SLUG));
+  html = html.split('%%PICKING_PAGE_HREF%%').join(v7PageHref(locale, PICKING_SLUG));
 
   return html;
 }
@@ -279,6 +286,46 @@ function renderCirclePage(template, strings, locale, page) {
   return html;
 }
 
+// Render the "Dorian picking" lesson page (src/site/punteo-dorico.html) for
+// one locale. Static content (three fretboard-diagram images + tips), no
+// client-side data script.
+function renderPickingPage(template, strings, locale) {
+  const resolvedAssetsPrefix = locale === 'es' ? 'assets/' : '../assets/';
+  const ogImage = SITE_BASE_URL + '/assets/og-image.png';
+  let html = template;
+
+  const simpleKeys = [
+    'htmlLang', 'wordmark', 'wordmarkSmall', 'altLangLabel',
+    'extensionHeading', 'extensionDescription',
+    'pickingIntro1', 'pickingIntro2',
+    'pickingFig1Alt', 'pickingFig1Caption',
+    'pickingFig2Alt', 'pickingFig2Caption',
+    'pickingFig3Alt', 'pickingFig3Caption',
+    'pickingTipsH2', 'pickingTip1', 'pickingTip2', 'pickingTip3',
+  ];
+  simpleKeys.forEach(function (key) {
+    html = html.split('%%' + key + '%%').join(strings[key] || '');
+  });
+
+  html = html.split('%%PAGE_TITLE%%').join(strings.pickingPageTitle || '');
+  html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings.pickingMetaDescription || '');
+  html = html.split('%%PAGE_H1%%').join(strings.pickingH1 || '');
+  html = html.split('%%PAGE_LEAD%%').join(strings.pickingLead || '');
+
+  html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
+  html = html.split('%%homeHref%%').join(homeHref(locale));
+  html = html.split('%%altLangHref%%').join(locale === 'es' ? v7PageHref('en', PICKING_SLUG) : v7PageHref('es', PICKING_SLUG));
+  html = html.split('%%canonicalUrl%%').join(v7CanonicalUrl(locale, PICKING_SLUG));
+  html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es', PICKING_SLUG));
+  html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en', PICKING_SLUG));
+  html = html.split('%%ogImage%%').join(ogImage);
+  html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
+  html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
+  html = html.split('%%SW_PATH%%').join('/sw.js');
+
+  return html;
+}
+
 // ---- build -----------------------------------------------------------------
 
 console.log('==> Building site assets...');
@@ -303,6 +350,9 @@ copyFile(path.join(SRC_SITE, 'circle-fifths.js'), path.join(ASSETS_DIST, 'circle
 copyFile(path.join(SRC_SITE, 'circle-fifths-minor.js'), path.join(ASSETS_DIST, 'circle-fifths-minor.js'));
 copyFile(path.join(SRC_SHARED, 'circle-render.js'), path.join(ASSETS_DIST, 'circle-render.js'));
 copyFile(path.join(SRC_SITE, 'site.css'), path.join(ASSETS_DIST, 'site.css'));
+copyFile(path.join(SRC_SITE, 'punteo-dorico-1.png'), path.join(ASSETS_DIST, 'punteo-dorico-1.png'));
+copyFile(path.join(SRC_SITE, 'punteo-dorico-2.png'), path.join(ASSETS_DIST, 'punteo-dorico-2.png'));
+copyFile(path.join(SRC_SITE, 'punteo-dorico-3.png'), path.join(ASSETS_DIST, 'punteo-dorico-3.png'));
 copyFile(path.join(SRC_EXT, 'icon-source.svg'), path.join(ASSETS_DIST, 'favicon.svg'));
 // Vendored svguitar, fuzzysort, and jsPDF.
 copyFile(path.join(SRC_VENDOR, 'svguitar.umd.js'), path.join(VENDOR_DIST, 'svguitar.umd.js'));
@@ -393,6 +443,9 @@ const precacheUrls = [
   '/assets/vendor/jspdf.umd.min.js',
   '/assets/icons/icon-192.png',
   '/assets/icons/icon-512.png',
+  '/assets/punteo-dorico-1.png',
+  '/assets/punteo-dorico-2.png',
+  '/assets/punteo-dorico-3.png',
 ];
 const swOut = swTemplate
   .split('%%CACHE_VERSION%%').join(cacheVersion)
@@ -430,6 +483,11 @@ LOCALES.forEach(function (locale) {
       fs.writeFileSync(circleOutFile, circleHtml, 'utf8');
       say(path.relative(ROOT, circleOutFile));
     });
+
+    const pickingHtml = renderPickingPage(pickingTemplate, strings, locale);
+    const pickingOutFile = path.join(DIST_SITE, PICKING_SLUG + '.html');
+    fs.writeFileSync(pickingOutFile, pickingHtml, 'utf8');
+    say(path.relative(ROOT, pickingOutFile));
     return;
   }
 
@@ -459,6 +517,11 @@ LOCALES.forEach(function (locale) {
     fs.writeFileSync(circleOutFile, circleHtml, 'utf8');
     say(path.relative(ROOT, circleOutFile));
   });
+
+  const pickingHtml = renderPickingPage(pickingTemplate, strings, locale);
+  const pickingOutFile = path.join(localeDir, PICKING_SLUG + '.html');
+  fs.writeFileSync(pickingOutFile, pickingHtml, 'utf8');
+  say(path.relative(ROOT, pickingOutFile));
 });
 
 // ---- robots.txt ------------------------------------------------------------
@@ -551,6 +614,22 @@ const sitemapXml = [
       '  </url>',
     ];
   }),
+  '  <url>',
+  '    <loc>' + SITE_BASE_URL + '/' + PICKING_SLUG + '</loc>',
+  '    <lastmod>' + today + '</lastmod>',
+  '    <changefreq>monthly</changefreq>',
+  '    <priority>0.5</priority>',
+  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + PICKING_SLUG + '"/>',
+  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + PICKING_SLUG + '"/>',
+  '  </url>',
+  '  <url>',
+  '    <loc>' + SITE_BASE_URL + '/en/' + PICKING_SLUG + '</loc>',
+  '    <lastmod>' + today + '</lastmod>',
+  '    <changefreq>monthly</changefreq>',
+  '    <priority>0.4</priority>',
+  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + PICKING_SLUG + '"/>',
+  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + PICKING_SLUG + '"/>',
+  '  </url>',
   '  <url>',
   '    <loc>' + SITE_BASE_URL + '/store/privacy-policy.html</loc>',
   '    <lastmod>' + today + '</lastmod>',
