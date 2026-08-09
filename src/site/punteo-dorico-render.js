@@ -9,8 +9,8 @@
       frets: 12,
       fingers: [
         [1, 'x'],
-        [2, 2], [2, 3], [2, 5], [2, 7], [2, 8], [2, 10], [2, 12],
-        [3, 2], [3, 4], [3, 6], [3, 7], [3, 9], [3, 11], [3, 12],
+        [2, 'o'], [2, 2], [2, 3], [2, 5], [2, 7], [2, 8], [2, 10], [2, 12],
+        [3, 'o'], [3, 2], [3, 4], [3, 6], [3, 7], [3, 9], [3, 11], [3, 12],
         [4, 'x'],
         [5, 'x'],
         [6, 'o'],
@@ -19,9 +19,9 @@
     2: {
       frets: 12,
       fingers: [
-        [1, 2], [1, 3], [1, 5], [1, 7], [1, 9], [1, 10], [1, 12],
+        [1, 'o'], [1, 2], [1, 3], [1, 5], [1, 7], [1, 9], [1, 10], [1, 12],
         [2, 'x'],
-        [3, 2], [3, 4], [3, 6], [3, 7], [3, 9], [3, 11], [3, 12],
+        [3, 'o'], [3, 2], [3, 4], [3, 6], [3, 7], [3, 9], [3, 11], [3, 12],
         [4, 'x'],
         [5, 'x'],
         [6, 'o'],
@@ -30,7 +30,7 @@
     3: {
       frets: 15,
       fingers: [
-        [1, 2], [1, 3], [1, 5], [1, 7], [1, 9], [1, 10], [1, 12], [1, 14],
+        [1, 'o'], [1, 2], [1, 3], [1, 5], [1, 7], [1, 9], [1, 10], [1, 12], [1, 14],
         [2, 2], [2, 3], [2, 5], [2, 7], [2, 8], [2, 10], [2, 12], [2, 14], [2, 15],
         [3, 'x'],
         [4, 'x'],
@@ -58,14 +58,12 @@
     showFretMarkers: false,
   };
 
-  // svguitar's horizontal orientation mis-renders the open-string ('o')
-  // marker as a zero-radius "ghost" circle (class contains "fret-NaN") sitting
-  // at x=0 instead of next to the nut — its cy is correct, only cx/r/style are
-  // wrong. Reposition it using the geometry of the (correctly rendered) 'x'
-  // silent-string markers, which are short diagonal line pairs near the nut.
+  // svguitar's horizontal orientation leaves open-string markers clipped
+  // against the left edge. Reposition the actual open-string circles using the
+  // geometry of the correctly rendered 'x' silent-string markers near the nut.
   function fixOpenStringMarker(svg) {
-    var ghost = svg.querySelector('circle.finger-circle[class*="fret-NaN"]');
-    if (!ghost) return;
+    var opens = svg.querySelectorAll('circle.open-string');
+    if (!opens.length) return;
 
     var xs = [];
     svg.querySelectorAll('line').forEach(function (line) {
@@ -82,11 +80,17 @@
     var headerX = (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2;
     var radius = (Math.max.apply(null, xs) - Math.min.apply(null, xs)) / 2;
 
-    ghost.setAttribute('cx', String(headerX));
-    ghost.setAttribute('r', String(radius));
-    ghost.setAttribute('fill', 'none');
-    ghost.setAttribute('stroke', '#1a1a1a');
-    ghost.setAttribute('stroke-width', '2');
+    opens.forEach(function (open) {
+      var currentCx = parseFloat(open.getAttribute('cx') || '0');
+      var currentRadius = parseFloat(open.getAttribute('r') || String(radius));
+      if (currentCx > currentRadius) return;
+
+      open.setAttribute('cx', String(headerX));
+      open.setAttribute('r', String(radius));
+      open.setAttribute('fill', 'none');
+      open.setAttribute('stroke', '#1a1a1a');
+      open.setAttribute('stroke-width', '2');
+    });
   }
 
   document.querySelectorAll('.picking-diagram').forEach(function (el) {
