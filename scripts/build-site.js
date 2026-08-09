@@ -303,6 +303,17 @@ function renderPickingPage(template, strings, locale) {
     'pickingFig2Alt', 'pickingFig2Caption',
     'pickingFig3Alt', 'pickingFig3Caption',
     'pickingTipsH2', 'pickingTip1', 'pickingTip2', 'pickingTip3',
+    'metronomeTitle',
+    'metronomeBeatsAria', 'metronomeSlowerLabel', 'metronomeFasterLabel',
+    'metronomeTempoSliderLabel', 'metronomeStartLabel', 'metronomeStopLabel',
+    'metronomeMeasureLabel', 'metronomeSubdivisionLabel',
+    'metronomeMuteLabel', 'metronomeUnmuteLabel', 'metronomeVolumeLabel',
+    'metronomeVolumeOnIcon', 'metronomeVolumeOffIcon', 'metronomeShortcut',
+    'metronomeTempoLargo', 'metronomeTempoAdagio', 'metronomeTempoAndante',
+    'metronomeTempoModerato', 'metronomeTempoAllegro',
+    'metronomeTempoVivace', 'metronomeTempoPresto',
+    'metronomeSubdivisionQuarter', 'metronomeSubdivisionEighth',
+    'metronomeSubdivisionTriplet', 'metronomeSubdivisionSixteenth',
   ];
   simpleKeys.forEach(function (key) {
     html = html.split('%%' + key + '%%').join(strings[key] || '');
@@ -386,6 +397,7 @@ copyFile(path.join(SRC_SITE, 'circle-fifths-minor.js'), path.join(ASSETS_DIST, '
 copyFile(path.join(SRC_SHARED, 'circle-render.js'), path.join(ASSETS_DIST, 'circle-render.js'));
 copyFile(path.join(SRC_SITE, 'site.css'), path.join(ASSETS_DIST, 'site.css'));
 copyFile(path.join(SRC_SITE, 'punteo-dorico-render.js'), path.join(ASSETS_DIST, 'punteo-dorico-render.js'));
+copyFile(path.join(SRC_SITE, 'metronome.js'), path.join(ASSETS_DIST, 'metronome.js'));
 copyFile(path.join(SRC_EXT, 'icon-source.svg'), path.join(ASSETS_DIST, 'favicon.svg'));
 // Vendored svguitar, fuzzysort, and jsPDF.
 copyFile(path.join(SRC_VENDOR, 'svguitar.umd.js'), path.join(VENDOR_DIST, 'svguitar.umd.js'));
@@ -477,6 +489,7 @@ const precacheUrls = [
   '/assets/icons/icon-192.png',
   '/assets/icons/icon-512.png',
   '/assets/punteo-dorico-render.js',
+  '/assets/metronome.js',
   '/404.html',
 ];
 const swOut = swTemplate

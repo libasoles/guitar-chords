@@ -546,6 +546,262 @@ footer {
   margin: 0.4rem 0;
 }
 
+.lesson-metronome {
+  margin: 2.4rem 0 0;
+}
+.lesson-metronome-header h2 {
+  margin-bottom: 0.4rem;
+}
+.lesson-metronome-header p,
+.lesson-metronome-shortcut {
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+.lesson-metronome-shortcut {
+  margin-top: 0.8rem;
+}
+
+.metronome-widget {
+  --mt-border: var(--rule);
+  --mt-card: #fff;
+  --mt-wood: linear-gradient(180deg, #d7b892 0%, #b88d65 100%);
+  --mt-wood-line: #7f6146;
+  --mt-primary: #8b0000;
+  --mt-primary-ink: #fff8f4;
+  margin-top: 1rem;
+  padding: 1.4rem;
+  border: 1px solid var(--mt-border);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(253, 250, 245, 0.98));
+  box-shadow: 0 10px 30px rgba(26, 26, 26, 0.06);
+}
+.metronome-pendulum {
+  position: relative;
+  margin: 0 auto 1.25rem;
+  width: 100%;
+  max-width: 280px;
+  height: 160px;
+}
+.metronome-pendulum-base,
+.metronome-pendulum-scale,
+.metronome-pendulum-arm,
+.metronome-pendulum-pivot {
+  position: absolute;
+}
+.metronome-pendulum-base {
+  inset: 0 0 0.4rem 0;
+  border-radius: 12px;
+  background: var(--mt-wood);
+}
+.metronome-pendulum-scale {
+  left: 50%;
+  bottom: 0.8rem;
+  width: 1px;
+  height: 130px;
+  transform: translateX(-50%);
+  background: var(--mt-wood-line);
+  opacity: 0.45;
+}
+.metronome-pendulum-arm {
+  left: 50%;
+  bottom: 0.8rem;
+  width: 4px;
+  height: 124px;
+  transform: translateX(-50%) rotate(0deg);
+  transform-origin: bottom center;
+  border-radius: 999px;
+  background: var(--ink);
+}
+.metronome-pendulum-weight {
+  position: absolute;
+  top: 1.5rem;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  transform: translateX(-50%);
+  border: 2px solid #6a0000;
+  border-radius: 6px;
+  background: var(--mt-primary);
+}
+.metronome-pendulum-pivot {
+  left: 50%;
+  bottom: 0.35rem;
+  width: 12px;
+  height: 12px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: var(--ink);
+}
+
+.metronome-beats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.55rem;
+  margin-bottom: 1.2rem;
+}
+.metronome-beat-dot {
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 1px solid var(--mt-border);
+  border-radius: 999px;
+  background: transparent;
+  transition: transform 100ms ease, background-color 100ms ease, border-color 100ms ease;
+}
+.metronome-beat-dot.is-accent {
+  border-color: var(--accent);
+}
+.metronome-beat-dot.is-active {
+  transform: scale(1.3);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.metronome-beat-dot.is-active.is-accent {
+  background: var(--accent);
+}
+
+.metronome-bpm {
+  text-align: center;
+}
+.metronome-bpm-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+.metronome-bpm-readout {
+  min-width: 7rem;
+}
+.metronome-bpm-value {
+  font-family: var(--mono);
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.metronome-bpm-unit {
+  margin-left: 0.25rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.metronome-tempo-name {
+  margin: 0.25rem 0 0;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.metronome-icon-btn,
+.metronome-option-btn,
+.metronome-start-btn,
+.metronome-volume-btn {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+}
+.metronome-icon-btn,
+.metronome-option-btn,
+.metronome-volume-btn {
+  border: 1px solid var(--mt-border);
+}
+.metronome-icon-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.metronome-icon-btn:hover,
+.metronome-option-btn:hover,
+.metronome-volume-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.metronome-slider {
+  width: 100%;
+  margin-top: 0.9rem;
+  accent-color: var(--accent);
+}
+.metronome-primary-action {
+  margin-top: 1.25rem;
+}
+.metronome-start-btn {
+  display: block;
+  width: 100%;
+  min-height: 3.2rem;
+  border: 0;
+  border-radius: 10px;
+  background: var(--mt-primary);
+  color: var(--mt-primary-ink);
+  font-family: var(--sans);
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.metronome-start-btn:hover {
+  opacity: 0.92;
+}
+
+.metronome-settings {
+  margin-top: 1.3rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--mt-border);
+}
+.metronome-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-top: 0.9rem;
+}
+.metronome-setting-row:first-child {
+  margin-top: 0;
+}
+.metronome-setting-row label {
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+.metronome-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.3rem;
+}
+.metronome-option-btn {
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.55rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.metronome-option-btn-wide {
+  min-width: 2.2rem;
+}
+.metronome-option-btn.is-selected {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.metronome-volume-row {
+  align-items: center;
+}
+.metronome-volume-btn {
+  min-width: 3.35rem;
+  height: 2rem;
+  padding: 0 0.55rem;
+  border-radius: 8px;
+  font-family: var(--sans);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
 /* ----- 404 page ----- */
 
 .notfound {
@@ -583,4 +839,17 @@ footer {
 
 @media (max-width: 600px) {
   .notfound-code { font-size: 3.4rem; }
+  .metronome-widget {
+    padding: 1rem;
+  }
+  .metronome-bpm-value {
+    font-size: 2.5rem;
+  }
+  .metronome-setting-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .metronome-options {
+    justify-content: flex-start;
+  }
 }

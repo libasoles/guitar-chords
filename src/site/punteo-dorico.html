@@ -85,6 +85,98 @@
       <li>%%pickingTip3%%</li>
     </ul>
 
+    <section class="lesson-metronome" aria-labelledby="lesson-metronome-title">
+      <header class="lesson-metronome-header">
+        <h2 id="lesson-metronome-title">%%metronomeTitle%%</h2>
+      </header>
+
+      <div
+        class="metronome-widget"
+        data-title-largo="%%metronomeTempoLargo%%"
+        data-title-adagio="%%metronomeTempoAdagio%%"
+        data-title-andante="%%metronomeTempoAndante%%"
+        data-title-moderato="%%metronomeTempoModerato%%"
+        data-title-allegro="%%metronomeTempoAllegro%%"
+        data-title-vivace="%%metronomeTempoVivace%%"
+        data-title-presto="%%metronomeTempoPresto%%"
+        data-start-label="%%metronomeStartLabel%%"
+        data-stop-label="%%metronomeStopLabel%%"
+        data-mute-label="%%metronomeMuteLabel%%"
+        data-unmute-label="%%metronomeUnmuteLabel%%"
+        data-volume-on-icon="%%metronomeVolumeOnIcon%%"
+        data-volume-off-icon="%%metronomeVolumeOffIcon%%"
+        data-subdivision-quarter="%%metronomeSubdivisionQuarter%%"
+        data-subdivision-eighth="%%metronomeSubdivisionEighth%%"
+        data-subdivision-triplet="%%metronomeSubdivisionTriplet%%"
+        data-subdivision-sixteenth="%%metronomeSubdivisionSixteenth%%"
+      >
+        <div class="metronome-pendulum" aria-hidden="true">
+          <div class="metronome-pendulum-base"></div>
+          <div class="metronome-pendulum-scale"></div>
+          <div class="metronome-pendulum-arm">
+            <div class="metronome-pendulum-weight"></div>
+          </div>
+          <div class="metronome-pendulum-pivot"></div>
+        </div>
+
+        <div class="metronome-beats" role="group" aria-label="%%metronomeBeatsAria%%"></div>
+
+        <div class="metronome-bpm">
+          <div class="metronome-bpm-controls">
+            <button type="button" class="metronome-icon-btn" data-action="decrease-bpm" aria-label="%%metronomeSlowerLabel%%">-</button>
+            <div class="metronome-bpm-readout">
+              <span class="metronome-bpm-value">100</span>
+              <span class="metronome-bpm-unit">BPM</span>
+            </div>
+            <button type="button" class="metronome-icon-btn" data-action="increase-bpm" aria-label="%%metronomeFasterLabel%%">+</button>
+          </div>
+          <p class="metronome-tempo-name">%%metronomeTempoModerato%%</p>
+        </div>
+
+        <input
+          class="metronome-slider"
+          data-role="bpm-slider"
+          type="range"
+          min="30"
+          max="260"
+          value="100"
+          aria-label="%%metronomeTempoSliderLabel%%"
+        />
+
+        <div class="metronome-primary-action">
+          <button type="button" class="metronome-start-btn" data-action="toggle-play">%%metronomeStartLabel%%</button>
+        </div>
+
+        <div class="metronome-settings">
+          <div class="metronome-setting-row">
+            <label>%%metronomeMeasureLabel%%</label>
+            <div class="metronome-options" data-role="beats-options"></div>
+          </div>
+
+          <div class="metronome-setting-row">
+            <label>%%metronomeSubdivisionLabel%%</label>
+            <div class="metronome-options" data-role="subdivision-options"></div>
+          </div>
+
+          <div class="metronome-setting-row metronome-volume-row">
+            <button type="button" class="metronome-volume-btn" data-action="toggle-mute" aria-label="%%metronomeMuteLabel%%">%%metronomeVolumeOnIcon%%</button>
+            <input
+              class="metronome-slider"
+              data-role="volume-slider"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value="0.8"
+              aria-label="%%metronomeVolumeLabel%%"
+            />
+          </div>
+        </div>
+      </div>
+
+      <p class="lesson-metronome-shortcut">%%metronomeShortcut%%</p>
+    </section>
+
     <footer>
       <div class="extension-cta">
         <svg class="ext-icon" viewBox="0 0 48 48" aria-hidden="true">
@@ -162,6 +254,7 @@
 
     <script src="%%ASSETS_PREFIX%%vendor/svguitar.umd.js"></script>
     <script src="%%ASSETS_PREFIX%%punteo-dorico-render.js"></script>
+    <script src="%%ASSETS_PREFIX%%metronome.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
