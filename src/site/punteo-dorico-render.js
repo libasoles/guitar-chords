@@ -58,25 +58,9 @@
     showFretMarkers: false,
   };
 
-  function leftHalfCirclePath(x, cy, r) {
-    return [
-      'M', x, cy - r,
-      'A', r, r, 0, 0, 0, x, cy + r,
-      'Z',
-    ].join(' ');
-  }
-
-  // A half-disk's ink is concentrated toward its curved side, so its flat
-  // edge must sit past the true anchor point for the shape to *look*
-  // centered there — by the semicircle centroid offset, 4r/3π — matching
-  // how a symmetric X glyph already looks centered on its own midpoint.
-  function halfDiskCentroidOffset(r) {
-    return (4 * r) / (3 * Math.PI);
-  }
-
   // svguitar's horizontal open-string ("o") and muted-string ("x") markers
   // sit in a padded strip that doesn't match the intended lesson artwork:
-  // open notes should render as filled semicircles flush with the nut, and
+  // open notes should render as full filled circles centered on the nut, and
   // muted-string X's should be centered on that same nut line so both marker
   // types line up in one column.
   function fixStringMarkers(svg) {
@@ -86,16 +70,9 @@
 
     var opens = svg.querySelectorAll('circle.open-string');
     opens.forEach(function (open) {
-      var cy = parseFloat(open.getAttribute('cy') || '0');
-      var r = parseFloat(open.getAttribute('r') || '0');
-      if (!cy || !r) return;
-
-      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', leftHalfCirclePath(nutX + halfDiskCentroidOffset(r), cy, r));
-      path.setAttribute('fill', '#1a1a1a');
-      path.setAttribute('stroke', 'none');
-      path.setAttribute('class', 'open-string-half');
-      open.replaceWith(path);
+      open.setAttribute('cx', nutX);
+      open.setAttribute('fill', '#1a1a1a');
+      open.setAttribute('stroke', 'none');
     });
 
     var muted = svg.querySelectorAll('line.silent-string');
