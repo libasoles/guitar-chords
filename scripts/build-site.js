@@ -385,9 +385,7 @@ copyFile(path.join(SRC_SITE, 'circle-fifths.js'), path.join(ASSETS_DIST, 'circle
 copyFile(path.join(SRC_SITE, 'circle-fifths-minor.js'), path.join(ASSETS_DIST, 'circle-fifths-minor.js'));
 copyFile(path.join(SRC_SHARED, 'circle-render.js'), path.join(ASSETS_DIST, 'circle-render.js'));
 copyFile(path.join(SRC_SITE, 'site.css'), path.join(ASSETS_DIST, 'site.css'));
-copyFile(path.join(SRC_SITE, 'punteo-dorico-1.png'), path.join(ASSETS_DIST, 'punteo-dorico-1.png'));
-copyFile(path.join(SRC_SITE, 'punteo-dorico-2.png'), path.join(ASSETS_DIST, 'punteo-dorico-2.png'));
-copyFile(path.join(SRC_SITE, 'punteo-dorico-3.png'), path.join(ASSETS_DIST, 'punteo-dorico-3.png'));
+copyFile(path.join(SRC_SITE, 'punteo-dorico-render.js'), path.join(ASSETS_DIST, 'punteo-dorico-render.js'));
 copyFile(path.join(SRC_EXT, 'icon-source.svg'), path.join(ASSETS_DIST, 'favicon.svg'));
 // Vendored svguitar, fuzzysort, and jsPDF.
 copyFile(path.join(SRC_VENDOR, 'svguitar.umd.js'), path.join(VENDOR_DIST, 'svguitar.umd.js'));
@@ -478,9 +476,7 @@ const precacheUrls = [
   '/assets/vendor/jspdf.umd.min.js',
   '/assets/icons/icon-192.png',
   '/assets/icons/icon-512.png',
-  '/assets/punteo-dorico-1.png',
-  '/assets/punteo-dorico-2.png',
-  '/assets/punteo-dorico-3.png',
+  '/assets/punteo-dorico-render.js',
   '/404.html',
 ];
 const swOut = swTemplate

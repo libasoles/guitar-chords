@@ -516,12 +516,19 @@ footer {
 .picking-figure {
   margin: 0;
 }
-.picking-figure img {
+.picking-diagram {
+  display: block;
+  width: 100%;
+  padding: 1rem 0.5rem;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+.picking-diagram svg {
   display: block;
   width: 100%;
   height: auto;
-  border: 1px solid var(--rule);
-  border-radius: 8px;
 }
 .picking-figure figcaption {
   font-family: var(--sans);

@@ -65,15 +65,15 @@
 
     <div class="picking-figures">
       <figure class="picking-figure">
-        <img src="%%ASSETS_PREFIX%%punteo-dorico-1.png" alt="%%pickingFig1Alt%%" width="1156" height="257" loading="lazy" />
+        <div class="picking-diagram" data-pattern="1" role="img" aria-label="%%pickingFig1Alt%%"></div>
         <figcaption>%%pickingFig1Caption%%</figcaption>
       </figure>
       <figure class="picking-figure">
-        <img src="%%ASSETS_PREFIX%%punteo-dorico-2.png" alt="%%pickingFig2Alt%%" width="1156" height="257" loading="lazy" />
+        <div class="picking-diagram" data-pattern="2" role="img" aria-label="%%pickingFig2Alt%%"></div>
         <figcaption>%%pickingFig2Caption%%</figcaption>
       </figure>
       <figure class="picking-figure">
-        <img src="%%ASSETS_PREFIX%%punteo-dorico-3.png" alt="%%pickingFig3Alt%%" width="1156" height="257" loading="lazy" />
+        <div class="picking-diagram" data-pattern="3" role="img" aria-label="%%pickingFig3Alt%%"></div>
         <figcaption>%%pickingFig3Caption%%</figcaption>
       </figure>
     </div>
@@ -160,6 +160,8 @@
       </div>
     </footer>
 
+    <script src="%%ASSETS_PREFIX%%vendor/svguitar.umd.js"></script>
+    <script src="%%ASSETS_PREFIX%%punteo-dorico-render.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
