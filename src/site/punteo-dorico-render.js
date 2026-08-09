@@ -58,38 +58,35 @@
     showFretMarkers: false,
   };
 
-  // svguitar's horizontal orientation leaves open-string markers clipped
-  // against the left edge. Reposition the actual open-string circles using the
-  // geometry of the correctly rendered 'x' silent-string markers near the nut.
+  function leftHalfCirclePath(x, cy, r) {
+    return [
+      'M', x, cy - r,
+      'A', r, r, 0, 0, 0, x, cy + r,
+      'Z',
+    ].join(' ');
+  }
+
+  // svguitar's horizontal open-string markers do not match the intended
+  // lesson artwork. Replace them with filled semicircles attached to the nut.
   function fixOpenStringMarker(svg) {
     var opens = svg.querySelectorAll('circle.open-string');
     if (!opens.length) return;
 
-    var xs = [];
-    svg.querySelectorAll('line').forEach(function (line) {
-      var x1 = parseFloat(line.getAttribute('x1'));
-      var y1 = parseFloat(line.getAttribute('y1'));
-      var x2 = parseFloat(line.getAttribute('x2'));
-      var y2 = parseFloat(line.getAttribute('y2'));
-      if (Math.abs(x2 - x1) < 60 && Math.abs(y2 - y1) < 60) {
-        xs.push(x1, x2);
-      }
-    });
-    if (!xs.length) return;
-
-    var headerX = (Math.min.apply(null, xs) + Math.max.apply(null, xs)) / 2;
-    var radius = (Math.max.apply(null, xs) - Math.min.apply(null, xs)) / 2;
+    var nut = svg.querySelector('line.top-fret');
+    if (!nut) return;
 
     opens.forEach(function (open) {
-      var currentCx = parseFloat(open.getAttribute('cx') || '0');
-      var currentRadius = parseFloat(open.getAttribute('r') || String(radius));
-      if (currentCx > currentRadius) return;
+      var cy = parseFloat(open.getAttribute('cy') || '0');
+      var r = parseFloat(open.getAttribute('r') || '0');
+      if (!cy || !r) return;
 
-      open.setAttribute('cx', String(headerX));
-      open.setAttribute('r', String(radius));
-      open.setAttribute('fill', 'none');
-      open.setAttribute('stroke', '#1a1a1a');
-      open.setAttribute('stroke-width', '2');
+      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      var nutX = parseFloat(nut.getAttribute('x1') || '0');
+      path.setAttribute('d', leftHalfCirclePath(nutX, cy, r));
+      path.setAttribute('fill', '#1a1a1a');
+      path.setAttribute('stroke', 'none');
+      path.setAttribute('class', 'open-string-half');
+      open.replaceWith(path);
     });
   }
 
