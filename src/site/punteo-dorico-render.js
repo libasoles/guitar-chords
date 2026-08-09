@@ -66,28 +66,41 @@
     ].join(' ');
   }
 
-  // svguitar's horizontal open-string markers do not match the intended
-  // lesson artwork. Replace them with filled semicircles attached to the nut.
-  function fixOpenStringMarker(svg) {
-    var opens = svg.querySelectorAll('circle.open-string');
-    if (!opens.length) return;
-
+  // svguitar's horizontal open-string ("o") and muted-string ("x") markers
+  // sit in a padded strip that doesn't match the intended lesson artwork:
+  // open notes should render as filled semicircles flush with the nut, and
+  // muted-string X's should be centered on that same nut line so both marker
+  // types line up in one column.
+  function fixStringMarkers(svg) {
     var nut = svg.querySelector('line.top-fret');
     if (!nut) return;
+    var nutX = parseFloat(nut.getAttribute('x1') || '0');
 
+    var opens = svg.querySelectorAll('circle.open-string');
     opens.forEach(function (open) {
       var cy = parseFloat(open.getAttribute('cy') || '0');
       var r = parseFloat(open.getAttribute('r') || '0');
       if (!cy || !r) return;
 
       var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      var nutX = parseFloat(nut.getAttribute('x1') || '0');
       path.setAttribute('d', leftHalfCirclePath(nutX, cy, r));
       path.setAttribute('fill', '#1a1a1a');
       path.setAttribute('stroke', 'none');
       path.setAttribute('class', 'open-string-half');
       open.replaceWith(path);
     });
+
+    var muted = svg.querySelectorAll('line.silent-string');
+    if (muted.length) {
+      var first = muted[0];
+      var x1 = parseFloat(first.getAttribute('x1') || '0');
+      var x2 = parseFloat(first.getAttribute('x2') || '0');
+      var delta = nutX - (x1 + x2) / 2;
+      muted.forEach(function (line) {
+        line.setAttribute('x1', parseFloat(line.getAttribute('x1') || '0') + delta);
+        line.setAttribute('x2', parseFloat(line.getAttribute('x2') || '0') + delta);
+      });
+    }
   }
 
   document.querySelectorAll('.picking-diagram').forEach(function (el) {
@@ -100,6 +113,6 @@
       .draw();
 
     var svg = el.querySelector('svg');
-    if (svg) fixOpenStringMarker(svg);
+    if (svg) fixStringMarkers(svg);
   });
 })();
