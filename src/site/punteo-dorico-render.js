@@ -58,34 +58,29 @@
     showFretMarkers: false,
   };
 
-  // svguitar's horizontal open-string ("o") and muted-string ("x") markers
-  // sit in a padded strip that doesn't match the intended lesson artwork:
-  // open notes should render as full filled circles centered on the nut, and
-  // muted-string X's should be centered on that same nut line so both marker
-  // types line up in one column.
+  // In horizontal orientation the vendored svguitar draws an open string ("o")
+  // as a regular finger circle at cx=0 — half of it falls outside the viewBox,
+  // so it reads as a half-disk sitting left of the muted-string X's. Move those
+  // circles into the X column so both marker types line up whole and centered.
+  //
+  // Neither marker carries a usable class here (open strings only differ by the
+  // NaN fret their non-numeric "o" produces, and the X's are plain <line>s), so
+  // both are matched by shape: X's are the only diagonal lines in the diagram.
   function fixStringMarkers(svg) {
-    var nut = svg.querySelector('line.top-fret');
-    if (!nut) return;
-    var nutX = parseFloat(nut.getAttribute('x1') || '0');
-
-    var opens = svg.querySelectorAll('circle.open-string');
-    opens.forEach(function (open) {
-      open.setAttribute('cx', nutX);
-      open.setAttribute('fill', '#1a1a1a');
-      open.setAttribute('stroke', 'none');
+    var centers = [];
+    svg.querySelectorAll('line').forEach(function (line) {
+      var x1 = parseFloat(line.getAttribute('x1'));
+      var y1 = parseFloat(line.getAttribute('y1'));
+      var x2 = parseFloat(line.getAttribute('x2'));
+      var y2 = parseFloat(line.getAttribute('y2'));
+      if (x1 !== x2 && y1 !== y2) centers.push((x1 + x2) / 2);
     });
+    if (!centers.length) return;
 
-    var muted = svg.querySelectorAll('line.silent-string');
-    if (muted.length) {
-      var first = muted[0];
-      var x1 = parseFloat(first.getAttribute('x1') || '0');
-      var x2 = parseFloat(first.getAttribute('x2') || '0');
-      var delta = nutX - (x1 + x2) / 2;
-      muted.forEach(function (line) {
-        line.setAttribute('x1', parseFloat(line.getAttribute('x1') || '0') + delta);
-        line.setAttribute('x2', parseFloat(line.getAttribute('x2') || '0') + delta);
-      });
-    }
+    var markerX = centers.reduce(function (a, b) { return a + b; }, 0) / centers.length;
+    svg.querySelectorAll('circle[class*="finger-fret-NaN"]').forEach(function (open) {
+      open.setAttribute('cx', markerX);
+    });
   }
 
   document.querySelectorAll('.picking-diagram').forEach(function (el) {
