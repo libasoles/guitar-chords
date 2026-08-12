@@ -162,6 +162,9 @@ const PICKING_PAGES = [
   { slug: 'punteo-dorico-sexta-cuerda-al-aire', mode: 'dorian', prefix: 'picking', modeLabelKey: 'pickingModeDorianLabel' },
   { slug: 'punteo-jonico-sexta-cuerda-al-aire', mode: 'ionian', prefix: 'pickingJonico', modeLabelKey: 'pickingModeJonicoLabel' },
   { slug: 'punteo-frigio-sexta-cuerda-al-aire', mode: 'phrygian', prefix: 'pickingFrigio', modeLabelKey: 'pickingModeFrigioLabel' },
+  { slug: 'punteo-lidio-sexta-cuerda-al-aire', mode: 'lydian', prefix: 'pickingLidio', modeLabelKey: 'pickingModeLidioLabel' },
+  { slug: 'punteo-mixolidio-sexta-cuerda-al-aire', mode: 'mixolydian', prefix: 'pickingMixolidio', modeLabelKey: 'pickingModeMixolidioLabel' },
+  { slug: 'punteo-eolico-sexta-cuerda-al-aire', mode: 'aeolian', prefix: 'pickingEolico', modeLabelKey: 'pickingModeEolicoLabel' },
 ];
 // Home-nav / 404 / og default link points at the original Dorian lesson.
 const PICKING_SLUG = PICKING_PAGES[0].slug;
@@ -192,6 +195,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     'extensionHeading', 'extensionDescription',
     'v7NavLabel', 'circleNavLabel', 'pickingNavLabel',
     'pickingJonicoNavLabel', 'pickingFrigioNavLabel',
+    'pickingLidioNavLabel', 'pickingMixolidioNavLabel', 'pickingEolicoNavLabel',
   ];
   simpleKeys.forEach(function (key) {
     html = html.split('%%' + key + '%%').join(strings[key] || '');
@@ -214,6 +218,9 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html.split('%%PICKING_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[0].slug));
   html = html.split('%%PICKING_JONICO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[1].slug));
   html = html.split('%%PICKING_FRIGIO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[2].slug));
+  html = html.split('%%PICKING_LIDIO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[3].slug));
+  html = html.split('%%PICKING_MIXOLIDIO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[4].slug));
+  html = html.split('%%PICKING_EOLICO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[5].slug));
 
   return html;
 }
