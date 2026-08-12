@@ -4,41 +4,64 @@
   // Strings numbered 1 (high e) to 6 (low E), matching svguitar/chords-db
   // convention. String 6 is always 'o' — the open low-E pedal note — and
   // strings not part of a pattern are 'x' (not played).
-  var PATTERNS = {
-    1: {
-      frets: 12,
-      fingers: [
-        [1, 'x'],
-        [2, 'o'], [2, 2], [2, 3], [2, 5], [2, 7], [2, 8], [2, 10], [2, 12],
-        [3, 'o'], [3, 2], [3, 4], [3, 6], [3, 7], [3, 9], [3, 11], [3, 12],
-        [4, 'x'],
-        [5, 'x'],
-        [6, 'o'],
-      ],
-    },
-    2: {
-      frets: 12,
-      fingers: [
-        [1, 'o'], [1, 2], [1, 3], [1, 5], [1, 7], [1, 9], [1, 10], [1, 12],
-        [2, 'x'],
-        [3, 'o'], [3, 2], [3, 4], [3, 6], [3, 7], [3, 9], [3, 11], [3, 12],
-        [4, 'x'],
-        [5, 'x'],
-        [6, 'o'],
-      ],
-    },
-    3: {
-      frets: 15,
-      fingers: [
-        [1, 'o'], [1, 2], [1, 3], [1, 5], [1, 7], [1, 9], [1, 10], [1, 12], [1, 14],
-        [2, 2], [2, 3], [2, 5], [2, 7], [2, 8], [2, 10], [2, 12], [2, 14], [2, 15],
-        [3, 'x'],
-        [4, 'x'],
-        [5, 'x'],
-        [6, 'o'],
-      ],
-    },
+  //
+  // Patterns are generated from the mode's interval set rather than
+  // hardcoded per-mode fret lists: for a string whose open note sits
+  // `openSemitone` semitones above E, a fret `f` lands on a scale tone when
+  // (openSemitone + f) mod 12 is one of the mode's semitone offsets from E
+  // (the pedal note). This reproduces the original hand-picked Dorian
+  // fret lists exactly, so the same formula is trusted for the other modes.
+  var SCALES = {
+    dorian: [0, 2, 3, 5, 7, 9, 10],
+    ionian: [0, 2, 4, 5, 7, 9, 11],
+    phrygian: [0, 1, 3, 5, 7, 8, 10],
   };
+
+  var OPEN_SEMITONE = { 1: 0, 2: 7, 3: 3, 4: 10, 5: 5, 6: 0 };
+
+  function scaleFrets(scale, openSemitone, maxFret, skipOpen) {
+    var out = [];
+    for (var f = skipOpen ? 1 : 0; f <= maxFret; f++) {
+      if (scale.indexOf((openSemitone + f) % 12) !== -1) out.push(f);
+    }
+    return out;
+  }
+
+  function toFingers(stringNum, frets) {
+    return frets.map(function (f) { return [stringNum, f === 0 ? 'o' : f]; });
+  }
+
+  function buildPatterns(mode) {
+    var scale = SCALES[mode] || SCALES.dorian;
+    return {
+      1: {
+        frets: 12,
+        fingers: [].concat(
+          [[1, 'x']],
+          toFingers(2, scaleFrets(scale, OPEN_SEMITONE[2], 12, false)),
+          toFingers(3, scaleFrets(scale, OPEN_SEMITONE[3], 12, false)),
+          [[4, 'x'], [5, 'x'], [6, 'o']]
+        ),
+      },
+      2: {
+        frets: 12,
+        fingers: [].concat(
+          toFingers(1, scaleFrets(scale, OPEN_SEMITONE[1], 12, false)),
+          [[2, 'x']],
+          toFingers(3, scaleFrets(scale, OPEN_SEMITONE[3], 12, false)),
+          [[4, 'x'], [5, 'x'], [6, 'o']]
+        ),
+      },
+      3: {
+        frets: 15,
+        fingers: [].concat(
+          toFingers(1, scaleFrets(scale, OPEN_SEMITONE[1], 14, false)),
+          toFingers(2, scaleFrets(scale, OPEN_SEMITONE[2], 15, true)),
+          [[3, 'x'], [4, 'x'], [5, 'x'], [6, 'o']]
+        ),
+      },
+    };
+  }
 
   var CONFIG_BASE = {
     strings: 6,
@@ -82,6 +105,9 @@
       open.setAttribute('cx', markerX);
     });
   }
+
+  var mode = (document.body && document.body.getAttribute('data-picking-mode')) || 'dorian';
+  var PATTERNS = buildPatterns(mode);
 
   document.querySelectorAll('.picking-diagram').forEach(function (el) {
     var pattern = PATTERNS[el.getAttribute('data-pattern')];

@@ -64,7 +64,7 @@ if (!fs.existsSync(JSPDF)) {
 const template = fs.readFileSync(path.join(SRC_SITE, 'template.html'), 'utf8');
 const v7Template = fs.readFileSync(path.join(SRC_SITE, 'v7-guide.html'), 'utf8');
 const circleTemplate = fs.readFileSync(path.join(SRC_SITE, 'circle-fifths.html'), 'utf8');
-const pickingTemplate = fs.readFileSync(path.join(SRC_SITE, 'punteo-dorico.html'), 'utf8');
+const pickingTemplate = fs.readFileSync(path.join(SRC_SITE, 'picking-lesson.html'), 'utf8');
 const notFoundTemplate = fs.readFileSync(path.join(SRC_SITE, '404.html'), 'utf8');
 const LOCALES = ['es', 'en'];
 
@@ -154,10 +154,29 @@ const CIRCLE_PAGES = [
 // Home-nav link points at the major "chords and their notes" page.
 const CIRCLE_SLUG = CIRCLE_PAGES[0].slug;
 
-// Static lesson page rendered from src/site/punteo-dorico.html — Dorian
-// picking patterns with the open low E string as a pedal note. No otherSlug
-// pairing (single page, both locales).
-const PICKING_SLUG = 'punteo-dorico-sexta-cuerda-al-aire';
+// Static lesson pages rendered from src/site/picking-lesson.html — modal
+// picking patterns with the open low E string as a pedal note. One page per
+// mode; each cross-links to the other two. i18n keys are namespaced by
+// `prefix` (e.g. pickingH1, pickingJonicoH1, pickingFrigioH1).
+const PICKING_PAGES = [
+  { slug: 'punteo-dorico-sexta-cuerda-al-aire', mode: 'dorian', prefix: 'picking', modeLabelKey: 'pickingModeDorianLabel' },
+  { slug: 'punteo-jonico-sexta-cuerda-al-aire', mode: 'ionian', prefix: 'pickingJonico', modeLabelKey: 'pickingModeJonicoLabel' },
+  { slug: 'punteo-frigio-sexta-cuerda-al-aire', mode: 'phrygian', prefix: 'pickingFrigio', modeLabelKey: 'pickingModeFrigioLabel' },
+];
+// Home-nav / 404 / og default link points at the original Dorian lesson.
+const PICKING_SLUG = PICKING_PAGES[0].slug;
+
+// Builds the "see also" nav line linking a picking-lesson page to its two
+// sibling modes.
+function pickingOtherModesNav(strings, locale, page) {
+  const label = strings.pickingSeeOtherModesLabel || '';
+  const links = PICKING_PAGES.filter(function (pg) { return pg.slug !== page.slug; })
+    .map(function (pg) {
+      return '<a href="' + v7PageHref(locale, pg.slug) + '">' + (strings[pg.modeLabelKey] || pg.mode) + '</a>';
+    })
+    .join(' · ');
+  return '<p class="v7-nav">' + label + ' ' + links + '</p>';
+}
 
 function render(template, strings, locale, assetsPrefix, outputMode) {
   const resolvedAssetsPrefix = assetsPrefix || (locale === 'es' ? 'assets/' : '../assets/');
@@ -172,6 +191,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     'thPart', 'thSymbols', 'thMeaning', 'thExample',
     'extensionHeading', 'extensionDescription',
     'v7NavLabel', 'circleNavLabel', 'pickingNavLabel',
+    'pickingJonicoNavLabel', 'pickingFrigioNavLabel',
   ];
   simpleKeys.forEach(function (key) {
     html = html.split('%%' + key + '%%').join(strings[key] || '');
@@ -191,7 +211,9 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html.split('%%SW_PATH%%').join('/sw.js');
   html = html.split('%%V7_PAGE_HREF%%').join(v7PageHref(locale));
   html = html.split('%%CIRCLE_PAGE_HREF%%').join(v7PageHref(locale, CIRCLE_SLUG));
-  html = html.split('%%PICKING_PAGE_HREF%%').join(v7PageHref(locale, PICKING_SLUG));
+  html = html.split('%%PICKING_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[0].slug));
+  html = html.split('%%PICKING_JONICO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[1].slug));
+  html = html.split('%%PICKING_FRIGIO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[2].slug));
 
   return html;
 }
@@ -287,22 +309,19 @@ function renderCirclePage(template, strings, locale, page) {
   return html;
 }
 
-// Render the "Dorian picking" lesson page (src/site/punteo-dorico.html) for
-// one locale. Static content (three fretboard-diagram images + tips), no
-// client-side data script.
-function renderPickingPage(template, strings, locale) {
+// Render a modal picking lesson page (src/site/picking-lesson.html) for one
+// locale — one of PICKING_PAGES (Dorian, Ionian, Phrygian). Static content
+// (three fretboard-diagram images + tips, computed client-side from the
+// mode by src/site/picking-render.js), no client-side data script.
+function renderPickingPage(template, strings, locale, page) {
   const resolvedAssetsPrefix = locale === 'es' ? 'assets/' : '../assets/';
   const ogImage = SITE_BASE_URL + '/assets/og-image.png';
+  const p = page.prefix;
   let html = template;
 
   const simpleKeys = [
     'htmlLang', 'wordmark', 'wordmarkSmall', 'altLangLabel',
     'extensionHeading', 'extensionDescription',
-    'pickingIntro1', 'pickingIntro2',
-    'pickingFig1Alt', 'pickingFig1Caption',
-    'pickingFig2Alt', 'pickingFig2Caption',
-    'pickingFig3Alt', 'pickingFig3Caption',
-    'pickingTipsH2', 'pickingTip1', 'pickingTip2', 'pickingTip3',
     'metronomeTitle',
     'metronomeBeatsAria', 'metronomeSlowerLabel', 'metronomeFasterLabel',
     'metronomeTempoSliderLabel', 'metronomeStartLabel', 'metronomeStopLabel',
@@ -319,17 +338,32 @@ function renderPickingPage(template, strings, locale) {
     html = html.split('%%' + key + '%%').join(strings[key] || '');
   });
 
-  html = html.split('%%PAGE_TITLE%%').join(strings.pickingPageTitle || '');
-  html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings.pickingMetaDescription || '');
-  html = html.split('%%PAGE_H1%%').join(strings.pickingH1 || '');
-  html = html.split('%%PAGE_LEAD%%').join(strings.pickingLead || '');
+  html = html.split('%%PAGE_TITLE%%').join(strings[p + 'PageTitle'] || '');
+  html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings[p + 'MetaDescription'] || '');
+  html = html.split('%%PAGE_H1%%').join(strings[p + 'H1'] || '');
+  html = html.split('%%PAGE_LEAD%%').join(strings[p + 'Lead'] || '');
+  html = html.split('%%pickingIntro1%%').join(strings[p + 'Intro1'] || '');
+  html = html.split('%%pickingIntro2%%').join(strings[p + 'Intro2'] || '');
+  html = html.split('%%pickingFig1Alt%%').join(strings[p + 'Fig1Alt'] || '');
+  html = html.split('%%pickingFig1Caption%%').join(strings[p + 'Fig1Caption'] || '');
+  html = html.split('%%pickingFig2Alt%%').join(strings[p + 'Fig2Alt'] || '');
+  html = html.split('%%pickingFig2Caption%%').join(strings[p + 'Fig2Caption'] || '');
+  html = html.split('%%pickingFig3Alt%%').join(strings[p + 'Fig3Alt'] || '');
+  html = html.split('%%pickingFig3Caption%%').join(strings[p + 'Fig3Caption'] || '');
+  html = html.split('%%pickingTipsH2%%').join(strings[p + 'TipsH2'] || '');
+  html = html.split('%%pickingTip1%%').join(strings[p + 'Tip1'] || '');
+  html = html.split('%%pickingTip2%%').join(strings[p + 'Tip2'] || '');
+  html = html.split('%%pickingTip3%%').join(strings[p + 'Tip3'] || '');
+
+  html = html.split('%%PICKING_MODE%%').join(page.mode);
+  html = html.split('%%PICKING_OTHER_MODES_NAV%%').join(pickingOtherModesNav(strings, locale, page));
 
   html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
   html = html.split('%%homeHref%%').join(homeHref(locale));
-  html = html.split('%%altLangHref%%').join(locale === 'es' ? v7PageHref('en', PICKING_SLUG) : v7PageHref('es', PICKING_SLUG));
-  html = html.split('%%canonicalUrl%%').join(v7CanonicalUrl(locale, PICKING_SLUG));
-  html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es', PICKING_SLUG));
-  html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en', PICKING_SLUG));
+  html = html.split('%%altLangHref%%').join(locale === 'es' ? v7PageHref('en', page.slug) : v7PageHref('es', page.slug));
+  html = html.split('%%canonicalUrl%%').join(v7CanonicalUrl(locale, page.slug));
+  html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es', page.slug));
+  html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en', page.slug));
   html = html.split('%%ogImage%%').join(ogImage);
   html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
   html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
@@ -396,7 +430,7 @@ copyFile(path.join(SRC_SITE, 'circle-fifths.js'), path.join(ASSETS_DIST, 'circle
 copyFile(path.join(SRC_SITE, 'circle-fifths-minor.js'), path.join(ASSETS_DIST, 'circle-fifths-minor.js'));
 copyFile(path.join(SRC_SHARED, 'circle-render.js'), path.join(ASSETS_DIST, 'circle-render.js'));
 copyFile(path.join(SRC_SITE, 'site.css'), path.join(ASSETS_DIST, 'site.css'));
-copyFile(path.join(SRC_SITE, 'punteo-dorico-render.js'), path.join(ASSETS_DIST, 'punteo-dorico-render.js'));
+copyFile(path.join(SRC_SITE, 'picking-render.js'), path.join(ASSETS_DIST, 'picking-render.js'));
 copyFile(path.join(SRC_SITE, 'metronome.js'), path.join(ASSETS_DIST, 'metronome.js'));
 copyFile(path.join(SRC_EXT, 'icon-source.svg'), path.join(ASSETS_DIST, 'favicon.svg'));
 // Vendored svguitar, fuzzysort, and jsPDF.
@@ -488,7 +522,7 @@ const precacheUrls = [
   '/assets/vendor/jspdf.umd.min.js',
   '/assets/icons/icon-192.png',
   '/assets/icons/icon-512.png',
-  '/assets/punteo-dorico-render.js',
+  '/assets/picking-render.js',
   '/assets/metronome.js',
   '/404.html',
 ];
@@ -529,10 +563,12 @@ LOCALES.forEach(function (locale) {
       say(path.relative(ROOT, circleOutFile));
     });
 
-    const pickingHtml = renderPickingPage(pickingTemplate, strings, locale);
-    const pickingOutFile = path.join(DIST_SITE, PICKING_SLUG + '.html');
-    fs.writeFileSync(pickingOutFile, pickingHtml, 'utf8');
-    say(path.relative(ROOT, pickingOutFile));
+    PICKING_PAGES.forEach(function (page) {
+      const pickingHtml = renderPickingPage(pickingTemplate, strings, locale, page);
+      const pickingOutFile = path.join(DIST_SITE, page.slug + '.html');
+      fs.writeFileSync(pickingOutFile, pickingHtml, 'utf8');
+      say(path.relative(ROOT, pickingOutFile));
+    });
     return;
   }
 
@@ -563,10 +599,12 @@ LOCALES.forEach(function (locale) {
     say(path.relative(ROOT, circleOutFile));
   });
 
-  const pickingHtml = renderPickingPage(pickingTemplate, strings, locale);
-  const pickingOutFile = path.join(localeDir, PICKING_SLUG + '.html');
-  fs.writeFileSync(pickingOutFile, pickingHtml, 'utf8');
-  say(path.relative(ROOT, pickingOutFile));
+  PICKING_PAGES.forEach(function (page) {
+    const pickingHtml = renderPickingPage(pickingTemplate, strings, locale, page);
+    const pickingOutFile = path.join(localeDir, page.slug + '.html');
+    fs.writeFileSync(pickingOutFile, pickingHtml, 'utf8');
+    say(path.relative(ROOT, pickingOutFile));
+  });
 });
 
 console.log('==> Rendering 404 page...');
@@ -669,22 +707,26 @@ const sitemapXml = [
       '  </url>',
     ];
   }),
-  '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/' + PICKING_SLUG + '</loc>',
-  '    <lastmod>' + today + '</lastmod>',
-  '    <changefreq>monthly</changefreq>',
-  '    <priority>0.5</priority>',
-  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + PICKING_SLUG + '"/>',
-  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + PICKING_SLUG + '"/>',
-  '  </url>',
-  '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/en/' + PICKING_SLUG + '</loc>',
-  '    <lastmod>' + today + '</lastmod>',
-  '    <changefreq>monthly</changefreq>',
-  '    <priority>0.4</priority>',
-  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + PICKING_SLUG + '"/>',
-  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + PICKING_SLUG + '"/>',
-  '  </url>',
+  ...PICKING_PAGES.flatMap(function (page) {
+    return [
+      '  <url>',
+      '    <loc>' + SITE_BASE_URL + '/' + page.slug + '</loc>',
+      '    <lastmod>' + today + '</lastmod>',
+      '    <changefreq>monthly</changefreq>',
+      '    <priority>0.5</priority>',
+      '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + page.slug + '"/>',
+      '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + page.slug + '"/>',
+      '  </url>',
+      '  <url>',
+      '    <loc>' + SITE_BASE_URL + '/en/' + page.slug + '</loc>',
+      '    <lastmod>' + today + '</lastmod>',
+      '    <changefreq>monthly</changefreq>',
+      '    <priority>0.4</priority>',
+      '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + page.slug + '"/>',
+      '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + page.slug + '"/>',
+      '  </url>',
+    ];
+  }),
   '  <url>',
   '    <loc>' + SITE_BASE_URL + '/store/privacy-policy.html</loc>',
   '    <lastmod>' + today + '</lastmod>',

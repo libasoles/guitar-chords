@@ -37,7 +37,7 @@
       gtag("config", "G-0S8GH7ZFHT");
     </script>
   </head>
-  <body>
+  <body data-picking-mode="%%PICKING_MODE%%">
     <header class="site-header">
       <a class="brand" href="%%homeHref%%">
         <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
@@ -59,6 +59,8 @@
 
     <h1>%%PAGE_H1%%</h1>
     <p class="lead">%%PAGE_LEAD%%</p>
+
+    %%PICKING_OTHER_MODES_NAV%%
 
     <p>%%pickingIntro1%%</p>
     <p>%%pickingIntro2%%</p>
@@ -258,7 +260,7 @@
     </footer>
 
     <script src="%%ASSETS_PREFIX%%vendor/svguitar.umd.js"></script>
-    <script src="%%ASSETS_PREFIX%%punteo-dorico-render.js"></script>
+    <script src="%%ASSETS_PREFIX%%picking-render.js"></script>
     <script src="%%ASSETS_PREFIX%%metronome.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
