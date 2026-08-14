@@ -216,8 +216,10 @@
   "pickingTip1": "Start slow with a metronome and build up speed gradually; the priority is keeping the open E even every time it lands.",
   "pickingTip2": "Use alternate picking (down-up), or alternate pick and finger if you want the pedal note to ring out longer.",
   "pickingTip3": "Mute the unused strings with your palm or thumb so they don't ring along by accident.",
+  "pickingChords": "Em, Em7 — also works over D major, the relative key of Dorian mode.",
 
   "pickingSeeOtherModesLabel": "See also:",
+  "pickingChordsHeading": "Sounds best over these chords",
   "pickingModeDorianLabel": "Dorian",
   "pickingModeJonicoLabel": "Ionian",
   "pickingModeFrigioLabel": "Phrygian",
@@ -243,6 +245,7 @@
   "pickingJonicoTip1": "Start slow with a metronome and build up speed gradually; the priority is keeping the open E even every time it lands.",
   "pickingJonicoTip2": "Use alternate picking (down-up), or alternate pick and finger if you want the pedal note to ring out longer.",
   "pickingJonicoTip3": "Mute the unused strings with your palm or thumb so they don't ring along by accident.",
+  "pickingJonicoChords": "E, Emaj7 — the tonic major chord, the most natural fit for this mode.",
 
   "pickingFrigioNavLabel": "See Phrygian picking over the open low E string →",
   "pickingFrigioPageTitle": "Phrygian picking over the open low E string · Guitar Chords",
@@ -261,6 +264,7 @@
   "pickingFrigioTip1": "Start slow with a metronome and build up speed gradually; the priority is keeping the open E even every time it lands.",
   "pickingFrigioTip2": "Use alternate picking (down-up), or alternate pick and finger if you want the pedal note to ring out longer.",
   "pickingFrigioTip3": "Mute the unused strings with your palm or thumb so they don't ring along by accident.",
+  "pickingFrigioChords": "Em — also over Am or C, since they share the same notes as Phrygian mode.",
 
   "pickingLidioNavLabel": "See Lydian picking over the open low E string →",
   "pickingLidioPageTitle": "Lydian picking over the open low E string · Guitar Chords",
@@ -279,6 +283,7 @@
   "pickingLidioTip1": "Start slow with a metronome and build up speed gradually; the priority is keeping the open E even every time it lands.",
   "pickingLidioTip2": "Use alternate picking (down-up), or alternate pick and finger if you want the pedal note to ring out longer.",
   "pickingLidioTip3": "Mute the unused strings with your palm or thumb so they don't ring along by accident.",
+  "pickingLidioChords": "E, Emaj7(#11) — the tonic major chord, with that floating raised-4th color.",
 
   "pickingMixolidioNavLabel": "See Mixolydian picking over the open low E string →",
   "pickingMixolidioPageTitle": "Mixolydian picking over the open low E string · Guitar Chords",
@@ -297,6 +302,7 @@
   "pickingMixolidioTip1": "Start slow with a metronome and build up speed gradually; the priority is keeping the open E even every time it lands.",
   "pickingMixolidioTip2": "Use alternate picking (down-up), or alternate pick and finger if you want the pedal note to ring out longer.",
   "pickingMixolidioTip3": "Mute the unused strings with your palm or thumb so they don't ring along by accident.",
+  "pickingMixolidioChords": "E7 — the tonic dominant chord; it also resolves nicely toward A.",
 
   "pickingEolicoNavLabel": "See Aeolian picking over the open low E string →",
   "pickingEolicoPageTitle": "Aeolian picking over the open low E string · Guitar Chords",
@@ -315,6 +321,7 @@
   "pickingEolicoTip1": "Start slow with a metronome and build up speed gradually; the priority is keeping the open E even every time it lands.",
   "pickingEolicoTip2": "Use alternate picking (down-up), or alternate pick and finger if you want the pedal note to ring out longer.",
   "pickingEolicoTip3": "Mute the unused strings with your palm or thumb so they don't ring along by accident.",
+  "pickingEolicoChords": "Em — also over G major, the relative key of Aeolian mode.",
 
   "pickingLocrioNavLabel": "See Locrian picking over the open low E string →",
   "pickingLocrioPageTitle": "Locrian picking over the open low E string · Guitar Chords",
@@ -333,6 +340,7 @@
   "pickingLocrioTip1": "Start slow with a metronome and build up speed gradually; the priority is keeping the open E even every time it lands.",
   "pickingLocrioTip2": "Use alternate picking (down-up), or alternate pick and finger if you want the pedal note to ring out longer.",
   "pickingLocrioTip3": "Mute the unused strings with your palm or thumb so they don't ring along by accident.",
+  "pickingLocrioChords": "E° (E diminished) — or, in context, over F major or D minor, since they share the same notes as Locrian mode.",
 
   "metronomeTitle": "Metronome",
   "metronomeBeatsAria": "Measure beats",

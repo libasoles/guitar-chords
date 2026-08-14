@@ -571,6 +571,27 @@ footer {
   text-align: center;
 }
 
+.picking-chords-highlight {
+  margin: 1.2rem 0 1.6rem;
+  padding: 0.9rem 1.1rem;
+  background: #fdf3ee;
+  border: 1px solid var(--accent);
+  border-left-width: 4px;
+  border-radius: 6px;
+}
+.picking-chords-highlight-label {
+  margin: 0 0 0.25rem;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+.picking-chords-highlight-text {
+  margin: 0;
+}
+
 .picking-tips {
   margin: 0.6rem 0 1.6rem;
   padding-left: 1.2rem;

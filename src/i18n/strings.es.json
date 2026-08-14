@@ -216,8 +216,10 @@
   "pickingTip1": "Empezá lento con metrónomo y subí la velocidad de a poco; la prioridad es que el Mi al aire suene parejo cada vez que aparece.",
   "pickingTip2": "Usá púa alternada (abajo-arriba) o alterná púa y dedo si querés que el pedal resuene más tiempo.",
   "pickingTip3": "Silenciá con la palma o con el dedo pulgar las cuerdas que no estás usando para evitar que suenen de más.",
+  "pickingChords": "Em, Em7 — también funciona sobre Re mayor (D), la tonalidad relativa del modo dórico.",
 
   "pickingSeeOtherModesLabel": "Ver también:",
+  "pickingChordsHeading": "Suena mejor sobre estos acordes",
   "pickingModeDorianLabel": "Dórico",
   "pickingModeJonicoLabel": "Jónico",
   "pickingModeFrigioLabel": "Frigio",
@@ -243,6 +245,7 @@
   "pickingJonicoTip1": "Empezá lento con metrónomo y subí la velocidad de a poco; la prioridad es que el Mi al aire suene parejo cada vez que aparece.",
   "pickingJonicoTip2": "Usá púa alternada (abajo-arriba) o alterná púa y dedo si querés que el pedal resuene más tiempo.",
   "pickingJonicoTip3": "Silenciá con la palma o con el dedo pulgar las cuerdas que no estás usando para evitar que suenen de más.",
+  "pickingJonicoChords": "E, Emaj7 — el acorde mayor de la tónica, el más natural para este modo.",
 
   "pickingFrigioNavLabel": "Ver punteo frigio con la 6ª cuerda al aire →",
   "pickingFrigioPageTitle": "Punteo frigio sobre la 6ª cuerda al aire · Acordes para la guitarra",
@@ -261,6 +264,7 @@
   "pickingFrigioTip1": "Empezá lento con metrónomo y subí la velocidad de a poco; la prioridad es que el Mi al aire suene parejo cada vez que aparece.",
   "pickingFrigioTip2": "Usá púa alternada (abajo-arriba) o alterná púa y dedo si querés que el pedal resuene más tiempo.",
   "pickingFrigioTip3": "Silenciá con la palma o con el dedo pulgar las cuerdas que no estás usando para evitar que suenen de más.",
+  "pickingFrigioChords": "Em — y también sobre Am o C, ya que comparten las mismas notas que el modo frigio.",
 
   "pickingLidioNavLabel": "Ver punteo lidio con la 6ª cuerda al aire →",
   "pickingLidioPageTitle": "Punteo lidio sobre la 6ª cuerda al aire · Acordes para la guitarra",
@@ -279,6 +283,7 @@
   "pickingLidioTip1": "Empezá lento con metrónomo y subí la velocidad de a poco; la prioridad es que el Mi al aire suene parejo cada vez que aparece.",
   "pickingLidioTip2": "Usá púa alternada (abajo-arriba) o alterná púa y dedo si querés que el pedal resuene más tiempo.",
   "pickingLidioTip3": "Silenciá con la palma o con el dedo pulgar las cuerdas que no estás usando para evitar que suenen de más.",
+  "pickingLidioChords": "E, Emaj7(#11) — el acorde mayor de la tónica, con ese color flotante de la 4ª aumentada.",
 
   "pickingMixolidioNavLabel": "Ver punteo mixolidio con la 6ª cuerda al aire →",
   "pickingMixolidioPageTitle": "Punteo mixolidio sobre la 6ª cuerda al aire · Acordes para la guitarra",
@@ -297,6 +302,7 @@
   "pickingMixolidioTip1": "Empezá lento con metrónomo y subí la velocidad de a poco; la prioridad es que el Mi al aire suene parejo cada vez que aparece.",
   "pickingMixolidioTip2": "Usá púa alternada (abajo-arriba) o alterná púa y dedo si querés que el pedal resuene más tiempo.",
   "pickingMixolidioTip3": "Silenciá con la palma o con el dedo pulgar las cuerdas que no estás usando para evitar que suenen de más.",
+  "pickingMixolidioChords": "E7 — el acorde dominante de la tónica; también resuelve bien hacia La (A).",
 
   "pickingEolicoNavLabel": "Ver punteo eólico con la 6ª cuerda al aire →",
   "pickingEolicoPageTitle": "Punteo eólico sobre la 6ª cuerda al aire · Acordes para la guitarra",
@@ -315,6 +321,7 @@
   "pickingEolicoTip1": "Empezá lento con metrónomo y subí la velocidad de a poco; la prioridad es que el Mi al aire suene parejo cada vez que aparece.",
   "pickingEolicoTip2": "Usá púa alternada (abajo-arriba) o alterná púa y dedo si querés que el pedal resuene más tiempo.",
   "pickingEolicoTip3": "Silenciá con la palma o con el dedo pulgar las cuerdas que no estás usando para evitar que suenen de más.",
+  "pickingEolicoChords": "Em — y también sobre Sol mayor (G), la tonalidad relativa del modo eólico.",
 
   "pickingLocrioNavLabel": "Ver punteo locrio con la 6ª cuerda al aire →",
   "pickingLocrioPageTitle": "Punteo locrio sobre la 6ª cuerda al aire · Acordes para la guitarra",
@@ -333,6 +340,7 @@
   "pickingLocrioTip1": "Empezá lento con metrónomo y subí la velocidad de a poco; la prioridad es que el Mi al aire suene parejo cada vez que aparece.",
   "pickingLocrioTip2": "Usá púa alternada (abajo-arriba) o alterná púa y dedo si querés que el pedal resuene más tiempo.",
   "pickingLocrioTip3": "Silenciá con la palma o con el dedo pulgar las cuerdas que no estás usando para evitar que suenen de más.",
+  "pickingLocrioChords": "E° (Mi disminuido) — o, en contexto, sobre Fa mayor (F) o Re menor (Dm), ya que comparten las mismas notas que el modo locrio.",
 
   "metronomeTitle": "Metrónomo",
   "metronomeBeatsAria": "Pulsos del compás",

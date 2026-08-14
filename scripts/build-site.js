@@ -358,6 +358,8 @@ function renderPickingPage(template, strings, locale, page) {
   html = html.split('%%PAGE_LEAD%%').join(strings[p + 'Lead'] || '');
   html = html.split('%%pickingIntro1%%').join(strings[p + 'Intro1'] || '');
   html = html.split('%%pickingIntro2%%').join(strings[p + 'Intro2'] || '');
+  html = html.split('%%pickingChordsHeading%%').join(strings.pickingChordsHeading || '');
+  html = html.split('%%pickingChordsText%%').join(strings[p + 'Chords'] || '');
   html = html.split('%%pickingFig1Alt%%').join(strings[p + 'Fig1Alt'] || '');
   html = html.split('%%pickingFig1Caption%%').join(strings[p + 'Fig1Caption'] || '');
   html = html.split('%%pickingFig2Alt%%').join(strings[p + 'Fig2Alt'] || '');
