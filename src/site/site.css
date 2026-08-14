@@ -142,6 +142,10 @@ a:hover {
   font-size: 0.9rem;
 }
 
+.v7-nav-current {
+  color: var(--ink-soft);
+}
+
 /* ----- V7 guide pages ----- */
 
 .v7-grid {

@@ -169,16 +169,20 @@ const PICKING_PAGES = [
 // Home-nav / 404 / og default link points at the original Dorian lesson.
 const PICKING_SLUG = PICKING_PAGES[0].slug;
 
-// Builds the "see also" nav line linking a picking-lesson page to its two
-// sibling modes.
+// Builds the "see also" nav line linking a picking-lesson page to its
+// sibling modes, in the fixed PICKING_PAGES order. The current page's own
+// mode is rendered as plain (non-linked) text so the list order never
+// shifts depending on which page you're on.
 function pickingOtherModesNav(strings, locale, page) {
   const label = strings.pickingSeeOtherModesLabel || '';
-  const links = PICKING_PAGES.filter(function (pg) { return pg.slug !== page.slug; })
-    .map(function (pg) {
-      return '<a href="' + v7PageHref(locale, pg.slug) + '">' + (strings[pg.modeLabelKey] || pg.mode) + '</a>';
-    })
-    .join(' · ');
-  return '<p class="v7-nav">' + label + ' ' + links + '</p>';
+  const items = PICKING_PAGES.map(function (pg) {
+    const modeLabel = strings[pg.modeLabelKey] || pg.mode;
+    if (pg.slug === page.slug) {
+      return '<span class="v7-nav-current">' + modeLabel + '</span>';
+    }
+    return '<a href="' + v7PageHref(locale, pg.slug) + '">' + modeLabel + '</a>';
+  }).join(' · ');
+  return '<p class="v7-nav">' + label + ' ' + items + '</p>';
 }
 
 function render(template, strings, locale, assetsPrefix, outputMode) {
