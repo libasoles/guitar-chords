@@ -156,13 +156,14 @@ a:hover {
   display: none;
 }
 .v7-nav-group summary::after {
-  content: "▾";
+  content: "→";
   display: inline-block;
   margin-left: 0.4em;
+  transform: rotate(90deg);
   transition: transform 0.15s ease;
 }
 .v7-nav-group[open] summary::after {
-  transform: rotate(180deg);
+  transform: rotate(270deg);
 }
 .v7-nav-group .v7-nav {
   margin: 0.5rem 0 0 1rem;
