@@ -82,7 +82,12 @@
     sidePadding: 0.08,
     fretSize: 1.3,
     emptyStringIndicatorSize: 0.5,
-    showFretMarkers: false,
+    showFretMarkers: true,
+    fretMarkerColor: 'rgba(26, 26, 26, 0.25)',
+    fretMarkerSize: 0.3,
+    // Real fretboards dot frets 3, 5, 7, 9 and 12 (double dot). svguitar
+    // indexes fret markers from 0, so subtract 1 from each real fret number.
+    fretMarkers: [2, 4, 6, 8, { fret: 11, double: true }],
   };
 
   // In horizontal orientation the vendored svguitar draws an open string ("o")
