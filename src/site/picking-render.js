@@ -134,6 +134,23 @@
     if (!fretLineXs.length || !isFinite(topY)) return;
     fretLineXs.sort(function (a, b) { return a - b; });
 
+    var gap = 26;
+    var radius = 8;
+    var markerY = topY - gap;
+
+    // Grow the viewBox upward if there isn't enough headroom above the neck,
+    // so the dots don't get clipped — svguitar only reserves a few units of
+    // margin above the top string, not enough for the wider gap here.
+    var box = (svg.getAttribute('viewBox') || '').split(/\s+/).map(Number);
+    if (box.length === 4) {
+      var needed = radius + 2 - (markerY - box[1]);
+      if (needed > 0) {
+        box[1] -= needed;
+        box[3] += needed;
+        svg.setAttribute('viewBox', box.join(' '));
+      }
+    }
+
     var svgNS = 'http://www.w3.org/2000/svg';
     POSITION_MARKER_FRETS.forEach(function (fret) {
       if (fret > totalFrets) return;
@@ -142,8 +159,8 @@
       if (left === undefined || right === undefined) return;
       var dot = document.createElementNS(svgNS, 'circle');
       dot.setAttribute('cx', (left + right) / 2);
-      dot.setAttribute('cy', topY - 16);
-      dot.setAttribute('r', 8);
+      dot.setAttribute('cy', markerY);
+      dot.setAttribute('r', radius);
       dot.setAttribute('fill', 'rgba(26, 26, 26, 0.35)');
       dot.setAttribute('class', 'position-marker position-marker-fret-' + fret);
       svg.appendChild(dot);
