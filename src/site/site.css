@@ -142,6 +142,35 @@ a:hover {
   font-size: 0.9rem;
 }
 
+.v7-nav-group {
+  margin: 1.2rem 0 1.6rem;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+}
+.v7-nav-group summary {
+  cursor: pointer;
+  color: var(--accent);
+  list-style: none;
+}
+.v7-nav-group summary::-webkit-details-marker {
+  display: none;
+}
+.v7-nav-group summary::after {
+  content: "▾";
+  display: inline-block;
+  margin-left: 0.4em;
+  transition: transform 0.15s ease;
+}
+.v7-nav-group[open] summary::after {
+  transform: rotate(180deg);
+}
+.v7-nav-group .v7-nav {
+  margin: 0.5rem 0 0 1rem;
+}
+.v7-nav-group .v7-nav:last-child {
+  margin-bottom: 0;
+}
+
 /* ----- V7 guide pages ----- */
 
 .v7-grid {

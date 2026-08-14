@@ -193,7 +193,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     'h1', 'lead', 'h2Decoder', 'decoderIntro',
     'thPart', 'thSymbols', 'thMeaning', 'thExample',
     'extensionHeading', 'extensionDescription',
-    'v7NavLabel', 'circleNavLabel', 'pickingNavLabel',
+    'v7NavLabel', 'circleNavLabel', 'pickingGroupLabel', 'pickingNavLabel',
     'pickingJonicoNavLabel', 'pickingFrigioNavLabel',
     'pickingLidioNavLabel', 'pickingMixolidioNavLabel', 'pickingEolicoNavLabel',
   ];
