@@ -165,6 +165,7 @@ const PICKING_PAGES = [
   { slug: 'punteo-lidio-sexta-cuerda-al-aire', mode: 'lydian', prefix: 'pickingLidio', modeLabelKey: 'pickingModeLidioLabel' },
   { slug: 'punteo-mixolidio-sexta-cuerda-al-aire', mode: 'mixolydian', prefix: 'pickingMixolidio', modeLabelKey: 'pickingModeMixolidioLabel' },
   { slug: 'punteo-eolico-sexta-cuerda-al-aire', mode: 'aeolian', prefix: 'pickingEolico', modeLabelKey: 'pickingModeEolicoLabel' },
+  { slug: 'punteo-locrio-sexta-cuerda-al-aire', mode: 'locrian', prefix: 'pickingLocrio', modeLabelKey: 'pickingModeLocrioLabel' },
 ];
 // Home-nav / 404 / og default link points at the original Dorian lesson.
 const PICKING_SLUG = PICKING_PAGES[0].slug;
@@ -200,6 +201,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     'v7NavLabel', 'circleNavLabel', 'pickingGroupLabel', 'pickingNavLabel',
     'pickingJonicoNavLabel', 'pickingFrigioNavLabel',
     'pickingLidioNavLabel', 'pickingMixolidioNavLabel', 'pickingEolicoNavLabel',
+    'pickingLocrioNavLabel',
   ];
   simpleKeys.forEach(function (key) {
     html = html.split('%%' + key + '%%').join(strings[key] || '');
@@ -225,6 +227,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html.split('%%PICKING_LIDIO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[3].slug));
   html = html.split('%%PICKING_MIXOLIDIO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[4].slug));
   html = html.split('%%PICKING_EOLICO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[5].slug));
+  html = html.split('%%PICKING_LOCRIO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[6].slug));
 
   return html;
 }
