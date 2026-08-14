@@ -82,13 +82,11 @@
     sidePadding: 0.08,
     fretSize: 1.3,
     emptyStringIndicatorSize: 0.5,
-    showFretMarkers: true,
-    fretMarkerColor: 'rgba(26, 26, 26, 0.25)',
-    fretMarkerSize: 0.3,
-    // Real fretboards dot frets 3, 5, 7, 9 and 12 (double dot). svguitar
-    // indexes fret markers from 0, so subtract 1 from each real fret number.
-    fretMarkers: [2, 4, 6, 8, { fret: 11, double: true }],
+    showFretMarkers: false,
   };
+
+  // Real fretboards dot these frets for orientation.
+  var POSITION_MARKER_FRETS = [3, 5, 7, 9, 12];
 
   // In horizontal orientation the vendored svguitar draws an open string ("o")
   // as a regular finger circle at cx=0 — half of it falls outside the viewBox,
@@ -115,6 +113,43 @@
     });
   }
 
+  // Real (criolla) fretboards mark frets 3, 5, 7, 9 and 12 with a small dot
+  // inlaid above the strings, not on the neck itself. svguitar's own
+  // fretMarkers option draws them centered inside the fretboard, so instead
+  // this reads the fret-line x positions svguitar already drew and places a
+  // dot above the top string line, centered over each marked fret's cell.
+  function addPositionMarkers(svg, totalFrets) {
+    var fretLineXs = [];
+    var topY = Infinity;
+    svg.querySelectorAll('line').forEach(function (line) {
+      var x1 = parseFloat(line.getAttribute('x1'));
+      var y1 = parseFloat(line.getAttribute('y1'));
+      var x2 = parseFloat(line.getAttribute('x2'));
+      var y2 = parseFloat(line.getAttribute('y2'));
+      if (x1 === x2 && y1 !== y2) {
+        fretLineXs.push(x1);
+        topY = Math.min(topY, y1, y2);
+      }
+    });
+    if (!fretLineXs.length || !isFinite(topY)) return;
+    fretLineXs.sort(function (a, b) { return a - b; });
+
+    var svgNS = 'http://www.w3.org/2000/svg';
+    POSITION_MARKER_FRETS.forEach(function (fret) {
+      if (fret > totalFrets) return;
+      var left = fretLineXs[fret - 1];
+      var right = fretLineXs[fret];
+      if (left === undefined || right === undefined) return;
+      var dot = document.createElementNS(svgNS, 'circle');
+      dot.setAttribute('cx', (left + right) / 2);
+      dot.setAttribute('cy', topY - 16);
+      dot.setAttribute('r', 8);
+      dot.setAttribute('fill', 'rgba(26, 26, 26, 0.35)');
+      dot.setAttribute('class', 'position-marker position-marker-fret-' + fret);
+      svg.appendChild(dot);
+    });
+  }
+
   var mode = (document.body && document.body.getAttribute('data-picking-mode')) || 'dorian';
   var PATTERNS = buildPatterns(mode);
 
@@ -128,6 +163,9 @@
       .draw();
 
     var svg = el.querySelector('svg');
-    if (svg) fixStringMarkers(svg);
+    if (svg) {
+      fixStringMarkers(svg);
+      addPositionMarkers(svg, pattern.frets);
+    }
   });
 })();
