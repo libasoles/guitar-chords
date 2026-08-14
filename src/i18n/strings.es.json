@@ -198,8 +198,8 @@
   "circleLabelFifth": "5°",
   "circleTimesLabel": "veces",
 
-  "pickingGroupLabel": "Punteo con cuerdas al aire",
-  "pickingNavLabel": "Ver punteo dórico con la 6ª cuerda al aire →",
+  "pickingGroupLabel": "Punteo con la 6ª cuerda al aire",
+  "pickingNavLabel": "Ver punteo dórico →",
   "pickingPageTitle": "Punteo dórico sobre la 6ª cuerda al aire · Acordes para la guitarra",
   "pickingMetaDescription": "Tres patrones de punteo en modo dórico usando la 6ª cuerda (Mi grave) al aire como nota pedal. Diagramas de traste listos para practicar.",
   "pickingH1": "Punteo dórico sobre la 6ª cuerda al aire",
@@ -228,7 +228,7 @@
   "pickingModeEolicoLabel": "Eólico",
   "pickingModeLocrioLabel": "Locrio",
 
-  "pickingJonicoNavLabel": "Ver punteo jónico con la 6ª cuerda al aire →",
+  "pickingJonicoNavLabel": "Ver punteo jónico →",
   "pickingJonicoPageTitle": "Punteo jónico sobre la 6ª cuerda al aire · Acordes para la guitarra",
   "pickingJonicoMetaDescription": "Tres patrones de punteo en modo jónico (escala mayor) usando la 6ª cuerda (Mi grave) al aire como nota pedal. Diagramas de traste listos para practicar.",
   "pickingJonicoH1": "Punteo jónico sobre la 6ª cuerda al aire",
@@ -247,7 +247,7 @@
   "pickingJonicoTip3": "Silenciá con la palma o con el dedo pulgar las cuerdas que no estás usando para evitar que suenen de más.",
   "pickingJonicoChords": "E, Emaj7 — el acorde mayor de la tónica, el más natural para este modo.",
 
-  "pickingFrigioNavLabel": "Ver punteo frigio con la 6ª cuerda al aire →",
+  "pickingFrigioNavLabel": "Ver punteo frigio →",
   "pickingFrigioPageTitle": "Punteo frigio sobre la 6ª cuerda al aire · Acordes para la guitarra",
   "pickingFrigioMetaDescription": "Tres patrones de punteo en modo frigio usando la 6ª cuerda (Mi grave) al aire como nota pedal. Diagramas de traste listos para practicar.",
   "pickingFrigioH1": "Punteo frigio sobre la 6ª cuerda al aire",
@@ -266,7 +266,7 @@
   "pickingFrigioTip3": "Silenciá con la palma o con el dedo pulgar las cuerdas que no estás usando para evitar que suenen de más.",
   "pickingFrigioChords": "Em — y también sobre Am o C, ya que comparten las mismas notas que el modo frigio.",
 
-  "pickingLidioNavLabel": "Ver punteo lidio con la 6ª cuerda al aire →",
+  "pickingLidioNavLabel": "Ver punteo lidio →",
   "pickingLidioPageTitle": "Punteo lidio sobre la 6ª cuerda al aire · Acordes para la guitarra",
   "pickingLidioMetaDescription": "Tres patrones de punteo en modo lidio usando la 6ª cuerda (Mi grave) al aire como nota pedal. Diagramas de traste listos para practicar.",
   "pickingLidioH1": "Punteo lidio sobre la 6ª cuerda al aire",
@@ -285,7 +285,7 @@
   "pickingLidioTip3": "Silenciá con la palma o con el dedo pulgar las cuerdas que no estás usando para evitar que suenen de más.",
   "pickingLidioChords": "E, Emaj7(#11) — el acorde mayor de la tónica, con ese color flotante de la 4ª aumentada.",
 
-  "pickingMixolidioNavLabel": "Ver punteo mixolidio con la 6ª cuerda al aire →",
+  "pickingMixolidioNavLabel": "Ver punteo mixolidio →",
   "pickingMixolidioPageTitle": "Punteo mixolidio sobre la 6ª cuerda al aire · Acordes para la guitarra",
   "pickingMixolidioMetaDescription": "Tres patrones de punteo en modo mixolidio usando la 6ª cuerda (Mi grave) al aire como nota pedal. Diagramas de traste listos para practicar.",
   "pickingMixolidioH1": "Punteo mixolidio sobre la 6ª cuerda al aire",
@@ -304,7 +304,7 @@
   "pickingMixolidioTip3": "Silenciá con la palma o con el dedo pulgar las cuerdas que no estás usando para evitar que suenen de más.",
   "pickingMixolidioChords": "E7 — el acorde dominante de la tónica; también resuelve bien hacia La (A).",
 
-  "pickingEolicoNavLabel": "Ver punteo eólico con la 6ª cuerda al aire →",
+  "pickingEolicoNavLabel": "Ver punteo eólico →",
   "pickingEolicoPageTitle": "Punteo eólico sobre la 6ª cuerda al aire · Acordes para la guitarra",
   "pickingEolicoMetaDescription": "Tres patrones de punteo en modo eólico (escala menor natural) usando la 6ª cuerda (Mi grave) al aire como nota pedal. Diagramas de traste listos para practicar.",
   "pickingEolicoH1": "Punteo eólico sobre la 6ª cuerda al aire",
@@ -323,7 +323,7 @@
   "pickingEolicoTip3": "Silenciá con la palma o con el dedo pulgar las cuerdas que no estás usando para evitar que suenen de más.",
   "pickingEolicoChords": "Em — y también sobre Sol mayor (G), la tonalidad relativa del modo eólico.",
 
-  "pickingLocrioNavLabel": "Ver punteo locrio con la 6ª cuerda al aire →",
+  "pickingLocrioNavLabel": "Ver punteo locrio →",
   "pickingLocrioPageTitle": "Punteo locrio sobre la 6ª cuerda al aire · Acordes para la guitarra",
   "pickingLocrioMetaDescription": "Tres patrones de punteo en modo locrio (escala semidisminuida) usando la 6ª cuerda (Mi grave) al aire como nota pedal. Diagramas de traste listos para practicar.",
   "pickingLocrioH1": "Punteo locrio sobre la 6ª cuerda al aire",
