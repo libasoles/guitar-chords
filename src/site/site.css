@@ -171,6 +171,10 @@ a:hover {
   margin-bottom: 0;
 }
 
+.v7-nav-current {
+  color: var(--ink-soft);
+}
+
 /* ----- V7 guide pages ----- */
 
 .v7-grid {
