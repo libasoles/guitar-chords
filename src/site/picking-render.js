@@ -120,23 +120,30 @@
   // dot above the top string line, centered over each marked fret's cell.
   function addPositionMarkers(svg, totalFrets) {
     var fretLineXs = [];
-    var topY = Infinity;
+    var topInk = Infinity;
     svg.querySelectorAll('line').forEach(function (line) {
       var x1 = parseFloat(line.getAttribute('x1'));
       var y1 = parseFloat(line.getAttribute('y1'));
       var x2 = parseFloat(line.getAttribute('x2'));
       var y2 = parseFloat(line.getAttribute('y2'));
-      if (x1 === x2 && y1 !== y2) {
-        fretLineXs.push(x1);
-        topY = Math.min(topY, y1, y2);
-      }
+      if (x1 === x2 && y1 !== y2) fretLineXs.push(x1);
+      topInk = Math.min(topInk, y1, y2);
     });
-    if (!fretLineXs.length || !isFinite(topY)) return;
+    // The topmost string's finger circles (open-string or fretted notes)
+    // stick out above the string line itself — measure their top edge too,
+    // so the gap above the markers is consistent whether or not the first
+    // string has a note on it (otherwise a note there crowds the marker).
+    svg.querySelectorAll('circle').forEach(function (circle) {
+      var cy = parseFloat(circle.getAttribute('cy'));
+      var r = parseFloat(circle.getAttribute('r'));
+      if (isFinite(cy) && isFinite(r)) topInk = Math.min(topInk, cy - r);
+    });
+    if (!fretLineXs.length || !isFinite(topInk)) return;
     fretLineXs.sort(function (a, b) { return a - b; });
 
-    var gap = 26;
+    var gap = 18;
     var radius = 8;
-    var markerY = topY - gap;
+    var markerY = topInk - gap;
 
     // Grow the viewBox upward if there isn't enough headroom above the neck,
     // so the dots don't get clipped — svguitar only reserves a few units of
