@@ -170,13 +170,19 @@ const PICKING_PAGES = [
 // Home-nav / 404 / og default link points at the original Dorian lesson.
 const PICKING_SLUG = PICKING_PAGES[0].slug;
 
+// Display order for the "see also" nav and the home-page picking menu:
+// Ionian (jónico) before Dorian (dórico), then the rest in PICKING_PAGES
+// order. PICKING_PAGES[0] itself stays Dorian — it's the canonical/original
+// lesson used for the home-nav link, sitemap, and OG default.
+const PICKING_MENU_ORDER = [1, 0, 2, 3, 4, 5, 6].map(function (i) { return PICKING_PAGES[i]; });
+
 // Builds the "see also" nav line linking a picking-lesson page to its
-// sibling modes, in the fixed PICKING_PAGES order. The current page's own
-// mode is rendered as plain (non-linked) text so the list order never
-// shifts depending on which page you're on.
+// sibling modes, in PICKING_MENU_ORDER. The current page's own mode is
+// rendered as plain (non-linked) text so the list order never shifts
+// depending on which page you're on.
 function pickingOtherModesNav(strings, locale, page) {
   const label = strings.pickingSeeOtherModesLabel || '';
-  const items = PICKING_PAGES.map(function (pg) {
+  const items = PICKING_MENU_ORDER.map(function (pg) {
     const modeLabel = strings[pg.modeLabelKey] || pg.mode;
     if (pg.slug === page.slug) {
       return '<span class="v7-nav-current">' + modeLabel + '</span>';
