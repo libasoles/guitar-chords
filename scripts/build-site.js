@@ -64,6 +64,7 @@ if (!fs.existsSync(JSPDF)) {
 const template = fs.readFileSync(path.join(SRC_SITE, 'template.html'), 'utf8');
 const v7Template = fs.readFileSync(path.join(SRC_SITE, 'v7-guide.html'), 'utf8');
 const circleTemplate = fs.readFileSync(path.join(SRC_SITE, 'circle-fifths.html'), 'utf8');
+const dimTemplate = fs.readFileSync(path.join(SRC_SITE, 'dim-guide.html'), 'utf8');
 const pickingTemplate = fs.readFileSync(path.join(SRC_SITE, 'picking-lesson.html'), 'utf8');
 const notFoundTemplate = fs.readFileSync(path.join(SRC_SITE, '404.html'), 'utf8');
 const LOCALES = ['es', 'en'];
@@ -154,6 +155,11 @@ const CIRCLE_PAGES = [
 // Home-nav link points at the major "chords and their notes" page.
 const CIRCLE_SLUG = CIRCLE_PAGES[0].slug;
 
+// Diminished-chords page, rendered from src/site/dim-guide.html. Single
+// page (no locale-agnostic pairing like V7/circle) with three movable dim7
+// shapes grouped by root string (6th, 5th, 4th).
+const DIM_SLUG = 'acordes-disminuidos';
+
 // Static lesson pages rendered from src/site/picking-lesson.html — modal
 // picking patterns with the open low E string as a pedal note. One page per
 // mode; each cross-links to the other two. i18n keys are namespaced by
@@ -204,7 +210,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     'h1', 'lead', 'h2Decoder', 'decoderIntro',
     'thPart', 'thSymbols', 'thMeaning', 'thExample',
     'extensionHeading', 'extensionDescription',
-    'v7NavLabel', 'circleNavLabel', 'pickingGroupLabel', 'pickingNavLabel',
+    'v7NavLabel', 'circleNavLabel', 'dimNavLabel', 'pickingGroupLabel', 'pickingNavLabel',
     'pickingJonicoNavLabel', 'pickingFrigioNavLabel',
     'pickingLidioNavLabel', 'pickingMixolidioNavLabel', 'pickingEolicoNavLabel',
     'pickingLocrioNavLabel',
@@ -227,6 +233,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html.split('%%SW_PATH%%').join('/sw.js');
   html = html.split('%%V7_PAGE_HREF%%').join(v7PageHref(locale));
   html = html.split('%%CIRCLE_PAGE_HREF%%').join(v7PageHref(locale, CIRCLE_SLUG));
+  html = html.split('%%DIM_PAGE_HREF%%').join(v7PageHref(locale, DIM_SLUG));
   html = html.split('%%PICKING_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[0].slug));
   html = html.split('%%PICKING_JONICO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[1].slug));
   html = html.split('%%PICKING_FRIGIO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[2].slug));
@@ -321,6 +328,45 @@ function renderCirclePage(template, strings, locale, page) {
   html = html.split('%%canonicalUrl%%').join(v7CanonicalUrl(locale, page.slug));
   html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es', page.slug));
   html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en', page.slug));
+  html = html.split('%%ogImage%%').join(ogImage);
+  html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
+  html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
+  html = html.split('%%SW_PATH%%').join('/sw.js');
+
+  return html;
+}
+
+// Render the diminished-chords page (src/site/dim-guide.html) for one
+// locale. Single static page (no major/minor pairing) with three grids of
+// dim7 diagrams, grouped by which string carries the root.
+function renderDimPage(template, strings, locale) {
+  const resolvedAssetsPrefix = locale === 'es' ? 'assets/' : '../assets/';
+  const ogImage = SITE_BASE_URL + '/assets/og-image.png';
+  let html = template;
+
+  const simpleKeys = [
+    'htmlLang', 'wordmark', 'wordmarkSmall', 'altLangLabel',
+    'extensionHeading', 'extensionDescription',
+    'dimSection6Title', 'dimSection6Lead',
+    'dimSection5Title', 'dimSection5Lead',
+    'dimSection4Title', 'dimSection4Lead',
+  ];
+  simpleKeys.forEach(function (key) {
+    html = html.split('%%' + key + '%%').join(strings[key] || '');
+  });
+
+  html = html.split('%%PAGE_TITLE%%').join(strings.dimPageTitle || '');
+  html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings.dimMetaDescription || '');
+  html = html.split('%%PAGE_H1%%').join(strings.dimH1 || '');
+  html = html.split('%%PAGE_LEAD%%').join(strings.dimLead || '');
+  html = html.split('%%PAGE_SCRIPT%%').join(resolvedAssetsPrefix + 'dim-guide.js');
+
+  html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
+  html = html.split('%%homeHref%%').join(homeHref(locale));
+  html = html.split('%%altLangHref%%').join(locale === 'es' ? v7PageHref('en', DIM_SLUG) : v7PageHref('es', DIM_SLUG));
+  html = html.split('%%canonicalUrl%%').join(v7CanonicalUrl(locale, DIM_SLUG));
+  html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es', DIM_SLUG));
+  html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en', DIM_SLUG));
   html = html.split('%%ogImage%%').join(ogImage);
   html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
   html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
@@ -451,6 +497,8 @@ copyFile(path.join(SRC_SHARED, 'v7-chord-overrides.js'), path.join(ASSETS_DIST, 
 copyFile(path.join(SRC_SITE, 'circle-fifths.js'), path.join(ASSETS_DIST, 'circle-fifths.js'));
 copyFile(path.join(SRC_SITE, 'circle-fifths-minor.js'), path.join(ASSETS_DIST, 'circle-fifths-minor.js'));
 copyFile(path.join(SRC_SHARED, 'circle-render.js'), path.join(ASSETS_DIST, 'circle-render.js'));
+copyFile(path.join(SRC_SITE, 'dim-guide.js'), path.join(ASSETS_DIST, 'dim-guide.js'));
+copyFile(path.join(SRC_SHARED, 'dim-page-render.js'), path.join(ASSETS_DIST, 'dim-page-render.js'));
 copyFile(path.join(SRC_SITE, 'site.css'), path.join(ASSETS_DIST, 'site.css'));
 copyFile(path.join(SRC_SITE, 'picking-render.js'), path.join(ASSETS_DIST, 'picking-render.js'));
 copyFile(path.join(SRC_SITE, 'metronome.js'), path.join(ASSETS_DIST, 'metronome.js'));
@@ -539,6 +587,8 @@ const precacheUrls = [
   '/assets/circle-render.js',
   '/assets/circle-fifths.js',
   '/assets/circle-fifths-minor.js',
+  '/assets/dim-guide.js',
+  '/assets/dim-page-render.js',
   '/assets/vendor/svguitar.umd.js',
   '/assets/vendor/fuzzysort.js',
   '/assets/vendor/jspdf.umd.min.js',
@@ -585,6 +635,13 @@ LOCALES.forEach(function (locale) {
       say(path.relative(ROOT, circleOutFile));
     });
 
+    {
+      const dimHtml = renderDimPage(dimTemplate, strings, locale);
+      const dimOutFile = path.join(DIST_SITE, DIM_SLUG + '.html');
+      fs.writeFileSync(dimOutFile, dimHtml, 'utf8');
+      say(path.relative(ROOT, dimOutFile));
+    }
+
     PICKING_PAGES.forEach(function (page) {
       const pickingHtml = renderPickingPage(pickingTemplate, strings, locale, page);
       const pickingOutFile = path.join(DIST_SITE, page.slug + '.html');
@@ -620,6 +677,13 @@ LOCALES.forEach(function (locale) {
     fs.writeFileSync(circleOutFile, circleHtml, 'utf8');
     say(path.relative(ROOT, circleOutFile));
   });
+
+  {
+    const dimHtml = renderDimPage(dimTemplate, strings, locale);
+    const dimOutFile = path.join(localeDir, DIM_SLUG + '.html');
+    fs.writeFileSync(dimOutFile, dimHtml, 'utf8');
+    say(path.relative(ROOT, dimOutFile));
+  }
 
   PICKING_PAGES.forEach(function (page) {
     const pickingHtml = renderPickingPage(pickingTemplate, strings, locale, page);
@@ -729,6 +793,22 @@ const sitemapXml = [
       '  </url>',
     ];
   }),
+  '  <url>',
+  '    <loc>' + SITE_BASE_URL + '/' + DIM_SLUG + '</loc>',
+  '    <lastmod>' + today + '</lastmod>',
+  '    <changefreq>monthly</changefreq>',
+  '    <priority>0.5</priority>',
+  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + DIM_SLUG + '"/>',
+  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + DIM_SLUG + '"/>',
+  '  </url>',
+  '  <url>',
+  '    <loc>' + SITE_BASE_URL + '/en/' + DIM_SLUG + '</loc>',
+  '    <lastmod>' + today + '</lastmod>',
+  '    <changefreq>monthly</changefreq>',
+  '    <priority>0.4</priority>',
+  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + DIM_SLUG + '"/>',
+  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + DIM_SLUG + '"/>',
+  '  </url>',
   ...PICKING_PAGES.flatMap(function (page) {
     return [
       '  <url>',

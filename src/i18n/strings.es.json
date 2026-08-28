@@ -198,6 +198,18 @@
   "circleLabelFifth": "5°",
   "circleTimesLabel": "veces",
 
+  "dimNavLabel": "Ver los acordes disminuidos →",
+  "dimPageTitle": "Acordes disminuidos en la guitarra · Acordes para la guitarra",
+  "dimMetaDescription": "Los 12 acordes disminuidos (dim7) en la guitarra, con la digitación movible en la 6ª, la 5ª y la 4ª cuerda. Diagramas listos para tocar en cualquier posición del mástil.",
+  "dimH1": "Acordes disminuidos",
+  "dimLead": "El acorde disminuido séptima (dim7) es simétrico: repite la misma forma cada 3 trastes. Con sólo tres formas movibles —una por cada cuerda donde puede caer la tónica— podés tocarlo en cualquier tonalidad y en cualquier parte del mástil.",
+  "dimSection6Title": "Tónica en la 6ª cuerda",
+  "dimSection6Lead": "La forma más grave: la tónica suena en la 6ª cuerda (Mi grave), con la 5ª y la 1ª apagadas.",
+  "dimSection5Title": "Tónica en la 5ª cuerda",
+  "dimSection5Lead": "La misma idea, un cuerda más arriba: la tónica suena en la 5ª cuerda (La), con la 6ª y la 4ª apagadas.",
+  "dimSection4Title": "Tónica en la 4ª cuerda",
+  "dimSection4Lead": "La forma más compacta: sólo dos trastes de ancho, con la tónica en la 4ª cuerda (Re) y las cuerdas 6ª y 5ª apagadas.",
+
   "pickingGroupLabel": "Punteo con la 6ª cuerda al aire",
   "pickingNavLabel": "Ver punteo dórico →",
   "pickingPageTitle": "Punteo dórico sobre la 6ª cuerda al aire · Acordes para la guitarra",

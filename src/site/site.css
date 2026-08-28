@@ -407,6 +407,32 @@ a:hover {
   }
 }
 
+/* ----- Diminished chords page ----- */
+
+.dim-section-lead {
+  color: var(--ink-soft);
+  margin: 0.4rem 0 1.2rem;
+}
+
+.dim-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.6rem 1.2rem;
+  margin: 1rem 0 2.4rem;
+}
+.dim-grid .v7-card {
+  width: 130px;
+}
+
+@media (max-width: 480px) {
+  .dim-grid {
+    gap: 1.2rem 0.8rem;
+  }
+  .dim-grid .v7-card {
+    width: 92px;
+  }
+}
+
 code {
   font-family: var(--mono);
   font-size: 0.9em;

@@ -198,6 +198,18 @@
   "circleLabelFifth": "5th",
   "circleTimesLabel": "times",
 
+  "dimNavLabel": "See diminished chords →",
+  "dimPageTitle": "Diminished chords on guitar · Guitar Chords",
+  "dimMetaDescription": "The 12 diminished chords (dim7) on guitar, with the movable fingering on the 6th, 5th and 4th string. Ready-to-play diagrams for any position on the neck.",
+  "dimH1": "Diminished chords",
+  "dimLead": "The diminished seventh chord (dim7) is symmetric: it repeats the same shape every 3 frets. With just three movable shapes — one for each string the root can fall on — you can play it in any key, anywhere on the neck.",
+  "dimSection6Title": "Root on the 6th string",
+  "dimSection6Lead": "The lowest shape: the root sounds on the 6th string (low E), with the 5th and 1st strings muted.",
+  "dimSection5Title": "Root on the 5th string",
+  "dimSection5Lead": "Same idea, one string up: the root sounds on the 5th string (A), with the 6th and 4th strings muted.",
+  "dimSection4Title": "Root on the 4th string",
+  "dimSection4Lead": "The most compact shape: only two frets wide, with the root on the 4th string (D) and the 6th and 5th strings muted.",
+
   "pickingGroupLabel": "Picking over open strings",
   "pickingNavLabel": "See Dorian picking over the open low E string →",
   "pickingPageTitle": "Dorian picking over the open low E string · Guitar Chords",
