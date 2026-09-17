@@ -42,7 +42,12 @@
   // es la letra americana de Re, así que abreviar Do como "d" chocaría con
   // eso. "s" es ambigua entre Sol y Si; se prioriza Sol por ser la más
   // buscada, y Si sigue accesible escribiendo "si" completo.
-  const ES_NOTE_PREFIX = /^(sol|do|re|mi|fa|la|si|r|m|l|s)/;
+  // La abreviatura de una sola letra sólo debe activarse cuando esa letra
+  // no es en realidad el comienzo de otra palabra (p. ej. "sus", "maj",
+  // "min", "dim"): por eso exige que NO le sigan 2+ letras consecutivas.
+  // Sí permite una sola letra más (como la "m" de menor en "Rm" → Dm) o
+  // dígitos/#/b/fin de string ("s7", "sm7", "s").
+  const ES_NOTE_PREFIX = /^(sol|do|re|mi|fa|la|si|r(?![a-z]{2})|m(?![a-z]{2})|l(?![a-z]{2})|s(?![a-z]{2}))/;
   const ES_TO_EN_NOTE = {
     sol: 'g', do: 'c', re: 'd', mi: 'e', fa: 'f', la: 'a', si: 'b',
     r: 'd', m: 'e', l: 'a', s: 'g',
@@ -62,7 +67,7 @@
   // matchea "do", "re7" matchea "re", y sólo una "d" sin "o" cae en "d"→c).
   // Se aplica sólo a la QUERY, nunca a los nombres/alias de la base (siempre
   // en americano), para no romper el matching interno.
-  const ES_NOTE_PREFIX_WITH_D = /^(sol|do|re|mi|fa|la|si|d|r|m|l|s)/;
+  const ES_NOTE_PREFIX_WITH_D = /^(sol|do|re|mi|fa|la|si|d(?![a-z]{2})|r(?![a-z]{2})|m(?![a-z]{2})|l(?![a-z]{2})|s(?![a-z]{2}))/;
   const ES_TO_EN_NOTE_WITH_D = Object.assign({ d: 'c' }, ES_TO_EN_NOTE);
 
   // Normaliza un string de acorde/query a una forma comparable.
