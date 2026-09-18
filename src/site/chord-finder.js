@@ -255,7 +255,8 @@
     '.error strong { color: var(--accent, #8b0000); }',
     '',
     '.pinned-strip {',
-    '  margin: 1rem 0 1.5rem; padding: 0.8rem 1rem;',
+    '  position: relative;',
+    '  margin: 1rem 0 1.5rem; padding: 0.8rem 1rem 2.1rem;',
     '  background: var(--paper, #fdfaf5);',
     '  border: 1px solid var(--accent, #8b0000);',
     '  border-left: 3px solid var(--accent, #8b0000);',
@@ -285,7 +286,7 @@
     '.pinned-card {',
     '  position: relative; background: #fff;',
     '  border: 1px solid var(--rule, #d8d2c4); border-radius: 6px;',
-    '  padding: 0.5rem 0.5rem 1.5rem; text-align: center;',
+    '  padding: 0.5rem 0.5rem 0.3rem; text-align: center;',
     '  display: flex; flex-direction: column; align-items: center;',
     '  cursor: grab;',
     '}',
@@ -303,13 +304,13 @@
     '}',
     '.pinned-card .pinned-notes[hidden] { display: none; }',
     '.pinned-notes-toggle {',
-    '  position: absolute; left: 0.15rem; bottom: 0.1rem;',
+    '  position: absolute; left: 0.7rem; bottom: 0.5rem;',
     '  display: inline-flex; align-items: center; justify-content: center;',
-    '  width: 1.4rem; height: 1.4rem; padding: 0;',
+    '  width: 1.7rem; height: 1.7rem; padding: 0;',
     '  background: transparent; border: none; cursor: pointer;',
     '  color: var(--ink-soft, #999); opacity: 0.55;',
     '}',
-    '.pinned-notes-toggle svg { width: 0.9rem; height: 0.9rem; }',
+    '.pinned-notes-toggle svg { width: 1.05rem; height: 1.05rem; }',
     '.pinned-notes-toggle:hover { opacity: 1; color: var(--accent, #8b0000); }',
     '.pinned-notes-toggle[aria-pressed="true"] { opacity: 0.9; color: var(--accent, #8b0000); }',
     '.pinned-remove {',
@@ -441,7 +442,7 @@
     this._visibleLimit = this._pageSize;
     this._cards = [];
     this._pinnedNames = this._loadPinned();
-    this._pinnedNotesShown = {};
+    this._pinnedNotesShown = false;
     this._notation = this._loadNotation();
     this._buildUI();
     this._renderCards();
@@ -744,9 +745,22 @@
     stripExport.querySelector('span').textContent = t('cfExportPdf', 'Exportar PDF');
     stripExport.addEventListener('click', function () { self._openExportDialog(); });
     stripActions.appendChild(stripExport);
+
+    var notesToggle = document.createElement('button');
+    notesToggle.type = 'button';
+    notesToggle.className = 'pinned-notes-toggle';
+    notesToggle.innerHTML = [
+      '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">',
+      '<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>',
+      '</svg>'
+    ].join('');
+    notesToggle.addEventListener('click', function () { self._toggleAllPinnedNotes(); });
+    this._pinnedNotesToggle = notesToggle;
+
     strip.appendChild(stripTitleRow);
     strip.appendChild(stripList);
     strip.appendChild(stripActions);
+    strip.appendChild(notesToggle);
 
     var grid = document.createElement('div');
     grid.className = 'grid';
@@ -1015,6 +1029,22 @@
     this._renderPinned();
   };
 
+  ChordFinder.prototype._toggleAllPinnedNotes = function () {
+    this._pinnedNotesShown = !this._pinnedNotesShown;
+    this._syncPinnedNotesToggle();
+    this._stripList.querySelectorAll('.pinned-card').forEach(function (item) {
+      item._notesEl.hidden = !this._pinnedNotesShown;
+    }, this);
+  };
+
+  ChordFinder.prototype._syncPinnedNotesToggle = function () {
+    var shown = this._pinnedNotesShown;
+    var label = shown ? t('cfHideNotesLabel', 'Ocultar notas') : t('cfShowNotesLabel', 'Mostrar notas');
+    this._pinnedNotesToggle.setAttribute('aria-label', label);
+    this._pinnedNotesToggle.title = label;
+    this._pinnedNotesToggle.setAttribute('aria-pressed', shown ? 'true' : 'false');
+  };
+
   ChordFinder.prototype._renderPinned = function () {
     var self = this;
     var strip = this._strip;
@@ -1035,6 +1065,7 @@
       return;
     }
     strip.hidden = false;
+    this._syncPinnedNotesToggle();
     this._stripActions.hidden = this._pinnedNames.length < 2;
 
     list.textContent = '';
@@ -1108,35 +1139,9 @@
       var notesLine = document.createElement('div');
       notesLine.className = 'pinned-notes';
       notesLine.textContent = self._displayNotes(chord);
-      var notesShown = !!self._pinnedNotesShown[chord.name];
-      notesLine.hidden = !notesShown;
+      notesLine.hidden = !self._pinnedNotesShown;
       item.appendChild(notesLine);
-
-      var notesToggle = document.createElement('button');
-      notesToggle.type = 'button';
-      notesToggle.className = 'pinned-notes-toggle';
-      notesToggle.draggable = false;
-      notesToggle.addEventListener('dragstart', function (e) { e.preventDefault(); e.stopPropagation(); });
-      notesToggle.innerHTML = [
-        '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">',
-        '<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>',
-        '</svg>'
-      ].join('');
-      var setNotesToggleLabel = function (shown) {
-        var label = shown ? t('cfHideNotesLabel', 'Ocultar notas') : t('cfShowNotesLabel', 'Mostrar notas');
-        notesToggle.setAttribute('aria-label', label);
-        notesToggle.title = label;
-        notesToggle.setAttribute('aria-pressed', shown ? 'true' : 'false');
-      };
-      setNotesToggleLabel(notesShown);
-      notesToggle.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var shown = !self._pinnedNotesShown[chord.name];
-        self._pinnedNotesShown[chord.name] = shown;
-        notesLine.hidden = !shown;
-        setNotesToggleLabel(shown);
-      });
-      item.appendChild(notesToggle);
+      item._notesEl = notesLine;
 
       list.appendChild(item);
 
