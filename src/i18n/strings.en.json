@@ -151,6 +151,8 @@
   "cfPinnedLabel": "Pinned",
   "cfPinnedTitle": "Pinned chords",
   "cfClearPinned": "Clear",
+  "cfShowNotesLabel": "Show notes",
+  "cfHideNotesLabel": "Hide notes",
   "cfExportPdf": "Export PDF",
   "cfExportDialogTitle": "Export to PDF",
   "cfExportTitleLabel": "Page title",

@@ -285,7 +285,7 @@
     '.pinned-card {',
     '  position: relative; background: #fff;',
     '  border: 1px solid var(--rule, #d8d2c4); border-radius: 6px;',
-    '  padding: 0.5rem 0.5rem 0.3rem; text-align: center;',
+    '  padding: 0.5rem 0.5rem 1.5rem; text-align: center;',
     '  display: flex; flex-direction: column; align-items: center;',
     '  cursor: grab;',
     '}',
@@ -297,6 +297,21 @@
     '  font-family: var(--mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);',
     '  font-weight: 600; font-size: 0.95rem; margin-top: 0.2rem;',
     '}',
+    '.pinned-card .pinned-notes {',
+    '  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif);',
+    '  font-size: 0.68rem; color: var(--ink-soft, #555); margin-top: 0.1rem;',
+    '}',
+    '.pinned-card .pinned-notes[hidden] { display: none; }',
+    '.pinned-notes-toggle {',
+    '  position: absolute; left: 0.15rem; bottom: 0.1rem;',
+    '  display: inline-flex; align-items: center; justify-content: center;',
+    '  width: 1.4rem; height: 1.4rem; padding: 0;',
+    '  background: transparent; border: none; cursor: pointer;',
+    '  color: var(--ink-soft, #999); opacity: 0.55;',
+    '}',
+    '.pinned-notes-toggle svg { width: 0.9rem; height: 0.9rem; }',
+    '.pinned-notes-toggle:hover { opacity: 1; color: var(--accent, #8b0000); }',
+    '.pinned-notes-toggle[aria-pressed="true"] { opacity: 0.9; color: var(--accent, #8b0000); }',
     '.pinned-remove {',
     '  position: absolute; top: -0.5rem; right: -0.5rem;',
     '  width: 1.4rem; height: 1.4rem; line-height: 1; padding: 0;',
@@ -426,6 +441,7 @@
     this._visibleLimit = this._pageSize;
     this._cards = [];
     this._pinnedNames = this._loadPinned();
+    this._pinnedNotesShown = {};
     this._notation = this._loadNotation();
     this._buildUI();
     this._renderCards();
@@ -1088,6 +1104,39 @@
       nm.className = 'name';
       nm.textContent = self._displayName(chord);
       item.appendChild(nm);
+
+      var notesLine = document.createElement('div');
+      notesLine.className = 'pinned-notes';
+      notesLine.textContent = self._displayNotes(chord);
+      var notesShown = !!self._pinnedNotesShown[chord.name];
+      notesLine.hidden = !notesShown;
+      item.appendChild(notesLine);
+
+      var notesToggle = document.createElement('button');
+      notesToggle.type = 'button';
+      notesToggle.className = 'pinned-notes-toggle';
+      notesToggle.draggable = false;
+      notesToggle.addEventListener('dragstart', function (e) { e.preventDefault(); e.stopPropagation(); });
+      notesToggle.innerHTML = [
+        '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">',
+        '<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>',
+        '</svg>'
+      ].join('');
+      var setNotesToggleLabel = function (shown) {
+        var label = shown ? t('cfHideNotesLabel', 'Ocultar notas') : t('cfShowNotesLabel', 'Mostrar notas');
+        notesToggle.setAttribute('aria-label', label);
+        notesToggle.title = label;
+        notesToggle.setAttribute('aria-pressed', shown ? 'true' : 'false');
+      };
+      setNotesToggleLabel(notesShown);
+      notesToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var shown = !self._pinnedNotesShown[chord.name];
+        self._pinnedNotesShown[chord.name] = shown;
+        notesLine.hidden = !shown;
+        setNotesToggleLabel(shown);
+      });
+      item.appendChild(notesToggle);
 
       list.appendChild(item);
 

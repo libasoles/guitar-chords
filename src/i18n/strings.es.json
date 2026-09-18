@@ -151,6 +151,8 @@
   "cfPinnedLabel": "Pineado",
   "cfPinnedTitle": "Acordes pineados",
   "cfClearPinned": "Limpiar",
+  "cfShowNotesLabel": "Mostrar notas",
+  "cfHideNotesLabel": "Ocultar notas",
   "cfExportPdf": "Exportar PDF",
   "cfExportDialogTitle": "Exportar a PDF",
   "cfExportTitleLabel": "Título de la página",
