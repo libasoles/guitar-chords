@@ -3,7 +3,7 @@
    la consume el buscador web (reference/chord-finder.html) y la extensión de Chrome.
 
    Cobertura: para las 12 fundamentales — mayor, menor, 7, m7, maj7, 6, maj9, 9,
-   m9, sus2, sus4 — más dim7 (los 12), aug (los 12), slash y tensiones comunes.
+   m9, 7♭9, sus2, sus4 — más dim7 (los 12), aug (los 12), slash y tensiones comunes.
    Posiciones abiertas donde existen; formas movibles con cejilla para el resto.
 
    Voicings notation per svguitar: fingers = [[string, fret|'x'|'o', fingerLabel?], ...]
@@ -504,6 +504,44 @@ window.CHORDS = [
   { name: 'E♭m9', families: ['m9'], aliases: ['D♯m9','E♭-9'], position: 4,
     notes: 'E♭ G♭ D♭ F',
     fingers: [[6,'x'],[5,6,'2'],[4,4,'1'],[3,6,'4'],[2,6,'3'],[1,'x']] },
+
+  // ----- NOVENAS BEMOL (7♭9) -----
+  { name: 'C7♭9', families: ['b9'], aliases: ['C7(b9)'],
+    notes: 'C E B♭ D♭',
+    fingers: [[6,'x'],[5,3,'2'],[4,2,'1'],[3,3,'4'],[2,2,'3'],[1,'x']] },
+  { name: 'D7♭9', families: ['b9'], aliases: ['D7(b9)'], position: 4,
+    notes: 'D F♯ C E♭',
+    fingers: [[6,'x'],[5,5,'2'],[4,4,'1'],[3,5,'4'],[2,4,'3'],[1,'x']] },
+  { name: 'E7♭9', families: ['b9'], aliases: ['E7(b9)'], position: 6,
+    notes: 'E G♯ D F',
+    fingers: [[6,'x'],[5,7,'2'],[4,6,'1'],[3,7,'4'],[2,6,'3'],[1,'x']] },
+  { name: 'G7♭9', families: ['b9'], aliases: ['G7(b9)'], position: 9,
+    notes: 'G B F A♭',
+    fingers: [[6,'x'],[5,10,'2'],[4,9,'1'],[3,10,'4'],[2,9,'3'],[1,'x']] },
+  { name: 'A7♭9', families: ['b9'], aliases: ['A7(b9)'], position: 4,
+    notes: 'A C♯ G B♭',
+    fingers: [[6,5,'3'],[5,4,'2'],[4,5,'4'],[3,3,'1'],[2,'x'],[1,'x']] },
+  { name: 'F7♭9', families: ['b9'], aliases: ['F7(b9)'], position: 7,
+    notes: 'F A E♭ G♭',
+    fingers: [[6,'x'],[5,8,'2'],[4,7,'1'],[3,8,'4'],[2,7,'3'],[1,'x']] },
+  { name: 'F♯7♭9', families: ['b9'], aliases: ['G♭7♭9','F♯7(b9)'], position: 8,
+    notes: 'F♯ A♯ E G',
+    fingers: [[6,'x'],[5,9,'2'],[4,8,'1'],[3,9,'4'],[2,8,'3'],[1,'x']] },
+  { name: 'A♭7♭9', families: ['b9'], aliases: ['G♯7♭9','A♭7(b9)'], position: 10,
+    notes: 'A♭ C G♭ A',
+    fingers: [[6,'x'],[5,11,'2'],[4,10,'1'],[3,11,'4'],[2,10,'3'],[1,'x']] },
+  { name: 'B♭7♭9', families: ['b9'], aliases: ['A♯7♭9','B♭7(b9)'],
+    notes: 'B♭ D A♭ B',
+    fingers: [[6,'x'],[5,1,'1'],[4,'o'],[3,1,'2'],[2,'o'],[1,'x']] },
+  { name: 'B7♭9', families: ['b9'], aliases: ['B7(b9)'],
+    notes: 'B D♯ A C',
+    fingers: [[6,'x'],[5,2,'2'],[4,1,'1'],[3,2,'4'],[2,1,'3'],[1,'x']] },
+  { name: 'D♭7♭9', families: ['b9'], aliases: ['C♯7♭9','D♭7(b9)'], position: 3,
+    notes: 'D♭ F B D',
+    fingers: [[6,'x'],[5,4,'2'],[4,3,'1'],[3,4,'4'],[2,3,'3'],[1,'x']] },
+  { name: 'E♭7♭9', families: ['b9'], aliases: ['D♯7♭9','E♭7(b9)'], position: 5,
+    notes: 'E♭ G D♭ E',
+    fingers: [[6,'x'],[5,6,'2'],[4,5,'1'],[3,6,'4'],[2,5,'3'],[1,'x']] },
 
   // ----- SLASH (bajo invertido) -----
   { name: 'D/F#', families: ['slash'], aliases: ['D/F♯'],

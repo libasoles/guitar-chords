@@ -27,9 +27,10 @@
     { filter: 'otros', i18n: 11 },
     { filter: 'dom9',  i18n: 13 },
     { filter: 'm9',    i18n: 14 },
+    { filter: 'b9',    i18n: 15 },
   ];
 
-  var DEFAULT_FILTER_LABELS = ['Todos', 'Mayores', 'Menores', 'Con 7ª (dom.)', 'Menor 7ª', 'Mayor 7ª', 'Menor con 7ª mayor', 'Con 6ª', 'Sus', 'Con bajo (/)', 'Mayor 9ª', 'Otros', 'Menor con 6ª', '9ª (dom.)', 'Menor 9ª'];
+  var DEFAULT_FILTER_LABELS = ['Todos', 'Mayores', 'Menores', 'Con 7ª (dom.)', 'Menor 7ª', 'Mayor 7ª', 'Menor con 7ª mayor', 'Con 6ª', 'Sus', 'Con bajo (/)', 'Mayor 9ª', 'Otros', 'Menor con 6ª', '9ª (dom.)', 'Menor 9ª', '9ª bemol'];
 
   function filterLabel(index) {
     var labels = t('cfFilters', DEFAULT_FILTER_LABELS);
