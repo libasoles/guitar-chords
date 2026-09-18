@@ -3,7 +3,7 @@
    la consume el buscador web (reference/chord-finder.html) y la extensión de Chrome.
 
    Cobertura: para las 12 fundamentales — mayor, menor, 7, m7, maj7, 6, maj9, 9,
-   m9, sus2, sus4 — más dim7 (los 12), aug, slash y tensiones comunes.
+   m9, sus2, sus4 — más dim7 (los 12), aug (los 12), slash y tensiones comunes.
    Posiciones abiertas donde existen; formas movibles con cejilla para el resto.
 
    Voicings notation per svguitar: fingers = [[string, fret|'x'|'o', fingerLabel?], ...]
@@ -616,5 +616,23 @@ window.CHORDS = [
   { name: 'Faug', families: ['otros'], aliases: ['F+','F(♯5)'],
     notes: 'F A C♯ F',
     fingers: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,2,'2'],[1,1,'1']] },
+  { name: 'D♭aug', families: ['otros'], aliases: ['D♭+','D♭(♯5)','C♯aug','C♯+'],
+    notes: 'C♯ F A C♯ F',
+    fingers: [[6,'x'],[5,4,'4'],[4,3,'3'],[3,2,'2'],[2,2,'2'],[1,1,'1']] },
+  { name: 'E♭aug', families: ['otros'], aliases: ['E♭+','E♭(♯5)','D♯aug','D♯+'],
+    notes: 'D♯ B D♯ G',
+    fingers: [[6,'x'],[5,'x'],[4,1,'1'],[3,4,'3'],[2,4,'3'],[1,3,'2']] },
+  { name: 'F♯aug', families: ['otros'], aliases: ['F♯+','F♯(♯5)','G♭aug','G♭+'],
+    notes: 'F♯ A♯ D F♯',
+    fingers: [[6,'x'],[5,'x'],[4,4,'3'],[3,3,'2'],[2,3,'2'],[1,2,'1']] },
+  { name: 'A♭aug', families: ['otros'], aliases: ['A♭+','A♭(♯5)','G♯aug','G♯+'],
+    notes: 'G♯ C E G♯ C G♯',
+    fingers: [[6,4,'4'],[5,3,'3'],[4,2,'2'],[3,1,'1'],[2,1,'1'],[1,4,'4']] },
+  { name: 'B♭aug', families: ['otros'], aliases: ['B♭+','B♭(♯5)','A♯aug','A♯+'],
+    notes: 'A♯ F♯ A♯ D F♯',
+    fingers: [[6,'x'],[5,1,'1'],[4,4,'4'],[3,3,'3'],[2,3,'3'],[1,2,'2']] },
+  { name: 'Baug', families: ['otros'], aliases: ['B+','B(♯5)'],
+    notes: 'B G B D♯ G',
+    fingers: [[6,'x'],[5,2,'1'],[4,5,'4'],[3,4,'3'],[2,4,'3'],[1,3,'2']] },
 
 ];
