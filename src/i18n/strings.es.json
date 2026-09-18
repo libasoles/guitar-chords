@@ -213,6 +213,18 @@
   "dimSection4Title": "Tónica en la 4ª cuerda",
   "dimSection4Lead": "La forma más compacta: sólo dos trastes de ancho, con la tónica en la 4ª cuerda (Re) y las cuerdas 6ª y 5ª apagadas.",
 
+  "noteFinderNavLabel": "Identificar acordes a partir de notas →",
+  "noteFinderPageTitle": "Identificar acordes a partir de notas · Acordes para la guitarra",
+  "noteFinderMetaDescription": "Marcá las notas en un teclado y encontrá qué acordes de guitarra las contienen, con diagramas listos para tocar.",
+  "noteFinderH1": "Identificar acordes a partir de notas",
+  "noteFinderLead": "Marcá las notas que querés armar en el teclado de abajo y vas a ver, a la derecha, los acordes de guitarra que las contienen todas.",
+  "noteFinderNotesLabel": "Notas",
+  "noteFinderAccidentalsLabel": "Alteraciones",
+  "noteFinderClearLabel": "Deseleccionar todo",
+  "noteFinderResultsLabel": "Acordes que contienen estas notas",
+  "noteFinderEmpty": "No hay acordes que contengan todas esas notas.",
+  "noteFinderSelectPrompt": "Marcá al menos una nota para ver acordes.",
+
   "pickingGroupLabel": "Punteo con la 6ª cuerda al aire",
   "pickingNavLabel": "Ver punteo dórico →",
   "pickingPageTitle": "Punteo dórico sobre la 6ª cuerda al aire · Acordes para la guitarra",

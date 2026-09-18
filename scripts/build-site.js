@@ -65,6 +65,7 @@ const template = fs.readFileSync(path.join(SRC_SITE, 'template.html'), 'utf8');
 const v7Template = fs.readFileSync(path.join(SRC_SITE, 'v7-guide.html'), 'utf8');
 const circleTemplate = fs.readFileSync(path.join(SRC_SITE, 'circle-fifths.html'), 'utf8');
 const dimTemplate = fs.readFileSync(path.join(SRC_SITE, 'dim-guide.html'), 'utf8');
+const noteFinderTemplate = fs.readFileSync(path.join(SRC_SITE, 'note-finder.html'), 'utf8');
 const pickingTemplate = fs.readFileSync(path.join(SRC_SITE, 'picking-lesson.html'), 'utf8');
 const notFoundTemplate = fs.readFileSync(path.join(SRC_SITE, '404.html'), 'utf8');
 const LOCALES = ['es', 'en'];
@@ -160,6 +161,12 @@ const CIRCLE_SLUG = CIRCLE_PAGES[0].slug;
 // shapes grouped by root string (6th, 5th, 4th).
 const DIM_SLUG = 'acordes-disminuidos';
 
+// "Identify chords from notes" page, rendered from src/site/note-finder.html.
+// Single page (no locale-agnostic pairing like V7/circle): a piano-style note
+// picker filters chords-db.js client-side to the chords containing every
+// selected note (see src/shared/note-match.js).
+const NOTE_FINDER_SLUG = 'identificar-acordes-por-notas';
+
 // Static lesson pages rendered from src/site/picking-lesson.html — modal
 // picking patterns with the open low E string as a pedal note. One page per
 // mode; each cross-links to the other two. i18n keys are namespaced by
@@ -210,7 +217,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     'h1', 'lead', 'h2Decoder', 'decoderIntro',
     'thPart', 'thSymbols', 'thMeaning', 'thExample',
     'extensionHeading', 'extensionDescription',
-    'v7NavLabel', 'circleNavLabel', 'dimNavLabel', 'pickingGroupLabel', 'pickingNavLabel',
+    'v7NavLabel', 'circleNavLabel', 'dimNavLabel', 'noteFinderNavLabel', 'pickingGroupLabel', 'pickingNavLabel',
     'pickingJonicoNavLabel', 'pickingFrigioNavLabel',
     'pickingLidioNavLabel', 'pickingMixolidioNavLabel', 'pickingEolicoNavLabel',
     'pickingLocrioNavLabel',
@@ -234,6 +241,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html.split('%%V7_PAGE_HREF%%').join(v7PageHref(locale));
   html = html.split('%%CIRCLE_PAGE_HREF%%').join(v7PageHref(locale, CIRCLE_SLUG));
   html = html.split('%%DIM_PAGE_HREF%%').join(v7PageHref(locale, DIM_SLUG));
+  html = html.split('%%NOTE_FINDER_PAGE_HREF%%').join(v7PageHref(locale, NOTE_FINDER_SLUG));
   html = html.split('%%PICKING_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[0].slug));
   html = html.split('%%PICKING_JONICO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[1].slug));
   html = html.split('%%PICKING_FRIGIO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[2].slug));
@@ -375,6 +383,51 @@ function renderDimPage(template, strings, locale) {
   return html;
 }
 
+// Render the "identify chords from notes" page (src/site/note-finder.html)
+// for one locale. Single static page (no major/minor pairing): a piano-style
+// note picker filters chords-db.js client-side (see src/site/note-finder.js
+// and src/shared/note-match.js).
+function renderNoteFinderPage(template, strings, locale) {
+  const resolvedAssetsPrefix = locale === 'es' ? 'assets/' : '../assets/';
+  const ogImage = SITE_BASE_URL + '/assets/og-image.png';
+  let html = template;
+
+  const simpleKeys = [
+    'htmlLang', 'wordmark', 'wordmarkSmall', 'altLangLabel',
+    'extensionHeading', 'extensionDescription',
+    'noteFinderNotesLabel', 'noteFinderAccidentalsLabel',
+    'noteFinderClearLabel', 'noteFinderResultsLabel',
+  ];
+  simpleKeys.forEach(function (key) {
+    html = html.split('%%' + key + '%%').join(strings[key] || '');
+  });
+
+  const noteFinderStrings = {
+    noteFinderSelectPrompt: strings.noteFinderSelectPrompt || '',
+    noteFinderEmpty: strings.noteFinderEmpty || '',
+  };
+
+  html = html.split('%%PAGE_TITLE%%').join(strings.noteFinderPageTitle || '');
+  html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings.noteFinderMetaDescription || '');
+  html = html.split('%%PAGE_H1%%').join(strings.noteFinderH1 || '');
+  html = html.split('%%PAGE_LEAD%%').join(strings.noteFinderLead || '');
+  html = html.split('%%NOTE_FINDER_LABELS_JSON%%').join(JSON.stringify(strings.cfRootLabels || []));
+  html = html.split('%%NOTE_FINDER_STRINGS_JSON%%').join(JSON.stringify(noteFinderStrings));
+
+  html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
+  html = html.split('%%homeHref%%').join(homeHref(locale));
+  html = html.split('%%altLangHref%%').join(locale === 'es' ? v7PageHref('en', NOTE_FINDER_SLUG) : v7PageHref('es', NOTE_FINDER_SLUG));
+  html = html.split('%%canonicalUrl%%').join(v7CanonicalUrl(locale, NOTE_FINDER_SLUG));
+  html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es', NOTE_FINDER_SLUG));
+  html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en', NOTE_FINDER_SLUG));
+  html = html.split('%%ogImage%%').join(ogImage);
+  html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
+  html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
+  html = html.split('%%SW_PATH%%').join('/sw.js');
+
+  return html;
+}
+
 // Render a modal picking lesson page (src/site/picking-lesson.html) for one
 // locale — one of PICKING_PAGES (Dorian, Ionian, Phrygian). Static content
 // (three fretboard-diagram images + tips, computed client-side from the
@@ -485,7 +538,7 @@ ensureDir(ASSETS_DIST);
 ensureDir(VENDOR_DIST);
 
 // Shared JS.
-['chords-db.js', 'chord-diagram.js', 'chord-positions.js', 'chord-search.js', 'note-names.js'].forEach(function (f) {
+['chords-db.js', 'chord-diagram.js', 'chord-positions.js', 'chord-search.js', 'note-names.js', 'note-match.js'].forEach(function (f) {
   copyFile(path.join(SRC_SHARED, f), path.join(ASSETS_DIST, f));
 });
 // Site-specific JS and CSS.
@@ -499,6 +552,7 @@ copyFile(path.join(SRC_SITE, 'circle-fifths-minor.js'), path.join(ASSETS_DIST, '
 copyFile(path.join(SRC_SHARED, 'circle-render.js'), path.join(ASSETS_DIST, 'circle-render.js'));
 copyFile(path.join(SRC_SITE, 'dim-guide.js'), path.join(ASSETS_DIST, 'dim-guide.js'));
 copyFile(path.join(SRC_SHARED, 'dim-page-render.js'), path.join(ASSETS_DIST, 'dim-page-render.js'));
+copyFile(path.join(SRC_SITE, 'note-finder.js'), path.join(ASSETS_DIST, 'note-finder.js'));
 copyFile(path.join(SRC_SITE, 'site.css'), path.join(ASSETS_DIST, 'site.css'));
 copyFile(path.join(SRC_SITE, 'picking-render.js'), path.join(ASSETS_DIST, 'picking-render.js'));
 copyFile(path.join(SRC_SITE, 'metronome.js'), path.join(ASSETS_DIST, 'metronome.js'));
@@ -589,6 +643,8 @@ const precacheUrls = [
   '/assets/circle-fifths-minor.js',
   '/assets/dim-guide.js',
   '/assets/dim-page-render.js',
+  '/assets/note-match.js',
+  '/assets/note-finder.js',
   '/assets/vendor/svguitar.umd.js',
   '/assets/vendor/fuzzysort.js',
   '/assets/vendor/jspdf.umd.min.js',
@@ -642,6 +698,13 @@ LOCALES.forEach(function (locale) {
       say(path.relative(ROOT, dimOutFile));
     }
 
+    {
+      const noteFinderHtml = renderNoteFinderPage(noteFinderTemplate, strings, locale);
+      const noteFinderOutFile = path.join(DIST_SITE, NOTE_FINDER_SLUG + '.html');
+      fs.writeFileSync(noteFinderOutFile, noteFinderHtml, 'utf8');
+      say(path.relative(ROOT, noteFinderOutFile));
+    }
+
     PICKING_PAGES.forEach(function (page) {
       const pickingHtml = renderPickingPage(pickingTemplate, strings, locale, page);
       const pickingOutFile = path.join(DIST_SITE, page.slug + '.html');
@@ -683,6 +746,13 @@ LOCALES.forEach(function (locale) {
     const dimOutFile = path.join(localeDir, DIM_SLUG + '.html');
     fs.writeFileSync(dimOutFile, dimHtml, 'utf8');
     say(path.relative(ROOT, dimOutFile));
+  }
+
+  {
+    const noteFinderHtml = renderNoteFinderPage(noteFinderTemplate, strings, locale);
+    const noteFinderOutFile = path.join(localeDir, NOTE_FINDER_SLUG + '.html');
+    fs.writeFileSync(noteFinderOutFile, noteFinderHtml, 'utf8');
+    say(path.relative(ROOT, noteFinderOutFile));
   }
 
   PICKING_PAGES.forEach(function (page) {
@@ -808,6 +878,22 @@ const sitemapXml = [
   '    <priority>0.4</priority>',
   '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + DIM_SLUG + '"/>',
   '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + DIM_SLUG + '"/>',
+  '  </url>',
+  '  <url>',
+  '    <loc>' + SITE_BASE_URL + '/' + NOTE_FINDER_SLUG + '</loc>',
+  '    <lastmod>' + today + '</lastmod>',
+  '    <changefreq>monthly</changefreq>',
+  '    <priority>0.5</priority>',
+  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + NOTE_FINDER_SLUG + '"/>',
+  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + NOTE_FINDER_SLUG + '"/>',
+  '  </url>',
+  '  <url>',
+  '    <loc>' + SITE_BASE_URL + '/en/' + NOTE_FINDER_SLUG + '</loc>',
+  '    <lastmod>' + today + '</lastmod>',
+  '    <changefreq>monthly</changefreq>',
+  '    <priority>0.4</priority>',
+  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + NOTE_FINDER_SLUG + '"/>',
+  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + NOTE_FINDER_SLUG + '"/>',
   '  </url>',
   ...PICKING_PAGES.flatMap(function (page) {
     return [

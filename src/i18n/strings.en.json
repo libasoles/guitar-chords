@@ -213,6 +213,18 @@
   "dimSection4Title": "Root on the 4th string",
   "dimSection4Lead": "The most compact shape: only two frets wide, with the root on the 4th string (D) and the 6th and 5th strings muted.",
 
+  "noteFinderNavLabel": "Identify chords from notes →",
+  "noteFinderPageTitle": "Identify chords from notes · Guitar Chords",
+  "noteFinderMetaDescription": "Pick notes on a keyboard and find which guitar chords contain them, with ready-to-play diagrams.",
+  "noteFinderH1": "Identify chords from notes",
+  "noteFinderLead": "Pick the notes you want to build on the keyboard below, and see, on the right, the guitar chords that contain all of them.",
+  "noteFinderNotesLabel": "Notes",
+  "noteFinderAccidentalsLabel": "Accidentals",
+  "noteFinderClearLabel": "Clear all",
+  "noteFinderResultsLabel": "Chords that contain these notes",
+  "noteFinderEmpty": "No chords contain all of those notes.",
+  "noteFinderSelectPrompt": "Pick at least one note to see chords.",
+
   "pickingGroupLabel": "Picking over open strings",
   "pickingNavLabel": "See Dorian picking over the open low E string →",
   "pickingPageTitle": "Dorian picking over the open low E string · Guitar Chords",
