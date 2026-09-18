@@ -13,15 +13,14 @@
   // Default selection: C7 (Do, Mi, Sol, Sib) — pitch classes 0, 4, 7, 10.
   var DEFAULT_SELECTED = [0, 4, 7, 10];
 
-  // Naturals column, descending one octave from C to C (piano-style: the
-  // octave's start and end are both shown, sharing the same pitch class).
+  // Naturals column, descending one octave from B down to C (piano-style).
   // Grid row of natural i (0-indexed) is 2 + i*2 (row 1 is the header).
-  var NATURAL_PCS = [0, 11, 9, 7, 5, 4, 2, 0];
+  var NATURAL_PCS = [11, 9, 7, 5, 4, 2, 0];
 
   // Accidentals column, one slot per gap between adjacent naturals above;
-  // null where there is no black key in that gap (B-C and E-F). Grid row of
+  // null where there is no black key in that gap (E-F). Grid row of
   // accidental i is 3 + i*2, i.e. right between naturals i and i+1.
-  var ACCIDENTAL_SLOTS = [null, 10, 8, 6, null, 3, 1];
+  var ACCIDENTAL_SLOTS = [10, 8, 6, null, 3, 1];
 
   function ready(fn) {
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn);
