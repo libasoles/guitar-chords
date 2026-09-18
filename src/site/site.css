@@ -441,7 +441,7 @@ a:hover {
   grid-template-columns: minmax(230px, 280px) 1fr;
   gap: 1.5rem 2rem;
   align-items: start;
-  margin: 1.5rem 0 2.5rem;
+  margin: 2.6rem 0 3rem;
 }
 
 .note-finder-picker {
@@ -463,13 +463,16 @@ a:hover {
 
 .note-finder-col-label {
   grid-row: 1;
+  align-self: end;
   font-family: var(--sans);
   font-size: 0.62rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.02em;
   color: var(--ink-soft);
-  padding-bottom: 0.4rem;
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.7rem;
+  border-bottom: 1px solid var(--rule);
   text-align: center;
   white-space: nowrap;
 }
@@ -554,7 +557,9 @@ a:hover {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--ink-soft);
-  margin: 0 0 0.8rem;
+  margin: 0 0 1.3rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--rule);
 }
 
 .note-finder-grid {
