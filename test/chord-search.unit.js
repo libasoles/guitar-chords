@@ -253,6 +253,14 @@ test('"am" sigue matcheando sólo acordes de A, sin arrastrar "aumentado"', () =
   assert.ok(!r.includes('Eaug'));
 });
 
+test('"aum" y "aumentado" matchean los 12 acordes aumentados', () => {
+  const AUG = ['Caug', 'Eaug', 'Aaug', 'Daug', 'Gaug', 'Faug'];
+  ['aum', 'aumentado'].forEach((q) => {
+    const r = names(q);
+    AUG.forEach((n) => assert.ok(r.includes(n), `"${q}" debería incluir ${n}`));
+  });
+});
+
 test('modo español: sílabas completas siguen resolviendo con la "d" ampliada', () => {
   assert.equal(normalize('do', 'es'), 'c');
   assert.equal(normalize('Do7', 'es'), 'c7');
