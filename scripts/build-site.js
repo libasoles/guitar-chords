@@ -556,6 +556,10 @@ copyFile(path.join(SRC_SITE, 'note-finder.js'), path.join(ASSETS_DIST, 'note-fin
 copyFile(path.join(SRC_SITE, 'site.css'), path.join(ASSETS_DIST, 'site.css'));
 copyFile(path.join(SRC_SITE, 'picking-render.js'), path.join(ASSETS_DIST, 'picking-render.js'));
 copyFile(path.join(SRC_SITE, 'metronome.js'), path.join(ASSETS_DIST, 'metronome.js'));
+// Song-sheet mechanism (cancionero: lyrics-with-chords pages under /canciones,
+// not linked from nav — discoverable via SEO/sitemap only).
+copyFile(path.join(SRC_SHARED, 'song-sheet.js'), path.join(ASSETS_DIST, 'song-sheet.js'));
+copyFile(path.join(SRC_SHARED, 'chord-modal.js'), path.join(ASSETS_DIST, 'chord-modal.js'));
 copyFile(path.join(SRC_EXT, 'icon-source.svg'), path.join(ASSETS_DIST, 'favicon.svg'));
 // Vendored svguitar, fuzzysort, and jsPDF.
 copyFile(path.join(SRC_VENDOR, 'svguitar.umd.js'), path.join(VENDOR_DIST, 'svguitar.umd.js'));
@@ -572,6 +576,21 @@ if (fs.existsSync(ogImageSrc)) {
 const storeDist = path.join(DIST_SITE, 'store');
 ensureDir(storeDist);
 copyFile(path.join(SRC_STORE, 'privacy-policy.html'), path.join(storeDist, 'privacy-policy.html'));
+
+// Song pages ("cancionero"): standalone lyrics-with-chords pages under
+// /canciones. Static, not part of the i18n template pipeline, and NOT linked
+// from the nav/index anywhere — discoverable only via sitemap.xml/SEO. Copies
+// every file in src/site/canciones/ verbatim (HTML + the page's own CSS).
+const SRC_CANCIONES = path.join(SRC_SITE, 'canciones');
+const CANCIONES_SLUGS = [];
+if (fs.existsSync(SRC_CANCIONES)) {
+  const cancionesDist = path.join(DIST_SITE, 'canciones');
+  ensureDir(cancionesDist);
+  fs.readdirSync(SRC_CANCIONES).forEach(function (file) {
+    copyFile(path.join(SRC_CANCIONES, file), path.join(cancionesDist, file));
+    if (file.endsWith('.html')) CANCIONES_SLUGS.push(file);
+  });
+}
 
 // ---- PWA: icons ------------------------------------------------------------
 // PNG icons for the web app manifest, generated from the site logo. Prefer
@@ -921,6 +940,16 @@ const sitemapXml = [
   '    <changefreq>yearly</changefreq>',
   '    <priority>0.3</priority>',
   '  </url>',
+  ...CANCIONES_SLUGS.flatMap(function (file) {
+    return [
+      '  <url>',
+      '    <loc>' + SITE_BASE_URL + '/canciones/' + file + '</loc>',
+      '    <lastmod>' + today + '</lastmod>',
+      '    <changefreq>yearly</changefreq>',
+      '    <priority>0.4</priority>',
+      '  </url>',
+    ];
+  }),
   '</urlset>',
   '',
 ].join('\n');
