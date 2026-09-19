@@ -84,7 +84,7 @@
     "  display: flex;",
     "  flex-direction: column;",
     "  gap: 1.2rem;",
-    "  margin: 0.55rem 0 1.1rem;",
+    "  margin: 1.6rem 0 1.1rem;",
     "}",
     ".letra .estrofa { margin: 0; }",
     ".letra .seccion {",
@@ -135,14 +135,6 @@
     ':host([data-chords-hidden="true"]) .letra .sobre[data-chord-only="true"] {',
     "  display: none;",
     "}",
-    ":host([data-vowel-focus]) .letra .vowel-focus__vowel {",
-    "  color: var(--accent, #8b0000);",
-    "  font-weight: 700;",
-    "}",
-    ":host([data-vowel-focus]) .letra .vowel-focus__consonant {",
-    "  color: transparent;",
-    "}",
-    "",
     "/* ----- Impresión ----- */",
     "/* El cancionero se imprime como en pantalla; sólo neutralizamos el fondo",
     "   para no gastar tinta y forzamos color exacto en el borde de acento. */",
@@ -333,7 +325,6 @@
     this._mountScrollRegion();
     this._mountTeleprompter();
     this._mountTextSize();
-    this._mountVowelFocus();
   };
 
   SongSheet.prototype._markChordOnlySpans = function (root) {
@@ -999,107 +990,6 @@
 
     currentScale = readStoredScale();
     render();
-  };
-
-  // Separamos sólo el texto de la letra: acordes y rótulos quedan intactos.
-  SongSheet.prototype._prepareVowelFocus = function () {
-    var letters = this._root.querySelector(".letra");
-    if (!letters || letters.dataset.vowelFocusPrepared === "true") return;
-
-    var walker = document.createTreeWalker(letters, NodeFilter.SHOW_TEXT);
-    var textNodes = [];
-    var node;
-    while ((node = walker.nextNode())) {
-      var parent = node.parentElement;
-      if (parent && !parent.closest(".c, .seccion")) textNodes.push(node);
-    }
-
-    var vowels = /[aeiouáéíóúüAEIOUÁÉÍÓÚÜ]/;
-    var consonants = /[a-zñA-ZÑ]/;
-    for (var i = 0; i < textNodes.length; i++) {
-      var text = textNodes[i].nodeValue;
-      if (!text || !/[a-zñáéíóúüA-ZÑÁÉÍÓÚÜ]/.test(text)) continue;
-
-      var fragment = document.createDocumentFragment();
-      var run = "";
-      var type = "";
-      function appendRun() {
-        if (!run) return;
-        if (!type) fragment.appendChild(document.createTextNode(run));
-        else {
-          var span = document.createElement("span");
-          span.className = "vowel-focus__" + type;
-          span.textContent = run;
-          fragment.appendChild(span);
-        }
-        run = "";
-      }
-
-      for (var j = 0; j < text.length; j++) {
-        var nextType = vowels.test(text.charAt(j))
-          ? "vowel"
-          : consonants.test(text.charAt(j))
-            ? "consonant"
-            : "";
-        if (nextType !== type) {
-          appendRun();
-          type = nextType;
-        }
-        run += text.charAt(j);
-      }
-      appendRun();
-      textNodes[i].parentNode.replaceChild(fragment, textNodes[i]);
-    }
-    letters.dataset.vowelFocusPrepared = "true";
-  };
-
-  SongSheet.prototype._mountVowelFocus = function () {
-    var bar = document.querySelector(".song-titlebar");
-    if (!bar) return;
-    var controls = bar.querySelector(".song-controls");
-    if (!controls || controls.querySelector(".vowel-focus-toggle")) return;
-
-    this._prepareVowelFocus();
-    var host = this;
-    var toggle = document.createElement("button");
-    toggle.type = "button";
-    toggle.className = "vowel-focus-toggle";
-    toggle.setAttribute("aria-pressed", "false");
-    toggle.setAttribute("aria-label", "Resaltar vocales y atenuar consonantes");
-    toggle.title = "Resaltar vocales";
-    toggle.innerHTML = '<span aria-hidden="true">A<span>e</span></span>';
-    controls.appendChild(toggle);
-
-    var storageKey = "song-sheet:vowel-focus:" + window.location.pathname;
-    function setEnabled(enabled) {
-      host.toggleAttribute("data-vowel-focus", enabled);
-      toggle.setAttribute("aria-pressed", String(enabled));
-      toggle.setAttribute(
-        "aria-label",
-        enabled ? "Restaurar texto normal" : "Resaltar vocales y atenuar consonantes",
-      );
-      toggle.title = enabled ? "Restaurar texto normal" : "Resaltar vocales";
-      try {
-        if (enabled) window.localStorage.setItem(storageKey, "true");
-        else window.localStorage.removeItem(storageKey);
-      } catch (err) {}
-    }
-
-    toggle.addEventListener("click", function () {
-      setEnabled(!host.hasAttribute("data-vowel-focus"));
-      toggle.classList.remove("is-pulsing");
-      void toggle.offsetWidth;
-      toggle.classList.add("is-pulsing");
-    });
-    toggle.addEventListener("animationend", function (event) {
-      if (event.animationName === "toggle-pulse")
-        toggle.classList.remove("is-pulsing");
-    });
-    try {
-      setEnabled(window.localStorage.getItem(storageKey) === "true");
-    } catch (err) {
-      setEnabled(false);
-    }
   };
 
   SongSheet.prototype._mountScrollRegion = function () {
