@@ -220,6 +220,39 @@ test('modo español: "Re7" matchea D7 (Re), no D♭7/C7 (Do)', () => {
   assert.ok(!r.includes('C7'));
 });
 
+test('"dim" matchea los 12 acordes dim7, no sólo el de raíz D', () => {
+  const r = names('dim');
+  ['Cdim7', 'Ddim7', 'Edim7', 'Fdim7', 'Gdim7', 'Adim7', 'Bdim7'].forEach((n) => {
+    assert.ok(r.includes(n), `"dim" debería incluir ${n}`);
+  });
+});
+
+test('"dism" (prefijo de "disminuido") matchea los acordes dim7', () => {
+  const r = names('dism');
+  assert.ok(r.includes('Cdim7'));
+  assert.ok(r.includes('Ddim7'));
+});
+
+test('"disminuido" completo matchea los acordes dim7', () => {
+  const r = names('disminuido');
+  assert.ok(r.includes('Cdim7'));
+  assert.ok(r.includes('Ddim7'));
+});
+
+test('"aug" matchea acordes aumentados de varias raíces, no sólo A', () => {
+  const r = names('aug');
+  assert.ok(r.includes('Caug'));
+  assert.ok(r.includes('Eaug'));
+  assert.ok(r.includes('Aaug'));
+});
+
+test('"am" sigue matcheando sólo acordes de A, sin arrastrar "aumentado"', () => {
+  const r = names('am');
+  assert.ok(r.includes('Am'));
+  assert.ok(!r.includes('Caug'));
+  assert.ok(!r.includes('Eaug'));
+});
+
 test('modo español: sílabas completas siguen resolviendo con la "d" ampliada', () => {
   assert.equal(normalize('do', 'es'), 'c');
   assert.equal(normalize('Do7', 'es'), 'c7');

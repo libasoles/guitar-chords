@@ -90,6 +90,19 @@
     return normalized.replace(prefix, function (m) { return map[m]; });
   }
 
+  // Palabras de calidad que casualmente empiezan con una letra de nota
+  // (a-g) — "dim"/"disminuido", "aug"/"aumentado" — y por eso NO deben
+  // forzar el bloqueo por raíz de splitRoot() más abajo: si no, "dim"
+  // sólo matchearía acordes con raíz D (Ddim7) y "aug" sólo raíz A (Aaug),
+  // excluyendo Cdim7/Edim7/etc. Sólo aplica cuando la query completa (3+
+  // letras, sin dígitos) es prefijo de alguna de estas palabras, para no
+  // romper búsquedas legítimas de raíz sola como "d" o "a" (ver tests).
+  const QUALITY_WORDS = ['dim', 'disminuido', 'aug', 'aumentado', 'add'];
+  function isQualityWordPrefix(q) {
+    return q.length >= 3 && /^[a-z]+$/.test(q) &&
+      QUALITY_WORDS.some(function (w) { return w.indexOf(q) === 0; });
+  }
+
   // Nota inicial de un nombre/alias normalizado (letra + # o b opcional).
   const ROOT_RE = /^[a-g](?:#|b)?/;
 
@@ -122,7 +135,7 @@
   function matchChords(query, chords, notation) {
     const q = normalize(query, notation);
     if (q === '') return [];
-    const qSplit = splitRoot(q);
+    const qSplit = isQualityWordPrefix(q) ? { root: '', rest: q } : splitRoot(q);
     const list = chords || [];
     const scored = [];
     list.forEach(function (chord, index) {
@@ -132,6 +145,10 @@
         const normalized = normalize(candidate);
         let included;
         if (qSplit.root !== '') {
+          // "disminuido"/"aumentado" son alias genéricos (no llevan raíz
+          // propia): sólo deben aportar en modo sin bloqueo de raíz (ver
+          // isQualityWordPrefix), si no "am" matchearía Caug vía "aumentado".
+          if (normalized === 'disminuido' || normalized === 'aumentado') return;
           const cSplit = splitRoot(normalized);
           included = cSplit.root === qSplit.root &&
             (qSplit.rest === '' || !!fuzzysort.single(qSplit.rest, cSplit.rest));
