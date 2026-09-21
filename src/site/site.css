@@ -459,6 +459,18 @@ a:hover {
     1.6rem 2.7rem 1.6rem 2.7rem 1.6rem 2.7rem;
   column-gap: 0.9rem;
   justify-items: center;
+  /* Keep the note picker compact while retaining the piano-key layout.
+     The overflow remains touch/wheel scrollable; browser scrollbars are
+     deliberately hidden so it reads as a note carousel. */
+  max-height: 22rem;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scroll-snap-type: y proximity;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.note-finder-keys::-webkit-scrollbar {
+  display: none;
 }
 
 .note-finder-col-label {
@@ -491,6 +503,7 @@ a:hover {
   cursor: pointer;
   border-radius: 999px;
   transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  scroll-snap-align: center;
 }
 .note-finder-note:focus-visible {
   outline: 2px solid var(--accent);
@@ -587,6 +600,7 @@ a:hover {
   }
   .note-finder-keys {
     justify-self: center;
+    max-height: 19rem;
   }
 }
 
