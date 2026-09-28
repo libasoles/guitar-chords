@@ -14,9 +14,16 @@ const CACHE = 'gc-pwa-%%CACHE_VERSION%%';
 const PRECACHE_URLS = %%PRECACHE_URLS%%;
 
 self.addEventListener('install', function (event) {
+  // Precache cada URL por separado (no cache.addAll): en mobile, una sola
+  // request fallida por señal debil no debe tumbar la instalacion completa
+  // y dejar el device sin app-shell offline hasta el proximo deploy.
   event.waitUntil(
     caches.open(CACHE).then(function (cache) {
-      return cache.addAll(PRECACHE_URLS);
+      return Promise.all(PRECACHE_URLS.map(function (url) {
+        return fetch(url).then(function (res) {
+          if (res && res.ok) return cache.put(url, res);
+        }).catch(function () {});
+      }));
     }).then(function () { return self.skipWaiting(); })
   );
 });
@@ -51,7 +58,10 @@ self.addEventListener('fetch', function (event) {
         return caches.match(req).then(function (hit) {
           return hit || caches.match('%%START_URL%%');
         }).then(function (hit) {
-          return hit || Response.error();
+          if (hit) return hit;
+          return caches.match('/404.html').then(function (offlinePage) {
+            return offlinePage || Response.error();
+          });
         });
       })
     );
