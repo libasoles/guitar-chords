@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Original cubist guitarist: front-face variation. Transparent background. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Guitarrista cubista de frente</title>
+  <g stroke="#293044" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <!-- A warm, simple frontal face and hair cap. -->
+    <path fill="#4A7C93" d="M190 92c1-41 35-70 76-65 35 4 61 32 61 67l-11 25-115 1z"/>
+    <path fill="#F6C85F" d="M204 84c13-29 54-39 81-20 27 18 30 57 8 80l-17 26-45-1-24-28c-12-16-14-39-3-57z"/>
+    <path fill="#E96D50" d="M248 55l-4 112-20-4-17-22 8-49z"/>
+    <circle cx="234" cy="106" r="7" fill="#293044" stroke="none"/>
+    <circle cx="274" cy="106" r="7" fill="#293044" stroke="none"/>
+    <path fill="none" d="M242 142c11 7 23 7 34 0"/>
+
+    <path fill="#D85B70" d="M164 189l72-26 72 39-27 101-102 3-43-61z"/>
+    <path fill="#4A7C93" d="M236 163l72 39 35 63-62 38-35-69z"/>
+    <path fill="#F6C85F" d="M164 189l-28 56 43 61 37-53z"/>
+    <path fill="#E96D50" d="M295 197l36 15 66 53-25 32-69-43-35-20z"/>
+    <path fill="#F6C85F" d="M379 270l30-24 29 28-16 24-26 3z"/>
+
+    <path fill="#F6C85F" d="M167 284c-29-10-59 14-57 45 1 31 29 52 58 42 7 43 56 57 85 29 29-31 9-78-32-76-10-19-29-33-54-40z"/>
+    <path fill="#4A7C93" d="M221 324c41-2 61 45 32 76-29 28-78 14-85-29 25-10 42-27 53-47z"/>
+    <circle cx="190" cy="339" r="18" fill="#293044"/>
+    <path fill="none" stroke="#FAF0D3" stroke-width="5" d="M157 314c22 25 51 46 84 62"/>
+
+    <path fill="#FAF0D3" d="M213 304l185-123 23 35-185 123z"/>
+    <path fill="#D85B70" d="M395 182l47-31 28 40-48 30z"/>
+    <path fill="#F6C85F" d="M438 154l20-13 29 39-19 14z"/>
+    <path fill="none" stroke="#293044" stroke-width="5" d="M232 306l184-123M240 318l184-123"/>
+    <path fill="#4A7C93" d="M465 150l21-9 10 17-21 10zM475 179l23 7-6 19-23-7zM456 200l17 18-14 14-17-17z"/>
+    <path fill="#E96D50" d="M110 234l35-21 84 72-25 33-68-52z"/>
+    <path fill="#F6C85F" d="M110 234l26 32-16 21-25-27z"/>
+  </g>
+</svg>

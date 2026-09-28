@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Original cubist guitarist: profile-head variation. Transparent background. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Guitarrista cubista de perfil</title>
+  <g stroke="#293044" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <!-- A single, readable profile replaces the split mask. -->
+    <path fill="#F6C85F" d="M218 58c38-6 72 18 77 53l-6 43-30 30-41-8-22-31 7-27-11-21c-8-16 8-35 26-39z"/>
+    <path fill="#4A7C93" d="M193 96c5-37 40-61 76-54 17 3 33 12 44 27-33-11-55 2-69 27l-4 28z"/>
+    <path fill="#E96D50" d="M259 184l30-30-4 36-19 16z"/>
+    <circle cx="260" cy="104" r="7" fill="#293044" stroke="none"/>
+    <path fill="none" d="M264 143l17 2"/>
+
+    <path fill="#D85B70" d="M166 192l72-27 69 43-26 98-102 2-42-62z"/>
+    <path fill="#4A7C93" d="M238 165l69 43 35 61-61 37-33-72z"/>
+    <path fill="#F6C85F" d="M166 192l-29 54 42 62 37-54z"/>
+
+    <path fill="#E96D50" d="M294 199l36 15 67 52-25 32-70-43-34-21z"/>
+    <path fill="#F6C85F" d="M380 271l29-24 29 28-17 24-25 3z"/>
+
+    <path fill="#F6C85F" d="M167 286c-29-10-58 13-57 44 1 31 29 53 58 42 7 43 56 58 85 29 29-30 10-77-32-76-10-19-28-32-54-39z"/>
+    <path fill="#4A7C93" d="M221 325c42-1 61 46 32 76-29 29-78 14-85-29 25-10 42-27 53-47z"/>
+    <circle cx="190" cy="340" r="18" fill="#293044"/>
+    <path fill="none" stroke="#FAF0D3" stroke-width="5" d="M157 315c22 25 51 46 84 62"/>
+
+    <path fill="#FAF0D3" d="M213 305l185-123 23 35-185 123z"/>
+    <path fill="#D85B70" d="M395 183l47-31 28 40-48 30z"/>
+    <path fill="#F6C85F" d="M438 155l20-13 29 39-19 14z"/>
+    <path fill="none" stroke="#293044" stroke-width="5" d="M232 307l184-123M240 319l184-123"/>
+    <path fill="#4A7C93" d="M465 151l21-9 10 17-21 10zM475 180l23 7-6 19-23-7zM456 201l17 18-14 14-17-17z"/>
+    <path fill="#E96D50" d="M110 235l35-21 84 72-25 33-68-52z"/>
+    <path fill="#F6C85F" d="M110 235l26 32-16 21-25-27z"/>
+  </g>
+</svg>
