@@ -49,7 +49,6 @@ body {
   color: var(--ink);
   background: url("guitar-player-cubist-left-head.svg") center / contain no-repeat;
 }
-.site-header .logo > * { display: none; }
 .site-header .wordmark {
   font-family: var(--serif);
   font-weight: 600;
