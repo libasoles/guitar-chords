@@ -15,6 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { drawIcon } = require('./lib/icon-png');
 
 const ROOT = path.join(__dirname, '..');
 const SRC_SITE = path.join(ROOT, 'src', 'site');
@@ -603,12 +604,19 @@ const maskableSvg = path.join(SRC_SITE, 'icon-maskable.svg');
 const hasRsvg = (() => {
   try { execSync('rsvg-convert --version', { stdio: 'ignore' }); return true; } catch { return false; }
 })();
+if (!fs.existsSync(maskableSvg)) {
+  fail('src/site/icon-maskable.svg is required to generate PWA icons.');
+}
+if (!hasRsvg) {
+  say('(rsvg-convert not found — generating portable PNG fallbacks)');
+}
 PWA_ICON_SIZES.forEach(function (size) {
   const out = path.join(ICONS_DIST, 'icon-' + size + '.png');
-  if (!hasRsvg || !fs.existsSync(maskableSvg)) {
-    fail('rsvg-convert and src/site/icon-maskable.svg are required to generate PWA icons.');
+  if (hasRsvg) {
+    execSync('rsvg-convert -w ' + size + ' -h ' + size + ' "' + maskableSvg + '" -o "' + out + '"');
+  } else {
+    drawIcon(size, out);
   }
-  execSync('rsvg-convert -w ' + size + ' -h ' + size + ' "' + maskableSvg + '" -o "' + out + '"');
   say('assets/icons/icon-' + size + '.png');
 });
 
