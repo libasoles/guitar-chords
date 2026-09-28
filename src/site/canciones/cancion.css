@@ -73,19 +73,10 @@ a {
   height: 40px;
   flex: none;
   display: block;
+  background: url("../assets/guitar-player-cubist-left-head.svg") center / contain no-repeat;
 }
-.site-header .logo .frame {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 4;
-}
-.site-header .logo .string {
-  stroke: currentColor;
-  stroke-width: 2;
-  opacity: 0.5;
-}
-.site-header .logo .dot {
-  fill: var(--accent);
+.site-header .logo > * {
+  display: none;
 }
 .site-header .wordmark {
   font-family: var(--sans);

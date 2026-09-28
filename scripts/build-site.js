@@ -15,7 +15,6 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const { drawIcon } = require('./lib/icon-png');
 
 const ROOT = path.join(__dirname, '..');
 const SRC_SITE = path.join(ROOT, 'src', 'site');
@@ -556,11 +555,12 @@ copyFile(path.join(SRC_SITE, 'note-finder.js'), path.join(ASSETS_DIST, 'note-fin
 copyFile(path.join(SRC_SITE, 'site.css'), path.join(ASSETS_DIST, 'site.css'));
 copyFile(path.join(SRC_SITE, 'picking-render.js'), path.join(ASSETS_DIST, 'picking-render.js'));
 copyFile(path.join(SRC_SITE, 'metronome.js'), path.join(ASSETS_DIST, 'metronome.js'));
+copyFile(path.join(SRC_SITE, 'guitar-player-cubist-left-head.svg'), path.join(ASSETS_DIST, 'guitar-player-cubist-left-head.svg'));
 // Song-sheet mechanism (cancionero: lyrics-with-chords pages under /canciones,
 // not linked from nav — discoverable via SEO/sitemap only).
 copyFile(path.join(SRC_SHARED, 'song-sheet.js'), path.join(ASSETS_DIST, 'song-sheet.js'));
 copyFile(path.join(SRC_SHARED, 'chord-modal.js'), path.join(ASSETS_DIST, 'chord-modal.js'));
-copyFile(path.join(SRC_EXT, 'icon-source.svg'), path.join(ASSETS_DIST, 'favicon.svg'));
+copyFile(path.join(SRC_SITE, 'guitar-player-cubist-left-head.svg'), path.join(ASSETS_DIST, 'favicon.svg'));
 // Vendored svguitar, fuzzysort, and jsPDF.
 copyFile(path.join(SRC_VENDOR, 'svguitar.umd.js'), path.join(VENDOR_DIST, 'svguitar.umd.js'));
 copyFile(path.join(SRC_VENDOR, 'fuzzysort.js'), path.join(VENDOR_DIST, 'fuzzysort.js'));
@@ -593,9 +593,7 @@ if (fs.existsSync(SRC_CANCIONES)) {
 }
 
 // ---- PWA: icons ------------------------------------------------------------
-// PNG icons for the web app manifest, generated from the site logo. Prefer
-// rsvg-convert (crisp, anti-aliased) and fall back to the pure-JS renderer so
-// the build works on CI runners without librsvg installed.
+// PNG icons for the web app manifest, generated from the site logo.
 
 console.log('==> Generating PWA icons...');
 const ICONS_DIST = path.join(ASSETS_DIST, 'icons');
@@ -607,12 +605,11 @@ const hasRsvg = (() => {
 })();
 PWA_ICON_SIZES.forEach(function (size) {
   const out = path.join(ICONS_DIST, 'icon-' + size + '.png');
-  if (hasRsvg && fs.existsSync(maskableSvg)) {
-    execSync('rsvg-convert -w ' + size + ' -h ' + size + ' "' + maskableSvg + '" -o "' + out + '"');
-  } else {
-    drawIcon(size, out);
+  if (!hasRsvg || !fs.existsSync(maskableSvg)) {
+    fail('rsvg-convert and src/site/icon-maskable.svg are required to generate PWA icons.');
   }
-  say('assets/icons/icon-' + size + '.png' + (hasRsvg ? '' : ' (js fallback)'));
+  execSync('rsvg-convert -w ' + size + ' -h ' + size + ' "' + maskableSvg + '" -o "' + out + '"');
+  say('assets/icons/icon-' + size + '.png');
 });
 
 // ---- PWA: web app manifest (one per locale) --------------------------------

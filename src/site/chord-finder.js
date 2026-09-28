@@ -1195,14 +1195,7 @@
     svg.setAttribute('height', String(LOGO_H));
     svg.setAttribute('viewBox', '0 0 ' + LOGO_W + ' ' + LOGO_H);
     svg.innerHTML =
-      '<rect x="8" y="8" width="32" height="32" rx="3" fill="none" stroke="#1a1a1a" stroke-width="4"></rect>' +
-      '<line x1="18" y1="8" x2="18" y2="40" stroke="#1a1a1a" stroke-width="2" opacity="0.5"></line>' +
-      '<line x1="24" y1="8" x2="24" y2="40" stroke="#1a1a1a" stroke-width="2" opacity="0.5"></line>' +
-      '<line x1="30" y1="8" x2="30" y2="40" stroke="#1a1a1a" stroke-width="2" opacity="0.5"></line>' +
-      '<line x1="8" y1="20" x2="40" y2="20" stroke="#1a1a1a" stroke-width="2" opacity="0.5"></line>' +
-      '<line x1="8" y1="30" x2="40" y2="30" stroke="#1a1a1a" stroke-width="2" opacity="0.5"></line>' +
-      '<circle cx="18" cy="25" r="3.2" fill="#8b0000"></circle>' +
-      '<circle cx="30" cy="15" r="3.2" fill="#8b0000"></circle>' +
+      '<image href="' + window.location.origin + '/assets/guitar-player-cubist-left-head.svg" x="0" y="0" width="48" height="48" preserveAspectRatio="xMidYMid meet"></image>' +
       '<text x="56" y="24" font-family="Georgia, \'Times New Roman\', serif" font-weight="700" font-size="19" fill="#1a1a1a">' + escapeXml(wordmark) + '</text>' +
       '<text x="56" y="39" font-family="Arial, Helvetica, sans-serif" font-weight="400" font-size="10" letter-spacing="1.5" fill="#555555">' + escapeXml(String(wordmarkSmall).toUpperCase()) + '</text>';
     return svg;

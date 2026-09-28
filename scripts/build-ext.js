@@ -12,6 +12,7 @@ const zlib = require('zlib');
 
 const ROOT = path.join(__dirname, '..');
 const SRC_EXT = path.join(ROOT, 'src', 'extension');
+const SRC_SITE = path.join(ROOT, 'src', 'site');
 const SRC_SHARED = path.join(ROOT, 'src', 'shared');
 const SRC_VENDOR = path.join(ROOT, 'vendor');
 const DIST_EXT = path.join(ROOT, 'dist', 'extension');
@@ -190,6 +191,7 @@ console.log('==> Copying extension sources...');
 ['manifest.json', 'popup.html', 'popup.js', 'popup.css'].forEach(function (f) {
   copyFile(path.join(SRC_EXT, f), path.join(DIST_EXT, f));
 });
+copyFile(path.join(SRC_SITE, 'guitar-player-cubist-left-head.svg'), path.join(DIST_EXT, 'guitar-player-cubist-left-head.svg'));
 copyDir(path.join(SRC_EXT, '_locales'), path.join(DIST_EXT, '_locales'));
 
 console.log('==> Copying vendored svguitar and fuzzysort...');
@@ -199,7 +201,7 @@ copyFile(FUZZYSORT, path.join(DIST_EXT, 'vendor', 'fuzzysort.js'));
 
 // ---- icons (rsvg-convert if available) -------------------------------------
 
-const iconSrc = path.join(SRC_EXT, 'icon-source.svg');
+const iconSrc = path.join(SRC_SITE, 'guitar-player-cubist-left-head.svg');
 const iconsDir = path.join(DIST_EXT, 'icons');
 if (fs.existsSync(iconSrc)) {
   const hasRsvg = (() => {

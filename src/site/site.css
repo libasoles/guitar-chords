@@ -53,19 +53,10 @@ body {
   height: 40px;
   flex: none;
   display: block;
+  background: url("guitar-player-cubist-left-head.svg") center / contain no-repeat;
 }
-.site-header .logo .frame {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 4;
-}
-.site-header .logo .string {
-  stroke: currentColor;
-  stroke-width: 2;
-  opacity: 0.5;
-}
-.site-header .logo .dot {
-  fill: var(--accent);
+.site-header .logo > * {
+  display: none;
 }
 .site-header .wordmark {
   font-family: var(--serif);
@@ -680,6 +671,10 @@ footer {
   width: 48px;
   height: 48px;
   flex: none;
+  background: url("guitar-player-cubist-left-head.svg") center / contain no-repeat;
+}
+.extension-cta .ext-icon > * {
+  display: none;
 }
 .extension-cta .ext-body {
 }
