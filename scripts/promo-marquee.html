@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Guitar Chords — promo marquee</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --ink-soft: #555;
+    --paper: #fdfaf5;
+    --rule: #d8d2c4;
+    --accent: #8b0000;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    width: 1400px;
+    height: 560px;
+    margin: 0;
+    background: var(--paper);
+    font-family: var(--serif);
+    color: var(--ink);
+  }
+  body {
+    display: flex;
+    align-items: center;
+    padding: 0 90px;
+  }
+  .left {
+    flex: 0 0 auto;
+    width: 620px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 26px;
+  }
+  .brand img {
+    width: 76px;
+    height: 76px;
+  }
+  .brand h1 {
+    margin: 0;
+    font-size: 56px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  .tagline {
+    font-family: var(--sans);
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    margin: 0 0 24px;
+    max-width: 480px;
+  }
+  .tagline strong {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .chips {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 16px;
+    background: #efe9db;
+    border: 1px solid var(--rule);
+    border-radius: 7px;
+    padding: 8px 14px;
+    color: var(--ink);
+  }
+  .right {
+    flex: 1 1 auto;
+    position: relative;
+    height: 420px;
+  }
+  .card {
+    position: absolute;
+    width: 232px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.16), 0 3px 10px rgba(0,0,0,0.08);
+    padding: 18px 18px 22px;
+    text-align: center;
+  }
+  .card h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 30px;
+    margin: 0 0 6px;
+  }
+  .card .diagram {
+    width: 100%;
+    height: 210px;
+  }
+  .card .diagram svg {
+    width: 100%;
+    height: 100%;
+  }
+  .card.back {
+    top: 10px;
+    right: 10px;
+    transform: rotate(3deg);
+  }
+  .card.front {
+    top: 96px;
+    right: 210px;
+    transform: rotate(-2deg);
+  }
+</style>
+</head>
+<body>
+  <div class="left">
+    <div class="brand">
+      <img src="../src/site/guitar-player-cubist-left-head.svg" alt="">
+      <h1>Guitar Chords</h1>
+    </div>
+    <p class="tagline">
+      Instant chord diagrams for any chord name.<br>
+      Search, pin your favorites, <strong>100% offline</strong>.
+    </p>
+    <div class="chips">
+      <span class="chip">Cmaj7</span>
+      <span class="chip">Am7</span>
+      <span class="chip">D/F♯</span>
+      <span class="chip">Bm7♭5</span>
+    </div>
+  </div>
+  <div class="right">
+    <div class="card back">
+      <h2 id="name-2"></h2>
+      <div class="diagram" id="diagram-2"></div>
+    </div>
+    <div class="card front">
+      <h2 id="name-1"></h2>
+      <div class="diagram" id="diagram-1"></div>
+    </div>
+  </div>
+
+  <script src="../vendor/svguitar.umd.js"></script>
+  <script src="../vendor/fuzzysort.js"></script>
+  <script src="../dist/extension/chords-db.js"></script>
+  <script src="../src/shared/chord-diagram.js"></script>
+  <script src="../src/shared/chord-search.js"></script>
+  <script>
+    function findChord(query) {
+      const exact = window.CHORDS.find((c) => c.name === query);
+      if (exact) return exact;
+      const matches = window.matchChords(query, window.CHORDS, 'american');
+      if (!matches.length) throw new Error('No chord found for ' + query);
+      return matches[0];
+    }
+
+    function paint(id, query) {
+      const chord = findChord(query);
+      document.getElementById('name-' + id).textContent = chord.name;
+      window.ChordDiagram.render(document.getElementById('diagram-' + id), chord, 'finder');
+    }
+
+    paint(1, 'Am');
+    paint(2, 'Cmaj7');
+  </script>
+</body>
+</html>
