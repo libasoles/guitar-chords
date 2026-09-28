@@ -497,10 +497,7 @@ function renderPickingPage(template, strings, locale, page) {
 // single Spanish page at the root — GitHub Pages only serves one 404.html
 // at the domain root, so there's no per-locale variant.
 function render404Page(template, strings) {
-  // Prefijo absoluto: esta pagina se sirve para cualquier ruta rota, incluidas
-  // las anidadas (p.ej. /canciones/inexistente.html), donde un prefijo
-  // relativo resolveria los assets contra el directorio equivocado.
-  const resolvedAssetsPrefix = '/assets/';
+  const resolvedAssetsPrefix = 'assets/';
   const ogImage = SITE_BASE_URL + '/assets/og-image.png';
   let html = template;
 
