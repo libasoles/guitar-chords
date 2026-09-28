@@ -1187,6 +1187,33 @@
 
   var LOGO_W = 260;
   var LOGO_H = 48;
+  // The PDF exporter serializes its logo as a data: SVG before drawing it on a
+  // canvas. Referencing the site SVG with <image> from there produces a broken
+  // image in Chromium, so this is the same artwork inlined at export time.
+  var PDF_LOGO_ART =
+    '<g transform="scale(0.09375)"><g stroke="#293044" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path fill="#4A7C93" d="M107 121c-3-39 30-70 69-66 31 3 57 26 61 57l-13 28-111 5z"/>' +
+    '<path fill="#F6C85F" d="M124 101c17-24 55-29 78-9 19 17 23 46 9 67l-24 31-42-7-27-34c-10-15-8-34 6-48z"/>' +
+    '<path fill="#E96D50" d="M145 183l42 7-17 26-35-16z"/>' +
+    '<circle cx="174" cy="112" r="7" fill="#293044" stroke="none"/>' +
+    '<path fill="none" d="M177 147l18 3"/>' +
+    '<path fill="#D85B70" d="M151 202l73-16 70 43-27 95-104 6-42-63z"/>' +
+    '<path fill="#4A7C93" d="M224 186l70 43 35 64-62 31-31-72z"/>' +
+    '<path fill="#F6C85F" d="M151 202l-30 65 42 63 39-54z"/>' +
+    '<path fill="#E96D50" d="M280 216l42 6 72 47-22 34-74-37-39-17z"/>' +
+    '<path fill="#F6C85F" d="M379 275l31-22 27 30-18 23-25 1z"/>' +
+    '<path fill="#F6C85F" d="M165 302c-28-10-57 12-57 43 0 31 27 54 57 44 6 42 55 59 84 31 30-30 11-78-31-77-10-19-28-33-53-41z"/>' +
+    '<path fill="#4A7C93" d="M218 343c42-1 61 47 31 77-29 28-78 11-84-31 26-9 42-27 53-46z"/>' +
+    '<circle cx="188" cy="357" r="18" fill="#293044"/>' +
+    '<path fill="none" stroke="#FAF0D3" stroke-width="5" d="M155 332c22 25 50 46 83 62"/>' +
+    '<path fill="#FAF0D3" d="M209 322l190-120 22 35-190 120z"/>' +
+    '<path fill="#D85B70" d="M396 203l47-29 27 40-48 29z"/>' +
+    '<path fill="#F6C85F" d="M438 177l20-13 29 39-19 14z"/>' +
+    '<path fill="none" stroke="#293044" stroke-width="5" d="M228 324l189-120M236 336l189-120"/>' +
+    '<path fill="#4A7C93" d="M465 172l21-9 10 17-21 10zM475 201l23 7-6 19-23-7zM456 222l17 18-14 14-17-17z"/>' +
+    '<path fill="#E96D50" d="M98 254l34-22 86 70-24 34-70-51z"/>' +
+    '<path fill="#F6C85F" d="M98 254l26 31-16 22-25-27z"/>' +
+    '</g></g>';
 
   function buildLogoSvg(wordmark, wordmarkSmall) {
     var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -1195,7 +1222,7 @@
     svg.setAttribute('height', String(LOGO_H));
     svg.setAttribute('viewBox', '0 0 ' + LOGO_W + ' ' + LOGO_H);
     svg.innerHTML =
-      '<image href="' + window.location.origin + '/assets/guitar-player-cubist-left-head.svg" x="0" y="0" width="48" height="48" preserveAspectRatio="xMidYMid meet"></image>' +
+      PDF_LOGO_ART +
       '<text x="56" y="24" font-family="Georgia, \'Times New Roman\', serif" font-weight="700" font-size="19" fill="#1a1a1a">' + escapeXml(wordmark) + '</text>' +
       '<text x="56" y="39" font-family="Arial, Helvetica, sans-serif" font-weight="400" font-size="10" letter-spacing="1.5" fill="#555555">' + escapeXml(String(wordmarkSmall).toUpperCase()) + '</text>';
     return svg;
