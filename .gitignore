@@ -2,3 +2,7 @@ node_modules/
 dist/
 
 TODO.md
+.agents
+.claude
+.hermes
+skills-lock.json
