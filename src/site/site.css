@@ -482,7 +482,8 @@ a:hover {
 }
 
 .note-finder-keys-track {
-  display: block;
+  display: grid;
+  row-gap: 1.6rem;
 }
 
 .note-finder-keys {
@@ -511,10 +512,6 @@ a:hover {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
-.note-finder-keys[aria-hidden="true"] .note-finder-note {
-  pointer-events: none;
-}
-
 .note-finder-note-natural {
   width: 2.7rem;
   height: 2.7rem;
@@ -533,22 +530,33 @@ a:hover {
 }
 
 .note-finder-note-accidental {
-  width: 3.6rem;
-  height: 1.7rem;
-  font-size: 0.78rem;
+  width: 2.7rem;
+  height: 2.7rem;
+  font-size: 0.72rem;
   line-height: 1;
   border-radius: 999px;
-  background: #fff;
-  color: var(--ink);
-  border: 1px solid var(--rule);
-  white-space: nowrap;
+}
+.note-finder-note-sharp {
+  background: #e2f3e7;
+  color: #285e3a;
+  border: 1px solid #9bcaaa;
+}
+.note-finder-note-flat {
+  background: #cfe9d8;
+  color: #1f5735;
+  border: 1px solid #7eb994;
 }
 .note-finder-note-accidental:hover {
-  border-color: var(--ink-soft);
+  border-color: #4f8b63;
 }
-.note-finder-note-accidental.is-selected {
-  background: var(--note-selected);
-  border-color: var(--note-selected);
+.note-finder-note-sharp.is-selected {
+  background: #39784e;
+  border-color: #39784e;
+  color: #fff;
+}
+.note-finder-note-flat.is-selected {
+  background: #28653d;
+  border-color: #28653d;
   color: #fff;
 }
 

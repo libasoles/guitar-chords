@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../src/site/site.css">
+  <script>
+    window.ChordDiagram = { render: function () {} };
+    window.NOTE_FINDER_LABELS = ['C', 'C♯/D♭', 'D', 'D♯/E♭', 'E', 'F', 'F♯/G♭', 'G', 'G♯/A♭', 'A', 'A♯/B♭', 'B'];
+    window.NOTE_FINDER_STRINGS = {};
+  </script>
+  <script src="../src/shared/chords-db.js"></script>
+  <script src="../src/shared/note-match.js"></script>
+  <script src="../src/site/note-finder.js"></script>
+</head>
+<body>
+  <div class="note-finder">
+    <div class="note-finder-picker">
+      <div class="note-finder-keys-head">
+        <span class="note-finder-col-label note-finder-col-label-sharps">#</span>
+        <span class="note-finder-col-label note-finder-col-label-naturals">Notas</span>
+        <span class="note-finder-col-label note-finder-col-label-flats">b</span>
+      </div>
+      <div class="note-finder-keys-viewport" id="noteFinderKeysViewport"><div class="note-finder-keys-track" id="noteFinderKeysTrack"></div></div>
+      <button type="button" class="note-finder-clear" id="noteFinderClear">Limpiar</button>
+    </div>
+    <div class="note-finder-results"><div class="note-finder-grid" id="noteFinderGrid"></div></div>
+  </div>
+</body>
+</html>

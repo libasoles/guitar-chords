@@ -11,8 +11,7 @@
    The note list is rendered three times, stacked in a scrollable
    track (previous / real / next), so scrolling past either edge
    loops seamlessly into an identical copy — an infinite carousel.
-   Only the middle copy is interactive; the other two are purely
-   visual and mirror its selection state. */
+   Every copy is interactive and mirrors the same selection state. */
 (function () {
   'use strict';
 
@@ -57,10 +56,9 @@
       renderResults();
     }
 
-    function buildKeysGrid(interactive) {
+    function buildKeysGrid() {
       var gridEl = document.createElement('div');
       gridEl.className = 'note-finder-keys';
-      if (!interactive) gridEl.setAttribute('aria-hidden', 'true');
 
       function makeButton(pc, column, row, extraClass, text) {
         var btn = document.createElement('button');
@@ -70,11 +68,7 @@
         btn.style.gridRow = String(row);
         btn.textContent = text;
         btn.setAttribute('aria-pressed', 'false');
-        if (interactive) {
-          btn.addEventListener('click', function () { toggle(pc); });
-        } else {
-          btn.tabIndex = -1;
-        }
+        btn.addEventListener('click', function () { toggle(pc); });
         (buttonsByPc[pc] = buttonsByPc[pc] || []).push(btn);
         gridEl.appendChild(btn);
       }
@@ -94,17 +88,19 @@
       return gridEl;
     }
 
-    track.appendChild(buildKeysGrid(false));
-    var mainGrid = buildKeysGrid(true);
+    track.appendChild(buildKeysGrid());
+    var mainGrid = buildKeysGrid();
     track.appendChild(mainGrid);
-    track.appendChild(buildKeysGrid(false));
+    track.appendChild(buildKeysGrid());
 
     function syncViewportHeight() {
       var cycleHeight = mainGrid.getBoundingClientRect().height;
       if (!cycleHeight) return;
-      viewport.style.height = cycleHeight + 'px';
-      viewport.scrollTop = cycleHeight;
-      return cycleHeight;
+      var cycleGap = parseFloat(window.getComputedStyle(track).rowGap) || 0;
+      var cycleSpan = cycleHeight + cycleGap;
+      viewport.style.height = cycleSpan + 'px';
+      viewport.scrollTop = cycleSpan;
+      return cycleSpan;
     }
 
     var cycleHeight = syncViewportHeight();
