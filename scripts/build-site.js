@@ -217,10 +217,13 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     'h1', 'lead', 'h2Decoder', 'decoderIntro',
     'thPart', 'thSymbols', 'thMeaning', 'thExample',
     'extensionHeading', 'extensionDescription',
-    'v7NavLabel', 'circleNavLabel', 'dimNavLabel', 'noteFinderNavLabel', 'pickingGroupLabel', 'pickingNavLabel',
+    'v7NavLabel', 'circleNavLabel', 'dimNavLabel', 'pickingGroupLabel', 'pickingNavLabel',
     'pickingJonicoNavLabel', 'pickingFrigioNavLabel',
     'pickingLidioNavLabel', 'pickingMixolidioNavLabel', 'pickingEolicoNavLabel',
     'pickingLocrioNavLabel',
+    'noteFinderPromoKicker', 'noteFinderPromoTitle', 'noteFinderPromoDescription', 'noteFinderPromoCta',
+    'promoNoteTop', 'promoNoteUpperLeft', 'promoNoteUpperRight', 'promoNoteCenter',
+    'promoNoteLowerLeft', 'promoNoteLowerRight', 'promoNoteBottom',
   ];
   simpleKeys.forEach(function (key) {
     html = html.split('%%' + key + '%%').join(strings[key] || '');

@@ -673,6 +673,124 @@ code {
   }
 }
 
+/* ----- Note finder home-page promotion ----- */
+
+.note-finder-promo {
+  margin: 2.8rem 0 0;
+}
+.note-finder-promo-link {
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  gap: 1.7rem;
+  align-items: center;
+  padding: 1.3rem;
+  color: var(--ink);
+  background: #f7f4eb;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  text-decoration: none;
+}
+.note-finder-promo-link:hover {
+  border-color: #2a835f;
+}
+.note-finder-promo-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.note-finder-promo-notes {
+  position: relative;
+  width: 230px;
+  height: 218px;
+  font-family: var(--mono);
+  font-weight: 600;
+}
+.note-finder-promo-note {
+  position: absolute;
+  display: grid;
+  width: 4.45rem;
+  height: 4.45rem;
+  place-items: center;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+.note-finder-promo-note-top,
+.note-finder-promo-note-bottom {
+  left: calc(50% - 2.225rem);
+  color: #fff;
+  background: #092328;
+}
+.note-finder-promo-note-top { top: 0; }
+.note-finder-promo-note-bottom { bottom: 0; background: #12544f; }
+.note-finder-promo-note-upper-left,
+.note-finder-promo-note-lower-left {
+  left: 0;
+  color: #132a13;
+  background: #ecf39e;
+  border-color: #90a955;
+}
+.note-finder-promo-note-upper-right,
+.note-finder-promo-note-lower-right {
+  right: 0;
+  color: #132a13;
+  background: #8bbb92;
+  border-color: #2a835f;
+}
+.note-finder-promo-note-upper-left,
+.note-finder-promo-note-upper-right { top: 2.35rem; }
+.note-finder-promo-note-lower-left,
+.note-finder-promo-note-lower-right { bottom: 2.35rem; }
+.note-finder-promo-note-center {
+  top: calc(50% - 2.225rem);
+  left: calc(50% - 2.225rem);
+  background: #fff;
+  border-color: var(--rule);
+  font-size: 1.2rem;
+}
+.note-finder-promo-copy {
+  min-width: 0;
+}
+.note-finder-promo-copy p {
+  margin: 0;
+}
+.note-finder-promo-kicker {
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #2a835f;
+}
+.note-finder-promo-copy h2 {
+  margin: 0.25rem 0 0.55rem;
+  padding: 0;
+  border: 0;
+  font-size: 1.45rem;
+}
+.note-finder-promo-cta {
+  display: inline-block;
+  margin-top: 1rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #12544f;
+}
+.note-finder-promo-link:hover .note-finder-promo-cta {
+  text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+  .note-finder-promo-link {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 1rem;
+  }
+  .note-finder-promo-copy {
+    text-align: center;
+  }
+}
+
 /* ----- Footer ----- */
 
 footer {
