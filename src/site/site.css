@@ -662,8 +662,8 @@ footer {
   flex-wrap: wrap;
 }
 .extension-cta .ext-icon {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   flex: none;
   background: url("guitar-player-cubist-left-head.svg") center / contain
     no-repeat;
