@@ -293,8 +293,9 @@ function renderV7Page(template, strings, locale, page) {
 
 // Render a "chords and their notes" page (src/site/circle-fifths.html, shared
 // by all entries in CIRCLE_PAGES) for one locale. Same head/footer chrome as
-// the V7 pages; a single-column grid of chords with per-voicing 1ª/3ª/5ª counts
-// (computed client-side by the page's data script).
+// the V7 pages; a single-column grid of chords with the sounding pitch on each
+// string and their root, third and fifth (computed client-side by the page's
+// data script).
 function renderCirclePage(template, strings, locale, page) {
   const resolvedAssetsPrefix = locale === 'es' ? 'assets/' : '../assets/';
   const ogImage = SITE_BASE_URL + '/assets/og-image.png';
@@ -310,15 +311,8 @@ function renderCirclePage(template, strings, locale, page) {
   });
 
   const labels = {
-    root: strings.circleLabelRoot || '1ª',
-    third: strings.circleLabelThird || '3ª',
-    fifth: strings.circleLabelFifth || '5ª',
-    times: strings.circleTimesLabel || 'veces',
     prevLabel: strings.cfPosPrevLabel || 'Posición anterior',
     nextLabel: strings.cfPosNextLabel || 'Posición siguiente',
-    posOpen: strings.cfPosOpen || 'Posición abierta',
-    posBarre6: strings.cfPosBarre6 || 'Cejilla en la 6ª cuerda',
-    posBarre5: strings.cfPosBarre5 || 'Cejilla en la 5ª cuerda',
   };
 
   html = html.split('%%PAGE_TITLE%%').join(strings[page.titleKey] || '');

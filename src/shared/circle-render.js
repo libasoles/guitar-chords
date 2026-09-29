@@ -1,16 +1,10 @@
 /* circle-render.js — Renderer for the "circle of fifths" page. Walks a list of
    major chord names (in circle-of-fifths order) and, for each one, draws its
-   diagram next to a count of how many roots (1ª), thirds (3ª) and fifths (5ª)
-   the voicing actually sounds on the guitar. When a chord has more than one
-   playable position (open vs. barre, via window.ChordPositions), chevrons let
-   the user cycle between them — both the diagram and the counts update to
-   match the position shown.
-
-   The counts are computed from the actual voicing geometry (fingers + barres +
-   standard tuning), so they reflect how many *strings* sound each degree — not
-   just which pitch names are present. Each sounding string's pitch is reduced
-   to its interval above the root, and we tally the tonic (0), the major third
-   (4) and the perfect fifth (7). Labels are supplied per-locale by the page. */
+   diagram next to its three chord tones: root, third and fifth. When a chord
+   has more than one playable position (open vs. barre, via
+   window.ChordPositions), chevrons let the user cycle between them. Under each
+   diagram, the six string labels show the pitch that actually sounds on that
+   string for the current position. */
 (function () {
   'use strict';
 
@@ -18,8 +12,6 @@
 
   // Pitch class of each open string in standard tuning (string 6 = low E … 1 = high E).
   var OPEN_STRING = { 6: 4, 5: 9, 4: 2, 3: 7, 2: 11, 1: 4 };
-
-  var POSITION_LABEL_KEYS = { open: 'posOpen', barre6: 'posBarre6', barre5: 'posBarre5' };
 
   // 'E♭' → 3, 'F♯' → 6, 'C' → 0. Reads the leading letter + optional accidental.
   function pitchClass(token) {
@@ -52,26 +44,53 @@
     return frets;
   }
 
-  // Count how many *strings* sound the root (0), the third and the perfect
-  // fifth (7) semitones above the root, for this triad voicing. The third is a
-  // major third (4) by default; pass thirdSemitones = 3 for minor triads.
-  function intervalCounts(name, fingers, barres, thirdSemitones) {
-    var third = thirdSemitones || 4;
-    var rootPc = pitchClass(name);
-    var counts = { root: 0, third: 0, fifth: 0 };
-    if (rootPc == null) return counts;
+  // Prefer the spelling used by the chord itself (E♭ rather than D♯, for
+  // example). This makes the per-string labels agree with the chord notes.
+  function spellingForPitch(chord, pc) {
+    var spellings = (chord.notes || '').split(/\s+/);
+    for (var i = 0; i < spellings.length; i++) {
+      if (pitchClass(spellings[i]) === pc) return spellings[i];
+    }
+    return ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'][pc];
+  }
 
+  // Return one label per physical string, ordered as the diagram (6 → 1).
+  // A muted string keeps its place so every label remains under its string.
+  function soundingNotes(chord, fingers, barres) {
     var frets = soundingFrets(fingers, barres);
-    Object.keys(frets).forEach(function (string) {
-      var open = OPEN_STRING[string];
-      if (open == null) return;
-      var pc = (open + frets[string]) % 12;
-      var interval = ((pc - rootPc) % 12 + 12) % 12;
-      if (interval === 0) counts.root += 1;
-      else if (interval === third) counts.third += 1;
-      else if (interval === 7) counts.fifth += 1;
+    var notes = [];
+    for (var string = 6; string >= 1; string--) {
+      if (frets[string] == null) {
+        notes.push('—');
+        continue;
+      }
+      notes.push(spellingForPitch(chord, (OPEN_STRING[string] + frets[string]) % 12));
+    }
+    return notes;
+  }
+
+  function buildStringNotes(notes) {
+    var wrap = document.createElement('div');
+    wrap.className = 'string-notes';
+    notes.forEach(function (note) {
+      var label = document.createElement('span');
+      label.className = 'string-note';
+      label.textContent = note;
+      wrap.appendChild(label);
     });
-    return counts;
+    return wrap;
+  }
+
+  function buildComposition(chord, thirdSemitones) {
+    var root = pitchClass(chord.name);
+    var third = thirdSemitones || 4;
+    var tones = root == null ? [] : [root, (root + third) % 12, (root + 7) % 12];
+    var composition = document.createElement('div');
+    composition.className = 'circle-composition';
+    composition.textContent = tones.map(function (pc) {
+      return spellingForPitch(chord, pc);
+    }).join(' ');
+    return composition;
   }
 
   function chordPositions(chord) {
@@ -81,49 +100,12 @@
     return [{ fingers: chord.fingers, barres: chord.barres || [], position: chord.position || 1, kind: 'open' }];
   }
 
-  function buildCounts(counts, labels) {
-    var wrap = document.createElement('div');
-    wrap.className = 'circle-counts';
-
-    var timesWord = labels.times || '';
-
-    [
-      ['root', counts.root],
-      ['third', counts.third],
-      ['fifth', counts.fifth],
-    ].forEach(function (pair) {
-      var key = pair[0];
-      var stat = document.createElement('div');
-      stat.className = 'circle-stat circle-stat--' + key;
-
-      // The degree (1ª/3ª/5ª) is the headline; the count is the caption below.
-      var num = document.createElement('span');
-      num.className = 'circle-stat-num';
-      num.textContent = labels[key];
-      stat.appendChild(num);
-
-      var lab = document.createElement('span');
-      lab.className = 'circle-stat-label';
-      lab.textContent = timesWord ? pair[1] + ' ' + timesWord : String(pair[1]);
-      stat.appendChild(lab);
-
-      wrap.appendChild(stat);
-    });
-    return wrap;
-  }
-
   function renderPosition(entry, labels, thirdSemitones) {
     var pos = entry.positions[entry.index];
     var multi = entry.positions.length > 1;
 
     entry.prevBtn.hidden = !multi;
     entry.nextBtn.hidden = !multi;
-    entry.posLabel.hidden = !multi;
-    if (multi) {
-      var labelKey = POSITION_LABEL_KEYS[pos.kind] || POSITION_LABEL_KEYS.open;
-      entry.posLabel.textContent = labels[labelKey] || '';
-    }
-
     var renderChord = {
       name: entry.chord.name, families: entry.chord.families, aliases: entry.chord.aliases,
       notes: entry.chord.notes, fingers: pos.fingers, barres: pos.barres, position: pos.position,
@@ -137,9 +119,11 @@
       if (window.console) console.error('svguitar error for', entry.chord.name, err);
     }
 
-    var counts = intervalCounts(entry.chord.name, pos.fingers, pos.barres, thirdSemitones);
+    entry.stringNotes.innerHTML = '';
+    entry.stringNotes.appendChild(buildStringNotes(soundingNotes(entry.chord, pos.fingers, pos.barres)));
+
     entry.countsWrap.innerHTML = '';
-    entry.countsWrap.appendChild(buildCounts(counts, labels));
+    entry.countsWrap.appendChild(buildComposition(entry.chord, thirdSemitones));
   }
 
   function stepPosition(entry, delta, labels, thirdSemitones) {
@@ -177,10 +161,10 @@
 
     card.appendChild(diagramWrap);
 
-    var posLabel = document.createElement('div');
-    posLabel.className = 'pos-label';
-    card.appendChild(posLabel);
-    entry.posLabel = posLabel;
+    var stringNotes = document.createElement('div');
+    stringNotes.className = 'string-notes-wrap';
+    card.appendChild(stringNotes);
+    entry.stringNotes = stringNotes;
 
     var name = document.createElement('div');
     name.className = 'name';
