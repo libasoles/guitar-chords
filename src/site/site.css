@@ -350,7 +350,9 @@ a:hover {
 .circle-card .string-note {
   text-align: center;
   border-radius: 3px;
-  transition: color 0.1s ease, background-color 0.1s ease;
+  transition:
+    color 0.1s ease,
+    background-color 0.1s ease;
 }
 .circle-card .string-note--active {
   color: var(--accent);
@@ -371,7 +373,7 @@ a:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  cursor: default;
+  cursor: pointer;
 }
 .circle-tone-note {
   font-family: var(--mono);
