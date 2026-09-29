@@ -29,7 +29,12 @@
       fingerSize: 0.75,
       fingerTextSize: 28,
       color: '#1a1a1a',
-      backgroundColor: '#ffffff',
+      backgroundColor: 'transparent',
+      // Not a svguitar setting; read by addNeckBackground() below to paint only
+      // the fretboard grid white, not the full SVG canvas (svguitar's own
+      // `backgroundColor` fills the whole viewBox, including the space where
+      // the X/O markers and "Nfr" label sit).
+      neckBackgroundColor: '#ffffff',
     },
   };
 
@@ -80,6 +85,40 @@
     group.setAttribute('transform', `translate(0 ${delta})`);
     svg.appendChild(group);
     svg.setAttribute('viewBox', `${minX} ${minY} ${width} ${height + delta}`);
+  }
+
+  // svguitar's `backgroundColor` setting paints the whole SVG canvas, including
+  // the margins where the X/O markers and "Nfr" label live. We only want the
+  // fretboard grid itself colored, so instead we compute the grid's bounding
+  // box from the string/fret <line> elements it just drew and paint a rect
+  // behind just that area.
+  function addNeckBackground(svg, color) {
+    if (!svg || !color) return;
+
+    const root = svg.querySelector('g') || svg;
+    const lines = Array.from(root.querySelectorAll('line'));
+    if (!lines.length) return;
+
+    const xs = [];
+    const ys = [];
+    lines.forEach((line) => {
+      xs.push(Number(line.getAttribute('x1')), Number(line.getAttribute('x2')));
+      ys.push(Number(line.getAttribute('y1')), Number(line.getAttribute('y2')));
+    });
+    if (xs.some(Number.isNaN) || ys.some(Number.isNaN)) return;
+
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', String(minX));
+    rect.setAttribute('y', String(minY));
+    rect.setAttribute('width', String(maxX - minX));
+    rect.setAttribute('height', String(maxY - minY));
+    rect.setAttribute('fill', color);
+    root.insertBefore(rect, root.firstChild);
   }
 
   function alignOpenStringMarkers(svg, config) {
@@ -142,6 +181,7 @@
       .draw();
 
     const svg = target.querySelector('svg');
+    addNeckBackground(svg, config.neckBackgroundColor);
     normalizeHeaderSpacing(svg, chord, config);
     alignOpenStringMarkers(svg, config);
   }
