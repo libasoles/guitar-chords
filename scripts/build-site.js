@@ -361,6 +361,7 @@ function renderDimPage(template, strings, locale) {
   html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings.dimMetaDescription || '');
   html = html.split('%%PAGE_H1%%').join(strings.dimH1 || '');
   html = html.split('%%PAGE_LEAD%%').join(strings.dimLead || '');
+  html = html.split('%%PAGE_LEAD_FORMS%%').join(strings.dimLeadForms || '');
   html = html.split('%%PAGE_SCRIPT%%').join(resolvedAssetsPrefix + 'dim-guide.js');
 
   html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);

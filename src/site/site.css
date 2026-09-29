@@ -388,6 +388,10 @@ a:hover {
 
 /* ----- Diminished chords page ----- */
 
+.dim-lead-forms {
+  margin-top: 1rem;
+}
+
 .dim-section-lead {
   color: var(--ink-soft);
   margin: 0.4rem 0 1.2rem;
