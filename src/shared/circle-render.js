@@ -100,9 +100,22 @@
 
     var composition = document.createElement('div');
     composition.className = 'circle-composition';
-    composition.textContent = tones.map(function (pc, i) {
-      return spellingForPitch(chord, pc) + ' ×' + counts[i];
-    }).join('  ');
+    tones.forEach(function (pc, i) {
+      var tone = document.createElement('div');
+      tone.className = 'circle-tone';
+
+      var note = document.createElement('span');
+      note.className = 'circle-tone-note';
+      note.textContent = spellingForPitch(chord, pc);
+      tone.appendChild(note);
+
+      var count = document.createElement('span');
+      count.className = 'circle-tone-count';
+      count.textContent = '×' + counts[i];
+      tone.appendChild(count);
+
+      composition.appendChild(tone);
+    });
     return composition;
   }
 
