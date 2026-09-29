@@ -54,17 +54,19 @@
     return ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'][pc];
   }
 
-  // Return one label per physical string, ordered as the diagram (6 → 1).
-  // A muted string keeps its place so every label remains under its string.
+  // Return one { note, pc } pair per physical string, ordered as the diagram
+  // (6 → 1). A muted string keeps its place (pc: null) so every label
+  // remains under its string.
   function soundingNotes(chord, fingers, barres) {
     var frets = soundingFrets(fingers, barres);
     var notes = [];
     for (var string = 6; string >= 1; string--) {
       if (frets[string] == null) {
-        notes.push('—');
+        notes.push({ note: '—', pc: null });
         continue;
       }
-      notes.push(spellingForPitch(chord, (OPEN_STRING[string] + frets[string]) % 12));
+      var pc = (OPEN_STRING[string] + frets[string]) % 12;
+      notes.push({ note: spellingForPitch(chord, pc), pc: pc });
     }
     return notes;
   }
@@ -72,19 +74,32 @@
   function buildStringNotes(notes) {
     var wrap = document.createElement('div');
     wrap.className = 'string-notes';
-    notes.forEach(function (note) {
+    notes.forEach(function (entry) {
       var label = document.createElement('span');
       label.className = 'string-note';
-      label.textContent = note;
+      label.textContent = entry.note;
+      if (entry.pc != null) label.dataset.pc = String(entry.pc);
       wrap.appendChild(label);
     });
     return wrap;
   }
 
+  // Toggles the highlight on every string-note in `stringNotesEl` that
+  // sounds pitch class `pc`, so hovering a chord tone shows where it lands
+  // on the fretboard above.
+  function setToneHighlight(stringNotesEl, pc, on) {
+    var selector = '.string-note[data-pc="' + pc + '"]';
+    var matches = stringNotesEl.querySelectorAll(selector);
+    for (var i = 0; i < matches.length; i++) {
+      matches[i].classList.toggle('string-note--active', on);
+    }
+  }
+
   // Composition text lists each chord tone with the number of strings that
   // actually sound it in the current voicing (e.g. a barre chord may sound
-  // the root or fifth several times).
-  function buildComposition(chord, fingers, barres, thirdSemitones) {
+  // the root or fifth several times). Hovering a tone highlights the
+  // matching string-note label(s) in `stringNotesEl`.
+  function buildComposition(chord, fingers, barres, thirdSemitones, stringNotesEl) {
     var root = pitchClass(chord.name);
     var third = thirdSemitones || 4;
     var tones = root == null ? [] : [root, (root + third) % 12, (root + 7) % 12];
@@ -113,6 +128,9 @@
       count.className = 'circle-tone-count';
       count.textContent = '×' + counts[i];
       tone.appendChild(count);
+
+      tone.addEventListener('mouseenter', function () { setToneHighlight(stringNotesEl, pc, true); });
+      tone.addEventListener('mouseleave', function () { setToneHighlight(stringNotesEl, pc, false); });
 
       composition.appendChild(tone);
     });
@@ -149,7 +167,7 @@
     entry.stringNotes.appendChild(buildStringNotes(soundingNotes(entry.chord, pos.fingers, pos.barres)));
 
     entry.countsWrap.innerHTML = '';
-    entry.countsWrap.appendChild(buildComposition(entry.chord, pos.fingers, pos.barres, thirdSemitones));
+    entry.countsWrap.appendChild(buildComposition(entry.chord, pos.fingers, pos.barres, thirdSemitones, entry.stringNotes));
   }
 
   function stepPosition(entry, delta, labels, thirdSemitones, diagramVariant) {

@@ -349,6 +349,12 @@ a:hover {
 }
 .circle-card .string-note {
   text-align: center;
+  border-radius: 3px;
+  transition: color 0.1s ease, background-color 0.1s ease;
+}
+.circle-card .string-note--active {
+  color: var(--accent);
+  background: rgba(139, 0, 0, 0.1);
 }
 .circle-card .name {
   font-family: var(--mono);
@@ -365,6 +371,7 @@ a:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
+  cursor: default;
 }
 .circle-tone-note {
   font-family: var(--mono);
