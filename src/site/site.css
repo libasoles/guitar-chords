@@ -680,8 +680,8 @@ code {
 }
 .note-finder-promo-link {
   display: grid;
-  grid-template-columns: 230px 1fr;
-  gap: 1.7rem;
+  grid-template-columns: 172px 1fr;
+  gap: 1.5rem;
   align-items: center;
   padding: 1.3rem;
   color: var(--ink);
@@ -699,54 +699,42 @@ code {
 }
 .note-finder-promo-notes {
   position: relative;
-  width: 230px;
-  height: 218px;
+  width: 172px;
+  height: 172px;
   font-family: var(--mono);
   font-weight: 600;
 }
 .note-finder-promo-note {
   position: absolute;
   display: grid;
-  width: 4.45rem;
-  height: 4.45rem;
+  width: 3.25rem;
+  height: 3.25rem;
   place-items: center;
   border: 2px solid transparent;
   border-radius: 50%;
   box-sizing: border-box;
-  font-size: 1rem;
+  font-size: 0.8rem;
 }
 .note-finder-promo-note-top,
 .note-finder-promo-note-bottom {
-  left: calc(50% - 2.225rem);
+  left: 3.75rem;
   color: #fff;
-  background: #092328;
 }
 .note-finder-promo-note-top { top: 0; }
-.note-finder-promo-note-bottom { bottom: 0; background: #12544f; }
-.note-finder-promo-note-upper-left,
-.note-finder-promo-note-lower-left {
-  left: 0;
-  color: #132a13;
-  background: #ecf39e;
-  border-color: #90a955;
-}
-.note-finder-promo-note-upper-right,
-.note-finder-promo-note-lower-right {
-  right: 0;
-  color: #132a13;
-  background: #8bbb92;
-  border-color: #2a835f;
-}
-.note-finder-promo-note-upper-left,
-.note-finder-promo-note-upper-right { top: 2.35rem; }
-.note-finder-promo-note-lower-left,
-.note-finder-promo-note-lower-right { bottom: 2.35rem; }
+.note-finder-promo-note-bottom { bottom: 0; background: #4f772d; }
+.note-finder-promo-note-upper-left { top: 1.875rem; left: 0.5rem; background: #12544f; color: #fff; }
+.note-finder-promo-note-lower-left { bottom: 1.875rem; left: 0.5rem; background: #2a835f; color: #fff; }
+.note-finder-promo-note-upper-right { top: 1.875rem; right: 0.5rem; background: #ecf39e; color: #132a13; }
+.note-finder-promo-note-lower-right { bottom: 1.875rem; right: 0.5rem; background: #8bbb92; color: #132a13; }
+.note-finder-promo-note-top { background: #092328; }
 .note-finder-promo-note-center {
-  top: calc(50% - 2.225rem);
-  left: calc(50% - 2.225rem);
+  top: 3.625rem;
+  left: 3.625rem;
+  width: 3.5rem;
+  height: 3.5rem;
   background: #fff;
   border-color: var(--rule);
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 .note-finder-promo-copy {
   min-width: 0;
