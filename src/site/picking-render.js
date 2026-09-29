@@ -230,18 +230,26 @@
     });
   }
 
-  // Wires hover on every melodic note (never the open-string pedal on string
-  // 6 — that's drawn as an empty-string indicator, not a "finger", so it's
-  // never selected here) so pointing at one highlights it and the 3rd/6th
-  // it's paired with, per pattern.pairs.
+  // Wires hover on every melodic note — fretted or open — so pointing at one
+  // highlights it and the 3rd/6th it's paired with, per pattern.pairs. The
+  // pedal on string 6 is always open too and renders with the same
+  // "fret-NaN" class as any other open note (fixStringMarkers above relies
+  // on this too), so it's told apart by string number, not by shape, and
+  // left out of the hover entirely.
   function wireHover(svg, pattern) {
     var elements = {};
     pattern.fingers.forEach(function (finger) {
       var stringNum = finger[0];
       var fret = finger[1];
-      if (fret === 'x' || fret === 'o') return;
-      var key = stringNum + ':' + fret;
       var arrIndex = Math.abs(stringNum - 6);
+      if (fret === 'x') return;
+      if (fret === 'o') {
+        if (stringNum === 6) return;
+        var openEl = svg.querySelector('.finger-string-' + arrIndex + '-fret-NaN');
+        if (openEl) elements[stringNum + ':0'] = openEl;
+        return;
+      }
+      var key = stringNum + ':' + fret;
       var el = svg.querySelector('.finger-string-' + arrIndex + '-fret-' + (fret - 1));
       if (el) elements[key] = el;
     });

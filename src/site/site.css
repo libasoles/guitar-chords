@@ -912,10 +912,11 @@ footer {
   cursor: pointer;
   transform-box: fill-box;
   transform-origin: center;
-  transition: transform 0.1s ease, fill 0.1s ease;
+  transition: transform 0.1s ease, fill 0.1s ease, stroke 0.1s ease;
 }
 .picking-note-active {
   fill: var(--accent) !important;
+  stroke: var(--accent) !important;
   transform: scale(1.25);
 }
 .picking-figure figcaption {
