@@ -49,11 +49,12 @@ body {
   flex: 1;
 }
 .site-header .logo {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   flex: none;
   display: block;
-  background: url("guitar-player-cubist-left-head.svg") center / contain no-repeat;
+  background: url("guitar-player-cubist-left-head.svg") center / contain
+    no-repeat;
 }
 .site-header .logo > * {
   display: none;
@@ -351,8 +352,6 @@ a:hover {
   align-items: center;
   min-width: 3.4rem;
   padding: 0.5rem 0.4rem;
-  border: 1px solid var(--rule);
-  border-radius: 8px;
 }
 .circle-stat-num {
   font-family: var(--mono);
@@ -493,7 +492,10 @@ a:hover {
   font-weight: 600;
   cursor: pointer;
   border-radius: 999px;
-  transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease,
+    border-color 0.12s ease;
   scroll-snap-align: center;
 }
 .note-finder-note:focus-visible {
@@ -671,7 +673,8 @@ footer {
   width: 48px;
   height: 48px;
   flex: none;
-  background: url("guitar-player-cubist-left-head.svg") center / contain no-repeat;
+  background: url("guitar-player-cubist-left-head.svg") center / contain
+    no-repeat;
 }
 .extension-cta .ext-icon > * {
   display: none;
@@ -712,11 +715,15 @@ footer {
 }
 
 @media (max-width: 600px) {
-  h1 { font-size: 1.4rem; }
+  h1 {
+    font-size: 1.4rem;
+  }
 }
 
 @media (max-width: 359px) {
-  h1 { font-size: 1.2rem; }
+  h1 {
+    font-size: 1.2rem;
+  }
 }
 
 @media print {
@@ -826,7 +833,11 @@ footer {
   padding: 1.4rem;
   border: 1px solid var(--mt-border);
   border-radius: 14px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(253, 250, 245, 0.98));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.94),
+    rgba(253, 250, 245, 0.98)
+  );
   box-shadow: 0 10px 30px rgba(26, 26, 26, 0.06);
 }
 .metronome-pendulum {
@@ -900,7 +911,10 @@ footer {
   border: 1px solid var(--mt-border);
   border-radius: 999px;
   background: transparent;
-  transition: transform 100ms ease, background-color 100ms ease, border-color 100ms ease;
+  transition:
+    transform 100ms ease,
+    background-color 100ms ease,
+    border-color 100ms ease;
 }
 .metronome-beat-dot.is-accent {
   border-color: var(--accent);
@@ -1106,7 +1120,9 @@ footer {
 }
 
 @media (max-width: 600px) {
-  .notfound-code { font-size: 3.4rem; }
+  .notfound-code {
+    font-size: 3.4rem;
+  }
   .metronome-widget {
     padding: 1rem;
   }
