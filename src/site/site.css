@@ -476,8 +476,20 @@ a:hover {
   overscroll-behavior-y: contain;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 1.25rem, #000 calc(100% - 1.25rem), transparent);
-  mask-image: linear-gradient(to bottom, transparent, #000 1.25rem, #000 calc(100% - 1.25rem), transparent);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 1.25rem,
+    #000 calc(100% - 1.25rem),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 1.25rem,
+    #000 calc(100% - 1.25rem),
+    transparent
+  );
 }
 .note-finder-keys-viewport::-webkit-scrollbar {
   display: none;
@@ -515,8 +527,8 @@ a:hover {
   outline-offset: 2px;
 }
 .note-finder-note-natural {
-  width: 2.7rem;
-  height: 2.7rem;
+  width: 3.7rem;
+  height: 3.7rem;
   font-size: 0.82rem;
   background: #fff;
   color: var(--ink);
@@ -573,6 +585,7 @@ a:hover {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--ink-soft);
+  padding-left: 20px;
 }
 .note-finder-clear:hover {
   color: var(--accent);
@@ -720,13 +733,40 @@ code {
   left: 3.75rem;
   color: #fff;
 }
-.note-finder-promo-note-top { top: 0; }
-.note-finder-promo-note-bottom { bottom: 0; background: #4f772d; }
-.note-finder-promo-note-upper-left { top: 1.875rem; left: 0.5rem; background: #12544f; color: #fff; }
-.note-finder-promo-note-lower-left { bottom: 1.875rem; left: 0.5rem; background: #2a835f; color: #fff; }
-.note-finder-promo-note-upper-right { top: 1.875rem; right: 0.5rem; background: #b4d2eb; color: #010101; }
-.note-finder-promo-note-lower-right { bottom: 1.875rem; right: 0.5rem; background: #8bbb92; color: #132a13; }
-.note-finder-promo-note-top { background: #092328; }
+.note-finder-promo-note-top {
+  top: 0;
+}
+.note-finder-promo-note-bottom {
+  bottom: 0;
+  background: #4f772d;
+}
+.note-finder-promo-note-upper-left {
+  top: 1.875rem;
+  left: 0.5rem;
+  background: #12544f;
+  color: #fff;
+}
+.note-finder-promo-note-lower-left {
+  bottom: 1.875rem;
+  left: 0.5rem;
+  background: #2a835f;
+  color: #fff;
+}
+.note-finder-promo-note-upper-right {
+  top: 1.875rem;
+  right: 0.5rem;
+  background: #b4d2eb;
+  color: #010101;
+}
+.note-finder-promo-note-lower-right {
+  bottom: 1.875rem;
+  right: 0.5rem;
+  background: #8bbb92;
+  color: #132a13;
+}
+.note-finder-promo-note-top {
+  background: #092328;
+}
 .note-finder-promo-note-center {
   top: 3.625rem;
   left: 3.625rem;
@@ -897,7 +937,10 @@ footer {
   cursor: pointer;
   transform-box: fill-box;
   transform-origin: center;
-  transition: transform 0.1s ease, fill 0.1s ease, stroke 0.1s ease;
+  transition:
+    transform 0.1s ease,
+    fill 0.1s ease,
+    stroke 0.1s ease;
 }
 .picking-note-active {
   fill: var(--accent) !important;
