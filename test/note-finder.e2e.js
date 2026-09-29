@@ -16,8 +16,10 @@ async function run() {
 
     const picker = await page.evaluate(() => {
       const grids = Array.from(document.querySelectorAll('.note-finder-keys'));
-      const sharp = document.querySelector('.note-finder-note-sharp');
-      const flat = document.querySelector('.note-finder-note-flat');
+      // Index 0 is A#/Bb, part of the default-selected C7 chord (as a flat);
+      // pick an accidental that starts unselected to compare neutral colors.
+      const sharp = document.querySelectorAll('.note-finder-note-sharp')[1];
+      const flat = document.querySelectorAll('.note-finder-note-flat')[1];
       const a = grids[0].getBoundingClientRect();
       const b = grids[1].getBoundingClientRect();
       const sharpStyle = getComputedStyle(sharp);
@@ -42,6 +44,7 @@ async function run() {
     assert.strictEqual(picker.sharpBackground, picker.flatBackground, 'accidental notes should start with the neutral, non-green background');
 
     await page.locator('.note-finder-keys').first().locator('.note-finder-note-sharp').nth(1).click();
+    await page.waitForTimeout(200); // let the 0.12s background-color transition settle
     const noteStates = await page.locator('.note-finder-keys').first().locator('.note-finder-note-sharp').nth(1).evaluate((button) => {
       const pc = button.textContent;
       return {
