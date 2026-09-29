@@ -34,19 +34,26 @@ async function run() {
       };
     });
 
-    assert.deepStrictEqual(picker.labels, ['#', 'Notas', 'b']);
+    assert.deepStrictEqual(picker.labels, ['♭', 'Notas', '#']);
     assert.ok(picker.cloneInteractive, 'the cloned cycles must accept pointer interaction');
     assert.ok(Math.abs(picker.gap - picker.naturalGap) < 1, 'the seam between cycles must match the gap between notes');
     assert.ok(Math.abs(picker.sharpSize[0] - picker.sharpSize[1]) < 1, 'accidental notes should be circular');
     assert.ok(picker.sharpRadius >= picker.sharpSize[0] / 2, 'accidental notes should have a circular radius');
-    assert.notStrictEqual(picker.sharpBackground, picker.flatBackground, 'sharp and flat columns should use two green shades');
+    assert.strictEqual(picker.sharpBackground, picker.flatBackground, 'accidental notes should start with the neutral, non-green background');
 
     await page.locator('.note-finder-keys').first().locator('.note-finder-note-sharp').nth(1).click();
-    const cloneStates = await page.locator('.note-finder-keys').first().locator('.note-finder-note-sharp').nth(1).evaluate((button) => {
+    const noteStates = await page.locator('.note-finder-keys').first().locator('.note-finder-note-sharp').nth(1).evaluate((button) => {
       const pc = button.textContent;
-      return Array.from(document.querySelectorAll('.note-finder-note-sharp')).filter((el) => el.textContent === pc).map((el) => el.getAttribute('aria-pressed'));
+      return {
+        sharps: Array.from(document.querySelectorAll('.note-finder-note-sharp')).filter((el) => el.textContent === pc).map((el) => el.getAttribute('aria-pressed')),
+        flats: Array.from(document.querySelectorAll('.note-finder-note-flat')).filter((el) => el.style.gridRow === button.style.gridRow).map((el) => el.getAttribute('aria-pressed')),
+        sharpBackground: getComputedStyle(button).backgroundColor,
+        flatBackground: getComputedStyle(Array.from(button.parentElement.querySelectorAll('.note-finder-note-flat')).find((el) => el.style.gridRow === button.style.gridRow)).backgroundColor,
+      };
     });
-    assert.ok(cloneStates.every((state) => state === 'true'), 'clicking a cloned note should synchronize every cycle');
+    assert.ok(noteStates.sharps.every((state) => state === 'true'), 'clicking a cloned note should synchronize every cycle');
+    assert.ok(noteStates.flats.every((state) => state === 'false'), 'selecting a sharp must not select its enharmonic flat');
+    assert.notStrictEqual(noteStates.sharpBackground, noteStates.flatBackground, 'sharp and flat columns should use different selected colors');
   } finally {
     await browser.close();
   }

@@ -1,6 +1,6 @@
 /* note-finder.js — "Identificar acordes a partir de notas" page.
    A piano-style note picker with naturals in the center column and
-   accidentals split into two side columns (sharps on the left, flats
+   accidentals split into two side columns (flats on the left, sharps
    on the right, since the same black key is one or the other
    depending which natural you approach it from), descending one
    octave from B to C. Toggling notes filters window.CHORDS (via
@@ -18,8 +18,9 @@
   var STRINGS = window.NOTE_FINDER_STRINGS || {};
   function t(key, fallback) { return STRINGS[key] !== undefined ? STRINGS[key] : fallback; }
 
-  // Default selection: C7 (Do, Mi, Sol, Sib) — pitch classes 0, 4, 7, 10.
-  var DEFAULT_SELECTED = [0, 4, 7, 10];
+  // Default selection: C7 (Do, Mi, Sol, Sib). Accidentals retain the
+  // spelling that was selected, so A# and Bb can be controlled separately.
+  var DEFAULT_SELECTED = ['natural:0', 'natural:4', 'natural:7', 'flat:10'];
 
   // Naturals column, descending one octave from B down to C (piano-style).
   // Grid row of natural i (0-indexed) is 1 + i*2.
@@ -42,25 +43,31 @@
     function label(pc) { return labels[pc] !== undefined ? labels[pc] : String(pc); }
 
     var selected = new Set(DEFAULT_SELECTED);
-    var buttonsByPc = {};
+    var buttonsByNote = {};
 
     var track = document.getElementById('noteFinderKeysTrack');
     var viewport = document.getElementById('noteFinderKeysViewport');
     var clearBtn = document.getElementById('noteFinderClear');
     var grid = document.getElementById('noteFinderGrid');
 
-    function toggle(pc) {
-      if (selected.has(pc)) selected.delete(pc);
-      else selected.add(pc);
+    function toggle(note) {
+      if (selected.has(note)) selected.delete(note);
+      else selected.add(note);
       syncButtons();
       renderResults();
+    }
+
+    function selectedPitchClasses() {
+      return new Set(Array.from(selected, function (note) {
+        return Number(note.split(':')[1]);
+      }));
     }
 
     function buildKeysGrid() {
       var gridEl = document.createElement('div');
       gridEl.className = 'note-finder-keys';
 
-      function makeButton(pc, column, row, extraClass, text) {
+      function makeButton(pc, column, row, extraClass, text, note) {
         var btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'note-finder-note' + (extraClass ? ' ' + extraClass : '');
@@ -68,21 +75,21 @@
         btn.style.gridRow = String(row);
         btn.textContent = text;
         btn.setAttribute('aria-pressed', 'false');
-        btn.addEventListener('click', function () { toggle(pc); });
-        (buttonsByPc[pc] = buttonsByPc[pc] || []).push(btn);
+        btn.addEventListener('click', function () { toggle(note); });
+        (buttonsByNote[note] = buttonsByNote[note] || []).push(btn);
         gridEl.appendChild(btn);
       }
 
       NATURAL_PCS.forEach(function (pc, i) {
-        makeButton(pc, 2, 1 + i * 2, 'note-finder-note-natural', label(pc));
+        makeButton(pc, 2, 1 + i * 2, 'note-finder-note-natural', label(pc), 'natural:' + pc);
       });
 
       ACCIDENTAL_SLOTS.forEach(function (pc, i) {
         if (pc === null) return;
         var parts = label(pc).split('/');
         var row = 2 + i * 2;
-        makeButton(pc, 1, row, 'note-finder-note-accidental note-finder-note-sharp', parts[0] || label(pc));
-        makeButton(pc, 3, row, 'note-finder-note-accidental note-finder-note-flat', parts[1] || label(pc));
+        makeButton(pc, 1, row, 'note-finder-note-accidental note-finder-note-flat', parts[1] || label(pc), 'flat:' + pc);
+        makeButton(pc, 3, row, 'note-finder-note-accidental note-finder-note-sharp', parts[0] || label(pc), 'sharp:' + pc);
       });
 
       return gridEl;
@@ -119,10 +126,9 @@
     });
 
     function syncButtons() {
-      Object.keys(buttonsByPc).forEach(function (key) {
-        var pc = Number(key);
-        var pressed = selected.has(pc);
-        buttonsByPc[pc].forEach(function (btn) {
+      Object.keys(buttonsByNote).forEach(function (note) {
+        var pressed = selected.has(note);
+        buttonsByNote[note].forEach(function (btn) {
           btn.classList.toggle('is-selected', pressed);
           btn.setAttribute('aria-pressed', pressed ? 'true' : 'false');
         });
@@ -189,7 +195,7 @@
         renderEmpty(t('noteFinderSelectPrompt', 'Marcá al menos una nota para ver acordes.'));
         return;
       }
-      var matches = window.NoteMatch.matchByNotes(selected, window.CHORDS);
+      var matches = window.NoteMatch.matchByNotes(selectedPitchClasses(), window.CHORDS);
       if (matches.length === 0) {
         renderEmpty(t('noteFinderEmpty', 'No hay acordes que contengan todas esas notas.'));
         return;

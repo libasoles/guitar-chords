@@ -455,13 +455,13 @@ a:hover {
   white-space: nowrap;
 }
 .note-finder-col-label-sharps {
-  grid-column: 1;
+  grid-column: 3;
 }
 .note-finder-col-label-naturals {
   grid-column: 2;
 }
 .note-finder-col-label-flats {
-  grid-column: 3;
+  grid-column: 1;
 }
 
 .note-finder-keys-viewport {
@@ -476,6 +476,8 @@ a:hover {
   overscroll-behavior-y: contain;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 1.25rem, #000 calc(100% - 1.25rem), transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 1.25rem, #000 calc(100% - 1.25rem), transparent);
 }
 .note-finder-keys-viewport::-webkit-scrollbar {
   display: none;
@@ -537,26 +539,26 @@ a:hover {
   border-radius: 999px;
 }
 .note-finder-note-sharp {
-  background: #e2f3e7;
-  color: #285e3a;
-  border: 1px solid #9bcaaa;
+  background: #fff;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
 }
 .note-finder-note-flat {
-  background: #cfe9d8;
-  color: #1f5735;
-  border: 1px solid #7eb994;
+  background: #fff;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
 }
 .note-finder-note-accidental:hover {
-  border-color: #4f8b63;
+  border-color: var(--ink-soft);
 }
 .note-finder-note-sharp.is-selected {
-  background: #39784e;
-  border-color: #39784e;
+  background: #174952;
+  border-color: #174952;
   color: #fff;
 }
 .note-finder-note-flat.is-selected {
-  background: #28653d;
-  border-color: #28653d;
+  background: #76a2a8;
+  border-color: #76a2a8;
   color: #fff;
 }
 
