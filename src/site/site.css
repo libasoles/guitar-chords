@@ -724,7 +724,7 @@ code {
 .note-finder-promo-note-bottom { bottom: 0; background: #4f772d; }
 .note-finder-promo-note-upper-left { top: 1.875rem; left: 0.5rem; background: #12544f; color: #fff; }
 .note-finder-promo-note-lower-left { bottom: 1.875rem; left: 0.5rem; background: #2a835f; color: #fff; }
-.note-finder-promo-note-upper-right { top: 1.875rem; right: 0.5rem; background: #ecf39e; color: #132a13; }
+.note-finder-promo-note-upper-right { top: 1.875rem; right: 0.5rem; background: #b4d2eb; color: #010101; }
 .note-finder-promo-note-lower-right { bottom: 1.875rem; right: 0.5rem; background: #8bbb92; color: #132a13; }
 .note-finder-promo-note-top { background: #092328; }
 .note-finder-promo-note-center {
@@ -886,9 +886,6 @@ footer {
   display: block;
   width: 100%;
   padding: 1rem 0.5rem;
-  background: #fff;
-  border: 1px solid var(--rule);
-  border-radius: 8px;
   box-sizing: border-box;
 }
 .picking-diagram svg {

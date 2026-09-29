@@ -169,6 +169,42 @@
     });
   }
 
+  // svguitar's background fills the whole SVG canvas, which also includes the
+  // open/muted-string symbols and the position markers. Give only the actual
+  // fretboard a white surface instead, keeping those surrounding areas on the
+  // page background.
+  function addFretboardBackground(svg) {
+    var left = Infinity;
+    var top = Infinity;
+    var right = -Infinity;
+    var bottom = -Infinity;
+
+    svg.querySelectorAll('line').forEach(function (line) {
+      var x1 = parseFloat(line.getAttribute('x1'));
+      var y1 = parseFloat(line.getAttribute('y1'));
+      var x2 = parseFloat(line.getAttribute('x2'));
+      var y2 = parseFloat(line.getAttribute('y2'));
+      // Ignore the diagonal strokes used for muted-string X markers.
+      if (!isFinite(x1) || !isFinite(y1) || !isFinite(x2) || !isFinite(y2) ||
+          (x1 !== x2 && y1 !== y2)) return;
+      left = Math.min(left, x1, x2);
+      top = Math.min(top, y1, y2);
+      right = Math.max(right, x1, x2);
+      bottom = Math.max(bottom, y1, y2);
+    });
+
+    if (!isFinite(left) || !isFinite(top)) return;
+
+    var board = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    board.setAttribute('x', left);
+    board.setAttribute('y', top);
+    board.setAttribute('width', right - left);
+    board.setAttribute('height', bottom - top);
+    board.setAttribute('fill', '#fff');
+    board.setAttribute('class', 'picking-fretboard-background');
+    svg.insertBefore(board, svg.firstChild);
+  }
+
   // Real (criolla) fretboards mark frets 3, 5, 7, 9 and 12 with a small dot
   // inlaid above the strings, not on the neck itself. svguitar's own
   // fretMarkers option draws them centered inside the fretboard, so instead
@@ -284,6 +320,7 @@
     var svg = el.querySelector('svg');
     if (svg) {
       fixStringMarkers(svg);
+      addFretboardBackground(svg);
       addPositionMarkers(svg, pattern.frets);
       wireHover(svg, pattern);
     }
