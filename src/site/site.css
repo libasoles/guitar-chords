@@ -526,9 +526,9 @@ a:hover {
   border-color: var(--ink-soft);
 }
 .note-finder-note-natural.is-selected {
-  background: var(--note-selected);
-  color: #fff;
-  border-color: var(--note-selected);
+  background: #ffdcdc;
+  color: var(--ink);
+  border-color: #ffdcdc;
 }
 
 .note-finder-note-accidental {
@@ -552,14 +552,14 @@ a:hover {
   border-color: var(--ink-soft);
 }
 .note-finder-note-sharp.is-selected {
-  background: #174952;
-  border-color: #174952;
-  color: #fff;
+  background: #d4e0ee;
+  border-color: #d4e0ee;
+  color: var(--ink);
 }
 .note-finder-note-flat.is-selected {
-  background: #76a2a8;
-  border-color: #76a2a8;
-  color: #fff;
+  background: #d0e1ca;
+  border-color: #d0e1ca;
+  color: var(--ink);
 }
 
 .note-finder-clear {
