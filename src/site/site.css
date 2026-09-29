@@ -433,30 +433,14 @@ a:hover {
   gap: 1rem;
 }
 
-.note-finder-keys {
+.note-finder-keys-head {
   display: grid;
-  grid-template-columns: 4.6rem 2.7rem;
-  grid-template-rows:
-    auto 2.7rem 1.6rem 2.7rem 1.6rem 2.7rem 1.6rem 2.7rem
-    1.6rem 2.7rem 1.6rem 2.7rem 1.6rem 2.7rem;
+  grid-template-columns: 3.6rem 2.7rem 3.6rem;
   column-gap: 0.9rem;
   justify-items: center;
-  /* Keep the note picker compact while retaining the piano-key layout.
-     The overflow remains touch/wheel scrollable; browser scrollbars are
-     deliberately hidden so it reads as a note carousel. */
-  max-height: 22rem;
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-  scroll-snap-type: y proximity;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.note-finder-keys::-webkit-scrollbar {
-  display: none;
 }
 
 .note-finder-col-label {
-  grid-row: 1;
   align-self: end;
   font-family: var(--sans);
   font-size: 0.62rem;
@@ -470,11 +454,45 @@ a:hover {
   text-align: center;
   white-space: nowrap;
 }
-.note-finder-col-label-accidentals {
+.note-finder-col-label-sharps {
   grid-column: 1;
 }
 .note-finder-col-label-naturals {
   grid-column: 2;
+}
+.note-finder-col-label-flats {
+  grid-column: 3;
+}
+
+.note-finder-keys-viewport {
+  width: 100%;
+  /* Height is set from JS to exactly match one cycle of the note list,
+     so the whole widget is visible without scrolling by default. The
+     container stays scrollable (wheel/touch) as an infinite carousel:
+     the track below holds three stacked copies of the list and the
+     scroll position is looped between them. Browser scrollbars are
+     deliberately hidden so it reads as a carousel, not a scroll area. */
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.note-finder-keys-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.note-finder-keys-track {
+  display: block;
+}
+
+.note-finder-keys {
+  display: grid;
+  grid-template-columns: 3.6rem 2.7rem 3.6rem;
+  grid-template-rows:
+    2.7rem 1.6rem 2.7rem 1.6rem 2.7rem 1.6rem 2.7rem
+    1.6rem 2.7rem 1.6rem 2.7rem 1.6rem 2.7rem;
+  column-gap: 0.9rem;
+  justify-items: center;
 }
 
 .note-finder-note {
@@ -488,11 +506,13 @@ a:hover {
     background-color 0.12s ease,
     color 0.12s ease,
     border-color 0.12s ease;
-  scroll-snap-align: center;
 }
 .note-finder-note:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+.note-finder-keys[aria-hidden="true"] .note-finder-note {
+  pointer-events: none;
 }
 
 .note-finder-note-natural {
@@ -513,7 +533,7 @@ a:hover {
 }
 
 .note-finder-note-accidental {
-  width: 4.2rem;
+  width: 3.6rem;
   height: 1.7rem;
   font-size: 0.78rem;
   line-height: 1;
@@ -583,9 +603,8 @@ a:hover {
   .note-finder {
     grid-template-columns: 1fr;
   }
-  .note-finder-keys {
-    justify-self: center;
-    max-height: 19rem;
+  .note-finder-picker {
+    align-items: center;
   }
 }
 

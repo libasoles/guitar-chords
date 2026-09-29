@@ -1,9 +1,18 @@
 /* note-finder.js — "Identificar acordes a partir de notas" page.
-   A piano-style note picker (accidentals on the left, naturals on the
-   right, descending one octave from C to C): toggling notes filters
-   window.CHORDS (via window.NoteMatch) down to the guitar chords that
-   contain every selected note, rendered like the chord-finder search
-   results (diagram + name + notes). */
+   A piano-style note picker with naturals in the center column and
+   accidentals split into two side columns (sharps on the left, flats
+   on the right, since the same black key is one or the other
+   depending which natural you approach it from), descending one
+   octave from B to C. Toggling notes filters window.CHORDS (via
+   window.NoteMatch) down to the guitar chords that contain every
+   selected note, rendered like the chord-finder search results
+   (diagram + name + notes).
+
+   The note list is rendered three times, stacked in a scrollable
+   track (previous / real / next), so scrolling past either edge
+   loops seamlessly into an identical copy — an infinite carousel.
+   Only the middle copy is interactive; the other two are purely
+   visual and mirror its selection state. */
 (function () {
   'use strict';
 
@@ -14,12 +23,12 @@
   var DEFAULT_SELECTED = [0, 4, 7, 10];
 
   // Naturals column, descending one octave from B down to C (piano-style).
-  // Grid row of natural i (0-indexed) is 2 + i*2 (row 1 is the header).
+  // Grid row of natural i (0-indexed) is 1 + i*2.
   var NATURAL_PCS = [11, 9, 7, 5, 4, 2, 0];
 
-  // Accidentals column, one slot per gap between adjacent naturals above;
-  // null where there is no black key in that gap (E-F). Grid row of
-  // accidental i is 3 + i*2, i.e. right between naturals i and i+1.
+  // Accidental slots, one per gap between adjacent naturals above; null
+  // where there is no black key in that gap (E-F). Grid row of
+  // accidental i is 2 + i*2, i.e. right between naturals i and i+1.
   var ACCIDENTAL_SLOTS = [10, 8, 6, null, 3, 1];
 
   function ready(fn) {
@@ -36,30 +45,81 @@
     var selected = new Set(DEFAULT_SELECTED);
     var buttonsByPc = {};
 
-    var keys = document.getElementById('noteFinderKeys');
+    var track = document.getElementById('noteFinderKeysTrack');
+    var viewport = document.getElementById('noteFinderKeysViewport');
     var clearBtn = document.getElementById('noteFinderClear');
     var grid = document.getElementById('noteFinderGrid');
 
-    function makeButton(pc, column, row, extraClass) {
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'note-finder-note' + (extraClass ? ' ' + extraClass : '');
-      btn.style.gridColumn = String(column);
-      btn.style.gridRow = String(row);
-      btn.textContent = label(pc);
-      btn.setAttribute('aria-pressed', 'false');
-      btn.addEventListener('click', function () { toggle(pc); });
-      (buttonsByPc[pc] = buttonsByPc[pc] || []).push(btn);
-      keys.appendChild(btn);
+    function toggle(pc) {
+      if (selected.has(pc)) selected.delete(pc);
+      else selected.add(pc);
+      syncButtons();
+      renderResults();
     }
 
-    NATURAL_PCS.forEach(function (pc, i) {
-      makeButton(pc, 2, 2 + i * 2, 'note-finder-note-natural');
+    function buildKeysGrid(interactive) {
+      var gridEl = document.createElement('div');
+      gridEl.className = 'note-finder-keys';
+      if (!interactive) gridEl.setAttribute('aria-hidden', 'true');
+
+      function makeButton(pc, column, row, extraClass, text) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'note-finder-note' + (extraClass ? ' ' + extraClass : '');
+        btn.style.gridColumn = String(column);
+        btn.style.gridRow = String(row);
+        btn.textContent = text;
+        btn.setAttribute('aria-pressed', 'false');
+        if (interactive) {
+          btn.addEventListener('click', function () { toggle(pc); });
+        } else {
+          btn.tabIndex = -1;
+        }
+        (buttonsByPc[pc] = buttonsByPc[pc] || []).push(btn);
+        gridEl.appendChild(btn);
+      }
+
+      NATURAL_PCS.forEach(function (pc, i) {
+        makeButton(pc, 2, 1 + i * 2, 'note-finder-note-natural', label(pc));
+      });
+
+      ACCIDENTAL_SLOTS.forEach(function (pc, i) {
+        if (pc === null) return;
+        var parts = label(pc).split('/');
+        var row = 2 + i * 2;
+        makeButton(pc, 1, row, 'note-finder-note-accidental note-finder-note-sharp', parts[0] || label(pc));
+        makeButton(pc, 3, row, 'note-finder-note-accidental note-finder-note-flat', parts[1] || label(pc));
+      });
+
+      return gridEl;
+    }
+
+    track.appendChild(buildKeysGrid(false));
+    var mainGrid = buildKeysGrid(true);
+    track.appendChild(mainGrid);
+    track.appendChild(buildKeysGrid(false));
+
+    function syncViewportHeight() {
+      var cycleHeight = mainGrid.getBoundingClientRect().height;
+      if (!cycleHeight) return;
+      viewport.style.height = cycleHeight + 'px';
+      viewport.scrollTop = cycleHeight;
+      return cycleHeight;
+    }
+
+    var cycleHeight = syncViewportHeight();
+
+    viewport.addEventListener('scroll', function () {
+      if (!cycleHeight) return;
+      if (viewport.scrollTop <= 0) {
+        viewport.scrollTop += cycleHeight;
+      } else if (viewport.scrollTop >= cycleHeight * 2) {
+        viewport.scrollTop -= cycleHeight;
+      }
     });
 
-    ACCIDENTAL_SLOTS.forEach(function (pc, i) {
-      if (pc === null) return;
-      makeButton(pc, 1, 3 + i * 2, 'note-finder-note-accidental');
+    window.addEventListener('resize', function () {
+      cycleHeight = syncViewportHeight();
     });
 
     function syncButtons() {
@@ -71,13 +131,6 @@
           btn.setAttribute('aria-pressed', pressed ? 'true' : 'false');
         });
       });
-    }
-
-    function toggle(pc) {
-      if (selected.has(pc)) selected.delete(pc);
-      else selected.add(pc);
-      syncButtons();
-      renderResults();
     }
 
     clearBtn.addEventListener('click', function () {
