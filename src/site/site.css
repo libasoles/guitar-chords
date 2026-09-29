@@ -329,10 +329,14 @@ a:hover {
 .circle-card .string-notes-wrap {
   /* svguitar places the outer strings at 20% and 80% of the diagram width.
      A six-column grid needs 72% width for its first/last column centres to
-     line up with those strings. */
+     line up with those strings. It's nested inside .diagram-wrap (not a
+     sibling in .circle-card) so that 72% resolves against the diagram's own
+     fixed width rather than the wider, stretched grid column — and centered
+     with margin auto since .diagram-wrap is a plain block, not a flex
+     container. */
   width: 72%;
   min-height: 1.3rem;
-  margin-top: 0.15rem;
+  margin: 0.15rem auto 0;
 }
 .circle-card .string-notes {
   display: grid;
@@ -357,7 +361,7 @@ a:hover {
   font-weight: 700;
   font-size: 1.15rem;
   color: var(--accent);
-  white-space: nowrap;
+  text-align: center;
 }
 
 @media (max-width: 480px) {

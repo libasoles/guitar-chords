@@ -81,15 +81,28 @@
     return wrap;
   }
 
-  function buildComposition(chord, thirdSemitones) {
+  // Composition text lists each chord tone with the number of strings that
+  // actually sound it in the current voicing (e.g. a barre chord may sound
+  // the root or fifth several times).
+  function buildComposition(chord, fingers, barres, thirdSemitones) {
     var root = pitchClass(chord.name);
     var third = thirdSemitones || 4;
     var tones = root == null ? [] : [root, (root + third) % 12, (root + 7) % 12];
+    var counts = tones.map(function () { return 0; });
+    var frets = soundingFrets(fingers, barres);
+    Object.keys(frets).forEach(function (string) {
+      var open = OPEN_STRING[string];
+      if (open == null) return;
+      var pc = (open + frets[string]) % 12;
+      var idx = tones.indexOf(pc);
+      if (idx !== -1) counts[idx] += 1;
+    });
+
     var composition = document.createElement('div');
     composition.className = 'circle-composition';
-    composition.textContent = tones.map(function (pc) {
-      return spellingForPitch(chord, pc);
-    }).join(' ');
+    composition.textContent = tones.map(function (pc, i) {
+      return spellingForPitch(chord, pc) + ' ×' + counts[i];
+    }).join('  ');
     return composition;
   }
 
@@ -123,7 +136,7 @@
     entry.stringNotes.appendChild(buildStringNotes(soundingNotes(entry.chord, pos.fingers, pos.barres)));
 
     entry.countsWrap.innerHTML = '';
-    entry.countsWrap.appendChild(buildComposition(entry.chord, thirdSemitones));
+    entry.countsWrap.appendChild(buildComposition(entry.chord, pos.fingers, pos.barres, thirdSemitones));
   }
 
   function stepPosition(entry, delta, labels, thirdSemitones, diagramVariant) {
@@ -159,12 +172,17 @@
     diagramWrap.appendChild(nextBtn);
     entry.nextBtn = nextBtn;
 
-    card.appendChild(diagramWrap);
-
+    // Nested inside diagramWrap (not a sibling in `card`) so its 72% width
+    // resolves against the diagram's own fixed pixel width — `card` is a
+    // grid item stretched to fill its column, which would otherwise make
+    // the percentage (and the string labels under it) far wider than the
+    // diagram itself and throw off the alignment.
     var stringNotes = document.createElement('div');
     stringNotes.className = 'string-notes-wrap';
-    card.appendChild(stringNotes);
+    diagramWrap.appendChild(stringNotes);
     entry.stringNotes = stringNotes;
+
+    card.appendChild(diagramWrap);
 
     var name = document.createElement('div');
     name.className = 'name';
