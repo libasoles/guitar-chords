@@ -19,7 +19,7 @@
   function t(key, fallback) { return STRINGS[key] !== undefined ? STRINGS[key] : fallback; }
 
   // Default selection: C7 (Do, Mi, Sol, Sib). Accidentals retain the
-  // spelling that was selected, so A# and Bb can be controlled separately.
+  // spelling that was selected, while enharmonic spellings are exclusive.
   var DEFAULT_SELECTED = ['natural:0', 'natural:4', 'natural:7', 'flat:10'];
 
   // Naturals column, descending one octave from B down to C (piano-style).
@@ -52,7 +52,14 @@
 
     function toggle(note) {
       if (selected.has(note)) selected.delete(note);
-      else selected.add(note);
+      else {
+        var parts = note.split(':');
+        if (parts[0] !== 'natural') {
+          var equivalent = (parts[0] === 'sharp' ? 'flat' : 'sharp') + ':' + parts[1];
+          selected.delete(equivalent);
+        }
+        selected.add(note);
+      }
       syncButtons();
       renderResults();
     }

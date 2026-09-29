@@ -43,7 +43,9 @@ async function run() {
     assert.ok(picker.sharpRadius >= picker.sharpSize[0] / 2, 'accidental notes should have a circular radius');
     assert.strictEqual(picker.sharpBackground, picker.flatBackground, 'accidental notes should start with the neutral, non-green background');
 
-    await page.locator('.note-finder-keys').first().locator('.note-finder-note-sharp').nth(1).click();
+    const firstGrid = page.locator('.note-finder-keys').first();
+    await firstGrid.locator('.note-finder-note-flat').nth(1).click();
+    await firstGrid.locator('.note-finder-note-sharp').nth(1).click();
     await page.waitForTimeout(200); // let the 0.12s background-color transition settle
     const noteStates = await page.locator('.note-finder-keys').first().locator('.note-finder-note-sharp').nth(1).evaluate((button) => {
       const pc = button.textContent;
@@ -55,7 +57,7 @@ async function run() {
       };
     });
     assert.ok(noteStates.sharps.every((state) => state === 'true'), 'clicking a cloned note should synchronize every cycle');
-    assert.ok(noteStates.flats.every((state) => state === 'false'), 'selecting a sharp must not select its enharmonic flat');
+    assert.ok(noteStates.flats.every((state) => state === 'false'), 'selecting a sharp must deselect its enharmonic flat');
     assert.notStrictEqual(noteStates.sharpBackground, noteStates.flatBackground, 'sharp and flat columns should use different selected colors');
   } finally {
     await browser.close();
