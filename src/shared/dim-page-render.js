@@ -25,7 +25,7 @@
     card.appendChild(name);
 
     try {
-      window.ChordDiagram.render(target, chord, 'finder');
+      window.ChordDiagram.render(target, chord, 'finder-white');
     } catch (err) {
       target.innerHTML = '<small style="color:#999">(error)</small>';
       if (window.console) console.error('svguitar error for', chord.name, err);

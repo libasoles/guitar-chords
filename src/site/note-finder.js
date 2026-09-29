@@ -180,7 +180,7 @@
         fingers: pos.fingers, barres: pos.barres, position: pos.position,
       };
       try {
-        window.ChordDiagram.render(target, renderChord, 'finder');
+        window.ChordDiagram.render(target, renderChord, 'finder-white');
       } catch (err) {
         target.innerHTML = '<small style="color:#999">(error)</small>';
         if (window.console) console.error('svguitar error for', chord.name, err);

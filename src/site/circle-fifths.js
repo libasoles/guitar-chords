@@ -12,5 +12,5 @@
 
   var LABELS = window.CIRCLE_LABELS || { root: '1ª', third: '3ª', fifth: '5ª', times: 'veces' };
 
-  window.CircleFifthsPage.render('circleGrid', NAMES, LABELS);
+  window.CircleFifthsPage.render('circleGrid', NAMES, LABELS, { diagramVariant: 'finder-white' });
 })();

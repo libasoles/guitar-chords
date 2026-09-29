@@ -23,6 +23,14 @@
       color: '#1a1a1a',
       backgroundColor: 'transparent',
     },
+    'finder-white': {
+      strings: 6,
+      frets: 5,
+      fingerSize: 0.75,
+      fingerTextSize: 28,
+      color: '#1a1a1a',
+      backgroundColor: '#ffffff',
+    },
   };
 
   function hasHeaderOnlyOpenStrings(chord) {

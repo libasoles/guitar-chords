@@ -100,7 +100,7 @@
     return [{ fingers: chord.fingers, barres: chord.barres || [], position: chord.position || 1, kind: 'open' }];
   }
 
-  function renderPosition(entry, labels, thirdSemitones) {
+  function renderPosition(entry, labels, thirdSemitones, diagramVariant) {
     var pos = entry.positions[entry.index];
     var multi = entry.positions.length > 1;
 
@@ -113,7 +113,7 @@
 
     entry.diagramTarget.innerHTML = '';
     try {
-      window.ChordDiagram.render(entry.diagramTarget, renderChord, 'finder');
+      window.ChordDiagram.render(entry.diagramTarget, renderChord, diagramVariant || 'finder');
     } catch (err) {
       entry.diagramTarget.innerHTML = '<small style="color:#999">(error)</small>';
       if (window.console) console.error('svguitar error for', entry.chord.name, err);
@@ -126,11 +126,11 @@
     entry.countsWrap.appendChild(buildComposition(entry.chord, thirdSemitones));
   }
 
-  function stepPosition(entry, delta, labels, thirdSemitones) {
+  function stepPosition(entry, delta, labels, thirdSemitones, diagramVariant) {
     var n = entry.positions.length;
     if (n <= 1) return;
     entry.index = (entry.index + delta + n) % n;
-    renderPosition(entry, labels, thirdSemitones);
+    renderPosition(entry, labels, thirdSemitones, diagramVariant);
   }
 
   function buildDiagram(chord, entry) {
@@ -176,6 +176,7 @@
 
   function render(gridId, names, labels, opts) {
     var thirdSemitones = (opts && opts.thirdSemitones) || 4;
+    var diagramVariant = (opts && opts.diagramVariant) || 'finder';
     function run() {
       var grid = document.getElementById(gridId);
       if (!grid || !window.CHORDS || !window.ChordDiagram) return;
@@ -198,11 +199,11 @@
         entry.prevBtn.title = labels.prevLabel || '';
         entry.nextBtn.setAttribute('aria-label', labels.nextLabel || '');
         entry.nextBtn.title = labels.nextLabel || '';
-        entry.prevBtn.addEventListener('click', function () { stepPosition(entry, -1, labels, thirdSemitones); });
-        entry.nextBtn.addEventListener('click', function () { stepPosition(entry, 1, labels, thirdSemitones); });
+        entry.prevBtn.addEventListener('click', function () { stepPosition(entry, -1, labels, thirdSemitones, diagramVariant); });
+        entry.nextBtn.addEventListener('click', function () { stepPosition(entry, 1, labels, thirdSemitones, diagramVariant); });
 
         grid.appendChild(row);
-        renderPosition(entry, labels, thirdSemitones);
+        renderPosition(entry, labels, thirdSemitones, diagramVariant);
       });
     }
 
