@@ -23,6 +23,13 @@
 
   var OPEN_SEMITONE = { 1: 0, 2: 7, 3: 3, 4: 10, 5: 5, 6: 0 };
 
+  // Absolute semitone offsets from the open low E (string 6), i.e. the real
+  // pitch distance between strings in standard tuning — unlike OPEN_SEMITONE
+  // these aren't reduced mod 12, so they preserve which string sits in which
+  // octave. Needed to work out true diatonic intervals between two strings
+  // (see degreeStep below).
+  var ABS_OPEN = { 1: 24, 2: 19, 3: 15, 4: 10, 5: 5, 6: 0 };
+
   function scaleFrets(scale, openSemitone, maxFret, skipOpen) {
     var out = [];
     for (var f = skipOpen ? 1 : 0; f <= maxFret; f++) {
@@ -35,34 +42,83 @@
     return frets.map(function (f) { return [stringNum, f === 0 ? 'o' : f]; });
   }
 
+  // Maps an absolute pitch to a continuous "diatonic step" number: each
+  // successive scale tone (within or across octaves) is one step apart, so
+  // subtracting two of these gives how many scale degrees apart two notes
+  // are — 2 steps is a diatonic 3rd, 5 steps is a diatonic 6th. Only ever
+  // called with pitches that land on the scale.
+  function degreeStep(scale, absPitch) {
+    var pc = ((absPitch % 12) + 12) % 12;
+    var idx = scale.indexOf(pc);
+    if (idx === -1) return null;
+    var octave = (absPitch - pc) / 12;
+    return octave * 7 + idx;
+  }
+
+  // Pairs each note on the upper (higher-pitched) string with the note on
+  // the lower string that sits exactly `intervalSteps` diatonic steps below
+  // it (2 for a 3rd, 5 for a 6th) — the note it's harmonizing with in these
+  // parallel-interval patterns. Not every note has a partner within the
+  // diagram's fret range; those are simply left unpaired.
+  function pairNotes(scale, upperString, upperFrets, lowerString, lowerFrets, intervalSteps) {
+    var lowerStepToFret = {};
+    lowerFrets.forEach(function (f) {
+      lowerStepToFret[degreeStep(scale, ABS_OPEN[lowerString] + f)] = f;
+    });
+    var pairs = {};
+    upperFrets.forEach(function (f) {
+      var step = degreeStep(scale, ABS_OPEN[upperString] + f);
+      var lowerFret = lowerStepToFret[step - intervalSteps];
+      if (lowerFret !== undefined) {
+        pairs[upperString + ':' + f] = lowerString + ':' + lowerFret;
+        pairs[lowerString + ':' + lowerFret] = upperString + ':' + f;
+      }
+    });
+    return pairs;
+  }
+
   function buildPatterns(mode) {
     var scale = SCALES[mode] || SCALES.dorian;
+
+    var p1Upper = scaleFrets(scale, OPEN_SEMITONE[2], 12, false);
+    var p1Lower = scaleFrets(scale, OPEN_SEMITONE[3], 12, false);
+    var p2Upper = scaleFrets(scale, OPEN_SEMITONE[1], 12, false);
+    var p2Lower = scaleFrets(scale, OPEN_SEMITONE[3], 12, false);
+    var p3Upper = scaleFrets(scale, OPEN_SEMITONE[1], 14, false);
+    var p3Lower = scaleFrets(scale, OPEN_SEMITONE[2], 15, true);
+
     return {
       1: {
         frets: 12,
         fingers: [].concat(
           [[1, 'x']],
-          toFingers(2, scaleFrets(scale, OPEN_SEMITONE[2], 12, false)),
-          toFingers(3, scaleFrets(scale, OPEN_SEMITONE[3], 12, false)),
+          toFingers(2, p1Upper),
+          toFingers(3, p1Lower),
           [[4, 'x'], [5, 'x'], [6, 'o']]
         ),
+        // Pattern 1 moves in parallel 3rds between strings 2 and 3.
+        pairs: pairNotes(scale, 2, p1Upper, 3, p1Lower, 2),
       },
       2: {
         frets: 12,
         fingers: [].concat(
-          toFingers(1, scaleFrets(scale, OPEN_SEMITONE[1], 12, false)),
+          toFingers(1, p2Upper),
           [[2, 'x']],
-          toFingers(3, scaleFrets(scale, OPEN_SEMITONE[3], 12, false)),
+          toFingers(3, p2Lower),
           [[4, 'x'], [5, 'x'], [6, 'o']]
         ),
+        // Pattern 2 skips a string, so strings 1 and 3 move in parallel 6ths.
+        pairs: pairNotes(scale, 1, p2Upper, 3, p2Lower, 5),
       },
       3: {
         frets: 15,
         fingers: [].concat(
-          toFingers(1, scaleFrets(scale, OPEN_SEMITONE[1], 14, false)),
-          toFingers(2, scaleFrets(scale, OPEN_SEMITONE[2], 15, true)),
+          toFingers(1, p3Upper),
+          toFingers(2, p3Lower),
           [[3, 'x'], [4, 'x'], [5, 'x'], [6, 'o']]
         ),
+        // Pattern 3 moves in parallel 3rds between strings 1 and 2.
+        pairs: pairNotes(scale, 1, p3Upper, 2, p3Lower, 2),
       },
     };
   }
@@ -174,6 +230,37 @@
     });
   }
 
+  // Wires hover on every melodic note (never the open-string pedal on string
+  // 6 — that's drawn as an empty-string indicator, not a "finger", so it's
+  // never selected here) so pointing at one highlights it and the 3rd/6th
+  // it's paired with, per pattern.pairs.
+  function wireHover(svg, pattern) {
+    var elements = {};
+    pattern.fingers.forEach(function (finger) {
+      var stringNum = finger[0];
+      var fret = finger[1];
+      if (fret === 'x' || fret === 'o') return;
+      var key = stringNum + ':' + fret;
+      var arrIndex = Math.abs(stringNum - 6);
+      var el = svg.querySelector('.finger-string-' + arrIndex + '-fret-' + (fret - 1));
+      if (el) elements[key] = el;
+    });
+
+    Object.keys(elements).forEach(function (key) {
+      var el = elements[key];
+      var partnerEl = elements[pattern.pairs[key]];
+      el.classList.add('picking-note');
+      el.addEventListener('mouseenter', function () {
+        el.classList.add('picking-note-active');
+        if (partnerEl) partnerEl.classList.add('picking-note-active');
+      });
+      el.addEventListener('mouseleave', function () {
+        el.classList.remove('picking-note-active');
+        if (partnerEl) partnerEl.classList.remove('picking-note-active');
+      });
+    });
+  }
+
   var mode = (document.body && document.body.getAttribute('data-picking-mode')) || 'dorian';
   var PATTERNS = buildPatterns(mode);
 
@@ -190,6 +277,7 @@
     if (svg) {
       fixStringMarkers(svg);
       addPositionMarkers(svg, pattern.frets);
+      wireHover(svg, pattern);
     }
   });
 })();
