@@ -837,6 +837,9 @@
     open: ['cfPosOpen', 'Posición abierta'],
     barre6: ['cfPosBarre6', 'Cejilla en la 6ª cuerda'],
     barre5: ['cfPosBarre5', 'Cejilla en la 5ª cuerda'],
+    dim4: ['cfPosDim4', 'Raíz en la 4ª cuerda'],
+    dim5: ['cfPosDim5', 'Raíz en la 5ª cuerda'],
+    dim6: ['cfPosDim6', 'Raíz en la 6ª cuerda'],
   };
 
   function chordPositions(chord) {

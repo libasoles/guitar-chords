@@ -127,6 +127,9 @@
   "cfFilterCategoryType": "Tipo",
   "cfFilterCategoryKey": "Tonalidad",
   "cfClearFilters": "Limpiar filtros",
+  "cfPosDim4": "Raíz en la 4ª cuerda",
+  "cfPosDim5": "Raíz en la 5ª cuerda",
+  "cfPosDim6": "Raíz en la 6ª cuerda",
   "cfRootLabels": [
     "Do",
     "Do♯/Re♭",

@@ -72,6 +72,21 @@ async function run() {
     assert.ok(!cList.includes('Am7'), `"Am7" should not appear for "C", got: ${cList.join(', ')}`);
     assert.notDeepStrictEqual(cList, am7, 'two queries should filter differently');
 
+    // 3b. Diminished chords expose the same three movable forms as the
+    // dedicated guide, without duplicating each chord name in the results.
+    await page.fill(input, 'dim');
+    await page.waitForFunction(() =>
+      document.querySelector('#pin').shadowRoot.querySelectorAll('.card:not(.hidden)').length === 12
+    );
+    const dimCardsHaveThreePositions = await page.evaluate(() => {
+      const finder = document.querySelector('#pin');
+      return Array.from(finder.shadowRoot.querySelectorAll('.card:not(.hidden)')).every((card) => {
+        const next = card.querySelector('.pos-next');
+        return next && !next.hidden && card._positions.length === 3;
+      });
+    });
+    assert.ok(dimCardsHaveThreePositions, 'each dim7 result should expose its three movable positions');
+
     // 4. No match → empty message.
     await page.fill(input, 'Zzz9');
     await page.waitForFunction(() =>

@@ -112,6 +112,39 @@
     return buildShape(family, candidates[0].shape, candidates[0].fret);
   }
 
+  // Las tres formas de dim7 de la guía de disminuidos tienen la raíz en la
+  // 4ª (la digitación almacenada en chords-db), 6ª y 5ª cuerda. Al ser un
+  // acorde simétrico, cada forma se desplaza igual para las doce raíces.
+  // Mantenemos estos cálculos aquí para que buscador y guía no representen
+  // conceptos distintos: una búsqueda por "dim" también permite recorrer
+  // todas las digitaciones movibles del acorde encontrado.
+  function dim7Shape(rootPc, rootString) {
+    var openPitch = rootString === 6 ? 4 : 9; // Mi y La, respectivamente.
+    var rootFret = (rootPc - openPitch + 12) % 12;
+    // Estas formas usan al menos el traste 1; conservar el siguiente ciclo
+    // evita posiciones imposibles en el traste 0 y coincide con la guía.
+    if (rootFret < 2) rootFret += 12;
+
+    if (rootString === 6) {
+      return {
+        fingers: [[6, rootFret, '2'], [5, 'x'], [4, rootFret - 1, '1'], [3, rootFret, '3'], [2, rootFret - 1, '1'], [1, 'x']],
+        barres: [], position: rootFret - 1, hasBarre: false, kind: 'dim6',
+      };
+    }
+
+    return {
+      fingers: [[6, 'x'], [5, rootFret, '2'], [4, 'x'], [3, rootFret - 1, '1'], [2, rootFret + 1, '3'], [1, rootFret - 1, '1']],
+      barres: [], position: rootFret - 1, hasBarre: false, kind: 'dim5',
+    };
+  }
+
+  function dim7Positions(chord, base) {
+    var pc = rootPitchClass(chord.name);
+    if (pc == null) return [base];
+    base.kind = 'dim4';
+    return [base, dim7Shape(pc, 6), dim7Shape(pc, 5)];
+  }
+
   function getPositions(chord) {
     var hasBarre = !!(chord.barres && chord.barres.length);
     var base = {
@@ -121,6 +154,8 @@
       hasBarre: hasBarre,
       kind: !hasBarre ? 'open' : (chord.barres[0].fromString === 6 ? 'barre6' : 'barre5'),
     };
+
+    if (/dim7$/i.test(chord.name || '')) return dim7Positions(chord, base);
 
     var alt = computeAlternate(chord);
     return alt ? [base, alt] : [base];

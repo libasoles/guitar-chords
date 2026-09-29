@@ -127,6 +127,9 @@
   "cfFilterCategoryType": "Type",
   "cfFilterCategoryKey": "Key",
   "cfClearFilters": "Clear filters",
+  "cfPosDim4": "Root on the 4th string",
+  "cfPosDim5": "Root on the 5th string",
+  "cfPosDim6": "Root on the 6th string",
   "cfRootLabels": [
     "C",
     "C♯/D♭",
