@@ -83,6 +83,19 @@ async function run() {
     assert.ok(noteStates.sharps.every((state) => state === 'true'), 'clicking a cloned note should synchronize every cycle');
     assert.ok(noteStates.flats.every((state) => state === 'false'), 'selecting a sharp must deselect its enharmonic flat');
     assert.notStrictEqual(noteStates.sharpBackground, noteStates.flatBackground, 'sharp and flat columns should use different selected colors');
+
+    // The selection persists across reloads (saved debounced to localStorage).
+    const pressedNotes = () => page.evaluate(() => Array.from(document.querySelectorAll('.note-finder-keys')[1].querySelectorAll('[aria-pressed="true"]'))
+      .map((el) => el.className + '|' + el.style.gridRow).sort());
+    const beforeReload = await pressedNotes();
+    await page.reload(); // pagehide flushes the pending debounced save
+    await page.waitForFunction(() => document.querySelectorAll('.note-finder-keys').length === 3);
+    assert.deepStrictEqual(await pressedNotes(), beforeReload, 'the selected notes should survive a reload');
+    await page.locator('#noteFinderClear').click();
+    await page.waitForTimeout(400);
+    await page.reload();
+    await page.waitForFunction(() => document.querySelectorAll('.note-finder-keys').length === 3);
+    assert.deepStrictEqual(await pressedNotes(), [], 'a cleared selection should stay cleared after a reload');
   } finally {
     await browser.close();
   }

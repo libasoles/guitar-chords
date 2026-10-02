@@ -23,6 +23,11 @@
   // spelling that was selected, while enharmonic spellings are exclusive.
   var DEFAULT_SELECTED = ['natural:0', 'natural:4', 'natural:7', 'flat:10'];
 
+  // The selection survives reloads: saved (debounced) as a JSON array of
+  // note ids while the user toggles notes, and read back on load.
+  var STORAGE_KEY = 'noteFinder.selected';
+  var SAVE_DELAY_MS = 300;
+
   // Naturals column, descending one octave from B down to C (piano-style).
   // Grid row of natural i (0-indexed) is 1 + i*2.
   var NATURAL_PCS = [11, 9, 7, 5, 4, 2, 0];
@@ -43,7 +48,7 @@
     var labels = window.NOTE_FINDER_LABELS || [];
     function label(pc) { return labels[pc] !== undefined ? labels[pc] : String(pc); }
 
-    var selected = new Set(DEFAULT_SELECTED);
+    var selected = new Set();
     var buttonsByNote = {};
 
     var track = document.getElementById('noteFinderKeysTrack');
@@ -63,7 +68,41 @@
       }
       syncButtons();
       renderResults();
+      scheduleSave();
     }
+
+    function loadSelection() {
+      try {
+        var stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY));
+        if (Array.isArray(stored)) {
+          return stored.filter(function (note) { return buttonsByNote.hasOwnProperty(note); });
+        }
+      } catch (e) {
+        // localStorage puede no estar disponible o tener basura; ignorar.
+      }
+      return DEFAULT_SELECTED;
+    }
+
+    function saveSelection() {
+      clearTimeout(saveTimer);
+      saveTimer = null;
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(selected)));
+      } catch (e) {
+        // localStorage puede no estar disponible; ignorar.
+      }
+    }
+
+    var saveTimer = null;
+    function scheduleSave() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveSelection, SAVE_DELAY_MS);
+    }
+
+    // Flush a pending save so a reload right after a click keeps it.
+    window.addEventListener('pagehide', function () {
+      if (saveTimer !== null) saveSelection();
+    });
 
     function selectedPitchClasses() {
       return new Set(Array.from(selected, function (note) {
@@ -108,6 +147,8 @@
     track.appendChild(mainGrid);
     track.appendChild(buildKeysGrid());
 
+    selected = new Set(loadSelection());
+
     function syncViewportHeight() {
       var cycleHeight = mainGrid.getBoundingClientRect().height;
       if (!cycleHeight) return;
@@ -148,6 +189,7 @@
       selected.clear();
       syncButtons();
       renderResults();
+      scheduleSave();
     });
 
     var POSITION_LABEL_KEYS = {
