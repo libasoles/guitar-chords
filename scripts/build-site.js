@@ -163,8 +163,8 @@ const DIM_SLUG = 'acordes-disminuidos';
 
 // "Identify chords from notes" page, rendered from src/site/note-finder.html.
 // Single page (no locale-agnostic pairing like V7/circle): a piano-style note
-// picker filters chords-db.js client-side to the chords containing every
-// selected note (see src/shared/note-match.js).
+// picker filters chords-db.js client-side to the chords with a position that
+// sounds every selected note (see src/shared/note-match.js).
 const NOTE_FINDER_SLUG = 'identificar-acordes-por-notas';
 
 // Static lesson pages rendered from src/site/picking-lesson.html — modal
@@ -404,6 +404,10 @@ function renderNoteFinderPage(template, strings, locale) {
     noteFinderSelectPrompt: strings.noteFinderSelectPrompt || '',
     noteFinderEmpty: strings.noteFinderEmpty || '',
   };
+  // Position-carousel labels, shared with the main chord finder.
+  ['cfPosPrevLabel', 'cfPosNextLabel', 'cfPosOpen', 'cfPosBarre6', 'cfPosBarre5', 'cfPosDim4', 'cfPosDim5', 'cfPosDim6'].forEach(function (key) {
+    if (strings[key]) noteFinderStrings[key] = strings[key];
+  });
 
   html = html.split('%%PAGE_TITLE%%').join(strings.noteFinderPageTitle || '');
   html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings.noteFinderMetaDescription || '');

@@ -4,12 +4,16 @@
    acordes a partir de notas": el usuario marca notas en un teclado y ve los
    acordes de guitarra que las contienen todas.
 
-   El matching usa la fórmula TEÓRICA del acorde (fundamental + intervalos de
-   su calidad), no el campo `notes` de chords-db: `notes` son las notas que
-   efectivamente suenan en ESA digitación puntual, y en la guitarra es común
-   omitir la 5ª (p. ej. el C7 en posición abierta de este dataset no toca la
-   Sol) sin que el acorde deje de ser, armónicamente, un C7. Si se matcheara
-   contra `notes`, elegir Do-Mi-Sol-Sib (la fórmula de C7) no encontraría C7.
+   El matching usa las notas que efectivamente SUENAN en cada digitación
+   (calculadas desde fingers + barres con afinación estándar), no la fórmula
+   teórica del acorde: la página muestra digitaciones concretas, y en la
+   guitarra es común omitir notas (el F6 abierto de este dataset no toca el
+   Do). Un acorde aparece si al menos una de sus posiciones (la base más las
+   alternativas de ChordPositions.getPositions) suena todas las notas
+   marcadas, y sólo con esas posiciones.
+
+   Cada digitación se reduce a una máscara de 12 bits (bit n = clase de
+   altura n), así que "contiene todas las notas" es (mask & sel) === sel.
 
    Funciona como <script> global (expone window.NoteMatch) y como módulo
    Node (module.exports) para los tests. */
@@ -40,6 +44,11 @@
     B: 11, 'C♭': 11,
   };
 
+  const SHARP_NAMES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+
+  // Clase de altura de cada cuerda al aire en afinación estándar (6 = Mi grave … 1 = Mi agudo).
+  const OPEN_STRING = { 6: 4, 5: 9, 4: 2, 3: 7, 2: 11, 1: 4 };
+
   // Nota → clase de altura 0-11 ('C♯' → 1). Devuelve null si no reconoce el token.
   function pitchClass(note) {
     const key = String(note == null ? '' : note).trim();
@@ -47,8 +56,6 @@
   }
 
   // El campo `notes` de un acorde ('E B E G♯ B E') → Set de clases de altura únicas ({4, 11, 8}).
-  // Representa lo que efectivamente SUENA en esa digitación (ver nota arriba
-  // sobre por qué el matching no usa esto directamente).
   function chordPitchClasses(chord) {
     const notes = String((chord && chord.notes) || '').trim();
     if (notes === '') return new Set();
@@ -60,90 +67,106 @@
     return set;
   }
 
-  const ROOT_RE = /^([A-G])([♯♭]?)/;
-
-  // Intervalos (semitonos desde la fundamental) por calidad, cubriendo el
-  // vocabulario cerrado de chords-db.js (ver el comentario de cabecera de
-  // ese archivo): mayor, menor, 7, m7, maj7, 6, m6, maj9, 9, m9, 7♭9, sus2,
-  // sus4, dim7, aug, m7♭5, m(add9). La clave es el sufijo del nombre del
-  // acorde tras la fundamental y (si es un acorde con bajo, "C7/B") antes
-  // de la barra.
-  const QUALITY_INTERVALS = {
-    '': [0, 4, 7],
-    m: [0, 3, 7],
-    '6': [0, 4, 7, 9],
-    m6: [0, 3, 7, 9],
-    '7': [0, 4, 7, 10],
-    m7: [0, 3, 7, 10],
-    m7b5: [0, 3, 6, 10],
-    maj7: [0, 4, 7, 11],
-    mMaj7: [0, 3, 7, 11],
-    '9': [0, 4, 7, 10, 2],
-    m9: [0, 3, 7, 10, 2],
-    maj9: [0, 4, 7, 11, 2],
-    '7♭9': [0, 4, 7, 10, 1],
-    sus2: [0, 2, 7],
-    sus4: [0, 5, 7],
-    dim7: [0, 3, 6, 9],
-    aug: [0, 4, 8],
-    'm(add9)': [0, 3, 7, 2],
-  };
-
-  // Nota de bajo de un acorde con barra ('C#' en "C7/C#") → clase de altura.
-  // El bajo se escribe siempre en cifrado americano con '#' ascii (nunca ♯/♭).
-  function bassPitchClass(bass) {
-    if (!bass) return null;
-    const letter = bass[0];
-    const accidental = bass[1] === '#' ? '♯' : '';
-    return pitchClass(letter + accidental);
+  // Traste que suena en cada cuerda: las cejillas ponen el piso y los dedos
+  // lo pisan ('x' silencia, 'o' = al aire, número = ese traste). Devuelve
+  // { cuerda: traste } sólo para las cuerdas que suenan.
+  function soundingFrets(fingers, barres) {
+    const frets = {};
+    (barres || []).forEach(function (barre) {
+      const lo = Math.min(barre.fromString, barre.toString);
+      const hi = Math.max(barre.fromString, barre.toString);
+      for (let s = lo; s <= hi; s++) frets[s] = barre.fret;
+    });
+    (fingers || []).forEach(function (finger) {
+      const string = finger[0];
+      const value = finger[1];
+      if (value === 'x') delete frets[string];
+      else if (value === 'o') frets[string] = 0;
+      else frets[string] = value;
+    });
+    return frets;
   }
 
-  // Clases de altura TEÓRICAS de un acorde: fundamental + intervalos de su
-  // calidad (más el bajo explícito si es un acorde con barra, p. ej. "C/E").
-  // Si la calidad no está en QUALITY_INTERVALS (no debería pasar con la base
-  // actual), cae de vuelta a chordPitchClasses (las notas de esa digitación).
-  function chordToneClasses(chord) {
-    const name = String((chord && chord.name) || '');
-    const m = ROOT_RE.exec(name);
-    if (!m) return chordPitchClasses(chord);
-    const rootPc = pitchClass(m[1] + m[2]);
-    const rest = name.slice(m[0].length);
-    const slashIndex = rest.indexOf('/');
-    const quality = slashIndex === -1 ? rest : rest.slice(0, slashIndex);
-    const bass = slashIndex === -1 ? null : rest.slice(slashIndex + 1);
-    const intervals = QUALITY_INTERVALS[quality];
-    if (rootPc === null || !intervals) return chordPitchClasses(chord);
-    const set = new Set(intervals.map(function (i) { return (rootPc + i) % 12; }));
-    const bassPc = bassPitchClass(bass);
-    if (bassPc !== null) set.add(bassPc);
-    return set;
+  // Deletreo preferido por el propio acorde (E♭ y no D♯), para que las notas
+  // de una posición alternativa se escriban igual que las de la base.
+  function spellingForPitch(chord, pc) {
+    const spellings = String((chord && chord.notes) || '').split(/\s+/);
+    for (let i = 0; i < spellings.length; i++) {
+      if (pitchClass(spellings[i]) === pc) return spellings[i];
+    }
+    return SHARP_NAMES[pc];
   }
 
-  // Acordes cuyas notas TEÓRICAS incluyen TODAS las clases de altura
-  // seleccionadas (selected ⊆ chordToneClasses(chord)), ordenados por menor
-  // cantidad de notas "extra" primero (match más exacto), y a igualdad, el
-  // orden de la base.
-  function matchByNotes(selectedPitchClasses, chords) {
-    const selected = Array.from(selectedPitchClasses || []);
-    if (selected.length === 0) return [];
-    const list = chords || [];
+  // Notas que suenan en una posición ({ fingers, barres }), de la 6ª a la 1ª
+  // cuerda, sin las cuerdas silenciadas: [{ note: 'C', pc: 0 }, ...].
+  function voicingNotes(chord, position) {
+    const frets = soundingFrets(position && position.fingers, position && position.barres);
+    const notes = [];
+    for (let string = 6; string >= 1; string--) {
+      if (frets[string] == null) continue;
+      const pc = (OPEN_STRING[string] + Number(frets[string])) % 12;
+      notes.push({ note: spellingForPitch(chord, pc), pc: pc });
+    }
+    return notes;
+  }
+
+  // Clases de altura → entero de 12 bits.
+  function toMask(pitchClasses) {
+    let mask = 0;
+    Array.from(pitchClasses || []).forEach(function (pc) { mask |= 1 << pc; });
+    return mask;
+  }
+
+  function bitCount(mask) {
+    let n = 0;
+    for (; mask; mask &= mask - 1) n++;
+    return n;
+  }
+
+  function basePosition(chord) {
+    return { fingers: chord.fingers, barres: chord.barres || [], position: chord.position || 1, kind: 'open' };
+  }
+
+  // Acordes con al menos una posición que suene TODAS las clases de altura
+  // seleccionadas. Cada resultado es { chord, positions } donde `positions`
+  // son sólo las posiciones que matchean, cada una con su texto `notes`.
+  // getPositions(chord) (opcional, p. ej. ChordPositions.getPositions) da
+  // las posiciones candidatas; sin él se usa sólo la digitación base.
+  // Orden: menos notas "extra" en la mejor posición primero (match más
+  // exacto) y, a igualdad, el orden de la base.
+  function matchByNotes(selectedPitchClasses, chords, getPositions) {
+    const sel = toMask(selectedPitchClasses);
+    if (sel === 0) return [];
+    const selCount = bitCount(sel);
     const scored = [];
-    list.forEach(function (chord, index) {
-      const chordSet = chordToneClasses(chord);
-      const containsAll = selected.every(function (pc) { return chordSet.has(pc); });
-      if (!containsAll) return;
-      scored.push({ chord: chord, extra: chordSet.size - selected.length, index: index });
+    (chords || []).forEach(function (chord, index) {
+      const candidates = getPositions ? getPositions(chord) : [basePosition(chord)];
+      let bestExtra = Infinity;
+      const positions = [];
+      candidates.forEach(function (pos) {
+        const notes = voicingNotes(chord, pos);
+        const mask = toMask(notes.map(function (n) { return n.pc; }));
+        if ((mask & sel) !== sel) return;
+        bestExtra = Math.min(bestExtra, bitCount(mask) - selCount);
+        positions.push(Object.assign({}, pos, {
+          notes: notes.map(function (n) { return n.note; }).join(' '),
+        }));
+      });
+      if (positions.length === 0) return;
+      scored.push({ chord: chord, positions: positions, extra: bestExtra, index: index });
     });
     scored.sort(function (a, b) {
       return a.extra - b.extra || a.index - b.index;
     });
-    return scored.map(function (s) { return s.chord; });
+    return scored.map(function (s) { return { chord: s.chord, positions: s.positions }; });
   }
 
   return {
     pitchClass: pitchClass,
     chordPitchClasses: chordPitchClasses,
-    chordToneClasses: chordToneClasses,
+    soundingFrets: soundingFrets,
+    voicingNotes: voicingNotes,
+    toMask: toMask,
     matchByNotes: matchByNotes,
   };
 });

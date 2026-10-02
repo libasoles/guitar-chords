@@ -4,11 +4,12 @@
   <meta charset="UTF-8">
   <link rel="stylesheet" href="../src/site/site.css">
   <script>
-    window.ChordDiagram = { render: function () {} };
+    window.ChordDiagram = { render: function (target, chord) { target.textContent = JSON.stringify(chord.fingers); } };
     window.NOTE_FINDER_LABELS = ['C', 'C♯/D♭', 'D', 'D♯/E♭', 'E', 'F', 'F♯/G♭', 'G', 'G♯/A♭', 'A', 'A♯/B♭', 'B'];
     window.NOTE_FINDER_STRINGS = {};
   </script>
   <script src="../src/shared/chords-db.js"></script>
+  <script src="../src/shared/chord-positions.js"></script>
   <script src="../src/shared/note-match.js"></script>
   <script src="../src/site/note-finder.js"></script>
 </head>

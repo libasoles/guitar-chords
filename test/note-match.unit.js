@@ -3,7 +3,21 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { pitchClass, chordPitchClasses, chordToneClasses, matchByNotes } = require('../src/shared/note-match.js');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+
+const { pitchClass, chordPitchClasses, soundingFrets, voicingNotes, toMask, matchByNotes } = require('../src/shared/note-match.js');
+
+// chords-db.js y chord-positions.js son scripts de navegador (window.*).
+function loadBrowserScript(file) {
+  const fakeWindow = {};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/shared', file), 'utf8'), { window: fakeWindow });
+  return fakeWindow;
+}
+const CHORDS = loadBrowserScript('chords-db.js').CHORDS;
+const { getPositions } = loadBrowserScript('chord-positions.js').ChordPositions;
+const chordsByName = Object.fromEntries(CHORDS.map((c) => [c.name, c]));
 
 test('pitchClass: naturales y alteraciones', () => {
   assert.equal(pitchClass('C'), 0);
@@ -25,70 +39,66 @@ test('chordPitchClasses: acorde sin notes → set vacío', () => {
   assert.equal(chordPitchClasses(null).size, 0);
 });
 
-test('chordToneClasses: fórmula teórica, no las notas de la digitación', () => {
-  // El C7 de chords-db.js es una digitación abierta que omite la 5ª (Sol):
-  // notes: 'C E B♭ C E'. La fórmula teórica de C7 SÍ incluye la 5ª.
-  const c7 = { name: 'C7', notes: 'C E B♭ C E' };
-  assert.deepEqual([...chordToneClasses(c7)].sort((a, b) => a - b), [0, 4, 7, 10]);
+test('soundingFrets: cejilla como piso, dedos la pisan, x silencia', () => {
+  const frets = soundingFrets([[6, 'x'], [4, 3], [1, 'o']], [{ fromString: 5, toString: 1, fret: 1 }]);
+  assert.deepEqual(frets, { 1: 0, 2: 1, 3: 1, 4: 3, 5: 1 });
 });
 
-test('chordToneClasses: acordes con bajo (slash) suman la nota de bajo', () => {
-  assert.deepEqual(
-    [...chordToneClasses({ name: 'C/E' })].sort((a, b) => a - b),
-    [0, 4, 7] // el bajo E ya es la 3ª de C, no agrega nada nuevo
-  );
-  assert.deepEqual(
-    [...chordToneClasses({ name: 'D/F#' })].sort((a, b) => a - b),
-    [2, 6, 9] // F# ya es la 3ª de D
-  );
-  assert.deepEqual(
-    [...chordToneClasses({ name: 'C7/B' })].sort((a, b) => a - b),
-    [0, 4, 7, 10, 11] // B (bajo) no es una nota de C7 → se suma
-  );
+test('voicingNotes: notas que suenan de la 6ª a la 1ª, sin cuerdas mudas', () => {
+  const f6 = chordsByName.F6;
+  assert.deepEqual(voicingNotes(f6, f6).map((n) => n.note), ['F', 'A', 'D', 'F']);
+  const f = chordsByName.F; // cejilla en el traste 1 que cubre las cuerdas sin dedo
+  assert.deepEqual(voicingNotes(f, f).map((n) => n.note), ['F', 'C', 'F', 'A', 'C', 'F']);
 });
 
-test('chordToneClasses: calidades varias', () => {
-  assert.deepEqual([...chordToneClasses({ name: 'Am' })].sort((a, b) => a - b), [9, 0, 4].sort((a, b) => a - b));
-  assert.deepEqual([...chordToneClasses({ name: 'Cdim7' })].sort((a, b) => a - b), [0, 3, 6, 9]);
-  assert.deepEqual([...chordToneClasses({ name: 'Caug' })].sort((a, b) => a - b), [0, 4, 8]);
-  assert.deepEqual([...chordToneClasses({ name: 'Gsus4' })].sort((a, b) => a - b), [7, 0, 2].sort((a, b) => a - b));
+test('toMask: clases de altura → máscara de 12 bits', () => {
+  assert.equal(toMask([0, 4, 7]), 0b10010001);
+  assert.equal(toMask([]), 0);
 });
 
-test('chordToneClasses: nombre irreconocible cae de vuelta a chordPitchClasses', () => {
-  const weird = { name: 'not-a-chord', notes: 'C E G' };
-  assert.deepEqual([...chordToneClasses(weird)].sort((a, b) => a - b), [0, 4, 7]);
+test('chords-db: `notes` coincide con lo que suena en la digitación', () => {
+  CHORDS.forEach((chord) => {
+    const fromNotes = [...chordPitchClasses(chord)].sort((a, b) => a - b);
+    const sounding = [...new Set(voicingNotes(chord, chord).map((n) => n.pc))].sort((a, b) => a - b);
+    assert.deepEqual(sounding, fromNotes, chord.name);
+  });
 });
 
 test('matchByNotes: selección vacía → sin resultados', () => {
-  const chords = [{ name: 'C', notes: 'C E G' }];
-  assert.deepEqual(matchByNotes([], chords), []);
-  assert.deepEqual(matchByNotes(new Set(), chords), []);
+  assert.deepEqual(matchByNotes([], CHORDS, getPositions), []);
+  assert.deepEqual(matchByNotes(new Set(), CHORDS, getPositions), []);
 });
 
-test('matchByNotes: C7 matchea Do-Mi-Sol-Sib pese a que su digitación abierta omite la 5ª', () => {
-  const chords = [
-    { name: 'C', notes: 'C E G' },
-    { name: 'C7', notes: 'C E B♭ C E' },
-    { name: 'Em', notes: 'E G B' },
-  ];
-  // C, E, G, Bb -> pitch classes 0, 4, 7, 10.
-  const result = matchByNotes([0, 4, 7, 10], chords);
-  assert.deepEqual(result.map((c) => c.name), ['C7']);
+test('matchByNotes: Fa-La-Do-Re no trae acordes cuya digitación omite alguna', () => {
+  const chords = ['F6', 'B♭maj9', 'Dm9', 'Dm7'].map((n) => chordsByName[n]);
+  const result = matchByNotes([5, 9, 0, 2], chords, getPositions);
+  assert.deepEqual(result.map((m) => m.chord.name), ['Dm7']);
 });
 
-test('matchByNotes: acordes con notas extra igual matchean (contención, no igualdad)', () => {
-  const chords = [
-    { name: 'C', notes: 'C E G' },
-    { name: 'Cmaj7', notes: 'C E G B' },
-    { name: 'C6', notes: 'C E G A' },
-  ];
-  // Seleccionando sólo C, E, G: los tres califican; el exacto (C) primero.
+test('matchByNotes: C7 sólo con la cejilla en la 5ª (la abierta omite el Sol)', () => {
+  const result = matchByNotes([0, 4, 7, 10], [chordsByName.C7], getPositions);
+  assert.equal(result.length, 1);
+  assert.deepEqual(result[0].positions.map((p) => p.kind), ['barre5']);
+  assert.equal(result[0].positions[0].notes, 'C G B♭ E G');
+});
+
+test('matchByNotes: devuelve todas las posiciones que matchean', () => {
+  const result = matchByNotes([7, 11, 2], [chordsByName.G], getPositions);
+  assert.equal(result[0].positions.length, 2);
+});
+
+test('matchByNotes: sin getPositions usa sólo la digitación base', () => {
+  const result = matchByNotes([0, 4, 7, 10], [chordsByName.C7]);
+  assert.deepEqual(result, []);
+});
+
+test('matchByNotes: menos notas extra primero', () => {
+  const chords = ['Cmaj7', 'C'].map((n) => chordsByName[n]);
   const result = matchByNotes([0, 4, 7], chords);
-  assert.deepEqual(result.map((c) => c.name), ['C', 'Cmaj7', 'C6']);
+  assert.deepEqual(result.map((m) => m.chord.name), ['C', 'Cmaj7']);
 });
 
 test('matchByNotes: enarmónicos (D♭ y C♯) son la misma clase de altura', () => {
-  const chords = [{ name: 'D♭', notes: 'D♭ A♭ D♭ F A♭' }];
-  const result = matchByNotes([1], chords); // 1 = C♯/D♭
-  assert.deepEqual(result.map((c) => c.name), ['D♭']);
+  const result = matchByNotes([1], [chordsByName['D♭']]);
+  assert.deepEqual(result.map((m) => m.chord.name), ['D♭']);
 });

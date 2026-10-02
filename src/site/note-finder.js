@@ -4,9 +4,10 @@
    on the right, since the same black key is one or the other
    depending which natural you approach it from), descending one
    octave from B to C. Toggling notes filters window.CHORDS (via
-   window.NoteMatch) down to the guitar chords that contain every
-   selected note, rendered like the chord-finder search results
-   (diagram + name + notes).
+   window.NoteMatch) down to the guitar chords with at least one
+   position that sounds every selected note, rendered like the
+   chord-finder search results (diagram + name + notes) with chevrons
+   to cycle through the matching positions only.
 
    The note list is rendered three times, stacked in a scrollable
    track (previous / real / next), so scrolling past either edge
@@ -149,20 +150,64 @@
       renderResults();
     });
 
-    function chordFirstPosition(chord) {
+    var POSITION_LABEL_KEYS = {
+      open: ['cfPosOpen', 'Posición abierta'],
+      barre6: ['cfPosBarre6', 'Cejilla en la 6ª cuerda'],
+      barre5: ['cfPosBarre5', 'Cejilla en la 5ª cuerda'],
+      dim4: ['cfPosDim4', 'Raíz en la 4ª cuerda'],
+      dim5: ['cfPosDim5', 'Raíz en la 5ª cuerda'],
+      dim6: ['cfPosDim6', 'Raíz en la 6ª cuerda'],
+    };
+
+    function getPositions(chord) {
       if (window.ChordPositions && typeof window.ChordPositions.getPositions === 'function') {
-        return window.ChordPositions.getPositions(chord)[0];
+        return window.ChordPositions.getPositions(chord);
       }
-      return { fingers: chord.fingers, barres: chord.barres || [], position: chord.position || 1 };
+      return [{ fingers: chord.fingers, barres: chord.barres || [], position: chord.position || 1, kind: 'open' }];
     }
 
-    function buildCard(chord) {
+    function navButton(className, path, label) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pos-nav ' + className;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + path + '"/></svg>';
+      btn.setAttribute('aria-label', label);
+      btn.title = label;
+      return btn;
+    }
+
+    // One card per matching chord. `match.positions` holds only the
+    // positions that sound every selected note; chevrons cycle through
+    // them (hidden when there is just one), like the main chord finder.
+    function buildCard(match) {
+      var chord = match.chord;
+      var positions = match.positions;
+      var index = 0;
+      var multi = positions.length > 1;
+
       var card = document.createElement('div');
       card.className = 'v7-card';
 
+      var diagramWrap = document.createElement('div');
+      diagramWrap.className = 'diagram-wrap';
+
+      var prevBtn = navButton('pos-prev', 'M15 4l-8 8 8 8', t('cfPosPrevLabel', 'Posición anterior'));
+      var nextBtn = navButton('pos-next', 'M9 4l8 8-8 8', t('cfPosNextLabel', 'Posición siguiente'));
+      prevBtn.hidden = !multi;
+      nextBtn.hidden = !multi;
+
       var target = document.createElement('div');
       target.className = 'diagram';
-      card.appendChild(target);
+
+      diagramWrap.appendChild(prevBtn);
+      diagramWrap.appendChild(target);
+      diagramWrap.appendChild(nextBtn);
+      card.appendChild(diagramWrap);
+
+      var posLabel = document.createElement('div');
+      posLabel.className = 'pos-label';
+      posLabel.hidden = !multi;
+      card.appendChild(posLabel);
 
       var name = document.createElement('div');
       name.className = 'name';
@@ -171,21 +216,38 @@
 
       var notes = document.createElement('div');
       notes.className = 'notes';
-      notes.textContent = chord.notes || '';
       card.appendChild(notes);
 
-      var pos = chordFirstPosition(chord);
-      var renderChord = {
-        name: chord.name, families: chord.families, aliases: chord.aliases, notes: chord.notes,
-        fingers: pos.fingers, barres: pos.barres, position: pos.position,
-      };
-      try {
-        window.ChordDiagram.render(target, renderChord, 'finder-white');
-      } catch (err) {
-        target.innerHTML = '<small style="color:#999">(error)</small>';
-        if (window.console) console.error('svguitar error for', chord.name, err);
+      function renderPosition() {
+        var pos = positions[index];
+        if (multi) {
+          var labelKey = POSITION_LABEL_KEYS[pos.kind] || POSITION_LABEL_KEYS.open;
+          posLabel.textContent = t(labelKey[0], labelKey[1]);
+        }
+        notes.textContent = pos.notes;
+
+        var renderChord = {
+          name: chord.name, families: chord.families, aliases: chord.aliases, notes: pos.notes,
+          fingers: pos.fingers, barres: pos.barres, position: pos.position,
+        };
+        target.innerHTML = '';
+        try {
+          window.ChordDiagram.render(target, renderChord, 'finder-white');
+        } catch (err) {
+          target.innerHTML = '<small style="color:#999">(error)</small>';
+          if (window.console) console.error('svguitar error for', chord.name, err);
+        }
       }
 
+      function step(delta) {
+        index = (index + delta + positions.length) % positions.length;
+        renderPosition();
+      }
+
+      prevBtn.addEventListener('click', function () { step(-1); });
+      nextBtn.addEventListener('click', function () { step(1); });
+
+      renderPosition();
       return card;
     }
 
@@ -202,12 +264,12 @@
         renderEmpty(t('noteFinderSelectPrompt', 'Marcá al menos una nota para ver acordes.'));
         return;
       }
-      var matches = window.NoteMatch.matchByNotes(selectedPitchClasses(), window.CHORDS);
+      var matches = window.NoteMatch.matchByNotes(selectedPitchClasses(), window.CHORDS, getPositions);
       if (matches.length === 0) {
         renderEmpty(t('noteFinderEmpty', 'No hay acordes que contengan todas esas notas.'));
         return;
       }
-      matches.forEach(function (chord) { grid.appendChild(buildCard(chord)); });
+      matches.forEach(function (match) { grid.appendChild(buildCard(match)); });
     }
 
     syncButtons();

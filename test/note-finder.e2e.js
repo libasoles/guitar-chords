@@ -43,7 +43,31 @@ async function run() {
     assert.ok(picker.sharpRadius >= picker.sharpSize[0] / 2, 'accidental notes should have a circular radius');
     assert.strictEqual(picker.sharpBackground, picker.flatBackground, 'accidental notes should start with the neutral, non-green background');
 
+    // Default selection (C E G B♭): the open C7 omits G, so only its
+    // 5th-string barre position matches — one position, no chevrons.
+    const defaultCards = await page.evaluate(() => Array.from(document.querySelectorAll('#noteFinderGrid .v7-card')).map((card) => ({
+      name: card.querySelector('.name').textContent,
+      notes: card.querySelector('.notes').textContent,
+      chevrons: Array.from(card.querySelectorAll('.pos-nav')).filter((b) => !b.hidden).length,
+    })));
+    assert.deepStrictEqual(defaultCards, [{ name: 'C7', notes: 'C G B♭ E G', chevrons: 0 }]);
+
+    // F A C D: F6, B♭maj9 and Dm9 voicings miss a note; only Dm7 remains,
+    // with two matching positions to cycle through.
     const firstGrid = page.locator('.note-finder-keys').first();
+    await page.locator('#noteFinderClear').click();
+    for (const i of [3, 1, 6, 5]) await firstGrid.locator('.note-finder-note-natural').nth(i).click();
+    const dm7 = page.locator('#noteFinderGrid .v7-card');
+    assert.deepStrictEqual(await dm7.locator('.name').allTextContents(), ['Dm7']);
+    const before = { diagram: await dm7.locator('.diagram').textContent(), notes: await dm7.locator('.notes').textContent() };
+    await dm7.locator('.pos-next').click();
+    const after = { diagram: await dm7.locator('.diagram').textContent(), notes: await dm7.locator('.notes').textContent() };
+    assert.notStrictEqual(after.diagram, before.diagram, 'the next chevron should switch to another position');
+    assert.notStrictEqual(after.notes, before.notes, 'the notes should follow the shown position');
+    await page.locator('#noteFinderClear').click();
+    for (const i of [6, 4, 2]) await firstGrid.locator('.note-finder-note-natural').nth(i).click();
+    await firstGrid.locator('.note-finder-note-flat').nth(0).click();
+
     await firstGrid.locator('.note-finder-note-flat').nth(1).click();
     await firstGrid.locator('.note-finder-note-sharp').nth(1).click();
     await page.waitForTimeout(200); // let the 0.12s background-color transition settle

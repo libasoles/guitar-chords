@@ -284,7 +284,8 @@ a:hover {
   width: 100%;
   height: 100%;
 }
-.circle-card .pos-nav {
+.circle-card .pos-nav,
+.note-finder-grid .v7-card .pos-nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -301,16 +302,20 @@ a:hover {
   border-radius: 999px;
   cursor: pointer;
 }
-.circle-card .pos-prev {
+.circle-card .pos-prev,
+.note-finder-grid .v7-card .pos-prev {
   left: -0.5rem;
 }
-.circle-card .pos-next {
+.circle-card .pos-next,
+.note-finder-grid .v7-card .pos-next {
   right: -0.5rem;
 }
-.circle-card .pos-nav[hidden] {
+.circle-card .pos-nav[hidden],
+.note-finder-grid .v7-card .pos-nav[hidden] {
   display: none;
 }
-.circle-card .pos-nav svg {
+.circle-card .pos-nav svg,
+.note-finder-grid .v7-card .pos-nav svg {
   width: 1rem;
   height: 1rem;
   fill: none;
@@ -320,7 +325,9 @@ a:hover {
   stroke-linejoin: round;
 }
 .circle-card .pos-nav:hover,
-.circle-card .pos-nav:focus-visible {
+.circle-card .pos-nav:focus-visible,
+.note-finder-grid .v7-card .pos-nav:hover,
+.note-finder-grid .v7-card .pos-nav:focus-visible {
   color: var(--accent);
   background: rgba(139, 0, 0, 0.08);
   border-color: rgba(139, 0, 0, 0.12);
@@ -645,6 +652,18 @@ a:hover {
 }
 .note-finder-grid .v7-card {
   width: 130px;
+}
+.note-finder-grid .v7-card .diagram-wrap {
+  position: relative;
+}
+.note-finder-grid .v7-card .pos-label {
+  font-family: var(--sans);
+  font-size: 0.66rem;
+  color: var(--ink-soft);
+  margin-top: 0.1rem;
+}
+.note-finder-grid .v7-card .pos-label[hidden] {
+  display: none;
 }
 .note-finder-grid .v7-card .notes {
   font-family: var(--sans);
