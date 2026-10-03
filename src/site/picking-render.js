@@ -130,14 +130,18 @@
     noPosition: true,
     color: '#1a1a1a',
     backgroundColor: 'transparent',
-    fingerSize: 0.55,
+    // svguitar derives all of these from `stringSpacing`.  A little more
+    // side padding shortens the horizontal diagram's height; increasing the
+    // other relative sizes by the same ratio preserves its width and the
+    // diameter of the circular notes.
+    fingerSize: 0.68,
     fingerTextSize: 0,
     fingerStrokeWidth: 0,
     strokeWidth: 2,
     nutWidth: 6,
-    sidePadding: 0.08,
-    fretSize: 1.3,
-    emptyStringIndicatorSize: 0.5,
+    sidePadding: 0.16,
+    fretSize: 1.606,
+    emptyStringIndicatorSize: 0.618,
     showFretMarkers: false,
   };
 
@@ -319,10 +323,6 @@
 
     var svg = el.querySelector('svg');
     if (svg) {
-      // CSS fixes a shorter viewport for these diagrams.  Do not let SVG's
-      // default aspect-ratio handling shrink the neck horizontally to fit it:
-      // preserve the full available width and compress only vertically.
-      svg.setAttribute('preserveAspectRatio', 'none');
       fixStringMarkers(svg);
       addFretboardBackground(svg);
       addPositionMarkers(svg, pattern.frets);
