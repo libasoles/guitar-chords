@@ -237,7 +237,7 @@
   "noteFinderLead": "Marcá las notas y vas a ver a la derecha los acordes que las contienen.",
   "noteFinderNotesLabel": "Notas",
   "noteFinderAccidentalsLabel": "Alteraciones",
-  "noteFinderClearLabel": "Deseleccionar todo",
+  "noteFinderClearLabel": "Deseleccionar",
   "noteFinderResultsLabel": "Acordes que contienen estas notas",
   "noteFinderEmpty": "No hay acordes que contengan todas esas notas.",
   "noteFinderSelectPrompt": "Marcá al menos una nota para ver acordes.",
