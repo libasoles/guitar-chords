@@ -28,12 +28,16 @@ function hashOf(buf) {
 
 function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
+function referenceRe(name, flags) {
+  return new RegExp("(?<=[/'\"`])" + escapeRe(name) + "(?=['\"`?#)\\s])", flags);
+}
+
 /* Reemplaza el nombre de archivo cuando aparece como ultimo segmento de una
    ruta o literal ("/x/name.js", 'name.js', "name.js?v=1"). */
 function rewriteRefs(text, renames) {
   let out = text;
   renames.forEach((to, from) => {
-    out = out.replace(new RegExp('(?<=[/\'"`])' + escapeRe(from) + '(?=[\'"`?#)\\s])', 'g'), to);
+    out = out.replace(referenceRe(from, 'g'), to);
   });
   return out;
 }
@@ -48,28 +52,51 @@ function rewriteTextFiles(files, renames) {
 }
 
 /* Dos pasadas: primero los archivos hoja (assets/vendor, que no referencian a
-   otros), luego el resto; asi el hash de cada archivo incluye los nombres ya
-   versionados de lo que referencia. Devuelve Map(relPath viejo -> relPath nuevo)
-   relativo a siteDir, con separador '/'. */
+   otros), luego el resto. Dentro de cada pasada, los assets se procesan después
+   de sus dependencias: asi CSS que apunta a un SVG incluye el nombre versionado
+   del SVG antes de calcular su propio hash. Devuelve Map(relPath viejo ->
+   relPath nuevo) relativo a siteDir, con separador '/'. */
 function fingerprintAssets(siteDir) {
   const assetsDir = path.join(siteDir, 'assets');
   const result = new Map();
 
   function pass(filter) {
-    const all = walk(siteDir);
     const targets = walk(assetsDir).filter((f) =>
       HASHED_EXT.has(path.extname(f)) && !HASHED_NAME_RE.test(f) && filter(f));
     const renames = new Map();
-    targets.forEach((f) => {
+
+    // A target can only be named after every target it references. Processing
+    // this small dependency graph in order also avoids leaving CSS pointing at
+    // the pre-fingerprint name of an image it uses as a background.
+    const pending = new Map(targets.map((f) => [f, path.basename(f)]));
+    while (pending.size) {
+      const ready = [...pending].find(([f]) => {
+        if (!TEXT_EXT.has(path.extname(f))) return true;
+        const source = fs.readFileSync(f, 'utf8');
+        return ![...pending].some(([other, name]) =>
+          other !== f && referenceRe(name).test(source));
+      });
+      if (!ready) {
+        throw new Error('Cannot fingerprint cyclic asset references: ' + [...pending.values()].join(', '));
+      }
+
+      const [f, from] = ready;
+      let contents = fs.readFileSync(f);
+      if (TEXT_EXT.has(path.extname(f))) {
+        const rewritten = rewriteRefs(contents.toString('utf8'), renames);
+        contents = Buffer.from(rewritten, 'utf8');
+        fs.writeFileSync(f, contents);
+      }
       const ext = path.extname(f);
       const base = path.basename(f, ext);
-      const next = path.join(path.dirname(f), base + '.' + hashOf(fs.readFileSync(f)) + ext);
+      const next = path.join(path.dirname(f), base + '.' + hashOf(contents) + ext);
       fs.renameSync(f, next);
-      renames.set(path.basename(f), path.basename(next));
+      renames.set(from, path.basename(next));
       result.set(path.relative(siteDir, f).split(path.sep).join('/'),
         path.relative(siteDir, next).split(path.sep).join('/'));
-    });
-    rewriteTextFiles(all.filter((f) => fs.existsSync(f)), renames);
+      pending.delete(f);
+    }
+    rewriteTextFiles(walk(siteDir), renames);
   }
 
   const vendorDir = path.join(assetsDir, 'vendor') + path.sep;

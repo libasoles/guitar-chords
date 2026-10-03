@@ -57,6 +57,23 @@ test('el hash cambia solo cuando cambia el contenido (propagando a quien lo refe
   assert.equal(c.get('assets/site.css'), a.get('assets/site.css'));
 });
 
+test('propaga el hash de un SVG a la hoja CSS que lo usa', () => {
+  const files = {
+    'index.html': '<link href="assets/site.css">',
+    'assets/site.css': '.logo { background: url("logo.svg") }',
+    'assets/logo.svg': '<svg>first</svg>',
+  };
+  const firstDir = makeSite(files);
+  const first = fingerprintAssets(firstDir);
+  const firstCss = first.get('assets/site.css');
+  const firstLogo = first.get('assets/logo.svg');
+  assert.ok(read(firstDir, firstCss).includes(path.basename(firstLogo)));
+
+  const second = fingerprintAssets(makeSite({ ...files, 'assets/logo.svg': '<svg>second</svg>' }));
+  assert.notEqual(second.get('assets/logo.svg'), firstLogo);
+  assert.notEqual(second.get('assets/site.css'), firstCss);
+});
+
 // ---- contra el build real (needs `npm run build:site`) ----------------------
 const DIST = path.join(__dirname, '..', 'dist', 'site');
 const HASHED = /\.[0-9a-f]{10}\.(js|css|svg)$/;
@@ -79,6 +96,18 @@ test('build: HTML solo referencia assets propios con hash y todos existen', () =
       assert.ok(fs.existsSync(path.join(DIST, rel)), f + ' → missing ' + rel);
     }
   });
+});
+
+test('build: las imagenes referenciadas desde CSS existen', () => {
+  const assets = path.join(DIST, 'assets');
+  const css = fs.readdirSync(assets).find((name) => /^site\.[0-9a-f]{10}\.css$/.test(name));
+  assert.ok(css, 'missing fingerprinted site stylesheet');
+  const content = fs.readFileSync(path.join(assets, css), 'utf8');
+  for (const match of content.matchAll(/url\(["']?([^"')]+)["']?\)/g)) {
+    const url = match[1];
+    if (/^(?:data:|https?:|#)/.test(url)) continue;
+    assert.ok(fs.existsSync(path.resolve(assets, url)), css + ' → missing ' + url);
+  }
 });
 
 test('build: el precache del service worker apunta a archivos existentes (modo offline)', () => {
