@@ -319,6 +319,10 @@
 
     var svg = el.querySelector('svg');
     if (svg) {
+      // CSS fixes a shorter viewport for these diagrams.  Do not let SVG's
+      // default aspect-ratio handling shrink the neck horizontally to fit it:
+      // preserve the full available width and compress only vertically.
+      svg.setAttribute('preserveAspectRatio', 'none');
       fixStringMarkers(svg);
       addFretboardBackground(svg);
       addPositionMarkers(svg, pattern.frets);
