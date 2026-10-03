@@ -925,13 +925,12 @@
 
       grid.appendChild(card);
 
-      self._renderPosition(card);
-
       return card;
     });
   };
 
   ChordFinder.prototype._renderPosition = function (card) {
+    card._drawn = true;
     var positions = card._positions;
     var pos = positions[card._positionIndex];
     var multi = positions.length > 1;
@@ -989,6 +988,8 @@
       var show = pass && (!limited || passCount < self._visibleLimit);
       if (pass) passCount++;
       card.classList.toggle('hidden', !show);
+      // Diagrams are drawn lazily, the first time a card is actually shown.
+      if (show && !card._drawn) self._renderPosition(card);
     });
 
     this._moreRow.hidden = !(limited && passCount > this._visibleLimit);

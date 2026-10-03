@@ -43,11 +43,20 @@ async function run() {
       !document.querySelector(s).shadowRoot.querySelector('.load-more').hidden, '#pin');
     assert.ok(moreShownInitially, 'More button should be visible initially');
 
+    // 1b2. Only the visible cards have drawn diagrams; the rest of the catalog
+    // is not rendered until it is shown.
+    const drawnInitially = await page.evaluate(() =>
+      document.querySelector('#pin').shadowRoot.querySelectorAll('.diagram[data-chord]').length);
+    assert.strictEqual(drawnInitially, 12, `initial view should draw only 12 diagrams, got ${drawnInitially}`);
+
     // 1c. Clicking "More" reveals 12 more.
     await page.evaluate((s) =>
       document.querySelector(s).shadowRoot.querySelector('.load-more-btn').click(), '#pin');
     await page.waitForFunction(() =>
       document.querySelector('#pin').shadowRoot.querySelectorAll('.card:not(.hidden)').length === 24);
+    const drawnAfterMore = await page.evaluate(() =>
+      document.querySelector('#pin').shadowRoot.querySelectorAll('.diagram[data-chord]').length);
+    assert.strictEqual(drawnAfterMore, 24, `"More" should draw 12 more diagrams, got ${drawnAfterMore}`);
     const afterMore = (await visibleNames(page)).length;
     assert.strictEqual(afterMore, 24, `expected 24 after one More click, got ${afterMore}`);
 
