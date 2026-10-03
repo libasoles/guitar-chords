@@ -272,6 +272,16 @@ function renderV7Page(template, strings, locale, page) {
     html = html.split('%%' + key + '%%').join(strings[key] || '');
   });
 
+  const labels = {
+    prevLabel: strings.cfPosPrevLabel || 'Previous position',
+    nextLabel: strings.cfPosNextLabel || 'Next position',
+    positionLabels: {
+      open: strings.cfPosOpen || 'Open position',
+      barre6: strings.cfPosBarre6 || 'Barre on the 6th string',
+      barre5: strings.cfPosBarre5 || 'Barre on the 5th string',
+    },
+  };
+
   html = html.split('%%PAGE_TITLE%%').join(strings[page.titleKey] || '');
   html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings[page.metaKey] || '');
   html = html.split('%%PAGE_H1%%').join(strings[page.h1Key] || '');
@@ -279,6 +289,7 @@ function renderV7Page(template, strings, locale, page) {
   html = html.split('%%OTHER_PAGE_HREF%%').join(v7PageHref(locale, page.otherSlug));
   html = html.split('%%OTHER_PAGE_LABEL%%').join(strings[page.otherLabelKey] || '');
   html = html.split('%%PAGE_SCRIPT%%').join(resolvedAssetsPrefix + page.scriptFile);
+  html = html.split('%%V7_GUIDE_LABELS_JSON%%').join(JSON.stringify(labels));
 
   html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
   html = html.split('%%homeHref%%').join(homeHref(locale));

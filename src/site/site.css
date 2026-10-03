@@ -209,6 +209,54 @@ a:hover {
   height: 152px;
   margin: 0 auto;
 }
+.v7-grid .v7-card .diagram-wrap {
+  position: relative;
+  width: 130px;
+  margin: 0 auto;
+}
+.v7-grid .v7-card .pos-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.v7-grid .v7-card .pos-prev { left: -0.5rem; }
+.v7-grid .v7-card .pos-next { right: -0.5rem; }
+.v7-grid .v7-card .pos-nav[hidden] { display: none; }
+.v7-grid .v7-card .pos-nav svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.v7-grid .v7-card .pos-nav:hover,
+.v7-grid .v7-card .pos-nav:focus-visible {
+  color: var(--accent);
+  background: rgba(139, 0, 0, 0.08);
+  border-color: rgba(139, 0, 0, 0.12);
+  outline: none;
+}
+.v7-grid .v7-card .pos-label {
+  font-family: var(--sans);
+  font-size: 0.66rem;
+  color: var(--ink-soft);
+  margin-top: 0.1rem;
+}
+.v7-grid .v7-card .pos-label[hidden] { display: none; }
 .v7-card .diagram svg {
   display: block;
   width: 100%;
@@ -220,17 +268,61 @@ a:hover {
   font-size: 1.05rem;
   margin-top: 0.3rem;
 }
+.v7-skeleton-card {
+  min-height: 174px;
+}
+.v7-skeleton-diagram,
+.v7-skeleton-name {
+  display: block;
+  background: linear-gradient(90deg, #eee9de 25%, #f7f3eb 37%, #eee9de 63%);
+  background-size: 400% 100%;
+  animation: v7-skeleton-shimmer 1.4s ease infinite;
+}
+.v7-skeleton-diagram {
+  width: 130px;
+  height: 152px;
+  border-radius: 3px;
+}
+.v7-skeleton-name {
+  width: 3.2rem;
+  height: 1.26rem;
+  margin-top: 0.3rem;
+  border-radius: 3px;
+}
+@keyframes v7-skeleton-shimmer {
+  to { background-position: -100% 0; }
+}
 
 @media (max-width: 480px) {
   .v7-card .diagram {
     width: 92px;
     height: 108px;
   }
+  .v7-grid .v7-card .diagram-wrap {
+    width: 92px;
+  }
   .v7-card .name {
     font-size: 0.85rem;
   }
+  .v7-skeleton-card {
+    min-height: 129px;
+  }
+  .v7-skeleton-diagram {
+    width: 92px;
+    height: 108px;
+  }
+  .v7-skeleton-name {
+    height: 1.02rem;
+  }
   .v7-grid-head {
     font-size: 0.66rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v7-skeleton-diagram,
+  .v7-skeleton-name {
+    animation: none;
   }
 }
 

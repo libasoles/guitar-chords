@@ -7,6 +7,26 @@
 (function () {
   'use strict';
 
+  var LABELS = window.V7_GUIDE_LABELS || {};
+  var POSITION_LABELS = LABELS.positionLabels || {};
+
+  function chordPositions(chord) {
+    if (window.ChordPositions && typeof window.ChordPositions.getPositions === 'function') {
+      return window.ChordPositions.getPositions(chord);
+    }
+    return [{ fingers: chord.fingers, barres: chord.barres || [], position: chord.position || 1 }];
+  }
+
+  function navButton(className, path, label) {
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'pos-nav ' + className;
+    button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + path + '"/></svg>';
+    button.setAttribute('aria-label', label);
+    button.title = label;
+    return button;
+  }
+
   function resolveChord(ref) {
     if (typeof ref === 'object') return ref;
     var overrides = window.V7_CHORD_OVERRIDES || {};
@@ -17,21 +37,66 @@
     var card = document.createElement('div');
     card.className = 'v7-card';
 
+    var positions = chordPositions(chord);
+    var index = 0;
+    var multi = positions.length > 1;
+
+    var diagramWrap = document.createElement('div');
+    diagramWrap.className = 'diagram-wrap';
+
+    var prev = navButton('pos-prev', 'M15 4l-8 8 8 8', LABELS.prevLabel || 'Previous position');
+    prev.hidden = !multi;
+    diagramWrap.appendChild(prev);
+
     var target = document.createElement('div');
     target.className = 'diagram';
-    card.appendChild(target);
+    diagramWrap.appendChild(target);
+
+    var next = navButton('pos-next', 'M9 4l8 8-8 8', LABELS.nextLabel || 'Next position');
+    next.hidden = !multi;
+    diagramWrap.appendChild(next);
+    card.appendChild(diagramWrap);
+
+    var positionLabel = document.createElement('div');
+    positionLabel.className = 'pos-label';
+    positionLabel.hidden = !multi;
+    card.appendChild(positionLabel);
 
     var name = document.createElement('div');
     name.className = 'name';
     name.textContent = chord.name;
     card.appendChild(name);
 
-    try {
-      window.ChordDiagram.render(target, chord, 'finder');
-    } catch (err) {
-      target.innerHTML = '<small style="color:#999">(error)</small>';
-      if (window.console) console.error('svguitar error for', chord.name, err);
+    function renderPosition() {
+      var position = positions[index];
+      if (multi) positionLabel.textContent = POSITION_LABELS[position.kind] || POSITION_LABELS.open || '';
+      var renderChord = {
+        name: chord.name,
+        families: chord.families,
+        aliases: chord.aliases,
+        notes: chord.notes,
+        fingers: position.fingers,
+        barres: position.barres,
+        position: position.position,
+      };
+
+      target.innerHTML = '';
+      try {
+        window.ChordDiagram.render(target, renderChord, 'finder-white');
+      } catch (err) {
+        target.innerHTML = '<small style="color:#999">(error)</small>';
+        if (window.console) console.error('svguitar error for', chord.name, err);
+      }
     }
+
+    function step(delta) {
+      index = (index + delta + positions.length) % positions.length;
+      renderPosition();
+    }
+
+    prev.addEventListener('click', function () { step(-1); });
+    next.addEventListener('click', function () { step(1); });
+    renderPosition();
 
     return card;
   }
@@ -40,6 +105,10 @@
     function run() {
       var grid = document.getElementById(gridId);
       if (!grid || !window.CHORDS || !window.ChordDiagram) return;
+
+      grid.querySelectorAll('.v7-skeleton-row').forEach(function (skeleton) {
+        skeleton.remove();
+      });
 
       pairs.forEach(function (pair) {
         var tonic = resolveChord(pair[0]);
@@ -52,6 +121,8 @@
         row.appendChild(buildCard(dominant));
         grid.appendChild(row);
       });
+
+      grid.setAttribute('aria-busy', 'false');
     }
 
     if (document.readyState === 'loading') {

@@ -61,11 +61,23 @@
     <p class="lead">%%PAGE_LEAD%%</p>
     <p class="v7-nav"><a href="%%OTHER_PAGE_HREF%%">%%OTHER_PAGE_LABEL%%</a></p>
 
-    <div class="v7-grid" id="v7Grid">
+    <div class="v7-grid" id="v7Grid" aria-busy="true">
       <div class="v7-grid-head">
         <span>%%v7ColTonic%%</span>
         <span>%%v7ColDominant%%</span>
       </div>
+      <div class="v7-row v7-skeleton-row" aria-hidden="true"><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div></div>
+      <div class="v7-row v7-skeleton-row" aria-hidden="true"><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div></div>
+      <div class="v7-row v7-skeleton-row" aria-hidden="true"><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div></div>
+      <div class="v7-row v7-skeleton-row" aria-hidden="true"><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div></div>
+      <div class="v7-row v7-skeleton-row" aria-hidden="true"><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div></div>
+      <div class="v7-row v7-skeleton-row" aria-hidden="true"><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div></div>
+      <div class="v7-row v7-skeleton-row" aria-hidden="true"><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div></div>
+      <div class="v7-row v7-skeleton-row" aria-hidden="true"><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div></div>
+      <div class="v7-row v7-skeleton-row" aria-hidden="true"><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div></div>
+      <div class="v7-row v7-skeleton-row" aria-hidden="true"><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div></div>
+      <div class="v7-row v7-skeleton-row" aria-hidden="true"><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div></div>
+      <div class="v7-row v7-skeleton-row" aria-hidden="true"><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div><div class="v7-card v7-skeleton-card"><span class="v7-skeleton-diagram"></span><span class="v7-skeleton-name"></span></div></div>
     </div>
 
     <footer>
@@ -143,9 +155,13 @@
       </div>
     </footer>
 
+    <script>
+      window.V7_GUIDE_LABELS = %%V7_GUIDE_LABELS_JSON%%;
+    </script>
     <script src="%%ASSETS_PREFIX%%vendor/svguitar.umd.js"></script>
     <script src="%%ASSETS_PREFIX%%chords-db.js"></script>
     <script src="%%ASSETS_PREFIX%%chord-diagram.js"></script>
+    <script src="%%ASSETS_PREFIX%%chord-positions.js"></script>
     <script src="%%ASSETS_PREFIX%%v7-chord-overrides.js"></script>
     <script src="%%ASSETS_PREFIX%%v7-page-render.js"></script>
     <script src="%%PAGE_SCRIPT%%"></script>
