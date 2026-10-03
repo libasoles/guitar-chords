@@ -26,14 +26,14 @@ jobs:
       - name: Vendor (svguitar)
         run: npm run vendor
 
+      - name: Build site
+        run: npm run build:site
+
       - name: Unit tests
         run: npm run test:unit
 
       - name: E2E tests
         run: npm run test:e2e
-
-      - name: Build site
-        run: npm run build:site
 
       - name: Sitemap lastmod manifest is committed
         run: git diff --exit-code -- src/site/sitemap-lastmod.json
