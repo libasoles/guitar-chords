@@ -1155,7 +1155,9 @@ footer {
 .picking-diagram svg {
   display: block;
   width: 100%;
-  height: auto;
+  /* These horizontal fretboards carry quite a bit of vertical whitespace.
+     Keep their full width, but make the three lesson diagrams more compact. */
+  height: clamp(11rem, 21vw, 15rem);
 }
 .picking-note {
   cursor: pointer;
