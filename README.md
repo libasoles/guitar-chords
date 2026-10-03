@@ -53,6 +53,10 @@ npm run build:ext   # → dist/extension/ + dist/extension.zip
 | `SITE_BASE_URL` | `https://acordesdeguitarra.com.ar` | Canonical URLs, og:url, sitemap |
 | `EXTENSION_STORE_URL` | *(empty)* | Enables "Add to Chrome" button on the site when set |
 
+### Sitemap `lastmod`
+
+Each URL's `<lastmod>` comes from `src/site/sitemap-lastmod.json`, a per-URL content hash + date. `npm run build:site` only bumps a date when that page's built HTML changed; commit the updated manifest with your change (CI fails if it is stale).
+
 ### OG / social image
 
 Place your screenshot at `src/site/og-image.png` before building.

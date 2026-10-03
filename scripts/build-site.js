@@ -17,6 +17,7 @@ const path = require('path');
 const { execSync } = require('child_process');
 const { drawIcon } = require('./lib/icon-png');
 const { fingerprintAssets } = require('./lib/fingerprint');
+const { resolveLastmods, loadManifest, saveManifest } = require('./lib/lastmod');
 
 const ROOT = path.join(__dirname, '..');
 const SRC_SITE = path.join(ROOT, 'src', 'site');
@@ -828,143 +829,54 @@ say(path.relative(ROOT, robotsFile));
 
 console.log('==> Writing sitemap.xml...');
 const today = new Date().toISOString().slice(0, 10);
+
+// Each entry: URL path, the built file whose content defines "modified", and
+// (for bilingual pages) the es/en alternates. lastmod comes from a committed
+// content-hash manifest, so it only moves when that page's content changes.
+const sitemapEntries = [];
+function addBilingual(esPath, esFile, enPath, enFile, priorities) {
+  sitemapEntries.push({ loc: esPath, file: esFile, changefreq: 'monthly', priority: priorities[0], es: esPath, en: enPath });
+  sitemapEntries.push({ loc: enPath, file: enFile, changefreq: 'monthly', priority: priorities[1], es: esPath, en: enPath });
+}
+addBilingual('/', 'index.html', '/en', 'en.html', ['1.0', '0.9']);
+addBilingual('/v7', 'v7.html', '/en/v7', 'en/v7.html', ['0.6', '0.5']);
+addBilingual('/v7-menor', 'v7-menor.html', '/en/v7-menor', 'en/v7-menor.html', ['0.5', '0.4']);
+function addSlugPages(slugs) {
+  slugs.forEach(function (slug) {
+    addBilingual('/' + slug, slug + '.html', '/en/' + slug, 'en/' + slug + '.html', ['0.5', '0.4']);
+  });
+}
+addSlugPages(CIRCLE_PAGES.map(function (page) { return page.slug; }));
+addSlugPages([DIM_SLUG, NOTE_FINDER_SLUG]);
+addSlugPages(PICKING_PAGES.map(function (page) { return page.slug; }));
+sitemapEntries.push({ loc: '/store/privacy-policy.html', file: 'store/privacy-policy.html', changefreq: 'yearly', priority: '0.3' });
+CANCIONES_SLUGS.forEach(function (file) {
+  sitemapEntries.push({ loc: '/canciones/' + file, file: 'canciones/' + file, changefreq: 'yearly', priority: '0.4' });
+});
+
+const lastmodManifestFile = path.join(ROOT, 'src', 'site', 'sitemap-lastmod.json');
+const lastmodContent = {};
+sitemapEntries.forEach(function (entry) {
+  lastmodContent[entry.loc] = fs.readFileSync(path.join(DIST_SITE, entry.file));
+});
+const resolvedLastmods = resolveLastmods(loadManifest(lastmodManifestFile), lastmodContent, today);
+saveManifest(lastmodManifestFile, resolvedLastmods.manifest);
+
 const sitemapXml = [
   '<?xml version="1.0" encoding="UTF-8"?>',
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"',
   '        xmlns:xhtml="http://www.w3.org/1999/xhtml">',
-  '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/</loc>',
-  '    <lastmod>' + today + '</lastmod>',
-  '    <changefreq>monthly</changefreq>',
-  '    <priority>1.0</priority>',
-  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/"/>',
-  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en"/>',
-  '  </url>',
-  '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/en</loc>',
-  '    <lastmod>' + today + '</lastmod>',
-  '    <changefreq>monthly</changefreq>',
-  '    <priority>0.9</priority>',
-  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/"/>',
-  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en"/>',
-  '  </url>',
-  '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/v7</loc>',
-  '    <lastmod>' + today + '</lastmod>',
-  '    <changefreq>monthly</changefreq>',
-  '    <priority>0.6</priority>',
-  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/v7"/>',
-  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/v7"/>',
-  '  </url>',
-  '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/en/v7</loc>',
-  '    <lastmod>' + today + '</lastmod>',
-  '    <changefreq>monthly</changefreq>',
-  '    <priority>0.5</priority>',
-  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/v7"/>',
-  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/v7"/>',
-  '  </url>',
-  '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/v7-menor</loc>',
-  '    <lastmod>' + today + '</lastmod>',
-  '    <changefreq>monthly</changefreq>',
-  '    <priority>0.5</priority>',
-  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/v7-menor"/>',
-  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/v7-menor"/>',
-  '  </url>',
-  '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/en/v7-menor</loc>',
-  '    <lastmod>' + today + '</lastmod>',
-  '    <changefreq>monthly</changefreq>',
-  '    <priority>0.4</priority>',
-  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/v7-menor"/>',
-  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/v7-menor"/>',
-  '  </url>',
-  ...CIRCLE_PAGES.flatMap(function (page) {
+  ...sitemapEntries.flatMap(function (entry) {
     return [
       '  <url>',
-      '    <loc>' + SITE_BASE_URL + '/' + page.slug + '</loc>',
-      '    <lastmod>' + today + '</lastmod>',
-      '    <changefreq>monthly</changefreq>',
-      '    <priority>0.5</priority>',
-      '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + page.slug + '"/>',
-      '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + page.slug + '"/>',
-      '  </url>',
-      '  <url>',
-      '    <loc>' + SITE_BASE_URL + '/en/' + page.slug + '</loc>',
-      '    <lastmod>' + today + '</lastmod>',
-      '    <changefreq>monthly</changefreq>',
-      '    <priority>0.4</priority>',
-      '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + page.slug + '"/>',
-      '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + page.slug + '"/>',
-      '  </url>',
-    ];
-  }),
-  '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/' + DIM_SLUG + '</loc>',
-  '    <lastmod>' + today + '</lastmod>',
-  '    <changefreq>monthly</changefreq>',
-  '    <priority>0.5</priority>',
-  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + DIM_SLUG + '"/>',
-  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + DIM_SLUG + '"/>',
-  '  </url>',
-  '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/en/' + DIM_SLUG + '</loc>',
-  '    <lastmod>' + today + '</lastmod>',
-  '    <changefreq>monthly</changefreq>',
-  '    <priority>0.4</priority>',
-  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + DIM_SLUG + '"/>',
-  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + DIM_SLUG + '"/>',
-  '  </url>',
-  '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/' + NOTE_FINDER_SLUG + '</loc>',
-  '    <lastmod>' + today + '</lastmod>',
-  '    <changefreq>monthly</changefreq>',
-  '    <priority>0.5</priority>',
-  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + NOTE_FINDER_SLUG + '"/>',
-  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + NOTE_FINDER_SLUG + '"/>',
-  '  </url>',
-  '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/en/' + NOTE_FINDER_SLUG + '</loc>',
-  '    <lastmod>' + today + '</lastmod>',
-  '    <changefreq>monthly</changefreq>',
-  '    <priority>0.4</priority>',
-  '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + NOTE_FINDER_SLUG + '"/>',
-  '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + NOTE_FINDER_SLUG + '"/>',
-  '  </url>',
-  ...PICKING_PAGES.flatMap(function (page) {
-    return [
-      '  <url>',
-      '    <loc>' + SITE_BASE_URL + '/' + page.slug + '</loc>',
-      '    <lastmod>' + today + '</lastmod>',
-      '    <changefreq>monthly</changefreq>',
-      '    <priority>0.5</priority>',
-      '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + page.slug + '"/>',
-      '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + page.slug + '"/>',
-      '  </url>',
-      '  <url>',
-      '    <loc>' + SITE_BASE_URL + '/en/' + page.slug + '</loc>',
-      '    <lastmod>' + today + '</lastmod>',
-      '    <changefreq>monthly</changefreq>',
-      '    <priority>0.4</priority>',
-      '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + '/' + page.slug + '"/>',
-      '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + '/en/' + page.slug + '"/>',
-      '  </url>',
-    ];
-  }),
-  '  <url>',
-  '    <loc>' + SITE_BASE_URL + '/store/privacy-policy.html</loc>',
-  '    <lastmod>' + today + '</lastmod>',
-  '    <changefreq>yearly</changefreq>',
-  '    <priority>0.3</priority>',
-  '  </url>',
-  ...CANCIONES_SLUGS.flatMap(function (file) {
-    return [
-      '  <url>',
-      '    <loc>' + SITE_BASE_URL + '/canciones/' + file + '</loc>',
-      '    <lastmod>' + today + '</lastmod>',
-      '    <changefreq>yearly</changefreq>',
-      '    <priority>0.4</priority>',
+      '    <loc>' + SITE_BASE_URL + entry.loc + '</loc>',
+      '    <lastmod>' + resolvedLastmods.lastmods[entry.loc] + '</lastmod>',
+      '    <changefreq>' + entry.changefreq + '</changefreq>',
+      '    <priority>' + entry.priority + '</priority>',
+      ...(entry.es ? [
+        '    <xhtml:link rel="alternate" hreflang="es" href="' + SITE_BASE_URL + entry.es + '"/>',
+        '    <xhtml:link rel="alternate" hreflang="en" href="' + SITE_BASE_URL + entry.en + '"/>',
+      ] : []),
       '  </url>',
     ];
   }),
