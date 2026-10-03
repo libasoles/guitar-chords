@@ -120,7 +120,16 @@
         btn.className = 'note-finder-note' + (extraClass ? ' ' + extraClass : '');
         btn.style.gridColumn = String(column);
         btn.style.gridRow = String(row);
-        btn.textContent = text;
+        if (extraClass && extraClass.indexOf('note-finder-note-accidental') !== -1) {
+          var accidental = text.slice(-1);
+          btn.append(document.createTextNode(text.slice(0, -1)));
+          var accidentalEl = document.createElement('span');
+          accidentalEl.className = 'note-finder-note-accidental-symbol';
+          accidentalEl.textContent = accidental;
+          btn.append(accidentalEl);
+        } else {
+          btn.textContent = text;
+        }
         btn.setAttribute('aria-pressed', 'false');
         btn.addEventListener('click', function () { toggle(note); });
         (buttonsByNote[note] = buttonsByNote[note] || []).push(btn);

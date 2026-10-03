@@ -513,6 +513,20 @@ a:hover {
   letter-spacing: 0;
   line-height: 0.8;
 }
+/* The flat glyph has a smaller optical footprint than a hash at the same
+   font size, so it needs a little more room to make the two headings read
+   as peers. */
+.note-finder-col-label-flats {
+  font-size: 1.7rem;
+}
+.note-finder-col-label-symbol {
+  display: inline-block;
+}
+/* Unlike the flat, the hash sits low within this font's line box. Move the
+   glyph alone so its underline remains aligned with the other headers. */
+.note-finder-col-label-sharps .note-finder-col-label-symbol {
+  transform: translateY(-0.2rem);
+}
 
 .note-finder-keys-viewport {
   width: 100%;
@@ -594,9 +608,7 @@ a:hover {
   border: 2px solid var(--rule);
   box-shadow: 0 0 0 3px #fff;
 }
-.note-finder-note-natural:hover {
-  border-color: var(--ink-soft);
-}
+.note-finder-note-natural:hover,
 .note-finder-note-natural.is-selected {
   background: #f6b2aa;
   color: var(--ink);
@@ -615,6 +627,9 @@ a:hover {
      natural note in the center rail. */
   border-radius: 50%;
   isolation: isolate;
+}
+.note-finder-note-accidental-symbol {
+  font-size: 1.35em;
 }
 .note-finder-note-accidental::before {
   content: "";
@@ -639,14 +654,13 @@ a:hover {
 .note-finder-note-flat::before {
   clip-path: polygon(0 50%, 35% 7%, 76% 7%, 100% 50%, 76% 93%, 35% 93%);
 }
-.note-finder-note-accidental:hover {
-  --note-outline: var(--ink-soft);
-}
+.note-finder-note-sharp:hover,
 .note-finder-note-sharp.is-selected {
   --note-fill: #9fc2da;
   --note-outline: #5c89a7;
   color: var(--ink);
 }
+.note-finder-note-flat:hover,
 .note-finder-note-flat.is-selected {
   --note-fill: #ddc99e;
   --note-outline: #9b7c42;
@@ -845,41 +859,45 @@ code {
 .note-finder-promo-note-top,
 .note-finder-promo-note-bottom {
   left: 3.75rem;
-  color: #fff;
+  color: var(--ink);
 }
 .note-finder-promo-note-top {
   top: 0;
 }
 .note-finder-promo-note-bottom {
   bottom: 0;
-  background: #4f772d;
+  background: #f6b2aa;
 }
 .note-finder-promo-note-upper-left {
   top: 1.875rem;
   left: 0.5rem;
-  background: #12544f;
-  color: #fff;
+  background: #ddc99e;
+  color: var(--ink);
+  clip-path: polygon(0 50%, 35% 7%, 76% 7%, 100% 50%, 76% 93%, 35% 93%);
 }
 .note-finder-promo-note-lower-left {
   bottom: 1.875rem;
   left: 0.5rem;
-  background: #2a835f;
-  color: #fff;
+  background: #f6efe4;
+  color: var(--ink-soft);
+  clip-path: polygon(0 50%, 35% 7%, 76% 7%, 100% 50%, 76% 93%, 35% 93%);
 }
 .note-finder-promo-note-upper-right {
   top: 1.875rem;
   right: 0.5rem;
-  background: #b4d2eb;
-  color: #010101;
+  background: #edf2f8;
+  color: var(--ink-soft);
+  clip-path: polygon(0 50%, 24% 7%, 65% 7%, 100% 50%, 65% 93%, 24% 93%);
 }
 .note-finder-promo-note-lower-right {
   bottom: 1.875rem;
   right: 0.5rem;
-  background: #8bbb92;
-  color: #132a13;
+  background: #9fc2da;
+  color: var(--ink);
+  clip-path: polygon(0 50%, 24% 7%, 65% 7%, 100% 50%, 65% 93%, 24% 93%);
 }
 .note-finder-promo-note-top {
-  background: #092328;
+  background: #f6b2aa;
 }
 .note-finder-promo-note-center {
   top: 3.625rem;

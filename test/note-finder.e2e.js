@@ -27,6 +27,8 @@ async function run() {
       const flatStyle = getComputedStyle(flat);
       const sharpShapeStyle = getComputedStyle(sharp, '::before');
       const flatShapeStyle = getComputedStyle(flat, '::before');
+      const flatHeading = document.querySelector('.note-finder-col-label-flats');
+      const sharpHeading = document.querySelector('.note-finder-col-label-sharps');
       return {
         labels: Array.from(document.querySelectorAll('.note-finder-col-label')).map((el) => el.textContent),
         cloneInteractive: !grids[0].hasAttribute('aria-hidden') && getComputedStyle(grids[0].querySelector('button')).pointerEvents !== 'none',
@@ -39,10 +41,17 @@ async function run() {
         flatClipPath: flatShapeStyle.clipPath,
         sharpBackground: sharpShapeStyle.backgroundColor,
         flatBackground: flatShapeStyle.backgroundColor,
+        headingSizes: [parseFloat(getComputedStyle(flatHeading).fontSize), parseFloat(getComputedStyle(sharpHeading).fontSize)],
+        sharpHeadingGlyphTransform: getComputedStyle(sharpHeading.querySelector('.note-finder-col-label-symbol')).transform,
+        accidentalSymbolSize: parseFloat(getComputedStyle(sharp.querySelector('.note-finder-note-accidental-symbol')).fontSize),
+        accidentalTextSize: parseFloat(sharpStyle.fontSize),
       };
     });
 
     assert.deepStrictEqual(picker.labels, ['♭', 'Notas', '#']);
+    assert.ok(picker.headingSizes[0] > picker.headingSizes[1], 'the flat heading needs optical compensation to match the hash');
+    assert.notStrictEqual(picker.sharpHeadingGlyphTransform, 'none', 'the hash glyph should be optically aligned without moving its underline');
+    assert.ok(picker.accidentalSymbolSize > picker.accidentalTextSize, 'the accidental symbol should stand out from its note letter');
     assert.ok(picker.cloneInteractive, 'the cloned cycles must accept pointer interaction');
     assert.ok(Math.abs(picker.gap - picker.naturalGap) < 1, 'the seam between cycles must match the gap between notes');
     assert.ok(Math.abs(picker.gridCenter - picker.naturalCenter) < 1, 'the central rail should align with natural notes');
