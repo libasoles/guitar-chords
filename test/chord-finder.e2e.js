@@ -329,6 +329,42 @@ async function run() {
     console.log('OK: jsPDF loads only on PDF export, with error/retry handling.');
     await pdfPage.close();
 
+    // svguitar is fetched lazily: the finder UI mounts first, and diagrams are
+    // drawn once the renderer arrives.
+    const lazyPage = await browser.newPage();
+    // The fixture preloads a stub; swallow that first assignment so only the
+    // lazily fetched script can provide svguitar.
+    await lazyPage.addInitScript(() => {
+      let value; let assignments = 0;
+      Object.defineProperty(window, 'svguitar', {
+        configurable: true,
+        get() { return value; },
+        set(v) { if (++assignments > 1) value = v; },
+      });
+    });
+    let releaseSvguitar;
+    const svguitarGate = new Promise((r) => { releaseSvguitar = r; });
+    const svguitarRequests = [];
+    await lazyPage.route('**/vendor/svguitar.umd.js', async (route) => {
+      svguitarRequests.push(route.request().url());
+      await svguitarGate;
+      route.fulfill({ contentType: 'text/javascript', body: 'window.svguitar = { SVGuitarChord: function () {} };' });
+    });
+    await lazyPage.goto(FIXTURE, { waitUntil: 'domcontentloaded' });
+    await lazyPage.waitForFunction(() => {
+      const f = document.querySelector('#pin');
+      return f && f.shadowRoot && f.shadowRoot.querySelectorAll('.card:not(.hidden)').length === 12;
+    });
+    assert.strictEqual(
+      await lazyPage.evaluate(() => document.querySelector('#pin').shadowRoot.querySelectorAll('.diagram[data-chord]').length),
+      0, 'no diagram is drawn before svguitar arrives');
+    await lazyPage.waitForFunction((n) => n > 0, svguitarRequests.length);
+    releaseSvguitar();
+    await lazyPage.waitForFunction(() =>
+      document.querySelector('#pin').shadowRoot.querySelectorAll('.diagram[data-chord]').length === 12);
+    console.log('OK: finder paints before svguitar loads; diagrams follow progressively.');
+    await lazyPage.close();
+
   } catch (err) {
     failures.push(err);
   } finally {

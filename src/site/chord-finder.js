@@ -13,27 +13,50 @@
     var own = document.querySelector('script[src*="chord-finder.js"]');
     SCRIPT_SRC = own && own.src;
   }
-  var jsPdfPromise = null;
+  // Heavy renderers are fetched from the vendor/ folder next to this script on
+  // demand instead of blocking the initial load.
+  function vendorUrl(file) {
+    return SCRIPT_SRC
+      ? SCRIPT_SRC.replace(/[^\/?#]*([?#].*)?$/, 'vendor/' + file)
+      : 'vendor/' + file;
+  }
 
-  function loadJsPdf() {
-    if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve();
-    if (jsPdfPromise) return jsPdfPromise;
-    jsPdfPromise = new Promise(function (resolve, reject) {
-      var el = document.createElement('script');
-      el.src = SCRIPT_SRC
-        ? SCRIPT_SRC.replace(/[^\/?#]*([?#].*)?$/, 'vendor/jspdf.umd.min.js')
-        : 'vendor/jspdf.umd.min.js';
-      el.onload = function () {
-        if (window.jspdf && window.jspdf.jsPDF) resolve();
-        else reject(new Error('jsPDF missing'));
-      };
-      el.onerror = function () { reject(new Error('jsPDF failed to load')); };
-      document.head.appendChild(el);
-    }).catch(function (err) {
-      jsPdfPromise = null; // allow retry
-      throw err;
+  function lazyVendorLoader(file, isReady) {
+    var promise = null;
+    return function () {
+      if (isReady()) return Promise.resolve();
+      if (promise) return promise;
+      promise = new Promise(function (resolve, reject) {
+        var el = document.createElement('script');
+        el.src = vendorUrl(file);
+        el.onload = function () {
+          if (isReady()) resolve();
+          else reject(new Error(file + ' missing'));
+        };
+        el.onerror = function () { reject(new Error(file + ' failed to load')); };
+        document.head.appendChild(el);
+      }).catch(function (err) {
+        promise = null; // allow retry
+        throw err;
+      });
+      return promise;
+    };
+  }
+
+  var loadJsPdf = lazyVendorLoader('jspdf.umd.min.js', function () {
+    return !!(window.jspdf && window.jspdf.jsPDF);
+  });
+  var loadSvguitar = lazyVendorLoader('svguitar.umd.js', function () {
+    return typeof window.svguitar !== 'undefined';
+  });
+
+  // Runs fn once the diagram renderer is available (synchronously if it
+  // already is), so the finder UI can paint before svguitar is downloaded.
+  function whenDiagramsReady(fn) {
+    if (typeof window.svguitar !== 'undefined') { fn(); return; }
+    loadSvguitar().then(fn, function (err) {
+      if (window.console) console.error('svguitar failed to load', err);
     });
-    return jsPdfPromise;
   }
 
   function t(key, fallback) {
@@ -499,7 +522,6 @@
     if (!window.ChordSearch || typeof window.ChordSearch.matchChords !== 'function') {
       missing.push('window.ChordSearch (chord-search.js)');
     }
-    if (typeof window.svguitar === 'undefined') missing.push('svguitar');
     return missing;
   };
 
@@ -987,13 +1009,15 @@
       fingers: pos.fingers, barres: pos.barres, position: pos.position,
     };
 
-    card._diagramTarget.innerHTML = '';
-    try {
-      window.ChordDiagram.render(card._diagramTarget, renderChord, 'finder');
-    } catch (err) {
-      card._diagramTarget.innerHTML = '<small style="color:#999">(error)</small>';
-      if (window.console) console.error('svguitar error for', chord.name, err);
-    }
+    whenDiagramsReady(function () {
+      card._diagramTarget.innerHTML = '';
+      try {
+        window.ChordDiagram.render(card._diagramTarget, renderChord, 'finder');
+      } catch (err) {
+        card._diagramTarget.innerHTML = '<small style="color:#999">(error)</small>';
+        if (window.console) console.error('svguitar error for', chord.name, err);
+      }
+    });
   };
 
   ChordFinder.prototype._stepPosition = function (card, delta) {
@@ -1187,12 +1211,14 @@
 
       list.appendChild(item);
 
-      try {
-        window.ChordDiagram.render(target, renderChord, 'finder');
-      } catch (err) {
-        target.innerHTML = '<small style="color:#999">(error)</small>';
-        if (window.console) console.error('svguitar error for', chord.name, err);
-      }
+      whenDiagramsReady(function () {
+        try {
+          window.ChordDiagram.render(target, renderChord, 'finder');
+        } catch (err) {
+          target.innerHTML = '<small style="color:#999">(error)</small>';
+          if (window.console) console.error('svguitar error for', chord.name, err);
+        }
+      });
     });
   };
 
