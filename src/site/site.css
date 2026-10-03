@@ -480,15 +480,16 @@ a:hover {
   grid-template-columns: 3.6rem 2.7rem 3.6rem;
   column-gap: 0.9rem;
   justify-items: center;
+  width: max-content;
 }
 
 .note-finder-col-label {
   align-self: end;
   font-family: var(--sans);
-  font-size: 0.62rem;
+  font-size: 0.9rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.06em;
   color: var(--ink-soft);
   padding-bottom: 0.6rem;
   margin-bottom: 0.7rem;
@@ -504,6 +505,13 @@ a:hover {
 }
 .note-finder-col-label-flats {
   grid-column: 1;
+}
+.note-finder-col-label-flats,
+.note-finder-col-label-sharps {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 0.8;
 }
 
 .note-finder-keys-viewport {
@@ -550,9 +558,18 @@ a:hover {
     1.6rem 3.7rem 1.6rem 3.7rem 1.6rem 3.7rem;
   column-gap: 0.9rem;
   justify-items: center;
+  /* Prevent the grid from stretching to the picker width: its background
+     rail is centred on this box, so this keeps it centred on the natural
+     notes too. */
+  width: max-content;
+  /* The middle rail makes the notes read as a connected chord map instead
+     of a list of independent controls. It deliberately stops at each note. */
+  background:
+    linear-gradient(var(--rule), var(--rule)) center / 1px 100% no-repeat;
 }
 
 .note-finder-note {
+  position: relative;
   align-self: center;
   justify-self: center;
   font-family: var(--mono);
@@ -574,46 +591,88 @@ a:hover {
   font-size: 0.82rem;
   background: #fff;
   color: var(--ink);
-  border: 1px solid var(--rule);
+  border: 2px solid var(--rule);
+  box-shadow: 0 0 0 3px #fff;
 }
 .note-finder-note-natural:hover {
   border-color: var(--ink-soft);
 }
 .note-finder-note-natural.is-selected {
-  background: #ffdcdc;
+  background: #f6b2aa;
   color: var(--ink);
-  border-color: #ffdcdc;
+  border-color: #fff;
+  box-shadow: 0 0 0 2px #e9d8d1;
 }
 
 .note-finder-note-accidental {
-  width: 2.7rem;
-  height: 2.7rem;
+  width: 3.45rem;
+  height: 2.95rem;
   font-size: 0.72rem;
   line-height: 1;
-  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  /* A speech-bubble silhouette keeps the accidental visually tied to the
+     natural note in the center rail. */
+  border-radius: 50%;
+  isolation: isolate;
+}
+.note-finder-note-accidental::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--note-fill);
+  clip-path: polygon(0 50%, 24% 7%, 65% 7%, 100% 50%, 65% 93%, 24% 93%);
+  filter: drop-shadow(0 0 1.2px var(--note-outline));
 }
 .note-finder-note-sharp {
-  background: #fff;
+  --note-fill: #edf2f8;
+  --note-outline: #c4d2df;
   color: var(--ink-soft);
-  border: 1px solid var(--rule);
 }
 .note-finder-note-flat {
-  background: #fff;
+  --note-fill: #f6efe4;
+  --note-outline: #d9cebc;
   color: var(--ink-soft);
-  border: 1px solid var(--rule);
+}
+.note-finder-note-flat::before {
+  clip-path: polygon(0 50%, 35% 7%, 76% 7%, 100% 50%, 76% 93%, 35% 93%);
 }
 .note-finder-note-accidental:hover {
-  border-color: var(--ink-soft);
+  --note-outline: var(--ink-soft);
 }
 .note-finder-note-sharp.is-selected {
-  background: #d4e0ee;
-  border-color: #d4e0ee;
+  --note-fill: #9fc2da;
+  --note-outline: #5c89a7;
   color: var(--ink);
 }
 .note-finder-note-flat.is-selected {
-  background: #d0e1ca;
-  border-color: #d0e1ca;
+  --note-fill: #ddc99e;
+  --note-outline: #9b7c42;
   color: var(--ink);
+}
+
+/* The selected state is recognisable at a glance without relying on colour. */
+.note-finder-note.is-selected::after {
+  content: "✓";
+  position: absolute;
+  z-index: 1;
+  top: -0.55rem;
+  right: -0.45rem;
+  display: grid;
+  width: 1.45rem;
+  height: 1.45rem;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #d54a36;
+  color: #fff;
+  box-shadow: 0 1px 3px rgb(76 35 28 / 22%);
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .note-finder-clear {
@@ -627,7 +686,8 @@ a:hover {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--ink-soft);
-  padding-left: 20px;
+  width: 11.7rem;
+  text-align: center;
 }
 .note-finder-clear:hover {
   color: var(--accent);
