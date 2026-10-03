@@ -10,6 +10,7 @@
 const path = require('path');
 const fs   = require('fs');
 const { chromium } = require('playwright');
+const { chromePath } = require('./lib/chrome-path');
 
 const ROOT   = path.join(__dirname, '..');
 const POPUP  = 'file://' + path.join(ROOT, 'dist', 'extension', 'popup.html');
@@ -70,7 +71,7 @@ async function capture(page, outPath) {
 async function run() {
   // ── 01-search.png  (1280×800, typing "C") ─────────────────────────────
   {
-    const browser = await chromium.launch();
+    const browser = await chromium.launch({ executablePath: chromePath() });
     const ctx  = await browser.newContext({ viewport: { width: 1280, height: 800 } });
     const page = await ctx.newPage();
     await page.goto(POPUP);
@@ -86,7 +87,7 @@ async function run() {
 
   // ── 02-pinned.png  (1280×800, G + D7 pinned, searching "Am") ──────────
   {
-    const browser = await chromium.launch();
+    const browser = await chromium.launch({ executablePath: chromePath() });
     const ctx  = await browser.newContext({ viewport: { width: 1280, height: 800 } });
     const page = await ctx.newPage();
     await page.goto(POPUP);
@@ -111,7 +112,7 @@ async function run() {
 
   // ── og-image.png  (1200×630) ────────────────────────────────────────
   {
-    const browser = await chromium.launch();
+    const browser = await chromium.launch({ executablePath: chromePath() });
     const ctx  = await browser.newContext({ viewport: { width: 1200, height: 630 } });
     const page = await ctx.newPage();
     await page.goto(POPUP);

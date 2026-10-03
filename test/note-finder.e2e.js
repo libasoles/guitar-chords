@@ -4,11 +4,12 @@
 const path = require('path');
 const assert = require('assert');
 const { chromium } = require('playwright');
+const { chromePath } = require('../scripts/lib/chrome-path');
 
 const FIXTURE = 'file://' + path.join(__dirname, 'note-finder.fixture.html');
 
 async function run() {
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ executablePath: chromePath() });
   const page = await browser.newPage();
   try {
     await page.goto(FIXTURE);

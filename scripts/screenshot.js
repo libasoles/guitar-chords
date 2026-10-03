@@ -6,6 +6,7 @@
 
 const path = require('path');
 const { chromium } = require('playwright');
+const { chromePath } = require('./lib/chrome-path');
 
 const POPUP = 'file://' + path.join(__dirname, '..', 'dist', 'extension', 'popup.html');
 const OUT   = path.join(__dirname, '..', 'src', 'site', 'og-image.png');
@@ -23,7 +24,7 @@ async function pinFirst(page) {
 }
 
 async function run() {
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ executablePath: chromePath() });
   const context = await browser.newContext({ viewport: { width: 380, height: 620 } });
   const page    = await context.newPage();
 
