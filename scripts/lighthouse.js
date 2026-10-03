@@ -61,6 +61,7 @@ async function main() {
     process.exit(1);
   }
 
+  process.env.CHROME_PATH = chrome;
   const server = await serveStatic(DIST_SITE, 0);
   const url = `http://localhost:${server.address().port}${urlPath}`;
   const name = (urlPath.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'home') + (desktop ? '-desktop' : '-mobile');
