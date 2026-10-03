@@ -211,7 +211,7 @@ a:hover {
 }
 .v7-grid .v7-card .diagram-wrap {
   position: relative;
-  width: 130px;
+  width: 190px;
   margin: 0 auto;
 }
 .v7-grid .v7-card .pos-nav {
@@ -231,8 +231,8 @@ a:hover {
   border-radius: 999px;
   cursor: pointer;
 }
-.v7-grid .v7-card .pos-prev { left: -0.5rem; }
-.v7-grid .v7-card .pos-next { right: -0.5rem; }
+.v7-grid .v7-card .pos-prev { left: 0; }
+.v7-grid .v7-card .pos-next { right: 0; }
 .v7-grid .v7-card .pos-nav[hidden] { display: none; }
 .v7-grid .v7-card .pos-nav svg {
   width: 1rem;
@@ -306,7 +306,7 @@ a:hover {
     height: 108px;
   }
   .v7-grid .v7-card .diagram-wrap {
-    width: 92px;
+    width: 144px;
   }
   .v7-card .name {
     font-size: 0.85rem;
