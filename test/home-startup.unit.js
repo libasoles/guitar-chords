@@ -23,7 +23,7 @@ for (const page of ['index.html', 'en/index.html']) {
 
   test(`${page}: los scripts del buscador conservan su orden de ejecución`, () => {
     const order = ['chords-db.js', 'chord-diagram.js', 'chord-positions.js', 'chord-search.js', 'note-names.js', 'chord-finder.js'];
-    const idx = order.map((f) => html.indexOf('/' + f));
+    const idx = order.map((f) => html.indexOf('/' + f.replace(/\.js$/, '.')));
     assert.ok(idx.every((i) => i > 0));
     assert.deepEqual([...idx].sort((a, b) => a - b), idx);
   });

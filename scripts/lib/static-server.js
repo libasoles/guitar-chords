@@ -5,6 +5,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { HASHED_NAME_RE } = require('./fingerprint');
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -45,7 +46,10 @@ function serveStatic(root, port) {
         return;
       }
       const ext = path.extname(filePath);
-      res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
+      const headers = { 'Content-Type': MIME[ext] || 'application/octet-stream' };
+      // Fingerprinted assets never change under the same URL (see fingerprint.js).
+      if (HASHED_NAME_RE.test(filePath)) headers['Cache-Control'] = 'public, max-age=31536000, immutable';
+      res.writeHead(200, headers);
       res.end(data);
     });
   });

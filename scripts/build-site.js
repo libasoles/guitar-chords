@@ -16,6 +16,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const { drawIcon } = require('./lib/icon-png');
+const { fingerprintAssets } = require('./lib/fingerprint');
 
 const ROOT = path.join(__dirname, '..');
 const SRC_SITE = path.join(ROOT, 'src', 'site');
@@ -985,5 +986,13 @@ say(path.relative(ROOT, cnameFile));
 const noJekyll = path.join(DIST_SITE, '.nojekyll');
 fs.writeFileSync(noJekyll, '', 'utf8');
 say(path.relative(ROOT, noJekyll));
+
+// ---- Fingerprinted assets ---------------------------------
+// Last step: every reference (HTML, JS, manifests, sw.js precache) is rewritten
+// to content-hashed URLs, so a changed file always gets a new URL.
+
+console.log('==> Fingerprinting assets...');
+const fingerprinted = fingerprintAssets(DIST_SITE);
+say(fingerprinted.size + ' assets versioned');
 
 console.log('==> Done. Site output: dist/site/');
