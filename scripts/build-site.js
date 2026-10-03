@@ -18,6 +18,7 @@ const { execSync } = require('child_process');
 const { drawIcon } = require('./lib/icon-png');
 const { fingerprintAssets } = require('./lib/fingerprint');
 const { resolveLastmods, loadManifest, saveManifest } = require('./lib/lastmod');
+const { homeJsonLd, guideJsonLd, injectJsonLd } = require('./lib/structured-data');
 
 const ROOT = path.join(__dirname, '..');
 const SRC_SITE = path.join(ROOT, 'src', 'site');
@@ -207,6 +208,27 @@ function pickingOtherModesNav(strings, locale, page) {
   return '<p class="v7-nav">' + label + ' ' + items + '</p>';
 }
 
+
+// JSON-LD options shared by the home and guide renderers; mirrors the values
+// already used for canonical/hreflang/meta so structured data matches the page.
+function structuredDataOpts(locale, url, name, description, homeUrl) {
+  return {
+    baseUrl: SITE_BASE_URL,
+    siteName: 'Guitar Chords',
+    ogImage: SITE_BASE_URL + '/assets/og-image.png',
+    locale: locale,
+    url: url,
+    homeUrl: homeUrl || SITE_BASE_URL + homeHref(locale),
+    name: name,
+    description: description,
+  };
+}
+
+function withGuideJsonLd(html, strings, locale, slug, titleKey, metaKey) {
+  return injectJsonLd(html, guideJsonLd(structuredDataOpts(
+    locale, v7CanonicalUrl(locale, slug), strings[titleKey] || '', strings[metaKey] || '')));
+}
+
 function render(template, strings, locale, assetsPrefix, outputMode) {
   const resolvedAssetsPrefix = assetsPrefix || (locale === 'es' ? 'assets/' : '../assets/');
   const ogImage = SITE_BASE_URL + '/assets/og-image.png';
@@ -255,7 +277,8 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html.split('%%PICKING_EOLICO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[5].slug));
   html = html.split('%%PICKING_LOCRIO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[6].slug));
 
-  return html;
+  return injectJsonLd(html, homeJsonLd(structuredDataOpts(
+    locale, canonicalUrl(locale), strings.pageTitle || '', strings.metaDescription || '')));
 }
 
 // Render a "chords and their V7" page (src/site/v7-guide.html, shared by all
@@ -304,7 +327,7 @@ function renderV7Page(template, strings, locale, page) {
   html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
   html = html.split('%%SW_PATH%%').join('/sw.js');
 
-  return html;
+  return withGuideJsonLd(html, strings, locale, page.slug, page.titleKey, page.metaKey);
 }
 
 // Render a "chords and their notes" page (src/site/circle-fifths.html, shared
@@ -351,7 +374,7 @@ function renderCirclePage(template, strings, locale, page) {
   html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
   html = html.split('%%SW_PATH%%').join('/sw.js');
 
-  return html;
+  return withGuideJsonLd(html, strings, locale, page.slug, page.titleKey, page.metaKey);
 }
 
 // Render the diminished-chords page (src/site/dim-guide.html) for one
@@ -391,7 +414,7 @@ function renderDimPage(template, strings, locale) {
   html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
   html = html.split('%%SW_PATH%%').join('/sw.js');
 
-  return html;
+  return withGuideJsonLd(html, strings, locale, DIM_SLUG, 'dimPageTitle', 'dimMetaDescription');
 }
 
 // Render the "identify chords from notes" page (src/site/note-finder.html)
@@ -505,7 +528,7 @@ function renderPickingPage(template, strings, locale, page) {
   html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
   html = html.split('%%SW_PATH%%').join('/sw.js');
 
-  return html;
+  return withGuideJsonLd(html, strings, locale, page.slug, p + 'PageTitle', p + 'MetaDescription');
 }
 
 // Render the site-wide 404 page (src/site/404.html) for GitHub Pages. A
