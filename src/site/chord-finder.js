@@ -6,6 +6,31 @@
   'use strict';
 
   var I18N = window.CHORD_FINDER_I18N || {};
+  // jsPDF is only needed when exporting, so it is fetched on demand from the
+  // vendor/ folder next to this script instead of blocking the initial load.
+  var SCRIPT_SRC = document.currentScript && document.currentScript.src;
+  var jsPdfPromise = null;
+
+  function loadJsPdf() {
+    if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve();
+    if (jsPdfPromise) return jsPdfPromise;
+    jsPdfPromise = new Promise(function (resolve, reject) {
+      var el = document.createElement('script');
+      el.src = SCRIPT_SRC
+        ? SCRIPT_SRC.replace(/[^\/?#]*([?#].*)?$/, 'vendor/jspdf.umd.min.js')
+        : 'vendor/jspdf.umd.min.js';
+      el.onload = function () {
+        if (window.jspdf && window.jspdf.jsPDF) resolve();
+        else reject(new Error('jsPDF missing'));
+      };
+      el.onerror = function () { reject(new Error('jsPDF failed to load')); };
+      document.head.appendChild(el);
+    }).catch(function (err) {
+      jsPdfPromise = null; // allow retry
+      throw err;
+    });
+    return jsPdfPromise;
+  }
 
   function t(key, fallback) {
     return I18N[key] !== undefined ? I18N[key] : fallback;
@@ -333,6 +358,9 @@
     '  font-size: 0.72rem; font-weight: 600; text-transform: uppercase;',
     '  letter-spacing: 0.05em;',
     '}',
+    '.pinned-export[aria-busy="true"] { opacity: 0.6; cursor: progress; }',
+    '.pinned-export-status { font-size: 0.8rem; color: var(--muted, #6b6558); }',
+    '.pinned-export-status.error { color: var(--accent, #8b0000); }',
     '.pinned-export:hover { background: var(--accent, #8b0000); color: #fff; }',
     '.pinned-export svg { width: 14px; height: 14px; flex: none; }',
     '.card .pin-button { display: none; }',
@@ -745,6 +773,12 @@
     stripExport.querySelector('span').textContent = t('cfExportPdf', 'Exportar PDF');
     stripExport.addEventListener('click', function () { self._openExportDialog(); });
     stripActions.appendChild(stripExport);
+    var exportStatus = document.createElement('span');
+    exportStatus.className = 'pinned-export-status';
+    exportStatus.setAttribute('role', 'status');
+    stripActions.appendChild(exportStatus);
+    this._exportStatus = exportStatus;
+    this._exportButton = stripExport;
 
     var notesToggle = document.createElement('button');
     notesToggle.type = 'button';
@@ -1320,7 +1354,24 @@
 
   ChordFinder.prototype._exportPinnedPdf = function (title, notes) {
     var self = this;
-    if (!window.jspdf || !window.jspdf.jsPDF) return;
+    var btn = this._exportButton;
+    var status = this._exportStatus;
+    status.textContent = t('cfExportLoading', 'Preparando PDF…');
+    status.classList.remove('error');
+    btn.setAttribute('aria-busy', 'true');
+    loadJsPdf().then(function () {
+      status.textContent = '';
+      btn.removeAttribute('aria-busy');
+      self._buildPinnedPdf(title, notes);
+    }, function () {
+      btn.removeAttribute('aria-busy');
+      status.classList.add('error');
+      status.textContent = t('cfExportError', 'No se pudo cargar el exportador de PDF. Reintentá.');
+    });
+  };
+
+  ChordFinder.prototype._buildPinnedPdf = function (title, notes) {
+    var self = this;
     var items = this._pinnedNames
       .map(function (entry) { return window.CHORDS.find(function (c) { return c.name === entry.name; }); })
       .filter(Boolean);

@@ -264,6 +264,71 @@ async function run() {
     });
 
     console.log('OK: notation toggle switches chord names between American and Spanish (cifrado); search accepts both regardless of toggle.');
+
+    // ---- PDF export loads jsPDF on demand ----
+    const pdfPage = await browser.newPage({ acceptDownloads: true });
+    const jspdfRequests = [];
+    let failJsPdf = false;
+    await pdfPage.route(/jspdf/, (route) => {
+      jspdfRequests.push(route.request().url());
+      if (failJsPdf) return route.abort();
+      return route.fulfill({
+        path: path.join(__dirname, '..', 'vendor', 'jspdf.umd.min.js'),
+        contentType: 'text/javascript',
+      });
+    });
+    await pdfPage.goto(FIXTURE);
+    await pdfPage.waitForFunction(() =>
+      document.querySelector('#pin').shadowRoot.querySelectorAll('.card').length > 0);
+    assert.strictEqual(jspdfRequests.length, 0, 'jsPDF must not load at startup');
+
+    await pdfPage.evaluate(() => {
+      const f = document.querySelector('#pin');
+      const cards = f.shadowRoot.querySelectorAll('.card');
+      cards[0].querySelector('.pin-button').click();
+      cards[1].querySelector('.pin-button').click();
+    });
+    const pdfEval = (fn) => pdfPage.evaluate((src) => {
+      const sr = document.querySelector('#pin').shadowRoot;
+      return new Function('sr', 'return (' + src + ')(sr)')(sr);
+    }, fn.toString());
+    await pdfPage.waitForFunction(() => {
+      const b = document.querySelector('#pin').shadowRoot.querySelector('.pinned-export');
+      return b && b.offsetParent !== null;
+    });
+    assert.strictEqual(jspdfRequests.length, 0, 'jsPDF must not load when pinning');
+
+    const startExport = async () => {
+      await pdfEval((sr) => sr.querySelector('.pinned-export').click());
+      await pdfPage.waitForFunction(() =>
+        document.querySelector('#pin').shadowRoot.querySelector('.export-confirm'));
+      await pdfEval((sr) => sr.querySelector('.export-confirm').click());
+    };
+
+    // Failure: clear error status, normal use still works, retry possible.
+    failJsPdf = true;
+    await startExport();
+    await pdfPage.waitForFunction(() => {
+      const el = document.querySelector('#pin').shadowRoot.querySelector('.pinned-export-status.error');
+      return el && el.textContent.length > 0;
+    });
+    assert.strictEqual(await pdfEval((sr) => sr.querySelector('.pinned-export').hasAttribute('aria-busy')), false);
+    await pdfPage.fill('#pin .search', 'Am7');
+    await pdfPage.waitForFunction(() =>
+      document.querySelector('#pin').shadowRoot.querySelectorAll('.card:not(.hidden)').length > 0);
+
+    // Success: the same flow downloads the PDF.
+    failJsPdf = false;
+    const [download] = await Promise.all([
+      pdfPage.waitForEvent('download'),
+      startExport(),
+    ]);
+    assert.strictEqual(download.suggestedFilename(), 'acordes-pineados.pdf');
+    assert.ok(jspdfRequests.length >= 2, 'jsPDF requested on export');
+    assert.strictEqual(await pdfEval((sr) => sr.querySelector('.pinned-export-status').textContent), '');
+    console.log('OK: jsPDF loads only on PDF export, with error/retry handling.');
+    await pdfPage.close();
+
   } catch (err) {
     failures.push(err);
   } finally {

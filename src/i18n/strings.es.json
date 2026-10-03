@@ -157,6 +157,8 @@
   "cfShowNotesLabel": "Mostrar notas",
   "cfHideNotesLabel": "Ocultar notas",
   "cfExportPdf": "Exportar PDF",
+  "cfExportLoading": "Preparando PDF…",
+  "cfExportError": "No se pudo cargar el exportador de PDF. Reintentá.",
   "cfExportDialogTitle": "Exportar a PDF",
   "cfExportTitleLabel": "Título de la página",
   "cfExportTitlePlaceholder": "Opcional",

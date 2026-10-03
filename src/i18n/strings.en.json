@@ -157,6 +157,8 @@
   "cfShowNotesLabel": "Show notes",
   "cfHideNotesLabel": "Hide notes",
   "cfExportPdf": "Export PDF",
+  "cfExportLoading": "Preparing PDF…",
+  "cfExportError": "Could not load the PDF exporter. Please try again.",
   "cfExportDialogTitle": "Export to PDF",
   "cfExportTitleLabel": "Page title",
   "cfExportTitlePlaceholder": "Optional",
