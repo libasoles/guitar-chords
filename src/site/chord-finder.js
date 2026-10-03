@@ -9,6 +9,10 @@
   // jsPDF is only needed when exporting, so it is fetched on demand from the
   // vendor/ folder next to this script instead of blocking the initial load.
   var SCRIPT_SRC = document.currentScript && document.currentScript.src;
+  if (!SCRIPT_SRC) {
+    var own = document.querySelector('script[src*="chord-finder.js"]');
+    SCRIPT_SRC = own && own.src;
+  }
   var jsPdfPromise = null;
 
   function loadJsPdf() {
@@ -1356,6 +1360,7 @@
     var self = this;
     var btn = this._exportButton;
     var status = this._exportStatus;
+    if (!btn || btn.hasAttribute('aria-busy')) return;
     status.textContent = t('cfExportLoading', 'Preparando PDF…');
     status.classList.remove('error');
     btn.setAttribute('aria-busy', 'true');

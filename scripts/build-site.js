@@ -684,7 +684,6 @@ const precacheUrls = [
   '/assets/note-finder.js',
   '/assets/vendor/svguitar.umd.js',
   '/assets/vendor/fuzzysort.js',
-  '/assets/vendor/jspdf.umd.min.js',
   '/assets/icons/icon-192.png',
   '/assets/icons/icon-512.png',
   '/assets/picking-render.js',
