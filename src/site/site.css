@@ -269,9 +269,10 @@ a:hover {
   margin-top: 0.3rem;
 }
 .v7-skeleton-card {
-  min-height: 174px;
+  min-height: 200.8px;
 }
 .v7-skeleton-diagram,
+.v7-skeleton-position,
 .v7-skeleton-name {
   display: block;
   background: linear-gradient(90deg, #eee9de 25%, #f7f3eb 37%, #eee9de 63%);
@@ -285,8 +286,14 @@ a:hover {
 }
 .v7-skeleton-name {
   width: 3.2rem;
-  height: 1.26rem;
+  height: 1.3705rem;
   margin-top: 0.3rem;
+  border-radius: 3px;
+}
+.v7-skeleton-position {
+  width: 4.25rem;
+  height: 0.8615rem;
+  margin-top: 0.1rem;
   border-radius: 3px;
 }
 @keyframes v7-skeleton-shimmer {
@@ -305,14 +312,14 @@ a:hover {
     font-size: 0.85rem;
   }
   .v7-skeleton-card {
-    min-height: 129px;
+    min-height: 151.8px;
   }
   .v7-skeleton-diagram {
     width: 92px;
     height: 108px;
   }
   .v7-skeleton-name {
-    height: 1.02rem;
+    height: 1.108rem;
   }
   .v7-grid-head {
     font-size: 0.66rem;
@@ -321,6 +328,7 @@ a:hover {
 
 @media (prefers-reduced-motion: reduce) {
   .v7-skeleton-diagram,
+  .v7-skeleton-position,
   .v7-skeleton-name {
     animation: none;
   }
