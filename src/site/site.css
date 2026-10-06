@@ -887,16 +887,21 @@ a:hover {
   .note-finder-results {
     min-width: 0;
     height: min(42rem, calc(100svh - 2rem));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     text-align: center;
     background: transparent;
   }
   .note-finder-results-label {
-    /* The long results heading grows upward so its final baseline shares
-       the picker-heading baseline instead of pushing the table downward. */
-    margin-top: calc(-2 * 1.55 * 0.78rem);
+    flex: none;
+    margin-top: 0;
+  }
+  .note-finder-results-scroll {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
   }
   .note-finder-grid {
     justify-content: center;

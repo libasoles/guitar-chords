@@ -69,6 +69,7 @@ async function run() {
       const pickerRect = rect('.note-finder-picker');
       const resultsRect = rect('.note-finder-results');
       const resultsLabel = document.querySelector('.note-finder-results-label');
+      const resultsScroll = document.querySelector('.note-finder-results-scroll');
       const labelRect = resultsLabel.getBoundingClientRect();
       const pickerLabel = document.querySelector('.note-finder-col-label-naturals');
       const results = document.querySelector('.note-finder-results');
@@ -81,15 +82,18 @@ async function run() {
         labelLeft: labelRect.left,
         headingFontSize: getComputedStyle(resultsLabel).fontSize,
         pickerHeadingFontSize: getComputedStyle(pickerLabel).fontSize,
-        resultsOverflowY: getComputedStyle(results).overflowY,
+        resultsOverflowY: getComputedStyle(resultsScroll).overflowY,
+        resultsHeight: results.getBoundingClientRect().height,
+        resultsScrollHeight: resultsScroll.getBoundingClientRect().height,
         resultsTextAlign: getComputedStyle(results).textAlign,
       };
     });
     assert.ok(mobileLayout.resultsLeft >= mobileLayout.pickerRight, 'mobile results should sit to the right of the picker');
-    assert.ok(mobileLayout.resultsLabelTop < mobileLayout.pickerTop, 'the results title should begin above the picker title');
+    assert.ok(Math.abs(mobileLayout.resultsLabelTop - mobileLayout.pickerTop) < 1, 'the results title should share the picker-heading baseline row');
     assert.ok(Math.abs(mobileLayout.labelLeft - mobileLayout.resultsLeft) < 1, 'the results title should align with its column');
     assert.strictEqual(mobileLayout.headingFontSize, mobileLayout.pickerHeadingFontSize, 'picker and results headings should share baseline metrics');
     assert.strictEqual(mobileLayout.resultsOverflowY, 'auto', 'mobile results should scroll independently');
+    assert.ok(mobileLayout.resultsScrollHeight < mobileLayout.resultsHeight, 'the fixed title should sit outside the scrolling results area');
     assert.strictEqual(mobileLayout.resultsTextAlign, 'center', 'mobile results should be centered in their column');
 
     // Default selection (C E G B♭): the open C7 omits G, so only its

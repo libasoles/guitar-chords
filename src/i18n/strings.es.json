@@ -240,7 +240,7 @@
   "noteFinderNotesLabel": "Notas",
   "noteFinderAccidentalsLabel": "Alteraciones",
   "noteFinderClearLabel": "Deseleccionar",
-  "noteFinderResultsLabel": "Acordes que contienen estas notas",
+  "noteFinderResultsLabel": "Acordes",
   "noteFinderEmpty": "No hay acordes que contengan todas esas notas.",
   "noteFinderSelectPrompt": "Marcá al menos una nota para ver acordes.",
 

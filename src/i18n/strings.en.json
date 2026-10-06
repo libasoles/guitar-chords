@@ -240,7 +240,7 @@
   "noteFinderNotesLabel": "Notes",
   "noteFinderAccidentalsLabel": "Accidentals",
   "noteFinderClearLabel": "Clear all",
-  "noteFinderResultsLabel": "Chords that contain these notes",
+  "noteFinderResultsLabel": "Chords",
   "noteFinderEmpty": "No chords contain all of those notes.",
   "noteFinderSelectPrompt": "Pick at least one note to see chords.",
 
