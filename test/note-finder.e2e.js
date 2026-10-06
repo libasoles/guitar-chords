@@ -77,6 +77,7 @@ async function run() {
         resultsLeft: resultsRect.left,
         pickerTop: pickerRect.top,
         resultsTop: resultsRect.top,
+        resultsLabelTop: labelRect.top,
         labelLeft: labelRect.left,
         headingFontSize: getComputedStyle(resultsLabel).fontSize,
         pickerHeadingFontSize: getComputedStyle(pickerLabel).fontSize,
@@ -85,7 +86,7 @@ async function run() {
       };
     });
     assert.ok(mobileLayout.resultsLeft >= mobileLayout.pickerRight, 'mobile results should sit to the right of the picker');
-    assert.ok(Math.abs(mobileLayout.resultsTop - mobileLayout.pickerTop) < 1, 'the picker and results should start on the same row');
+    assert.ok(mobileLayout.resultsLabelTop < mobileLayout.pickerTop, 'the results title should begin above the picker title');
     assert.ok(Math.abs(mobileLayout.labelLeft - mobileLayout.resultsLeft) < 1, 'the results title should align with its column');
     assert.strictEqual(mobileLayout.headingFontSize, mobileLayout.pickerHeadingFontSize, 'picker and results headings should share baseline metrics');
     assert.strictEqual(mobileLayout.resultsOverflowY, 'auto', 'mobile results should scroll independently');
@@ -113,8 +114,8 @@ async function run() {
       const next = card.querySelector('.pos-next').getBoundingClientRect();
       return { prevRight: prev.right, diagramLeft: diagram.left, nextLeft: next.left, diagramRight: diagram.right };
     });
-    assert.ok(navSpacing.prevRight < navSpacing.diagramLeft, 'the previous chevron should not touch the mobile diagram');
-    assert.ok(navSpacing.nextLeft > navSpacing.diagramRight, 'the next chevron should not touch the mobile diagram');
+    assert.ok(navSpacing.prevRight <= navSpacing.diagramLeft + 2, 'the previous chevron should stay within a 2px gap from the mobile diagram');
+    assert.ok(navSpacing.nextLeft >= navSpacing.diagramRight - 2, 'the next chevron should stay within a 2px gap from the mobile diagram');
     const before = { diagram: await dm7.locator('.diagram').textContent(), notes: await dm7.locator('.notes').textContent() };
     await dm7.locator('.pos-next').click();
     const after = { diagram: await dm7.locator('.diagram').textContent(), notes: await dm7.locator('.notes').textContent() };

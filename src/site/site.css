@@ -874,12 +874,15 @@ a:hover {
     /* Keep the picker and its matches in the same reading row on phones.
        The picker has a deliberate fixed visual width, while the results
        column is allowed to take the remaining space. */
-    grid-template-columns: minmax(0, 11.7rem) minmax(0, 1fr);
-    column-gap: 0.75rem;
+    /* Reserve room for the selected-note badge on the picker's right edge. */
+    grid-template-columns: minmax(0, 12.4rem) minmax(0, 1fr);
+    column-gap: 0.5rem;
   }
   .note-finder-picker {
     align-items: center;
     min-width: 0;
+    position: relative;
+    z-index: 1;
   }
   .note-finder-results {
     min-width: 0;
@@ -888,9 +891,12 @@ a:hover {
     overscroll-behavior: contain;
     scrollbar-width: thin;
     text-align: center;
+    background: transparent;
   }
   .note-finder-results-label {
-    margin-top: 0;
+    /* The long results heading grows upward so its final baseline shares
+       the picker-heading baseline instead of pushing the table downward. */
+    margin-top: calc(-2 * 1.55 * 0.78rem);
   }
   .note-finder-grid {
     justify-content: center;
@@ -903,10 +909,14 @@ a:hover {
   }
   /* Keep the position controls clear of the miniature chord diagram. */
   .note-finder-grid .v7-card .pos-prev {
-    left: -1.9rem;
+    left: -1.6rem;
   }
   .note-finder-grid .v7-card .pos-next {
-    right: -1.9rem;
+    right: -1.6rem;
+  }
+  /* Let any part of the picker that reaches this column stay visible. */
+  .note-finder-grid .v7-card .pos-nav {
+    background: transparent;
   }
 }
 
