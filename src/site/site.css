@@ -708,7 +708,6 @@ a:hover {
   border: 2px solid var(--rule);
   box-shadow: 0 0 0 3px #fff;
 }
-.note-finder-note-natural:hover,
 .note-finder-note-natural.is-selected {
   background: #f6b2aa;
   color: var(--ink);
@@ -754,17 +753,36 @@ a:hover {
 .note-finder-note-flat::before {
   clip-path: polygon(0 50%, 35% 7%, 76% 7%, 100% 50%, 76% 93%, 35% 93%);
 }
-.note-finder-note-sharp:hover,
 .note-finder-note-sharp.is-selected {
   --note-fill: #9fc2da;
   --note-outline: #5c89a7;
   color: var(--ink);
 }
-.note-finder-note-flat:hover,
 .note-finder-note-flat.is-selected {
   --note-fill: #ddc99e;
   --note-outline: #9b7c42;
   color: var(--ink);
+}
+
+/* Touch browsers can retain :hover after a tap. Only offer the hover
+   affordance to devices that have a real hovering pointer. */
+@media (hover: hover) {
+  .note-finder-note-natural:hover {
+    background: #f6b2aa;
+    color: var(--ink);
+    border-color: #fff;
+    box-shadow: 0 0 0 2px #e9d8d1;
+  }
+  .note-finder-note-sharp:hover {
+    --note-fill: #9fc2da;
+    --note-outline: #5c89a7;
+    color: var(--ink);
+  }
+  .note-finder-note-flat:hover {
+    --note-fill: #ddc99e;
+    --note-outline: #9b7c42;
+    color: var(--ink);
+  }
 }
 
 /* The selected state is recognisable at a glance without relying on colour. */
@@ -809,7 +827,8 @@ a:hover {
 
 .note-finder-results-label {
   font-family: var(--sans);
-  font-size: 0.72rem;
+  /* Match the picker heading metrics so their first-line baselines align. */
+  font-size: 0.78rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -864,15 +883,30 @@ a:hover {
   }
   .note-finder-results {
     min-width: 0;
+    height: min(42rem, calc(100svh - 2rem));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    text-align: center;
   }
   .note-finder-results-label {
     margin-top: 0;
+  }
+  .note-finder-grid {
+    justify-content: center;
   }
 }
 
 @media (max-width: 480px) {
   .note-finder-grid .v7-card {
     width: 92px;
+  }
+  /* Keep the position controls clear of the miniature chord diagram. */
+  .note-finder-grid .v7-card .pos-prev {
+    left: -1.9rem;
+  }
+  .note-finder-grid .v7-card .pos-next {
+    right: -1.9rem;
   }
 }
 
