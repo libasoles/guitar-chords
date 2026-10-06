@@ -62,6 +62,25 @@ async function run() {
     assert.notStrictEqual(picker.sharpClipPath, picker.flatClipPath, 'sharp and flat bubbles should point in opposite directions');
     assert.notStrictEqual(picker.sharpBackground, picker.flatBackground, 'sharp and flat notes should have distinct neutral colors');
 
+    // Mobile keeps the note picker and the matching-chord column together.
+    await page.setViewportSize({ width: 360, height: 800 });
+    const mobileLayout = await page.evaluate(() => {
+      const rect = (selector) => document.querySelector(selector).getBoundingClientRect();
+      const pickerRect = rect('.note-finder-picker');
+      const resultsRect = rect('.note-finder-results');
+      const labelRect = rect('.note-finder-results-label');
+      return {
+        pickerRight: pickerRect.right,
+        resultsLeft: resultsRect.left,
+        pickerTop: pickerRect.top,
+        resultsTop: resultsRect.top,
+        labelLeft: labelRect.left,
+      };
+    });
+    assert.ok(mobileLayout.resultsLeft >= mobileLayout.pickerRight, 'mobile results should sit to the right of the picker');
+    assert.ok(Math.abs(mobileLayout.resultsTop - mobileLayout.pickerTop) < 1, 'the picker and results should start on the same row');
+    assert.ok(Math.abs(mobileLayout.labelLeft - mobileLayout.resultsLeft) < 1, 'the results title should align with its column');
+
     // Default selection (C E G B♭): the open C7 omits G, so only its
     // 5th-string barre position matches — one position, no chevrons.
     const defaultCards = await page.evaluate(() => Array.from(document.querySelectorAll('#noteFinderGrid .v7-card')).map((card) => ({

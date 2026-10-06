@@ -852,16 +852,40 @@ a:hover {
 
 @media (max-width: 600px) {
   .note-finder {
-    grid-template-columns: 1fr;
+    /* Keep the picker and its matches in the same reading row on phones.
+       The picker has a deliberate fixed visual width, while the results
+       column is allowed to take the remaining space. */
+    grid-template-columns: minmax(0, 11.7rem) minmax(0, 1fr);
+    column-gap: 0.75rem;
   }
   .note-finder-picker {
     align-items: center;
+    min-width: 0;
+  }
+  .note-finder-results {
+    min-width: 0;
+  }
+  .note-finder-results-label {
+    margin-top: 0;
   }
 }
 
 @media (max-width: 480px) {
   .note-finder-grid .v7-card {
     width: 92px;
+  }
+}
+
+/* At 320 px wide the full-size picker would crowd out even one result.
+   `zoom` participates in layout, unlike transform: scale(), so the two
+   columns remain side by side without leaving a tall empty grid row. */
+@media (max-width: 350px) {
+  .note-finder {
+    grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+    column-gap: 0.5rem;
+  }
+  .note-finder-picker {
+    zoom: 0.76;
   }
 }
 
