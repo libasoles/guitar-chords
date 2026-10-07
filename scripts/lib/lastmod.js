@@ -1,6 +1,6 @@
 'use strict';
 /* lastmod.js — Fechas de modificacion del sitemap basadas en contenido.
-   Un manifest versionado (por URL: hash del contenido indexable + fecha)
+   Un manifest generado (por URL: hash del contenido indexable + fecha)
    evita renovar la fecha de paginas que no cambiaron: la fecha solo avanza
    cuando el hash del contenido cambia. */
 

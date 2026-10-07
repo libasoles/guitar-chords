@@ -854,8 +854,8 @@ console.log('==> Writing sitemap.xml...');
 const today = new Date().toISOString().slice(0, 10);
 
 // Each entry: URL path, the built file whose content defines "modified", and
-// (for bilingual pages) the es/en alternates. lastmod comes from a committed
-// content-hash manifest, so it only moves when that page's content changes.
+// (for bilingual pages) the es/en alternates. lastmod comes from the
+// build-generated content-hash manifest.
 const sitemapEntries = [];
 function addBilingual(esPath, esFile, enPath, enFile, priorities) {
   sitemapEntries.push({ loc: esPath, file: esFile, changefreq: 'monthly', priority: priorities[0], es: esPath, en: enPath });

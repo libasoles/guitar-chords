@@ -35,9 +35,6 @@ jobs:
       - name: E2E tests
         run: npm run test:e2e
 
-      - name: Sitemap lastmod manifest is committed
-        run: git diff --exit-code -- src/site/sitemap-lastmod.json
-
       - name: Build extension
         run: npm run build:ext
 

@@ -55,7 +55,7 @@ npm run build:ext   # → dist/extension/ + dist/extension.zip
 
 ### Sitemap `lastmod`
 
-Each URL's `<lastmod>` comes from `src/site/sitemap-lastmod.json`, a per-URL content hash + date. `npm run build:site` only bumps a date when that page's built HTML changed; commit the updated manifest with your change (CI fails if it is stale).
+`npm run build:site` generates `src/site/sitemap-lastmod.json`, which records a per-URL content hash and date used to build the sitemap. It is a local, ignored build artifact and must not be committed.
 
 ### OG / social image
 
