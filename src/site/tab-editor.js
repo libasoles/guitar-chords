@@ -318,7 +318,6 @@
         }, 1200);
       });
     } else if (btn.classList.contains('del')) {
-      if (lastUsed(tabs[ti]) >= 0 && !confirm(t('tabEditorDeleteConfirm', 'Delete this tab?'))) return;
       tabs.splice(ti, 1);
       save();
       build();

@@ -512,7 +512,7 @@ function renderTabEditorPage(template, strings, locale) {
   });
 
   const editorStrings = {};
-  ['tabEditorCopyLabel', 'tabEditorCopiedLabel', 'tabEditorDeleteLabel', 'tabEditorDeleteConfirm'].forEach(function (key) {
+  ['tabEditorCopyLabel', 'tabEditorCopiedLabel', 'tabEditorDeleteLabel'].forEach(function (key) {
     if (strings[key]) editorStrings[key] = strings[key];
   });
 
