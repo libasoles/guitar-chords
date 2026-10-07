@@ -1165,8 +1165,8 @@ code {
 .tab-promo-strings {
   color: #b3ada1;
 }
-/* The frets live on their own layer over the empty strings; widening it one
-   character at a time "writes" the lick, then it fades and starts over. */
+/* The frets live on their own layer over the empty strings; widening it at a
+   steady pace "writes" the lick, then it fades and starts over. */
 .tab-promo-ink {
   position: absolute;
   top: 0.8rem;
@@ -1195,7 +1195,7 @@ code {
   6% {
     width: 2ch;
     opacity: 1;
-    animation-timing-function: steps(27, end);
+    animation-timing-function: linear;
   }
   62%,
   88% {
