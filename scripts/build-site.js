@@ -72,6 +72,7 @@ const noteFinderTemplate = fs.readFileSync(path.join(SRC_SITE, 'note-finder.html
 const pickingTemplate = fs.readFileSync(path.join(SRC_SITE, 'picking-lesson.html'), 'utf8');
 const tabEditorTemplate = fs.readFileSync(path.join(SRC_SITE, 'tab-editor.html'), 'utf8');
 const notFoundTemplate = fs.readFileSync(path.join(SRC_SITE, '404.html'), 'utf8');
+const noteFinderPromoTemplate = fs.readFileSync(path.join(SRC_SITE, 'note-finder-promo.html'), 'utf8');
 const LOCALES = ['es', 'en'];
 
 // Build the chord-finder i18n subset (only the cfXxx keys).
@@ -234,6 +235,21 @@ function withGuideJsonLd(html, strings, locale, slug, titleKey, metaKey) {
     locale, v7CanonicalUrl(locale, slug), strings[titleKey] || '', strings[metaKey] || '')));
 }
 
+// Render the note-finder promo banner (src/site/note-finder-promo.html),
+// shared by the home page and the 404 page.
+function noteFinderPromo(strings, locale) {
+  const keys = [
+    'noteFinderPromoKicker', 'noteFinderPromoTitle', 'noteFinderPromoDescription', 'noteFinderPromoCta',
+    'promoNoteTop', 'promoNoteUpperLeft', 'promoNoteUpperRight', 'promoNoteCenter',
+    'promoNoteLowerLeft', 'promoNoteLowerRight', 'promoNoteBottom',
+  ];
+  let html = noteFinderPromoTemplate.trim();
+  keys.forEach(function (key) {
+    html = html.split('%%' + key + '%%').join(strings[key] || '');
+  });
+  return html.split('%%NOTE_FINDER_PAGE_HREF%%').join(v7PageHref(locale, NOTE_FINDER_SLUG));
+}
+
 function render(template, strings, locale, assetsPrefix, outputMode) {
   const resolvedAssetsPrefix = assetsPrefix || (locale === 'es' ? 'assets/' : '../assets/');
   const ogImage = SITE_BASE_URL + '/assets/og-image.png';
@@ -250,15 +266,13 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     'pickingJonicoNavLabel', 'pickingFrigioNavLabel',
     'pickingLidioNavLabel', 'pickingMixolidioNavLabel', 'pickingEolicoNavLabel',
     'pickingLocrioNavLabel',
-    'noteFinderPromoKicker', 'noteFinderPromoTitle', 'noteFinderPromoDescription', 'noteFinderPromoCta',
-    'promoNoteTop', 'promoNoteUpperLeft', 'promoNoteUpperRight', 'promoNoteCenter',
-    'promoNoteLowerLeft', 'promoNoteLowerRight', 'promoNoteBottom',
   ];
   simpleKeys.forEach(function (key) {
     html = html.split('%%' + key + '%%').join(strings[key] || '');
   });
 
   // Computed substitutions.
+  html = html.split('%%NOTE_FINDER_PROMO%%').join(noteFinderPromo(strings, locale));
   html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
   html = html.split('%%altLangHref%%').join(altLangHref(locale, outputMode));
   html = html.split('%%canonicalUrl%%').join(canonicalUrl(locale));
@@ -273,7 +287,6 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html.split('%%V7_PAGE_HREF%%').join(v7PageHref(locale));
   html = html.split('%%CIRCLE_PAGE_HREF%%').join(v7PageHref(locale, CIRCLE_SLUG));
   html = html.split('%%DIM_PAGE_HREF%%').join(v7PageHref(locale, DIM_SLUG));
-  html = html.split('%%NOTE_FINDER_PAGE_HREF%%').join(v7PageHref(locale, NOTE_FINDER_SLUG));
   html = html.split('%%TAB_EDITOR_PAGE_HREF%%').join(v7PageHref(locale, TAB_EDITOR_SLUG));
   html = html.split('%%PICKING_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[0].slug));
   html = html.split('%%PICKING_JONICO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[1].slug));
@@ -602,6 +615,7 @@ function render404Page(template, strings) {
   const simpleKeys = [
     'wordmark', 'wordmarkSmall',
     'extensionHeading', 'extensionDescription',
+    'notFoundExploreLabel',
     'notFoundHomeLink', 'notFoundPickingLink', 'notFoundV7Link',
   ];
   simpleKeys.forEach(function (key) {
@@ -612,6 +626,7 @@ function render404Page(template, strings) {
   html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings.notFoundMetaDescription || '');
   html = html.split('%%PAGE_H1%%').join(strings.notFoundH1 || '');
   html = html.split('%%PAGE_LEAD%%').join(strings.notFoundLead || '');
+  html = html.split('%%NOTE_FINDER_PROMO%%').join(noteFinderPromo(strings, 'es'));
 
   html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
   html = html.split('%%homeHref%%').join(homeHref('es'));

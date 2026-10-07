@@ -1601,6 +1601,13 @@ footer {
 .notfound .lead {
   margin: 0 auto 1.6rem;
 }
+.notfound-explore {
+  text-align: left;
+}
+.notfound-explore-label {
+  font-family: var(--sans);
+  margin: 0 0 0.6rem;
+}
 .notfound-links {
   list-style: none;
   margin: 0;
@@ -1608,7 +1615,7 @@ footer {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  align-items: center;
+  align-items: flex-start;
 }
 .notfound-links a {
   font-family: var(--sans);
