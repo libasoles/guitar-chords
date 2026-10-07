@@ -1124,6 +1124,142 @@ code {
   }
 }
 
+/* ----- Tab editor home-page promotion ----- */
+
+.tab-promo {
+  margin: 1.2rem 0 0;
+}
+.tab-promo-link {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1.3rem;
+  color: var(--ink);
+  background: #f7f4eb;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  text-decoration: none;
+}
+.tab-promo-link:hover {
+  border-color: var(--accent);
+}
+.tab-promo-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.tab-promo-sheet {
+  position: relative;
+  padding: 0.8rem 1rem;
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1.5;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+.tab-promo-sheet pre {
+  margin: 0;
+  font: inherit;
+}
+.tab-promo-strings {
+  color: #b3ada1;
+}
+/* The frets live on their own layer over the empty strings; widening it one
+   character at a time "writes" the lick, then it fades and starts over. */
+.tab-promo-ink {
+  position: absolute;
+  top: 0.8rem;
+  bottom: 0.8rem;
+  left: 1rem;
+  width: 29ch;
+  overflow: hidden;
+  animation: tab-promo-write 7s infinite;
+}
+.tab-promo-ink span {
+  background: #fff;
+  color: var(--accent);
+  font-weight: 700;
+}
+.tab-promo-ink::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+}
+@keyframes tab-promo-write {
+  0%,
+  6% {
+    width: 2ch;
+    opacity: 1;
+    animation-timing-function: steps(27, end);
+  }
+  62%,
+  88% {
+    width: 29ch;
+    opacity: 1;
+  }
+  96%,
+  100% {
+    width: 29ch;
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tab-promo-ink {
+    animation: none;
+  }
+  .tab-promo-ink::after {
+    display: none;
+  }
+}
+.tab-promo-copy {
+  min-width: 0;
+}
+.tab-promo-kicker {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+.tab-promo-copy h2 {
+  margin: 0.25rem 0 0;
+  padding: 0;
+  border: 0;
+  font-size: 1.45rem;
+}
+.tab-promo-cta {
+  display: inline-block;
+  margin-top: 1rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.tab-promo-link:hover .tab-promo-cta {
+  text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+  .tab-promo-link {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 1rem;
+  }
+  .tab-promo-sheet {
+    font-size: 13px;
+  }
+  .tab-promo-copy {
+    text-align: center;
+  }
+}
+
 /* ----- Footer ----- */
 
 footer {

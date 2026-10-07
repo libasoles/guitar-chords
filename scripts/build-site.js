@@ -73,6 +73,7 @@ const pickingTemplate = fs.readFileSync(path.join(SRC_SITE, 'picking-lesson.html
 const tabEditorTemplate = fs.readFileSync(path.join(SRC_SITE, 'tab-editor.html'), 'utf8');
 const notFoundTemplate = fs.readFileSync(path.join(SRC_SITE, '404.html'), 'utf8');
 const noteFinderPromoTemplate = fs.readFileSync(path.join(SRC_SITE, 'note-finder-promo.html'), 'utf8');
+const tabEditorPromoTemplate = fs.readFileSync(path.join(SRC_SITE, 'tab-editor-promo.html'), 'utf8');
 const LOCALES = ['es', 'en'];
 
 // Build the chord-finder i18n subset (only the cfXxx keys).
@@ -250,6 +251,16 @@ function noteFinderPromo(strings, locale) {
   return html.split('%%NOTE_FINDER_PAGE_HREF%%').join(v7PageHref(locale, NOTE_FINDER_SLUG));
 }
 
+// Render the tab-editor promo banner (src/site/tab-editor-promo.html) shown
+// on the home page below the note-finder promo.
+function tabEditorPromo(strings, locale) {
+  let html = tabEditorPromoTemplate.trim();
+  ['tabPromoKicker', 'tabPromoTitle', 'tabPromoCta'].forEach(function (key) {
+    html = html.split('%%' + key + '%%').join(strings[key] || '');
+  });
+  return html.split('%%TAB_EDITOR_PAGE_HREF%%').join(v7PageHref(locale, TAB_EDITOR_SLUG));
+}
+
 function render(template, strings, locale, assetsPrefix, outputMode) {
   const resolvedAssetsPrefix = assetsPrefix || (locale === 'es' ? 'assets/' : '../assets/');
   const ogImage = SITE_BASE_URL + '/assets/og-image.png';
@@ -273,6 +284,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
 
   // Computed substitutions.
   html = html.split('%%NOTE_FINDER_PROMO%%').join(noteFinderPromo(strings, locale));
+  html = html.split('%%TAB_EDITOR_PROMO%%').join(tabEditorPromo(strings, locale));
   html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
   html = html.split('%%altLangHref%%').join(altLangHref(locale, outputMode));
   html = html.split('%%canonicalUrl%%').join(canonicalUrl(locale));
