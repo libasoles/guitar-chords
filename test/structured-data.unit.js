@@ -2,7 +2,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { homeJsonLd, guideJsonLd, toScriptTag, injectJsonLd } = require('../scripts/lib/structured-data');
+const { homeJsonLd, guideJsonLd, toolJsonLd, toScriptTag, injectJsonLd } = require('../scripts/lib/structured-data');
 
 const BASE = 'https://example.test';
 const site = { baseUrl: BASE, siteName: 'Acordes', ogImage: BASE + '/assets/og-image.png' };
@@ -83,4 +83,15 @@ test('home y guias generadas emiten JSON-LD con canonica e idioma de la pagina',
     const kinds = graph.map((n) => n['@type']);
     assert.ok(kinds.includes(file === 'index.html' || file === 'en.html' ? 'WebApplication' : 'Article'), file);
   });
+});
+
+test('una pagina-herramienta es WebApplication con migas y FAQPage sin HTML', () => {
+  const graph = toolJsonLd({ ...es, url: BASE + '/tab', name: 'Tab', faq: [{ q: '¿<em>Se</em> guarda?', a: 'Sí, en tu <strong>navegador</strong>.' }] })['@graph'];
+  const app = graph.find((n) => n['@type'] === 'WebApplication');
+  const faq = graph.find((n) => n['@type'] === 'FAQPage');
+  assert.equal(app.url, BASE + '/tab');
+  assert.equal(app.applicationCategory, 'MusicApplication');
+  assert.ok(graph.some((n) => n['@type'] === 'BreadcrumbList'));
+  assert.equal(faq.mainEntity[0].name, '¿Se guarda?');
+  assert.equal(faq.mainEntity[0].acceptedAnswer.text, 'Sí, en tu navegador.');
 });

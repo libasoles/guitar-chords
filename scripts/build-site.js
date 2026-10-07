@@ -18,7 +18,7 @@ const { execSync } = require('child_process');
 const { drawIcon } = require('./lib/icon-png');
 const { fingerprintAssets } = require('./lib/fingerprint');
 const { resolveLastmods, loadManifest, saveManifest } = require('./lib/lastmod');
-const { homeJsonLd, guideJsonLd, injectJsonLd } = require('./lib/structured-data');
+const { homeJsonLd, guideJsonLd, toolJsonLd, injectJsonLd } = require('./lib/structured-data');
 
 const ROOT = path.join(__dirname, '..');
 const SRC_SITE = path.join(ROOT, 'src', 'site');
@@ -70,6 +70,7 @@ const circleTemplate = fs.readFileSync(path.join(SRC_SITE, 'circle-fifths.html')
 const dimTemplate = fs.readFileSync(path.join(SRC_SITE, 'dim-guide.html'), 'utf8');
 const noteFinderTemplate = fs.readFileSync(path.join(SRC_SITE, 'note-finder.html'), 'utf8');
 const pickingTemplate = fs.readFileSync(path.join(SRC_SITE, 'picking-lesson.html'), 'utf8');
+const tabEditorTemplate = fs.readFileSync(path.join(SRC_SITE, 'tab-editor.html'), 'utf8');
 const notFoundTemplate = fs.readFileSync(path.join(SRC_SITE, '404.html'), 'utf8');
 const LOCALES = ['es', 'en'];
 
@@ -170,6 +171,10 @@ const DIM_SLUG = 'acordes-disminuidos';
 // sounds every selected note (see src/shared/note-match.js).
 const NOTE_FINDER_SLUG = 'identificar-acordes-por-notas';
 
+// "Tablatura ASCII" page, rendered from src/site/tab-editor.html: an editor
+// to write guitar tabs and copy them as plain text (src/site/tab-editor.js).
+const TAB_EDITOR_SLUG = 'crear-tablaturas-de-guitarra';
+
 // Static lesson pages rendered from src/site/picking-lesson.html — modal
 // picking patterns with the open low E string as a pedal note. One page per
 // mode; each cross-links to the other two. i18n keys are namespaced by
@@ -241,7 +246,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     'h1', 'lead', 'h2Decoder', 'decoderIntro',
     'thPart', 'thSymbols', 'thMeaning', 'thExample',
     'extensionHeading', 'extensionDescription',
-    'v7NavLabel', 'circleNavLabel', 'dimNavLabel', 'pickingGroupLabel', 'pickingNavLabel',
+    'v7NavLabel', 'circleNavLabel', 'dimNavLabel', 'tabNavLabel', 'pickingGroupLabel', 'pickingNavLabel',
     'pickingJonicoNavLabel', 'pickingFrigioNavLabel',
     'pickingLidioNavLabel', 'pickingMixolidioNavLabel', 'pickingEolicoNavLabel',
     'pickingLocrioNavLabel',
@@ -269,6 +274,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html.split('%%CIRCLE_PAGE_HREF%%').join(v7PageHref(locale, CIRCLE_SLUG));
   html = html.split('%%DIM_PAGE_HREF%%').join(v7PageHref(locale, DIM_SLUG));
   html = html.split('%%NOTE_FINDER_PAGE_HREF%%').join(v7PageHref(locale, NOTE_FINDER_SLUG));
+  html = html.split('%%TAB_EDITOR_PAGE_HREF%%').join(v7PageHref(locale, TAB_EDITOR_SLUG));
   html = html.split('%%PICKING_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[0].slug));
   html = html.split('%%PICKING_JONICO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[1].slug));
   html = html.split('%%PICKING_FRIGIO_PAGE_HREF%%').join(v7PageHref(locale, PICKING_PAGES[2].slug));
@@ -466,6 +472,60 @@ function renderNoteFinderPage(template, strings, locale) {
   return html;
 }
 
+// Render the "Tablatura ASCII" page (src/site/tab-editor.html) for one locale:
+// the tab editor plus how-to / FAQ copy for search, marked up as a
+// WebApplication with an FAQPage built from the same visible Q&A strings.
+function renderTabEditorPage(template, strings, locale) {
+  const resolvedAssetsPrefix = locale === 'es' ? 'assets/' : '../assets/';
+  const ogImage = SITE_BASE_URL + '/assets/og-image.png';
+  let html = template;
+
+  const simpleKeys = [
+    'htmlLang', 'wordmark', 'wordmarkSmall', 'altLangLabel',
+    'extensionHeading', 'extensionDescription',
+    'tabEditorHint', 'tabEditorAddLabel', 'tabEditorFretLabel',
+    'tabHowToH2', 'tabHowTo1', 'tabHowTo2', 'tabHowTo3', 'tabHowTo4',
+    'tabKeyDigits', 'tabKeyArrows', 'tabKeyNext', 'tabKeyDelete', 'tabDelKey',
+    'tabWhatH2', 'tabWhat1', 'tabWhat2', 'tabSampleLabel',
+    'tabReadH2', 'tabRead1', 'tabRead2', 'tabRead3',
+    'tabFaqH2', 'tabFaq1Q', 'tabFaq1A', 'tabFaq2Q', 'tabFaq2A', 'tabFaq3Q', 'tabFaq3A',
+    'tabSeePickingLink', 'tabSeeHomeLink',
+  ];
+  simpleKeys.forEach(function (key) {
+    html = html.split('%%' + key + '%%').join(strings[key] || '');
+  });
+
+  const editorStrings = {};
+  ['tabEditorCopyLabel', 'tabEditorCopiedLabel', 'tabEditorDeleteLabel', 'tabEditorDeleteConfirm'].forEach(function (key) {
+    if (strings[key]) editorStrings[key] = strings[key];
+  });
+
+  html = html.split('%%PAGE_TITLE%%').join(strings.tabPageTitle || '');
+  html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings.tabMetaDescription || '');
+  html = html.split('%%PAGE_H1%%').join(strings.tabH1 || '');
+  html = html.split('%%PAGE_LEAD%%').join(strings.tabLead || '');
+  html = html.split('%%TAB_EDITOR_STRINGS_JSON%%').join(JSON.stringify(editorStrings));
+  html = html.split('%%PICKING_PAGE_HREF%%').join(v7PageHref(locale, PICKING_SLUG));
+
+  html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
+  html = html.split('%%homeHref%%').join(homeHref(locale));
+  html = html.split('%%altLangHref%%').join(locale === 'es' ? v7PageHref('en', TAB_EDITOR_SLUG) : v7PageHref('es', TAB_EDITOR_SLUG));
+  html = html.split('%%canonicalUrl%%').join(v7CanonicalUrl(locale, TAB_EDITOR_SLUG));
+  html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es', TAB_EDITOR_SLUG));
+  html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en', TAB_EDITOR_SLUG));
+  html = html.split('%%ogImage%%').join(ogImage);
+  html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
+  html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
+  html = html.split('%%SW_PATH%%').join('/sw.js');
+
+  const opts = structuredDataOpts(locale, v7CanonicalUrl(locale, TAB_EDITOR_SLUG),
+    strings.tabPageTitle || '', strings.tabMetaDescription || '');
+  opts.faq = [1, 2, 3].map(function (n) {
+    return { q: strings['tabFaq' + n + 'Q'] || '', a: strings['tabFaq' + n + 'A'] || '' };
+  });
+  return injectJsonLd(html, toolJsonLd(opts));
+}
+
 // Render a modal picking lesson page (src/site/picking-lesson.html) for one
 // locale — one of PICKING_PAGES (Dorian, Ionian, Phrygian). Static content
 // (three fretboard-diagram images + tips, computed client-side from the
@@ -594,6 +654,7 @@ copyFile(path.join(SRC_SITE, 'note-finder.js'), path.join(ASSETS_DIST, 'note-fin
 copyFile(path.join(SRC_SITE, 'site.css'), path.join(ASSETS_DIST, 'site.css'));
 copyFile(path.join(SRC_SITE, 'picking-render.js'), path.join(ASSETS_DIST, 'picking-render.js'));
 copyFile(path.join(SRC_SITE, 'metronome.js'), path.join(ASSETS_DIST, 'metronome.js'));
+copyFile(path.join(SRC_SITE, 'tab-editor.js'), path.join(ASSETS_DIST, 'tab-editor.js'));
 copyFile(path.join(SRC_SITE, 'guitar-player-cubist-left-head.svg'), path.join(ASSETS_DIST, 'guitar-player-cubist-left-head.svg'));
 // Song-sheet mechanism (cancionero: lyrics-with-chords pages under /canciones,
 // not linked from nav — discoverable via SEO/sitemap only).
@@ -713,6 +774,7 @@ const precacheUrls = [
   '/assets/icons/icon-512.png',
   '/assets/picking-render.js',
   '/assets/metronome.js',
+  '/assets/tab-editor.js',
   '/404.html',
 ];
 const swOut = swTemplate
@@ -766,6 +828,13 @@ LOCALES.forEach(function (locale) {
       say(path.relative(ROOT, noteFinderOutFile));
     }
 
+    {
+      const tabEditorHtml = renderTabEditorPage(tabEditorTemplate, strings, locale);
+      const tabEditorOutFile = path.join(DIST_SITE, TAB_EDITOR_SLUG + '.html');
+      fs.writeFileSync(tabEditorOutFile, tabEditorHtml, 'utf8');
+      say(path.relative(ROOT, tabEditorOutFile));
+    }
+
     PICKING_PAGES.forEach(function (page) {
       const pickingHtml = renderPickingPage(pickingTemplate, strings, locale, page);
       const pickingOutFile = path.join(DIST_SITE, page.slug + '.html');
@@ -814,6 +883,13 @@ LOCALES.forEach(function (locale) {
     const noteFinderOutFile = path.join(localeDir, NOTE_FINDER_SLUG + '.html');
     fs.writeFileSync(noteFinderOutFile, noteFinderHtml, 'utf8');
     say(path.relative(ROOT, noteFinderOutFile));
+  }
+
+  {
+    const tabEditorHtml = renderTabEditorPage(tabEditorTemplate, strings, locale);
+    const tabEditorOutFile = path.join(localeDir, TAB_EDITOR_SLUG + '.html');
+    fs.writeFileSync(tabEditorOutFile, tabEditorHtml, 'utf8');
+    say(path.relative(ROOT, tabEditorOutFile));
   }
 
   PICKING_PAGES.forEach(function (page) {
@@ -871,6 +947,7 @@ function addSlugPages(slugs) {
 }
 addSlugPages(CIRCLE_PAGES.map(function (page) { return page.slug; }));
 addSlugPages([DIM_SLUG, NOTE_FINDER_SLUG]);
+addBilingual('/' + TAB_EDITOR_SLUG, TAB_EDITOR_SLUG + '.html', '/en/' + TAB_EDITOR_SLUG, 'en/' + TAB_EDITOR_SLUG + '.html', ['0.7', '0.6']);
 addSlugPages(PICKING_PAGES.map(function (page) { return page.slug; }));
 sitemapEntries.push({ loc: '/store/privacy-policy.html', file: 'store/privacy-policy.html', changefreq: 'yearly', priority: '0.3' });
 CANCIONES_SLUGS.forEach(function (file) {
