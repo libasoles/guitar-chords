@@ -58,144 +58,48 @@
     </header>
 
     <main>
-    <h1>%%PAGE_H1%%</h1>
-    <p class="lead">%%PAGE_LEAD%%</p>
+      <h1>%%PAGE_H1%%</h1>
+      <p class="lead">%%PAGE_LEAD%%</p>
 
-    <div class="tab-editor" id="tabEditor">
-      <p class="tab-editor-hint">%%tabEditorHint%%</p>
-      <div id="tabSheets"></div>
-      <button id="tabAdd" class="tab-icon-btn tab-add" type="button" title="%%tabEditorAddLabel%%" aria-label="%%tabEditorAddLabel%%">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-      </button>
-      <input id="tabKey" class="tab-key" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="%%tabEditorFretLabel%%">
-      <span id="tabProbe" class="tab-probe" aria-hidden="true">0000000000</span>
-    </div>
-
-    <h2>%%tabHowToH2%%</h2>
-    <ol class="tab-steps">
-      <li>%%tabHowTo1%%</li>
-      <li>%%tabHowTo2%%</li>
-      <li>%%tabHowTo3%%</li>
-      <li>%%tabHowTo4%%</li>
-    </ol>
-    <table class="tab-keys">
-      <tbody>
-        <tr><th scope="row"><kbd>0</kbd>–<kbd>9</kbd></th><td>%%tabKeyDigits%%</td></tr>
-        <tr><th scope="row"><kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd></th><td>%%tabKeyArrows%%</td></tr>
-        <tr><th scope="row"><kbd>Enter</kbd> / <kbd>Tab</kbd></th><td>%%tabKeyNext%%</td></tr>
-        <tr><th scope="row"><kbd>⌫</kbd> / <kbd>%%tabDelKey%%</kbd></th><td>%%tabKeyDelete%%</td></tr>
-      </tbody>
-    </table>
-
-    <h2>%%tabWhatH2%%</h2>
-    <p>%%tabWhat1%%</p>
-    <pre class="tab-sample" aria-label="%%tabSampleLabel%%">1 -----------0-----
-2 ---------1---1----
-3 -------0-------0--
-4 -----2------------
-5 ---3--------------
-6 ------------------</pre>
-    <p>%%tabWhat2%%</p>
-
-    <h2>%%tabReadH2%%</h2>
-    <ul class="tab-steps">
-      <li>%%tabRead1%%</li>
-      <li>%%tabRead2%%</li>
-      <li>%%tabRead3%%</li>
-    </ul>
-
-    <h2>%%tabFaqH2%%</h2>
-    <details class="tab-faq">
-      <summary>%%tabFaq1Q%%</summary>
-      <p>%%tabFaq1A%%</p>
-    </details>
-    <details class="tab-faq">
-      <summary>%%tabFaq2Q%%</summary>
-      <p>%%tabFaq2A%%</p>
-    </details>
-    <details class="tab-faq">
-      <summary>%%tabFaq3Q%%</summary>
-      <p>%%tabFaq3A%%</p>
-    </details>
-
-    <p class="v7-nav"><a href="%%PICKING_PAGE_HREF%%">%%tabSeePickingLink%%</a></p>
-    <p class="v7-nav"><a href="%%homeHref%%">%%tabSeeHomeLink%%</a></p>
-    </main>
-
-    <footer>
-      <div class="extension-cta">
-        <svg class="ext-icon" viewBox="0 0 48 48" aria-hidden="true">
-          <rect
-            class="frame"
-            x="8"
-            y="8"
-            width="32"
-            height="32"
-            rx="3"
+      <div class="tab-editor" id="tabEditor">
+        <p class="tab-editor-hint">%%tabEditorHint%%</p>
+        <div id="tabSheets"></div>
+        <button
+          id="tabAdd"
+          class="tab-icon-btn tab-add"
+          type="button"
+          title="%%tabEditorAddLabel%%"
+          aria-label="%%tabEditorAddLabel%%"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
             fill="none"
-            stroke="#d8d2c4"
-            stroke-width="4"
-          />
-          <line
-            class="string"
-            x1="18"
-            y1="8"
-            x2="18"
-            y2="40"
-            stroke="#1a1a1a"
+            stroke="currentColor"
             stroke-width="2"
-            opacity="0.4"
-          />
-          <line
-            class="string"
-            x1="24"
-            y1="8"
-            x2="24"
-            y2="40"
-            stroke="#1a1a1a"
-            stroke-width="2"
-            opacity="0.4"
-          />
-          <line
-            class="string"
-            x1="30"
-            y1="8"
-            x2="30"
-            y2="40"
-            stroke="#1a1a1a"
-            stroke-width="2"
-            opacity="0.4"
-          />
-          <line
-            class="string"
-            x1="8"
-            y1="20"
-            x2="40"
-            y2="20"
-            stroke="#1a1a1a"
-            stroke-width="2"
-            opacity="0.4"
-          />
-          <line
-            class="string"
-            x1="8"
-            y1="30"
-            x2="40"
-            y2="30"
-            stroke="#1a1a1a"
-            stroke-width="2"
-            opacity="0.4"
-          />
-          <circle cx="18" cy="25" r="3.2" fill="#8b0000" />
-          <circle cx="30" cy="15" r="3.2" fill="#8b0000" />
-        </svg>
-        <div class="ext-body">
-          <p class="ext-heading">%%extensionHeading%%</p>
-          <p class="ext-desc">%%extensionDescription%%</p>
-          %%EXTENSION_CTA_BUTTON%%
-        </div>
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M5 12h14" />
+            <path d="M12 5v14" />
+          </svg>
+        </button>
+        <input
+          id="tabKey"
+          class="tab-key"
+          inputmode="numeric"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+          aria-label="%%tabEditorFretLabel%%"
+        />
+        <span id="tabProbe" class="tab-probe" aria-hidden="true"
+          >0000000000</span
+        >
       </div>
-    </footer>
+
+    </main>
 
     <script>
       window.TAB_EDITOR_STRINGS = %%TAB_EDITOR_STRINGS_JSON%%;

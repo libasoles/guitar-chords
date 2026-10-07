@@ -37,7 +37,7 @@
     var stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (Array.isArray(stored)) tabs = stored.filter(Array.isArray);
   } catch (e) {}
-  if (!tabs.length) tabs = [[]];
+  if (!tabs.length) tabs = [[], [], []];
 
   var perStaff = 16;
   var cur = null;    // { t, c, s } focused cell

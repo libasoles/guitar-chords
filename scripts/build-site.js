@@ -497,9 +497,7 @@ function renderNoteFinderPage(template, strings, locale) {
   return html;
 }
 
-// Render the "Tablatura ASCII" page (src/site/tab-editor.html) for one locale:
-// the tab editor plus how-to / FAQ copy for search, marked up as a
-// WebApplication with an FAQPage built from the same visible Q&A strings.
+// Render the tab editor page (src/site/tab-editor.html) for one locale.
 function renderTabEditorPage(template, strings, locale) {
   const resolvedAssetsPrefix = locale === 'es' ? 'assets/' : '../assets/';
   const ogImage = SITE_BASE_URL + '/assets/og-image.png';
@@ -507,14 +505,7 @@ function renderTabEditorPage(template, strings, locale) {
 
   const simpleKeys = [
     'htmlLang', 'wordmark', 'wordmarkSmall', 'altLangLabel',
-    'extensionHeading', 'extensionDescription',
     'tabEditorHint', 'tabEditorAddLabel', 'tabEditorFretLabel',
-    'tabHowToH2', 'tabHowTo1', 'tabHowTo2', 'tabHowTo3', 'tabHowTo4',
-    'tabKeyDigits', 'tabKeyArrows', 'tabKeyNext', 'tabKeyDelete', 'tabDelKey',
-    'tabWhatH2', 'tabWhat1', 'tabWhat2', 'tabSampleLabel',
-    'tabReadH2', 'tabRead1', 'tabRead2', 'tabRead3',
-    'tabFaqH2', 'tabFaq1Q', 'tabFaq1A', 'tabFaq2Q', 'tabFaq2A', 'tabFaq3Q', 'tabFaq3A',
-    'tabSeePickingLink', 'tabSeeHomeLink',
   ];
   simpleKeys.forEach(function (key) {
     html = html.split('%%' + key + '%%').join(strings[key] || '');
@@ -530,8 +521,6 @@ function renderTabEditorPage(template, strings, locale) {
   html = html.split('%%PAGE_H1%%').join(strings.tabH1 || '');
   html = html.split('%%PAGE_LEAD%%').join(strings.tabLead || '');
   html = html.split('%%TAB_EDITOR_STRINGS_JSON%%').join(JSON.stringify(editorStrings));
-  html = html.split('%%PICKING_PAGE_HREF%%').join(v7PageHref(locale, PICKING_SLUG));
-
   html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
   html = html.split('%%homeHref%%').join(homeHref(locale));
   html = html.split('%%altLangHref%%').join(locale === 'es' ? v7PageHref('en', TAB_EDITOR_SLUG) : v7PageHref('es', TAB_EDITOR_SLUG));
@@ -539,15 +528,11 @@ function renderTabEditorPage(template, strings, locale) {
   html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es', TAB_EDITOR_SLUG));
   html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en', TAB_EDITOR_SLUG));
   html = html.split('%%ogImage%%').join(ogImage);
-  html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
   html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
   html = html.split('%%SW_PATH%%').join('/sw.js');
 
   const opts = structuredDataOpts(locale, v7CanonicalUrl(locale, TAB_EDITOR_SLUG),
     strings.tabPageTitle || '', strings.tabMetaDescription || '');
-  opts.faq = [1, 2, 3].map(function (n) {
-    return { q: strings['tabFaq' + n + 'Q'] || '', a: strings['tabFaq' + n + 'A'] || '' };
-  });
   return injectJsonLd(html, toolJsonLd(opts));
 }
 
