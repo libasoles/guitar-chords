@@ -276,7 +276,7 @@
   // "fret-NaN" class as any other open note (fixStringMarkers above relies
   // on this too), so it's told apart by string number, not by shape, and
   // left out of the hover entirely.
-  function wireHover(svg, pattern) {
+  function pickingNoteElements(svg, pattern) {
     var elements = {};
     pattern.fingers.forEach(function (finger) {
       var stringNum = finger[0];
@@ -293,6 +293,40 @@
       var el = svg.querySelector('.finger-string-' + arrIndex + '-fret-' + (fret - 1));
       if (el) elements[key] = el;
     });
+
+    return elements;
+  }
+
+  // Draw each pair once, underneath the note circles.  The pair map contains
+  // both directions so it can power hover from either note; a small seen map
+  // prevents it from producing duplicate connector lines.
+  function addPairConnectors(svg, pairs, elements) {
+    var seen = {};
+    var svgNS = 'http://www.w3.org/2000/svg';
+    var firstNote = Object.keys(elements).map(function (key) {
+      return elements[key];
+    })[0];
+
+    Object.keys(pairs).forEach(function (key) {
+      var partnerKey = pairs[key];
+      var pairKey = [key, partnerKey].sort().join('|');
+      var from = elements[key];
+      var to = elements[partnerKey];
+      if (seen[pairKey] || !from || !to) return;
+      seen[pairKey] = true;
+
+      var line = document.createElementNS(svgNS, 'line');
+      line.setAttribute('x1', from.getAttribute('cx'));
+      line.setAttribute('y1', from.getAttribute('cy'));
+      line.setAttribute('x2', to.getAttribute('cx'));
+      line.setAttribute('y2', to.getAttribute('cy'));
+      line.setAttribute('class', 'picking-pair-connector');
+      // Insert before the first note so the circles stay legible and clickable.
+      svg.insertBefore(line, firstNote);
+    });
+  }
+
+  function wireHover(elements, pattern) {
 
     Object.keys(elements).forEach(function (key) {
       var el = elements[key];
@@ -326,7 +360,9 @@
       fixStringMarkers(svg);
       addFretboardBackground(svg);
       addPositionMarkers(svg, pattern.frets);
-      wireHover(svg, pattern);
+      var elements = pickingNoteElements(svg, pattern);
+      addPairConnectors(svg, pattern.pairs, elements);
+      wireHover(elements, pattern);
     }
   });
 })();
