@@ -180,7 +180,8 @@ const NOTE_FINDER_SLUG = 'identificar-acordes-por-notas';
 const TAB_EDITOR_SLUG = 'crear-tablaturas-de-guitarra';
 
 // "Ejercicio de sextas" exercise page, rendered from src/site/sixths-exercise.html:
-// the tab editor preloaded with the exercise (not saved, no delete button).
+// the tab editor preloaded with the exercise (not saved, no delete or add
+// buttons), the exercise video, the tab-editor promo and the extension CTA.
 // Split in three parts (up, high position, down) so each one fits on a single
 // staff instead of wrapping.
 const SIXTHS_SLUG = 'ejercicio-de-sextas';
@@ -288,7 +289,7 @@ function noteFinderPromo(strings, locale) {
 }
 
 // Render the tab-editor promo banner (src/site/tab-editor-promo.html) shown
-// on the home page below the note-finder promo.
+// on the home page below the note-finder promo and on the sixths exercise page.
 function tabEditorPromo(strings, locale) {
   let html = tabEditorPromoTemplate.trim();
   ['tabPromoKicker', 'tabPromoTitle', 'tabPromoCta'].forEach(function (key) {
@@ -581,13 +582,14 @@ function renderSixthsPage(template, strings, locale) {
   const simpleKeys = [
     'htmlLang', 'wordmark', 'wordmarkSmall', 'altLangLabel',
     'tabEditorHint', 'tabEditorAddLabel', 'tabEditorFretLabel',
+    'extensionHeading', 'extensionDescription',
   ];
   simpleKeys.forEach(function (key) {
     html = html.split('%%' + key + '%%').join(strings[key] || '');
   });
 
   const editorOptions = {
-    storageKey: null, deletable: false, copyable: false, spacing: 1,
+    storageKey: null, deletable: false, copyable: false, addable: false, spacing: 1,
     tabs: SIXTHS_TABS.map(parseAsciiTab),
   };
 
@@ -597,6 +599,8 @@ function renderSixthsPage(template, strings, locale) {
   html = html.split('%%PAGE_LEAD%%').join(strings.sixthsLead || '');
   html = html.split('%%SIXTHS_SOURCE%%').join(strings.sixthsSource || '');
   html = html.split('%%SIXTHS_VIDEO_ID%%').join(SIXTHS_VIDEO_ID);
+  html = html.split('%%TAB_EDITOR_PROMO%%').join(tabEditorPromo(strings, locale));
+  html = html.split('%%EXTENSION_CTA_BUTTON%%').join(ctaButton(strings));
   html = html.split('%%TAB_EDITOR_OPTIONS_JSON%%').join(JSON.stringify(editorOptions));
   html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
   html = html.split('%%homeHref%%').join(homeHref(locale));
