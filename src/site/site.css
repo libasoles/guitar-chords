@@ -2015,3 +2015,10 @@ footer {
     padding: 2.4rem 0.6rem 0.8rem;
   }
 }
+
+.tab-source {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin: 1.6rem 0 0;
+}

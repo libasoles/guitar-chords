@@ -3,7 +3,10 @@
    string); staves are only visual wrapping, recomputed from the available
    width. Click a slot and type the fret, move with arrows/Enter/Tab, drag a
    number to another slot, and copy the tab as plain ASCII text. Tabs are
-   kept in localStorage. */
+   kept in localStorage.
+   A page can set window.TAB_EDITOR_OPTIONS to start from given tabs
+   (`tabs`), skip localStorage (`storageKey: null`) or hide the delete
+   button (`deletable: false`). */
 (function () {
   'use strict';
 
@@ -11,7 +14,9 @@
   function t(key, fallback) { return STRINGS[key] !== undefined ? STRINGS[key] : fallback; }
 
   var STRING_NAMES = ['1', '2', '3', '4', '5', '6'];
-  var STORAGE_KEY = 'tabEditor.tabs';
+  var OPTIONS = window.TAB_EDITOR_OPTIONS || {};
+  var STORAGE_KEY = 'storageKey' in OPTIONS ? OPTIONS.storageKey : 'tabEditor.tabs';
+  var DELETABLE = OPTIONS.deletable !== false;
   var LABEL_W = 2; // "1 "
   var CELL_W = 3;  // "---"
   var MAX_FRET = 24;
@@ -33,10 +38,13 @@
   function emptyCol() { return STRING_NAMES.map(function () { return ''; }); }
 
   var tabs = [];
-  try {
-    var stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (Array.isArray(stored)) tabs = stored.filter(Array.isArray);
-  } catch (e) {}
+  if (STORAGE_KEY) {
+    try {
+      var stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (Array.isArray(stored)) tabs = stored.filter(Array.isArray);
+    } catch (e) {}
+  }
+  if (!tabs.length && Array.isArray(OPTIONS.tabs)) tabs = JSON.parse(JSON.stringify(OPTIONS.tabs));
   if (!tabs.length) tabs = [[], [], []];
 
   var perStaff = 16;
@@ -52,6 +60,7 @@
   }
 
   function save() {
+    if (!STORAGE_KEY) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(tabs.map(function (cols) {
         return cols.slice(0, lastUsed(cols) + 1);
@@ -110,7 +119,7 @@
       return '<section class="tab-sheet" data-t="' + ti + '">' +
         '<div class="tab-tools">' +
           '<button class="tab-icon-btn copy" type="button" title="' + copyLabel + '" aria-label="' + copyLabel + '">' + ICON_COPY + '</button>' +
-          (tabs.length > 1 ? '<button class="tab-icon-btn del" type="button" title="' + deleteLabel + '" aria-label="' + deleteLabel + '">' + ICON_TRASH + '</button>' : '') +
+          (DELETABLE && tabs.length > 1 ? '<button class="tab-icon-btn del" type="button" title="' + deleteLabel + '" aria-label="' + deleteLabel + '">' + ICON_TRASH + '</button>' : '') +
         '</div>' +
         '<div class="tab-staves"></div>' +
       '</section>';

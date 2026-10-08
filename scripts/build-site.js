@@ -19,6 +19,7 @@ const { drawIcon } = require('./lib/icon-png');
 const { fingerprintAssets } = require('./lib/fingerprint');
 const { resolveLastmods, loadManifest, saveManifest } = require('./lib/lastmod');
 const { homeJsonLd, guideJsonLd, toolJsonLd, injectJsonLd } = require('./lib/structured-data');
+const { parseAsciiTab } = require('./lib/ascii-tab');
 
 const ROOT = path.join(__dirname, '..');
 const SRC_SITE = path.join(ROOT, 'src', 'site');
@@ -71,6 +72,7 @@ const dimTemplate = fs.readFileSync(path.join(SRC_SITE, 'dim-guide.html'), 'utf8
 const noteFinderTemplate = fs.readFileSync(path.join(SRC_SITE, 'note-finder.html'), 'utf8');
 const pickingTemplate = fs.readFileSync(path.join(SRC_SITE, 'picking-lesson.html'), 'utf8');
 const tabEditorTemplate = fs.readFileSync(path.join(SRC_SITE, 'tab-editor.html'), 'utf8');
+const thirdsTemplate = fs.readFileSync(path.join(SRC_SITE, 'thirds-scale.html'), 'utf8');
 const notFoundTemplate = fs.readFileSync(path.join(SRC_SITE, '404.html'), 'utf8');
 const noteFinderPromoTemplate = fs.readFileSync(path.join(SRC_SITE, 'note-finder-promo.html'), 'utf8');
 const tabEditorPromoTemplate = fs.readFileSync(path.join(SRC_SITE, 'tab-editor-promo.html'), 'utf8');
@@ -176,6 +178,38 @@ const NOTE_FINDER_SLUG = 'identificar-acordes-por-notas';
 // "Tablatura ASCII" page, rendered from src/site/tab-editor.html: an editor
 // to write guitar tabs and copy them as plain text (src/site/tab-editor.js).
 const TAB_EDITOR_SLUG = 'crear-tablaturas-de-guitarra';
+
+// "Escala con terceras" exercise page, rendered from src/site/thirds-scale.html:
+// the tab editor preloaded with the exercise (not saved, no delete button).
+// Split in three parts (up, down, high position) so each one fits on a single
+// staff instead of wrapping.
+const THIRDS_SLUG = 'escala-con-terceras';
+const THIRDS_TABS = [
+  `
+e|---------------------------------------0---1---3
+B|---------------------------0---1---3------------
+G|-------------------0---2---------------0---2---4
+D|-------0---2---3-----------0---2---3------------
+A|---3---------------2---3------------------------
+E|---0---1---3---5--------------------------------
+`,
+  `
+e|---0------------------------------------
+B|-------3---1---0------------------------
+G|---0---------------2---0----------------
+D|-------3---2---0-----------3---2---0----
+A|-------------------3---2---------------3
+E|---------------------------5---3---1---0
+`,
+  `
+e|---5---7---8--10--12--10---8---7---5---3---1
+B|--------------------------------------------
+G|---5---7---9--10--12--10---9---7---5---4---2
+D|--------------------------------------------
+A|--------------------------------------------
+E|--------------------------------------------
+`,
+];
 
 // Static lesson pages rendered from src/site/picking-lesson.html — modal
 // picking patterns with the open low E string as a pedal note. One page per
@@ -536,6 +570,46 @@ function renderTabEditorPage(template, strings, locale) {
   return injectJsonLd(html, toolJsonLd(opts));
 }
 
+// Render the "Escala con terceras" page (src/site/thirds-scale.html) for one locale.
+function renderThirdsPage(template, strings, locale) {
+  const resolvedAssetsPrefix = locale === 'es' ? 'assets/' : '../assets/';
+  const ogImage = SITE_BASE_URL + '/assets/og-image.png';
+  let html = template;
+
+  const simpleKeys = [
+    'htmlLang', 'wordmark', 'wordmarkSmall', 'altLangLabel',
+    'tabEditorHint', 'tabEditorAddLabel', 'tabEditorFretLabel',
+  ];
+  simpleKeys.forEach(function (key) {
+    html = html.split('%%' + key + '%%').join(strings[key] || '');
+  });
+
+  const editorStrings = {};
+  ['tabEditorCopyLabel', 'tabEditorCopiedLabel'].forEach(function (key) {
+    if (strings[key]) editorStrings[key] = strings[key];
+  });
+  const editorOptions = { storageKey: null, deletable: false, tabs: THIRDS_TABS.map(parseAsciiTab) };
+
+  html = html.split('%%PAGE_TITLE%%').join(strings.thirdsPageTitle || '');
+  html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings.thirdsMetaDescription || '');
+  html = html.split('%%PAGE_H1%%').join(strings.thirdsH1 || '');
+  html = html.split('%%PAGE_LEAD%%').join(strings.thirdsLead || '');
+  html = html.split('%%THIRDS_SOURCE%%').join(strings.thirdsSource || '');
+  html = html.split('%%TAB_EDITOR_STRINGS_JSON%%').join(JSON.stringify(editorStrings));
+  html = html.split('%%TAB_EDITOR_OPTIONS_JSON%%').join(JSON.stringify(editorOptions));
+  html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
+  html = html.split('%%homeHref%%').join(homeHref(locale));
+  html = html.split('%%altLangHref%%').join(locale === 'es' ? v7PageHref('en', THIRDS_SLUG) : v7PageHref('es', THIRDS_SLUG));
+  html = html.split('%%canonicalUrl%%').join(v7CanonicalUrl(locale, THIRDS_SLUG));
+  html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es', THIRDS_SLUG));
+  html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en', THIRDS_SLUG));
+  html = html.split('%%ogImage%%').join(ogImage);
+  html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
+  html = html.split('%%SW_PATH%%').join('/sw.js');
+
+  return withGuideJsonLd(html, strings, locale, THIRDS_SLUG, 'thirdsPageTitle', 'thirdsMetaDescription');
+}
+
 // Render a modal picking lesson page (src/site/picking-lesson.html) for one
 // locale — one of PICKING_PAGES (Dorian, Ionian, Phrygian). Static content
 // (three fretboard-diagram images + tips, computed client-side from the
@@ -847,6 +921,13 @@ LOCALES.forEach(function (locale) {
       say(path.relative(ROOT, tabEditorOutFile));
     }
 
+    {
+      const thirdsHtml = renderThirdsPage(thirdsTemplate, strings, locale);
+      const thirdsOutFile = path.join(DIST_SITE, THIRDS_SLUG + '.html');
+      fs.writeFileSync(thirdsOutFile, thirdsHtml, 'utf8');
+      say(path.relative(ROOT, thirdsOutFile));
+    }
+
     PICKING_PAGES.forEach(function (page) {
       const pickingHtml = renderPickingPage(pickingTemplate, strings, locale, page);
       const pickingOutFile = path.join(DIST_SITE, page.slug + '.html');
@@ -904,6 +985,13 @@ LOCALES.forEach(function (locale) {
     say(path.relative(ROOT, tabEditorOutFile));
   }
 
+  {
+    const thirdsHtml = renderThirdsPage(thirdsTemplate, strings, locale);
+    const thirdsOutFile = path.join(localeDir, THIRDS_SLUG + '.html');
+    fs.writeFileSync(thirdsOutFile, thirdsHtml, 'utf8');
+    say(path.relative(ROOT, thirdsOutFile));
+  }
+
   PICKING_PAGES.forEach(function (page) {
     const pickingHtml = renderPickingPage(pickingTemplate, strings, locale, page);
     const pickingOutFile = path.join(localeDir, page.slug + '.html');
@@ -958,7 +1046,7 @@ function addSlugPages(slugs) {
   });
 }
 addSlugPages(CIRCLE_PAGES.map(function (page) { return page.slug; }));
-addSlugPages([DIM_SLUG, NOTE_FINDER_SLUG]);
+addSlugPages([DIM_SLUG, NOTE_FINDER_SLUG, THIRDS_SLUG]);
 addBilingual('/' + TAB_EDITOR_SLUG, TAB_EDITOR_SLUG + '.html', '/en/' + TAB_EDITOR_SLUG, 'en/' + TAB_EDITOR_SLUG + '.html', ['0.7', '0.6']);
 addSlugPages(PICKING_PAGES.map(function (page) { return page.slug; }));
 sitemapEntries.push({ loc: '/store/privacy-policy.html', file: 'store/privacy-policy.html', changefreq: 'yearly', priority: '0.3' });

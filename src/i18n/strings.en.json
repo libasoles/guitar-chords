@@ -465,5 +465,10 @@
   "tabFaq3Q": "Where can I paste the tab?",
   "tabFaq3A": "Anywhere that takes text: a chat, an email, a document or a guitar forum. Use a monospaced font so the columns line up.",
   "tabSeePickingLink": "Practice picking over the open 6th string →",
-  "tabSeeHomeLink": "Chord finder →"
+  "tabSeeHomeLink": "Chord finder →",
+  "thirdsPageTitle": "Scale in thirds · Guitar tab exercise",
+  "thirdsMetaDescription": "Guitar tab exercise: a scale played in thirds, with the main melody carried by the higher note.",
+  "thirdsH1": "Scale in thirds",
+  "thirdsLead": "The main melody is played by the higher note.",
+  "thirdsSource": "Exercise taken from <a href=\"https://www.youtube.com/watch?v=rWCeQNEXTDY\" target=\"_blank\" rel=\"noopener\">this video</a>."
 }
