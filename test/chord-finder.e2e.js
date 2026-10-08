@@ -4,7 +4,7 @@
 const path = require('path');
 const assert = require('assert');
 const { chromium } = require('playwright');
-const { chromePath } = require('../scripts/lib/chrome-path');
+const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
 
 const FIXTURE = 'file://' + path.join(__dirname, 'chord-finder.fixture.html');
 
@@ -17,7 +17,7 @@ async function visibleNames(page) {
 }
 
 async function run() {
-  const browser = await chromium.launch({ executablePath: chromePath() });
+  const browser = await chromium.launch({ executablePath: playwrightExecutablePath() });
   const page = await browser.newPage();
   const failures = [];
 

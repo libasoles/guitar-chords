@@ -7,7 +7,13 @@
    ultimo cualquier Chromium preinstalado en $PLAYWRIGHT_BROWSERS_PATH o
    /opt/pw-browsers (los sandboxes de agentes traen uno, pero de otra version
    y sin acceso a la CDN de Playwright). Devuelve undefined si no encuentra
-   ninguno, para que Playwright use su default y falle con su mensaje. */
+   ninguno, para que Playwright use su default y falle con su mensaje.
+
+   playwrightExecutablePath() es para chromium.launch(): si Playwright ya
+   tiene su propio Chromium, devuelve undefined para que use
+   chrome-headless-shell. Pasarle el Chrome for Testing completo hace que
+   macOS lo registre como app con ventana y a veces aborta al arrancar
+   (SIGABRT en _RegisterApplication). */
 
 const fs = require('fs');
 const path = require('path');
@@ -55,4 +61,9 @@ function chromePath() {
   return playwrightChromium() || preinstalledChromium();
 }
 
-module.exports = { chromePath };
+function playwrightExecutablePath() {
+  if (process.env.CHROME_PATH && exists(process.env.CHROME_PATH)) return process.env.CHROME_PATH;
+  return playwrightChromium() ? undefined : preinstalledChromium();
+}
+
+module.exports = { chromePath, playwrightExecutablePath };
