@@ -5,8 +5,9 @@
    number to another slot, and copy the tab as plain ASCII text. Tabs are
    kept in localStorage.
    A page can set window.TAB_EDITOR_OPTIONS to start from given tabs
-   (`tabs`), skip localStorage (`storageKey: null`), hide the copy or delete
-   buttons (`copyable: false`, `deletable: false`) or add extra dashes
+   (`tabs`), skip localStorage (`storageKey: null`), hide the copy, delete
+   or add-tab buttons (`copyable: false`, `deletable: false`,
+   `addable: false`) or add extra dashes
    between notes (`spacing: 1` turns "-3--1-" into "--3---1-"). */
 (function () {
   'use strict';
@@ -19,6 +20,7 @@
   var STORAGE_KEY = 'storageKey' in OPTIONS ? OPTIONS.storageKey : 'tabEditor.tabs';
   var DELETABLE = OPTIONS.deletable !== false;
   var COPYABLE = OPTIONS.copyable !== false;
+  var ADDABLE = OPTIONS.addable !== false;
   var LEAD = new Array(Math.max(0, OPTIONS.spacing | 0) + 2).join('-'); // dashes before each note
   var LABEL_W = 2; // "1 "
   var CELL_W = LEAD.length + 2;  // "---" plus the extra spacing
@@ -37,6 +39,7 @@
   var $key = document.getElementById('tabKey');
   var $probe = document.getElementById('tabProbe');
   if (!$sheets || !$add || !$key || !$probe) return;
+  if (!ADDABLE) $add.remove();
 
   function emptyCol() { return STRING_NAMES.map(function () { return ''; }); }
 
@@ -337,15 +340,17 @@
     }
   });
 
-  $add.addEventListener('pointerdown', function (e) { e.preventDefault(); }); // stay focused through the click
-  $add.addEventListener('click', function () {
-    commit();
-    tabs.push([]);
-    save();
-    build();
-    goTo(tabs.length - 1, 0, 0);
-    $key.focus({ preventScroll: true });
-  });
+  if (ADDABLE) {
+    $add.addEventListener('pointerdown', function (e) { e.preventDefault(); }); // stay focused through the click
+    $add.addEventListener('click', function () {
+      commit();
+      tabs.push([]);
+      save();
+      build();
+      goTo(tabs.length - 1, 0, 0);
+      $key.focus({ preventScroll: true });
+    });
+  }
 
   var resizeTimer;
   addEventListener('resize', function () {
