@@ -72,7 +72,7 @@ const dimTemplate = fs.readFileSync(path.join(SRC_SITE, 'dim-guide.html'), 'utf8
 const noteFinderTemplate = fs.readFileSync(path.join(SRC_SITE, 'note-finder.html'), 'utf8');
 const pickingTemplate = fs.readFileSync(path.join(SRC_SITE, 'picking-lesson.html'), 'utf8');
 const tabEditorTemplate = fs.readFileSync(path.join(SRC_SITE, 'tab-editor.html'), 'utf8');
-const thirdsTemplate = fs.readFileSync(path.join(SRC_SITE, 'thirds-scale.html'), 'utf8');
+const sixthsTemplate = fs.readFileSync(path.join(SRC_SITE, 'sixths-exercise.html'), 'utf8');
 const notFoundTemplate = fs.readFileSync(path.join(SRC_SITE, '404.html'), 'utf8');
 const noteFinderPromoTemplate = fs.readFileSync(path.join(SRC_SITE, 'note-finder-promo.html'), 'utf8');
 const tabEditorPromoTemplate = fs.readFileSync(path.join(SRC_SITE, 'tab-editor-promo.html'), 'utf8');
@@ -179,12 +179,14 @@ const NOTE_FINDER_SLUG = 'identificar-acordes-por-notas';
 // to write guitar tabs and copy them as plain text (src/site/tab-editor.js).
 const TAB_EDITOR_SLUG = 'crear-tablaturas-de-guitarra';
 
-// "Escala con terceras" exercise page, rendered from src/site/thirds-scale.html:
+// "Ejercicio de sextas" exercise page, rendered from src/site/sixths-exercise.html:
 // the tab editor preloaded with the exercise (not saved, no delete button).
 // Split in three parts (up, high position, down) so each one fits on a single
 // staff instead of wrapping.
-const THIRDS_SLUG = 'escala-con-terceras';
-const THIRDS_TABS = [
+const SIXTHS_SLUG = 'ejercicio-de-sextas';
+// YouTube video the exercise was taken from, embedded below the tabs.
+const SIXTHS_VIDEO_ID = 'NNwTR8Q8JN4';
+const SIXTHS_TABS = [
   `
 e|---------------------------------------0---1---3
 B|---------------------------0---1---3------------
@@ -570,8 +572,8 @@ function renderTabEditorPage(template, strings, locale) {
   return injectJsonLd(html, toolJsonLd(opts));
 }
 
-// Render the "Escala con terceras" page (src/site/thirds-scale.html) for one locale.
-function renderThirdsPage(template, strings, locale) {
+// Render the "Ejercicio de sextas" page (src/site/sixths-exercise.html) for one locale.
+function renderSixthsPage(template, strings, locale) {
   const resolvedAssetsPrefix = locale === 'es' ? 'assets/' : '../assets/';
   const ogImage = SITE_BASE_URL + '/assets/og-image.png';
   let html = template;
@@ -586,26 +588,27 @@ function renderThirdsPage(template, strings, locale) {
 
   const editorOptions = {
     storageKey: null, deletable: false, copyable: false, spacing: 1,
-    tabs: THIRDS_TABS.map(parseAsciiTab),
+    tabs: SIXTHS_TABS.map(parseAsciiTab),
   };
 
-  html = html.split('%%PAGE_TITLE%%').join(strings.thirdsPageTitle || '');
-  html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings.thirdsMetaDescription || '');
-  html = html.split('%%PAGE_H1%%').join(strings.thirdsH1 || '');
-  html = html.split('%%PAGE_LEAD%%').join(strings.thirdsLead || '');
-  html = html.split('%%THIRDS_SOURCE%%').join(strings.thirdsSource || '');
+  html = html.split('%%PAGE_TITLE%%').join(strings.sixthsPageTitle || '');
+  html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings.sixthsMetaDescription || '');
+  html = html.split('%%PAGE_H1%%').join(strings.sixthsH1 || '');
+  html = html.split('%%PAGE_LEAD%%').join(strings.sixthsLead || '');
+  html = html.split('%%SIXTHS_SOURCE%%').join(strings.sixthsSource || '');
+  html = html.split('%%SIXTHS_VIDEO_ID%%').join(SIXTHS_VIDEO_ID);
   html = html.split('%%TAB_EDITOR_OPTIONS_JSON%%').join(JSON.stringify(editorOptions));
   html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
   html = html.split('%%homeHref%%').join(homeHref(locale));
-  html = html.split('%%altLangHref%%').join(locale === 'es' ? v7PageHref('en', THIRDS_SLUG) : v7PageHref('es', THIRDS_SLUG));
-  html = html.split('%%canonicalUrl%%').join(v7CanonicalUrl(locale, THIRDS_SLUG));
-  html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es', THIRDS_SLUG));
-  html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en', THIRDS_SLUG));
+  html = html.split('%%altLangHref%%').join(locale === 'es' ? v7PageHref('en', SIXTHS_SLUG) : v7PageHref('es', SIXTHS_SLUG));
+  html = html.split('%%canonicalUrl%%').join(v7CanonicalUrl(locale, SIXTHS_SLUG));
+  html = html.split('%%hreflangEs%%').join(SITE_BASE_URL + v7PageHref('es', SIXTHS_SLUG));
+  html = html.split('%%hreflangEn%%').join(SITE_BASE_URL + v7PageHref('en', SIXTHS_SLUG));
   html = html.split('%%ogImage%%').join(ogImage);
   html = html.split('%%MANIFEST_HREF%%').join(resolvedAssetsPrefix + 'manifest.' + locale + '.webmanifest');
   html = html.split('%%SW_PATH%%').join('/sw.js');
 
-  return withGuideJsonLd(html, strings, locale, THIRDS_SLUG, 'thirdsPageTitle', 'thirdsMetaDescription');
+  return withGuideJsonLd(html, strings, locale, SIXTHS_SLUG, 'sixthsPageTitle', 'sixthsMetaDescription');
 }
 
 // Render a modal picking lesson page (src/site/picking-lesson.html) for one
@@ -920,10 +923,10 @@ LOCALES.forEach(function (locale) {
     }
 
     {
-      const thirdsHtml = renderThirdsPage(thirdsTemplate, strings, locale);
-      const thirdsOutFile = path.join(DIST_SITE, THIRDS_SLUG + '.html');
-      fs.writeFileSync(thirdsOutFile, thirdsHtml, 'utf8');
-      say(path.relative(ROOT, thirdsOutFile));
+      const sixthsHtml = renderSixthsPage(sixthsTemplate, strings, locale);
+      const sixthsOutFile = path.join(DIST_SITE, SIXTHS_SLUG + '.html');
+      fs.writeFileSync(sixthsOutFile, sixthsHtml, 'utf8');
+      say(path.relative(ROOT, sixthsOutFile));
     }
 
     PICKING_PAGES.forEach(function (page) {
@@ -984,10 +987,10 @@ LOCALES.forEach(function (locale) {
   }
 
   {
-    const thirdsHtml = renderThirdsPage(thirdsTemplate, strings, locale);
-    const thirdsOutFile = path.join(localeDir, THIRDS_SLUG + '.html');
-    fs.writeFileSync(thirdsOutFile, thirdsHtml, 'utf8');
-    say(path.relative(ROOT, thirdsOutFile));
+    const sixthsHtml = renderSixthsPage(sixthsTemplate, strings, locale);
+    const sixthsOutFile = path.join(localeDir, SIXTHS_SLUG + '.html');
+    fs.writeFileSync(sixthsOutFile, sixthsHtml, 'utf8');
+    say(path.relative(ROOT, sixthsOutFile));
   }
 
   PICKING_PAGES.forEach(function (page) {
@@ -1044,7 +1047,7 @@ function addSlugPages(slugs) {
   });
 }
 addSlugPages(CIRCLE_PAGES.map(function (page) { return page.slug; }));
-addSlugPages([DIM_SLUG, NOTE_FINDER_SLUG, THIRDS_SLUG]);
+addSlugPages([DIM_SLUG, NOTE_FINDER_SLUG, SIXTHS_SLUG]);
 addBilingual('/' + TAB_EDITOR_SLUG, TAB_EDITOR_SLUG + '.html', '/en/' + TAB_EDITOR_SLUG, 'en/' + TAB_EDITOR_SLUG + '.html', ['0.7', '0.6']);
 addSlugPages(PICKING_PAGES.map(function (page) { return page.slug; }));
 sitemapEntries.push({ loc: '/store/privacy-policy.html', file: 'store/privacy-policy.html', changefreq: 'yearly', priority: '0.3' });
