@@ -5,8 +5,9 @@
    number to another slot, and copy the tab as plain ASCII text. Tabs are
    kept in localStorage.
    A page can set window.TAB_EDITOR_OPTIONS to start from given tabs
-   (`tabs`), skip localStorage (`storageKey: null`) or hide the delete
-   button (`deletable: false`). */
+   (`tabs`), skip localStorage (`storageKey: null`), hide the copy or delete
+   buttons (`copyable: false`, `deletable: false`) or add extra dashes
+   between notes (`spacing: 1` turns "-3--1-" into "--3---1-"). */
 (function () {
   'use strict';
 
@@ -17,8 +18,10 @@
   var OPTIONS = window.TAB_EDITOR_OPTIONS || {};
   var STORAGE_KEY = 'storageKey' in OPTIONS ? OPTIONS.storageKey : 'tabEditor.tabs';
   var DELETABLE = OPTIONS.deletable !== false;
+  var COPYABLE = OPTIONS.copyable !== false;
+  var LEAD = new Array(Math.max(0, OPTIONS.spacing | 0) + 2).join('-'); // dashes before each note
   var LABEL_W = 2; // "1 "
-  var CELL_W = 3;  // "---"
+  var CELL_W = LEAD.length + 2;  // "---" plus the extra spacing
   var MAX_FRET = 24;
 
   // Lucide icons, inlined
@@ -86,13 +89,13 @@
   }
 
   function cellHtml(v) {
-    if (v === '') return '-<span class="mid">-</span><span class="caret"> </span>-';
-    if (v.length === 1) return '-<span class="n">' + v + '</span>-';
-    return '-<span class="n">' + v + '</span>';
+    if (v === '') return LEAD + '<span class="mid">-</span><span class="caret"> </span>-';
+    if (v.length === 1) return LEAD + '<span class="n">' + v + '</span>-';
+    return LEAD + '<span class="n">' + v + '</span>';
   }
 
   function cellText(v) {
-    return v === '' ? '---' : v.length === 1 ? '-' + v + '-' : '-' + v;
+    return v === '' ? LEAD + '--' : v.length === 1 ? LEAD + v + '-' : LEAD + v;
   }
 
   // Plain-text version, with every staff cut right after its last note
@@ -118,7 +121,7 @@
     $sheets.innerHTML = tabs.map(function (_, ti) {
       return '<section class="tab-sheet" data-t="' + ti + '">' +
         '<div class="tab-tools">' +
-          '<button class="tab-icon-btn copy" type="button" title="' + copyLabel + '" aria-label="' + copyLabel + '">' + ICON_COPY + '</button>' +
+          (COPYABLE ? '<button class="tab-icon-btn copy" type="button" title="' + copyLabel + '" aria-label="' + copyLabel + '">' + ICON_COPY + '</button>' : '') +
           (DELETABLE && tabs.length > 1 ? '<button class="tab-icon-btn del" type="button" title="' + deleteLabel + '" aria-label="' + deleteLabel + '">' + ICON_TRASH + '</button>' : '') +
         '</div>' +
         '<div class="tab-staves"></div>' +

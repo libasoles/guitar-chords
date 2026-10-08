@@ -181,7 +181,7 @@ const TAB_EDITOR_SLUG = 'crear-tablaturas-de-guitarra';
 
 // "Escala con terceras" exercise page, rendered from src/site/thirds-scale.html:
 // the tab editor preloaded with the exercise (not saved, no delete button).
-// Split in three parts (up, down, high position) so each one fits on a single
+// Split in three parts (up, high position, down) so each one fits on a single
 // staff instead of wrapping.
 const THIRDS_SLUG = 'escala-con-terceras';
 const THIRDS_TABS = [
@@ -194,20 +194,20 @@ A|---3---------------2---3------------------------
 E|---0---1---3---5--------------------------------
 `,
   `
-e|---0------------------------------------
-B|-------3---1---0------------------------
-G|---0---------------2---0----------------
-D|-------3---2---0-----------3---2---0----
-A|-------------------3---2---------------3
-E|---------------------------5---3---1---0
-`,
-  `
 e|---5---7---8--10--12--10---8---7---5---3---1
 B|--------------------------------------------
 G|---5---7---9--10--12--10---9---7---5---4---2
 D|--------------------------------------------
 A|--------------------------------------------
 E|--------------------------------------------
+`,
+  `
+e|---0------------------------------------
+B|-------3---1---0------------------------
+G|---0---------------2---0----------------
+D|-------3---2---0-----------3---2---0----
+A|-------------------3---2---------------3
+E|---------------------------5---3---1---0
 `,
 ];
 
@@ -584,18 +584,16 @@ function renderThirdsPage(template, strings, locale) {
     html = html.split('%%' + key + '%%').join(strings[key] || '');
   });
 
-  const editorStrings = {};
-  ['tabEditorCopyLabel', 'tabEditorCopiedLabel'].forEach(function (key) {
-    if (strings[key]) editorStrings[key] = strings[key];
-  });
-  const editorOptions = { storageKey: null, deletable: false, tabs: THIRDS_TABS.map(parseAsciiTab) };
+  const editorOptions = {
+    storageKey: null, deletable: false, copyable: false, spacing: 1,
+    tabs: THIRDS_TABS.map(parseAsciiTab),
+  };
 
   html = html.split('%%PAGE_TITLE%%').join(strings.thirdsPageTitle || '');
   html = html.split('%%PAGE_META_DESCRIPTION%%').join(strings.thirdsMetaDescription || '');
   html = html.split('%%PAGE_H1%%').join(strings.thirdsH1 || '');
   html = html.split('%%PAGE_LEAD%%').join(strings.thirdsLead || '');
   html = html.split('%%THIRDS_SOURCE%%').join(strings.thirdsSource || '');
-  html = html.split('%%TAB_EDITOR_STRINGS_JSON%%').join(JSON.stringify(editorStrings));
   html = html.split('%%TAB_EDITOR_OPTIONS_JSON%%').join(JSON.stringify(editorOptions));
   html = html.split('%%ASSETS_PREFIX%%').join(resolvedAssetsPrefix);
   html = html.split('%%homeHref%%').join(homeHref(locale));
