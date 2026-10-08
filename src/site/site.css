@@ -1816,6 +1816,9 @@ footer {
     flex-direction: column;
     gap: 8px;
   }
+  .tab-editor .ascii-tabs-spacing {
+    display: none;
+  }
   .tab-editor .ascii-tabs-tools {
     order: -1;
     flex-direction: row;

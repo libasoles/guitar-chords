@@ -37,6 +37,7 @@ async function run() {
         toolsAttribute: el.getAttribute('tools'),
         toolsDirection: getComputedStyle(el.querySelector('.ascii-tabs-tools')).flexDirection,
         hint: el.querySelector('.ascii-tabs-hint').textContent,
+        spacing: el.spacing,
         hintFontSize: getComputedStyle(el.querySelector('.ascii-tabs-hint')).fontSize,
         spacingFontSize: getComputedStyle(el.querySelector('.ascii-tabs-spacing')).fontSize,
         hintTop: el.querySelector('.ascii-tabs-hint').getBoundingClientRect().top,
@@ -49,6 +50,7 @@ async function run() {
     assert.strictEqual(editor.toolsAttribute, null);
     assert.strictEqual(editor.toolsDirection, 'column');
     assert.strictEqual(editor.hint, 'Hacé clic en una cuerda y escribí el número de traste.');
+    assert.strictEqual(editor.spacing, 2);
     assert.strictEqual(editor.hintFontSize, editor.spacingFontSize);
     assert.strictEqual(editor.hintTop, editor.spacingTop);
 
@@ -82,12 +84,14 @@ async function run() {
       return {
         direction: getComputedStyle(tools).flexDirection,
         sheetDirection: getComputedStyle(sheet).flexDirection,
+        sliderDisplay: getComputedStyle(document.querySelector('.ascii-tabs-spacing')).display,
         toolsTop: tools.getBoundingClientRect().top,
         tabTop: sheet.querySelector('.ascii-tabs-tab').getBoundingClientRect().top,
       };
     });
     assert.strictEqual(mobileTools.direction, 'row');
     assert.strictEqual(mobileTools.sheetDirection, 'column');
+    assert.strictEqual(mobileTools.sliderDisplay, 'none');
     assert.ok(mobileTools.toolsTop < mobileTools.tabTop);
 
     // The sixths exercise shows its three Tabs read-only, with no controls.
