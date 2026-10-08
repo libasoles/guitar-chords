@@ -1,6 +1,6 @@
-// Parse an ASCII guitar tab into the column format used by the tab editor
-// (src/site/tab-editor.js): one array per column, one fret string per guitar
-// string from the 1st (high e) to the 6th, '' where nothing is played.
+// Parse an ASCII guitar tab into one Tab of the ascii-tabs `value` format
+// (vendor/ascii-tabs.js): one array per column, one fret number per guitar
+// string from the 1st (high e) to the 6th, null where nothing is played.
 // Every column is 4 characters wide ("---3", "--10"), after the "e|" label.
 
 function parseAsciiTab(text) {
@@ -14,7 +14,10 @@ function parseAsciiTab(text) {
   }
   const cols = [];
   for (let c = 0; c < width / 4; c++) {
-    cols.push(lines.map(function (line) { return line.slice(c * 4, c * 4 + 4).replace(/-/g, ''); }));
+    cols.push(lines.map(function (line) {
+      const fret = line.slice(c * 4, c * 4 + 4).replace(/-/g, '');
+      return fret === '' ? null : Number(fret);
+    }));
   }
   return cols;
 }

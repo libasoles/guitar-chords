@@ -61,12 +61,19 @@
       <h1>%%PAGE_H1%%</h1>
       <p class="lead">%%PAGE_LEAD%%</p>
 
-      <div class="tab-editor" id="tabEditor">
-        <div id="tabSheets"></div>
-        <span id="tabProbe" class="tab-probe" aria-hidden="true"
-          >0000000000</span
-        >
-      </div>
+      <ascii-tabs
+        class="tab-editor"
+        id="sixthsTabs"
+        lang="%%htmlLang%%"
+        theme="light"
+        spacing="3"
+        readonly
+      >
+        <ascii-tabs-sheet></ascii-tabs-sheet>
+      </ascii-tabs>
+      <script>
+        document.getElementById("sixthsTabs").value = %%SIXTHS_TABS_JSON%%;
+      </script>
       <p class="tab-source">%%SIXTHS_SOURCE%%</p>
       <div class="tab-video">
         <iframe
@@ -157,10 +164,7 @@
       </footer>
     </main>
 
-    <script>
-      window.TAB_EDITOR_OPTIONS = %%TAB_EDITOR_OPTIONS_JSON%%;
-    </script>
-    <script src="%%ASSETS_PREFIX%%tab-editor.js"></script>
+    <script type="module" src="%%ASSETS_PREFIX%%vendor/ascii-tabs.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {

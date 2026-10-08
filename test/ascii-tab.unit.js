@@ -1,4 +1,4 @@
-/* Tablaturas ASCII a columnas del editor. Run: node --test test/ascii-tab.unit.js */
+/* Tablaturas ASCII a columnas del `value` de ascii-tabs. Run: node --test test/ascii-tab.unit.js */
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -14,8 +14,8 @@ test('cada columna lista los trastes de la 1ª a la 6ª cuerda', () => {
     'E|--10----',
   ].join('\n'));
   assert.deepEqual(cols, [
-    ['', '', '', '', '3', '10'],
-    ['0', '', '', '2', '', ''],
+    [null, null, null, null, 3, 10],
+    [0, null, null, 2, null, null],
   ]);
 });
 

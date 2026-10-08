@@ -78,6 +78,10 @@ const JSPDF = path.join(SRC_VENDOR, "jspdf.umd.min.js");
 if (!fs.existsSync(JSPDF)) {
   fail("vendor/jspdf.umd.min.js not found. Run: npm run vendor");
 }
+const ASCII_TABS = path.join(SRC_VENDOR, "ascii-tabs.js");
+if (!fs.existsSync(ASCII_TABS)) {
+  fail("vendor/ascii-tabs.js not found. Run: npm run vendor");
+}
 
 // ---- template rendering ----------------------------------------------------
 
@@ -298,11 +302,11 @@ const DIM_SLUG = "acordes-disminuidos";
 const NOTE_FINDER_SLUG = "identificar-acordes-por-notas";
 
 // "Tablatura ASCII" page, rendered from src/site/tab-editor.html: an editor
-// to write guitar tabs and copy them as plain text (src/site/tab-editor.js).
+// to write guitar tabs and copy them as plain text (vendor/ascii-tabs.js).
 const TAB_EDITOR_SLUG = "crear-tablaturas-de-guitarra";
 
 // "Ejercicio de sextas" exercise page, rendered from src/site/sixths-exercise.html:
-// the read-only tab viewer preloaded with the exercise, the exercise video,
+// a read-only <ascii-tabs> preloaded with the exercise, the exercise video,
 // the tab-editor promo and the extension CTA.
 // Split in three parts (up, high position, down) so each one fits on a single
 // staff instead of wrapping.
@@ -908,21 +912,9 @@ function renderTabEditorPage(template, strings, locale) {
     "wordmark",
     "wordmarkSmall",
     "altLangLabel",
-    "tabEditorHint",
-    "tabEditorAddLabel",
-    "tabEditorFretLabel",
   ];
   simpleKeys.forEach(function (key) {
     html = html.split("%%" + key + "%%").join(strings[key] || "");
-  });
-
-  const editorStrings = {};
-  [
-    "tabEditorCopyLabel",
-    "tabEditorCopiedLabel",
-    "tabEditorDeleteLabel",
-  ].forEach(function (key) {
-    if (strings[key]) editorStrings[key] = strings[key];
   });
 
   html = html.split("%%PAGE_TITLE%%").join(strings.tabPageTitle || "");
@@ -931,9 +923,6 @@ function renderTabEditorPage(template, strings, locale) {
     .join(strings.tabMetaDescription || "");
   html = html.split("%%PAGE_H1%%").join(strings.tabH1 || "");
   html = html.split("%%PAGE_LEAD%%").join(strings.tabLead || "");
-  html = html
-    .split("%%TAB_EDITOR_STRINGS_JSON%%")
-    .join(JSON.stringify(editorStrings));
   html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
   html = html.split("%%homeHref%%").join(homeHref(locale));
   html = html
@@ -985,13 +974,6 @@ function renderSixthsPage(template, strings, locale) {
     html = html.split("%%" + key + "%%").join(strings[key] || "");
   });
 
-  const editorOptions = {
-    storageKey: null,
-    readOnly: true,
-    spacing: 1,
-    tabs: SIXTHS_TABS.map(parseAsciiTab),
-  };
-
   html = html.split("%%PAGE_TITLE%%").join(strings.sixthsPageTitle || "");
   html = html
     .split("%%PAGE_META_DESCRIPTION%%")
@@ -1007,8 +989,8 @@ function renderSixthsPage(template, strings, locale) {
     .split("%%EXTENSION_CTA_BUTTON%%")
     .join(ctaButton(strings));
   html = html
-    .split("%%TAB_EDITOR_OPTIONS_JSON%%")
-    .join(JSON.stringify(editorOptions));
+    .split("%%SIXTHS_TABS_JSON%%")
+    .join(JSON.stringify(SIXTHS_TABS.map(parseAsciiTab)));
   html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
   html = html.split("%%homeHref%%").join(homeHref(locale));
   html = html
@@ -1283,10 +1265,6 @@ copyFile(
   path.join(ASSETS_DIST, "metronome.js"),
 );
 copyFile(
-  path.join(SRC_SITE, "tab-editor.js"),
-  path.join(ASSETS_DIST, "tab-editor.js"),
-);
-copyFile(
   path.join(SRC_SITE, "guitar-player-cubist-left-head.svg"),
   path.join(ASSETS_DIST, "guitar-player-cubist-left-head.svg"),
 );
@@ -1316,6 +1294,10 @@ copyFile(
 copyFile(
   path.join(SRC_VENDOR, "jspdf.umd.min.js"),
   path.join(VENDOR_DIST, "jspdf.umd.min.js"),
+);
+copyFile(
+  path.join(SRC_VENDOR, "ascii-tabs.js"),
+  path.join(VENDOR_DIST, "ascii-tabs.js"),
 );
 // OG image (optional — skip silently if not present yet).
 const ogImageSrc = path.join(SRC_SITE, "og-image.png");
@@ -1459,11 +1441,11 @@ const precacheUrls = [
   "/assets/note-finder.js",
   "/assets/vendor/svguitar.umd.js",
   "/assets/vendor/fuzzysort.js",
+  "/assets/vendor/ascii-tabs.js",
   "/assets/icons/icon-192.png",
   "/assets/icons/icon-512.png",
   "/assets/picking-render.js",
   "/assets/metronome.js",
-  "/assets/tab-editor.js",
   "/404.html",
 ];
 const swOut = swTemplate

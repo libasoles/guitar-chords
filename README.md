@@ -19,14 +19,14 @@ src/
   site/            # Web app: template.html, chord-finder component, site.css
   extension/       # Chrome extension: manifest, popup, icons, _locales/
   i18n/            # Strings for the site (strings.es.json, strings.en.json)
-vendor/            # Bundled svguitar.umd.js
+vendor/            # Bundled third-party libs (svguitar, fuzzysort, jsPDF, ascii-tabs)
 scripts/
   build-site.js    # Assembles dist/site/
   build-ext.js     # Assembles dist/extension/ and extension.zip
   vendor.js        # Downloads / updates vendor assets
 test/
   chord-search.unit.js   # Unit tests (Node, no browser)
-  chord-finder.e2e.js    # E2E tests (Playwright)
+  *.e2e.js               # E2E tests (Playwright)
 dist/              # Build output — not committed (except extension.zip for releases)
 ```
 
