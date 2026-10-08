@@ -1782,17 +1782,45 @@ footer {
 .tab-editor {
   --ascii-tabs-font: var(--mono);
   --ascii-tabs-font-size: 17px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 1rem;
   margin: 0 0 2rem;
 }
 .tab-editor .ascii-tabs-hint {
   font-family: var(--sans);
   font-size: 0.85rem;
   color: var(--ink-soft);
+  margin: 0 0 16px;
+  align-self: center;
+}
+.tab-editor .ascii-tabs-spacing {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin: 0 0 16px;
+  align-self: center;
+  justify-self: end;
+}
+.tab-editor .ascii-tabs-sheets,
+.tab-editor .ascii-tabs-add {
+  grid-column: 1 / -1;
 }
 
 @media (max-width: 640px) {
   .tab-editor {
     --ascii-tabs-font-size: 15px;
+    display: block;
+  }
+  .tab-editor .ascii-tabs-sheet {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .tab-editor .ascii-tabs-tools {
+    order: -1;
+    flex-direction: row;
+    align-self: flex-end;
+    margin: -14px 0 0;
   }
 }
 

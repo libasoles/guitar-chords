@@ -37,6 +37,10 @@ async function run() {
         toolsAttribute: el.getAttribute('tools'),
         toolsDirection: getComputedStyle(el.querySelector('.ascii-tabs-tools')).flexDirection,
         hint: el.querySelector('.ascii-tabs-hint').textContent,
+        hintFontSize: getComputedStyle(el.querySelector('.ascii-tabs-hint')).fontSize,
+        spacingFontSize: getComputedStyle(el.querySelector('.ascii-tabs-spacing')).fontSize,
+        hintTop: el.querySelector('.ascii-tabs-hint').getBoundingClientRect().top,
+        spacingTop: el.querySelector('.ascii-tabs-spacing').getBoundingClientRect().top,
       };
     });
     assert.deepStrictEqual(editor.value, [[[null, null, null, null, 3, null], [0, null, null, 2, null, null]]]);
@@ -45,6 +49,8 @@ async function run() {
     assert.strictEqual(editor.toolsAttribute, null);
     assert.strictEqual(editor.toolsDirection, 'column');
     assert.strictEqual(editor.hint, 'Hacé clic en una cuerda y escribí el número de traste.');
+    assert.strictEqual(editor.hintFontSize, editor.spacingFontSize);
+    assert.strictEqual(editor.hintTop, editor.spacingTop);
 
     // The editor has one shared spacing slider. It changes every current Tab
     // and remains the setting for Tabs added afterwards.
@@ -67,6 +73,22 @@ async function run() {
       sheetCount: 2,
       sliderValue: '5',
     });
+
+    // On phones the sheet actions move above the Tab, in a horizontal row.
+    await page.setViewportSize({ width: 390, height: 844 });
+    const mobileTools = await page.evaluate(() => {
+      const sheet = document.querySelector('.ascii-tabs-sheet');
+      const tools = sheet.querySelector('.ascii-tabs-tools');
+      return {
+        direction: getComputedStyle(tools).flexDirection,
+        sheetDirection: getComputedStyle(sheet).flexDirection,
+        toolsTop: tools.getBoundingClientRect().top,
+        tabTop: sheet.querySelector('.ascii-tabs-tab').getBoundingClientRect().top,
+      };
+    });
+    assert.strictEqual(mobileTools.direction, 'row');
+    assert.strictEqual(mobileTools.sheetDirection, 'column');
+    assert.ok(mobileTools.toolsTop < mobileTools.tabTop);
 
     // The sixths exercise shows its three Tabs read-only, with no controls.
     await page.goto(base + '/ejercicio-de-sextas');
