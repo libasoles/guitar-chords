@@ -33,11 +33,17 @@ async function run() {
       return {
         value: el.value,
         readonly: el.readonly,
+        tools: el.tools,
+        toolsAttribute: el.getAttribute('tools'),
+        toolsDirection: getComputedStyle(el.querySelector('.ascii-tabs-tools')).flexDirection,
         hint: el.querySelector('.ascii-tabs-hint').textContent,
       };
     });
     assert.deepStrictEqual(editor.value, [[[null, null, null, null, 3, null], [0, null, null, 2, null, null]]]);
     assert.strictEqual(editor.readonly, false);
+    assert.strictEqual(editor.tools, 'side');
+    assert.strictEqual(editor.toolsAttribute, null);
+    assert.strictEqual(editor.toolsDirection, 'column');
     assert.strictEqual(editor.hint, 'Hacé clic en una cuerda y escribí el número de traste.');
 
     // The sixths exercise shows its three Tabs read-only, with no controls.
