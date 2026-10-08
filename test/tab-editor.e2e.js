@@ -46,6 +46,28 @@ async function run() {
     assert.strictEqual(editor.toolsDirection, 'column');
     assert.strictEqual(editor.hint, 'Hacé clic en una cuerda y escribí el número de traste.');
 
+    // The editor has one shared spacing slider. It changes every current Tab
+    // and remains the setting for Tabs added afterwards.
+    const sharedSpacing = await page.evaluate(() => {
+      const el = document.querySelector('ascii-tabs');
+      const slider = el.querySelector('.ascii-tabs-spacing-input');
+      slider.value = '5';
+      slider.dispatchEvent(new Event('input', { bubbles: true }));
+      el.addTab();
+      return {
+        sliders: el.querySelectorAll('.ascii-tabs-spacing-input').length,
+        spacing: el.spacing,
+        sheetCount: el.querySelectorAll('.ascii-tabs-sheet').length,
+        sliderValue: slider.value,
+      };
+    });
+    assert.deepStrictEqual(sharedSpacing, {
+      sliders: 1,
+      spacing: 5,
+      sheetCount: 2,
+      sliderValue: '5',
+    });
+
     // The sixths exercise shows its three Tabs read-only, with no controls.
     await page.goto(base + '/ejercicio-de-sextas');
     await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
