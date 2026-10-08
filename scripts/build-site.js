@@ -315,20 +315,20 @@ const SIXTHS_SLUG = "ejercicio-de-sextas";
 const SIXTHS_VIDEO_ID = "NNwTR8Q8JN4";
 const SIXTHS_TABS = [
   `
-e|---------------------------------------0---1
-B|---------------------------0---1---3--------
-G|-------------------0---2---------------0---2
+e|---------------------------------------0
+B|---------------------------0---1---3----
+G|-------------------0---2---------------0
 D|-------0---2---3-----------0---2---3--------
 A|---3---------------2---3--------------------
 E|---0---1---3---5----------------------------
 `,
   `
-e|---3---5---7---8--10--12--10---8---7---5---3---1
-B|------------------------------------------------
-G|---4---5---7---9--10--12--10---9---7---5---4---2
-D|------------------------------------------------
-A|------------------------------------------------
-E|------------------------------------------------
+e|---1---3---5---7---8--10--12--10---8---7---5---3---1
+B|----------------------------------------------------
+G|---2---4---5---7---9--10--12--10---9---7---5---4---2
+D|----------------------------------------------------
+A|----------------------------------------------------
+E|----------------------------------------------------
 `,
   `
 e|---0------------------------------------
@@ -907,12 +907,7 @@ function renderTabEditorPage(template, strings, locale) {
   const ogImage = SITE_BASE_URL + "/assets/og-image.png";
   let html = template;
 
-  const simpleKeys = [
-    "htmlLang",
-    "wordmark",
-    "wordmarkSmall",
-    "altLangLabel",
-  ];
+  const simpleKeys = ["htmlLang", "wordmark", "wordmarkSmall", "altLangLabel"];
   simpleKeys.forEach(function (key) {
     html = html.split("%%" + key + "%%").join(strings[key] || "");
   });
@@ -985,9 +980,7 @@ function renderSixthsPage(template, strings, locale) {
   html = html
     .split("%%TAB_EDITOR_PROMO%%")
     .join(tabEditorPromo(strings, locale));
-  html = html
-    .split("%%EXTENSION_CTA_BUTTON%%")
-    .join(ctaButton(strings));
+  html = html.split("%%EXTENSION_CTA_BUTTON%%").join(ctaButton(strings));
   html = html
     .split("%%SIXTHS_TABS_JSON%%")
     .join(JSON.stringify(SIXTHS_TABS.map(parseAsciiTab)));
