@@ -302,8 +302,8 @@ const NOTE_FINDER_SLUG = "identificar-acordes-por-notas";
 const TAB_EDITOR_SLUG = "crear-tablaturas-de-guitarra";
 
 // "Ejercicio de sextas" exercise page, rendered from src/site/sixths-exercise.html:
-// the tab editor preloaded with the exercise (not saved, no delete or add
-// buttons), the exercise video, the tab-editor promo and the extension CTA.
+// the read-only tab viewer preloaded with the exercise, the exercise video,
+// the tab-editor promo and the extension CTA.
 // Split in three parts (up, high position, down) so each one fits on a single
 // staff instead of wrapping.
 const SIXTHS_SLUG = "ejercicio-de-sextas";
@@ -978,9 +978,6 @@ function renderSixthsPage(template, strings, locale) {
     "wordmark",
     "wordmarkSmall",
     "altLangLabel",
-    "tabEditorHint",
-    "tabEditorAddLabel",
-    "tabEditorFretLabel",
     "extensionHeading",
     "extensionDescription",
   ];
@@ -990,9 +987,7 @@ function renderSixthsPage(template, strings, locale) {
 
   const editorOptions = {
     storageKey: null,
-    deletable: false,
-    copyable: false,
-    addable: false,
+    readOnly: true,
     spacing: 1,
     tabs: SIXTHS_TABS.map(parseAsciiTab),
   };

@@ -5,9 +5,8 @@
    number to another slot, and copy the tab as plain ASCII text. Tabs are
    kept in localStorage.
    A page can set window.TAB_EDITOR_OPTIONS to start from given tabs
-   (`tabs`), skip localStorage (`storageKey: null`), hide the copy, delete
-   or add-tab buttons (`copyable: false`, `deletable: false`,
-   `addable: false`) or add extra dashes
+   (`tabs`), skip localStorage (`storageKey: null`), render a read-only tab
+   (`readOnly: true`), or add extra dashes
    between notes (`spacing: 1` turns "-3--1-" into "--3---1-"). */
 (function () {
   'use strict';
@@ -18,9 +17,10 @@
   var STRING_NAMES = ['1', '2', '3', '4', '5', '6'];
   var OPTIONS = window.TAB_EDITOR_OPTIONS || {};
   var STORAGE_KEY = 'storageKey' in OPTIONS ? OPTIONS.storageKey : 'tabEditor.tabs';
-  var DELETABLE = OPTIONS.deletable !== false;
-  var COPYABLE = OPTIONS.copyable !== false;
-  var ADDABLE = OPTIONS.addable !== false;
+  var READ_ONLY = OPTIONS.readOnly === true;
+  var DELETABLE = !READ_ONLY && OPTIONS.deletable !== false;
+  var COPYABLE = !READ_ONLY && OPTIONS.copyable !== false;
+  var ADDABLE = !READ_ONLY && OPTIONS.addable !== false;
   var LEAD = new Array(Math.max(0, OPTIONS.spacing | 0) + 2).join('-'); // dashes before each note
   var LABEL_W = 2; // "1 "
   var CELL_W = LEAD.length + 2;  // "---" plus the extra spacing
@@ -35,10 +35,12 @@
   var ICON_TRASH = svg('<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>');
 
   var $sheets = document.getElementById('tabSheets');
-  var $add = document.getElementById('tabAdd');
-  var $key = document.getElementById('tabKey');
+  // Read-only pages compose only the display markup. Detached controls keep
+  // shared editor logic inert without adding editable elements to those pages.
+  var $add = document.getElementById('tabAdd') || document.createElement('button');
+  var $key = document.getElementById('tabKey') || document.createElement('input');
   var $probe = document.getElementById('tabProbe');
-  if (!$sheets || !$add || !$key || !$probe) return;
+  if (!$sheets || !$probe) return;
   if (!ADDABLE) $add.remove();
 
   function emptyCol() { return STRING_NAMES.map(function () { return ''; }); }
@@ -259,6 +261,7 @@
   }
 
   $sheets.addEventListener('pointerdown', function (e) {
+    if (READ_ONLY) return;
     var cell = e.target.closest('.cell');
     if (!cell || e.button !== 0) return;
     e.preventDefault(); // keep focus on the hidden input
