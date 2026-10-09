@@ -1802,6 +1802,38 @@ footer {
   align-self: center;
   justify-self: end;
 }
+.tab-editor .ascii-tabs-spacing-input {
+  appearance: none;
+  background: transparent;
+  height: 16px;
+  cursor: pointer;
+}
+.tab-editor .ascii-tabs-spacing-input::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--rule);
+}
+.tab-editor .ascii-tabs-spacing-input::-moz-range-track {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--rule);
+}
+.tab-editor .ascii-tabs-spacing-input::-webkit-slider-thumb {
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  margin-top: -3.5px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.tab-editor .ascii-tabs-spacing-input::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+}
 .tab-editor .ascii-tabs-sheets,
 .tab-editor .ascii-tabs-add {
   grid-column: 1 / -1;
