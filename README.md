@@ -39,10 +39,20 @@ npm run build       # Build site + extension → dist/
 npm test            # Unit + E2E tests
 ```
 
-The tab editor bundles ascii-tabs 0.2.0 from the local `punteo-ascii` project.
-This version adds Cmd+Right Arrow / Alt+Right Arrow to duplicate all six strings
-of the current column into the next one and move the cursor there. The release
-tag is not published yet; use the committed `vendor/ascii-tabs.js` for builds.
+Production bundles ascii-tabs [v0.3.0](https://github.com/libasoles/ascii-tabs/releases/tag/v0.3.0)
+from the committed `vendor/ascii-tabs.js`. Cmd/Alt+Right Arrow duplicates a
+column; Cmd/Alt+0 fills its empty strings with open-string frets.
+
+For local development, link the sibling `punteo-ascii` project:
+
+```bash
+ln -s ../../punteo-ascii/ascii-tabs.js vendor/ascii-tabs.local.js
+npm run dev
+```
+
+`npm run dev` uses this ignored symlink and rebuilds when its target changes.
+Without it, development uses the bundled release. `npm run build:site` and
+`npm run build` always use the bundled release, even when the symlink exists.
 
 Individual build targets:
 

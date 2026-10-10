@@ -78,7 +78,13 @@ const JSPDF = path.join(SRC_VENDOR, "jspdf.umd.min.js");
 if (!fs.existsSync(JSPDF)) {
   fail("vendor/jspdf.umd.min.js not found. Run: npm run vendor");
 }
-const ASCII_TABS = path.join(SRC_VENDOR, "ascii-tabs.js");
+// Only the dev server opts into the ignored local override. Production builds
+// always use the committed release, even when a local symlink is present.
+const LOCAL_ASCII_TABS = path.join(SRC_VENDOR, "ascii-tabs.local.js");
+const ASCII_TABS =
+  process.argv.includes("--local-ascii-tabs") && fs.existsSync(LOCAL_ASCII_TABS)
+    ? LOCAL_ASCII_TABS
+    : path.join(SRC_VENDOR, "ascii-tabs.js");
 if (!fs.existsSync(ASCII_TABS)) {
   fail("vendor/ascii-tabs.js not found. Run: npm run vendor");
 }
@@ -1289,7 +1295,7 @@ copyFile(
   path.join(VENDOR_DIST, "jspdf.umd.min.js"),
 );
 copyFile(
-  path.join(SRC_VENDOR, "ascii-tabs.js"),
+  ASCII_TABS,
   path.join(VENDOR_DIST, "ascii-tabs.js"),
 );
 // OG image (optional — skip silently if not present yet).

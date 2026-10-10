@@ -837,6 +837,16 @@ class AsciiTabs extends Base {
     if (changed) this.#emitChange();
   }
 
+  #fillColumnWithZeros() {
+    const { t, c, s } = this.#cur;
+    let changed = false;
+    for (let string = 0; string < STRING_COUNT; string++) {
+      if (this.#tabs[t][c]?.[string] == null && this.#setFret(t, c, string, 0)) changed = true;
+    }
+    this.#goTo(t, c, s);
+    if (changed) this.#emitChange();
+  }
+
   // Up/down walks across Strings and jumps between Staves at the edges
   #moveVertical(d) {
     const { t, c, s } = this.#cur;
@@ -876,6 +886,10 @@ class AsciiTabs extends Base {
 
   #onKeyDown = e => {
     if (!this.#cur) return;
+    if ((e.metaKey || e.altKey) && (e.key === '0' || e.code === 'Digit0')) {
+      e.preventDefault();
+      return this.#fillColumnWithZeros();
+    }
     if (/^[0-9]$/.test(e.key)) {
       e.preventDefault();
       return this.#typeDigit(e.key);

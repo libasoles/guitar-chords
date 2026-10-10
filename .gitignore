@@ -1,4 +1,5 @@
 node_modules/
+vendor/ascii-tabs.local.js
 dist/
 /src/site/sitemap-lastmod.json
 

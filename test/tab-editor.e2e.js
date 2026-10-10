@@ -132,6 +132,31 @@ async function run() {
       assert.deepStrictEqual(await page.evaluate(() => document.querySelector('ascii-tabs').value), edited);
     }
 
+    // ascii-tabs 0.3.0 fills empty strings with zeros without replacing frets
+    // or moving the cursor. Repeating it on a full column is a no-op.
+    for (const modifier of ['Meta', 'Alt']) {
+      await page.evaluate(() => {
+        const el = document.querySelector('ascii-tabs');
+        el.value = [[[null, 12, null, 0, null, 24]]];
+        window.tabChanges = [];
+        el.addEventListener('change', (event) => window.tabChanges.push(event.detail.value));
+      });
+      await page.locator('.ascii-tabs-cell[data-c="0"][data-s="2"]').click();
+      await page.keyboard.press(modifier + '+0');
+      await page.keyboard.press(modifier + '+0');
+      const filled = await page.evaluate(() => {
+        const el = document.querySelector('ascii-tabs');
+        const cursor = el.querySelector('.ascii-tabs-cur');
+        return { value: el.value, cursor: [cursor.dataset.c, cursor.dataset.s], changes: window.tabChanges };
+      });
+      assert.deepStrictEqual(filled.value, [[[0, 12, 0, 0, 0, 24]]]);
+      assert.deepStrictEqual(filled.cursor, ['0', '2']);
+      assert.deepStrictEqual(filled.changes, [filled.value]);
+      await page.reload();
+      await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
+      assert.deepStrictEqual(await page.evaluate(() => document.querySelector('ascii-tabs').value), filled.value);
+    }
+
     // Duplicating the last column grows the Tab; an unmodified arrow only moves.
     await page.evaluate(() => {
       document.querySelector('ascii-tabs').value = [[[3, null, null, null, null, null]]];
@@ -164,7 +189,7 @@ async function run() {
     assert.strictEqual(sixths.spacing, 3);
     assert.strictEqual(sixths.buttons, 0);
 
-    console.log('OK: tab editor loads and saves tabs, duplicates columns with Cmd/Alt+Right; sixths exercise is read-only with no controls.');
+    console.log('OK: tab editor loads and saves tabs, duplicates columns with Cmd/Alt+Right and fills empty strings with Cmd/Alt+0; sixths exercise is read-only with no controls.');
   } finally {
     await browser.close();
     server.close();
