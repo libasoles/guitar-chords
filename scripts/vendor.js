@@ -16,7 +16,9 @@ const LIBS = [
   { url: 'https://omnibrain.github.io/svguitar/js/svguitar.umd.js', out: path.join(VENDOR, 'svguitar.umd.js') },
   { url: 'https://cdn.jsdelivr.net/npm/fuzzysort@3.1.0/fuzzysort.js', out: path.join(VENDOR, 'fuzzysort.js') },
   { url: 'https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js', out: path.join(VENDOR, 'jspdf.umd.min.js') },
-  { url: 'https://cdn.jsdelivr.net/gh/libasoles/ascii-tabs@0.1.3/ascii-tabs.js', out: path.join(VENDOR, 'ascii-tabs.js') },
+  // 0.2.0 is bundled from the local punteo-ascii project until its tag is published.
+  // Keep the committed vendor file: downloading this URL requires that release.
+  { url: 'https://cdn.jsdelivr.net/gh/libasoles/ascii-tabs@0.2.0/ascii-tabs.js', out: path.join(VENDOR, 'ascii-tabs.js') },
 ];
 
 function say(msg) { process.stdout.write('  ' + msg + '\n'); }

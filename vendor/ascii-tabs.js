@@ -17,6 +17,7 @@ const LABELS = {
 };
 const labelStyle = value => (value === 'notes' ? 'notes' : 'numbers');
 const toolsPosition = value => (value === 'top' ? 'top' : 'side');
+const sheetVariant = value => (value === 'flat' ? 'flat' : 'default');
 
 const emptyColumn = () => Array(STRING_COUNT).fill(null);
 
@@ -176,6 +177,7 @@ const STYLES = `
 :where(ascii-tabs) {
   --ascii-tabs-paper: #fdfaf5;
   --ascii-tabs-sheet: #fff;
+  --ascii-tabs-flat-background: #fff;
   --ascii-tabs-ink: #1a1a1a;
   --ascii-tabs-dash: #6f6c66;
   /* The ASCII dashes are the visual guitar strings, not text to be read aloud. */
@@ -185,7 +187,6 @@ const STYLES = `
   --ascii-tabs-focus: #f6e4df;
   --ascii-tabs-accent: #8b0000;
   --ascii-tabs-font: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --ascii-tabs-font-size: 22px;
   color-scheme: light;
 }
 /* Dark palette, from the original editor. Default theme follows the OS; [theme] forces one. */
@@ -215,11 +216,11 @@ const STYLES = `
   --ascii-tabs-accent: #fb923c;
   color-scheme: dark;
 }
-ascii-tabs {
+:where(ascii-tabs) {
   display: block;
   position: relative;
   font-family: var(--ascii-tabs-font);
-  font-size: var(--ascii-tabs-font-size);
+  font-size: var(--ascii-tabs-font-size, 22px);
   color: var(--ascii-tabs-ink);
 }
 ascii-tabs .ascii-tabs-hint { margin: 0 0 16px; font-size: .7em; color: var(--ascii-tabs-dash); }
@@ -232,6 +233,14 @@ ascii-tabs .ascii-tabs-sheet {
   border: 1px solid var(--ascii-tabs-line);
   border-radius: 8px;
 }
+/* A flat Sheet blends into the consumer's surface instead of looking like a card. */
+ascii-tabs[variant="flat"] .ascii-tabs-sheet {
+  gap: 20px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
 ascii-tabs .ascii-tabs-sheet + .ascii-tabs-sheet { margin-top: 24px; }
 /* Sheet tools sit in a column beside the Staves (tools="side", the default) or in a row above them
    (tools="top"), never over a String. Negative margins tuck them into the Sheet's corner. */
@@ -239,10 +248,12 @@ ascii-tabs .ascii-tabs-tools {
   order: 1; display: flex; flex-direction: column; gap: 2px;
   align-self: flex-start; margin: 4px -14px 0 0;
 }
+ascii-tabs[variant="flat"] .ascii-tabs-tools { margin-right: 0; }
 ascii-tabs[tools="top"] .ascii-tabs-sheet { flex-direction: column; gap: 8px; }
 ascii-tabs[tools="top"] .ascii-tabs-tools {
   order: -1; flex-direction: row; align-self: flex-end; margin-top: -14px;
 }
+ascii-tabs[variant="flat"][tools="top"] .ascii-tabs-tools { margin-top: 0; }
 ascii-tabs .ascii-tabs-button {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 32px; height: 32px; padding: 0;
@@ -266,6 +277,8 @@ ascii-tabs .ascii-tabs-button.ascii-tabs-labelled { padding: 0 8px; }
 ascii-tabs .ascii-tabs-add.ascii-tabs-labelled { width: auto; padding: 0 16px; border-radius: 22px; }
 
 ascii-tabs .ascii-tabs-tab { flex: 1; min-width: 0; white-space: pre; user-select: none; -webkit-user-select: none; }
+/* Flat Sheets retain a surface for the Staffs, without reintroducing a card around the Tab. */
+ascii-tabs[variant="flat"] .ascii-tabs-staff { background: var(--ascii-tabs-flat-background); }
 ascii-tabs .ascii-tabs-staff + .ascii-tabs-staff { margin-top: 1.4em; }
 ascii-tabs .ascii-tabs-line { display: block; height: 1.5em; line-height: 1.5em; }
 ascii-tabs .ascii-tabs-label { color: var(--ascii-tabs-dash); }
@@ -377,6 +390,7 @@ function readPart(el) {
   const hasContent = [...el.childNodes].some(n => (n.nodeType === 3 ? n.textContent.trim() : n.nodeType === 1 && !isPart(n)));
   const part = { type, content: hasContent ? [...el.childNodes].map(n => n.cloneNode(true)) : null };
   if (type === 'storage') part.key = el.getAttribute('key');
+  if (type === 'delete') part.enabled = el.hasAttribute('enabled');
   if (type === 'sheet') part.tools = [...el.children].filter(isPart).map(readPart);
   return part;
 }
@@ -481,6 +495,15 @@ class AsciiTabs extends Base {
     this.setAttribute('tools', toolsPosition(value));
   }
 
+  get variant() {
+    return sheetVariant(this.getAttribute('variant'));
+  }
+
+  set variant(value) {
+    if (sheetVariant(value) === 'flat') this.setAttribute('variant', 'flat');
+    else this.removeAttribute('variant');
+  }
+
   get spacing() {
     return this.#spacing;
   }
@@ -521,7 +544,7 @@ class AsciiTabs extends Base {
       return;
     }
     // Properties set before the element was upgraded shadow the accessors
-    for (const name of ['value', 'readonly', 'spacing', 'labels', 'tools', 'theme', 'messages']) {
+    for (const name of ['value', 'readonly', 'spacing', 'labels', 'tools', 'variant', 'theme', 'messages']) {
       if (Object.hasOwn(this, name)) {
         const own = this[name];
         delete this[name];
@@ -659,7 +682,10 @@ class AsciiTabs extends Base {
       const tools = this.#el('div', 'ascii-tabs-tools', sheet);
       for (const tool of this.#sheetTools) {
         if (tool.type === 'copy') this.#button('ascii-tabs-copy', this.#text.copy, ICON_COPY, tools, tool.content);
-        else if (tool.type === 'delete') this.#button('ascii-tabs-delete', this.#text.delete, ICON_TRASH, tools, tool.content);
+        else if (tool.type === 'delete') {
+          const button = this.#button('ascii-tabs-delete', this.#text.delete, ICON_TRASH, tools, tool.content);
+          button._forceEnabled = tool.enabled;
+        }
       }
       if (!tools.children.length) tools.remove();
       this.#tabEls.push(this.#el('div', 'ascii-tabs-tab', sheet));
@@ -737,8 +763,9 @@ class AsciiTabs extends Base {
       }
       el.innerHTML = html;
       const empty = lastUsed(tab) < 0;
-      const del = this.#sheetEls[t]?.querySelector('.ascii-tabs-delete');
-      if (del) del.disabled = this.#tabs.length === 1 && empty;
+      for (const del of this.#sheetEls[t]?.querySelectorAll('.ascii-tabs-delete') ?? []) {
+        del.disabled = this.#tabs.length === 1 && empty && !del._forceEnabled;
+      }
     });
     this.#placeInput();
   }
@@ -799,6 +826,17 @@ class AsciiTabs extends Base {
     this.#goTo(this.#cur.t, this.#cur.c + d, this.#cur.s);
   }
 
+  #duplicateColumn() {
+    const { t, c, s } = this.#cur;
+    const column = [...(this.#tabs[t][c] ?? emptyColumn())];
+    let changed = false;
+    for (let string = 0; string < STRING_COUNT; string++) {
+      if (this.#setFret(t, c + 1, string, column[string])) changed = true;
+    }
+    this.#goTo(t, c + 1, s);
+    if (changed) this.#emitChange();
+  }
+
   // Up/down walks across Strings and jumps between Staves at the edges
   #moveVertical(d) {
     const { t, c, s } = this.#cur;
@@ -849,6 +887,7 @@ class AsciiTabs extends Base {
         return this.#moveHorizontal(e.shiftKey ? -1 : 1);
       case 'ArrowRight':
         e.preventDefault();
+        if (e.metaKey || e.altKey) return this.#duplicateColumn();
         return this.#moveHorizontal(1);
       case 'ArrowLeft':
         e.preventDefault();
@@ -945,8 +984,17 @@ class AsciiTabs extends Base {
     if (button.classList.contains('ascii-tabs-add')) return this.addTab();
     const t = +button.closest('.ascii-tabs-sheet').dataset.t;
     if (button.classList.contains('ascii-tabs-copy')) return this.copy(t);
-    if (button.classList.contains('ascii-tabs-delete')) return this.removeTab(t);
+    if (button.classList.contains('ascii-tabs-delete')) return this.#deleteFromButton(t);
   };
+
+  // Listeners can observe or replace the built-in delete action. Cancelling the
+  // event leaves the Tab untouched, so an asynchronous confirmation can call
+  // removeTab(event.detail.index) later if it succeeds.
+  #deleteFromButton(index) {
+    const event = new CustomEvent('delete', { detail: { index }, bubbles: true, cancelable: true });
+    if (!this.dispatchEvent(event)) return;
+    this.removeTab(index);
+  }
 
   // Copies Tab `index` as plain ASCII, like the copy button does
   async copy(index = 0) {

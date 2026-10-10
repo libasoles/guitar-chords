@@ -94,6 +94,57 @@ async function run() {
     assert.strictEqual(mobileTools.sliderDisplay, 'none');
     assert.ok(mobileTools.toolsTop < mobileTools.tabTop);
 
+    // ascii-tabs 0.2.0 duplicates the whole column, including empty strings,
+    // with either shortcut. The cursor advances and storage receives one edit.
+    await page.setViewportSize({ width: 1280, height: 720 });
+    for (const modifier of ['Meta', 'Alt']) {
+      const original = [0, null, 12, null, 5, 24];
+      await page.evaluate((column) => {
+        const el = document.querySelector('ascii-tabs');
+        el.value = [[column, [9, 9, 9, 9, 9, 9]]];
+        window.tabChanges = [];
+        el.addEventListener('change', (event) => window.tabChanges.push(event.detail.value));
+      }, original);
+      await page.locator('.ascii-tabs-cell[data-c="0"][data-s="2"]').click();
+      await page.keyboard.press(modifier + '+ArrowRight');
+      const duplicated = await page.evaluate(() => {
+        const el = document.querySelector('ascii-tabs');
+        const cursor = el.querySelector('.ascii-tabs-cur');
+        return {
+          value: el.value,
+          cursor: [cursor.dataset.c, cursor.dataset.s],
+          changes: window.tabChanges,
+          saved: JSON.parse(localStorage.getItem('tabEditor.tabs')),
+        };
+      });
+      assert.deepStrictEqual(duplicated.value, [[original, original]]);
+      assert.deepStrictEqual(duplicated.cursor, ['1', '2']);
+      assert.deepStrictEqual(duplicated.changes, [[[original, original]]]);
+      assert.deepStrictEqual(duplicated.saved, [[['0', '', '12', '', '5', '24'], ['0', '', '12', '', '5', '24']]]);
+
+      // Editing the duplicate leaves the source column untouched.
+      await page.keyboard.press('Delete');
+      const edited = await page.evaluate(() => document.querySelector('ascii-tabs').value);
+      assert.strictEqual(edited[0][0][2], 12);
+      assert.strictEqual(edited[0][1][2], null);
+      await page.reload();
+      await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
+      assert.deepStrictEqual(await page.evaluate(() => document.querySelector('ascii-tabs').value), edited);
+    }
+
+    // Duplicating the last column grows the Tab; an unmodified arrow only moves.
+    await page.evaluate(() => {
+      document.querySelector('ascii-tabs').value = [[[3, null, null, null, null, null]]];
+    });
+    await page.locator('.ascii-tabs-cell[data-c="0"][data-s="0"]').click();
+    await page.keyboard.press('ArrowRight');
+    assert.strictEqual(await page.evaluate(() => document.querySelector('ascii-tabs').value[0].length), 1);
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('Alt+ArrowRight');
+    assert.deepStrictEqual(await page.evaluate(() => document.querySelector('ascii-tabs').value), [
+      [[3, null, null, null, null, null], [3, null, null, null, null, null]],
+    ]);
+
     // The sixths exercise shows its three Tabs read-only, with no controls.
     await page.goto(base + '/ejercicio-de-sextas');
     await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
@@ -113,7 +164,7 @@ async function run() {
     assert.strictEqual(sixths.spacing, 3);
     assert.strictEqual(sixths.buttons, 0);
 
-    console.log('OK: tab editor loads saved tabs; sixths exercise is read-only with no controls.');
+    console.log('OK: tab editor loads and saves tabs, duplicates columns with Cmd/Alt+Right; sixths exercise is read-only with no controls.');
   } finally {
     await browser.close();
     server.close();

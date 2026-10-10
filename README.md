@@ -39,6 +39,11 @@ npm run build       # Build site + extension → dist/
 npm test            # Unit + E2E tests
 ```
 
+The tab editor bundles ascii-tabs 0.2.0 from the local `punteo-ascii` project.
+This version adds Cmd+Right Arrow / Alt+Right Arrow to duplicate all six strings
+of the current column into the next one and move the cursor there. The release
+tag is not published yet; use the committed `vendor/ascii-tabs.js` for builds.
+
 Individual build targets:
 
 ```bash
