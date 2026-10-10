@@ -170,6 +170,68 @@ async function run() {
       [[3, null, null, null, null, null], [3, null, null, null, null, null]],
     ]);
 
+    // v0.4.0 selects notes with a rectangle and duplicates only that group.
+    await page.evaluate(() => {
+      document.querySelector('ascii-tabs').value = [
+        [[3, null, null, null, null, null], [null, 12, null, null, null, null], [7, null, null, null, null, null]],
+      ];
+    });
+    const cell = (c, s) => page.locator(`.ascii-tabs-cell[data-c="${c}"][data-s="${s}"]`);
+    const start = await cell(0, 2).boundingBox();
+    const end = await cell(1, 0).boundingBox();
+    await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(end.x + end.width, end.y, { steps: 8 });
+    await page.mouse.up();
+    assert.strictEqual(await page.locator('.ascii-tabs-selected').count(), 2);
+    await page.keyboard.press('Alt+ArrowRight');
+    const grouped = [
+      [3, null, null, null, null, null], [null, 12, null, null, null, null],
+      [3, null, null, null, null, null], [null, 12, null, null, null, null],
+    ];
+    assert.deepStrictEqual(await page.evaluate(() => document.querySelector('ascii-tabs').value), [grouped]);
+    assert.strictEqual(await page.locator('.ascii-tabs-selected').count(), 2);
+
+    // Copy the selection as ASCII and move it down one string and right one
+    // column. Relative positions survive and the originals stay untouched.
+    const copied = await page.evaluate(() => {
+      const clipboardData = new DataTransfer();
+      document.querySelector('.ascii-tabs-input').dispatchEvent(new ClipboardEvent('copy', { clipboardData, cancelable: true }));
+      return clipboardData.getData('text/plain');
+    });
+    assert.strictEqual(copied.split('\n').length, 6);
+    assert.ok(copied.includes('12'));
+    const from = await cell(2, 0).boundingBox();
+    const to = await cell(3, 1).boundingBox();
+    await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 8 });
+    await page.mouse.up();
+    const moved = [
+      grouped[0], grouped[1], [null, null, null, null, null, null],
+      [null, 3, null, null, null, null], [null, null, 12, null, null, null],
+    ];
+    assert.deepStrictEqual(await page.evaluate(() => document.querySelector('ascii-tabs').value), [moved]);
+    await page.keyboard.press('Delete');
+    assert.strictEqual(await page.locator('.ascii-tabs-selected').count(), 0);
+    assert.deepStrictEqual(await page.evaluate(() => document.querySelector('ascii-tabs').value[0].slice(0, 2)), grouped.slice(0, 2));
+
+    // Paste at the current column preserves string positions and saves the
+    // result. Escape dismisses the selection without changing the notes.
+    await cell(2, 0).click();
+    await page.evaluate((text) => {
+      const clipboardData = new DataTransfer();
+      clipboardData.setData('text/plain', text);
+      document.querySelector('.ascii-tabs-input').dispatchEvent(new ClipboardEvent('paste', { clipboardData, cancelable: true }));
+    }, copied);
+    assert.strictEqual(await page.locator('.ascii-tabs-selected').count(), 2);
+    assert.deepStrictEqual(await page.evaluate(() => document.querySelector('ascii-tabs').value), [grouped]);
+    await page.keyboard.press('Escape');
+    assert.strictEqual(await page.locator('.ascii-tabs-selected').count(), 0);
+    await page.reload();
+    await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
+    assert.deepStrictEqual(await page.evaluate(() => document.querySelector('ascii-tabs').value), [grouped]);
+
     // The sixths exercise shows its three Tabs read-only, with no controls.
     await page.goto(base + '/ejercicio-de-sextas');
     await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
@@ -189,7 +251,7 @@ async function run() {
     assert.strictEqual(sixths.spacing, 3);
     assert.strictEqual(sixths.buttons, 0);
 
-    console.log('OK: tab editor loads and saves tabs, duplicates columns with Cmd/Alt+Right and fills empty strings with Cmd/Alt+0; sixths exercise is read-only with no controls.');
+    console.log('OK: tab editor saves edits, supports shortcuts, group selection/movement and ASCII copy/paste; sixths exercise is read-only with no controls.');
   } finally {
     await browser.close();
     server.close();
