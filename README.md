@@ -39,7 +39,7 @@ npm run build       # Build site + extension → dist/
 npm test            # Unit + E2E tests
 ```
 
-Production bundles ascii-tabs [v0.4.0](https://github.com/libasoles/ascii-tabs/releases/tag/v0.4.0)
+Production bundles ascii-tabs [v0.4.1](https://github.com/libasoles/ascii-tabs/releases/tag/v0.4.1)
 from the committed `vendor/ascii-tabs.js`. Cmd/Alt+Right Arrow duplicates a
 column; Cmd/Alt+0 fills its empty strings with open-string frets.
 Drag from an empty cell to select a group of notes, then move, duplicate,

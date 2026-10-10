@@ -182,7 +182,14 @@ async function run() {
     await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2);
     await page.mouse.down();
     await page.mouse.move(end.x + end.width, end.y, { steps: 8 });
+    // v0.4.1 keeps the selection rectangle behind frets so notes stay legible.
+    const selectionLayers = await page.evaluate(() => ({
+      marquee: Number(getComputedStyle(document.querySelector('.ascii-tabs-marquee')).zIndex),
+      fret: Number(getComputedStyle(document.querySelector('.ascii-tabs-fret')).zIndex),
+    }));
+    assert.ok(selectionLayers.fret > selectionLayers.marquee);
     await page.mouse.up();
+    assert.strictEqual(await page.locator('.ascii-tabs-marquee').count(), 0);
     assert.strictEqual(await page.locator('.ascii-tabs-selected').count(), 2);
     await page.keyboard.press('Alt+ArrowRight');
     const grouped = [
@@ -206,7 +213,11 @@ async function run() {
     await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
     await page.mouse.down();
     await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 8 });
+    // The entire selected group follows the pointer in a visual preview.
+    assert.strictEqual(await page.locator('.ascii-tabs-drag-preview .ascii-tabs-fret').count(), 2);
+    assert.strictEqual(await page.locator('.ascii-tabs-drag-preview').getAttribute('aria-hidden'), 'true');
     await page.mouse.up();
+    assert.strictEqual(await page.locator('.ascii-tabs-drag-preview').count(), 0);
     const moved = [
       grouped[0], grouped[1], [null, null, null, null, null, null],
       [null, 3, null, null, null, null], [null, null, 12, null, null, null],
