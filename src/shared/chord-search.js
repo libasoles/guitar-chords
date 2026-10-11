@@ -4,7 +4,7 @@
    y como módulo importado en Node (module.exports) para los tests.
 
    Es la MISMA normalización que usa el buscador web (reference/chord-finder.html):
-   minúsculas; ♭→b, ♯→#, △/Δ→maj, ø→m7b5; sin espacios.
+   minúsculas; ♭→b, ♯→#, △/Δ→maj, ø→m7b5, °/º/˚→dim; sin espacios.
 
    Soporta buscar en cifrado español (Do, Re, Mi, Fa, Sol, La, Si) además del
    americano (C D E F G A B): la nota inicial en español se traduce a su
@@ -71,8 +71,10 @@
   const ES_TO_EN_NOTE_WITH_D = Object.assign({ d: 'c' }, ES_TO_EN_NOTE);
 
   // Normaliza un string de acorde/query a una forma comparable.
-  //   ♭ → b, ♯ → #, △/Δ → maj, ø → m7b5, minúsculas, sin espacios.
+  //   ♭ → b, ♯ → #, △/Δ → maj, ø → m7b5, °/º/˚ → dim, minúsculas, sin espacios.
   // △ = U+25B3 (triángulo), Δ = U+0394 (delta griega): ambos significan maj7.
+  // ° = U+00B0 (grado), º = U+00BA (ordinal, la tecla junto al 1 en teclados
+  // españoles), ˚ = U+02DA (anillo): los tres se usan para escribir disminuido.
   // `notation`: 'es' cuando la query viene del toggle en modo español (ver
   // ES_NOTE_PREFIX_WITH_D arriba); se omite al normalizar nombres/alias.
   function normalize(s, notation) {
@@ -83,6 +85,7 @@
       .replace(/♯/g, '#')
       .replace(/[△Δ]/g, 'maj')
       .replace(/ø/g, 'm7b5')
+      .replace(/[°º˚]/g, 'dim')
       .toLowerCase()
       .replace(/\s+/g, '');
     const prefix = notation === 'es' ? ES_NOTE_PREFIX_WITH_D : ES_NOTE_PREFIX;

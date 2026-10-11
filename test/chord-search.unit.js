@@ -39,6 +39,23 @@ test('normalize: símbolos ♭ ♯ △ Δ ø', () => {
   assert.equal(normalize('Bø'), 'bm7b5');
 });
 
+test('normalize: ° º ˚ → dim', () => {
+  assert.equal(normalize('C°7'), 'cdim7');
+  assert.equal(normalize('Cº7'), 'cdim7');
+  assert.equal(normalize('C˚7'), 'cdim7');
+});
+
+test('"cº7" / "bº" (º del teclado español) → acorde dim7', () => {
+  assert.deepEqual(names('cº7'), ['Cdim7']);
+  assert.deepEqual(names('bº'), ['Bdim7']);
+});
+
+test('"º" solo matchea los acordes dim7', () => {
+  const r = names('º');
+  assert.ok(r.includes('Cdim7'));
+  assert.ok(r.includes('Ddim7'));
+});
+
 test('normalize: query vacía / null / sólo espacios → ""', () => {
   assert.equal(normalize(''), '');
   assert.equal(normalize('   '), '');
