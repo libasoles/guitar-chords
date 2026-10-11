@@ -517,6 +517,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     "circleNavLabel",
     "dimNavLabel",
     "tabNavLabel",
+    "sixthsH1",
     "pickingGroupLabel",
     "pickingNavLabel",
     "pickingJonicoNavLabel",
@@ -557,6 +558,9 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     .split("%%CIRCLE_PAGE_HREF%%")
     .join(v7PageHref(locale, CIRCLE_SLUG));
   html = html.split("%%DIM_PAGE_HREF%%").join(v7PageHref(locale, DIM_SLUG));
+  html = html
+    .split("%%SIXTHS_PAGE_HREF%%")
+    .join(v7PageHref(locale, SIXTHS_SLUG));
   html = html
     .split("%%TAB_EDITOR_PAGE_HREF%%")
     .join(v7PageHref(locale, TAB_EDITOR_SLUG));
