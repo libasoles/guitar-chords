@@ -15,7 +15,7 @@ const { serveStatic } = require('../scripts/lib/static-server');
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     for (const locale of ['', '/en']) {
-      await page.goto(base + locale + '/punteo-escala-mayor-terceras-sextas-decimas');
+      await page.goto(base + locale + '/punteo-terceras-sextas-decimas');
       await page.waitForSelector('.picking-note');
       assert.equal(await page.locator('.picking-diagram svg').count(), 4);
       assert.deepEqual(await page.locator('.picking-diagram').evaluateAll(els => els.map(el => el.dataset.pattern)), ['3', '1', '2', '4']);
@@ -25,58 +25,67 @@ const { serveStatic } = require('../scripts/lib/static-server');
         return [6 - Number(match[1]), match[2] === 'NaN' ? 0 : Number(match[2]) + 1];
       })));
       const openPc = { 1: 0, 2: 7, 3: 3, 4: 10, 5: 5, 6: 0 };
-      const major = [0, 2, 4, 5, 7, 9, 11];
+      const scales = { major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10] };
       const tonics = () => page.locator('.picking-diagram').evaluateAll(els => els.map(el => el.querySelectorAll('.picking-note-tonic').length));
-      for (let offset = 0; offset <= 11; offset++) {
-        await page.locator('#picking-transpose').evaluate((el, value) => { el.value = value; el.dispatchEvent(new Event('input')); }, String(offset));
-        const current = await notes();
-        const expectedTonics = current.map(pattern => {
-          const byString = {};
-          pattern.forEach(([string, fret]) => {
-            const fromTonic = (openPc[string] + fret - offset + 12) % 12;
-            assert.ok(major.includes(fromTonic));
-            (byString[string] = byString[string] || []).push(fret);
+      for (const quality of ['major', 'minor']) {
+        const scale = scales[quality];
+        await page.locator('#picking-minor').setChecked(quality === 'minor');
+        for (let offset = 0; offset <= 11; offset++) {
+          await page.locator('#picking-transpose').evaluate((el, value) => { el.value = value; el.dispatchEvent(new Event('input')); }, String(offset));
+          const current = await notes();
+          const expectedTonics = current.map(pattern => {
+            const byString = {};
+            pattern.forEach(([string, fret]) => {
+              const fromTonic = (openPc[string] + fret - offset + 12) % 12;
+              assert.ok(scale.includes(fromTonic));
+              (byString[string] = byString[string] || []).push(fret);
+            });
+            // The neck is filled across octaves: every scale tone from the open
+            // string up to fret 19 is drawn.
+            Object.entries(byString).forEach(([string, frets]) => {
+              const expected = [];
+              for (let fret = 0; fret <= 19; fret++) {
+                if (scale.includes((openPc[string] + fret - offset + 12) % 12)) expected.push(fret);
+              }
+              assert.deepEqual(frets.sort((a, b) => a - b), expected, 'filled neck at offset ' + offset);
+            });
+            return pattern.filter(([string, fret]) => (openPc[string] + fret - offset + 12) % 12 === 0).length;
           });
-          // The neck is filled across octaves: every scale tone from the open
-          // string up to fret 19 is drawn.
-          Object.entries(byString).forEach(([string, frets]) => {
-            const expected = [];
-            for (let fret = 0; fret <= 19; fret++) {
-              if (major.includes((openPc[string] + fret - offset + 12) % 12)) expected.push(fret);
-            }
-            assert.deepEqual(frets.sort((a, b) => a - b), expected, 'filled neck at offset ' + offset);
+          assert.deepEqual(await tonics(), expectedTonics);
+          expectedTonics.forEach(count => assert.ok(count > 0));
+          const connections = await page.locator('.picking-diagram').evaluateAll(els => els.map(el => {
+            const svg = el.querySelector('svg');
+            const notes = Array.from(svg.querySelectorAll('.picking-note'));
+            const pitch = note => {
+              const match = note.getAttribute('class').match(/finger-string-(\d+)-fret-(\d+|NaN)/);
+              const string = 6 - Number(match[1]);
+              return { 1: 24, 2: 19, 3: 15, 4: 10, 5: 5, 6: 0 }[string] + (match[2] === 'NaN' ? 0 : Number(match[2]) + 1);
+            };
+            return Array.from(svg.querySelectorAll('.picking-pair-connector'), line => {
+              const from = notes.find(n => n.getAttribute('cx') === line.getAttribute('x1') && n.getAttribute('cy') === line.getAttribute('y1'));
+              const to = notes.find(n => n.getAttribute('cx') === line.getAttribute('x2') && n.getAttribute('cy') === line.getAttribute('y2'));
+              return Math.abs(pitch(from) - pitch(to));
+            });
+          }));
+          connections.forEach((intervals, i) => {
+            assert.ok(intervals.length > 0);
+            intervals.forEach(interval => assert.ok(([ [3,4], [3,4], [8,9], [15,16] ][i]).includes(interval)));
+            // Edge notes whose partner falls off the neck have no connector.
+            assert.ok(intervals.length * 2 <= current[i].length && intervals.length * 2 >= current[i].length - 6);
           });
-          return pattern.filter(([string, fret]) => (openPc[string] + fret - offset + 12) % 12 === 0).length;
-        });
-        assert.deepEqual(await tonics(), expectedTonics);
-        expectedTonics.forEach(count => assert.ok(count > 0));
-        const connections = await page.locator('.picking-diagram').evaluateAll(els => els.map(el => {
-          const svg = el.querySelector('svg');
-          const notes = Array.from(svg.querySelectorAll('.picking-note'));
-          const pitch = note => {
-            const match = note.getAttribute('class').match(/finger-string-(\d+)-fret-(\d+|NaN)/);
-            const string = 6 - Number(match[1]);
-            return { 1: 24, 2: 19, 3: 15, 4: 10, 5: 5, 6: 0 }[string] + (match[2] === 'NaN' ? 0 : Number(match[2]) + 1);
-          };
-          return Array.from(svg.querySelectorAll('.picking-pair-connector'), line => {
-            const from = notes.find(n => n.getAttribute('cx') === line.getAttribute('x1') && n.getAttribute('cy') === line.getAttribute('y1'));
-            const to = notes.find(n => n.getAttribute('cx') === line.getAttribute('x2') && n.getAttribute('cy') === line.getAttribute('y2'));
-            return Math.abs(pitch(from) - pitch(to));
-          });
-        }));
-        connections.forEach((intervals, i) => {
-          assert.ok(intervals.length > 0);
-          intervals.forEach(interval => assert.ok(([ [3,4], [3,4], [8,9], [15,16] ][i]).includes(interval)));
-          // Edge notes whose partner falls off the neck have no connector.
-          assert.ok(intervals.length * 2 <= current[i].length && intervals.length * 2 >= current[i].length - 6);
-        });
-        const shade = await page.locator('.picking-diagram').evaluateAll(els => els.map(el => {
-          const rect = el.querySelector('.picking-upper-frets');
-          const marker = el.querySelector('.position-marker-fret-12');
-          return rect && Number(rect.getAttribute('x')) > Number(marker.getAttribute('cx'));
-        }));
-        assert.deepEqual(shade, [true, true, true, true]);
+          const shade = await page.locator('.picking-diagram').evaluateAll(els => els.map(el => {
+            const rect = el.querySelector('.picking-upper-frets');
+            const marker = el.querySelector('.position-marker-fret-12');
+            return rect && Number(rect.getAttribute('x')) > Number(marker.getAttribute('cx'));
+          }));
+          assert.deepEqual(shade, [true, true, true, true]);
+        }
       }
+      await page.locator('#picking-transpose').evaluate(el => { el.value = '4'; el.dispatchEvent(new Event('input')); });
+      assert.equal(await page.locator('#picking-key').textContent(), locale ? 'G♯ minor' : 'Sol♯ menor');
+      await page.locator('.picking-quality-major').click();
+      assert.equal(await page.locator('#picking-key').textContent(), locale ? 'A♭ major' : 'La♭ mayor');
+      assert.equal(await page.locator('#picking-minor').isChecked(), false);
       await page.locator('#picking-transpose').focus();
       await page.keyboard.press('Home');
       await page.keyboard.press('ArrowRight');

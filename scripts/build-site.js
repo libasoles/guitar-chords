@@ -346,11 +346,11 @@ E|---------------------------5---3---1---0
 `,
 ];
 
-// Static lesson page rendered from src/site/picking-intervals.html — the
-// major scale in thirds, sixths and tenths. i18n keys are namespaced by
+// Static lesson page rendered from src/site/picking-intervals.html — a major
+// or minor key in thirds, sixths and tenths. i18n keys are namespaced by
 // `prefix` (intervalsH1, intervalsPageTitle, ...).
 const INTERVALS_PAGE = {
-  slug: "punteo-escala-mayor-terceras-sextas-decimas",
+  slug: "punteo-terceras-sextas-decimas",
   mode: "ionian",
   prefix: "intervals",
 };
@@ -952,6 +952,8 @@ function renderPickingPage(template, strings, locale, page) {
     "extensionDescription",
     "intervalsKeyLabel",
     "intervalsInitialKey",
+    "intervalsMajor",
+    "intervalsMinor",
     "intervalsFig1",
     "intervalsFig2",
     "intervalsFig3",

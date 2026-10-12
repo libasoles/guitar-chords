@@ -61,8 +61,17 @@
     <p class="lead">%%PAGE_LEAD%%</p>
 
     <div class="picking-transpose">
-      <label for="picking-transpose">%%intervalsKeyLabel%%</label>
-      <output id="picking-key" for="picking-transpose" aria-live="polite">%%intervalsInitialKey%%</output>
+      <div class="picking-transpose-row">
+        <div>
+          <label for="picking-transpose">%%intervalsKeyLabel%%</label>
+          <output id="picking-key" for="picking-transpose" aria-live="polite">%%intervalsInitialKey%%</output>
+        </div>
+        <div class="picking-quality">
+          <span class="picking-quality-major" aria-hidden="true">%%intervalsMajor%%</span>
+          <input id="picking-minor" type="checkbox" role="switch" aria-label="%%intervalsMinor%%" />
+          <span class="picking-quality-minor" aria-hidden="true">%%intervalsMinor%%</span>
+        </div>
+      </div>
       <input id="picking-transpose" type="range" min="0" max="11" step="1" value="0" />
     </div>
     <div class="picking-figures">

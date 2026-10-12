@@ -138,8 +138,12 @@
     4: { upper: 2, lower: 5, steps: 9 },
   };
 
-  function buildIntervalPatterns(offset) {
-    var scale = SCALES.ionian;
+  // `minor` switches the key to its natural minor (Aeolian) over the same
+  // tonic. Every pattern follows, sixths included: they are the thirds
+  // inverted, so keeping all pairs diatonic to one key keeps the four
+  // diagrams on the same notes.
+  function buildIntervalPatterns(offset, minor) {
+    var scale = minor ? SCALES.aeolian : SCALES.ionian;
     // Semitones above the tonic (E + offset) of a note, mod 12.
     function fromTonic(string, fret) {
       return (OPEN_SEMITONE[string] + fret - offset + 12) % 12;
@@ -417,8 +421,8 @@
 
   var mode = (document.body && document.body.getAttribute('data-picking-mode')) || 'dorian';
   var transposable = document.body.hasAttribute('data-picking-transposable');
-  function renderPatterns(offset) {
-    var PATTERNS = transposable ? buildIntervalPatterns(offset) : buildPatterns(mode);
+  function renderPatterns(offset, minor) {
+    var PATTERNS = transposable ? buildIntervalPatterns(offset, minor) : buildPatterns(mode);
 
     document.querySelectorAll('.picking-diagram').forEach(function (el) {
       var pattern = PATTERNS[el.getAttribute('data-pattern')];
@@ -455,19 +459,40 @@
     });
   }
   var slider = document.getElementById('picking-transpose');
+  var minorSwitch = document.getElementById('picking-minor');
   if (transposable && slider) {
     var spanish = document.documentElement.lang === 'es';
-    var keys = spanish
+    // Minor keys are spelled with the fewest accidentals: A♭ major but
+    // G♯ minor.
+    var majorKeys = spanish
       ? ['Mi', 'Fa', 'Fa♯', 'Sol', 'La♭', 'La', 'Si♭', 'Si', 'Do', 'Do♯', 'Re', 'Mi♭']
       : ['E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B', 'C', 'C♯', 'D', 'E♭'];
+    var minorKeys = spanish
+      ? ['Mi', 'Fa', 'Fa♯', 'Sol', 'Sol♯', 'La', 'Si♭', 'Si', 'Do', 'Do♯', 'Re', 'Mi♭']
+      : ['E', 'F', 'F♯', 'G', 'G♯', 'A', 'B♭', 'B', 'C', 'C♯', 'D', 'E♭'];
     function update() {
       var offset = Number(slider.value);
-      var key = keys[offset] + (spanish ? ' mayor' : ' major');
+      var minor = !!(minorSwitch && minorSwitch.checked);
+      var key = minor
+        ? minorKeys[offset] + (spanish ? ' menor' : ' minor')
+        : majorKeys[offset] + (spanish ? ' mayor' : ' major');
       document.getElementById('picking-key').textContent = key;
       slider.setAttribute('aria-valuetext', key);
-      renderPatterns(offset);
+      renderPatterns(offset, minor);
     }
     slider.addEventListener('input', update);
+    if (minorSwitch) {
+      minorSwitch.addEventListener('change', update);
+      // The words either side of the switch pick their own side.
+      [['.picking-quality-major', false], ['.picking-quality-minor', true]].forEach(function (side) {
+        var word = document.querySelector(side[0]);
+        if (word) word.addEventListener('click', function () {
+          if (minorSwitch.checked === side[1]) return;
+          minorSwitch.checked = side[1];
+          update();
+        });
+      });
+    }
     update();
   } else {
     renderPatterns(0);

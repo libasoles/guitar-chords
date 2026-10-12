@@ -1525,9 +1525,40 @@ footer {
 .picking-diagram-scroll { overflow-x: auto; }
 [data-picking-transposable] .picking-diagram { min-width: 960px; }
 .picking-transpose { margin: 1.5rem 0; }
+.picking-transpose-row { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.5rem 1rem; white-space: nowrap; }
 .picking-transpose label { font-weight: 600; }
 .picking-transpose output { margin-left: 0.75rem; color: var(--accent); font-weight: 600; }
-.picking-transpose input {
+/* Major/minor switch. Both sides are a valid choice rather than off/on, so
+   the knob keeps the accent colour and the chosen side's word is inked. */
+.picking-quality { display: flex; align-items: center; gap: 0.5rem; }
+.picking-quality span { font-weight: 600; color: var(--ink-soft); cursor: pointer; }
+.picking-quality:has(input:not(:checked)) .picking-quality-major,
+.picking-quality input:checked + span { color: var(--ink); }
+.picking-quality input {
+  position: relative;
+  width: 30px;
+  height: 16px;
+  margin: 0;
+  appearance: none;
+  border: 1px solid var(--ink);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+.picking-quality input::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  transition: transform 0.15s ease;
+}
+.picking-quality input:checked::before { transform: translateX(14px); }
+.picking-quality input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.picking-transpose input[type="range"] {
   display: block;
   width: 100%;
   max-width: 220px;
