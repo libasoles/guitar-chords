@@ -1885,5 +1885,28 @@ footer {
 .picking-transpose { margin: 1.5rem 0; }
 .picking-transpose label { font-weight: 600; }
 .picking-transpose output { margin-left: 0.75rem; color: var(--accent); font-weight: 600; }
-.picking-transpose input { display: block; width: 100%; margin: 1rem 0; accent-color: var(--accent); }
+.picking-transpose input {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: 14px;
+  margin: 0.75rem 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+.picking-transpose input::-webkit-slider-runnable-track { height: 1px; background: var(--ink); }
+.picking-transpose input::-moz-range-track { height: 1px; background: var(--ink); }
+.picking-transpose input::-webkit-slider-thumb {
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  margin-top: -4.5px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.picking-transpose input::-moz-range-thumb { width: 10px; height: 10px; border: 0; border-radius: 50%; background: var(--accent); }
+/* No fill transition: notes are redrawn on every slider step. */
+.picking-note-tonic { fill: #f5c400; stroke: var(--ink); stroke-width: 1.5px; transition: transform 0.1s ease; }
 .picking-transpose p { font-size: 0.9rem; }

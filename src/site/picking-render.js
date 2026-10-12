@@ -59,15 +59,17 @@
   // the lower string that sits exactly `intervalSteps` diatonic steps below
   // it (2 for a 3rd, 5 for a 6th) — the note it's harmonizing with in these
   // parallel-interval patterns. Not every note has a partner within the
-  // diagram's fret range; those are simply left unpaired.
-  function pairNotes(scale, upperString, upperFrets, lowerString, lowerFrets, intervalSteps) {
+  // diagram's fret range; those are simply left unpaired. `offset` (default
+  // 0) transposes the scale that many semitones above E.
+  function pairNotes(scale, upperString, upperFrets, lowerString, lowerFrets, intervalSteps, offset) {
+    var shift = offset || 0;
     var lowerStepToFret = {};
     lowerFrets.forEach(function (f) {
-      lowerStepToFret[degreeStep(scale, ABS_OPEN[lowerString] + f)] = f;
+      lowerStepToFret[degreeStep(scale, ABS_OPEN[lowerString] + f - shift)] = f;
     });
     var pairs = {};
     upperFrets.forEach(function (f) {
-      var step = degreeStep(scale, ABS_OPEN[upperString] + f);
+      var step = degreeStep(scale, ABS_OPEN[upperString] + f - shift);
       var lowerFret = lowerStepToFret[step - intervalSteps];
       if (lowerFret !== undefined) {
         pairs[upperString + ':' + f] = lowerString + ':' + lowerFret;
@@ -123,34 +125,42 @@
     };
   }
 
-  // Keep only complete, fretted pairs, then translate both notes equally.
+  // Fill the whole neck with the key's fretted pairs, so transposing brings
+  // in notes from the neighbouring octaves instead of sliding a fixed block
+  // and leaving empty frets behind it. Open strings are skipped.
   // Tenths use nine diatonic steps: an octave plus a third.
+  var INTERVAL_FRETS = 26;
+  var INTERVAL_PATTERNS = {
+    1: { upper: 2, lower: 3, steps: 2 },
+    2: { upper: 1, lower: 3, steps: 5 },
+    3: { upper: 1, lower: 2, steps: 2 },
+    4: { upper: 2, lower: 5, steps: 9 },
+  };
+
   function buildIntervalPatterns(offset) {
-    var patterns = buildPatterns('ionian');
     var scale = SCALES.ionian;
-    var upper = scaleFrets(scale, OPEN_SEMITONE[2], 12, true);
-    var lower = scaleFrets(scale, OPEN_SEMITONE[5], 12, true);
-    patterns[4] = { pairs: pairNotes(scale, 2, upper, 5, lower, 9) };
-    Object.keys(patterns).forEach(function (id) {
-      var base = patterns[id];
-      var pairs = {};
-      function shifted(key) {
-        var parts = key.split(':');
-        return parts[0] + ':' + (Number(parts[1]) + offset);
-      }
-      Object.keys(base.pairs).forEach(function (key) {
-        var partner = base.pairs[key];
-        if (Number(key.split(':')[1]) > 0 && Number(partner.split(':')[1]) > 0) {
-          pairs[shifted(key)] = shifted(partner);
-        }
-      });
+    // Semitones above the tonic (E + offset) of a note, mod 12.
+    function fromTonic(string, fret) {
+      return (OPEN_SEMITONE[string] + fret - offset + 12) % 12;
+    }
+    function frets(string) {
+      return scaleFrets(scale, fromTonic(string, 0), INTERVAL_FRETS, true);
+    }
+    var patterns = {};
+    Object.keys(INTERVAL_PATTERNS).forEach(function (id) {
+      var def = INTERVAL_PATTERNS[id];
+      var pairs = pairNotes(scale, def.upper, frets(def.upper), def.lower, frets(def.lower), def.steps, offset);
       var fingers = Object.keys(pairs).map(function (key) {
         return key.split(':').map(Number);
+      });
+      var tonics = {};
+      fingers.forEach(function (finger) {
+        if (fromTonic(finger[0], finger[1]) === 0) tonics[finger.join(':')] = true;
       });
       for (var string = 1; string <= 6; string++) {
         if (!fingers.some(function (finger) { return finger[0] === string; })) fingers.push([string, 'x']);
       }
-      patterns[id] = { frets: 26, fingers: fingers, pairs: pairs };
+      patterns[id] = { frets: INTERVAL_FRETS, fingers: fingers, pairs: pairs, tonics: tonics };
     });
     return patterns;
   }
@@ -400,6 +410,7 @@
         wireHover(elements, pattern);
         if (transposable) {
           Object.keys(elements).forEach(function (key) {
+            if (pattern.tonics[key]) elements[key].classList.add('picking-note-tonic');
             var title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
             title.textContent = (document.documentElement.lang === 'es' ? 'Traste ' : 'Fret ') + key.split(':')[1];
             elements[key].appendChild(title);

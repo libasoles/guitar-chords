@@ -24,10 +24,30 @@ const { serveStatic } = require('../scripts/lib/static-server');
         const match = note.getAttribute('class').match(/finger-string-(\d+)-fret-(\d+)/);
         return [6 - Number(match[1]), Number(match[2]) + 1];
       })));
-      const original = await notes();
+      const openPc = { 1: 0, 2: 7, 3: 3, 4: 10, 5: 5, 6: 0 };
+      const major = [0, 2, 4, 5, 7, 9, 11];
+      const tonics = () => page.locator('.picking-diagram').evaluateAll(els => els.map(el => el.querySelectorAll('.picking-note-tonic').length));
       for (let offset = 0; offset <= 11; offset++) {
         await page.locator('#picking-transpose').evaluate((el, value) => { el.value = value; el.dispatchEvent(new Event('input')); }, String(offset));
-        assert.deepEqual(await notes(), original.map(pattern => pattern.map(([string, fret]) => [string, fret + offset])));
+        const current = await notes();
+        const expectedTonics = current.map(pattern => {
+          const byString = {};
+          pattern.forEach(([string, fret]) => {
+            const fromTonic = (openPc[string] + fret - offset + 12) % 12;
+            assert.ok(major.includes(fromTonic));
+            (byString[string] = byString[string] || []).push(fret);
+          });
+          // The neck is filled across octaves: no empty stretch at either end
+          // and never more than a whole tone between neighbouring notes.
+          Object.values(byString).forEach(frets => {
+            frets.sort((a, b) => a - b);
+            assert.ok(frets[0] <= 4 && frets[frets.length - 1] >= 22, 'filled neck at offset ' + offset);
+            frets.slice(1).forEach((fret, i) => assert.ok(fret - frets[i] <= 2));
+          });
+          return pattern.filter(([string, fret]) => (openPc[string] + fret - offset + 12) % 12 === 0).length;
+        });
+        assert.deepEqual(await tonics(), expectedTonics);
+        expectedTonics.forEach(count => assert.ok(count > 0));
         const connections = await page.locator('.picking-diagram').evaluateAll(els => els.map(el => {
           const svg = el.querySelector('svg');
           const notes = Array.from(svg.querySelectorAll('.picking-note'));
@@ -45,7 +65,7 @@ const { serveStatic } = require('../scripts/lib/static-server');
         connections.forEach((intervals, i) => {
           assert.ok(intervals.length > 0);
           intervals.forEach(interval => assert.ok(([ [3,4], [3,4], [8,9], [15,16] ][i]).includes(interval)));
-          assert.equal(intervals.length * 2, original[i].length);
+          assert.equal(intervals.length * 2, current[i].length);
         });
       }
       await page.locator('#picking-transpose').focus();
