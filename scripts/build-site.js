@@ -399,7 +399,7 @@ const PICKING_PAGES = [
   },
 ];
 const INTERVALS_PAGE = {
-  slug: "punteo-jonico-terceras-sextas-decimas",
+  slug: "punteo-escala-mayor-terceras-sextas-decimas",
   mode: "ionian",
   prefix: "intervals",
 };

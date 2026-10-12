@@ -15,7 +15,7 @@ const { serveStatic } = require('../scripts/lib/static-server');
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     for (const locale of ['', '/en']) {
-      await page.goto(base + locale + '/punteo-jonico-terceras-sextas-decimas');
+      await page.goto(base + locale + '/punteo-escala-mayor-terceras-sextas-decimas');
       await page.waitForSelector('.picking-note');
       assert.equal(await page.locator('.picking-diagram svg').count(), 4);
       assert.deepEqual(await page.locator('.picking-diagram').evaluateAll(els => els.map(el => el.dataset.pattern)), ['3', '1', '2', '4']);
