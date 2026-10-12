@@ -38,10 +38,10 @@ const { serveStatic } = require('../scripts/lib/static-server');
             (byString[string] = byString[string] || []).push(fret);
           });
           // The neck is filled across octaves: every scale tone from fret 1 to
-          // 26 is drawn, including ones whose partner would be an open string.
+          // 19 is drawn, including ones whose partner would be an open string.
           Object.entries(byString).forEach(([string, frets]) => {
             const expected = [];
-            for (let fret = 1; fret <= 26; fret++) {
+            for (let fret = 1; fret <= 19; fret++) {
               if (major.includes((openPc[string] + fret - offset + 12) % 12)) expected.push(fret);
             }
             assert.deepEqual(frets.sort((a, b) => a - b), expected, 'filled neck at offset ' + offset);

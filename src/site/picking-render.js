@@ -129,7 +129,7 @@
   // in notes from the neighbouring octaves instead of sliding a fixed block
   // and leaving empty frets behind it. Open strings are skipped.
   // Tenths use nine diatonic steps: an octave plus a third.
-  var INTERVAL_FRETS = 26;
+  var INTERVAL_FRETS = 19;
   var INTERVAL_PATTERNS = {
     1: { upper: 2, lower: 3, steps: 2 },
     2: { upper: 1, lower: 3, steps: 5 },
