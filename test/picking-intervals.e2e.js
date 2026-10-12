@@ -37,12 +37,14 @@ const { serveStatic } = require('../scripts/lib/static-server');
             assert.ok(major.includes(fromTonic));
             (byString[string] = byString[string] || []).push(fret);
           });
-          // The neck is filled across octaves: no empty stretch at either end
-          // and never more than a whole tone between neighbouring notes.
-          Object.values(byString).forEach(frets => {
-            frets.sort((a, b) => a - b);
-            assert.ok(frets[0] <= 4 && frets[frets.length - 1] >= 22, 'filled neck at offset ' + offset);
-            frets.slice(1).forEach((fret, i) => assert.ok(fret - frets[i] <= 2));
+          // The neck is filled across octaves: every scale tone from fret 1 to
+          // 26 is drawn, including ones whose partner would be an open string.
+          Object.entries(byString).forEach(([string, frets]) => {
+            const expected = [];
+            for (let fret = 1; fret <= 26; fret++) {
+              if (major.includes((openPc[string] + fret - offset + 12) % 12)) expected.push(fret);
+            }
+            assert.deepEqual(frets.sort((a, b) => a - b), expected, 'filled neck at offset ' + offset);
           });
           return pattern.filter(([string, fret]) => (openPc[string] + fret - offset + 12) % 12 === 0).length;
         });
@@ -65,8 +67,15 @@ const { serveStatic } = require('../scripts/lib/static-server');
         connections.forEach((intervals, i) => {
           assert.ok(intervals.length > 0);
           intervals.forEach(interval => assert.ok(([ [3,4], [3,4], [8,9], [15,16] ][i]).includes(interval)));
-          assert.equal(intervals.length * 2, current[i].length);
+          // Edge notes whose partner falls off the neck have no connector.
+          assert.ok(intervals.length * 2 <= current[i].length && intervals.length * 2 >= current[i].length - 6);
         });
+        const shade = await page.locator('.picking-diagram').evaluateAll(els => els.map(el => {
+          const rect = el.querySelector('.picking-upper-frets');
+          const marker = el.querySelector('.position-marker-fret-12');
+          return rect && Number(rect.getAttribute('x')) > Number(marker.getAttribute('cx'));
+        }));
+        assert.deepEqual(shade, [true, true, true, true]);
       }
       await page.locator('#picking-transpose').focus();
       await page.keyboard.press('Home');

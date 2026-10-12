@@ -150,8 +150,12 @@
     Object.keys(INTERVAL_PATTERNS).forEach(function (id) {
       var def = INTERVAL_PATTERNS[id];
       var pairs = pairNotes(scale, def.upper, frets(def.upper), def.lower, frets(def.lower), def.steps, offset);
-      var fingers = Object.keys(pairs).map(function (key) {
-        return key.split(':').map(Number);
+      // Every scale tone on both strings is drawn, even when its partner
+      // would fall on an open string or past the last fret — those notes are
+      // simply left without a connector, so the neck has no gaps at its ends.
+      var fingers = [];
+      [def.upper, def.lower].forEach(function (string) {
+        frets(string).forEach(function (fret) { fingers.push([string, fret]); });
       });
       var tonics = {};
       fingers.forEach(function (finger) {
@@ -249,6 +253,31 @@
     board.setAttribute('fill', '#fff');
     board.setAttribute('class', 'picking-fretboard-background');
     svg.insertBefore(board, svg.firstChild);
+  }
+
+  // Most guitars (criollas especially) aren't comfortably playable past the
+  // 12th fret, so grey out the board from fret 13 on. Drawn just above the
+  // white background, under the strings and notes.
+  function addUpperFretsShade(svg, fromFret) {
+    var board = svg.querySelector('.picking-fretboard-background');
+    var fretLineXs = [];
+    svg.querySelectorAll('line').forEach(function (line) {
+      var x1 = parseFloat(line.getAttribute('x1'));
+      if (x1 === parseFloat(line.getAttribute('x2')) &&
+          line.getAttribute('y1') !== line.getAttribute('y2')) fretLineXs.push(x1);
+    });
+    fretLineXs.sort(function (a, b) { return a - b; });
+    var start = fretLineXs[fromFret - 1];
+    if (!board || start === undefined) return;
+
+    var right = parseFloat(board.getAttribute('x')) + parseFloat(board.getAttribute('width'));
+    var shade = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    shade.setAttribute('x', start);
+    shade.setAttribute('y', board.getAttribute('y'));
+    shade.setAttribute('width', right - start);
+    shade.setAttribute('height', board.getAttribute('height'));
+    shade.setAttribute('class', 'picking-upper-frets');
+    svg.insertBefore(shade, board.nextSibling);
   }
 
   // Real (criolla) fretboards mark frets 3, 5, 7, 9 and 12 with a small dot
@@ -404,6 +433,7 @@
       if (svg) {
         fixStringMarkers(svg);
         addFretboardBackground(svg);
+        if (transposable) addUpperFretsShade(svg, 13);
         addPositionMarkers(svg, pattern.frets);
         var elements = pickingNoteElements(svg, pattern);
         addPairConnectors(svg, pattern.pairs, elements);

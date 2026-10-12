@@ -1907,6 +1907,7 @@ footer {
   background: var(--accent);
 }
 .picking-transpose input::-moz-range-thumb { width: 10px; height: 10px; border: 0; border-radius: 50%; background: var(--accent); }
+.picking-upper-frets { fill: #e2ded6; }
 /* No fill transition: notes are redrawn on every slider step. */
 .picking-note-tonic { fill: #f5c400; stroke: var(--ink); stroke-width: 1.5px; transition: transform 0.1s ease; }
 .picking-transpose p { font-size: 0.9rem; }
