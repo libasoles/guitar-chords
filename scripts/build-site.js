@@ -451,7 +451,6 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     "dimNavLabel",
     "tabNavLabel",
     "sixthsH1",
-    "pickingGroupLabel",
   ];
   simpleKeys.forEach(function (key) {
     html = html.split("%%" + key + "%%").join(strings[key] || "");
