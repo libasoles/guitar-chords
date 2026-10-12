@@ -55,7 +55,6 @@ const { serveStatic } = require('../scripts/lib/static-server');
       await page.setViewportSize({ width: 390, height: 844 });
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
       assert.ok(await page.locator('.picking-diagram-scroll').first().evaluate(el => el.scrollWidth > el.clientWidth));
-      if (!locale) await page.screenshot({ path: '/private/tmp/intervals-mobile.png', fullPage: true });
     }
     for (const locale of ['', '/en']) {
       for (const mode of ['dorico', 'jonico', 'frigio', 'lidio', 'mixolidio', 'eolico', 'locrio']) {
