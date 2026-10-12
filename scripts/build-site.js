@@ -1060,7 +1060,6 @@ function renderPickingPage(template, strings, locale, page) {
     "extensionDescription",
     "intervalsKeyLabel",
     "intervalsInitialKey",
-    "intervalsSliderHint",
     "intervalsFig1",
     "intervalsFig2",
     "intervalsFig3",
