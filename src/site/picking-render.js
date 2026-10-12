@@ -125,9 +125,10 @@
     };
   }
 
-  // Fill the whole neck with the key's fretted pairs, so transposing brings
-  // in notes from the neighbouring octaves instead of sliding a fixed block
-  // and leaving empty frets behind it. Open strings are skipped.
+  // Fill the whole neck with the key's pairs, so transposing brings in notes
+  // from the neighbouring octaves instead of sliding a fixed block and
+  // leaving empty frets behind it. Open strings that belong to the key are
+  // drawn (and paired) too.
   // Tenths use nine diatonic steps: an octave plus a third.
   var INTERVAL_FRETS = 19;
   var INTERVAL_PATTERNS = {
@@ -144,22 +145,22 @@
       return (OPEN_SEMITONE[string] + fret - offset + 12) % 12;
     }
     function frets(string) {
-      return scaleFrets(scale, fromTonic(string, 0), INTERVAL_FRETS, true);
+      return scaleFrets(scale, fromTonic(string, 0), INTERVAL_FRETS, false);
     }
     var patterns = {};
     Object.keys(INTERVAL_PATTERNS).forEach(function (id) {
       var def = INTERVAL_PATTERNS[id];
       var pairs = pairNotes(scale, def.upper, frets(def.upper), def.lower, frets(def.lower), def.steps, offset);
       // Every scale tone on both strings is drawn, even when its partner
-      // would fall on an open string or past the last fret — those notes are
-      // simply left without a connector, so the neck has no gaps at its ends.
+      // would fall past the last fret — those notes are simply left without
+      // a connector, so the neck has no gaps at its ends.
       var fingers = [];
-      [def.upper, def.lower].forEach(function (string) {
-        frets(string).forEach(function (fret) { fingers.push([string, fret]); });
-      });
       var tonics = {};
-      fingers.forEach(function (finger) {
-        if (fromTonic(finger[0], finger[1]) === 0) tonics[finger.join(':')] = true;
+      [def.upper, def.lower].forEach(function (string) {
+        frets(string).forEach(function (fret) {
+          fingers.push([string, fret === 0 ? 'o' : fret]);
+          if (fromTonic(string, fret) === 0) tonics[string + ':' + fret] = true;
+        });
       });
       for (var string = 1; string <= 6; string++) {
         if (!fingers.some(function (finger) { return finger[0] === string; })) fingers.push([string, 'x']);
@@ -442,7 +443,11 @@
           Object.keys(elements).forEach(function (key) {
             if (pattern.tonics[key]) elements[key].classList.add('picking-note-tonic');
             var title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-            title.textContent = (document.documentElement.lang === 'es' ? 'Traste ' : 'Fret ') + key.split(':')[1];
+            var fret = key.split(':')[1];
+            var spanishTitle = document.documentElement.lang === 'es';
+            title.textContent = fret === '0'
+              ? (spanishTitle ? 'Cuerda al aire' : 'Open string')
+              : (spanishTitle ? 'Traste ' : 'Fret ') + fret;
             elements[key].appendChild(title);
           });
         }

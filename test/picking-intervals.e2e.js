@@ -19,10 +19,10 @@ const { serveStatic } = require('../scripts/lib/static-server');
       await page.waitForSelector('.picking-note');
       assert.equal(await page.locator('.picking-diagram svg').count(), 4);
       assert.deepEqual(await page.locator('.picking-diagram').evaluateAll(els => els.map(el => el.dataset.pattern)), ['3', '1', '2', '4']);
-      assert.equal(await page.locator('.metronome-widget, .picking-tips, [class*="finger-fret-NaN"]').count(), 0);
+      assert.equal(await page.locator('.metronome-widget, .picking-tips').count(), 0);
       const notes = () => page.locator('.picking-diagram').evaluateAll(els => els.map(el => Array.from(el.querySelectorAll('.picking-note'), note => {
-        const match = note.getAttribute('class').match(/finger-string-(\d+)-fret-(\d+)/);
-        return [6 - Number(match[1]), Number(match[2]) + 1];
+        const match = note.getAttribute('class').match(/finger-string-(\d+)-fret-(\d+|NaN)/);
+        return [6 - Number(match[1]), match[2] === 'NaN' ? 0 : Number(match[2]) + 1];
       })));
       const openPc = { 1: 0, 2: 7, 3: 3, 4: 10, 5: 5, 6: 0 };
       const major = [0, 2, 4, 5, 7, 9, 11];
@@ -37,11 +37,11 @@ const { serveStatic } = require('../scripts/lib/static-server');
             assert.ok(major.includes(fromTonic));
             (byString[string] = byString[string] || []).push(fret);
           });
-          // The neck is filled across octaves: every scale tone from fret 1 to
-          // 19 is drawn, including ones whose partner would be an open string.
+          // The neck is filled across octaves: every scale tone from the open
+          // string up to fret 19 is drawn.
           Object.entries(byString).forEach(([string, frets]) => {
             const expected = [];
-            for (let fret = 1; fret <= 19; fret++) {
+            for (let fret = 0; fret <= 19; fret++) {
               if (major.includes((openPc[string] + fret - offset + 12) % 12)) expected.push(fret);
             }
             assert.deepEqual(frets.sort((a, b) => a - b), expected, 'filled neck at offset ' + offset);
@@ -54,9 +54,9 @@ const { serveStatic } = require('../scripts/lib/static-server');
           const svg = el.querySelector('svg');
           const notes = Array.from(svg.querySelectorAll('.picking-note'));
           const pitch = note => {
-            const match = note.getAttribute('class').match(/finger-string-(\d+)-fret-(\d+)/);
+            const match = note.getAttribute('class').match(/finger-string-(\d+)-fret-(\d+|NaN)/);
             const string = 6 - Number(match[1]);
-            return { 1: 24, 2: 19, 3: 15, 4: 10, 5: 5, 6: 0 }[string] + Number(match[2]) + 1;
+            return { 1: 24, 2: 19, 3: 15, 4: 10, 5: 5, 6: 0 }[string] + (match[2] === 'NaN' ? 0 : Number(match[2]) + 1);
           };
           return Array.from(svg.querySelectorAll('.picking-pair-connector'), line => {
             const from = notes.find(n => n.getAttribute('cx') === line.getAttribute('x1') && n.getAttribute('cy') === line.getAttribute('y1'));
