@@ -123,6 +123,38 @@
     };
   }
 
+  // Keep only complete, fretted pairs, then translate both notes equally.
+  // Tenths use nine diatonic steps: an octave plus a third.
+  function buildIntervalPatterns(offset) {
+    var patterns = buildPatterns('ionian');
+    var scale = SCALES.ionian;
+    var upper = scaleFrets(scale, OPEN_SEMITONE[2], 12, true);
+    var lower = scaleFrets(scale, OPEN_SEMITONE[5], 12, true);
+    patterns[4] = { pairs: pairNotes(scale, 2, upper, 5, lower, 9) };
+    Object.keys(patterns).forEach(function (id) {
+      var base = patterns[id];
+      var pairs = {};
+      function shifted(key) {
+        var parts = key.split(':');
+        return parts[0] + ':' + (Number(parts[1]) + offset);
+      }
+      Object.keys(base.pairs).forEach(function (key) {
+        var partner = base.pairs[key];
+        if (Number(key.split(':')[1]) > 0 && Number(partner.split(':')[1]) > 0) {
+          pairs[shifted(key)] = shifted(partner);
+        }
+      });
+      var fingers = Object.keys(pairs).map(function (key) {
+        return key.split(':').map(Number);
+      });
+      for (var string = 1; string <= 6; string++) {
+        if (!fingers.some(function (finger) { return finger[0] === string; })) fingers.push([string, 'x']);
+      }
+      patterns[id] = { frets: 26, fingers: fingers, pairs: pairs };
+    });
+    return patterns;
+  }
+
   var CONFIG_BASE = {
     strings: 6,
     orientation: 'horizontal',
@@ -146,7 +178,7 @@
   };
 
   // Real fretboards dot these frets for orientation.
-  var POSITION_MARKER_FRETS = [3, 5, 7, 9, 12];
+  var POSITION_MARKER_FRETS = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24];
 
   // In horizontal orientation the vendored svguitar draws an open string ("o")
   // as a regular finger circle at cx=0 — half of it falls outside the viewBox,
@@ -344,25 +376,54 @@
   }
 
   var mode = (document.body && document.body.getAttribute('data-picking-mode')) || 'dorian';
-  var PATTERNS = buildPatterns(mode);
+  var transposable = document.body.hasAttribute('data-picking-transposable');
+  function renderPatterns(offset) {
+    var PATTERNS = transposable ? buildIntervalPatterns(offset) : buildPatterns(mode);
 
-  document.querySelectorAll('.picking-diagram').forEach(function (el) {
-    var pattern = PATTERNS[el.getAttribute('data-pattern')];
-    if (!pattern || !window.svguitar) return;
+    document.querySelectorAll('.picking-diagram').forEach(function (el) {
+      var pattern = PATTERNS[el.getAttribute('data-pattern')];
+      if (!pattern || !window.svguitar) return;
 
-    new svguitar.SVGuitarChord(el)
-      .configure(Object.assign({}, CONFIG_BASE, { frets: pattern.frets }))
-      .chord({ fingers: pattern.fingers, barres: [] })
-      .draw();
+      el.replaceChildren();
+      new svguitar.SVGuitarChord(el)
+        .configure(Object.assign({}, CONFIG_BASE, { frets: pattern.frets }))
+        .chord({ fingers: pattern.fingers, barres: [] })
+        .draw();
 
-    var svg = el.querySelector('svg');
-    if (svg) {
-      fixStringMarkers(svg);
-      addFretboardBackground(svg);
-      addPositionMarkers(svg, pattern.frets);
-      var elements = pickingNoteElements(svg, pattern);
-      addPairConnectors(svg, pattern.pairs, elements);
-      wireHover(elements, pattern);
+      var svg = el.querySelector('svg');
+      if (svg) {
+        fixStringMarkers(svg);
+        addFretboardBackground(svg);
+        addPositionMarkers(svg, pattern.frets);
+        var elements = pickingNoteElements(svg, pattern);
+        addPairConnectors(svg, pattern.pairs, elements);
+        wireHover(elements, pattern);
+        if (transposable) {
+          Object.keys(elements).forEach(function (key) {
+            var title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+            title.textContent = (document.documentElement.lang === 'es' ? 'Traste ' : 'Fret ') + key.split(':')[1];
+            elements[key].appendChild(title);
+          });
+        }
+      }
+    });
+  }
+  var slider = document.getElementById('picking-transpose');
+  if (transposable && slider) {
+    var spanish = document.documentElement.lang === 'es';
+    var keys = spanish
+      ? ['Mi', 'Fa', 'Fa♯', 'Sol', 'La♭', 'La', 'Si♭', 'Si', 'Do', 'Do♯', 'Re', 'Mi♭']
+      : ['E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B', 'C', 'C♯', 'D', 'E♭'];
+    function update() {
+      var offset = Number(slider.value);
+      var key = keys[offset] + (spanish ? ' mayor' : ' major');
+      document.getElementById('picking-key').textContent = key;
+      slider.setAttribute('aria-valuetext', key);
+      renderPatterns(offset);
     }
-  });
+    slider.addEventListener('input', update);
+    update();
+  } else {
+    renderPatterns(0);
+  }
 })();

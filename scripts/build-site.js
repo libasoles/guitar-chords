@@ -112,6 +112,10 @@ const pickingTemplate = fs.readFileSync(
   path.join(SRC_SITE, "picking-lesson.html"),
   "utf8",
 );
+const intervalsTemplate = fs.readFileSync(
+  path.join(SRC_SITE, "picking-intervals.html"),
+  "utf8",
+);
 const tabEditorTemplate = fs.readFileSync(
   path.join(SRC_SITE, "tab-editor.html"),
   "utf8",
@@ -394,6 +398,13 @@ const PICKING_PAGES = [
     modeLabelKey: "pickingModeLocrioLabel",
   },
 ];
+const INTERVALS_PAGE = {
+  slug: "punteo-jonico-terceras-sextas-decimas",
+  mode: "ionian",
+  prefix: "intervals",
+};
+const ALL_PICKING_PAGES = PICKING_PAGES.concat(INTERVALS_PAGE);
+
 // Home-nav / 404 / og default link points at the original Dorian lesson.
 const PICKING_SLUG = PICKING_PAGES[0].slug;
 
@@ -530,6 +541,8 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   simpleKeys.forEach(function (key) {
     html = html.split("%%" + key + "%%").join(strings[key] || "");
   });
+  html = html.split("%%INTERVALS_PAGE_HREF%%").join(v7PageHref(locale, INTERVALS_PAGE.slug));
+  html = html.split("%%intervalsNavLabel%%").join(strings.intervalsNavLabel || "");
 
   // Computed substitutions.
   html = html
@@ -1045,6 +1058,13 @@ function renderPickingPage(template, strings, locale, page) {
     "altLangLabel",
     "extensionHeading",
     "extensionDescription",
+    "intervalsKeyLabel",
+    "intervalsInitialKey",
+    "intervalsSliderHint",
+    "intervalsFig1",
+    "intervalsFig2",
+    "intervalsFig3",
+    "intervalsFig4",
     "metronomeTitle",
     "metronomeBeatsAria",
     "metronomeSlowerLabel",
@@ -1535,9 +1555,9 @@ LOCALES.forEach(function (locale) {
       say(path.relative(ROOT, sixthsOutFile));
     }
 
-    PICKING_PAGES.forEach(function (page) {
+    ALL_PICKING_PAGES.forEach(function (page) {
       const pickingHtml = renderPickingPage(
-        pickingTemplate,
+        page === INTERVALS_PAGE ? intervalsTemplate : pickingTemplate,
         strings,
         locale,
         page,
@@ -1612,9 +1632,9 @@ LOCALES.forEach(function (locale) {
     say(path.relative(ROOT, sixthsOutFile));
   }
 
-  PICKING_PAGES.forEach(function (page) {
+  ALL_PICKING_PAGES.forEach(function (page) {
     const pickingHtml = renderPickingPage(
-      pickingTemplate,
+      page === INTERVALS_PAGE ? intervalsTemplate : pickingTemplate,
       strings,
       locale,
       page,
@@ -1707,7 +1727,7 @@ addBilingual(
   ["0.7", "0.6"],
 );
 addSlugPages(
-  PICKING_PAGES.map(function (page) {
+  ALL_PICKING_PAGES.map(function (page) {
     return page.slug;
   }),
 );

@@ -464,5 +464,17 @@
   "sixthsMetaDescription": "Ejercicio de guitarra en tablatura: una escala tocada en sextas, donde la melodía principal la hace la nota aguda.",
   "sixthsH1": "Ejercicio de sextas",
   "sixthsLead": "La melodía principal la hace la nota aguda.",
-  "sixthsSource": "Ejercicio extraído de este video:"
+  "sixthsSource": "Ejercicio extraído de este video:",
+  "intervalsPageTitle": "Terceras, sextas y décimas · Punteo jónico",
+  "intervalsMetaDescription": "Cuatro patrones de guitarra en terceras, sextas y décimas sin cuerdas al aire. Cambiá la tonalidad de a un semitono con el slider.",
+  "intervalsH1": "Terceras, sextas y décimas",
+  "intervalsLead": "Cuatro patrones de la escala mayor, sin cuerdas al aire.",
+  "intervalsNavLabel": "Terceras, sextas y décimas →",
+  "intervalsKeyLabel": "Tonalidad",
+  "intervalsInitialKey": "Mi mayor",
+  "intervalsSliderHint": "Cada paso mueve todos los patrones un semitono.",
+  "intervalsFig3": "Terceras · cuerdas 1 y 2",
+  "intervalsFig1": "Terceras · cuerdas 2 y 3",
+  "intervalsFig2": "Sextas · cuerdas 1 y 3",
+  "intervalsFig4": "Décimas · cuerdas 2 y 5"
 }

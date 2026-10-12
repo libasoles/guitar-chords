@@ -1878,3 +1878,12 @@ footer {
   height: 100%;
   border: 0;
 }
+
+/* Keep transposed notes on a fixed neck so semitone movement stays visible. */
+.picking-diagram-scroll { overflow-x: auto; }
+[data-picking-transposable] .picking-diagram { min-width: 960px; }
+.picking-transpose { margin: 1.5rem 0; }
+.picking-transpose label { font-weight: 600; }
+.picking-transpose output { margin-left: 0.75rem; color: var(--accent); font-weight: 600; }
+.picking-transpose input { display: block; width: 100%; margin: 1rem 0; accent-color: var(--accent); }
+.picking-transpose p { font-size: 0.9rem; }
