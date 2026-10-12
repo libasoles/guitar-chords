@@ -85,19 +85,6 @@ const { serveStatic } = require('../scripts/lib/static-server');
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
       assert.ok(await page.locator('.picking-diagram-scroll').first().evaluate(el => el.scrollWidth > el.clientWidth));
     }
-    for (const locale of ['', '/en']) {
-      for (const mode of ['dorico', 'jonico', 'frigio', 'lidio', 'mixolidio', 'eolico', 'locrio']) {
-        await page.goto(base + locale + '/punteo-' + mode + '-sexta-cuerda-al-aire');
-        assert.equal(await page.locator('.picking-diagram svg').count(), 3);
-        assert.equal(await page.locator('.metronome-widget').count(), 1);
-        const labelNumbers = await page.locator('.picking-figure').evaluateAll(figures => figures.map(figure => {
-          const caption = figure.querySelector('figcaption').textContent;
-          const alt = figure.querySelector('.picking-diagram').getAttribute('aria-label');
-          return [Number(caption.match(/(?:Patrón|Pattern) (\d+)/)[1]), Number(alt.match(/(?:patrón|pattern) (\d+)/)[1])];
-        }));
-        assert.deepEqual(labelNumbers, [[1, 1], [2, 2], [3, 3]], locale + '/' + mode);
-      }
-    }
     assert.deepEqual(errors, []);
     console.log('Picking intervals E2E passed');
   } finally {

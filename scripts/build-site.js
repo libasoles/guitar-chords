@@ -108,10 +108,6 @@ const noteFinderTemplate = fs.readFileSync(
   path.join(SRC_SITE, "note-finder.html"),
   "utf8",
 );
-const pickingTemplate = fs.readFileSync(
-  path.join(SRC_SITE, "picking-lesson.html"),
-  "utf8",
-);
 const intervalsTemplate = fs.readFileSync(
   path.join(SRC_SITE, "picking-intervals.html"),
   "utf8",
@@ -350,89 +346,15 @@ E|---------------------------5---3---1---0
 `,
 ];
 
-// Static lesson pages rendered from src/site/picking-lesson.html — modal
-// picking patterns with the open low E string as a pedal note. One page per
-// mode; each cross-links to the other two. i18n keys are namespaced by
-// `prefix` (e.g. pickingH1, pickingJonicoH1, pickingFrigioH1).
-const PICKING_PAGES = [
-  {
-    slug: "punteo-dorico-sexta-cuerda-al-aire",
-    mode: "dorian",
-    prefix: "picking",
-    modeLabelKey: "pickingModeDorianLabel",
-  },
-  {
-    slug: "punteo-jonico-sexta-cuerda-al-aire",
-    mode: "ionian",
-    prefix: "pickingJonico",
-    modeLabelKey: "pickingModeJonicoLabel",
-  },
-  {
-    slug: "punteo-frigio-sexta-cuerda-al-aire",
-    mode: "phrygian",
-    prefix: "pickingFrigio",
-    modeLabelKey: "pickingModeFrigioLabel",
-  },
-  {
-    slug: "punteo-lidio-sexta-cuerda-al-aire",
-    mode: "lydian",
-    prefix: "pickingLidio",
-    modeLabelKey: "pickingModeLidioLabel",
-  },
-  {
-    slug: "punteo-mixolidio-sexta-cuerda-al-aire",
-    mode: "mixolydian",
-    prefix: "pickingMixolidio",
-    modeLabelKey: "pickingModeMixolidioLabel",
-  },
-  {
-    slug: "punteo-eolico-sexta-cuerda-al-aire",
-    mode: "aeolian",
-    prefix: "pickingEolico",
-    modeLabelKey: "pickingModeEolicoLabel",
-  },
-  {
-    slug: "punteo-locrio-sexta-cuerda-al-aire",
-    mode: "locrian",
-    prefix: "pickingLocrio",
-    modeLabelKey: "pickingModeLocrioLabel",
-  },
-];
+// Static lesson page rendered from src/site/picking-intervals.html — the
+// major scale in thirds, sixths and tenths. i18n keys are namespaced by
+// `prefix` (intervalsH1, intervalsPageTitle, ...).
 const INTERVALS_PAGE = {
   slug: "punteo-escala-mayor-terceras-sextas-decimas",
   mode: "ionian",
   prefix: "intervals",
 };
-const ALL_PICKING_PAGES = PICKING_PAGES.concat(INTERVALS_PAGE);
-
-// Home-nav / 404 / og default link points at the original Dorian lesson.
-const PICKING_SLUG = PICKING_PAGES[0].slug;
-
-// Display order for the "see also" nav and the home-page picking menu:
-// Ionian (jónico) before Dorian (dórico), then the rest in PICKING_PAGES
-// order. PICKING_PAGES[0] itself stays Dorian — it's the canonical/original
-// lesson used for the home-nav link, sitemap, and OG default.
-const PICKING_MENU_ORDER = [1, 0, 2, 3, 4, 5, 6].map(function (i) {
-  return PICKING_PAGES[i];
-});
-
-// Builds the "see also" nav line linking a picking-lesson page to its
-// sibling modes, in PICKING_MENU_ORDER. The current page's own mode is
-// rendered as plain (non-linked) text so the list order never shifts
-// depending on which page you're on.
-function pickingOtherModesNav(strings, locale, page) {
-  const label = strings.pickingSeeOtherModesLabel || "";
-  const items = PICKING_MENU_ORDER.map(function (pg) {
-    const modeLabel = strings[pg.modeLabelKey] || pg.mode;
-    if (pg.slug === page.slug) {
-      return '<span class="v7-nav-current">' + modeLabel + "</span>";
-    }
-    return (
-      '<a href="' + v7PageHref(locale, pg.slug) + '">' + modeLabel + "</a>"
-    );
-  }).join(" · ");
-  return '<p class="v7-nav">' + label + " " + items + "</p>";
-}
+const ALL_PICKING_PAGES = [INTERVALS_PAGE];
 
 // JSON-LD options shared by the home and guide renderers; mirrors the values
 // already used for canonical/hreflang/meta so structured data matches the page.
@@ -530,13 +452,6 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     "tabNavLabel",
     "sixthsH1",
     "pickingGroupLabel",
-    "pickingNavLabel",
-    "pickingJonicoNavLabel",
-    "pickingFrigioNavLabel",
-    "pickingLidioNavLabel",
-    "pickingMixolidioNavLabel",
-    "pickingEolicoNavLabel",
-    "pickingLocrioNavLabel",
   ];
   simpleKeys.forEach(function (key) {
     html = html.split("%%" + key + "%%").join(strings[key] || "");
@@ -577,27 +492,6 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html
     .split("%%TAB_EDITOR_PAGE_HREF%%")
     .join(v7PageHref(locale, TAB_EDITOR_SLUG));
-  html = html
-    .split("%%PICKING_PAGE_HREF%%")
-    .join(v7PageHref(locale, PICKING_PAGES[0].slug));
-  html = html
-    .split("%%PICKING_JONICO_PAGE_HREF%%")
-    .join(v7PageHref(locale, PICKING_PAGES[1].slug));
-  html = html
-    .split("%%PICKING_FRIGIO_PAGE_HREF%%")
-    .join(v7PageHref(locale, PICKING_PAGES[2].slug));
-  html = html
-    .split("%%PICKING_LIDIO_PAGE_HREF%%")
-    .join(v7PageHref(locale, PICKING_PAGES[3].slug));
-  html = html
-    .split("%%PICKING_MIXOLIDIO_PAGE_HREF%%")
-    .join(v7PageHref(locale, PICKING_PAGES[4].slug));
-  html = html
-    .split("%%PICKING_EOLICO_PAGE_HREF%%")
-    .join(v7PageHref(locale, PICKING_PAGES[5].slug));
-  html = html
-    .split("%%PICKING_LOCRIO_PAGE_HREF%%")
-    .join(v7PageHref(locale, PICKING_PAGES[6].slug));
 
   return injectJsonLd(
     html,
@@ -1041,10 +935,9 @@ function renderSixthsPage(template, strings, locale) {
   );
 }
 
-// Render a modal picking lesson page (src/site/picking-lesson.html) for one
-// locale — one of PICKING_PAGES (Dorian, Ionian, Phrygian). Static content
-// (three fretboard-diagram images + tips, computed client-side from the
-// mode by src/site/picking-render.js), no client-side data script.
+// Render the intervals lesson page (src/site/picking-intervals.html) for one
+// locale. Fretboard diagrams are computed client-side by
+// src/site/picking-render.js; no client-side data script.
 function renderPickingPage(template, strings, locale, page) {
   const resolvedAssetsPrefix = locale === "es" ? "assets/" : "../assets/";
   const ogImage = SITE_BASE_URL + "/assets/og-image.png";
@@ -1064,33 +957,6 @@ function renderPickingPage(template, strings, locale, page) {
     "intervalsFig2",
     "intervalsFig3",
     "intervalsFig4",
-    "metronomeTitle",
-    "metronomeBeatsAria",
-    "metronomeSlowerLabel",
-    "metronomeFasterLabel",
-    "metronomeTempoSliderLabel",
-    "metronomeStartLabel",
-    "metronomeStopLabel",
-    "metronomeMeasureLabel",
-    "metronomeSubdivisionLabel",
-    "metronomePitchLabel",
-    "metronomeMuteLabel",
-    "metronomeUnmuteLabel",
-    "metronomeVolumeLabel",
-    "metronomeVolumeOnIcon",
-    "metronomeVolumeOffIcon",
-    "metronomeShortcut",
-    "metronomeTempoLargo",
-    "metronomeTempoAdagio",
-    "metronomeTempoAndante",
-    "metronomeTempoModerato",
-    "metronomeTempoAllegro",
-    "metronomeTempoVivace",
-    "metronomeTempoPresto",
-    "metronomeSubdivisionQuarter",
-    "metronomeSubdivisionEighth",
-    "metronomeSubdivisionTriplet",
-    "metronomeSubdivisionSixteenth",
   ];
   simpleKeys.forEach(function (key) {
     html = html.split("%%" + key + "%%").join(strings[key] || "");
@@ -1102,33 +968,8 @@ function renderPickingPage(template, strings, locale, page) {
     .join(strings[p + "MetaDescription"] || "");
   html = html.split("%%PAGE_H1%%").join(strings[p + "H1"] || "");
   html = html.split("%%PAGE_LEAD%%").join(strings[p + "Lead"] || "");
-  html = html.split("%%pickingIntro1%%").join(strings[p + "Intro1"] || "");
-  html = html.split("%%pickingIntro2%%").join(strings[p + "Intro2"] || "");
-  html = html
-    .split("%%pickingChordsHeading%%")
-    .join(strings.pickingChordsHeading || "");
-  html = html.split("%%pickingChordsText%%").join(strings[p + "Chords"] || "");
-  html = html.split("%%pickingFig1Alt%%").join(strings[p + "Fig1Alt"] || "");
-  html = html
-    .split("%%pickingFig1Caption%%")
-    .join(strings[p + "Fig1Caption"] || "");
-  html = html.split("%%pickingFig2Alt%%").join(strings[p + "Fig2Alt"] || "");
-  html = html
-    .split("%%pickingFig2Caption%%")
-    .join(strings[p + "Fig2Caption"] || "");
-  html = html.split("%%pickingFig3Alt%%").join(strings[p + "Fig3Alt"] || "");
-  html = html
-    .split("%%pickingFig3Caption%%")
-    .join(strings[p + "Fig3Caption"] || "");
-  html = html.split("%%pickingTipsH2%%").join(strings[p + "TipsH2"] || "");
-  html = html.split("%%pickingTip1%%").join(strings[p + "Tip1"] || "");
-  html = html.split("%%pickingTip2%%").join(strings[p + "Tip2"] || "");
-  html = html.split("%%pickingTip3%%").join(strings[p + "Tip3"] || "");
 
   html = html.split("%%PICKING_MODE%%").join(page.mode);
-  html = html
-    .split("%%PICKING_OTHER_MODES_NAV%%")
-    .join(pickingOtherModesNav(strings, locale, page));
 
   html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
   html = html.split("%%homeHref%%").join(homeHref(locale));
@@ -1200,7 +1041,7 @@ function render404Page(template, strings) {
   html = html.split("%%V7_PAGE_HREF%%").join(v7PageHref("es"));
   html = html
     .split("%%PICKING_PAGE_HREF%%")
-    .join(v7PageHref("es", PICKING_SLUG));
+    .join(v7PageHref("es", INTERVALS_PAGE.slug));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html.split("%%EXTENSION_CTA_BUTTON%%").join(ctaButton(strings));
   html = html
@@ -1281,10 +1122,6 @@ copyFile(path.join(SRC_SITE, "site.css"), path.join(ASSETS_DIST, "site.css"));
 copyFile(
   path.join(SRC_SITE, "picking-render.js"),
   path.join(ASSETS_DIST, "picking-render.js"),
-);
-copyFile(
-  path.join(SRC_SITE, "metronome.js"),
-  path.join(ASSETS_DIST, "metronome.js"),
 );
 copyFile(
   path.join(SRC_SITE, "guitar-player-cubist-left-head.svg"),
@@ -1467,7 +1304,6 @@ const precacheUrls = [
   "/assets/icons/icon-192.png",
   "/assets/icons/icon-512.png",
   "/assets/picking-render.js",
-  "/assets/metronome.js",
   "/404.html",
 ];
 const swOut = swTemplate
@@ -1556,7 +1392,7 @@ LOCALES.forEach(function (locale) {
 
     ALL_PICKING_PAGES.forEach(function (page) {
       const pickingHtml = renderPickingPage(
-        page === INTERVALS_PAGE ? intervalsTemplate : pickingTemplate,
+        intervalsTemplate,
         strings,
         locale,
         page,
@@ -1633,7 +1469,7 @@ LOCALES.forEach(function (locale) {
 
   ALL_PICKING_PAGES.forEach(function (page) {
     const pickingHtml = renderPickingPage(
-      page === INTERVALS_PAGE ? intervalsTemplate : pickingTemplate,
+      intervalsTemplate,
       strings,
       locale,
       page,
