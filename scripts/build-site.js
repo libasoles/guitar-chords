@@ -10,6 +10,10 @@
    Env vars:
      SITE_BASE_URL         Base URL without trailing slash (default: https://acordesdeguitarra.com.ar)
      EXTENSION_STORE_URL   Chrome Web Store URL — enables the "Add to Chrome" button
+     PARTITURA_API_URL     Base URL of the Partitura y tablatura API. The tool page
+                           (and its home banner/links) is only generated when set.
+     SITE_OUT_DIR          Output directory (default: dist/site)
+     TURNSTILE_SITE_KEY    Cloudflare Turnstile public site key for that page
 */
 
 const fs = require("fs");
@@ -37,13 +41,26 @@ const SRC_I18N = path.join(ROOT, "src", "i18n");
 const SRC_EXT = path.join(ROOT, "src", "extension");
 const SRC_VENDOR = path.join(ROOT, "vendor");
 const SRC_STORE = path.join(ROOT, "store");
-const DIST_SITE = path.join(ROOT, "dist", "site");
+// SITE_OUT_DIR lets tests build variants (with/without the API URL) side by side.
+const DIST_SITE = process.env.SITE_OUT_DIR
+  ? path.resolve(process.env.SITE_OUT_DIR)
+  : path.join(ROOT, "dist", "site");
 
 // Base URL for canonical/OG tags (no trailing slash).
 const SITE_BASE_URL = (
   process.env.SITE_BASE_URL || "https://acordesdeguitarra.com.ar"
 ).replace(/\/$/, "");
 const SITE_HOSTNAME = new URL(SITE_BASE_URL).hostname;
+
+// Partitura y tablatura is generated only when its API URL is configured, so
+// merging to main does not publish the page before the backend is deployed.
+const PARTITURA_API_URL = (process.env.PARTITURA_API_URL || "").replace(
+  /\/+$/,
+  "",
+);
+const TURNSTILE_SITE_KEY =
+  process.env.TURNSTILE_SITE_KEY || "0x4AAAAAAFX8ivpyYAAvr-8D";
+const PARTITURA_ENABLED = Boolean(PARTITURA_API_URL && TURNSTILE_SITE_KEY);
 
 // ---- helpers ---------------------------------------------------------------
 
@@ -134,6 +151,18 @@ const noteFinderPromoTemplate = fs.readFileSync(
 );
 const tabEditorPromoTemplate = fs.readFileSync(
   path.join(SRC_SITE, "tab-editor-promo.html"),
+  "utf8",
+);
+const privacyTemplate = fs.readFileSync(
+  path.join(SRC_SITE, "privacy.html"),
+  "utf8",
+);
+const partituraTemplate = fs.readFileSync(
+  path.join(SRC_SITE, "partitura.html"),
+  "utf8",
+);
+const partituraPromoTemplate = fs.readFileSync(
+  path.join(SRC_SITE, "partitura-promo.html"),
   "utf8",
 );
 const LOCALES = ["es", "en"];
@@ -329,6 +358,11 @@ const TAB_EDITOR_SLUG = "crear-tablaturas-de-guitarra";
 // Split in three parts (up, high position, down) so each one fits on a single
 // staff instead of wrapping.
 const SIXTHS_SLUG = "ejercicio-de-sextas";
+
+// Partitura y tablatura tool (src/site/partitura.html, src/site/partitura.js)
+// and the site-wide privacy policy (src/site/privacy.html).
+const PARTITURA_SLUG = "partitura-y-tablatura";
+const PRIVACY_SLUG = "politica-de-privacidad";
 // YouTube video the exercise was taken from, embedded below the tabs.
 const SIXTHS_VIDEO_ID = "NNwTR8Q8JN4";
 const SIXTHS_TABS = [
@@ -434,6 +468,37 @@ function tabEditorPromo(strings, locale) {
     .join(v7PageHref(locale, TAB_EDITOR_SLUG));
 }
 
+// Home banner for Partitura y tablatura; empty when the page is not generated.
+function partituraPromo(strings, locale, assetsPrefix) {
+  if (!PARTITURA_ENABLED) return "";
+  let html = partituraPromoTemplate.trim();
+  [
+    "partPromoKicker",
+    "partPromoTitle",
+    "partPromoDescription",
+    "partPromoCta",
+    "partPromoAlt",
+  ].forEach(function (key) {
+    html = html.split("%%" + key + "%%").join(strings[key] || "");
+  });
+  return html
+    .split("%%PARTITURA_PAGE_HREF%%")
+    .join(v7PageHref(locale, PARTITURA_SLUG))
+    .split("%%ASSETS_PREFIX%%")
+    .join(assetsPrefix);
+}
+
+function partituraNav(strings, locale) {
+  if (!PARTITURA_ENABLED) return "";
+  return (
+    '<p class="v7-nav"><a href="' +
+    v7PageHref(locale, PARTITURA_SLUG) +
+    '">' +
+    strings.partNavLabel +
+    "</a></p>"
+  );
+}
+
 function render(template, strings, locale, assetsPrefix, outputMode) {
   const resolvedAssetsPrefix =
     assetsPrefix || (locale === "es" ? "assets/" : "../assets/");
@@ -478,6 +543,10 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html
     .split("%%TAB_EDITOR_PROMO%%")
     .join(tabEditorPromo(strings, locale));
+  html = html
+    .split("%%PARTITURA_PROMO%%")
+    .join(partituraPromo(strings, locale, resolvedAssetsPrefix));
+  html = html.split("%%PARTITURA_NAV%%").join(partituraNav(strings, locale));
   html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
   html = html.split("%%altLangHref%%").join(altLangHref(locale, outputMode));
   html = html.split("%%canonicalUrl%%").join(canonicalUrl(locale));
@@ -949,6 +1018,143 @@ function renderSixthsPage(template, strings, locale) {
   );
 }
 
+// Fill the document chrome shared by the standalone tool/policy templates.
+function fillPageChrome(html, strings, locale, slug) {
+  const resolvedAssetsPrefix = locale === "es" ? "assets/" : "../assets/";
+  html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
+  ["htmlLang", "wordmark", "wordmarkSmall", "altLangLabel"].forEach(
+    function (key) {
+      html = html.split("%%" + key + "%%").join(strings[key] || "");
+    },
+  );
+  return html
+    .split("%%homeHref%%")
+    .join(homeHref(locale))
+    .split("%%altLangHref%%")
+    .join(locale === "es" ? v7PageHref("en", slug) : v7PageHref("es", slug))
+    .split("%%canonicalUrl%%")
+    .join(v7CanonicalUrl(locale, slug))
+    .split("%%hreflangEs%%")
+    .join(SITE_BASE_URL + v7PageHref("es", slug))
+    .split("%%hreflangEn%%")
+    .join(SITE_BASE_URL + v7PageHref("en", slug))
+    .split("%%ogImage%%")
+    .join(SITE_BASE_URL + "/assets/og-image.png")
+    .split("%%MANIFEST_HREF%%")
+    .join(resolvedAssetsPrefix + "manifest." + locale + ".webmanifest")
+    .split("%%SW_PATH%%")
+    .join("/sw.js");
+}
+
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// Plain text with contact addresses turned into mailto links.
+function linkifyEmails(text) {
+  return escapeHtml(text).replace(
+    /([\w.+-]+@[\w-]+(?:\.[\w-]+)+)/g,
+    '<a href="mailto:$1">$1</a>',
+  );
+}
+
+// Render the bilingual privacy policy (src/site/privacy.html).
+function renderPrivacyPage(template, strings, locale) {
+  const sections = (strings.privSections || [])
+    .map(function (section) {
+      return (
+        "<h2>" +
+        escapeHtml(section.h) +
+        "</h2>\n      " +
+        section.p
+          .map(function (para) {
+            return "<p>" + linkifyEmails(para) + "</p>";
+          })
+          .join("\n      ")
+      );
+    })
+    .join("\n      ");
+  let html = fillPageChrome(template, strings, locale, PRIVACY_SLUG);
+  html = html
+    .split("%%PAGE_TITLE%%")
+    .join(strings.privPageTitle || "")
+    .split("%%PAGE_META_DESCRIPTION%%")
+    .join(strings.privMetaDescription || "")
+    .split("%%PAGE_H1%%")
+    .join(strings.privH1 || "")
+    .split("%%PAGE_LEAD%%")
+    .join(strings.privLead || "")
+    .split("%%PRIVACY_SECTIONS%%")
+    .join(sections);
+  return withGuideJsonLd(
+    html,
+    strings,
+    locale,
+    PRIVACY_SLUG,
+    "privPageTitle",
+    "privMetaDescription",
+  );
+}
+
+// Render the Partitura y tablatura tool page (src/site/partitura.html). The
+// client script reads window.PARTITURA_CONFIG: API base URL, Turnstile site
+// key and every part* string for the locale.
+function renderPartituraPage(template, strings, locale) {
+  const i18n = {};
+  Object.keys(strings).forEach(function (key) {
+    if (key.indexOf("part") === 0) i18n[key] = strings[key];
+  });
+  const config = {
+    apiUrl: PARTITURA_API_URL,
+    turnstileSiteKey: TURNSTILE_SITE_KEY,
+    locale: locale,
+    privacyHref: v7PageHref(locale, PRIVACY_SLUG),
+    strings: i18n,
+  };
+  let html = fillPageChrome(template, strings, locale, PARTITURA_SLUG);
+  [
+    "partRightsLabel",
+    "partFileLabel",
+    "partTuningLabel",
+    "partTuningAuto",
+    "partTuningStandard",
+    "partTuningDropD",
+    "partSubmit",
+    "partResumeHint",
+    "partLoadingAlt",
+    "partPrivacySummary",
+    "partPrivacyBody",
+    "partPrivacyLink",
+  ].forEach(function (key) {
+    html = html.split("%%" + key + "%%").join(escapeHtml(strings[key] || ""));
+  });
+  html = html
+    .split("%%PAGE_TITLE%%")
+    .join(strings.partPageTitle || "")
+    .split("%%PAGE_META_DESCRIPTION%%")
+    .join(strings.partMetaDescription || "")
+    .split("%%PAGE_H1%%")
+    .join(strings.partH1 || "")
+    .split("%%PAGE_LEAD%%")
+    .join(strings.partLead || "")
+    .split("%%PRIVACY_HREF%%")
+    .join(v7PageHref(locale, PRIVACY_SLUG))
+    .split("%%PARTITURA_CONFIG%%")
+    .join(JSON.stringify(config).replace(/</g, "\\u003c"));
+  return withGuideJsonLd(
+    html,
+    strings,
+    locale,
+    PARTITURA_SLUG,
+    "partPageTitle",
+    "partMetaDescription",
+  );
+}
+
 // Render the intervals lesson page (src/site/picking-intervals.html) for one
 // locale. Fretboard diagrams are computed client-side by
 // src/site/picking-render.js; no client-side data script.
@@ -1178,6 +1384,20 @@ copyFile(
   ASCII_TABS,
   path.join(VENDOR_DIST, "ascii-tabs.js"),
 );
+if (PARTITURA_ENABLED) {
+  copyFile(
+    path.join(SRC_SITE, "partitura.js"),
+    path.join(ASSETS_DIST, "partitura.js"),
+  );
+  copyFile(
+    path.join(SRC_SITE, "partitura-loading.svg"),
+    path.join(ASSETS_DIST, "partitura-loading.svg"),
+  );
+  copyFile(
+    path.join(SRC_SITE, "partitura-banner.webp"),
+    path.join(ASSETS_DIST, "partitura-banner.webp"),
+  );
+}
 // OG image (optional — skip silently if not present yet).
 const ogImageSrc = path.join(SRC_SITE, "og-image.png");
 if (fs.existsSync(ogImageSrc)) {
@@ -1411,6 +1631,26 @@ LOCALES.forEach(function (locale) {
       say(path.relative(ROOT, sixthsOutFile));
     }
 
+    {
+      const privacyOutFile = path.join(DIST_SITE, PRIVACY_SLUG + ".html");
+      fs.writeFileSync(
+        privacyOutFile,
+        renderPrivacyPage(privacyTemplate, strings, locale),
+        "utf8",
+      );
+      say(path.relative(ROOT, privacyOutFile));
+    }
+
+    if (PARTITURA_ENABLED) {
+      const partOutFile = path.join(DIST_SITE, PARTITURA_SLUG + ".html");
+      fs.writeFileSync(
+        partOutFile,
+        renderPartituraPage(partituraTemplate, strings, locale),
+        "utf8",
+      );
+      say(path.relative(ROOT, partOutFile));
+    }
+
     ALL_PICKING_PAGES.forEach(function (page) {
       const pickingHtml = renderPickingPage(
         intervalsTemplate,
@@ -1493,6 +1733,26 @@ LOCALES.forEach(function (locale) {
     say(path.relative(ROOT, sixthsOutFile));
   }
 
+  {
+    const privacyOutFile = path.join(localeDir, PRIVACY_SLUG + ".html");
+    fs.writeFileSync(
+      privacyOutFile,
+      renderPrivacyPage(privacyTemplate, strings, locale),
+      "utf8",
+    );
+    say(path.relative(ROOT, privacyOutFile));
+  }
+
+  if (PARTITURA_ENABLED) {
+    const partOutFile = path.join(localeDir, PARTITURA_SLUG + ".html");
+    fs.writeFileSync(
+      partOutFile,
+      renderPartituraPage(partituraTemplate, strings, locale),
+      "utf8",
+    );
+    say(path.relative(ROOT, partOutFile));
+  }
+
   ALL_PICKING_PAGES.forEach(function (page) {
     const pickingHtml = renderPickingPage(
       intervalsTemplate,
@@ -1515,6 +1775,46 @@ console.log("==> Rendering 404 page...");
   fs.writeFileSync(notFoundOutFile, notFoundHtml, "utf8");
   say(path.relative(ROOT, notFoundOutFile));
 }
+
+// ---- Privacy policy link in every page footer --------------------------------
+// Runs on the built HTML so every page — including the standalone song sheets
+// and pages without a footer — links to the policy in its own language.
+
+console.log("==> Linking the privacy policy from every page footer...");
+function addPrivacyLinks(dir) {
+  fs.readdirSync(dir, { withFileTypes: true }).forEach(function (entry) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name === "assets" || entry.name === "store") return;
+      addPrivacyLinks(full);
+      return;
+    }
+    if (!entry.name.endsWith(".html")) return;
+    const rel = path.relative(DIST_SITE, full).split(path.sep).join("/");
+    const isEn = rel === "en.html" || rel.indexOf("en/") === 0;
+    const label = isEn ? "Privacy policy" : "Política de privacidad";
+    const href = "/" + (isEn ? "en/" : "") + PRIVACY_SLUG;
+    let html = fs.readFileSync(full, "utf8");
+    if (html.indexOf('class="privacy-link"') !== -1) return;
+    const link =
+      '<p class="privacy-link"><a href="' + href + '">' + label + "</a></p>";
+    const footerEnd = html.lastIndexOf("</footer>");
+    if (footerEnd !== -1) {
+      html = html.slice(0, footerEnd) + link + "\n    " + html.slice(footerEnd);
+    } else {
+      const bodyEnd = html.lastIndexOf("</body>");
+      if (bodyEnd === -1) return;
+      html =
+        html.slice(0, bodyEnd) +
+        '<footer class="privacy-footer">' +
+        link +
+        "</footer>\n  " +
+        html.slice(bodyEnd);
+    }
+    fs.writeFileSync(full, html, "utf8");
+  });
+}
+addPrivacyLinks(DIST_SITE);
 
 // ---- robots.txt ------------------------------------------------------------
 
@@ -1587,6 +1887,22 @@ addBilingual(
   "en/" + TAB_EDITOR_SLUG + ".html",
   ["0.7", "0.6"],
 );
+addBilingual(
+  "/" + PRIVACY_SLUG,
+  PRIVACY_SLUG + ".html",
+  "/en/" + PRIVACY_SLUG,
+  "en/" + PRIVACY_SLUG + ".html",
+  ["0.3", "0.3"],
+);
+if (PARTITURA_ENABLED) {
+  addBilingual(
+    "/" + PARTITURA_SLUG,
+    PARTITURA_SLUG + ".html",
+    "/en/" + PARTITURA_SLUG,
+    "en/" + PARTITURA_SLUG + ".html",
+    ["0.7", "0.6"],
+  );
+}
 addSlugPages(
   ALL_PICKING_PAGES.map(function (page) {
     return page.slug;
