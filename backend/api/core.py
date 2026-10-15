@@ -10,6 +10,7 @@ import base64
 import hashlib
 import json
 import re
+import posixpath
 import secrets
 import time
 from dataclasses import dataclass, field
@@ -32,12 +33,15 @@ STATUS_BY_CODE = {
     "busy": 503,
     "budget_paused": 503,
     "omr_failed": 422,
+    "invalid_score": 422,
+    "export_failed": 500,
     "no_notes": 422,
     "timeout": 504,
     "internal_error": 500,
 }
 # Codes the engine / state machine may report for a failed job.
-JOB_FAILURE_CODES = {"omr_failed", "no_notes", "timeout", "too_large", "internal_error"}
+JOB_FAILURE_CODES = {"omr_failed", "no_notes", "invalid_score", "export_failed", "timeout",
+                     "too_large", "internal_error"}
 
 KINDS = ("pdf", "musicxml")
 TUNINGS = ("auto", "standard", "dropd")
@@ -259,10 +263,15 @@ class Service:
                "error": job.get("error"),
                "elapsedSeconds": int(max(0, end - started)) if started else 0,
                "expiresAt": job["expires_at"], "exports": job.get("exports", 0),
-               "discardedNotes": job.get("discarded", []), "preview": None}
+               "discardedNotes": job.get("dropped", []), "measures": job.get("measures"),
+               "title": job.get("title"), "preview": None}
         if job["status"] in ("ready", "exporting", "exported"):
             keys = self._keys(job["id"], job["kind"], job["filename"])
-            out["preview"] = self.blob.presign_download(keys["preview"], "preview.json", self.cfg.url_ttl)
+            ttl = self.cfg.url_ttl
+            out["preview"] = {
+                "json": self.blob.presign_download(keys["preview"], "preview.json", ttl),
+                "svgs": [self.blob.presign_download(k, posixpath.basename(k), ttl)
+                         for k in job.get("preview_svgs") or []]}
         return out
 
     # -- POST /jobs/{id}/export
@@ -275,10 +284,10 @@ class Service:
             raise ApiError("invalid_state", f"cannot export from {job['status']}")
         if not self.store.increment(job["pk"], "exports", self.cfg.export_limit):
             raise ApiError("export_limit")
-        keys = self._keys(job_id, job["kind"], job["filename"])
         n = job.get("exports", 0) + 1
+        keys = engine_adapter.keys_for(job_id, job["kind"], job["filename"], n)
         try:
-            self.blob.put_json(keys["edits"], {"tabs": tabs})
+            self.blob.put_json(keys["edits"], tabs)   # engine `tabs_key`: the Tab[] itself
             payload = engine_adapter.export_input(job, self.cfg.bucket, keys)
             arn = self.workflow.start("export", f"{job_id}-{n}", payload)
         except Exception:
@@ -296,12 +305,12 @@ class Service:
         job = self._job(job_id)
         if job["status"] not in ("ready", "exporting", "exported"):
             raise ApiError("invalid_state", f"no downloads in {job['status']}")
-        keys = self._keys(job_id, job["kind"], job["filename"])
+        keys = engine_adapter.keys_for(job_id, job["kind"], job["filename"], job.get("exports", 0))
         links = {}
         if job["status"] == "exported":
             for name, key, fname in (("pdf", "pdf", "tablatura.pdf"),
                                      ("musicxml", "final", "tablatura.musicxml"),
-                                     ("json", "json", "tablaturas.json")):
+                                     ("tabs", "tabs", "tablaturas.json")):
                 if self.blob.size(keys[key]) is not None:
                     links[name] = self.blob.presign_download(keys[key], fname, self.cfg.url_ttl)
         if job["kind"] == "pdf" and self.blob.size(keys["intermediate"]) is not None:
@@ -321,17 +330,21 @@ class Service:
                 self._release_slot(job)       # OCR finished, free the slot
             self.store.update(job["pk"], {"stage": event.get("stage")})
         elif op == "complete":
-            result = event.get("result") or {}
-            if isinstance(result, dict) and result.get("error"):
-                self._fail(job, str(result["error"]))
+            result = event.get("result")
+            result = result if isinstance(result, dict) else {}
+            if result.get("ok") is False or result.get("error"):
+                self._fail(job, engine_adapter.map_engine_error(result.get("error"), job["kind"]))
             else:
                 exporting = event.get("action") == "export"
                 fields = {"status": "exported" if exporting else "ready",
                           "stage": None, "finished_at": self.clock()}
-                if not exporting and isinstance(result, dict):
-                    fields["discarded"] = result.get("discarded", [])
-                    if result.get("tuning"):
-                        fields["resolved_tuning"] = result["tuning"]
+                if not exporting:
+                    fields["dropped"] = result.get("dropped") or []
+                    fields["preview_svgs"] = list((result.get("keys") or {}).get("preview_svgs") or [])
+                    for src, dst in (("tuning", "resolved_tuning"), ("measures", "measures"),
+                                     ("title", "title")):
+                        if result.get(src) is not None:
+                            fields[dst] = result[src]
                 self.store.update(job["pk"], fields)
                 self._release_slot(job)
         elif op == "fail":
@@ -349,9 +362,9 @@ def classify_failure(error: Any, stage: Optional[str]) -> str:
     err = error if isinstance(error, dict) else {}
     name = str(err.get("Error", ""))
     cause = str(err.get("Cause", ""))
-    if name == "States.Timeout" or "timed out" in cause.lower():
+    if name in ("States.Timeout", "Sandbox.Timedout") or "timed out" in cause.lower():
         return "timeout"
-    for code in ("no_notes", "omr_failed", "too_large", "timeout"):
+    for code in ("no_notes", "invalid_score", "export_failed", "omr_failed", "too_large", "timeout"):
         if name == code or f'"{code}"' in cause:
             return code
     return "omr_failed" if stage == "ocr" else "internal_error"

@@ -5,7 +5,7 @@ Fargate OCR task (public subnet, no NAT/ALB) + Step Functions (process/export)
 + HTTP API + Budget with a pause flag.
 """
 from aws_cdk import (
-    Duration, RemovalPolicy, Stack, CfnOutput,
+    Duration, RemovalPolicy, Size, Stack, CfnOutput,
     aws_apigatewayv2 as apigw,
     aws_apigatewayv2_integrations as integrations,
     aws_budgets as budgets,
@@ -74,7 +74,8 @@ class BackendStack(Stack):
         engine_fn = lambda_.DockerImageFunction(
             self, "EngineFunction",
             code=lambda_.DockerImageCode.from_image_asset(engine_dir, platform=_arm64_platform()),
-            architecture=lambda_.Architecture.ARM_64, memory_size=3008, timeout=Duration.minutes(5),
+            architecture=lambda_.Architecture.ARM_64, memory_size=2048, timeout=Duration.seconds(120),
+            ephemeral_storage_size=Size.gibibytes(1),
             log_retention=logs.RetentionDays.ONE_MONTH)
         bucket.grant_read_write(engine_fn)
 
@@ -92,7 +93,7 @@ class BackendStack(Stack):
                 operating_system_family=ecs.OperatingSystemFamily.LINUX))
         task_def.add_container(
             "ocr", image=ecs.ContainerImage.from_asset(ocr_dir, platform=_arm64_platform()),
-            environment={"JAVA_TOOL_OPTIONS": "-Xmx6g"},
+            environment={"OMR_MAX_HEAP_MB": "5120", "OMR_TIMEOUT_SECONDS": "780"},
             logging=ecs.LogDrivers.aws_logs(stream_prefix="ocr", log_retention=logs.RetentionDays.ONE_MONTH))
         bucket.grant_read_write(task_def.task_role)
 
@@ -125,13 +126,16 @@ class BackendStack(Stack):
             security_groups=[ocr_sg], integration_pattern=sfn.IntegrationPattern.RUN_JOB,
             container_overrides=[tasks.ContainerOverride(
                 container_definition=task_def.default_container,
-                environment=[tasks.TaskEnvironmentVariable(
-                    name="OCR_EVENT",
-                    value=sfn.JsonPath.json_to_string(sfn.JsonPath.object_at("$.ocr")))])],
-            result_path=sfn.JsonPath.DISCARD, task_timeout=sfn.Timeout.duration(Duration.minutes(11)))
+                environment=[
+                    tasks.TaskEnvironmentVariable(
+                        name=name, value=sfn.JsonPath.string_at(f"$.ocr.{name}"))
+                    for name in ("BUCKET", "INPUT_KEY", "OUTPUT_PREFIX")])],
+            # Audiveris self-kills at OMR_TIMEOUT_SECONDS (780s, exit 2 -> omr_failed);
+            # this is only the backstop, below the 15 min machine timeout.
+            result_path=sfn.JsonPath.DISCARD, task_timeout=sfn.Timeout.duration(Duration.minutes(14)))
         stage_preparing = invoke_events("StagePreparing", {
             "internal": "stage", "jobId": job_id, "stage": "preparing"})
-        prepare = engine_task("Prepare", "$.prepare", Duration.minutes(3))
+        prepare = engine_task("Prepare", "$.prepare", Duration.seconds(150))
         process_done = complete("ProcessComplete", "process")
         for state in (ocr, stage_preparing, prepare, process_done):
             state.add_catch(process_fail, result_path="$.error")
@@ -148,7 +152,7 @@ class BackendStack(Stack):
         export_fail = invoke_events("ExportMarkFailed", {
             "internal": "fail", "jobId": job_id, "error": sfn.JsonPath.object_at("$.error")})
         export_fail.next(sfn.Fail(self, "ExportFailed", error="JobFailed"))
-        export = engine_task("Export", "$.export", Duration.minutes(5))
+        export = engine_task("Export", "$.export", Duration.seconds(150))
         export_done = complete("ExportComplete", "export")
         for state in (export, export_done):
             state.add_catch(export_fail, result_path="$.error")

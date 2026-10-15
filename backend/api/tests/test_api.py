@@ -135,7 +135,8 @@ class Env:
         self.upload(jid)
         self.call("POST /jobs/{id}/process", job=jid)
         self.svc.internal({"internal": "complete", "jobId": jid, "action": "process",
-                           "result": {"discarded": [], "tuning": "standard"}})
+                           "result": {"ok": True, "tuning": "standard", "dropped": [], "measures": 4,
+                                      "keys": {"preview_svgs": [f"jobs/{jid}/prepared/preview-01.svg"]}}})
         return jid
 
 
@@ -254,21 +255,33 @@ class StateTests(unittest.TestCase):
         env.now += 7
         self.assertEqual(env.call("GET /jobs/{id}", job=jid)[1]["elapsedSeconds"], 7)
         env.svc.internal({"internal": "complete", "jobId": jid, "action": "process",
-                          "result": {"discarded": [{"measure": 3, "pitch": "E2"}], "tuning": "dropd"}})
+                          "result": {"ok": True, "tuning": "dropd", "measures": 8,
+                                    "dropped": [{"measure": 3, "pitch": "E2"}],
+                                    "keys": {"preview_svgs": [f"jobs/{jid}/prepared/preview-01.svg",
+                                                              f"jobs/{jid}/prepared/preview-02.svg"]}}})
         _, body, _ = env.call("GET /jobs/{id}", job=jid)
         self.assertEqual((body["status"], body["tuning"]), ("ready", "dropd"))
         self.assertEqual(body["discardedNotes"][0]["measure"], 3)
-        self.assertIn("preview", body["preview"])
+        self.assertIn("preview.json", body["preview"]["json"])
+        self.assertEqual(len(body["preview"]["svgs"]), 2)
+        self.assertIn("preview-02.svg", body["preview"]["svgs"][1])
+        self.assertEqual(body["measures"], 8)
+        started = env.wf.started[0][2]
+        self.assertEqual(started["prepare"]["kind"], "musicxml")
+        self.assertEqual(started["prepare"]["input_key"], f"jobs/{jid}/input.musicxml")
+        self.assertEqual(started["prepare"]["out_prefix"], f"jobs/{jid}/prepared/")
         status, body, _ = env.call("POST /jobs/{id}/export", {"tabs": [[1, None]]}, job=jid)
         self.assertEqual((status, body["status"]), (202, "exporting"))
         self.assertEqual(env.wf.started[-1][0], "export")
         self.assertEqual(env.call("POST /jobs/{id}/export", {"tabs": []}, job=jid)[1]["error"]["code"], "invalid_state")
         env.svc.internal({"internal": "complete", "jobId": jid, "action": "export", "result": {}})
-        for k in ("pdf", "final", "json"):
-            import engine_adapter
-            env.blob.objects[engine_adapter.keys_for(jid, "musicxml", "a.musicxml")[k]] = 10
+        export_event = env.wf.started[-1][2]["export"]
+        self.assertEqual(export_event["out_prefix"], f"jobs/{jid}/export/1/")
+        self.assertEqual(export_event["tuning"], "dropd")
+        for name in ("score.pdf", "score.musicxml", "tabs.json"):
+            env.blob.objects[f"jobs/{jid}/export/1/{name}"] = 10
         _, body, _ = env.call("GET /jobs/{id}/downloads", job=jid)
-        self.assertEqual(sorted(body["downloads"]), ["json", "musicxml", "pdf"])
+        self.assertEqual(sorted(body["downloads"]), ["musicxml", "pdf", "tabs"])
 
     def test_downloads_before_ready_invalid_state(self):
         env = Env()
@@ -290,9 +303,36 @@ class StateTests(unittest.TestCase):
         env.upload(jid)
         env.call("POST /jobs/{id}/process", job=jid)
         env.svc.internal({"internal": "complete", "jobId": jid, "action": "process",
-                          "result": {"error": "no_notes"}})
+                          "result": {"ok": False, "error": "no_notes", "message": "x"}})
         body = env.call("GET /jobs/{id}", job=jid)[1]
         self.assertEqual((body["status"], body["error"]), ("failed", "no_notes"))
+
+    def test_invalid_score_maps_by_kind(self):
+        env = Env()
+        a = env.create("musicxml")[1]["id"]
+        env.upload(a)
+        env.call("POST /jobs/{id}/process", job=a)
+        env.svc.internal({"internal": "complete", "jobId": a, "action": "process",
+                          "result": {"ok": False, "error": "invalid_score"}})
+        self.assertEqual(env.call("GET /jobs/{id}", job=a)[1]["error"], "invalid_score")
+        b = env.create("pdf", ip="9.9.9.9")[1]["id"]
+        env.upload(b)
+        env.call("POST /jobs/{id}/process", job=b)
+        started = env.wf.started[-1][2]
+        self.assertEqual(started["prepare"]["kind"], "pdf-ocr-output")
+        self.assertEqual(started["prepare"]["input_prefix"], f"jobs/{b}/omr/")
+        self.assertEqual(started["ocr"], {"BUCKET": "b", "INPUT_KEY": f"jobs/{b}/input.pdf",
+                                          "OUTPUT_PREFIX": f"jobs/{b}/omr/"})
+        env.svc.internal({"internal": "complete", "jobId": b, "action": "process",
+                          "result": {"ok": False, "error": "invalid_score"}})
+        self.assertEqual(env.call("GET /jobs/{id}", job=b)[1]["error"], "omr_failed")
+
+    def test_pdf_ready_offers_intermediate_download(self):
+        env = Env()
+        jid = env.ready_job("pdf")
+        env.blob.objects[f"jobs/{jid}/omr/omr-01.mxl"] = 5
+        body = env.call("GET /jobs/{id}/downloads", job=jid)[1]
+        self.assertEqual(list(body["downloads"]), ["intermediate"])
 
     def test_stuck_job_marked_timeout_lazily(self):
         env = Env()

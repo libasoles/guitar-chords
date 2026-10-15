@@ -39,35 +39,5 @@ jobs:
           python -m pytest infra/tests -q
       - name: Engine tests (inside the engine image)
         run: |
-          if [ -f backend/engine/Dockerfile ]; then
-            docker build -t engine-test backend/engine
-            docker run --rm --entrypoint python engine-test -m pytest
-          else
-            echo "backend/engine not present yet; skipping"
-          fi
-
-  deploy:
-    # Push to main only; PRs stop after the tests.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: test
-    runs-on: ubuntu-24.04-arm
-    permissions:
-      id-token: write   # OIDC token for the AWS role (no long-lived keys)
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: pip install -r infra/requirements.txt && npm install -g aws-cdk@2
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
-          aws-region: us-east-1
-      # CDK content-hashes image assets: unchanged code => "no changes", no rebuild/push.
-      - name: cdk deploy
-        working-directory: infra
-        run: cdk deploy GuitarChordsBackend --require-approval never --ci
+          docker build -t engine-test backend/engine
+          docker run --rm --entrypoint python engine-test -m pytest -q /var/task

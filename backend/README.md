@@ -174,3 +174,40 @@ cd backend/engine && ../../.venv/bin/python -m pytest -q   # requiere rsvg-conve
 ```
 
 Los fixtures son MusicXML inline; no se versionan partituras con copyright.
+
+## API publica (contrato con el sitio)
+
+Implementada en `backend/api` (HTTP API + Lambda + Step Functions). Errores:
+`{"error": {"code", "message"}}`. Codigos de Trabajo fallido (`error` en `GET /jobs/{id}`):
+`omr_failed` (OCR fallo, o `invalid_score` con origen PDF), `no_notes`, `invalid_score`
+(MusicXML ilegible), `export_failed`, `timeout`, `too_large`, `internal_error`.
+
+Claves S3 por Trabajo: `jobs/<id>/input.<ext>`, `omr/omr-01.mxl`, `prepared/{normalized.musicxml,
+suggestion.json,preview.json,preview-NN.svg}`, `edits.json` (el `tabs` recibido; es el `tabs_key`
+del export), `export/<n>/{score.pdf,score.musicxml,tabs.json}` (n = numero de exportacion).
+
+`GET /jobs/{id}`:
+
+```json
+{"id": "...", "status": "created|processing|ready|exporting|exported|failed",
+ "stage": "ocr|preparing|exporting|null", "kind": "pdf|musicxml", "tuning": "standard|dropd|auto",
+ "error": null, "elapsedSeconds": 12, "expiresAt": 0, "exports": 0,
+ "discardedNotes": [{"measure": 3, "pitch": "D2"}], "measures": 24, "title": "...|null",
+ "preview": {"json": "<signed url preview.json>",
+             "svgs": ["<signed url preview-01.svg>", "<signed url preview-02.svg>"]}}
+```
+
+`preview` es `null` hasta `ready`. `svgs[i]` corresponde a `rows[i]` de `preview.json`
+(mismo orden que `rows[].svg`). Las URL firmadas duran 15 min; volver a pedir el Trabajo las renueva.
+`suggestion.json` no se expone: la Digitacion sugerida viaja en `preview.json`/export segun el sitio
+(pendiente: exponerla en `preview` si el editor la necesita).
+
+`GET /jobs/{id}/downloads` (URL firmadas, `attachment`):
+
+```json
+{"id": "...", "status": "exported", "downloads":
+  {"pdf": "<url>", "musicxml": "<url>", "tabs": "<url>", "intermediate": "<url, solo kind=pdf>"}}
+```
+
+`pdf`/`musicxml`/`tabs` aparecen cuando `status = exported` (ultima exportacion);
+`intermediate` (`omr-01.mxl`) esta disponible desde `ready` para PDF.

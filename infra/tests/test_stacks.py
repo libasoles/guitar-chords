@@ -109,3 +109,16 @@ def test_ci_role_trust_limited_to_repo_main():
         "Condition": {"StringEquals": {
             "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
             "token.actions.githubusercontent.com:sub": "repo:libasoles/guitar-chords:ref:refs/heads/main"}}})]}})
+
+
+def test_engine_lambda_memory_timeout_tmp(template):
+    template.has_resource_properties("AWS::Lambda::Function", {
+        "PackageType": "Image", "MemorySize": 2048, "Timeout": 120,
+        "EphemeralStorage": {"Size": 1024}})
+
+
+def test_ocr_container_env_from_state_input(template):
+    text = json.dumps(template.to_json())
+    for name in ("BUCKET", "INPUT_KEY", "OUTPUT_PREFIX"):
+        assert f"$.ocr.{name}" in text
+    assert "OMR_MAX_HEAP_MB" in text and "OCR_EVENT" not in text
