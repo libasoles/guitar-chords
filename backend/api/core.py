@@ -270,6 +270,7 @@ class Service:
             ttl = self.cfg.url_ttl
             out["preview"] = {
                 "json": self.blob.presign_download(keys["preview"], "preview.json", ttl),
+                "suggestion": self.blob.presign_download(keys["suggestion"], "suggestion.json", ttl),
                 "svgs": [self.blob.presign_download(k, posixpath.basename(k), ttl)
                          for k in job.get("preview_svgs") or []]}
         return out

@@ -194,13 +194,12 @@ del export), `export/<n>/{score.pdf,score.musicxml,tabs.json}` (n = numero de ex
  "error": null, "elapsedSeconds": 12, "expiresAt": 0, "exports": 0,
  "discardedNotes": [{"measure": 3, "pitch": "D2"}], "measures": 24, "title": "...|null",
  "preview": {"json": "<signed url preview.json>",
+             "suggestion": "<signed url suggestion.json: tabs, preview_columns, ...>",
              "svgs": ["<signed url preview-01.svg>", "<signed url preview-02.svg>"]}}
 ```
 
 `preview` es `null` hasta `ready`. `svgs[i]` corresponde a `rows[i]` de `preview.json`
 (mismo orden que `rows[].svg`). Las URL firmadas duran 15 min; volver a pedir el Trabajo las renueva.
-`suggestion.json` no se expone: la Digitacion sugerida viaja en `preview.json`/export segun el sitio
-(pendiente: exponerla en `preview` si el editor la necesita).
 
 `GET /jobs/{id}/downloads` (URL firmadas, `attachment`):
 

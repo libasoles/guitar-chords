@@ -263,6 +263,7 @@ class StateTests(unittest.TestCase):
         self.assertEqual((body["status"], body["tuning"]), ("ready", "dropd"))
         self.assertEqual(body["discardedNotes"][0]["measure"], 3)
         self.assertIn("preview.json", body["preview"]["json"])
+        self.assertIn("suggestion.json", body["preview"]["suggestion"])
         self.assertEqual(len(body["preview"]["svgs"]), 2)
         self.assertIn("preview-02.svg", body["preview"]["svgs"][1])
         self.assertEqual(body["measures"], 8)
