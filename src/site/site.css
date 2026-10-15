@@ -135,6 +135,24 @@ a:hover {
   font-size: 0.9rem;
 }
 
+/* Compact home link for the circle of fifths. */
+.fifths-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.fifths-nav-icon {
+  width: 44px;
+  height: 44px;
+  flex: none;
+}
+.fifths-nav-icon text {
+  fill: var(--ink);
+  font: 7px var(--sans);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
 .v7-nav-current {
   color: var(--ink-soft);
 }
