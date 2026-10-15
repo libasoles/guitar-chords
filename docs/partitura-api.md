@@ -9,4 +9,4 @@ La fuente de verdad es `backend/README.md` ("API publica"). Este resumen fija lo
 - `POST /jobs/:id/export` `{tabs: Tab[]}` (un Tab por compas). En movil se envian los `tabs` de la sugerencia y se descarga el PDF sin vista previa.
 - `GET /jobs/:id/downloads` -> `{downloads: {pdf, musicxml, tabs, intermediate}}`.
 - Errores HTTP: `{"error": {"code", "message"}}`; trabajo fallido: `status: "failed"` + `error`. Todos los codigos tienen texto en `src/i18n/strings.*.json` (`partErr_<codigo>`); los desconocidos muestran `partErrDefault`.
-- Ediciones: `localStorage` `partitura.edits.v1.<id>` (try/catch). Solfeo usa afinacion estandar (limitacion de ascii-tabs) tambien con Drop D.
+- Ediciones: `localStorage` `partitura.edits.v1.<id>` (try/catch). El solfeo respeta la afinacion resuelta (`suggestion.tuning`/`job.tuning`, `dropd` -> `tuning="E B G D A D"` en ascii-tabs >= 0.6.0).
