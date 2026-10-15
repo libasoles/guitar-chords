@@ -1633,14 +1633,18 @@ footer {
 /* ----- Privacy policy link and page ----- */
 
 .privacy-link {
-  margin: 1rem 0 0;
+  margin: 5rem 0 0;
   font-family: var(--sans);
   font-size: 0.82rem;
+  text-align: right;
 }
-.privacy-footer {
-  max-width: var(--max-width);
-  margin: 2rem auto 0;
-  padding: 1rem 1.5rem 0;
+.privacy-link a {
+  color: var(--ink-soft);
+  border-bottom: none;
+  text-decoration: none;
+}
+.privacy-link a:hover {
+  text-decoration: underline;
 }
 .privacy-page h2 {
   margin-top: 1.8rem;
