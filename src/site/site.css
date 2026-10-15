@@ -1552,3 +1552,35 @@ footer {
 .picking-upper-frets { fill: #e2ded6; }
 /* No fill transition: notes are redrawn on every slider step. */
 .picking-note-tonic { fill: #f5c400; stroke: var(--ink); stroke-width: 1.5px; transition: transform 0.1s ease; }
+
+/* Interactive circle of fifths */
+.fifths-tool { margin: 0 auto 3rem; }
+.fifths-svg { display: block; width: 100%; height: auto; overflow: visible; font-family: var(--sans); }
+.fifths-key { cursor: pointer; outline: none; }
+.fifths-key path { fill: #eee9df; stroke: var(--paper); stroke-width: 2; transition: fill 140ms ease; }
+.fifths-key.is-related path { fill: #c5dce0; }
+.fifths-key.is-tonic path { fill: var(--note-selected); }
+.fifths-key:focus-visible path { stroke: var(--accent); stroke-width: 4; }
+.fifths-chord-name { font-size: 26px; fill: var(--ink); pointer-events: none; }
+.fifths-degree { font-size: 13px; fill: #315b62; pointer-events: none; }
+.fifths-key.is-tonic text { fill: white; }
+.fifths-center { fill: var(--paper); }
+.fifths-center-name { font-size: 24px; font-family: var(--serif); font-weight: 600; }
+.fifths-diminished { font-size: 20px; fill: var(--note-selected); }
+.fifths-accidental-names { font-size: 14px; fill: var(--ink-soft); }
+.fifths-detail { border-top: 1px solid var(--rule); padding-top: 1.2rem; text-align: center; }
+.fifths-detail h2 { margin: 0; }
+.fifths-signature { display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap; margin: .4rem 0 1rem; font-family: var(--sans); font-size: 1rem; }
+.fifths-staff { flex: none; }
+.fifths-chords { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .35rem; }
+.fifths-chord { padding: .65rem .15rem; background: #e3edef; border-radius: 4px; }
+.fifths-chord small, .fifths-chord strong { display: block; }
+.fifths-chord small { font: .75rem var(--sans); color: #315b62; margin-bottom: .3rem; }
+.fifths-chord strong { font-size: 1.1rem; font-weight: 500; }
+@media (max-width: 520px) {
+  .fifths-chord strong { font-size: .85rem; }
+  .fifths-chords { gap: .2rem; }
+  .fifths-signature { gap: .25rem; }
+  .fifths-svg { width: calc(100% + 2rem); max-width: none; margin-left: -1rem; }
+}
+@media (prefers-reduced-motion: reduce) { .fifths-key path { transition: none; } }

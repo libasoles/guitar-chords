@@ -100,6 +100,10 @@ const circleTemplate = fs.readFileSync(
   path.join(SRC_SITE, "circle-fifths.html"),
   "utf8",
 );
+const fifthsTemplate = fs.readFileSync(
+  path.join(SRC_SITE, "fifths-wheel.html"),
+  "utf8",
+);
 const dimTemplate = fs.readFileSync(
   path.join(SRC_SITE, "dim-guide.html"),
   "utf8",
@@ -269,9 +273,17 @@ const V7_PAGES = [
 ];
 
 // "Chords and their notes" pages rendered from src/site/circle-fifths.html —
-// one for major chords, one for minor. Same layout; each loads its own data
-// script and cross-links to the other below the lesson.
+// plus the interactive circle, which uses its own template and script.
 const CIRCLE_PAGES = [
+  {
+    slug: "circulo-de-quintas",
+    scriptFile: "fifths-wheel.js",
+    titleKey: "fifthsTitle",
+    metaKey: "fifthsDescription",
+    h1Key: "fifthsH1",
+    otherSlug: "acordes-mayores-y-sus-notas",
+    otherLabelKey: "circleNavLabel",
+  },
   {
     slug: "acordes-mayores-y-sus-notas",
     scriptFile: "circle-fifths.js",
@@ -294,7 +306,7 @@ const CIRCLE_PAGES = [
   },
 ];
 // Home-nav link points at the major "chords and their notes" page.
-const CIRCLE_SLUG = CIRCLE_PAGES[0].slug;
+const CIRCLE_SLUG = "acordes-mayores-y-sus-notas";
 
 // Diminished-chords page, rendered from src/site/dim-guide.html. Single
 // page (no locale-agnostic pairing like V7/circle) with three movable dim7
@@ -448,6 +460,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     "extensionDescription",
     "v7NavLabel",
     "circleNavLabel",
+    "fifthsH1",
     "dimNavLabel",
     "tabNavLabel",
     "sixthsH1",
@@ -482,6 +495,8 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html.split("%%SW_PATH%%").join("/sw.js");
   html = html.split("%%V7_PAGE_HREF%%").join(v7PageHref(locale));
   html = html
+    .split("%%FIFTHS_PAGE_HREF%%")
+    .join(v7PageHref(locale, "circulo-de-quintas"))
     .split("%%CIRCLE_PAGE_HREF%%")
     .join(v7PageHref(locale, CIRCLE_SLUG));
   html = html.split("%%DIM_PAGE_HREF%%").join(v7PageHref(locale, DIM_SLUG));
@@ -1094,6 +1109,10 @@ copyFile(
   path.join(ASSETS_DIST, "v7-chord-overrides.js"),
 );
 copyFile(
+  path.join(SRC_SITE, "fifths-wheel.js"),
+  path.join(ASSETS_DIST, "fifths-wheel.js"),
+);
+copyFile(
   path.join(SRC_SITE, "circle-fifths.js"),
   path.join(ASSETS_DIST, "circle-fifths.js"),
 );
@@ -1290,6 +1309,7 @@ const precacheUrls = [
   "/assets/chord-search.js",
   "/assets/note-names.js",
   "/assets/chord-finder.js",
+  "/assets/fifths-wheel.js",
   "/assets/circle-render.js",
   "/assets/circle-fifths.js",
   "/assets/circle-fifths-minor.js",
@@ -1340,7 +1360,7 @@ LOCALES.forEach(function (locale) {
 
     CIRCLE_PAGES.forEach(function (page) {
       const circleHtml = renderCirclePage(
-        circleTemplate,
+        page.slug === "circulo-de-quintas" ? fifthsTemplate : circleTemplate,
         strings,
         locale,
         page,
@@ -1424,7 +1444,12 @@ LOCALES.forEach(function (locale) {
   });
 
   CIRCLE_PAGES.forEach(function (page) {
-    const circleHtml = renderCirclePage(circleTemplate, strings, locale, page);
+    const circleHtml = renderCirclePage(
+      page.slug === "circulo-de-quintas" ? fifthsTemplate : circleTemplate,
+      strings,
+      locale,
+      page,
+    );
     const circleOutFile = path.join(localeDir, page.slug + ".html");
     fs.writeFileSync(circleOutFile, circleHtml, "utf8");
     say(path.relative(ROOT, circleOutFile));
