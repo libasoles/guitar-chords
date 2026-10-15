@@ -135,22 +135,18 @@ a:hover {
   font-size: 0.9rem;
 }
 
-/* Compact home link for the circle of fifths. */
-.fifths-nav a {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
+.home-links {
+  display: grid;
+  gap: 1.6rem 2rem;
+  margin: 1.2rem 0 1.6rem;
 }
-.fifths-nav-icon {
-  width: 44px;
-  height: 44px;
-  flex: none;
+.home-links .v7-nav {
+  margin: 0;
 }
-.fifths-nav-icon text {
-  fill: var(--ink);
-  font: 7px var(--sans);
-  text-anchor: middle;
-  dominant-baseline: central;
+@media (min-width: 768px) {
+  .home-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .v7-nav-current {

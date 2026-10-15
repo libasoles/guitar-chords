@@ -62,34 +62,14 @@
       <h1 slot="title">%%h1%%</h1>
     </chord-finder>
 
-    <p class="v7-nav"><a href="%%V7_PAGE_HREF%%">%%v7NavLabel%%</a></p>
-    <p class="v7-nav fifths-nav">
-      <a href="%%FIFTHS_PAGE_HREF%%">
-        <svg class="fifths-nav-icon" viewBox="0 0 80 80" aria-hidden="true" focusable="false">
-          <circle cx="40" cy="40" r="37" fill="#eee9df" />
-          <path d="M 40 40 L 13.84 13.84 A 37 37 0 0 1 66.16 13.84 Z" fill="#c5dce0" />
-          <path d="M40 40L30.42 4.26 M40 40L49.58 4.26 M40 40L66.16 13.84 M40 40L75.74 30.42 M40 40L75.74 49.58 M40 40L66.16 66.16 M40 40L49.58 75.74 M40 40L30.42 75.74 M40 40L13.84 66.16 M40 40L4.26 49.58 M40 40L4.26 30.42 M40 40L13.84 13.84" fill="none" stroke="var(--paper)" stroke-width="1.2" />
-          <circle cx="40" cy="40" r="20" fill="var(--paper)" />
-          <text x="40.00" y="11.50">C</text>
-          <text x="54.25" y="15.32">G</text>
-          <text x="64.68" y="25.75">D</text>
-          <text x="68.50" y="40.00">A</text>
-          <text x="64.68" y="54.25">E</text>
-          <text x="54.25" y="64.68">B</text>
-          <text x="40.00" y="68.50">F♯</text>
-          <text x="25.75" y="64.68">D♭</text>
-          <text x="15.32" y="54.25">A♭</text>
-          <text x="11.50" y="40.00">E♭</text>
-          <text x="15.32" y="25.75">B♭</text>
-          <text x="25.75" y="15.32">F</text>
-        </svg>
-        <span>%%fifthsH1%% →</span>
-      </a>
-    </p>
-    <p class="v7-nav"><a href="%%CIRCLE_PAGE_HREF%%">%%circleNavLabel%%</a></p>
-    <p class="v7-nav"><a href="%%DIM_PAGE_HREF%%">%%dimNavLabel%%</a></p>
-    <p class="v7-nav"><a href="%%SIXTHS_PAGE_HREF%%">%%sixthsH1%% →</a></p>
-    <p class="v7-nav"><a href="%%INTERVALS_PAGE_HREF%%">%%intervalsNavLabel%%</a></p>
+    <div class="home-links">
+      <p class="v7-nav"><a href="%%V7_PAGE_HREF%%">%%v7NavLabel%%</a></p>
+      <p class="v7-nav"><a href="%%FIFTHS_PAGE_HREF%%">%%fifthsH1%% →</a></p>
+      <p class="v7-nav"><a href="%%CIRCLE_PAGE_HREF%%">%%circleNavLabel%%</a></p>
+      <p class="v7-nav"><a href="%%DIM_PAGE_HREF%%">%%dimNavLabel%%</a></p>
+      <p class="v7-nav"><a href="%%SIXTHS_PAGE_HREF%%">%%sixthsH1%% →</a></p>
+      <p class="v7-nav"><a href="%%INTERVALS_PAGE_HREF%%">%%intervalsNavLabel%%</a></p>
+    </div>
 
     <h2 id="decoder">%%h2Decoder%%</h2>
     <p>%%decoderIntro%%</p>
