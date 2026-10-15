@@ -1737,6 +1737,32 @@ body.partitura-body {
   margin: 1.4rem 0;
   max-width: var(--max-width);
 }
+.part-example {
+  margin: 0.5rem 0 0;
+  padding: 1.2rem;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: #fff;
+}
+.part-example figcaption {
+  display: grid;
+  gap: 0.25rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.part-example figcaption strong {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  color: var(--ink);
+}
+.part-example img {
+  display: block;
+  width: 100%;
+  max-width: 620px;
+  height: auto;
+  margin: 0.6rem auto 0;
+}
 .part-rights {
   display: flex;
   gap: 0.6rem;
