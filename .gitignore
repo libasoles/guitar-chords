@@ -5,3 +5,9 @@ dist/
 
 TODO.md
 .hermes
+
+# backend / infra
+__pycache__/
+*.pyc
+cdk.out/
+.pytest_cache/
