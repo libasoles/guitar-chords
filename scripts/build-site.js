@@ -1776,11 +1776,11 @@ console.log("==> Rendering 404 page...");
   say(path.relative(ROOT, notFoundOutFile));
 }
 
-// ---- Privacy policy link in every page footer --------------------------------
+// ---- Privacy policy link before every page footer ----------------------------
 // Runs on the built HTML so every page — including the standalone song sheets
 // and pages without a footer — links to the policy in its own language.
 
-console.log("==> Linking the privacy policy from every page footer...");
+console.log("==> Linking the privacy policy before every page footer...");
 function addPrivacyLinks(dir) {
   fs.readdirSync(dir, { withFileTypes: true }).forEach(function (entry) {
     const full = path.join(dir, entry.name);
@@ -1798,9 +1798,9 @@ function addPrivacyLinks(dir) {
     if (html.indexOf('class="privacy-link"') !== -1) return;
     const link =
       '<p class="privacy-link"><a href="' + href + '">' + label + "</a></p>";
-    const footerEnd = html.lastIndexOf("</footer>");
-    if (footerEnd !== -1) {
-      html = html.slice(0, footerEnd) + link + "\n    " + html.slice(footerEnd);
+    const footerStart = html.lastIndexOf("<footer");
+    if (footerStart !== -1) {
+      html = html.slice(0, footerStart) + link + "\n    " + html.slice(footerStart);
     } else {
       const bodyEnd = html.lastIndexOf("</body>");
       if (bodyEnd === -1) return;
