@@ -248,10 +248,38 @@ async function fillForm(page, name) {
         const page = await browser.newPage();
         await mockApi(page, { jobs: [READY] });
         await page.goto(toolUrl);
-        assert.ok(await page.locator('#partFile').isDisabled());
+        assert.ok(await page.locator('#partFile').isEnabled());
         assert.equal(await page.locator('#partSubmit, #partTuning').count(), 0);
-        assert.equal(await page.locator('#partDropzone').getAttribute('aria-disabled'), 'true');
+        assert.equal(await page.locator('#partDropzone').getAttribute('aria-disabled'), 'false');
         assert.equal(await page.locator('.part-rights span').textContent(), S.partRightsLabel);
+        const contrast = await page.evaluate(() => {
+          function luminance(color) {
+            const rgb = color.match(/[\d.]+/g).slice(0, 3).map(Number).map(value => {
+              const c = value / 255;
+              return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+            });
+            return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
+          }
+          function ratio(a, b) {
+            const x = luminance(a), y = luminance(b);
+            return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+          }
+          const zone = getComputedStyle(document.querySelector('#partDropzone'));
+          const hint = getComputedStyle(document.querySelector('#partDropHint'));
+          const browse = getComputedStyle(document.querySelector('.part-drop-browse'));
+          const checkbox = getComputedStyle(document.querySelector('#partRights'));
+          return {
+            text: ratio(hint.color, zone.backgroundColor),
+            browse: ratio(browse.color, zone.backgroundColor),
+            border: ratio(zone.borderTopColor, zone.backgroundColor),
+            checkbox: ratio(checkbox.borderTopColor, checkbox.backgroundColor),
+            width: document.querySelector('#partDropzone').getBoundingClientRect().width,
+            available: document.querySelector('main').getBoundingClientRect().width,
+          };
+        });
+        assert.ok(contrast.text >= 4.5 && contrast.browse >= 4.5);
+        assert.ok(contrast.border >= 3 && contrast.checkbox >= 3);
+        assert.ok(Math.abs(contrast.width - contrast.available) < 2);
         await page.locator('#partRights').check();
         assert.ok(await page.locator('#partFile').isEnabled());
         assert.equal(await page.locator('#partDropzone').getAttribute('aria-disabled'), 'false');
@@ -285,8 +313,11 @@ async function fillForm(page, name) {
         }
         await dropScore();
         assert.equal(api.calls.length, 0);
+        assert.ok(await page.locator('.part-rights.needs-rights').count());
+        assert.equal(await page.locator('#partError').textContent(), S.partErrRights);
+        assert.equal(await page.locator('#partSelectedFile').textContent(), 'dropped.musicxml');
+        assert.ok(await page.locator('#partRights').evaluate(node => node === document.activeElement));
         await page.locator('#partRights').check();
-        await dropScore();
         await dropScore();
         await page.waitForSelector('#partRows .part-row');
         assert.equal(api.createBody.filename, 'dropped.musicxml');
@@ -294,6 +325,28 @@ async function fillForm(page, name) {
         assert.equal(api.calls.filter(call => call === 'POST /jobs').length, 1);
         await page.locator('.part-privacy summary').click();
         assert.equal(await page.locator('.part-privacy p').nth(1).textContent(), S.partPrivacyIp);
+        await page.close();
+      }
+
+      // Selecting first also waits for consent, with accessible mobile sizing.
+      {
+        const page = await browser.newPage({ viewport: { width: 375, height: 800 }, reducedMotion: 'reduce' });
+        const api = await mockApi(page, { jobs: [READY] });
+        await page.goto(toolUrl);
+        const sizing = await page.evaluate(() => {
+          const box = document.querySelector('#partRights').getBoundingClientRect();
+          const zone = document.querySelector('#partDropzone').getBoundingClientRect();
+          const main = document.querySelector('main').getBoundingClientRect();
+          return { checkbox: box.width, width: zone.width, available: main.width };
+        });
+        assert.ok(sizing.checkbox >= 28);
+        assert.ok(Math.abs(sizing.width - sizing.available) < 2);
+        await page.locator('#partFile').setInputFiles({ name: 'pending.musicxml', mimeType: 'application/xml', buffer: Buffer.from('<score-partwise/>') });
+        assert.equal(api.calls.length, 0);
+        assert.equal(await page.locator('.part-rights').evaluate(node => getComputedStyle(node).animationName), 'none');
+        await page.locator('#partRights').check();
+        await page.waitForFunction(() => document.querySelector('#partForm').hidden);
+        assert.equal(api.createBody.filename, 'pending.musicxml');
         await page.close();
       }
 

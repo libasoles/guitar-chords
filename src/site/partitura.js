@@ -1,6 +1,6 @@
 /* partitura.js — Partitura y tablatura tool page.
 
-   Flow: rights checkbox -> file (automatic tuning) -> Turnstile token ->
+   Flow: file + rights consent (either order, automatic tuning) -> Turnstile token ->
    POST /jobs, PUT upload, POST /jobs/:id/process -> poll GET /jobs/:id ->
    desktop: Verovio preview with one <ascii-tabs> per measure aligned to the
    notes, edit, confirm -> POST /jobs/:id/export -> downloads;
@@ -54,6 +54,8 @@
 
   var form = $('partForm');
   var rightsBox = $('partRights');
+  var rightsRow = $('partRightsRow');
+  var selectedFileEl = $('partSelectedFile');
   var fileInput = $('partFile');
   var dropzone = $('partDropzone');
   var errorEl = $('partError');
@@ -67,6 +69,7 @@
   // ---- state ---------------------------------------------------------------
 
   var state = {
+    pendingFile: null,
     jobId: null,
     pollTimer: null,
     tickTimer: null,
@@ -89,7 +92,7 @@
   }
 
   function setBusy(busy) {
-    fileInput.disabled = busy || !rightsBox.checked;
+    fileInput.disabled = busy;
     dropzone.setAttribute('aria-disabled', String(fileInput.disabled));
     dropzone.classList.remove('is-dragging');
     rightsBox.disabled = busy;
@@ -1061,22 +1064,40 @@
   rightsBox.addEventListener('change', function () {
     setBusy(false);
     showError('');
+    rightsRow.classList.remove('needs-rights');
+    rightsBox.removeAttribute('aria-invalid');
+    rightsBox.removeAttribute('aria-describedby');
+    if (rightsBox.checked && state.pendingFile) attachFile(state.pendingFile);
+  });
+
+  rightsRow.addEventListener('animationend', function () {
+    rightsRow.classList.remove('needs-rights');
   });
 
   function attachFile(file) {
     if (fileInput.disabled) return;
     showError('');
-    if (!rightsBox.checked) {
-      showError(t('partErrRights'));
-      return;
-    }
     if (!file) return;
+    state.pendingFile = null;
+    selectedFileEl.textContent = '';
     if (!extensionOk(file.name)) {
       showError(t('partErrBadType'));
       return;
     }
     if (file.size > MAX_BYTES) {
       showError(errorText('too_large'));
+      return;
+    }
+    if (!rightsBox.checked) {
+      state.pendingFile = file;
+      selectedFileEl.textContent = file.name;
+      rightsRow.classList.remove('needs-rights');
+      void rightsRow.offsetWidth;
+      rightsRow.classList.add('needs-rights');
+      rightsBox.setAttribute('aria-invalid', 'true');
+      rightsBox.setAttribute('aria-describedby', 'partError');
+      showError(t('partErrRights'));
+      rightsBox.focus();
       return;
     }
     startJob(file, 'auto');

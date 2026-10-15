@@ -1735,7 +1735,7 @@ body.partitura-body {
   display: grid;
   gap: 1.1rem;
   margin: 1.4rem 0;
-  max-width: var(--max-width);
+  width: 100%;
 }
 .part-example {
   margin: 0.5rem 0 0;
@@ -1765,14 +1765,62 @@ body.partitura-body {
 }
 .part-rights {
   display: flex;
-  gap: 0.6rem;
-  align-items: flex-start;
+  gap: 0.8rem;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.6rem;
+  border: 2px solid transparent;
+  border-radius: 8px;
   font-family: var(--sans);
   font-size: 0.95rem;
+  color: var(--ink);
+  cursor: pointer;
 }
 .part-rights input {
-  margin-top: 0.3rem;
+  appearance: none;
+  display: grid;
+  place-content: center;
+  width: 28px;
+  height: 28px;
+  margin: 0;
   flex: none;
+  border: 2px solid var(--ink-soft);
+  border-radius: 5px;
+  background: #fff;
+  cursor: pointer;
+}
+.part-rights input:checked {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+.part-rights input:checked::after {
+  content: "";
+  width: 12px;
+  height: 6px;
+  border-left: 3px solid #fff;
+  border-bottom: 3px solid #fff;
+  transform: translateY(-2px) rotate(-45deg);
+}
+.part-rights input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+.part-rights.needs-rights {
+  border-color: var(--accent);
+  background: #fbeeee;
+  animation: part-rights-flash 900ms ease-out;
+}
+@keyframes part-rights-flash {
+  0%, 100% { background: #fbeeee; }
+  45% { background: #f0caca; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .part-rights.needs-rights { animation: none; }
+  .part-form .part-dropzone { transition: none; }
+}
+@media (forced-colors: active) {
+  .part-rights input { appearance: auto; }
+  .part-rights input:checked::after { content: none; }
 }
 .part-dropzone {
   position: relative;
@@ -1780,7 +1828,10 @@ body.partitura-body {
   justify-items: center;
   gap: 0.65rem;
   padding: 2.2rem 1.2rem;
-  border: 2px dashed var(--rule);
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  border: 2px dashed var(--ink-soft);
   border-radius: 16px;
   background: #fff;
   color: var(--ink-soft);
@@ -1811,9 +1862,13 @@ body.partitura-body {
   opacity: 0;
   cursor: pointer;
 }
-.part-dropzone[aria-disabled="true"] {
-  opacity: 0.55;
+.part-selected-file {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-weight: 600;
 }
+.part-selected-file:empty { display: none; }
 .part-dropzone[aria-disabled="true"] .part-file-input {
   cursor: not-allowed;
 }
