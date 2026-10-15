@@ -48,11 +48,8 @@ const { serveStatic } = require('../scripts/lib/static-server');
       }
       await page.locator('h1').hover();
       await page.evaluate(() => document.activeElement.blur());
-      await page.emulateMedia({ reducedMotion: 'reduce' });
-      if (es) await page.screenshot({ path: '/private/tmp/fifths-desktop.png', fullPage: true });
       await page.setViewportSize({ width: 390, height: 844 });
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-      if (es) await page.screenshot({ path: '/private/tmp/fifths-mobile.png', fullPage: true });
       assert.equal(await page.locator('.lead').count(), 0);
       assert.ok(!(await page.content()).includes('%%'));
     }
