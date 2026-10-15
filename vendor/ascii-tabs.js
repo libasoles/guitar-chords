@@ -14,8 +14,23 @@ const DEFAULT_CAPACITY = 48; // characters per Staff before the element is measu
 const LABELS = {
   numbers: ['1 ', '2 ', '3 ', '4 ', '5 ', '6 '],
   notes: ['e|', 'B|', 'G|', 'D|', 'A|', 'E|'],
+  none: Array(STRING_COUNT).fill(''),
 };
-const labelStyle = value => (value === 'notes' ? 'notes' : 'numbers');
+const labelStyle = value => (value === 'notes' || value === 'none' ? value : 'numbers');
+const labelWidth = labels => (labelStyle(labels) === 'none' ? 0 : LABEL_WIDTH);
+const notationStyle = value => (value === 'letters' || value === 'solfege' ? value : 'frets');
+const OPEN_PITCHES = [4, 11, 7, 2, 9, 4]; // E B G D A E, pitch classes in standard tuning
+const NOTE_NAMES = {
+  letters: ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
+  solfege: ['do', 'do#', 're', 're#', 'mi', 'fa', 'fa#', 'sol', 'sol#', 'la', 'la#', 'si'],
+};
+const fretValue = note => (note !== null && typeof note === 'object' ? note.fret : note);
+const cloneNote = note => (note !== null && typeof note === 'object' ? { ...note } : note);
+const fretText = (note, string, notation) => {
+  const fret = fretValue(note);
+  const text = fret === null ? '' : notationStyle(notation) === 'frets' ? String(fret) : NOTE_NAMES[notation][(OPEN_PITCHES[string] + fret) % 12];
+  return note?.parenthesized ? `(${text})` : text || '-';
+};
 const toolsPosition = value => (value === 'top' ? 'top' : 'side');
 const sheetVariant = value => (value === 'flat' ? 'flat' : 'default');
 
@@ -34,20 +49,20 @@ const lastUsed = tab => {
   return -1;
 };
 
-// A Column is as wide as its Spacing plus its widest Fret, so Frets never touch
-const columnDigits = column => Math.max(1, ...column.map(v => (v === null ? 1 : String(v).length)));
-const columnWidth = (column, spacing) => spacing + columnDigits(column);
+// Size every String in a Column using its longest displayed Fret or note name.
+const columnDigits = (column, notation) => Math.max(1, ...column.map((v, s) => fretText(v, s, notation).length));
+const columnWidth = (column, spacing, notation) => spacing + columnDigits(column, notation);
 const leadingDashes = spacing => Math.ceil(spacing / 2);
 const visualDashes = count =>
   count ? `<span class="ascii-tabs-string" aria-hidden="true">${'-'.repeat(count)}</span>` : '';
 
 // Split Columns into Staves: [start, end) ranges that fit `capacity` characters
-function layout(tab, spacing, capacity) {
+function layout(tab, spacing, capacity, notation) {
   const staves = [];
   let start = 0;
   let used = 0;
   for (let c = 0; c < tab.length; c++) {
-    const width = columnWidth(tab[c], spacing);
+    const width = columnWidth(tab[c], spacing, notation);
     if (c > start && used + width > capacity) {
       staves.push([start, c]);
       start = c;
@@ -60,19 +75,19 @@ function layout(tab, spacing, capacity) {
 }
 
 // One Tab as plain ASCII, every Staff cut right after its last Column
-function format(tab, { spacing = DEFAULT_SPACING, labels = 'numbers', width = Infinity } = {}) {
+function format(tab, { spacing = DEFAULT_SPACING, labels = 'numbers', notation = 'frets', width = Infinity } = {}) {
   const columns = tab.slice(0, lastUsed(tab) + 1);
   if (!columns.length) return '';
   const lead = '-'.repeat(leadingDashes(spacing));
   const trail = '-'.repeat(spacing - lead.length);
-  return layout(columns, spacing, width - LABEL_WIDTH)
+  return layout(columns, spacing, width - labelWidth(labels), notation)
     .map(([start, end]) => {
       const lines = [];
       for (let s = 0; s < STRING_COUNT; s++) {
         let line = LABELS[labelStyle(labels)][s];
         for (let c = start; c < end; c++) {
-          const digits = columnDigits(columns[c]);
-          const fret = columns[c][s] === null ? '-' : String(columns[c][s]);
+          const digits = columnDigits(columns[c], notation);
+          const fret = fretText(columns[c][s], s, notation);
           line += lead + fret.padEnd(digits, '-') + trail;
         }
         lines.push(line);
@@ -107,9 +122,9 @@ function parse(ascii) {
       continue;
     }
     const label = LABEL_PATTERN.exec(line);
-    if (!label) return fail(`unexpected line "${line.trim()}"`);
-    const body = line.slice(label[0].length);
-    if (!/^[-|\d\s]*$/.test(body)) return fail(`unexpected characters in "${line.trim()}"`);
+    if (!label && !/^\s*-/.test(line)) return fail(`unexpected line "${line.trim()}"`);
+    const body = label ? line.slice(label[0].length) : line;
+    if (!/^[-|\d\s]*$/.test(body.replace(/\(\d*\)/g, ''))) return fail(`unexpected characters in "${line.trim()}"`);
     group.push(body);
   }
   if (!flush()) return fail('a Staff needs six Strings');
@@ -118,12 +133,14 @@ function parse(ascii) {
   for (const staff of staves) {
     const columns = new Map(); // start position -> { digits, frets }
     for (let s = 0; s < STRING_COUNT; s++) {
-      for (const match of staff[s].matchAll(/\d+/g)) {
-        const fret = Number(match[0]);
-        if (!isFret(fret)) return fail(`fret ${match[0]} is out of range`);
+      for (const match of staff[s].matchAll(/\((\d*)\)|(\d+)/g)) {
+        const parenthesized = match[1] !== undefined;
+        const digits = parenthesized ? match[1] : match[2];
+        const fret = digits === '' ? null : Number(digits);
+        if (fret !== null && !isFret(fret)) return fail(`fret ${digits} is out of range`);
         const at = columns.get(match.index) ?? { digits: 0, frets: emptyColumn() };
         at.digits = Math.max(at.digits, match[0].length);
-        at.frets[s] = fret;
+        at.frets[s] = parenthesized ? { fret, parenthesized: true } : fret;
         columns.set(match.index, at);
       }
     }
@@ -149,6 +166,10 @@ const MESSAGES_EN = {
   add: 'New tab',
   fret: 'Fret',
   spacing: 'Spacing',
+  notation: 'Notation',
+  frets: 'Fret numbers',
+  letters: 'Letters (E D F)',
+  solfege: 'Spanish notes (mi re fa)',
 };
 
 const MESSAGES_ES = {
@@ -159,6 +180,10 @@ const MESSAGES_ES = {
   add: 'Nueva tablatura',
   fret: 'Traste',
   spacing: 'Espaciado',
+  notation: 'Notación',
+  frets: 'Números de traste',
+  letters: 'Letras (E D F)',
+  solfege: 'Notas en español (mi re fa)',
 };
 
 const PRESETS = { en: MESSAGES_EN, es: MESSAGES_ES };
@@ -225,7 +250,8 @@ const STYLES = `
   color: var(--ascii-tabs-ink);
 }
 ascii-tabs .ascii-tabs-hint { margin: 0 0 16px; font-size: .7em; color: var(--ascii-tabs-dash); }
-ascii-tabs .ascii-tabs-spacing { display: flex; align-items: center; gap: 12px; margin: 0 0 16px; font-size: 14px; }
+ascii-tabs .ascii-tabs-spacing, ascii-tabs .ascii-tabs-notation { display: flex; align-items: center; gap: 12px; margin: 0 0 16px; font-size: 14px; }
+ascii-tabs .ascii-tabs-notation-input { font: inherit; color: inherit; background: var(--ascii-tabs-sheet); border: 1px solid var(--ascii-tabs-line); border-radius: 4px; padding: 4px; }
 ascii-tabs .ascii-tabs-spacing-input { accent-color: var(--ascii-tabs-accent); }
 ascii-tabs .ascii-tabs-sheet {
   display: flex; gap: 12px;
@@ -340,6 +366,21 @@ ascii-tabs .ascii-tabs-input {
   border: 0; padding: 0; font-size: 16px; pointer-events: none;
 }
 ascii-tabs .ascii-tabs-probe { position: absolute; visibility: hidden; white-space: pre; }
+/* External geometry: labels occupy a gutter outside the String coordinates. */
+ascii-tabs .ascii-tabs-tab.ascii-tabs-positioned { overflow-x: auto; }
+ascii-tabs .ascii-tabs-positioned .ascii-tabs-staff { width: max-content; }
+ascii-tabs .ascii-tabs-positioned .ascii-tabs-line { display: flex; }
+ascii-tabs .ascii-tabs-positioned .ascii-tabs-label { flex: 0 0 2ch; }
+ascii-tabs .ascii-tabs-area { position: relative; display: inline-block; height: 1.5em; flex: none; }
+ascii-tabs .ascii-tabs-area::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 50%;
+  border-top: 1px solid var(--ascii-tabs-string); pointer-events: none;
+}
+ascii-tabs .ascii-tabs-area .ascii-tabs-cell {
+  position: absolute; top: 0; transform: translateX(-50%); min-width: 1ch; text-align: center;
+}
+ascii-tabs .ascii-tabs-area .ascii-tabs-fret { background: var(--ascii-tabs-fret-background, var(--ascii-tabs-sheet)); }
+ascii-tabs .ascii-tabs-area .ascii-tabs-mid { visibility: hidden; }
 `;
 
 function injectStyles() {
@@ -350,11 +391,11 @@ function injectStyles() {
   document.head.prepend(style);
 }
 
-// What <ascii-tabs-storage> keeps in localStorage: Tabs → Columns → 6 cells, each '' or the Fret as text
+// Storage keeps legacy cells as '' or Fret text, and colored notes as objects
 // (the shape the original editor stores). Reading is lenient: numbers and null work too, and so does
 // a single Tab (an array of Columns) instead of an array of Tabs.
 const serializeStored = tabs =>
-  JSON.stringify(tabs.map(tab => tab.map(column => column.map(v => (v === null ? '' : String(v))))));
+  JSON.stringify(tabs.map(tab => tab.map(column => column.map(v => (v === null ? '' : typeof v === 'object' ? v : String(v))))));
 
 function readStored(json) {
   let raw;
@@ -379,11 +420,37 @@ function normalizeValue(value) {
   const tabs = value.filter(Array.isArray).map(tab =>
     tab.map(column => {
       const out = emptyColumn();
-      if (Array.isArray(column)) for (let s = 0; s < STRING_COUNT; s++) if (isFret(column[s])) out[s] = column[s];
+      if (Array.isArray(column)) for (let s = 0; s < STRING_COUNT; s++) {
+        const note = column[s];
+        if (isFret(note)) out[s] = note;
+        else if (note && typeof note === 'object' && (isFret(note.fret) || (note.fret === null && note.parenthesized === true))) {
+          out[s] = { fret: note.fret };
+          if (typeof note.color === 'string') out[s].color = note.color;
+          if (typeof note.bold === 'boolean') out[s].bold = note.bold;
+          if (note.parenthesized === true) out[s].parenthesized = true;
+        }
+      }
       return out;
     }),
   );
   return tabs.length ? tabs : [[]];
+}
+
+// Layout is consumer-owned geometry in CSS pixels, never part of the Tab data.
+function normalizeColumnLayout(value, tabs) {
+  if (value === null) return null;
+  const fail = message => { throw new TypeError(`columnLayout: ${message}`); };
+  if (!Array.isArray(value) || value.length !== tabs.length) fail('expected one layout per Tab');
+  return Array.from(value, (entry, t) => {
+    if (!entry || !Number.isFinite(entry.width) || entry.width <= 0) fail(`Tab ${t}: width must be finite and positive`);
+    if (!Array.isArray(entry.positions) || entry.positions.length !== tabs[t].length) fail(`Tab ${t}: positions must match the ${tabs[t].length} logical Columns`);
+    const positions = Array.from(entry.positions, (x, c) => {
+      if (!Number.isFinite(x) || x < 0 || x > entry.width) fail(`Tab ${t}, Column ${c}: position must be finite and within [0, width]`);
+      if (c && x <= entry.positions[c - 1]) fail(`Tab ${t}, Column ${c}: positions must be strictly increasing`);
+      return x;
+    });
+    return { width: entry.width, positions };
+  });
 }
 
 async function copyText(text) {
@@ -425,6 +492,10 @@ const Base = typeof HTMLElement !== 'undefined' ? HTMLElement : class {};
 
 class AsciiTabs extends Base {
   #tabs = [[]];
+  #logicalLengths = [0]; // Explicit Columns, excluding ASCII #fit padding
+  #columnLayout = null;
+  #overflowFrame = null;
+  #overflowSignatures = [];
   #spacing = DEFAULT_SPACING;
   #capacity = DEFAULT_CAPACITY;
   #staves = [];
@@ -450,17 +521,51 @@ class AsciiTabs extends Base {
   #declared = null; // parts the consumer wrote as children, null for the default composition
 
   get value() {
-    return this.#tabs.map(tab => tab.slice(0, lastUsed(tab) + 1).map(column => [...column]));
+    return this.#tabs.map(tab => (this.#columnLayout ? tab : tab.slice(0, lastUsed(tab) + 1)).map(column => column.map(cloneNote)));
   }
 
   set value(value) {
+    this.setDocument({ value, columnLayout: this.#columnLayout });
+  }
+
+  get columnLayout() {
+    return this.#columnLayout?.map(({ width, positions }) => ({ width, positions: [...positions] })) ?? null;
+  }
+
+  set columnLayout(value) {
+    const tabs = this.#tabs.map((tab, t) => Array.from({ length: this.#logicalLengths[t] }, (_, c) => tab[c] ?? emptyColumn()));
+    const geometry = normalizeColumnLayout(value, tabs);
+    if (this.#drag) this.#endDrag({ pointerId: this.#drag.pointerId }, true);
+    this.#tabs = tabs;
+    this.#columnLayout = geometry;
+    this.#overflowSignatures = [];
+    if (this.#cur && !this.#inBounds(this.#cur.t, this.#cur.c, this.#cur.s)) {
+      this.#cur = null;
+      this.#endTyping();
+    }
+    this.#selection = this.#selection.filter(p => this.#inBounds(p.t, p.c, p.s));
+    this.#render();
+  }
+
+  // Validate the entire document before committing either content or geometry.
+  // Like the value setter, programmatic updates do not emit change.
+  setDocument({ value, columnLayout = null }) {
+    if (columnLayout !== null && (!Array.isArray(value) || !value.length ||
+      Array.from(value).some(tab => !Array.isArray(tab) || Array.from(tab).some(column => !Array.isArray(column))))) {
+      throw new TypeError('columnLayout: value must contain Tabs of logical Columns');
+    }
     const tabs = normalizeValue(value);
     if (!tabs) return;
+    const geometry = normalizeColumnLayout(columnLayout, tabs);
+    if (this.#drag) this.#endDrag({ pointerId: this.#drag.pointerId }, true);
     this.#valueSet = true;
     this.#tabs = tabs;
+    this.#logicalLengths = tabs.map(tab => tab.length);
+    this.#columnLayout = geometry;
+    this.#overflowSignatures = [];
     this.#selection = [];
     this.#cur = null;
-    this.#draft = null;
+    this.#endTyping();
     if (this.#initialized) {
       this.#buildSheets();
       this.#render();
@@ -468,7 +573,7 @@ class AsciiTabs extends Base {
     }
   }
 
-  static observedAttributes = ['readonly', 'spacing', 'labels', 'lang', 'tools'];
+  static observedAttributes = ['readonly', 'spacing', 'labels', 'notation', 'lang', 'tools'];
 
   // Strings: the `lang` preset (English by default) with `messages` merged over it
   get #text() {
@@ -512,6 +617,14 @@ class AsciiTabs extends Base {
     this.setAttribute('labels', labelStyle(value));
   }
 
+  get notation() {
+    return notationStyle(this.getAttribute('notation'));
+  }
+
+  set notation(value) {
+    this.setAttribute('notation', notationStyle(value));
+  }
+
   get tools() {
     return toolsPosition(this.getAttribute('tools'));
   }
@@ -547,7 +660,14 @@ class AsciiTabs extends Base {
 
   attributeChangedCallback(name) {
     if (name === 'spacing') return this.#applySpacing();
-    if (name === 'labels') return this.#render();
+    if (name === 'labels') {
+      this.#measure();
+      return this.#render();
+    }
+    if (name === 'notation') {
+      for (const select of this.querySelectorAll('.ascii-tabs-notation-input')) select.value = this.notation;
+      return this.#render();
+    }
     // Moving the tools changes the Staves' width without resizing the element
     if (name === 'tools') return this.#measure();
     this.#rebuild();
@@ -569,7 +689,7 @@ class AsciiTabs extends Base {
       return;
     }
     // Properties set before the element was upgraded shadow the accessors
-    for (const name of ['value', 'readonly', 'spacing', 'labels', 'tools', 'variant', 'theme', 'messages']) {
+    for (const name of ['value', 'columnLayout', 'readonly', 'spacing', 'labels', 'notation', 'tools', 'variant', 'theme', 'messages']) {
       if (Object.hasOwn(this, name)) {
         const own = this[name];
         delete this[name];
@@ -581,6 +701,7 @@ class AsciiTabs extends Base {
       if (!this.#valueSet) {
         const pres = [...this.querySelectorAll('pre')];
         if (pres.length) this.#tabs = pres.map(pre => parse(pre.textContent));
+        this.#logicalLengths = this.#tabs.map(tab => tab.length);
       }
       // Storage is data, not interface: a root with only that part still gets the default composition
       const parts = [...this.children].filter(isPart).map(readPart);
@@ -608,6 +729,8 @@ class AsciiTabs extends Base {
   }
 
   disconnectedCallback() {
+    cancelAnimationFrame(this.#overflowFrame);
+    this.#overflowFrame = null;
     removeEventListener('pointermove', this.#onPointerMove);
     removeEventListener('pointerup', this.#onPointerUp);
     removeEventListener('pointercancel', this.#onPointerCancel);
@@ -658,6 +781,19 @@ class AsciiTabs extends Base {
       } else if (part.type === 'sheet' && !this.#sheetsEl) {
         this.#sheetsEl = this.#el('div', 'ascii-tabs-sheets', this);
         this.#sheetTools = part.tools ?? [];
+      } else if (part.type === 'notation') {
+        const label = this.#el('label', 'ascii-tabs-notation', this);
+        const text = this.#el('span', 'ascii-tabs-notation-label', label);
+        if (part.content) text.replaceChildren(...part.content.map(n => n.cloneNode(true)));
+        else text.textContent = this.#text.notation;
+        const select = this.#el('select', 'ascii-tabs-notation-input', label);
+        for (const value of ['frets', 'letters', 'solfege']) {
+          const option = this.#el('option', '', select);
+          option.value = value;
+          option.textContent = this.#text[value];
+        }
+        select.value = this.notation;
+        select.addEventListener('change', () => (this.notation = select.value));
       } else if (part.type === 'spacing') {
         const label = this.#el('label', 'ascii-tabs-spacing', this);
         const text = this.#el('span', 'ascii-tabs-spacing-label', label);
@@ -725,12 +861,13 @@ class AsciiTabs extends Base {
   // --- Layout ---------------------------------------------------------------
 
   #measure(force = false) {
+    this.#scheduleOverflow();
     const tabEl = this.#tabEls[0];
     if (!tabEl || !this.#probe) return;
     const charWidth = this.#probe.getBoundingClientRect().width / 10;
     if (!charWidth || !tabEl.clientWidth) return;
     const chars = Math.floor(tabEl.clientWidth / charWidth);
-    const capacity = Math.max(chars - LABEL_WIDTH, 4 * (this.#spacing + 1));
+    const capacity = Math.max(chars - labelWidth(this.labels), 4 * (this.#spacing + 1));
     if (capacity !== this.#capacity || force) {
       this.#capacity = capacity;
       this.#render();
@@ -740,20 +877,21 @@ class AsciiTabs extends Base {
   // Always leave room after the last Fret; a new Staff appears when you write past the end
   #fit(t) {
     const tab = this.#tabs[t];
+    if (this.#columnLayout) return (this.#staves[t] = [[0, tab.length]]);
     const need = Math.max(lastUsed(tab) + (this.readonly ? 1 : 2), this.#cur && this.#cur.t === t ? this.#cur.c + 1 : 0, 1);
     while (tab.length < need) tab.push(emptyColumn());
     tab.length = need;
-    let staves = layout(tab, this.#spacing, this.#capacity);
+    let staves = layout(tab, this.#spacing, this.#capacity, this.notation);
     // Fill the last Staff with empty Columns, so every Staff spans the Sheet and, when editable,
     // every slot can be clicked. `value` and copy trim them.
     const [start] = staves[staves.length - 1];
     let used = 0;
-    for (let c = start; c < tab.length; c++) used += columnWidth(tab[c], this.#spacing);
+    for (let c = start; c < tab.length; c++) used += columnWidth(tab[c], this.#spacing, this.notation);
     while (used + this.#spacing + 1 <= this.#capacity) {
       tab.push(emptyColumn());
       used += this.#spacing + 1;
     }
-    staves = layout(tab, this.#spacing, this.#capacity);
+    staves = layout(tab, this.#spacing, this.#capacity, this.notation);
     this.#staves[t] = staves;
     return staves;
   }
@@ -762,40 +900,89 @@ class AsciiTabs extends Base {
     if (!this.#initialized) return;
     this.#tabEls.forEach((el, t) => {
       const tab = this.#tabs[t];
+      const geometry = this.#columnLayout?.[t];
+      el.classList.toggle('ascii-tabs-positioned', Boolean(geometry));
       const lead = '-'.repeat(leadingDashes(this.#spacing));
       const trail = '-'.repeat(this.#spacing - lead.length);
       let html = '';
       for (const [start, end] of this.#fit(t)) {
         // Dashes after the last Column, so every Staff ends flush with the Sheet
         let used = 0;
-        for (let c = start; c < end; c++) used += columnWidth(tab[c], this.#spacing);
-        const fill = visualDashes(this.#capacity - used);
+        for (let c = start; c < end; c++) used += columnWidth(tab[c], this.#spacing, this.notation);
+        const fill = geometry ? '' : visualDashes(this.#capacity - used);
         html += '<div class="ascii-tabs-staff">';
         for (let s = 0; s < STRING_COUNT; s++) {
-          html += `<span class="ascii-tabs-line"><span class="ascii-tabs-label">${LABELS[this.labels][s]}</span>`;
+          html += '<span class="ascii-tabs-line">';
+          if (this.labels !== 'none') html += `<span class="ascii-tabs-label">${LABELS[this.labels][s]}</span>`;
+          if (geometry) html += `<span class="ascii-tabs-area" data-t="${t}" data-s="${s}" style="width:${geometry.width}px">`;
           for (let c = start; c < end; c++) {
             const isCur = this.#cur && this.#cur.t === t && this.#cur.c === c && this.#cur.s === s;
             const fret = tab[c][s];
-            const digits = columnDigits(tab[c]);
+            const digits = geometry ? fretText(tab[c][s], s, this.notation).length : columnDigits(tab[c], this.notation);
+            const text = fretText(fret, s, this.notation);
             const selected = !this.#drag?.selecting && this.#selection.some(p => p.t === t && p.c === c && p.s === s);
             const cls = `ascii-tabs-cell${isCur ? ' ascii-tabs-cur' : ''}${fret !== null ? ' ascii-tabs-has' : ''}${selected ? ' ascii-tabs-selected' : ''}`;
             const body =
               fret === null
                 ? `<span class="ascii-tabs-mid ascii-tabs-string" aria-hidden="true">-</span><span class="ascii-tabs-caret" aria-hidden="true"> </span>${visualDashes(digits - 1)}`
-                : `<span class="ascii-tabs-fret">${fret}</span>${visualDashes(digits - String(fret).length)}`;
-            html += `<span class="${cls}" data-t="${t}" data-c="${c}" data-s="${s}">${visualDashes(lead.length)}${body}${visualDashes(trail.length)}</span>`;
+                : `<span class="ascii-tabs-fret">${fret.fret === null && fret.parenthesized ? '(<span class="ascii-tabs-caret" aria-hidden="true"></span>)' : text}</span>${visualDashes(digits - text.length)}`;
+            const position = geometry ? ` style="left:${geometry.positions[c]}px"` : '';
+            html += `<span class="${cls}" data-t="${t}" data-c="${c}" data-s="${s}"${position}>${geometry ? '' : visualDashes(lead.length)}${body}${geometry ? '' : visualDashes(trail.length)}</span>`;
           }
+          if (geometry) html += '</span>';
           html += `${fill}</span>`;
         }
         html += '</div>';
       }
       el.innerHTML = html;
+      // Assign through the CSSOM: consumer colors never become HTML or extra declarations.
+      for (const cell of el.querySelectorAll('.ascii-tabs-has')) {
+        const note = tab[+cell.dataset.c][+cell.dataset.s];
+        const fret = cell.querySelector('.ascii-tabs-fret');
+        if (note.color) fret.style.color = note.color;
+        if (typeof note.bold === 'boolean') fret.style.fontWeight = note.bold ? '700' : '400';
+      }
       const empty = lastUsed(tab) < 0;
       for (const del of this.#sheetEls[t]?.querySelectorAll('.ascii-tabs-delete') ?? []) {
-        del.disabled = this.#tabs.length === 1 && empty && !del._forceEnabled;
+        del.disabled = Boolean(this.#columnLayout) || (this.#tabs.length === 1 && empty && !del._forceEnabled);
       }
     });
     this.#placeInput();
+    for (const add of this.querySelectorAll('.ascii-tabs-add')) add.disabled = Boolean(this.#columnLayout);
+    this.#scheduleOverflow();
+  }
+
+  #scheduleOverflow() {
+    if (!this.#columnLayout || this.#overflowFrame !== null || !this.isConnected) return;
+    this.#overflowFrame = requestAnimationFrame(() => {
+      this.#overflowFrame = null;
+      if (!this.#columnLayout) return;
+      // Measure displayed text (including note names, parentheses and bold) in CSS pixels.
+      const reports = this.#columnLayout.map(({ width, positions }, index) => {
+        const collisions = [];
+        for (let s = 0; s < STRING_COUNT; s++) {
+          let previous = null;
+          for (const cell of this.#tabEls[index]?.querySelectorAll(`.ascii-tabs-has[data-s="${s}"]`) ?? []) {
+            const c = +cell.dataset.c;
+            const areaWidth = cell.parentElement.getBoundingClientRect().width;
+            if (!areaWidth) continue;
+            const half = cell.querySelector('.ascii-tabs-fret').getBoundingClientRect().width * width / areaWidth / 2;
+            const left = positions[c] - half, right = positions[c] + half;
+            if (left < 0) collisions.push({ string: s, columns: [c], edge: 'left', overlap: -left });
+            if (right > width) collisions.push({ string: s, columns: [c], edge: 'right', overlap: right - width });
+            if (previous && left < previous.right) collisions.push({ string: s, columns: [previous.c, c], overlap: previous.right - left });
+            if (!previous || right > previous.right) previous = { c, right };
+          }
+        }
+        return { index, width, collisions };
+      });
+      for (const report of reports) {
+        const signature = JSON.stringify(report);
+        const changed = this.#overflowSignatures[report.index] !== signature;
+        this.#overflowSignatures[report.index] = signature;
+        if (changed && report.collisions.length) this.dispatchEvent(new CustomEvent('layoutoverflow', { detail: report, bubbles: true }));
+      }
+    });
   }
 
   // Keep the hidden input next to the focused cell so phones scroll to it
@@ -817,25 +1004,37 @@ class AsciiTabs extends Base {
 
   // Stored Tabs win over <pre> and `value`; an empty or unreadable store falls back to them
   #load() {
+    if (this.#columnLayout) return;
     try {
       const tabs = readStored(localStorage.getItem(this.#storageKey));
-      if (tabs) this.#tabs = tabs;
+      if (tabs) {
+        this.#tabs = tabs;
+        this.#logicalLengths = tabs.map(tab => tab.length);
+      }
     } catch {}
   }
 
   #save() {
-    if (!this.#storageKey) return;
+    if (!this.#storageKey || this.#columnLayout) return;
     try {
       localStorage.setItem(this.#storageKey, serializeStored(this.#tabs.map(tab => tab.slice(0, lastUsed(tab) + 1))));
     } catch {}
   }
 
   #setFret(t, c, s, fret) {
+    if (this.#columnLayout && !this.#inBounds(t, c, s)) return false;
     const tab = this.#tabs[t];
     while (tab.length <= c) tab.push(emptyColumn());
-    if (tab[c][s] === fret) return false;
-    tab[c][s] = fret;
+    const previous = tab[c][s];
+    if (previous === fret || (previous && fret && typeof previous === 'object' && typeof fret === 'object'
+      && previous.fret === fret.fret && previous.color === fret.color && previous.bold === fret.bold && previous.parenthesized === fret.parenthesized)) return false;
+    tab[c][s] = cloneNote(fret);
+    this.#logicalLengths[t] = Math.max(this.#logicalLengths[t], c + 1);
     return true;
+  }
+
+  #inBounds(t, c, s) {
+    return Boolean(this.#tabs[t]) && c >= 0 && c < this.#tabs[t].length && s >= 0 && s < STRING_COUNT;
   }
 
   #endTyping() {
@@ -844,6 +1043,10 @@ class AsciiTabs extends Base {
   }
 
   #goTo(t, c, s, keepSelection = false) {
+    if (this.#columnLayout) {
+      if (!this.#tabs[t]?.length) return;
+      c = Math.min(c, this.#tabs[t].length - 1);
+    }
     if (!keepSelection) this.#selection = [];
     this.#endTyping();
     this.#cur = { t, c: Math.max(0, c), s };
@@ -861,6 +1064,7 @@ class AsciiTabs extends Base {
       return this.#transferSelection(this.#selection[0].t, Math.max(...columns) - Math.min(...columns) + 1, 0, true);
     }
     const { t, c, s } = this.#cur;
+    if (this.#columnLayout && !this.#inBounds(t, c + 1, s)) return;
     const column = [...(this.#tabs[t][c] ?? emptyColumn())];
     let changed = false;
     for (let string = 0; string < STRING_COUNT; string++) {
@@ -902,12 +1106,15 @@ class AsciiTabs extends Base {
   }
 
   // Typing writes to the value straight away, so `change` follows every keystroke
-  #edit(draft) {
+  #edit(draft, keepParentheses = true) {
     this.#selection = [];
     const { t, c, s } = this.#cur;
     if (this.#draft === null) this.#draftOrigin = this.#tabs[t][c]?.[s] ?? null;
     this.#draft = draft;
-    const changed = this.#setFret(t, c, s, draft === '' ? null : Number(draft));
+    const previous = this.#tabs[t][c]?.[s];
+    const next = draft === '' && !(keepParentheses && previous?.parenthesized) ? null : previous && typeof previous === 'object'
+      ? { ...previous, fret: draft === '' ? null : Number(draft) } : Number(draft);
+    const changed = this.#setFret(t, c, s, next);
     this.#render();
     if (changed) this.#emitChange();
   }
@@ -916,6 +1123,20 @@ class AsciiTabs extends Base {
     if (this.#draft === null || this.#draft === '') return this.#edit(d);
     const next = this.#draft + d;
     if (/^(0|[1-9][0-9]?)$/.test(next) && Number(next) <= MAX_FRET) this.#edit(next);
+  }
+
+  #parenthesize() {
+    const { t, c, s } = this.#cur;
+    const previous = this.#tabs[t][c]?.[s] ?? null;
+    if (this.#draft === null) this.#draftOrigin = previous;
+    this.#draft = String(fretValue(previous) ?? '');
+    this.#selection = [];
+    const changed = this.#setFret(t, c, s, {
+      ...(previous && typeof previous === 'object' ? previous : { fret: previous }),
+      parenthesized: true,
+    });
+    this.#render();
+    if (changed) this.#emitChange();
   }
 
   #onKeyDown = e => {
@@ -940,6 +1161,10 @@ class AsciiTabs extends Base {
     if ((e.metaKey || e.altKey) && (e.key === '0' || e.code === 'Digit0')) {
       e.preventDefault();
       return this.#fillColumnWithZeros();
+    }
+    if (e.key === '(' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      e.preventDefault();
+      return this.#parenthesize();
     }
     if (/^[0-9]$/.test(e.key)) {
       e.preventDefault();
@@ -966,11 +1191,11 @@ class AsciiTabs extends Base {
       case 'Backspace': {
         e.preventDefault();
         const { t, c, s } = this.#cur;
-        return this.#edit((this.#draft ?? String(this.#tabs[t][c][s] ?? '')).slice(0, -1));
+        return this.#edit((this.#draft ?? String(fretValue(this.#tabs[t][c][s]) ?? '')).slice(0, -1));
       }
       case 'Delete':
         e.preventDefault();
-        return this.#edit('');
+        return this.#edit('', false);
       case 'Escape': {
         e.preventDefault();
         if (this.#draft === null) return;
@@ -994,7 +1219,7 @@ class AsciiTabs extends Base {
     const last = Math.max(...this.#selection.map(p => p.c));
     const columns = Array.from({ length: last - first + 1 }, emptyColumn);
     for (const { t, c, s } of this.#selection) columns[c - first][s] = this.#tabs[t][c][s];
-    return format(columns, { spacing: this.#spacing, labels: this.labels });
+    return format(columns, { spacing: this.#spacing, labels: this.labels, notation: this.notation });
   }
 
   #onCopy = e => {
@@ -1009,6 +1234,7 @@ class AsciiTabs extends Base {
     if (lastUsed(columns) < 0) return;
     e.preventDefault();
     const { t, c } = this.#cur;
+    if (this.#columnLayout && c + columns.length > this.#tabs[t].length) return;
     const selected = [];
     let changed = false;
     columns.forEach((column, offset) => column.forEach((fret, s) => {
@@ -1025,6 +1251,7 @@ class AsciiTabs extends Base {
   // Snapshot before clearing: overlapping moves preserve every selected Fret.
   #transferSelection(t, dc, ds, duplicate = false) {
     const notes = this.#selection.map(p => ({ ...p, fret: this.#tabs[p.t][p.c][p.s] }));
+    if (this.#columnLayout && notes.some(p => !this.#inBounds(t, p.c + dc, p.s + ds))) return false;
     if (notes.some(p => p.c + dc < 0 || p.s + ds < 0 || p.s + ds >= STRING_COUNT)) return false;
     if (!duplicate && notes.every(p => p.t === t) && dc === 0 && ds === 0) return false;
     let changed = false;
@@ -1042,11 +1269,24 @@ class AsciiTabs extends Base {
 
   // --- Pointer --------------------------------------------------------------
 
-  #cellAt = (x, y) => document.elementFromPoint(x, y)?.closest('.ascii-tabs-cell');
+  #cellAt = (x, y) => {
+    const target = document.elementFromPoint(x, y);
+    if (!this.#columnLayout) return target?.closest('.ascii-tabs-cell');
+    const area = target?.closest('.ascii-tabs-area');
+    if (!area || !this.contains(area)) return null;
+    const t = +area.dataset.t;
+    const rect = area.getBoundingClientRect();
+    const { width, positions } = this.#columnLayout[t];
+    const local = (x - rect.left) * width / rect.width;
+    if (local < 0 || local > width || y < rect.top || y > rect.bottom || !positions.length) return null;
+    let nearest = 0;
+    for (let c = 1; c < positions.length; c++) if (Math.abs(positions[c] - local) < Math.abs(positions[nearest] - local)) nearest = c;
+    return area.querySelector(`[data-c="${nearest}"]`);
+  };
   #position = el => ({ t: +el.dataset.t, c: +el.dataset.c, s: +el.dataset.s });
 
   #onPointerDown = e => {
-    const cell = e.target.closest('.ascii-tabs-cell');
+    const cell = this.#columnLayout ? this.#cellAt(e.clientX, e.clientY) : e.target.closest('.ascii-tabs-cell');
     const sheet = e.target.closest('.ascii-tabs-sheet');
     if (!sheet || e.target.closest('.ascii-tabs-tools') || e.button !== 0 || this.readonly) return;
     e.preventDefault(); // keep focus on the hidden input
@@ -1168,7 +1408,7 @@ class AsciiTabs extends Base {
   async copy(index = 0) {
     const tab = this.#tabs[index];
     if (!tab) return;
-    await copyText(this.#selection.length && this.#selection[0].t === index ? this.#selectionText() : format(tab, { spacing: this.#spacing, labels: this.labels, width: this.#capacity + LABEL_WIDTH }));
+    await copyText(this.#selection.length && this.#selection[0].t === index ? this.#selectionText() : format(tab, { spacing: this.#spacing, labels: this.labels, notation: this.notation, width: this.#capacity + labelWidth(this.labels) }));
     const button = this.#sheetEls[index]?.querySelector('.ascii-tabs-copy');
     if (!button) return;
     this.#flashCopied(button);
@@ -1194,9 +1434,10 @@ class AsciiTabs extends Base {
   }
 
   addTab() {
-    if (this.readonly) return;
+    if (this.readonly || this.#columnLayout) return;
     this.#endTyping();
     this.#tabs.push([]);
+    this.#logicalLengths.push(0);
     this.#buildSheets();
     if (this.#sheetsEl) {
       this.#goTo(this.#tabs.length - 1, 0, 0);
@@ -1208,13 +1449,18 @@ class AsciiTabs extends Base {
   // More than one Tab: remove it. A single Tab is cleared instead, and only when it has content
   removeTab(index) {
     const t = Number(index);
-    if (this.readonly || !this.#tabs[t]) return;
+    if (this.readonly || this.#columnLayout || !this.#tabs[t]) return;
     if (this.#tabs.length === 1 && lastUsed(this.#tabs[0]) < 0) return;
     this.#endTyping();
     this.#cur = null;
     this.#selection = [];
-    if (this.#tabs.length > 1) this.#tabs.splice(t, 1);
-    else this.#tabs[0] = [];
+    if (this.#tabs.length > 1) {
+      this.#tabs.splice(t, 1);
+      this.#logicalLengths.splice(t, 1);
+    } else {
+      this.#tabs[0] = [];
+      this.#logicalLengths[0] = 0;
+    }
     this.#buildSheets();
     this.#emitChange();
   }
