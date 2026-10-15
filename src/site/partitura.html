@@ -66,29 +66,24 @@
           <input type="checkbox" id="partRights" required />
           <span>%%partRightsLabel%%</span>
         </label>
-        <div class="part-fields">
-          <label class="part-field">
-            <span>%%partFileLabel%%</span>
-            <input
-              type="file"
-              id="partFile"
-              accept=".pdf,.mxl,.musicxml,.xml,application/pdf"
-              disabled
-            />
-          </label>
-          <label class="part-field">
-            <span>%%partTuningLabel%%</span>
-            <select id="partTuning" disabled>
-              <option value="auto">%%partTuningAuto%%</option>
-              <option value="standard">%%partTuningStandard%%</option>
-              <option value="dropd">%%partTuningDropD%%</option>
-            </select>
-          </label>
-        </div>
+        <label id="partDropzone" class="part-dropzone" aria-disabled="true">
+          <input
+            class="part-file-input"
+            type="file"
+            id="partFile"
+            accept=".pdf,.mxl,.musicxml,.xml,application/pdf"
+            aria-labelledby="partDropTitle"
+            aria-describedby="partDropHint"
+            disabled
+          />
+          <svg class="part-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M12 16V4m-4 4 4-4 4 4M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4" />
+          </svg>
+          <strong id="partDropTitle">%%partDropTitle%%</strong>
+          <span class="part-drop-browse">%%partDropBrowse%%</span>
+          <span id="partDropHint">%%partFileLabel%%</span>
+        </label>
         <div id="partTurnstile" class="part-turnstile"></div>
-        <button type="submit" id="partSubmit" class="part-btn" disabled>
-          %%partSubmit%%
-        </button>
       </form>
 
       <p id="partError" class="part-error" role="alert" hidden></p>
@@ -111,6 +106,7 @@
       <details class="part-privacy">
         <summary>%%partPrivacySummary%%</summary>
         <p>%%partPrivacyBody%%</p>
+        <p>%%partPrivacyIp%%</p>
         <p><a href="%%PRIVACY_HREF%%">%%partPrivacyLink%%</a></p>
       </details>
     </main>

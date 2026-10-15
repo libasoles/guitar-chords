@@ -1,6 +1,6 @@
 /* partitura.js — Partitura y tablatura tool page.
 
-   Flow: rights checkbox -> file + Afinación -> Turnstile token ->
+   Flow: rights checkbox -> file (automatic tuning) -> Turnstile token ->
    POST /jobs, PUT upload, POST /jobs/:id/process -> poll GET /jobs/:id ->
    desktop: Verovio preview with one <ascii-tabs> per measure aligned to the
    notes, edit, confirm -> POST /jobs/:id/export -> downloads;
@@ -55,8 +55,7 @@
   var form = $('partForm');
   var rightsBox = $('partRights');
   var fileInput = $('partFile');
-  var tuningSelect = $('partTuning');
-  var submitBtn = $('partSubmit');
+  var dropzone = $('partDropzone');
   var errorEl = $('partError');
   var progressEl = $('partProgress');
   var statusEl = $('partStatus');
@@ -90,9 +89,9 @@
   }
 
   function setBusy(busy) {
-    submitBtn.disabled = busy || !rightsBox.checked;
     fileInput.disabled = busy || !rightsBox.checked;
-    tuningSelect.disabled = busy || !rightsBox.checked;
+    dropzone.setAttribute('aria-disabled', String(fileInput.disabled));
+    dropzone.classList.remove('is-dragging');
     rightsBox.disabled = busy;
   }
 
@@ -1064,17 +1063,14 @@
     showError('');
   });
 
-  form.addEventListener('submit', function (event) {
-    event.preventDefault();
+  function attachFile(file) {
+    if (fileInput.disabled) return;
+    showError('');
     if (!rightsBox.checked) {
       showError(t('partErrRights'));
       return;
     }
-    var file = fileInput.files && fileInput.files[0];
-    if (!file) {
-      showError(t('partErrNoFile'));
-      return;
-    }
+    if (!file) return;
     if (!extensionOk(file.name)) {
       showError(t('partErrBadType'));
       return;
@@ -1083,7 +1079,27 @@
       showError(errorText('too_large'));
       return;
     }
-    startJob(file, tuningSelect.value);
+    startJob(file, 'auto');
+  }
+
+  form.addEventListener('submit', function (event) { event.preventDefault(); });
+  fileInput.addEventListener('change', function () {
+    var file = fileInput.files && fileInput.files[0];
+    fileInput.value = '';
+    attachFile(file);
+  });
+  dropzone.addEventListener('dragover', function (event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = fileInput.disabled ? 'none' : 'copy';
+    if (!fileInput.disabled) dropzone.classList.add('is-dragging');
+  });
+  dropzone.addEventListener('dragleave', function (event) {
+    if (!dropzone.contains(event.relatedTarget)) dropzone.classList.remove('is-dragging');
+  });
+  dropzone.addEventListener('drop', function (event) {
+    event.preventDefault();
+    dropzone.classList.remove('is-dragging');
+    attachFile(event.dataTransfer.files[0]);
   });
 
   setBusy(false);

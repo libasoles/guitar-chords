@@ -1119,6 +1119,9 @@ function renderPartituraPage(template, strings, locale) {
   [
     "partRightsLabel",
     "partFileLabel",
+    "partDropTitle",
+    "partDropBrowse",
+    "partPrivacyIp",
     "partTuningLabel",
     "partTuningAuto",
     "partTuningStandard",

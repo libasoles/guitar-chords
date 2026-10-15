@@ -178,14 +178,13 @@ const READY = {
   },
 };
 
-async function fillForm(page, name, tuning) {
+async function fillForm(page, name) {
   await page.locator('#partRights').check();
   await page.locator('#partFile').setInputFiles({
     name: name || 'score.musicxml',
     mimeType: 'application/xml',
     buffer: Buffer.from('<score-partwise/>'),
   });
-  if (tuning) await page.locator('#partTuning').selectOption(tuning);
 }
 
 (async function () {
@@ -250,11 +249,12 @@ async function fillForm(page, name, tuning) {
         await mockApi(page, { jobs: [READY] });
         await page.goto(toolUrl);
         assert.ok(await page.locator('#partFile').isDisabled());
-        assert.ok(await page.locator('#partSubmit').isDisabled());
+        assert.equal(await page.locator('#partSubmit, #partTuning').count(), 0);
+        assert.equal(await page.locator('#partDropzone').getAttribute('aria-disabled'), 'true');
         assert.equal(await page.locator('.part-rights span').textContent(), S.partRightsLabel);
         await page.locator('#partRights').check();
         assert.ok(await page.locator('#partFile').isEnabled());
-        assert.ok(await page.locator('#partSubmit').isEnabled());
+        assert.equal(await page.locator('#partDropzone').getAttribute('aria-disabled'), 'false');
         assert.ok(!(await page.locator('.part-privacy p').first().isVisible()));
         await page.locator('.part-privacy summary').click();
         assert.ok(await page.locator('.part-privacy p').first().isVisible());
@@ -268,6 +268,32 @@ async function fillForm(page, name, tuning) {
           await page.locator('#partTurnstile').getAttribute('data-sitekey'),
           '0x4AAAAAAFX8ivpyYAAvr-8D',
         );
+        await page.close();
+      }
+
+      // Dropping is gated by rights and starts exactly one automatic upload.
+      {
+        const page = await browser.newPage();
+        const api = await mockApi(page, { jobs: [READY] });
+        await page.goto(toolUrl);
+        async function dropScore() {
+          await page.locator('#partDropzone').evaluate(node => {
+            const data = new DataTransfer();
+            data.items.add(new File(['<score-partwise/>'], 'dropped.musicxml', { type: 'application/xml' }));
+            node.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: data }));
+          });
+        }
+        await dropScore();
+        assert.equal(api.calls.length, 0);
+        await page.locator('#partRights').check();
+        await dropScore();
+        await dropScore();
+        await page.waitForSelector('#partRows .part-row');
+        assert.equal(api.createBody.filename, 'dropped.musicxml');
+        assert.equal(api.createBody.tuning, 'auto');
+        assert.equal(api.calls.filter(call => call === 'POST /jobs').length, 1);
+        await page.locator('.part-privacy summary').click();
+        assert.equal(await page.locator('.part-privacy p').nth(1).textContent(), S.partPrivacyIp);
         await page.close();
       }
 
@@ -285,14 +311,13 @@ async function fillForm(page, name, tuning) {
           ],
         });
         await page.goto(toolUrl);
-        await fillForm(page, 'score.musicxml', 'dropd');
-        await page.locator('#partSubmit').click();
+        await fillForm(page, 'score.musicxml');
         await page.waitForFunction(() => /7|9|8/.test(document.querySelector('#partElapsed').textContent));
         assert.ok(/\d/.test(await page.locator('#partElapsed').textContent()));
         await page.waitForSelector('#partRows .part-row');
         assert.equal(api.createBody.filename, 'score.musicxml');
         assert.equal(api.createBody.kind, 'musicxml');
-        assert.equal(api.createBody.tuning, 'dropd');
+        assert.equal(api.createBody.tuning, 'auto');
         assert.ok(/^token-/.test(api.createBody.turnstileToken));
         assert.ok(api.calls.includes('UPLOAD POST'));
         assert.ok(api.calls.indexOf('POST /jobs/' + JOB + '/process') > api.calls.indexOf('UPLOAD POST'));
@@ -391,7 +416,6 @@ async function fillForm(page, name, tuning) {
         await mockApi(page, { createError: code, jobs: [READY] });
         await page.goto(toolUrl);
         await fillForm(page);
-        await page.locator('#partSubmit').click();
         await page.waitForSelector('#partError:not([hidden])');
         assert.equal(await page.locator('#partError').textContent(), S['partErr_' + code], code);
         await page.close();
@@ -420,14 +444,12 @@ async function fillForm(page, name, tuning) {
         await page.goto(toolUrl);
         await page.locator('#partRights').check();
         await page.locator('#partFile').setInputFiles({ name: 'cancion.mp3', mimeType: 'audio/mpeg', buffer: Buffer.from('x') });
-        await page.locator('#partSubmit').click();
         assert.equal(await page.locator('#partError').textContent(), S.partErrBadType);
         await page.locator('#partFile').setInputFiles({
           name: 'big.pdf',
           mimeType: 'application/pdf',
           buffer: Buffer.alloc(20 * 1024 * 1024 + 1),
         });
-        await page.locator('#partSubmit').click();
         assert.equal(await page.locator('#partError').textContent(), S.partErr_too_large);
         await page.close();
       }
@@ -438,9 +460,8 @@ async function fillForm(page, name, tuning) {
         const page = await context.newPage();
         const api = await mockApi(page, { jobs: [READY] });
         await page.goto(toolUrl);
-        await fillForm(page, 'score.pdf');
         const downloadPromise = page.waitForEvent('download');
-        await page.locator('#partSubmit').click();
+        await fillForm(page, 'score.pdf');
         const download = await downloadPromise;
         assert.equal(download.suggestedFilename(), 'out.pdf');
         assert.equal(api.createBody.kind, 'pdf');
