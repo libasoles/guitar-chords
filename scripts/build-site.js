@@ -1121,6 +1121,9 @@ function renderPartituraPage(template, strings, locale) {
     "partFileLabel",
     "partDropTitle",
     "partDropBrowse",
+    "partExampleTitle",
+    "partExampleCaption",
+    "partExampleAlt",
     "partPrivacyIp",
     "partTuningLabel",
     "partTuningAuto",
@@ -1388,6 +1391,10 @@ copyFile(
   path.join(VENDOR_DIST, "ascii-tabs.js"),
 );
 if (PARTITURA_ENABLED) {
+  copyFile(
+    path.join(SRC_SITE, "partitura-example.svg"),
+    path.join(ASSETS_DIST, "partitura-example.svg"),
+  );
   copyFile(
     path.join(SRC_SITE, "partitura.js"),
     path.join(ASSETS_DIST, "partitura.js"),
