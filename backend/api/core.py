@@ -352,6 +352,31 @@ class Service:
             self._fail(job, classify_failure(event.get("error"), job.get("stage")))
         return {"ok": True}
 
+    def execution_status_change(self, detail: dict) -> dict:
+        """EventBridge 'Step Functions Execution Status Change'. Catches what the
+        machine cannot catch itself (machine-level timeout, abort, crash)."""
+        status = detail.get("status")
+        if status not in ("TIMED_OUT", "FAILED", "ABORTED"):
+            return {"ok": True, "ignored": True}
+        try:
+            job_id = json.loads(detail.get("input") or "{}").get("jobId")
+        except (TypeError, ValueError, AttributeError):
+            job_id = None
+        job = self.store.get(f"job#{job_id}") if isinstance(job_id, str) and job_id else None
+        if job is None:
+            return {"ok": False}
+        # A job already finished (ready/exported/failed) keeps its outcome.
+        if job["status"] in ("processing", "exporting"):
+            if status == "TIMED_OUT":
+                code = "timeout"
+            else:
+                code = classify_failure({"Error": detail.get("error") or "",
+                                         "Cause": detail.get("cause") or ""}, job.get("stage"))
+            self._fail(job, code)
+        else:
+            self._release_slot(job)
+        return {"ok": True}
+
     def set_budget_paused(self, until: Optional[float] = None) -> None:
         item = {"pk": "flag#budget", "paused": True}
         if until:

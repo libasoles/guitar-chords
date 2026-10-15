@@ -386,6 +386,24 @@ class OcrConcurrencyTests(unittest.TestCase):
         self.assertEqual(env.call("POST /jobs/{id}/process", job=c)[0], 500)
         self.assertEqual(env.store.items["ocr#slots"]["active"], 0)
 
+    def test_machine_timeout_event_fails_job_and_releases_slot_once(self):
+        env = Env()
+        a = self.pdf(env)
+        env.call("POST /jobs/{id}/process", job=a)
+        self.assertEqual(env.store.items["ocr#slots"]["active"], 1)
+        event = {"source": "aws.states", "detail-type": "Step Functions Execution Status Change",
+                 "detail": {"status": "TIMED_OUT", "input": json.dumps({"jobId": a, "kind": "pdf"})}}
+        for _ in range(2):  # idempotent
+            handler.dispatch(env.svc, event)
+        body = env.call("GET /jobs/{id}", job=a)[1]
+        self.assertEqual((body["status"], body["error"]), ("failed", "timeout"))
+        self.assertEqual(env.store.items["ocr#slots"]["active"], 0)
+        ok = {"source": "aws.states", "detail-type": "Step Functions Execution Status Change",
+              "detail": {"status": "SUCCEEDED", "input": json.dumps({"jobId": a})}}
+        self.assertTrue(handler.dispatch(env.svc, ok)["ok"])
+        event["detail"]["input"] = json.dumps({"jobId": "nope"})
+        self.assertFalse(handler.dispatch(env.svc, event)["ok"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -10,6 +10,8 @@ from aws_cdk import (
     aws_apigatewayv2_integrations as integrations,
     aws_budgets as budgets,
     aws_dynamodb as dynamodb,
+    aws_events as events,
+    aws_events_targets as event_targets,
     aws_ec2 as ec2,
     aws_ecs as ecs,
     aws_iam as iam,
@@ -161,6 +163,17 @@ class BackendStack(Stack):
             self, "ExportMachine", state_machine_type=sfn.StateMachineType.STANDARD,
             definition_body=sfn.DefinitionBody.from_chainable(export.next(export_done)),
             timeout=PROCESS_TIMEOUT)
+
+        # Machine-level timeouts/aborts cannot be caught by the machine itself:
+        # route terminal failures to the events Lambda so the job fails and the
+        # OCR slot is released.
+        events.Rule(
+            self, "ExecutionFailedRule",
+            event_pattern=events.EventPattern(
+                source=["aws.states"], detail_type=["Step Functions Execution Status Change"],
+                detail={"status": ["TIMED_OUT", "FAILED", "ABORTED"],
+                        "stateMachineArn": [process_sm.state_machine_arn, export_sm.state_machine_arn]}),
+            targets=[event_targets.LambdaFunction(events_fn)])
 
         # ---- public API function
         api_fn = api_function("ApiFunction", PROCESS_SM_ARN=process_sm.state_machine_arn,

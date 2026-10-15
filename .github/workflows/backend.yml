@@ -41,3 +41,30 @@ jobs:
         run: |
           docker build -t engine-test backend/engine
           docker run --rm --entrypoint python engine-test -m pytest -q /var/task
+
+  deploy:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+      - name: Install CDK
+        run: |
+          pip install -r infra/requirements.txt
+          npm install -g aws-cdk
+      - name: Deploy
+        working-directory: infra
+        run: cdk deploy GuitarChordsBackend --require-approval never

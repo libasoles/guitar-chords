@@ -53,6 +53,14 @@ def test_fargate_ocr_task_arm64_2vcpu_8gb(template):
         "RuntimePlatform": {"CpuArchitecture": "ARM64", "OperatingSystemFamily": "LINUX"}})
 
 
+def test_execution_failure_rule_targets_events_lambda(template):
+    template.has_resource_properties("AWS::Events::Rule", {
+        "EventPattern": Match.object_like({
+            "source": ["aws.states"],
+            "detail-type": ["Step Functions Execution Status Change"],
+            "detail": Match.object_like({"status": ["TIMED_OUT", "FAILED", "ABORTED"]})})})
+
+
 def test_no_nat_or_load_balancer(template):
     template.resource_count_is("AWS::EC2::NatGateway", 0)
     template.resource_count_is("AWS::ElasticLoadBalancingV2::LoadBalancer", 0)

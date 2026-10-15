@@ -42,6 +42,9 @@ def build_service():
 def dispatch(svc, event):
     if "internal" in event:
         return svc.internal(event)
+    if event.get("source") == "aws.states" and \
+            event.get("detail-type") == "Step Functions Execution Status Change":
+        return svc.execution_status_change(event.get("detail") or {})
     records = event.get("Records")
     if records and records[0].get("EventSource") == "aws:sns":
         svc.set_budget_paused(until=_next_month_start(svc.clock()))
