@@ -228,7 +228,7 @@ async function fillForm(page, name, tuning) {
         const page = await browser.newPage();
         await page.goto(base + prefix + '/politica-de-privacidad');
         assert.equal(await page.locator('h1').textContent(), S.privH1);
-        assert.ok((await page.locator('main').textContent()).includes('contacto@acordesdeguitarra.com.ar'));
+        assert.ok((await page.locator('main').textContent()).includes('hola@acordesdeguitarra.com.ar'));
         for (const url of [prefix + '/', prefix + '/crear-tablaturas-de-guitarra', prefix + '/circulo-de-quintas', prefix + '/partitura-y-tablatura']) {
           await page.goto(base + url);
           const link = page.locator('a[href="' + prefix + '/politica-de-privacidad"]').last();
