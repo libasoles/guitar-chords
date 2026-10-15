@@ -291,5 +291,119 @@
   "intervalsFig3": "Terceras · cuerdas 1 y 2",
   "intervalsFig1": "Terceras · cuerdas 2 y 3",
   "intervalsFig2": "Sextas · cuerdas 1 y 3",
-  "intervalsFig4": "Décimas · cuerdas 2 y 5"
+  "intervalsFig4": "Décimas · cuerdas 2 y 5",
+  "privNavLabel": "Política de privacidad",
+  "privPageTitle": "Política de privacidad · Acordes de guitarra",
+  "privMetaDescription": "Qué datos recolecta acordesdeguitarra.com.ar: Google Analytics, archivos subidos a Partitura y tablatura, IPs para límites de uso y Cloudflare Turnstile.",
+  "privH1": "Política de privacidad",
+  "privLead": "Este sitio es gratuito y no tiene cuentas de usuario. Acá explicamos qué datos se recolectan y qué pasa con ellos.",
+  "privSections": [
+    {
+      "h": "Estadísticas de uso (Google Analytics)",
+      "p": [
+        "Usamos Google Analytics para saber qué páginas se visitan y mejorar el sitio. Google puede guardar cookies y datos de navegación según su propia política. No usamos esos datos para identificarte."
+      ]
+    },
+    {
+      "h": "Partitura y tablatura: archivos subidos",
+      "p": [
+        "Si usás la herramienta Partitura y tablatura, tu archivo (PDF o MusicXML) se guarda en un almacenamiento privado, solo para procesarlo y generar los resultados (PDF, MusicXML y JSON).",
+        "El enlace de tu trabajo contiene un identificador aleatorio y largo que funciona como secreto: quien tenga el enlace puede ver el resultado. Todos los archivos, originales y generados, se borran automáticamente a las 24 horas.",
+        "Las ediciones que hagas en el editor también se guardan en tu navegador (almacenamiento local) para que no se pierdan al recargar; podés borrarlas limpiando los datos del sitio."
+      ]
+    },
+    {
+      "h": "Direcciones IP y límites de uso",
+      "p": [
+        "Para evitar abusos, guardamos tu dirección IP junto a un contador diario de trabajos creados. Estos registros se borran automáticamente y no se usan para otro fin."
+      ]
+    },
+    {
+      "h": "Cloudflare Turnstile",
+      "p": [
+        "Para comprobar que quien crea un trabajo es una persona, usamos Cloudflare Turnstile, que solo se carga en la página de Partitura y tablatura. Turnstile puede recibir datos técnicos de tu navegador según la política de privacidad de Cloudflare."
+      ]
+    },
+    {
+      "h": "Derechos de autor",
+      "p": [
+        "Subí solo partituras que tengas derecho a usar. Sos responsable del contenido que subís. Si sos titular de derechos y querés que retiremos una obra, escribinos a contacto@acordesdeguitarra.com.ar indicando el enlace del trabajo."
+      ]
+    },
+    {
+      "h": "Tus derechos sobre datos personales",
+      "p": [
+        "Según la Ley 25.326 de Protección de Datos Personales de Argentina, podés acceder, rectificar y suprimir tus datos personales. La Agencia de Acceso a la Información Pública es el órgano de control de esta ley. Para ejercer tus derechos, escribinos a contacto@acordesdeguitarra.com.ar."
+      ]
+    }
+  ],
+  "partNavLabel": "Partitura y tablatura: pasá una partitura a tablatura →",
+  "partPromoKicker": "Nuevo",
+  "partPromoTitle": "De la partitura a la tablatura",
+  "partPromoDescription": "Subí un PDF o MusicXML y obtené la partitura con la tablatura alineada.",
+  "partPromoCta": "Probar Partitura y tablatura →",
+  "partPromoAlt": "Guitarra criolla ilustrada con partituras",
+  "partPageTitle": "Partitura a tablatura online gratis · Partitura y tablatura",
+  "partMetaDescription": "Convertí una partitura en PDF o MusicXML en tablatura de guitarra: digitación automática, editor de tablatura alineado a la notación y descarga en PDF, MusicXML y JSON.",
+  "partH1": "Partitura y tablatura",
+  "partLead": "Subí una partitura en PDF o MusicXML y obtené la notación con la tablatura de guitarra debajo de cada compás.",
+  "partRightsLabel": "Subí solo partituras que tengas derecho a usar. Sos responsable del contenido que subís.",
+  "partFileLabel": "Archivo (PDF, MusicXML, MXL; hasta 20 MB)",
+  "partTuningLabel": "Afinación",
+  "partTuningAuto": "Automática",
+  "partTuningStandard": "Estándar",
+  "partTuningDropD": "Drop D",
+  "partSubmit": "Procesar partitura",
+  "partVerifying": "Verificando que sos una persona…",
+  "partUploading": "Subiendo el archivo…",
+  "partQueued": "Trabajo creado, esperando…",
+  "partStageOcr": "Reconociendo la partitura (puede tardar varios minutos)…",
+  "partStagePreparing": "Calculando la digitación…",
+  "partStageExporting": "Generando los archivos…",
+  "partElapsed": "Tiempo transcurrido: {s} s",
+  "partResumeHint": "Podés cerrar esta página y volver con el mismo enlace: el trabajo se conserva 24 horas.",
+  "partLoadingAlt": "Procesando",
+  "partNewJob": "Empezar un trabajo nuevo",
+  "partToolbarLabel": "Herramientas de la tablatura",
+  "partBoldBass": "Resaltar el bajo",
+  "partNotation": "Mostrar",
+  "partNotationFrets": "Números de traste",
+  "partNotationSolfege": "Notas (solfeo)",
+  "partEditedCount": "Compases editados: {n}",
+  "partReset": "Restablecer digitación sugerida",
+  "partConfirm": "Confirmar y exportar",
+  "partExporting": "Exportando…",
+  "partDropped": "Notas descartadas (no hay posición posible en la guitarra):",
+  "partDroppedItem": "compás {m}: {p}",
+  "partNoteTabEdit": "Editar la tablatura no corrige errores de la notación. Si la partitura tiene errores de reconocimiento, descargá el MusicXML intermedio, corregilo en un editor de partituras y subilo de nuevo.",
+  "partPreviewHint": "Hacé clic en una cuerda de la tablatura y escribí el número de traste.",
+  "partDownloadsHeading": "Descargas",
+  "partDlPdf": "PDF (notación + tablatura)",
+  "partDlMusicxml": "MusicXML final",
+  "partDlJson": "JSON de las tablaturas",
+  "partDlIntermediate": "MusicXML intermedio (resultado del reconocimiento)",
+  "partMobileReady": "Listo. Se descargó el PDF con la digitación sugerida. Si no empezó, usá el enlace.",
+  "partMobileNote": "La vista previa y el editor están disponibles en pantallas de 768 px o más.",
+  "partPrivacySummary": "Qué pasa con mis archivos",
+  "partPrivacyBody": "Tu archivo es privado, se usa solo para generar el resultado y se borra automáticamente a las 24 horas. Guardamos tu IP únicamente para limitar el uso diario.",
+  "partPrivacyLink": "Política de privacidad completa",
+  "partErrDefault": "Ocurrió un error inesperado. Probá de nuevo en unos minutos.",
+  "partErrNetwork": "No pudimos conectar con el servicio. Revisá tu conexión y probá de nuevo.",
+  "partErrBadType": "Formato no admitido. Subí un PDF, MusicXML (.musicxml, .xml) o .mxl.",
+  "partErrNoFile": "Elegí un archivo para continuar.",
+  "partErrRights": "Marcá la casilla para confirmar que tenés derecho a usar el archivo.",
+  "partErr_rate_limited": "Alcanzaste el límite diario de trabajos. Probá de nuevo mañana.",
+  "partErr_busy": "El sistema está ocupado procesando otras partituras. Reintentá en unos minutos.",
+  "partErr_budget_paused": "El servicio está pausado temporalmente. Volvé a intentar más tarde.",
+  "partErr_turnstile_failed": "No pudimos verificar que sos una persona. Recargá la página y probá de nuevo.",
+  "partErr_too_large": "El archivo es demasiado grande (máximo 20 MB).",
+  "partErr_omr_failed": "No se pudo reconocer la partitura. Probá con un PDF más nítido o subí un MusicXML.",
+  "partErr_no_notes": "No se encontraron notas en la partitura.",
+  "partErr_timeout": "El procesamiento tardó demasiado y se canceló. Probá de nuevo.",
+  "partErr_export_limit": "Llegaste al límite de exportaciones de este trabajo.",
+  "partErr_expired": "Este trabajo expiró (los archivos se borran a las 24 horas). Empezá uno nuevo.",
+  "partErr_invalid_score": "No se pudo leer la partitura. Revisá que el MusicXML sea válido o probá con otro archivo.",
+  "partErr_export_failed": "No se pudieron generar los archivos. Probá de nuevo.",
+  "partErr_internal_error": "Error interno del servicio. Probá de nuevo en unos minutos.",
+  "partErr_not_found": "No encontramos este trabajo. Empezá uno nuevo."
 }

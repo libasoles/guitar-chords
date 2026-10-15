@@ -262,6 +262,25 @@ async function run() {
     assert.strictEqual(sixths.spacing, 3);
     assert.strictEqual(sixths.buttons, 0);
 
+    // The English pages run the same component with the English UI.
+    await page.evaluate(() => localStorage.clear());
+    await page.goto(base + '/en/crear-tablaturas-de-guitarra');
+    await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
+    const en = await page.evaluate(() => {
+      const el = document.querySelector('ascii-tabs');
+      return { tabs: el.value.length, readonly: el.readonly, hint: el.querySelector('.ascii-tabs-hint').textContent };
+    });
+    assert.strictEqual(en.tabs, 3);
+    assert.strictEqual(en.readonly, false);
+    assert.ok(/click/i.test(en.hint), 'English hint: ' + en.hint);
+    await page.goto(base + '/en/ejercicio-de-sextas');
+    await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
+    const enSixths = await page.evaluate(() => {
+      const el = document.querySelector('ascii-tabs');
+      return { tabs: el.value.length, readonly: el.readonly, buttons: el.querySelectorAll('button').length };
+    });
+    assert.deepStrictEqual(enSixths, { tabs: 3, readonly: true, buttons: 0 });
+
     console.log('OK: tab editor saves edits, supports shortcuts, group selection/movement and ASCII copy/paste; sixths exercise is read-only with no controls.');
   } finally {
     await browser.close();

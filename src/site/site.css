@@ -1629,3 +1629,289 @@ footer {
   .fifths-svg { width: calc(100% + 2rem); max-width: none; margin-left: -1rem; }
 }
 @media (prefers-reduced-motion: reduce) { .fifths-key path { transition: none; } }
+
+/* ----- Privacy policy link and page ----- */
+
+.privacy-link {
+  margin: 1rem 0 0;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+}
+.privacy-footer {
+  max-width: var(--max-width);
+  margin: 2rem auto 0;
+  padding: 1rem 1.5rem 0;
+}
+.privacy-page h2 {
+  margin-top: 1.8rem;
+}
+
+/* ----- Partitura y tablatura home promotion ----- */
+
+.part-promo {
+  margin: 1.2rem 0 0;
+}
+.part-promo-link {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1.3rem;
+  color: var(--ink);
+  background: #f7f4eb;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  text-decoration: none;
+}
+.part-promo-link:hover {
+  border-color: var(--accent);
+}
+.part-promo-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.part-promo-img {
+  display: block;
+  width: 200px;
+  height: auto;
+  aspect-ratio: 480 / 436;
+  border-radius: 8px;
+}
+.part-promo-copy {
+  min-width: 0;
+}
+.part-promo-kicker {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+.part-promo-copy h2 {
+  margin: 0.25rem 0 0;
+  padding: 0;
+  border: 0;
+  font-size: 1.45rem;
+}
+.part-promo-desc {
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+.part-promo-cta {
+  display: inline-block;
+  margin-top: 1rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.part-promo-link:hover .part-promo-cta {
+  text-decoration: underline;
+}
+@media (max-width: 560px) {
+  .part-promo-link {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 1rem;
+  }
+  .part-promo-copy {
+    text-align: center;
+  }
+}
+
+/* ----- Partitura y tablatura tool ----- */
+
+body.partitura-body {
+  max-width: 1120px;
+}
+.part-form {
+  display: grid;
+  gap: 1.1rem;
+  margin: 1.4rem 0;
+  max-width: var(--max-width);
+}
+.part-rights {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+}
+.part-rights input {
+  margin-top: 0.3rem;
+  flex: none;
+}
+.part-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+}
+.part-field {
+  display: grid;
+  gap: 0.3rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.part-field select,
+.part-toolbar select {
+  font: inherit;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--ink);
+}
+.part-btn {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  justify-self: start;
+}
+.part-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.part-btn-secondary {
+  background: transparent;
+  color: var(--accent);
+}
+.part-error {
+  max-width: var(--max-width);
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: #fbeeee;
+  color: #6b0000;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+}
+.part-progress {
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+  margin: 2rem 0;
+  text-align: center;
+  font-family: var(--sans);
+}
+.part-loading {
+  width: 96px;
+  height: 96px;
+}
+.part-status {
+  margin: 0;
+  font-weight: 600;
+}
+.part-elapsed,
+.part-resume {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.part-result {
+  margin: 1.5rem 0;
+  font-family: var(--sans);
+}
+.part-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem 1.4rem;
+  margin-bottom: 0.8rem;
+  font-size: 0.9rem;
+}
+.part-toolbar-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.part-edited {
+  color: var(--ink-soft);
+}
+.part-note {
+  margin: 0.4rem 0;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.part-note-warning {
+  margin-top: 1.2rem;
+  padding: 0.6rem 0.8rem;
+  border-left: 3px solid var(--rule);
+}
+.part-rows {
+  margin: 1rem 0;
+}
+.part-row {
+  margin-bottom: 1.4rem;
+}
+.part-row-notation svg {
+  display: block;
+  max-width: none;
+  overflow: visible;
+}
+.part-row-tabs {
+  position: relative;
+  min-height: 140px;
+  --ascii-tabs-font-size: 15px;
+  --ascii-tabs-fret-background: var(--paper);
+  --ascii-tabs-flat-background: transparent;
+}
+.part-measure-tab {
+  position: absolute;
+  top: 0;
+  display: block;
+}
+.part-measure-overflow {
+  outline: 1px dashed var(--rule);
+}
+.part-dropped {
+  margin-top: 1rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: #f7f4eb;
+  font-size: 0.9rem;
+}
+.part-dropped p,
+.part-dropped ul {
+  margin: 0;
+}
+.part-dropped ul {
+  padding-left: 1.2rem;
+}
+.part-downloads-heading {
+  margin: 1.4rem 0 0.4rem;
+  font-size: 1.1rem;
+}
+.part-download-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+.part-privacy {
+  max-width: var(--max-width);
+  margin: 2.5rem 0 0;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+.part-privacy summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.part-privacy-note,
+.part-mobile-ready {
+  margin: 0.5rem 0;
+}
+
+.partitura-body [hidden] {
+  display: none !important;
+}
