@@ -1,0 +1,279 @@
+"""Regression tests: run inside music21-score-tabs with unittest discover."""
+
+import tempfile
+import re
+import unittest
+from pathlib import Path
+from zipfile import ZipFile
+
+import tabify
+
+
+def score_xml(body):
+    return ('<score-partwise version="4.0"><part-list><score-part id="P1">'
+            '<part-name>Guitar</part-name></score-part></part-list><part id="P1">'
+            + body + '</part></score-partwise>')
+
+
+def note(duration, kind="half", extra=""):
+    return ('<note><pitch><step>D</step><octave>4</octave></pitch>'
+            f'<duration>{duration}</duration><type>{kind}</type>{extra}</note>')
+
+
+class ScoreImportTests(unittest.TestCase):
+    def test_header_excludes_footer_and_publisher(self):
+        m21 = tabify.m21
+        score = m21.stream.Score()
+        for text, y, size in [('COMO EL AIRE', 1723, 26),
+                              ('Juan Falu', 1844, 21),
+                              ('A. Quintero', 1802, 12),
+                              ('ZAMBA', 1296, 17),
+                              ('Editorial', 525, 18)]:
+            box = m21.text.TextBox(text, y=y, page=1)
+            box.style.fontSize = size
+            score.insert(0, box)
+        self.assertEqual(tabify.extract_header(score),
+                         ('COMO EL AIRE', ['Juan Falu', 'A. Quintero']))
+
+    def test_header_keeps_musicxml_author_and_transcriber(self):
+        m21 = tabify.m21
+        score = m21.stream.Score()
+        score.metadata = m21.metadata.Metadata()
+        score.metadata.title = 'Titulo'
+        score.metadata.composer = 'Autor'
+        score.metadata.add('transcriber', 'Transcriptor')
+        score.metadata.copyright = 'Pie de pagina'
+        self.assertEqual(tabify.extract_header(score),
+                         ('Titulo', ['Autor', 'Transcriptor']))
+
+    def test_preview_justifies_rows_and_keeps_short_last_row(self):
+        m21 = tabify.m21
+        part = m21.stream.Part()
+        for i in range(9):
+            measure = m21.stream.Measure(number=i + 1)
+            if i == 2:
+                measure.insert(0, m21.layout.SystemLayout(isNew=True))
+            duration = 4 if i < 4 or i == 8 else 1
+            for _ in range(4 // duration):
+                measure.append(m21.note.Note('D4', quarterLength=duration))
+            part.append(measure)
+        rows = tabify.preview_rows(part, 4)
+        self.assertEqual([(r['first'], r['last']) for r in rows], [(0, 3), (4, 7), (8, 8)])
+        self.assertEqual(tabify.svg_width(rows[0]['svg']), tabify.svg_width(rows[1]['svg']))
+        self.assertLess(tabify.svg_width(rows[2]['svg']), tabify.svg_width(rows[0]['svg']))
+        # Verify actual staff geometry, not merely an equal SVG canvas.
+        def staff_end(svg):
+            return max(float(x) for x in re.findall(
+                r'<path d="M[\d.]+ [\d.]+ L([\d.]+) [\d.]+" stroke-width="13"', svg))
+        self.assertEqual(staff_end(rows[0]['svg']), staff_end(rows[1]['svg']))
+        self.assertLess(staff_end(rows[2]['svg']), staff_end(rows[0]['svg']))
+
+    def test_preview_moves_measures_to_keep_two_digit_frets_apart(self):
+        m21 = tabify.m21
+        part = m21.stream.Part()
+        for i in range(8):
+            measure = m21.stream.Measure(number=i + 1)
+            # The short notes fit as notation, but their fret 12 labels need
+            # more room. E6 is written E5 after guitar octave transposition.
+            for duration in [3, .125, .125, .125, .125]:
+                measure.append(m21.note.Note('E6', quarterLength=duration))
+            part.append(measure)
+        measures, _ = tabify.build_columns(part)
+        tabify.assign_frets(measures)
+        old_rows = tabify.preview_rows(part, 4)
+        rows = tabify.preview_rows(part, 4, measures)
+        self.assertTrue(any(tabify.preview_tab_spacing(
+            row['svg'], measures[row['first']:row['last'] + 1]) > 1 for row in old_rows))
+        self.assertGreater(len(rows), len(old_rows))
+        self.assertEqual([i for row in rows for i in range(row['first'], row['last'] + 1)],
+                         list(range(8)))
+        for row in rows:
+            self.assertLessEqual(tabify.preview_tab_spacing(
+                row['svg'], measures[row['first']:row['last'] + 1]), 1)
+
+    def read(self, xml, compressed=False):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / ('score.mxl' if compressed else 'score.musicxml')
+            if compressed:
+                with ZipFile(path, 'w') as archive:
+                    archive.writestr('META-INF/container.xml',
+                                     '<container><rootfiles><rootfile full-path="score.xml"'
+                                     '/></rootfiles></container>')
+                    archive.writestr('score.xml', xml)
+            else:
+                path.write_text(xml)
+            original = path.read_bytes()
+            score = tabify.read_score(path)
+            self.assertEqual(path.read_bytes(), original)
+            return score
+
+    def test_zero_divisions_half_note_xml_and_mxl(self):
+        xml = score_xml('<measure number="1"><attributes><divisions>0</divisions>'
+                        '</attributes>' + note(1) + '</measure>')
+        for compressed in (False, True):
+            with self.subTest(compressed=compressed):
+                score = self.read(xml, compressed)
+                self.assertEqual(score.parts[0].recurse().notes.first().quarterLength, 2)
+
+    def test_repair_stops_at_next_divisions_and_rescales_backup(self):
+        score = self.read(score_xml(
+            '<measure number="1"><attributes><divisions>0</divisions></attributes>'
+            + note(1) + '<backup><duration>1</duration></backup>' + note(1)
+            + '</measure><measure number="2">' + note(1)
+            + '</measure><measure number="3"><attributes><divisions>4</divisions>'
+            '</attributes>' + note(8) + '</measure>'))
+        measures = list(score.parts[0].getElementsByClass('Measure'))
+        self.assertEqual([n.quarterLength for n in score.parts[0].recurse().notes], [2] * 4)
+        self.assertEqual([n.offset for n in measures[0].recurse().notes], [0, 0])
+
+    def test_dots_and_tuplets(self):
+        examples = [('quarter', '<dot/>', 1.5),
+                    ('eighth', '<time-modification><actual-notes>3</actual-notes>'
+                     '<normal-notes>2</normal-notes></time-modification>', 1 / 3)]
+        for kind, extra, expected in examples:
+            score = self.read(score_xml(
+                '<measure number="1"><attributes><divisions>0</divisions></attributes>'
+                + note(1, kind, extra) + '</measure>'))
+            self.assertAlmostEqual(float(score.parts[0].recurse().notes.first().quarterLength), expected)
+
+    def test_ambiguous_scale_reports_actionable_error(self):
+        with self.assertRaisesRegex(ValueError, 'Corregí el OMR'):
+            self.read(score_xml(
+                '<measure number="1"><attributes><divisions>0</divisions></attributes>'
+                + note(1, 'half') + note(1, 'quarter') + '</measure>'))
+
+    def test_valid_score_keeps_duration(self):
+        score = self.read(score_xml(
+            '<measure number="1"><attributes><divisions>12</divisions></attributes>'
+            + note(24) + '</measure>'))
+        self.assertEqual(score.parts[0].recurse().notes.first().quarterLength, 2)
+
+    def test_export_preserves_overfull_measures_and_changing_voices(self):
+        m21 = tabify.m21
+        part = m21.stream.Part()
+        for number, voice_id, length in ((1, '3', 6), (2, '1', 4)):
+            measure = m21.stream.Measure(number=number)
+            measure.insert(0, m21.meter.TimeSignature('4/4'))
+            voice = m21.stream.Voice(id=voice_id)
+            voice.append(m21.note.Note('D4', quarterLength=length))
+            measure.insert(0, voice)
+            part.append(measure)
+        xml = tabify.to_musicxml(m21.stream.Score([part]))
+        restored = m21.converter.parseData(xml, format='musicxml')
+        self.assertEqual([n.quarterLength for n in restored.recurse().notes], [6, 4])
+        self.assertEqual(len(restored.parts[0].getElementsByClass('Measure')), 2)
+
+    def test_preview_anchors_and_bass_survive_export(self):
+        m21 = tabify.m21
+        part = m21.stream.Part()
+        measure = m21.stream.Measure(number=1)
+        melody = m21.note.Note('E4')
+        melody.stemDirection = 'up'
+        bass = m21.chord.Chord(['E3', 'B3'])
+        bass.stemDirection = 'down'
+        continuation = m21.note.Note('E4')
+        continuation.tie = m21.tie.Tie('stop')
+        grace = m21.note.Note('F4').getGrace()
+        measure.insert(0, melody)
+        measure.insert(0, bass)
+        measure.insert(1, continuation)
+        measure.insert(2, grace)
+        part.append(measure)
+        measures, _ = tabify.build_columns(part)
+        tabify.assign_frets(measures)
+        columns = tabify.preview_columns(measures[0])
+        self.assertEqual(len(columns), 1)  # tie and grace are not attacks
+        self.assertEqual(len(columns[0]['note_ids']), 3)
+        self.assertEqual(len(set(columns[0]['note_ids'])), 3)
+        self.assertEqual(len(columns[0]['bass_strings']), 2)
+        xml = tabify.to_musicxml(part)
+        svg = tabify.preview_rows(part, 4)[0]['svg']
+        for note_id in columns[0]['note_ids']:
+            self.assertIn(f'id="{note_id}"', xml)
+            self.assertIn(f'data-id="{note_id}"', svg)
+        col = measures[0]['columns'][0]
+        self.assertNotIn(col['fingering'][id(melody)][0], columns[0]['bass_strings'])
+
+
+if __name__ == '__main__':
+    unittest.main()
+
+
+class TuningTests(unittest.TestCase):
+    def part(self, pitches, clef):
+        m21 = tabify.m21
+        part = m21.stream.Part()
+        measure = m21.stream.Measure(number=1)
+        measure.insert(0, clef)
+        for p in pitches:
+            measure.append(m21.note.Note(p, quarterLength=1))
+        part.append(measure)
+        return part
+
+    def tab(self, pitches, clef=None):
+        measures, shift = tabify.build_columns(self.part(pitches, clef or tabify.m21.clef.Treble8vbClef()))
+        tuning = tabify.guess_tuning(measures)
+        tabify.assign_frets(measures, tuning)
+        return measures, shift, tuning
+
+    def test_low_d_picks_drop_d_and_keeps_every_note(self):
+        # Falú, "Como el aire": the bass D below the staff was dropped in standard tuning.
+        measures, _, tuning = self.tab(['D2', 'A2', 'D3', 'F#3'])
+        self.assertEqual(tuning, tabify.DROP_D_TUNING)
+        self.assertEqual(tabify.dropped_notes(measures), [])
+        self.assertEqual(measures[0]['columns'][0]['cells'], [None] * 5 + [0])
+
+    def test_standard_when_nothing_is_below_e(self):
+        measures, _, tuning = self.tab(['E2', 'A2'])
+        self.assertEqual(tuning, tabify.STANDARD_TUNING)
+
+    def test_plain_treble_written_d_is_still_shifted_down(self):
+        _, shift, tuning = self.tab(['D3', 'A3'], tabify.m21.clef.TrebleClef())
+        self.assertEqual((shift, tuning), (-12, tabify.DROP_D_TUNING))
+
+    def test_clefless_pickup_movement_is_written_pitch(self):
+        # Falú, "Como el aire": Audiveris put the pickup D (below the staff) in
+        # its own movement without the treble-8vb clef; it was tabbed as D4.
+        m21 = tabify.m21
+        pickup = self.part(['D4'], m21.clef.TrebleClef())
+        pickup.getElementsByClass(m21.stream.Measure).first().removeByClass(m21.clef.Clef)
+        body = self.part(['D2', 'A2'], m21.clef.Treble8vbClef())
+        for i, part in enumerate((pickup, body)):
+            measure = part.getElementsByClass(m21.stream.Measure).first()
+            measure.number = i + 1
+            measure.editorial.movementStart = True
+            if i:
+                pickup.append(measure)
+        measures, _ = tabify.build_columns(pickup)
+        tabify.assign_frets(measures, tabify.guess_tuning(measures))
+        self.assertEqual(measures[0]['columns'][0]['notes'][0][1], 50)  # D3
+        self.assertEqual(measures[0]['columns'][0]['cells'], [None, None, None, 0, None, None])
+        self.assertEqual(measures[1]['columns'][0]['notes'][0][1], 38)  # D2
+
+    def test_dropped_notes_are_reported(self):
+        measures, shift = tabify.build_columns(self.part(['D2'], tabify.m21.clef.Treble8vbClef()))
+        tabify.assign_frets(measures, tabify.STANDARD_TUNING)
+        self.assertEqual(tabify.dropped_notes(measures), [(1, 'D2')])
+
+
+class PdfTabStaffTests(unittest.TestCase):
+    def test_tab_staff_gets_six_lines_and_tuning(self):
+        xml = ('<attributes><staves>2</staves><clef number="1"><sign>G</sign></clef>'
+               '<clef number="2"><sign>TAB</sign><line>5</line></clef></attributes>')
+        out = tabify.add_staff_tuning(xml, tabify.DROP_D_TUNING)
+        self.assertIn('<line>5</line></clef><staff-details number="2"><staff-lines>6</staff-lines>'
+                      '<staff-tuning line="1"><tuning-step>D</tuning-step><tuning-octave>2</tuning-octave>', out)
+        self.assertEqual(out.count('<staff-tuning '), 6)
+
+    def test_string_names_follow_the_tab_lines_of_the_first_system(self):
+        def staff(ys):
+            return '<g id="s" class="staff">' + ''.join(
+                f'<path d="M1920 {y} L9125 {y}" stroke-width="13" />' for y in ys) + '<g class="clef" /></g>'
+        svg = ('<svg><g id="a" class="system"><g class="grpSym"><path d="M1848,5098 C1488,4558 1938,3460 1668,3280" />'
+               '</g>' + staff([1443, 1623, 1803, 1983, 2163]) + staff([3856 + 315 * i for i in range(6)])
+               + '</g><g id="b" class="system">' + staff([9000]) + '</g></svg>')
+        out = tabify.add_string_names(svg, tabify.string_names(tabify.DROP_D_TUNING))
+        names = re.findall(r'<text x="(\d+)" y="(\d+)"[^>]*>(\w)</text>', out)
+        self.assertEqual([n for _, _, n in names], list('EBGDAD'))
+        self.assertTrue(all(int(x) < 1488 for x, _, _ in names))  # clear of the brace
+        self.assertEqual(out.count('class="stringNames"'), 1)
