@@ -66,9 +66,9 @@ async function run() {
       };
     });
     assert.strictEqual(tutorial.open, false);
-    assert.strictEqual(tutorial.demos, 3);
-    assert.strictEqual(tutorial.keys, 5);
-    assert.deepStrictEqual(tutorial.titles, ['Arrastrar y soltar', 'Duplicar una columna', 'Agregar ceros']);
+    assert.strictEqual(tutorial.demos, 4);
+    assert.strictEqual(tutorial.keys, 6);
+    assert.deepStrictEqual(tutorial.titles, ['Arrastrar y soltar', 'Duplicar una columna', 'Agregar ceros', 'Negritas']);
 
     // The editor has one shared spacing slider. It changes every current Tab
     // and remains the setting for Tabs added afterwards.
