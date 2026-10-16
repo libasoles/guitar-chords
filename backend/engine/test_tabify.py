@@ -125,7 +125,7 @@ class ScoreImportTests(unittest.TestCase):
                '<text><tspan font-size="405px">Autor</tspan></text>'
                '<text><tspan font-size="405px"> </tspan></text></g>')
         out = tabify.style_header(svg)
-        self.assertIn('font-family="Times New Roman', out)
+        self.assertIn('font-family="Playfair Display', out)
         self.assertIn('470px">Titulo', out)
         self.assertIn('300px">Autor', out)
 
