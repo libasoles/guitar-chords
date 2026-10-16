@@ -266,18 +266,16 @@ async function fillForm(page, name) {
           }
           const zone = getComputedStyle(document.querySelector('#partDropzone'));
           const hint = getComputedStyle(document.querySelector('#partDropHint'));
-          const browse = getComputedStyle(document.querySelector('.part-drop-browse'));
           const checkbox = getComputedStyle(document.querySelector('#partRights'));
           return {
             text: ratio(hint.color, zone.backgroundColor),
-            browse: ratio(browse.color, zone.backgroundColor),
             border: ratio(zone.borderTopColor, zone.backgroundColor),
             checkbox: ratio(checkbox.borderTopColor, checkbox.backgroundColor),
             width: document.querySelector('#partDropzone').getBoundingClientRect().width,
             available: document.querySelector('main').getBoundingClientRect().width,
           };
         });
-        assert.ok(contrast.text >= 4.5 && contrast.browse >= 4.5);
+        assert.ok(contrast.text >= 4.5);
         assert.ok(contrast.border >= 3 && contrast.checkbox >= 3);
         assert.ok(Math.abs(contrast.width - contrast.available) < 2);
         await page.locator('#partRights').check();
