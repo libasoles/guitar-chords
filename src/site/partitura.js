@@ -98,6 +98,8 @@
     dropzone.setAttribute('aria-disabled', String(fileInput.disabled));
     dropzone.classList.remove('is-dragging');
     rightsBox.disabled = busy;
+    var example = form.querySelector('.part-example');
+    if (example) example.hidden = busy;
   }
 
   function setStatus(message) {
@@ -440,6 +442,7 @@
           rows: rows.map(function (row, i) {
             return { svg: markups[i], first: row.first, last: row.last };
           }),
+          staff_space: layout.staff_space,
           measures: measures,
           dropped: job.discardedNotes || suggestion.dropped || [],
           suggestionTabs: tabs.map(function (tab) { return (tab || []).map(normalizeAttack); }),
@@ -972,12 +975,18 @@
         });
 
         function layoutAll() {
-          var available = rowsEl.clientWidth || 700;
+          var available = Math.max(rowsEl.clientWidth || 700, 760);
           var widest = 0;
           rowViews.forEach(function (v) { if (v.size) widest = Math.max(widest, v.size.w); });
-          var scale = widest ? Math.min(1, available / widest) : 1;
+          // Match the original music21 preview: one scale for all systems,
+          // with a four-measure minimum so short scores keep natural proportions.
+          var staffSpace = preview.staff_space || 7.2;
+          var reference = Math.max(90 * staffSpace, widest);
+          var scale = available / reference;
+          var tabFont = Math.min(22, Math.max(10, 1.5 * staffSpace * scale));
           rowViews.forEach(function (v) {
             if (!v.svg || !v.size) return;
+            v.tabsLine.style.setProperty('--ascii-tabs-font-size', tabFont + 'px');
             v.svg.setAttribute('width', String(v.size.w * scale));
             v.svg.setAttribute('height', String(v.size.h * scale));
           });

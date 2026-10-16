@@ -208,6 +208,14 @@ async function fillForm(page, name) {
     assert.ok(fs.existsSync(path.join(withoutDir, file)), file + ' must always be generated');
   }
 
+  for (const locale of ['es', 'en']) {
+    const prefix = locale === 'en' ? 'en/' : '';
+    const html = fs.readFileSync(path.join(withDir, prefix + 'partitura-y-tablatura.html'), 'utf8');
+    assert.ok(!/%%part\w+%%/.test(html), 'unresolved partitura translation in ' + locale);
+    const strings = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/i18n/strings.' + locale + '.json'), 'utf8'));
+    assert.ok(html.includes('<p class="part-duration">' + strings.partDurationHint + '</p>'));
+  }
+
   const server = await serveStatic(withDir, 0);
   const base = 'http://localhost:' + server.address().port;
   let browser;
@@ -379,6 +387,26 @@ async function fillForm(page, name) {
         await page.close();
       }
 
+      // The example disappears as soon as an upload starts.
+      {
+        const page = await browser.newPage();
+        await mockApi(page, { jobs: [READY] });
+        let releaseUpload;
+        const gate = new Promise(resolve => { releaseUpload = resolve; });
+        await page.route('https://upload.partitura.test/**', async route => {
+          if (route.request().method() !== 'OPTIONS') await gate;
+          return route.fulfill({ status: 200, headers: CORS });
+        });
+        await page.goto(toolUrl);
+        await fillForm(page);
+        await page.waitForSelector('#partProgress:not([hidden])');
+        assert.ok(await page.locator('.part-example').isHidden());
+        assert.equal(await page.locator('.part-duration').textContent(), S.partDurationHint);
+        releaseUpload();
+        await page.waitForSelector('#partRows .part-row');
+        await page.close();
+      }
+
       // Desktop flow: create, upload, process, poll, preview, edit, export.
       {
         const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
@@ -404,6 +432,14 @@ async function fillForm(page, name) {
         assert.ok(api.calls.includes('UPLOAD POST'));
         assert.ok(api.calls.indexOf('POST /jobs/' + JOB + '/process') > api.calls.indexOf('UPLOAD POST'));
         assert.equal(new URL(page.url()).searchParams.get('trabajo'), JOB);
+
+        const previewSize = await page.locator('#partRows').evaluate(rows => ({
+          available: rows.clientWidth,
+          score: rows.querySelector('svg').getBoundingClientRect().width,
+          font: parseFloat(getComputedStyle(rows.querySelector('.part-row-tabs')).getPropertyValue('--ascii-tabs-font-size')),
+        }));
+        assert.ok(Math.abs(previewSize.score - previewSize.available * 800 / 900) < 2);
+        assert.ok(previewSize.font >= 10 && previewSize.font <= 22);
 
         // One editor per measure, aligned to the notes by identifier.
         await page.waitForFunction(() => document.querySelectorAll('.part-measure-tab .ascii-tabs-has').length === 6);
