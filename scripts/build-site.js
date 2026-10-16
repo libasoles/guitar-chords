@@ -1112,6 +1112,7 @@ function renderPartituraPage(template, strings, locale) {
     apiUrl: PARTITURA_API_URL,
     turnstileSiteKey: TURNSTILE_SITE_KEY,
     locale: locale,
+    example: JSON.parse(fs.readFileSync(path.join(SRC_SITE, "partitura-example.json"), "utf8")),
     privacyHref: v7PageHref(locale, PRIVACY_SLUG),
     strings: i18n,
   };
@@ -1391,10 +1392,6 @@ copyFile(
   path.join(VENDOR_DIST, "ascii-tabs.js"),
 );
 if (PARTITURA_ENABLED) {
-  copyFile(
-    path.join(SRC_SITE, "partitura-example.svg"),
-    path.join(ASSETS_DIST, "partitura-example.svg"),
-  );
   copyFile(
     path.join(SRC_SITE, "partitura.js"),
     path.join(ASSETS_DIST, "partitura.js"),
