@@ -453,6 +453,7 @@
           staff_space: layout.staff_space,
           measures: measures,
           dropped: job.discardedNotes || suggestion.dropped || [],
+          tuning: (suggestion.tuning || job.tuning) === 'dropd' ? 'E B G D A D' : 'E B G D A E',
           suggestionTabs: tabs.map(function (tab) { return (tab || []).map(normalizeAttack); }),
         };
       });
@@ -957,6 +958,7 @@
             var tabsEl = document.createElement('ascii-tabs');
             tabsEl.className = 'part-measure-tab';
             tabsEl.setAttribute('labels', 'none');
+            tabsEl.setAttribute('tuning', preview.tuning || 'E B G D A E');
             tabsEl.setAttribute('variant', 'flat');
             tabsEl.setAttribute('theme', 'light');
             tabsEl.setAttribute('lang', CFG.locale === 'en' ? 'en' : 'es');
