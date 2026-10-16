@@ -2137,14 +2137,14 @@ footer {
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  border: 2px dashed var(--ink-soft);
+  border: 2px dashed #5c89a7;
   border-radius: 16px;
-  background: #fff;
-  color: var(--ink-soft);
+  background: #edf2f8;
+  color: #3d5f7a;
   font-family: var(--sans);
   font-size: 0.85rem;
   text-align: center;
-  transition: border-color 220ms ease-out;
+  transition: border-color 220ms ease-out, background-color 220ms ease-out;
 }
 .part-dropzone strong {
   max-width: 100%;
@@ -2156,7 +2156,7 @@ footer {
 .part-upload-icon {
   width: 36px;
   height: 36px;
-  color: var(--accent);
+  color: #2f6a9a;
 }
 .part-file-input {
   position: absolute;
@@ -2172,7 +2172,8 @@ footer {
 }
 .part-dropzone[aria-disabled="false"]:hover,
 .part-dropzone.is-dragging {
-  border-color: var(--accent);
+  border-color: #2f6a9a;
+  background: #dbe7f3;
 }
 @media (prefers-reduced-motion: no-preference) {
   .part-dropzone[aria-disabled="false"]:hover strong {
@@ -2180,7 +2181,7 @@ footer {
   }
 }
 .part-dropzone:focus-within {
-  outline: 2px solid var(--accent);
+  outline: 2px solid #2f6a9a;
   outline-offset: 4px;
 }
 .part-toolbar select {
