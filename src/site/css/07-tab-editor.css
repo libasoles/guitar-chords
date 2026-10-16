@@ -229,14 +229,22 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
 .tab-demo__note--copy-2 {
   animation: tab-demo-appear-2 6s steps(1, end) infinite;
 }
-.tab-demo--duplicate .tab-demo__key {
-  animation: tab-demo-lit-duplicate 6s steps(1, end) infinite;
+/* The modifier goes down first, then the second key; the action happens once
+   both are held, and both are released together. */
+.tab-demo--duplicate .tab-demo__key--mod {
+  animation: tab-demo-lit-duplicate-mod 6s steps(1, end) infinite;
+}
+.tab-demo--duplicate .tab-demo__key--arrow {
+  animation: tab-demo-lit-duplicate-second 6s steps(1, end) infinite;
 }
 .tab-demo__note--zero {
   animation: tab-demo-appear-zero 6s steps(1, end) infinite;
 }
-.tab-demo--zeros .tab-demo__key {
-  animation: tab-demo-lit-zeros 6s steps(1, end) infinite;
+.tab-demo--zeros .tab-demo__key--mod {
+  animation: tab-demo-lit-zeros-mod 6s steps(1, end) infinite;
+}
+.tab-demo--zeros .tab-demo__key--zero {
+  animation: tab-demo-lit-zeros-second 6s steps(1, end) infinite;
 }
 /* The selected note starts normal, B makes it bold, B again makes it normal. */
 .tab-demo__note--bold {
@@ -377,44 +385,76 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
   }
 }
 /* The keys light up in colour exactly while they are being pressed. */
-@keyframes tab-demo-lit-duplicate {
+@keyframes tab-demo-lit-duplicate-mod {
   0%,
-  26%,
+  24%,
   35%,
-  56%,
+  54%,
   65%,
   100% {
     background: #fff;
     border-color: var(--rule);
     color: inherit;
   }
-  27%,
+  25%,
   34%,
-  57%,
+  55%,
   64% {
     background: var(--demo-lit);
     border-color: var(--accent);
     color: var(--accent);
   }
 }
-@keyframes tab-demo-lit-zeros {
+@keyframes tab-demo-lit-duplicate-second {
   0%,
-  40% {
+  29%,
+  35%,
+  59%,
+  65%,
+  100% {
     background: #fff;
     border-color: var(--rule);
     color: inherit;
   }
-  41%,
-  50% {
+  30%,
+  34%,
+  60%,
+  64% {
     background: var(--demo-lit);
     border-color: var(--accent);
     color: var(--accent);
   }
+}
+@keyframes tab-demo-lit-zeros-mod {
+  0%,
+  37%,
   51%,
   100% {
     background: #fff;
     border-color: var(--rule);
     color: inherit;
+  }
+  38%,
+  50% {
+    background: var(--demo-lit);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+@keyframes tab-demo-lit-zeros-second {
+  0%,
+  44%,
+  51%,
+  100% {
+    background: #fff;
+    border-color: var(--rule);
+    color: inherit;
+  }
+  45%,
+  50% {
+    background: var(--demo-lit);
+    border-color: var(--accent);
+    color: var(--accent);
   }
 }
 
