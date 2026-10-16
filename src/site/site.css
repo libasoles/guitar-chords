@@ -1937,14 +1937,16 @@ body.partitura-body {
   font-family: var(--sans);
 }
 .part-loading {
-  width: 96px;
-  height: 96px;
+  width: 240px;
+  max-width: 100%;
+  height: auto;
 }
 .part-status {
   margin: 0;
   font-weight: 600;
 }
 .part-elapsed,
+.part-duration,
 .part-resume {
   margin: 0;
   font-size: 0.85rem;
