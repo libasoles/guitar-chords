@@ -1,0 +1,89 @@
+'use strict';
+/* tab-tutorial.js — Markup for the "how to use the editor" dropdown at the
+   foot of the tab-editor page: one looping, CSS-only mini tab per gesture
+   (drag a note, duplicate a column, fill with zeros). The keys to press are
+   lit in colour while the gesture plays. Styles live in site.css
+   (.tab-demo*). The stage is decorative (aria-hidden); the text carries the
+   instructions. */
+
+const STRING_COUNT = 6;
+const COLUMN_COUNT = 5;
+
+// A fret placed at column `c` on string `s` (0 = top string). `cls` hooks the
+// animation of that note.
+function note(c, s, fret, cls) {
+  return (
+    '<span class="tab-demo__note' + (cls ? ' ' + cls : '') + '" ' +
+    'style="--c:' + c + ';--s:' + s + '">' + fret + '</span>'
+  );
+}
+
+function key(label, cls) {
+  return '<kbd class="tab-demo__key ' + cls + '">' + label + '</kbd>';
+}
+
+function stage(notes) {
+  const strings = '<span class="tab-demo__string"></span>'.repeat(STRING_COUNT);
+  return (
+    '<div class="tab-demo__stage" aria-hidden="true" style="--cols:' + COLUMN_COUNT + '">' +
+    strings + notes.join('') + '</div>'
+  );
+}
+
+function demo(opts) {
+  return (
+    '<li><figure class="tab-demo ' + opts.cls + '">' +
+    stage(opts.notes) +
+    '<div class="tab-demo__keys" aria-hidden="true">' + opts.keys.join('<span class="tab-demo__plus">+</span>') + '</div>' +
+    '<figcaption><h3>' + opts.title + '</h3><p>' + opts.body + '</p></figcaption>' +
+    '</figure></li>'
+  );
+}
+
+function renderTabTutorial(strings) {
+  const s = function (k) { return strings[k] || ''; };
+  const modifier = s('tabTutorialModifierKey');
+
+  const drag = demo({
+    cls: 'tab-demo--drag',
+    // The cursor ring travels with the note.
+    notes: [note(0, 3, 5), note(1, 1, 2, 'tab-demo__note--dragged'), '<span class="tab-demo__cursor"></span>'],
+    keys: [key(s('tabTutorialDragKey'), 'tab-demo__key--drag')],
+    title: s('tabDragTitle'),
+    body: s('tabDragBody'),
+  });
+
+  const duplicate = demo({
+    cls: 'tab-demo--duplicate',
+    notes: [
+      note(0, 1, 1), note(0, 3, 2), note(0, 4, 3),
+      note(1, 1, 1, 'tab-demo__note--copy-1'), note(1, 3, 2, 'tab-demo__note--copy-1'), note(1, 4, 3, 'tab-demo__note--copy-1'),
+      note(2, 1, 1, 'tab-demo__note--copy-2'), note(2, 3, 2, 'tab-demo__note--copy-2'), note(2, 4, 3, 'tab-demo__note--copy-2'),
+    ],
+    keys: [key(modifier, 'tab-demo__key--mod'), key('→', 'tab-demo__key--arrow')],
+    title: s('tabDupTitle'),
+    body: s('tabDupBody'),
+  });
+
+  const zeros = demo({
+    cls: 'tab-demo--zeros',
+    notes: [
+      note(1, 0, 0, 'tab-demo__note--zero'), note(1, 1, 0, 'tab-demo__note--zero'),
+      note(1, 2, 0, 'tab-demo__note--zero'), note(1, 3, 2), note(1, 4, 2),
+      note(1, 5, 0, 'tab-demo__note--zero'),
+    ],
+    keys: [key(modifier, 'tab-demo__key--mod'), key('0', 'tab-demo__key--zero')],
+    title: s('tabZeroTitle'),
+    body: s('tabZeroBody'),
+  });
+
+  return (
+    '<details class="tab-tutorial">' +
+    '<summary>' + s('tabTutorialSummary') + '</summary>' +
+    '<p class="tab-tutorial__intro">' + s('tabTutorialIntro') + '</p>' +
+    '<ul class="tab-tutorial__list">' + drag + duplicate + zeros + '</ul>' +
+    '</details>'
+  );
+}
+
+module.exports = { renderTabTutorial };

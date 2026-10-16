@@ -33,6 +33,7 @@ const {
   injectJsonLd,
 } = require("./lib/structured-data");
 const { parseAsciiTab } = require("./lib/ascii-tab");
+const { renderTabTutorial } = require("./lib/tab-tutorial");
 
 const ROOT = path.join(__dirname, "..");
 const SRC_SITE = path.join(ROOT, "src", "site");
@@ -906,6 +907,7 @@ function renderTabEditorPage(template, strings, locale) {
     .join(strings.tabMetaDescription || "");
   html = html.split("%%PAGE_H1%%").join(strings.tabH1 || "");
   html = html.split("%%PAGE_LEAD%%").join(strings.tabLead || "");
+  html = html.split("%%TAB_TUTORIAL%%").join(renderTabTutorial(strings));
   html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
   html = html.split("%%homeHref%%").join(homeHref(locale));
   html = html
