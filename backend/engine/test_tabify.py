@@ -58,24 +58,66 @@ class ScoreImportTests(unittest.TestCase):
             score.insert(0, box)
         self.assertEqual(tabify.extract_header(score), ('COMO EL AIRE', ['Juan Falu']))
 
-    def test_pdf_xml_has_no_label_header_credits_and_notation_only_meter(self):
+    def test_pdf_xml_has_no_label_and_header_credits(self):
         xml = ('<score-partwise><part-list><score-part id="P1"><part-name>Guitarra</part-name>'
                '<part-abbreviation>Guit.</part-abbreviation></score-part></part-list>'
-               '<part id="P1"><measure number="1"><attributes><time><beats>6</beats>'
-               '<beat-type>8</beat-type></time></attributes></measure></part></score-partwise>')
-        out = tabify.add_credits(tabify.notation_time_only(tabify.clean_labels(xml)),
-                                 'Titulo', ['Autor', 'Transcriptor'])
+               '<part id="P1"><measure number="1"><note><time-modification><actual-notes>3'
+               '</actual-notes></time-modification></note></measure></part></score-partwise>')
+        out = tabify.add_credits(tabify.clean_labels(xml), 'Titulo', ['Autor', 'Transcriptor'])
         self.assertNotIn('Guitarra', out)
         self.assertNotIn('part-abbreviation', out)
-        self.assertIn('<time number="1">', out)
+        self.assertIn('<time-modification>', out)  # untouched: it once broke the whole PDF
         self.assertIn('>Titulo</credit-words>', out)
         self.assertIn('>Autor · Transcriptor</credit-words>', out)
 
-    def test_tab_clef_is_softened(self):
-        svg = '<g id="a" class="clef"><use xlink:href="#E050-x" /></g><g id="b" class="clef">\n<use xlink:href="#E06D-x" /></g>'
-        out = tabify.soften_tab_clef(svg)
-        self.assertEqual(out.count('fill="#bdbdbd"'), 1)
-        self.assertIn('<g id="b" class="clef" fill="#bdbdbd">', out)
+    def test_pdf_keeps_every_measure_with_tuplets_and_meter_changes(self):
+        m21 = tabify.m21
+        part = m21.stream.Part()
+        for i in range(60):
+            measure = m21.stream.Measure(number=i + 1)
+            if i in (0, 30):
+                measure.insert(0, m21.meter.TimeSignature('6/8' if i == 0 else '3/4'))
+            for _ in range(3):
+                measure.append(m21.note.Note('E4', quarterLength=1 if i % 2 else 2 / 3))
+            part.append(measure)
+        measures, _ = tabify.build_columns(part)
+        tabify.assign_frets(measures)
+        with tempfile.TemporaryDirectory() as tmp:
+            xml_path, _ = tabify.build_output(None, part, measures, tabify.STANDARD_TUNING,
+                                              'T', str(Path(tmp) / 'out'), header=('T', ['A']))
+            xml = Path(xml_path).read_text(encoding='utf-8')
+        toolkit = tabify.new_toolkit(tabify.PDF_OPTIONS)
+        self.assertTrue(toolkit.loadData(xml))
+        drawn = sum(len(re.findall(r'class="measure"', toolkit.renderToSVG(p)))
+                    for p in range(1, toolkit.getPageCount() + 1))
+        self.assertEqual(drawn, 60)
+
+    def test_tab_clef_is_solid_gray_letters(self):
+        lines = ''.join(f'<path d="M0 {y} L900 {y}" />' for y in range(100, 700, 100))
+        svg = ('<g class="staff">' + lines + '<g id="b" class="clef">\n'
+               '<use xlink:href="#E06D-x" transform="translate(50, 400) scale(0.7, 0.7)" /></g></g>')
+        out = tabify.draw_tab_clef(svg)
+        self.assertNotIn('E06D', out)
+        self.assertEqual(out.count('fill="#bdbdbd"'), 3)
+
+    def test_tab_staves_lose_meter_and_page_loses_brace(self):
+        svg = ('<g class="staff"><g class="meterSig"><use /></g></g>'
+               '<g class="staff"><g class="meterSig"><use /></g></g>'
+               '<g class="staff"><g class="meterSig"><use /></g></g>'
+               '<g class="staff"><g class="meterSig"><use /></g></g>'
+               '<g class="grpSym"><path d="M0 0" /></g>')
+        out = tabify.drop_brace(tabify.drop_tab_meter(svg))
+        self.assertEqual(out.count('meterSig'), 2)
+        self.assertNotIn('grpSym', out)
+
+    def test_header_is_serif_with_smaller_authors(self):
+        svg = ('<g class="pgHead"><text><tspan font-size="405px">Titulo</tspan></text>'
+               '<text><tspan font-size="405px">Autor</tspan></text>'
+               '<text><tspan font-size="405px"> </tspan></text></g>')
+        out = tabify.style_header(svg)
+        self.assertIn('font-family="Times New Roman', out)
+        self.assertIn('470px">Titulo', out)
+        self.assertIn('300px">Autor', out)
 
     def test_preview_justifies_rows_and_keeps_short_last_row(self):
         m21 = tabify.m21
@@ -300,11 +342,10 @@ class PdfTabStaffTests(unittest.TestCase):
         def staff(ys):
             return '<g id="s" class="staff">' + ''.join(
                 f'<path d="M1920 {y} L9125 {y}" stroke-width="13" />' for y in ys) + '<g class="clef" /></g>'
-        svg = ('<svg><g id="a" class="system"><g class="grpSym"><path d="M1848,5098 C1488,4558 1938,3460 1668,3280" />'
-               '</g>' + staff([1443, 1623, 1803, 1983, 2163]) + staff([3856 + 315 * i for i in range(6)])
+        svg = ('<svg><g id="a" class="system">' + staff([1443, 1623, 1803, 1983, 2163]) + staff([3856 + 315 * i for i in range(6)])
                + '</g><g id="b" class="system">' + staff([9000]) + '</g></svg>')
         out = tabify.add_string_names(svg, tabify.string_names(tabify.DROP_D_TUNING))
         names = re.findall(r'<text x="(\d+)" y="(\d+)"[^>]*>(\w)</text>', out)
         self.assertEqual([n for _, _, n in names], list('EBGDAD'))
-        self.assertTrue(all(int(x) < 1488 for x, _, _ in names))  # clear of the brace
+        self.assertTrue(all(int(x) < 1920 for x, _, _ in names))  # left of the staff
         self.assertEqual(out.count('class="stringNames"'), 1)

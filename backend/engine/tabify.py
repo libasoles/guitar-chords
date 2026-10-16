@@ -57,7 +57,7 @@ PREVIEW_MAX_ROW = 100 * PREVIEW_STAFF_SPACE
 PREVIEW_MIN_ROW = 90 * PREVIEW_STAFF_SPACE
 PDF_OPTIONS = {  # A4 at Verovio's 10 units per mm
     "pageWidth": 2100, "pageHeight": 2970, "scale": 45, "breaks": "auto",
-    "pageMarginLeft": 220, "pageMarginRight": 100, "pageMarginTop": 80,  # left: brace and string names
+    "pageMarginLeft": 160, "pageMarginRight": 100, "pageMarginTop": 80,  # left: string names
     "pageMarginBottom": 80, "header": "auto", "footer": "none", "spacingStaff": 6,
 }
 # Verovio draws rhythm stems on tab staves; the reference layout has frets only.
@@ -604,30 +604,89 @@ def clean_labels(xml):
     return re.sub(r"\s*<part-abbreviation\b[^>]*>.*?</part-abbreviation>", "", xml, flags=re.S)
 
 
-def notation_time_only(xml):
-    """A <time> without number applies to every staff and Verovio draws it on
-    the TAB staff too; the meter belongs to the notation staff only."""
-    return re.sub(r"<time(?![^>]*\bnumber=)", '<time number="1"', xml)
-
-
 def add_credits(xml, title, subtitles):
     """Page header as explicit credits (Verovio ignores the composer
-    otherwise): the title centred and the authors right-aligned below it."""
+    otherwise): the title centred and the authors right-aligned, plus a blank
+    centred line that leaves room before the first system. Verovio ignores the
+    credits' font; style_header() sets it on the SVG."""
     words = []
     if title:
-        words.append(('center', 1050, 'top', 24, title))
+        words.append(("center", 1050, title))
     if subtitles:
-        words.append(('right', 1900, 'top', 12, " · ".join(subtitles)))
+        words.append(("right", 1900, " · ".join(subtitles)))
+    if words:
+        words.append(("center", 1050, " "))
     credits = "".join(
         f'<credit page="1"><credit-words default-x="{x}" default-y="{1150 - i * 60}" justify="{j}" '
-        f'valign="{v}" font-size="{size}">{escape(text)}</credit-words></credit>'
-        for i, (j, x, v, size, text) in enumerate(words))
+        f'valign="top">{escape(text)}</credit-words></credit>'
+        for i, (j, x, text) in enumerate(words))
     return xml.replace("<part-list>", credits + "<part-list>", 1)
 
 
-def soften_tab_clef(svg):
-    """Verovio draws the TAB clef (SMuFL E06D) in full black and large."""
-    return re.sub(r'(<g [^>]*class="clef")(>\s*<use xlink:href="#E06D-)', r'\1 fill="#bdbdbd"\2', svg)
+HEADER_FONT = "Times New Roman, Liberation Serif, DejaVu Serif, serif"
+
+
+def style_header(svg):
+    """Serif header: the title a bit larger than Verovio's default size, the
+    authors smaller (the blank spacer line keeps the default)."""
+    def restyle(head):
+        count = iter(range(1000))
+
+        def size(match):
+            n = next(count)
+            if match.group(2).strip() == "":
+                return match.group(0)
+            return f'{match.group(1)}{"470" if n == 0 else "300"}px">{match.group(2)}'
+
+        body = re.sub(r'(<tspan font-size=")\d+px">([^<]*)', size, head.group(2))
+        return f'{head.group(1)} font-family="{HEADER_FONT}">{body}'
+
+    return re.sub(r'(<g [^>]*class="pgHead")>(.*?</g>)', restyle, svg, count=1, flags=re.S)
+
+
+def draw_tab_clef(svg):
+    """Replaces Verovio's TAB clef (SMuFL E06D, drawn large and black) with a
+    solid light-gray T-A-B on a white patch, so no staff line crosses it."""
+    gray = "#bdbdbd"
+
+    def staff(match):
+        body = match.group(0)
+        ys = sorted({float(y) for _, y, _, y2 in re.findall(
+            r'<path d="M([\d.]+) ([\d.]+) L([\d.]+) ([\d.]+)"', body) if y == y2})
+        if len(ys) < 4:
+            return body
+        gap = (ys[-1] - ys[0]) / (len(ys) - 1)
+        mid = len(ys) // 2  # T, A, B sit on the middle lines
+
+        def clef(c):
+            x = float(c.group(2))
+            top, height = ys[mid - 1] - 0.5 * gap, ys[mid + 1] - ys[mid - 1] + gap
+            left, width = x - 0.1 * gap, 1.5 * gap
+            letters = "".join(
+                f'<text x="{x + 0.65 * gap:.0f}" y="{ys[mid - 1 + i] + 0.43 * gap:.0f}" text-anchor="middle" '
+                f'font-family="sans-serif" font-weight="bold" font-size="{1.2 * gap:.0f}px" '
+                f'fill="{gray}" stroke="none">{ch}</text>' for i, ch in enumerate("TAB"))
+            patch = (f'<path d="M{left:.0f} {top:.0f} h{width:.0f} v{height:.0f} h{-width:.0f} z" '
+                     f'fill="#ffffff" stroke="none" stroke-width="0" />')
+            return f'{c.group(1)}>{patch}{letters}</g>'
+
+        return re.sub(r'(<g [^>]*class="clef")>\s*<use xlink:href="#E06D[^>]*?translate\(([\d.]+), [\d.]+\)[^>]*/>\s*</g>',
+                      clef, body, flags=re.S)
+
+    return re.sub(r'<g [^>]*class="staff"[^>]*>.*?(?=<g [^>]*class="staff"|</svg>|\Z)', staff, svg, flags=re.S)
+
+
+def drop_tab_meter(svg):
+    """The meter belongs to the notation staff: remove it from every TAB staff
+    (the second staff of each measure), where Verovio repeats it."""
+    parts = re.split(r'(<g [^>]*class="staff"[^>]*>)', svg)
+    for i in range(4, len(parts), 4):  # pre, staff, body, staff, body (TAB), ...
+        parts[i] = re.sub(r'<g [^>]*class="meterSig"[^>]*>.*?</g>', "", parts[i], flags=re.S)
+    return "".join(parts)
+
+
+def drop_brace(svg):
+    return re.sub(r'<g [^>]*class="grpSym"[^>]*>.*?</g>', "", svg, flags=re.S)
 
 
 def add_staff_tuning(xml, tuning):
@@ -647,7 +706,7 @@ def add_staff_tuning(xml, tuning):
 
 def add_string_names(svg, names):
     """Writes the string names left of the first TAB staff of a Verovio page,
-    one per line and clear of the group brace. Verovio draws no tuning."""
+    one per line, left of the staff. Verovio draws no tuning."""
     system = re.search(r'<g [^>]*class="system"[^>]*>', svg)
     if not system:
         return svg
@@ -661,9 +720,6 @@ def add_string_names(svg, names):
     if len(ys) != len(names):
         return svg
     left = min(x for x, _ in segments)
-    brace = re.search(r'class="grpSym">(.*?)</g>', svg[system.end():], re.S)
-    if brace:  # control points: a little left of the curve itself
-        left = min([left, *(float(x) for x in re.findall(r'[ML ,C](-?[\d.]+),-?[\d.]+', brace.group(1)))])
     gap = (ys[-1] - ys[0]) / (len(ys) - 1)
     texts = "".join(f'<text x="{left - 0.3 * gap:.0f}" y="{y + 0.34 * gap:.0f}" text-anchor="end" '
                     f'font-size="{0.95 * gap:.0f}px" font-family="sans-serif">{name}</text>'
@@ -689,7 +745,7 @@ def build_output(score, part, measures, tuning, title, out_base, header=None):
     if subtitles:
         out.metadata.composer = " · ".join(subtitles)
     xml = add_staff_tuning(fix_technical(to_musicxml(out)), tuning)
-    xml = add_credits(notation_time_only(clean_labels(xml)), out.metadata.title, subtitles)
+    xml = add_credits(clean_labels(xml), out.metadata.title, subtitles)
     xml_path = out_base + ".musicxml"
     with open(xml_path, "w", encoding="utf-8") as f:
         f.write(xml)
@@ -700,9 +756,12 @@ def build_output(score, part, measures, tuning, title, out_base, header=None):
     with tempfile.TemporaryDirectory() as tmp:
         pages = []
         for page in range(1, toolkit.getPageCount() + 1):
-            svg = soften_tab_clef(toolkit.renderToSVG(page)).replace("</svg>", HIDE_TAB_RHYTHM + "</svg>", 1)
+            svg = toolkit.renderToSVG(page)
             if page == 1:
                 svg = add_string_names(svg, string_names(tuning))
+                svg = style_header(svg)
+            svg = drop_brace(draw_tab_clef(drop_tab_meter(svg)))
+            svg = svg.replace("</svg>", HIDE_TAB_RHYTHM + "</svg>", 1)
             path = os.path.join(tmp, f"page-{page:03d}.svg")
             with open(path, "w", encoding="utf-8") as f:
                 f.write(svg)
