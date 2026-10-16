@@ -321,8 +321,6 @@ async function fillForm(page, name) {
         await page.locator('#partRights').check();
         assert.ok(await page.locator('#partFile').isEnabled());
         assert.equal(await page.locator('#partDropzone').getAttribute('aria-disabled'), 'false');
-        assert.ok(!(await page.locator('.part-privacy p').first().isVisible()));
-        await page.locator('.part-privacy summary').click();
         assert.ok(await page.locator('.part-privacy p').first().isVisible());
         assert.equal(
           await page.locator('.part-privacy a').getAttribute('href'),
@@ -364,7 +362,6 @@ async function fillForm(page, name) {
         assert.equal(api.createBody.filename, 'dropped.musicxml');
         assert.equal(api.createBody.tuning, 'auto');
         assert.equal(api.calls.filter(call => call === 'POST /jobs').length, 1);
-        await page.locator('.part-privacy summary').click();
         assert.equal(await page.locator('.part-privacy p').nth(1).textContent(), S.partPrivacyIp);
         await page.close();
       }
