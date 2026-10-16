@@ -140,6 +140,9 @@
       '<path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>';
     close.addEventListener('click', leaveModal);
     resultEl.appendChild(close);
+    var logo = el('span', 'part-modal-logo');
+    logo.setAttribute('aria-hidden', 'true');
+    resultEl.appendChild(logo);
     modalKeydown = function (event) {
       if (event.key === 'Escape' && !event.defaultPrevented) leaveModal();
     };

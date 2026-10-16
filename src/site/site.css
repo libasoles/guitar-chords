@@ -2399,6 +2399,17 @@ html.part-modal-open body { overflow: hidden; }
   color: var(--ink);
   cursor: pointer;
 }
+.part-modal-logo {
+  position: fixed;
+  top: 0.6rem;
+  left: max(1rem, 2vw);
+  z-index: 1;
+  width: 48px;
+  height: 48px;
+  background: url("guitar-player-cubist-left-head.svg") center / contain
+    no-repeat;
+  pointer-events: none;
+}
 .part-modal-close svg { width: 2rem; height: 2rem; }
 .part-modal-close:hover { background: #0000000f; }
 .part-modal-close:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
