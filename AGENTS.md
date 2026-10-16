@@ -3,7 +3,7 @@
 When an agent finishes a coding task in this repo:
 
 1. Commit the changes.
-2. Merge the branch into `main` (do not just open a PR and stop — merge it).
+2. Merge the worktree's branch into `main` locally (run `git merge` from the main checkout; do not just open a PR and stop — merge it).
 3. Push `main`.
 4. Delete the worktree used for the task (`ExitWorktree` with `action: "remove"`, or `git worktree remove`) and delete the now-merged branch.
 
