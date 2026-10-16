@@ -58,7 +58,8 @@ PREVIEW_MIN_ROW = 90 * PREVIEW_STAFF_SPACE
 PDF_OPTIONS = {  # A4 at Verovio's 10 units per mm
     "pageWidth": 2100, "pageHeight": 2970, "scale": 45, "breaks": "auto",
     "pageMarginLeft": 160, "pageMarginRight": 100, "pageMarginTop": 80,  # left: string names
-    "pageMarginBottom": 80, "header": "auto", "footer": "none", "spacingStaff": 6,
+    "pageMarginBottom": 80, "header": "auto", "footer": "none",
+    "spacingStaff": 9, "spacingSystem": 7,  # air around the TAB: below the notation and before the next system
 }
 # Verovio draws rhythm stems on tab staves; the reference layout has frets only.
 HIDE_TAB_RHYTHM = "<style>g.tabDurSym, g.tabRhythm { display: none; }</style>"
