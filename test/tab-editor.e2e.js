@@ -54,6 +54,22 @@ async function run() {
     assert.strictEqual(editor.hintFontSize, editor.spacingFontSize);
     assert.strictEqual(editor.hintTop, editor.spacingTop);
 
+    // The "how to use" dropdown at the foot starts closed and holds one
+    // looping demo per gesture, each with the keys to press.
+    const tutorial = await page.evaluate(() => {
+      const details = document.querySelector('details.tab-tutorial');
+      return {
+        open: details.open,
+        demos: details.querySelectorAll('.tab-demo').length,
+        keys: details.querySelectorAll('.tab-demo__key').length,
+        titles: [...details.querySelectorAll('.tab-demo h3')].map(h => h.textContent),
+      };
+    });
+    assert.strictEqual(tutorial.open, false);
+    assert.strictEqual(tutorial.demos, 3);
+    assert.strictEqual(tutorial.keys, 5);
+    assert.deepStrictEqual(tutorial.titles, ['Arrastrar y soltar', 'Duplicar una columna', 'Agregar ceros']);
+
     // The editor has one shared spacing slider. It changes every current Tab
     // and remains the setting for Tabs added afterwards.
     const sharedSpacing = await page.evaluate(() => {
