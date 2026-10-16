@@ -108,7 +108,8 @@ def handle_export(event, workdir):
     musicxml = _download(bucket, event["musicxml_key"], workdir)
     suggestion = _download(bucket, event["suggestion_key"], workdir)
     out_dir = os.path.join(workdir, "out")
-    result = tabify.export(musicxml, suggestion, tabs, event.get("tuning"), out_dir)
+    result = tabify.export(musicxml, suggestion, tabs, event.get("tuning"), out_dir,
+                           title=event.get("title"), subtitle=event.get("subtitle"))
     keys = {}
     for field in ("pdf", "musicxml", "tabs"):
         key = prefix + os.path.basename(result[field])

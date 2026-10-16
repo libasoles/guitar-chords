@@ -57,7 +57,7 @@ def process_input(job: dict, bucket: str, keys: dict) -> dict:
     }
 
 
-def export_input(job: dict, bucket: str, keys: dict) -> dict:
+def export_input(job: dict, bucket: str, keys: dict, header: dict | None = None) -> dict:
     """`keys` must come from keys_for(..., export_n=<this export's number>)."""
     event = {"action": "export", "bucket": bucket,
              "musicxml_key": keys["normalized"], "suggestion_key": keys["suggestion"],
@@ -65,4 +65,5 @@ def export_input(job: dict, bucket: str, keys: dict) -> dict:
     tuning = job.get("resolved_tuning") or job["tuning"]
     if tuning in ("standard", "dropd"):
         event["tuning"] = tuning
+    event.update(header or {})   # title / subtitle typed by the user
     return {"jobId": job["id"], "kind": job["kind"], "export": event}

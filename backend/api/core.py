@@ -281,6 +281,14 @@ class Service:
         tabs = body.get("tabs")
         if not isinstance(tabs, list) or len(json.dumps(tabs)) > 2_000_000:
             raise ApiError("invalid_request")
+        header = {}
+        for field in ("title", "subtitle"):   # optional edited page header
+            value = body.get(field)
+            if value is None:
+                continue
+            if not isinstance(value, str) or len(value) > 200:
+                raise ApiError("invalid_request")
+            header[field] = " ".join(value.split())
         if job["status"] not in ("ready", "exported"):
             raise ApiError("invalid_state", f"cannot export from {job['status']}")
         if not self.store.increment(job["pk"], "exports", self.cfg.export_limit):
@@ -289,7 +297,7 @@ class Service:
         keys = engine_adapter.keys_for(job_id, job["kind"], job["filename"], n)
         try:
             self.blob.put_json(keys["edits"], tabs)   # engine `tabs_key`: the Tab[] itself
-            payload = engine_adapter.export_input(job, self.cfg.bucket, keys)
+            payload = engine_adapter.export_input(job, self.cfg.bucket, keys, header)
             arn = self.workflow.start("export", f"{job_id}-{n}", payload)
         except Exception:
             self.store.decrement(job["pk"], "exports")

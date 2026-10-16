@@ -498,6 +498,8 @@
           measures: measures,
           dropped: job.discardedNotes || suggestion.dropped || [],
           tuning: (suggestion.tuning || job.tuning) === 'dropd' ? 'E B G D A D' : 'E B G D A E',
+          title: typeof suggestion.title === 'string' ? suggestion.title : '',
+          author: Array.isArray(suggestion.subtitles) ? suggestion.subtitles.join(' · ') : '',
           suggestionTabs: tabs.map(function (tab) { return (tab || []).map(normalizeAttack); }),
         };
       });
@@ -541,9 +543,14 @@
     });
   }
 
-  function runExport(jobId, tabs) {
+  function runExport(jobId, tabs, header) {
     // tabs === null asks the engine to use the Digitación sugerida.
-    return request('POST', '/jobs/' + encodeURIComponent(jobId) + '/export', { tabs: tabs })
+    var body = { tabs: tabs };
+    if (header) {
+      body.title = header.title;
+      body.subtitle = header.subtitle;
+    }
+    return request('POST', '/jobs/' + encodeURIComponent(jobId) + '/export', body)
       .then(function () { return waitForExport(jobId); })
       .then(function () { return request('GET', '/jobs/' + encodeURIComponent(jobId) + '/downloads'); });
   }
@@ -966,6 +973,27 @@
     var tabFontPx = 15;
     toolbar.appendChild(notation.label);
     toolbar.appendChild(boldControl.label);
+    // Title and author as underlined inputs, prefilled from the extraction;
+    // what the user leaves here is what the PDF header shows.
+    function headerInput(id, label, value) {
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.id = id;
+      input.className = 'part-header-input part-header-' + (id === 'partTitle' ? 'title' : 'author');
+      input.value = value || '';
+      input.maxLength = 200;
+      input.autocomplete = 'off';
+      input.spellcheck = false;
+      input.setAttribute('aria-label', label);
+      input.placeholder = label;
+      return input;
+    }
+    var titleInput = headerInput('partTitle', t('partTitleLabel'), preview.title);
+    var authorInput = headerInput('partAuthor', t('partAuthorLabel'), preview.author);
+    var headerEl = el('div', 'part-header');
+    headerEl.appendChild(titleInput);
+    headerEl.appendChild(authorInput);
+    toolbar.appendChild(headerEl);
     resultEl.appendChild(toolbar);
 
     // Sticky footer with the primary action.
@@ -1182,7 +1210,8 @@
           showError('');
           var label = confirmText.textContent;
           confirmText.textContent = t('partExporting');
-          runExport(jobId, current.map(function (tab) { return tab.map(function (c) { return c.slice(); }); }))
+          runExport(jobId, current.map(function (tab) { return tab.map(function (c) { return c.slice(); }); }),
+            { title: titleInput.value, subtitle: authorInput.value })
             .then(function (downloads) {
               var pdf = downloadUrl(downloads, ['pdf']);
               if (pdf) triggerDownload(pdf);

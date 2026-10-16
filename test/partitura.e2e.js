@@ -56,6 +56,8 @@ const SUGGESTION = {
     [{ note_ids: ['tab-note-2'], bass_strings: [] }, { note_ids: ['tab-note-3'], bass_strings: [5] }],
   ],
   dropped: [{ measure: 2, pitch: 'C#2' }],
+  title: 'Camino de las Tropas',
+  subtitles: ['Falú', 'Trans. X'],
 };
 const DROPPED = [{ measure: 2, pitch: 'C#2' }];
 
@@ -542,8 +544,18 @@ async function fillForm(page, name) {
         await page.locator('#partBoldBass').uncheck();
 
         // Confirm and export: the Digitación confirmada goes to POST /export.
+        assert.equal(await page.locator('#partTitle').inputValue(), 'Camino de las Tropas');
+        assert.equal(await page.locator('#partAuthor').inputValue(), 'Falú · Trans. X');
+        const underline = await page.locator('#partTitle').evaluate(n => {
+          const s = getComputedStyle(n);
+          return [s.borderBottomWidth, s.borderTopWidth, s.borderBottomLeftRadius];
+        });
+        assert.deepEqual(underline, ['1px', '0px', '0px']);
+        await page.locator('#partAuthor').fill('Cuchi Leguizamón');
         await page.locator('#partConfirm').click();
         await page.waitForFunction(() => !document.querySelector('#partConfirm').disabled);
+        assert.equal(api.exportBody.title, 'Camino de las Tropas');
+        assert.equal(api.exportBody.subtitle, 'Cuchi Leguizamón');
         assert.equal(api.exportBody.tabs.length, 2);
         assert.equal(api.exportBody.tabs[0][0][0], 7);
         assert.deepEqual(api.exportBody.tabs[1][1], [12, null, null, null, null, 5]);

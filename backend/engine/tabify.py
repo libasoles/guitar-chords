@@ -751,7 +751,7 @@ def build_output(score, part, measures, tuning, title, out_base, header=None):
     out = m21.stream.Score([notation, tab_staff, group])
     found, subtitles = header if header is not None else extract_header(score)
     out.metadata = m21.metadata.Metadata()
-    out.metadata.title = found or title
+    out.metadata.title = title if found is None else found
     if subtitles:
         out.metadata.composer = " · ".join(subtitles)
     xml = add_staff_tuning(fix_technical(to_musicxml(out)), tuning)
@@ -890,13 +890,14 @@ def prepare(input_path, kind, tuning, out_dir, per_row=4):
     }
 
 
-def export(musicxml_path, suggestion_path, tabs, tuning, out_dir):
+def export(musicxml_path, suggestion_path, tabs, tuning, out_dir, title=None, subtitle=None):
     """Persisted artifacts + edited tabs -> PDF, final MusicXML, tabs JSON.
 
     `tabs` is one ascii-tabs Tab (Column list) per measure. `tuning` is
     'standard', 'dropd' or None/'auto' to keep the suggestion's tuning.
     Edited cells map to notes by pitch; cells matching no note only reach the
-    TAB staff, never the notation.
+    TAB staff, never the notation. `title` and `subtitle` (the author line)
+    replace the extracted header when given; an empty string clears it.
     """
     with open(suggestion_path, encoding="utf-8") as f:
         suggestion = json.load(f)
@@ -910,10 +911,13 @@ def export(musicxml_path, suggestion_path, tabs, tuning, out_dir):
     chosen = TUNINGS.get(tuning) or suggestion["tuning_notes"]
     apply_edits(measures, tabs, chosen)
     os.makedirs(out_dir, exist_ok=True)
+    header_title = suggestion.get("title") if title is None else title.strip()
+    subtitles = suggestion.get("subtitles") or []
+    if subtitle is not None:
+        subtitles = [subtitle.strip()] if subtitle.strip() else []
     xml_path, pdf_path = build_output(
-        None, part, measures, chosen, suggestion.get("title") or "Partitura",
-        os.path.join(out_dir, "score"),
-        header=(suggestion.get("title"), suggestion.get("subtitles") or []))
+        None, part, measures, chosen, header_title or "Partitura",
+        os.path.join(out_dir, "score"), header=(header_title, subtitles))
     tabs_path = os.path.join(out_dir, FINAL_NAMES["tabs"])
     _write_json(tabs_path, tabs)
     return {"pdf": pdf_path, "musicxml": xml_path, "tabs": tabs_path, "tuning": tuning_key(chosen)}
