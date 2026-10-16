@@ -74,6 +74,17 @@ test('propaga el hash de un SVG a la hoja CSS que lo usa', () => {
   assert.notEqual(second.get('assets/site.css'), firstCss);
 });
 
+test('reescribe url() sin comillas, como lo deja el CSS minificado', () => {
+  const dir = makeSite({
+    'index.html': '<link href="assets/site.css">',
+    'assets/site.css': '.logo{background:url(logo.svg)}',
+    'assets/logo.svg': '<svg>logo</svg>',
+  });
+  const map = fingerprintAssets(dir);
+  const css = read(dir, map.get('assets/site.css'));
+  assert.ok(css.includes('url(' + path.basename(map.get('assets/logo.svg')) + ')'));
+});
+
 // ---- contra el build real (needs `npm run build:site`) ----------------------
 const DIST = path.join(__dirname, '..', 'dist', 'site');
 const HASHED = /\.[0-9a-f]{10}\.(js|css|svg)$/;
@@ -122,8 +133,22 @@ test('build: el precache del service worker apunta a archivos existentes (modo o
 test('build: los loaders lazy de chord-finder apuntan a vendor versionado', () => {
   const f = fs.readdirSync(path.join(DIST, 'assets')).find((n) => /^chord-finder\./.test(n));
   const js = fs.readFileSync(path.join(DIST, 'assets', f), 'utf8');
-  for (const name of js.match(/'(?:svguitar|jspdf)[^']*\.js'/g)) {
+  // Minified output uses double quotes.
+  for (const name of js.match(/["'](?:svguitar|jspdf)[^"']*\.js["']/g)) {
     assert.match(name.slice(1, -1), HASHED);
     assert.ok(fs.existsSync(path.join(DIST, 'assets', 'vendor', name.slice(1, -1))));
   }
+});
+
+test('build: toda url() de los CSS publicados apunta a un archivo existente', () => {
+  const assets = path.join(DIST, 'assets');
+  const sheets = fs.readdirSync(assets).filter((n) => n.endsWith('.css'));
+  assert.ok(sheets.length >= 1);
+  sheets.forEach((sheet) => {
+    const css = fs.readFileSync(path.join(assets, sheet), 'utf8');
+    for (const m of css.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/g)) {
+      if (/^(data:|https?:|#)/.test(m[1])) continue;
+      assert.ok(fs.existsSync(path.join(assets, m[1])), sheet + ' → ' + m[1]);
+    }
+  });
 });

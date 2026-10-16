@@ -1,0 +1,551 @@
+/* ----- Tablatura ASCII (<ascii-tabs>, vendor/ascii-tabs.js) ----- */
+
+/* The library blinks a caret only in empty cells. A cell that already has a
+   fret was just highlighted, so clicking it gave no sign it was being edited:
+   blink the same caret right after the digits. */
+ascii-tabs.ascii-tabs-editing .ascii-tabs-cur .ascii-tabs-fret:not(:has(.ascii-tabs-caret))::after {
+  content: '';
+  position: absolute;
+  left: 100%;
+  top: 0.25em;
+  bottom: 0.25em;
+  width: 2px;
+  margin-left: 1px;
+  background: var(--ascii-tabs-accent);
+  animation: ascii-tabs-blink 1s steps(1) infinite;
+}
+ascii-tabs.ascii-tabs-dragging .ascii-tabs-cur .ascii-tabs-fret::after,
+ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
+  display: none;
+}
+
+.tab-editor {
+  --ascii-tabs-font: var(--mono);
+  --ascii-tabs-font-size: 17px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 1rem;
+  margin: 0 0 2rem;
+}
+.tab-editor .ascii-tabs-hint {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin: 0 0 16px;
+  align-self: center;
+}
+.tab-editor .ascii-tabs-spacing {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin: 0 0 16px;
+  align-self: center;
+  justify-self: end;
+}
+.tab-editor .ascii-tabs-spacing-input {
+  appearance: none;
+  background: transparent;
+  height: 16px;
+  cursor: pointer;
+}
+.tab-editor .ascii-tabs-spacing-input::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--rule);
+}
+.tab-editor .ascii-tabs-spacing-input::-moz-range-track {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--rule);
+}
+.tab-editor .ascii-tabs-spacing-input::-webkit-slider-thumb {
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  margin-top: -3.5px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.tab-editor .ascii-tabs-spacing-input::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.tab-editor .ascii-tabs-sheets,
+.tab-editor .ascii-tabs-add {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .tab-editor {
+    --ascii-tabs-font-size: 15px;
+    display: block;
+  }
+  .tab-editor .ascii-tabs-sheet {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .tab-editor .ascii-tabs-spacing {
+    display: none;
+  }
+  .tab-editor .ascii-tabs-tools {
+    order: -1;
+    flex-direction: row;
+    align-self: flex-end;
+    margin: -14px 0 0;
+  }
+}
+
+/* Tab editor: "how to use" dropdown with looping CSS-only demos. The keys to
+   press light up in colour while each gesture plays; reduced motion shows the
+   end state with the keys lit. Markup: scripts/lib/tab-tutorial.js. */
+.tab-tutorial {
+  --demo-cw: 2.1em;
+  --demo-rh: 1.5em;
+  --demo-lit: #f4ddd6;
+  max-width: var(--max-width);
+  margin: 6rem 0 2rem;
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+}
+.tab-tutorial > summary {
+  cursor: pointer;
+  color: var(--ink-soft);
+}
+.tab-tutorial[open] > summary {
+  font-weight: 600;
+  color: var(--ink);
+}
+.tab-tutorial__intro {
+  margin: 0.75rem 0 0;
+}
+.tab-tutorial__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1.75rem 1.5rem;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.tab-demo {
+  margin: 0;
+}
+.tab-demo figcaption h3 {
+  margin: 0.9rem 0 0.2rem;
+  font-size: 1rem;
+  color: var(--ink);
+}
+.tab-demo figcaption p {
+  margin: 0;
+}
+.tab-demo kbd {
+  padding: 0.05em 0.4em;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: #fff;
+  font-family: var(--sans);
+  font-size: 0.85em;
+}
+.tab-demo__stage {
+  position: relative;
+  isolation: isolate;
+  width: calc(var(--cols) * var(--demo-cw));
+  max-width: 100%;
+  height: calc(6 * var(--demo-rh));
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+.tab-demo__string {
+  display: block;
+  height: var(--demo-rh);
+  background: linear-gradient(var(--rule), var(--rule)) center / 100% 1px
+    no-repeat;
+}
+.tab-demo__note {
+  position: absolute;
+  left: calc(var(--c) * var(--demo-cw));
+  top: calc(var(--s) * var(--demo-rh));
+  width: var(--demo-cw);
+  height: var(--demo-rh);
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  border-radius: 3px;
+}
+/* A note sits on its string line: the paper behind it hides the line. */
+.tab-demo__note::before {
+  content: "";
+  position: absolute;
+  inset: 20% 22%;
+  z-index: -1;
+  border-radius: 3px;
+  background: var(--paper);
+}
+.tab-demo__cursor {
+  position: absolute;
+  left: var(--demo-cw);
+  top: var(--demo-rh);
+  width: var(--demo-cw);
+  height: var(--demo-rh);
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+.tab-demo__cursor::after {
+  content: '';
+  position: absolute;
+  left: 55%;
+  top: 45%;
+  width: 1.9em;
+  height: 1.9em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 1l11 7-5 1.2L5.5 14z' fill='%23222' stroke='%23fff' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+.tab-demo__keys {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.7rem;
+  min-height: 1.9em;
+}
+.tab-demo__plus {
+  color: var(--ink-soft);
+}
+
+.tab-demo--drag .tab-demo__note--dragged {
+  animation: tab-demo-drag 6s ease-in-out infinite;
+}
+.tab-demo--drag .tab-demo__cursor {
+  animation: tab-demo-cursor 6s ease-in-out infinite;
+}
+.tab-demo__note--copy-1 {
+  animation: tab-demo-appear-1 6s steps(1, end) infinite;
+}
+.tab-demo__note--copy-2 {
+  animation: tab-demo-appear-2 6s steps(1, end) infinite;
+}
+.tab-demo--duplicate .tab-demo__key {
+  animation: tab-demo-lit-duplicate 6s steps(1, end) infinite;
+}
+.tab-demo__note--zero {
+  animation: tab-demo-appear-zero 6s steps(1, end) infinite;
+}
+.tab-demo--zeros .tab-demo__key {
+  animation: tab-demo-lit-zeros 6s steps(1, end) infinite;
+}
+/* The selected note starts normal, B makes it bold, B again makes it normal. */
+.tab-demo__note--bold {
+  animation: tab-demo-bold 6s steps(1, end) infinite;
+}
+.tab-demo__note--selected {
+  background: var(--demo-lit);
+}
+.tab-demo__note--selected::before {
+  background: var(--demo-lit);
+}
+.tab-demo--bold .tab-demo__key {
+  animation: tab-demo-lit-bold 6s steps(1, end) infinite;
+}
+
+@keyframes tab-demo-drag {
+  0%,
+  14% {
+    transform: none;
+    background: transparent;
+    opacity: 1;
+  }
+  20% {
+    transform: none;
+    background: var(--demo-lit);
+  }
+  48%,
+  58% {
+    transform: translate(calc(2 * var(--demo-cw)), var(--demo-rh));
+    background: var(--demo-lit);
+  }
+  62%,
+  88% {
+    transform: translate(calc(2 * var(--demo-cw)), var(--demo-rh));
+    background: transparent;
+    opacity: 1;
+  }
+  94% {
+    transform: translate(calc(2 * var(--demo-cw)), var(--demo-rh));
+    opacity: 0;
+  }
+  94.01% {
+    transform: none;
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes tab-demo-cursor {
+  0%,
+  10% {
+    transform: none;
+    opacity: 0;
+  }
+  14% {
+    transform: none;
+    opacity: 1;
+  }
+  20% {
+    transform: scale(0.85);
+    opacity: 1;
+  }
+  48%,
+  58% {
+    transform: translate(calc(2 * var(--demo-cw)), var(--demo-rh)) scale(0.85);
+    opacity: 1;
+  }
+  64%,
+  100% {
+    transform: translate(calc(2 * var(--demo-cw)), var(--demo-rh));
+    opacity: 0;
+  }
+}
+@keyframes tab-demo-appear-1 {
+  0%,
+  29% {
+    opacity: 0;
+  }
+  30%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tab-demo-appear-2 {
+  0%,
+  59% {
+    opacity: 0;
+  }
+  60%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tab-demo-appear-zero {
+  0%,
+  44% {
+    opacity: 0;
+  }
+  45%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tab-demo-bold {
+  0%,
+  19% {
+    font-weight: 400;
+  }
+  20%,
+  69% {
+    font-weight: 700;
+  }
+  70%,
+  100% {
+    font-weight: 400;
+  }
+}
+@keyframes tab-demo-lit-bold {
+  0%,
+  19%,
+  28%,
+  69%,
+  78%,
+  100% {
+    background: #fff;
+    border-color: var(--rule);
+    color: inherit;
+  }
+  20%,
+  27%,
+  70%,
+  77% {
+    background: var(--demo-lit);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+/* The keys light up in colour exactly while they are being pressed. */
+@keyframes tab-demo-lit-duplicate {
+  0%,
+  26%,
+  35%,
+  56%,
+  65%,
+  100% {
+    background: #fff;
+    border-color: var(--rule);
+    color: inherit;
+  }
+  27%,
+  34%,
+  57%,
+  64% {
+    background: var(--demo-lit);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+@keyframes tab-demo-lit-zeros {
+  0%,
+  40% {
+    background: #fff;
+    border-color: var(--rule);
+    color: inherit;
+  }
+  41%,
+  50% {
+    background: var(--demo-lit);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  51%,
+  100% {
+    background: #fff;
+    border-color: var(--rule);
+    color: inherit;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-demo__note,
+  .tab-demo__cursor,
+  .tab-demo__key {
+    animation: none !important;
+  }
+  .tab-demo--drag .tab-demo__note--dragged {
+    transform: translate(calc(2 * var(--demo-cw)), var(--demo-rh));
+  }
+  .tab-demo:not(.tab-demo--drag) .tab-demo__key {
+    background: var(--demo-lit);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+
+.tab-source {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin: 1.6rem 0 0;
+}
+.tab-video {
+  margin: 0.6rem 0 0;
+  aspect-ratio: 16 / 9;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+}
+.tab-video iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Keep transposed notes on a fixed neck so semitone movement stays visible. */
+.picking-diagram-scroll { overflow-x: auto; }
+[data-picking-transposable] .picking-diagram { min-width: 960px; }
+.picking-transpose { margin: 1.5rem 0; }
+.picking-transpose-row { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.5rem 1rem; white-space: nowrap; }
+.picking-transpose label { font-weight: 600; }
+.picking-transpose output { margin-left: 0.75rem; color: var(--accent); font-weight: 600; }
+/* Major/minor switch. Both sides are a valid choice rather than off/on, so
+   the knob keeps the accent colour and the chosen side's word is inked. */
+.picking-quality { display: flex; align-items: center; gap: 0.5rem; }
+.picking-quality span { font-weight: 600; color: var(--ink-soft); cursor: pointer; }
+.picking-quality:has(input:not(:checked)) .picking-quality-major,
+.picking-quality input:checked + span { color: var(--ink); }
+.picking-quality input {
+  position: relative;
+  width: 30px;
+  height: 16px;
+  margin: 0;
+  appearance: none;
+  border: 1px solid var(--ink);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+.picking-quality input::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  transition: transform 0.15s ease;
+}
+.picking-quality input:checked::before { transform: translateX(14px); }
+.picking-quality input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.picking-transpose input[type="range"] {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: 14px;
+  margin: 0.75rem 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+.picking-transpose input::-webkit-slider-runnable-track { height: 1px; background: var(--ink); }
+.picking-transpose input::-moz-range-track { height: 1px; background: var(--ink); }
+.picking-transpose input::-webkit-slider-thumb {
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  margin-top: -4.5px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.picking-transpose input::-moz-range-thumb { width: 10px; height: 10px; border: 0; border-radius: 50%; background: var(--accent); }
+.picking-upper-frets { fill: #e2ded6; }
+/* No fill transition: notes are redrawn on every slider step. */
+.picking-note-tonic { fill: #f5c400; stroke: var(--ink); stroke-width: 1.5px; transition: transform 0.1s ease; }
+
+/* Interactive circle of fifths */
+.fifths-tool { margin: 0 auto 3rem; }
+.fifths-svg { display: block; width: 100%; height: auto; overflow: visible; font-family: var(--sans); }
+.fifths-key { cursor: pointer; outline: none; }
+.fifths-key path { fill: #eee9df; stroke: var(--paper); stroke-width: 2; transition: fill 140ms ease; }
+.fifths-key.is-related path { fill: #c5dce0; }
+.fifths-key.is-tonic path { fill: var(--note-selected); }
+.fifths-key:focus-visible path { stroke: var(--accent); stroke-width: 4; }
+.fifths-chord-name { font-size: 26px; fill: var(--ink); pointer-events: none; }
+.fifths-degree { font-size: 13px; fill: #315b62; pointer-events: none; }
+.fifths-key.is-tonic text { fill: white; }
+.fifths-center { fill: var(--paper); }
+.fifths-center-name { font-size: 24px; font-family: var(--serif); font-weight: 600; }
+.fifths-diminished { font-size: 20px; fill: var(--note-selected); }
+.fifths-accidental-names { font-size: 14px; fill: var(--ink-soft); }
+.fifths-detail { border-top: 1px solid var(--rule); padding-top: 1.2rem; text-align: center; }
+.fifths-detail h2 { margin: 0; }
+.fifths-signature { display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap; margin: .4rem 0 1rem; font-family: var(--sans); font-size: 1rem; }
+.fifths-staff { flex: none; }
+.fifths-chords { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .35rem; }
+.fifths-chord { padding: .65rem .15rem; background: #e3edef; border-radius: 4px; }
+.fifths-chord small, .fifths-chord strong { display: block; }
+.fifths-chord small { font: .75rem var(--sans); color: #315b62; margin-bottom: .3rem; }
+.fifths-chord strong { font-size: 1.1rem; font-weight: 500; }
+@media (max-width: 520px) {
+  .fifths-chord strong { font-size: .85rem; }
+  .fifths-chords { gap: .2rem; }
+  .fifths-signature { gap: .25rem; }
+  .fifths-svg { width: calc(100% + 2rem); max-width: none; margin-left: -1rem; }
+}
+@media (prefers-reduced-motion: reduce) { .fifths-key path { transition: none; } }
+

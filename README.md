@@ -16,7 +16,7 @@ Built with vanilla JS, no framework, no build step beyond a Node.js assembly scr
 ```
 src/
   shared/          # Chord DB, diagram renderer, search — used by both site and extension
-  site/            # Web app: template.html, chord-finder component, site.css
+  site/            # Web app: template.html, chord-finder component, css/ (site.css parts)
   extension/       # Chrome extension: manifest, popup, icons, _locales/
   i18n/            # Strings for the site (strings.es.json, strings.en.json)
 vendor/            # Bundled third-party libs (svguitar, fuzzysort, jsPDF, ascii-tabs)

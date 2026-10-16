@@ -2,7 +2,17 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="../src/site/site.css">
+  <!-- All site.css parts, in cascade order (the build concatenates them). -->
+  <link rel="stylesheet" href="../src/site/css/01-base.css">
+  <link rel="stylesheet" href="../src/site/css/02-guides.css">
+  <link rel="stylesheet" href="../src/site/css/03-note-finder.css">
+  <link rel="stylesheet" href="../src/site/css/04-home-promos.css">
+  <link rel="stylesheet" href="../src/site/css/05-footer.css">
+  <link rel="stylesheet" href="../src/site/css/06-picking-404.css">
+  <link rel="stylesheet" href="../src/site/css/07-tab-editor.css">
+  <link rel="stylesheet" href="../src/site/css/08-privacy.css">
+  <link rel="stylesheet" href="../src/site/css/09-partitura-promo.css">
+  <link rel="stylesheet" href="../src/site/css/10-partitura.css">
   <script>
     window.ChordDiagram = { render: function (target, chord) { target.textContent = JSON.stringify(chord.fingers); } };
     window.NOTE_FINDER_LABELS = ['C', 'C♯/D♭', 'D', 'D♯/E♭', 'E', 'F', 'F♯/G♭', 'G', 'G♯/A♭', 'A', 'A♯/B♭', 'B'];

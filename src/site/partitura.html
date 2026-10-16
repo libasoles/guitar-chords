@@ -28,11 +28,7 @@
     <link rel="manifest" href="%%MANIFEST_HREF%%" />
     <meta name="theme-color" content="#fdfaf5" />
     <link rel="apple-touch-icon" href="%%ASSETS_PREFIX%%icons/icon-192.png" />
-    <link rel="stylesheet" href="%%ASSETS_PREFIX%%site.css" />
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-0S8GH7ZFHT"
-    ></script>
+    <link rel="stylesheet" href="%%ASSETS_PREFIX%%partitura.css" />
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
@@ -40,9 +36,20 @@
       }
       gtag("js", new Date());
       gtag("config", "G-0S8GH7ZFHT");
+      // Analytics loads once the page is done, so it never competes with it.
+      window.addEventListener("load", function () {
+        var load = function () {
+          var script = document.createElement("script");
+          script.async = true;
+          script.src = "https://www.googletagmanager.com/gtag/js?id=G-0S8GH7ZFHT";
+          document.head.appendChild(script);
+        };
+        if ("requestIdleCallback" in window) requestIdleCallback(load, { timeout: 4000 });
+        else setTimeout(load, 2000);
+      });
     </script>
   </head>
-  <body class="partitura-body">
+  <body class="partitura-body" data-toast-src="%%ASSETS_PREFIX%%toast.js">
     <header class="site-header">
       <a class="brand" href="%%homeHref%%">
         <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
@@ -167,7 +174,6 @@
           });
       })();
     </script>
-    <script defer src="%%ASSETS_PREFIX%%toast.js"></script>
     <script defer src="%%ASSETS_PREFIX%%partitura.js"></script>
     <script>
       if ("serviceWorker" in navigator) {

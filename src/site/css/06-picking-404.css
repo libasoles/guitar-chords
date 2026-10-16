@@ -1,0 +1,97 @@
+/* ----- Picking pattern pages ----- */
+
+.picking-figures {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  margin: 1.4rem 0 2rem;
+}
+.picking-figure {
+  margin: 0;
+}
+.picking-diagram {
+  display: block;
+  width: 100%;
+  padding: 1rem 0.5rem 0;
+  box-sizing: border-box;
+}
+.picking-diagram svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.picking-pair-connector {
+  stroke: var(--ink);
+  stroke-width: 2;
+  pointer-events: none;
+}
+.picking-note {
+  cursor: pointer;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    transform 0.1s ease,
+    fill 0.1s ease,
+    stroke 0.1s ease;
+}
+.picking-note-active {
+  fill: var(--accent) !important;
+  stroke: var(--accent) !important;
+  transform: scale(1.25);
+}
+.picking-figure figcaption {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-top: 0.15rem;
+  text-align: center;
+}
+
+/* ----- 404 page ----- */
+
+.notfound {
+  margin: 2.2rem 0 2.8rem;
+  text-align: center;
+}
+.notfound-code {
+  font-family: var(--mono);
+  font-size: 4.5rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  line-height: 1;
+  margin: 0 0 0.6rem;
+}
+.notfound h1 {
+  margin-bottom: 0.4rem;
+}
+.notfound .lead {
+  margin: 0 auto 1.6rem;
+}
+.notfound-explore {
+  text-align: left;
+}
+.notfound-explore-label {
+  font-family: var(--sans);
+  margin: 0 0 0.6rem;
+}
+.notfound-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+.notfound-links a {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 600px) {
+  .notfound-code {
+    font-size: 3.4rem;
+  }
+}
+

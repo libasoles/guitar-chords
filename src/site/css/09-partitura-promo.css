@@ -1,0 +1,76 @@
+/* ----- Partitura y tablatura home promotion ----- */
+
+.part-promo {
+  margin: 1.2rem 0 0;
+}
+.part-promo-link {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1.3rem;
+  color: var(--ink);
+  background: #f7f4eb;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  text-decoration: none;
+}
+.part-promo-link:hover {
+  border-color: var(--accent);
+}
+.part-promo-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.part-promo-img {
+  display: block;
+  width: 200px;
+  height: auto;
+  aspect-ratio: 480 / 436;
+  border-radius: 8px;
+}
+.part-promo-copy {
+  min-width: 0;
+}
+.part-promo-kicker {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+.part-promo-copy h2 {
+  margin: 0.25rem 0 0;
+  padding: 0;
+  border: 0;
+  font-size: 1.45rem;
+}
+.part-promo-desc {
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+.part-promo-cta {
+  display: inline-block;
+  margin-top: 1rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.part-promo-link:hover .part-promo-cta {
+  text-decoration: underline;
+}
+@media (max-width: 560px) {
+  .part-promo-link {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 1rem;
+  }
+  .part-promo-copy {
+    text-align: center;
+  }
+}
+

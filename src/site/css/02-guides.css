@@ -1,0 +1,389 @@
+/* ----- V7 guide pages ----- */
+
+.v7-grid {
+  margin: 1rem 0 2rem;
+}
+.v7-grid-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+.v7-grid-head span {
+  text-align: center;
+}
+.v7-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+.v7-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.v7-card .diagram {
+  width: 130px;
+  height: 152px;
+  margin: 0 auto;
+}
+.v7-grid .v7-card .diagram-wrap {
+  position: relative;
+  width: 190px;
+  margin: 0 auto;
+}
+.v7-grid .v7-card .pos-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.v7-grid .v7-card .pos-prev { left: 0; }
+.v7-grid .v7-card .pos-next { right: 0; }
+.v7-grid .v7-card .pos-nav[hidden] { display: none; }
+.v7-grid .v7-card .pos-nav svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.v7-grid .v7-card .pos-nav:hover,
+.v7-grid .v7-card .pos-nav:focus-visible {
+  color: var(--accent);
+  background: rgba(139, 0, 0, 0.08);
+  border-color: rgba(139, 0, 0, 0.12);
+  outline: none;
+}
+.v7-grid .v7-card .pos-label {
+  font-family: var(--sans);
+  font-size: 0.66rem;
+  color: var(--ink-soft);
+  margin-top: 0.1rem;
+}
+.v7-grid .v7-card .pos-label[hidden] { display: none; }
+.v7-card .diagram svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.v7-card .name {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin-top: 0.3rem;
+}
+.v7-skeleton-card {
+  min-height: 200.8px;
+}
+.v7-skeleton-diagram,
+.v7-skeleton-position,
+.v7-skeleton-name {
+  display: block;
+  background: linear-gradient(90deg, #eee9de 25%, #f7f3eb 37%, #eee9de 63%);
+  background-size: 400% 100%;
+  animation: v7-skeleton-shimmer 1.4s ease infinite;
+}
+.v7-skeleton-diagram {
+  width: 130px;
+  height: 152px;
+  border-radius: 3px;
+}
+.v7-skeleton-name {
+  width: 3.2rem;
+  height: 1.3705rem;
+  margin-top: 0.3rem;
+  border-radius: 3px;
+}
+.v7-skeleton-position {
+  width: 4.25rem;
+  height: 0.8615rem;
+  margin-top: 0.1rem;
+  border-radius: 3px;
+}
+@keyframes v7-skeleton-shimmer {
+  to { background-position: -100% 0; }
+}
+
+@media (max-width: 480px) {
+  .v7-card .diagram {
+    width: 92px;
+    height: 108px;
+  }
+  .v7-grid .v7-card .diagram-wrap {
+    width: 144px;
+  }
+  .v7-card .name {
+    font-size: 0.85rem;
+  }
+  .v7-skeleton-card {
+    min-height: 151.8px;
+  }
+  .v7-skeleton-diagram {
+    width: 92px;
+    height: 108px;
+  }
+  .v7-skeleton-name {
+    height: 1.108rem;
+  }
+  .v7-grid-head {
+    font-size: 0.66rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v7-skeleton-diagram,
+  .v7-skeleton-position,
+  .v7-skeleton-name {
+    animation: none;
+  }
+}
+
+/* ----- Circle of fifths page ----- */
+
+.circle-grid {
+  margin: 1rem 0 2rem;
+}
+.circle-grid-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+.circle-grid-head span {
+  text-align: center;
+}
+.circle-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+.circle-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.circle-card .diagram-wrap {
+  position: relative;
+  width: 130px;
+  margin: 0 auto;
+}
+.circle-card .diagram {
+  width: 130px;
+  height: 152px;
+  margin: 0 auto;
+}
+.circle-card .diagram svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.circle-card .pos-nav,
+.note-finder-grid .v7-card .pos-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.circle-card .pos-prev,
+.note-finder-grid .v7-card .pos-prev {
+  left: -0.5rem;
+}
+.circle-card .pos-next,
+.note-finder-grid .v7-card .pos-next {
+  right: -0.5rem;
+}
+.circle-card .pos-nav[hidden],
+.note-finder-grid .v7-card .pos-nav[hidden] {
+  display: none;
+}
+.circle-card .pos-nav svg,
+.note-finder-grid .v7-card .pos-nav svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.circle-card .pos-nav:hover,
+.circle-card .pos-nav:focus-visible,
+.note-finder-grid .v7-card .pos-nav:hover,
+.note-finder-grid .v7-card .pos-nav:focus-visible {
+  color: var(--accent);
+  background: rgba(139, 0, 0, 0.08);
+  border-color: rgba(139, 0, 0, 0.12);
+  outline: none;
+}
+.circle-card .string-notes-wrap {
+  /* svguitar places the outer strings at 20% and 80% of the diagram width.
+     A six-column grid needs 72% width for its first/last column centres to
+     line up with those strings. It's nested inside .diagram-wrap (not a
+     sibling in .circle-card) so that 72% resolves against the diagram's own
+     fixed width rather than the wider, stretched grid column — and centered
+     with margin auto since .diagram-wrap is a plain block, not a flex
+     container. */
+  width: 72%;
+  min-height: 1.3rem;
+  margin: 0.15rem auto 0;
+}
+.circle-card .string-notes {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.circle-card .string-note {
+  text-align: center;
+  border-radius: 3px;
+  transition:
+    color 0.1s ease,
+    background-color 0.1s ease;
+}
+.circle-card .string-note--active {
+  color: var(--accent);
+  background: rgba(139, 0, 0, 0.1);
+}
+.circle-card .name {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin-top: 0.3rem;
+}
+.circle-composition {
+  display: flex;
+  justify-content: center;
+  gap: 1.1rem;
+}
+.circle-tone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+.circle-tone-note {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--accent);
+}
+.circle-tone-count {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  margin-top: 0.1rem;
+}
+
+@media (max-width: 480px) {
+  .circle-card .diagram-wrap {
+    width: 92px;
+  }
+  .circle-card .diagram {
+    width: 92px;
+    height: 108px;
+  }
+  .circle-card .string-notes-wrap {
+    width: 72%;
+    min-height: 1.1rem;
+  }
+  .circle-card .string-notes {
+    font-size: 0.5rem;
+  }
+  .circle-card .name {
+    font-size: 0.85rem;
+  }
+  .circle-grid-head {
+    font-size: 0.66rem;
+  }
+  .circle-composition {
+    gap: 0.6rem;
+  }
+  .circle-tone-note {
+    font-size: 1.05rem;
+  }
+  .circle-tone-count {
+    font-size: 0.66rem;
+  }
+}
+
+/* ----- Diminished chords page ----- */
+
+.dim-lead-forms {
+  margin-top: 1rem;
+}
+
+.dim-section-lead {
+  color: var(--ink-soft);
+  margin: 0.4rem 0 1.2rem;
+}
+
+.dim-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.6rem 1.2rem;
+  margin: 1rem 0 2.4rem;
+}
+.dim-grid .v7-card {
+  width: 130px;
+}
+
+@media (max-width: 480px) {
+  .dim-grid {
+    gap: 1.2rem 0.8rem;
+  }
+  .dim-grid .v7-card {
+    width: 92px;
+  }
+}
+

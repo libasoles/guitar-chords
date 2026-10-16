@@ -1,0 +1,429 @@
+/* ----- Note finder page (identify chords from notes) ----- */
+
+.note-finder {
+  display: grid;
+  grid-template-columns: minmax(230px, 280px) 1fr;
+  gap: 1.5rem 2rem;
+  align-items: start;
+  margin: 2.6rem 0 3rem;
+}
+
+.note-finder-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.note-finder-keys-head {
+  display: grid;
+  grid-template-columns: 3.6rem 2.7rem 3.6rem;
+  column-gap: 0.9rem;
+  justify-items: center;
+  width: max-content;
+}
+
+.note-finder-col-label {
+  align-self: end;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.7rem;
+  border-bottom: 1px solid var(--rule);
+  text-align: center;
+  white-space: nowrap;
+}
+.note-finder-col-label-sharps {
+  grid-column: 3;
+}
+.note-finder-col-label-naturals {
+  grid-column: 2;
+}
+.note-finder-col-label-flats {
+  grid-column: 1;
+}
+.note-finder-col-label-flats,
+.note-finder-col-label-sharps {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 0.8;
+}
+/* The flat glyph has a smaller optical footprint than a hash at the same
+   font size, so it needs a little more room to make the two headings read
+   as peers. */
+.note-finder-col-label-flats {
+  font-size: 1.45rem;
+}
+.note-finder-col-label-symbol {
+  display: inline-block;
+}
+/* Unlike the flat, the hash sits low within this font's line box. Move the
+   glyph alone so its underline remains aligned with the other headers. */
+.note-finder-col-label-sharps .note-finder-col-label-symbol {
+  transform: translateY(-0.2rem);
+}
+
+.note-finder-keys-viewport {
+  width: 100%;
+  /* Height is set from JS to exactly match one cycle of the note list,
+     so the whole widget is visible without scrolling by default. The
+     container stays scrollable (wheel/touch) as an infinite carousel:
+     the track below holds three stacked copies of the list and the
+     scroll position is looped between them. Browser scrollbars are
+     deliberately hidden so it reads as a carousel, not a scroll area. */
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 1.25rem,
+    #000 calc(100% - 1.25rem),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 1.25rem,
+    #000 calc(100% - 1.25rem),
+    transparent
+  );
+}
+.note-finder-keys-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.note-finder-keys-track {
+  display: grid;
+  row-gap: 1.6rem;
+}
+
+.note-finder-keys {
+  display: grid;
+  grid-template-columns: 3.6rem 2.7rem 3.6rem;
+  grid-template-rows:
+    3.7rem 1.6rem 3.7rem 1.6rem 3.7rem 1.6rem 3.7rem
+    1.6rem 3.7rem 1.6rem 3.7rem 1.6rem 3.7rem;
+  column-gap: 0.9rem;
+  justify-items: center;
+  /* Prevent the grid from stretching to the picker width: its background
+     rail is centred on this box, so this keeps it centred on the natural
+     notes too. */
+  width: max-content;
+  /* The middle rail makes the notes read as a connected chord map instead
+     of a list of independent controls. It deliberately stops at each note. */
+  background:
+    linear-gradient(var(--rule), var(--rule)) center / 1px 100% no-repeat;
+}
+
+.note-finder-note {
+  position: relative;
+  align-self: center;
+  justify-self: center;
+  font-family: var(--mono);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 999px;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease,
+    border-color 0.12s ease;
+}
+.note-finder-note:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.note-finder-note-natural {
+  width: 3.7rem;
+  height: 3.7rem;
+  font-size: 0.82rem;
+  background: #fff;
+  color: var(--ink);
+  border: 2px solid var(--rule);
+  box-shadow: 0 0 0 3px #fff;
+}
+.note-finder-note-natural.is-selected {
+  background: #f6b2aa;
+  color: var(--ink);
+  border-color: #fff;
+  box-shadow: 0 0 0 2px #e9d8d1;
+}
+
+.note-finder-note-accidental {
+  width: 3.45rem;
+  height: 2.95rem;
+  font-size: 0.72rem;
+  line-height: 1;
+  border: 0;
+  background: transparent;
+  /* A speech-bubble silhouette keeps the accidental visually tied to the
+     natural note in the center rail. */
+  border-radius: 50%;
+  isolation: isolate;
+}
+.note-finder-note-accidental-symbol {
+  font-size: 1.35em;
+}
+.note-finder-note-accidental::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--note-fill);
+  clip-path: polygon(0 50%, 24% 7%, 65% 7%, 100% 50%, 65% 93%, 24% 93%);
+  filter: drop-shadow(0 0 1.2px var(--note-outline));
+}
+.note-finder-note-sharp {
+  --note-fill: #edf2f8;
+  --note-outline: #c4d2df;
+  color: var(--ink-soft);
+}
+.note-finder-note-flat {
+  --note-fill: #f6efe4;
+  --note-outline: #d9cebc;
+  color: var(--ink-soft);
+}
+.note-finder-note-flat::before {
+  clip-path: polygon(0 50%, 35% 7%, 76% 7%, 100% 50%, 76% 93%, 35% 93%);
+}
+.note-finder-note-sharp.is-selected {
+  --note-fill: #9fc2da;
+  --note-outline: #5c89a7;
+  color: var(--ink);
+}
+.note-finder-note-flat.is-selected {
+  --note-fill: #ddc99e;
+  --note-outline: #9b7c42;
+  color: var(--ink);
+}
+
+/* Touch browsers can retain :hover after a tap. Only offer the hover
+   affordance to devices that have a real hovering pointer. */
+@media (hover: hover) {
+  .note-finder-note-natural:hover {
+    background: #f6b2aa;
+    color: var(--ink);
+    border-color: #fff;
+    box-shadow: 0 0 0 2px #e9d8d1;
+  }
+  .note-finder-note-sharp:hover {
+    --note-fill: #9fc2da;
+    --note-outline: #5c89a7;
+    color: var(--ink);
+  }
+  .note-finder-note-flat:hover {
+    --note-fill: #ddc99e;
+    --note-outline: #9b7c42;
+    color: var(--ink);
+  }
+}
+
+/* The selected state is recognisable at a glance without relying on colour. */
+.note-finder-note.is-selected::after {
+  content: "✓";
+  position: absolute;
+  z-index: 1;
+  top: -0.55rem;
+  right: -0.45rem;
+  display: grid;
+  width: 1.45rem;
+  height: 1.45rem;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #d54a36;
+  color: #fff;
+  box-shadow: 0 1px 3px rgb(76 35 28 / 22%);
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.note-finder-clear {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  width: 11.7rem;
+  text-align: center;
+}
+.note-finder-clear:hover {
+  color: var(--accent);
+}
+
+.note-finder-results-label {
+  font-family: var(--sans);
+  /* Match the picker heading metrics so their first-line baselines align. */
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  margin: 0 0 1.3rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.note-finder-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.6rem 1.2rem;
+}
+.note-finder-grid .v7-card {
+  width: 130px;
+}
+.note-finder-grid .v7-card .diagram-wrap {
+  position: relative;
+}
+.note-finder-grid .v7-card .pos-label {
+  font-family: var(--sans);
+  font-size: 0.66rem;
+  color: var(--ink-soft);
+  margin-top: 0.1rem;
+}
+.note-finder-grid .v7-card .pos-label[hidden] {
+  display: none;
+}
+.note-finder-grid .v7-card .notes {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  min-height: 1em;
+}
+.note-finder-empty {
+  color: var(--ink-soft);
+  padding: 1rem 0;
+}
+
+@media (max-width: 600px) {
+  .note-finder {
+    /* Keep the picker and its matches in the same reading row on phones.
+       The picker has a deliberate fixed visual width, while the results
+       column is allowed to take the remaining space. */
+    /* Reserve room for the selected-note badge on the picker's right edge. */
+    grid-template-columns: minmax(0, 12.4rem) minmax(0, 1fr);
+    column-gap: 0.5rem;
+  }
+  .note-finder-picker {
+    align-items: center;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .note-finder-results {
+    min-width: 0;
+    height: min(42rem, calc(100svh - 2rem));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    text-align: center;
+    background: transparent;
+  }
+  .note-finder-results-label {
+    flex: none;
+    margin-top: 0;
+  }
+  .note-finder-results-scroll {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  .note-finder-grid {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .note-finder-grid .v7-card {
+    width: 92px;
+  }
+  /* Keep the position controls clear of the miniature chord diagram. */
+  .note-finder-grid .v7-card .pos-prev {
+    left: -1.6rem;
+  }
+  .note-finder-grid .v7-card .pos-next {
+    right: -1.6rem;
+  }
+  /* Let any part of the picker that reaches this column stay visible. */
+  .note-finder-grid .v7-card .pos-nav {
+    background: transparent;
+  }
+}
+
+/* At 320 px wide the full-size picker would crowd out even one result.
+   `zoom` participates in layout, unlike transform: scale(), so the two
+   columns remain side by side without leaving a tall empty grid row. */
+@media (max-width: 350px) {
+  .note-finder {
+    grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+    column-gap: 0.5rem;
+  }
+  .note-finder-picker {
+    zoom: 0.76;
+  }
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+
+/* ----- Decoder table ----- */
+
+.decoder-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1rem 0;
+}
+.decoder-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.98rem;
+}
+.decoder-table th,
+.decoder-table td {
+  border-bottom: 1px solid var(--rule);
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+.decoder-table th {
+  background: rgba(0, 0, 0, 0.03);
+  font-weight: 600;
+}
+.decoder-table code {
+  background: transparent;
+  padding: 0;
+}
+
+/* On phones, shrink the table so it fits within the viewport without
+   forcing horizontal scroll. The wrapper's overflow-x stays as a safety
+   net for extremely narrow screens. */
+@media (max-width: 420px) {
+  .decoder-table {
+    font-size: 0.72rem;
+  }
+  .decoder-table th,
+  .decoder-table td {
+    padding: 0.28rem 0.22rem;
+  }
+}
+

@@ -1,0 +1,20 @@
+/* ----- Privacy policy link and page ----- */
+
+.privacy-link {
+  margin: 5rem 0 0;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  text-align: right;
+}
+.privacy-link a {
+  color: var(--ink-soft);
+  border-bottom: none;
+  text-decoration: none;
+}
+.privacy-link a:hover {
+  text-decoration: underline;
+}
+.privacy-page h2 {
+  margin-top: 1.8rem;
+}
+

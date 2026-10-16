@@ -29,7 +29,8 @@ function hashOf(buf) {
 function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
 function referenceRe(name, flags) {
-  return new RegExp("(?<=[/'\"`])" + escapeRe(name) + "(?=['\"`?#)\\s])", flags);
+  // "(" precedes an unquoted url(name.svg), which minified CSS produces.
+  return new RegExp("(?<=[/'\"`(])" + escapeRe(name) + "(?=['\"`?#)\\s])", flags);
 }
 
 /* Reemplaza el nombre de archivo cuando aparece como ultimo segmento de una

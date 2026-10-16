@@ -81,14 +81,46 @@
     token: null,
     tokenWaiters: [],
     turnstileWidget: null,
+    turnstileStarted: false,
+    warmedUp: false,
     autoDownloaded: false,
   };
 
   // ---- UI helpers ----------------------------------------------------------
 
+  // The toast bundle (React + Radix) loads on the visitor's first interaction
+  // with the form, or when the first error needs it.
+  var toastLoading = null;
+  var latestError = '';
+
+  function loadToast() {
+    if (window.SiteToast) return Promise.resolve();
+    if (!toastLoading) {
+      toastLoading = new Promise(function (resolve, reject) {
+        var script = document.createElement('script');
+        script.src = document.body.getAttribute('data-toast-src');
+        script.onload = function () { resolve(); };
+        script.onerror = function () { toastLoading = null; reject(new Error('toast')); };
+        document.head.appendChild(script);
+      });
+    }
+    return toastLoading;
+  }
+
   function showError(message) {
-    if (message) window.SiteToast.show(message, { variant: 'alert' });
-    else window.SiteToast.clear();
+    latestError = message || '';
+    if (window.SiteToast) {
+      if (message) window.SiteToast.show(message, { variant: 'alert' });
+      else window.SiteToast.clear();
+      return;
+    }
+    if (!message) return; // nothing on screen yet, so nothing to clear
+    loadToast().then(function () {
+      // Skip it when a newer message or a clear arrived while loading.
+      if (latestError === message) window.SiteToast.show(message, { variant: 'alert' });
+    }, function () {
+      window.alert(message);
+    });
   }
 
   function clearRightsError() {
@@ -279,7 +311,11 @@
     waiters.forEach(function (resolve) { resolve(token); });
   }
 
+  // Started on the first interaction with the form (or when a token is first
+  // needed), so Cloudflare's script and widget stay out of the page load.
   function initTurnstile() {
+    if (state.turnstileStarted) return;
+    state.turnstileStarted = true;
     loadTurnstile().then(function () {
       if (!window.turnstile || state.turnstileWidget !== null) return;
       state.turnstileWidget = window.turnstile.render(turnstileBox, {
@@ -293,12 +329,22 @@
     }).catch(function () { /* surfaced as turnstile_failed on submit */ });
   }
 
+  // First interaction with the form: load the third-party script and the
+  // toast bundle now, so both are ready by the time they are needed.
+  function warmUp() {
+    if (state.warmedUp) return;
+    state.warmedUp = true;
+    initTurnstile();
+    loadToast().catch(function () { /* retried when an error needs it */ });
+  }
+
   function takeToken() {
     function consume(token) {
       state.token = null;
       return token;
     }
     if (state.token) return Promise.resolve(consume(state.token));
+    initTurnstile();
     return new Promise(function (resolve, reject) {
       var timer = setTimeout(function () {
         reject(new ApiError('turnstile_failed', 0));
@@ -1341,7 +1387,10 @@
 
   if (isDesktop()) renderExample();
   setBusy(false);
-  initTurnstile();
+
+  ['pointerdown', 'focusin', 'dragenter', 'keydown'].forEach(function (type) {
+    form.addEventListener(type, warmUp, true);
+  });
 
   var resumeId = null;
   try { resumeId = new URL(window.location.href).searchParams.get('trabajo'); } catch (e) { /* ignore */ }
