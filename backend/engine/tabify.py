@@ -147,7 +147,7 @@ def load_score(paths):
     for score in scores:
         # Audiveris files footer and publisher text as lyrics on nearby notes;
         # a guitar score has none, so drop them or they print under the staff.
-        for n in score.recurse().notes:
+        for n in score.recurse().getElementsByClass(m21.note.GeneralNote):
             n.lyrics = []
         # The same text can arrive as free text directions (<words>); only the
         # header credits are kept, so drop every other printed text.
