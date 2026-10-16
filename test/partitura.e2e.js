@@ -392,7 +392,7 @@ async function fillForm(page, name) {
           return { border: style.borderTopWidth, background: style.backgroundColor };
         });
         assert.equal(highlight.border, '0px');
-        assert.ok(highlight.background.startsWith('rgba(139, 0, 0,'));
+        assert.equal(highlight.background, 'rgb(250, 246, 238)');
         const inlineError = await page.locator('#partRightsError').evaluate(node => {
           const label = document.querySelector('#partRightsLabel');
           const box = node.getBoundingClientRect();
