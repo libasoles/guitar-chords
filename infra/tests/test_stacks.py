@@ -130,3 +130,16 @@ def test_ocr_container_env_from_state_input(template):
     for name in ("BUCKET", "INPUT_KEY", "OUTPUT_PREFIX"):
         assert f"$.ocr.{name}" in text
     assert "OMR_MAX_HEAP_MB" in text and "OCR_EVENT" not in text
+
+
+def test_engine_tasks_receive_state_input_object_not_literal_path(template):
+    # payload_response_only + from_json_path_at rendered Parameters as the string "$.prepare".
+    machines = template.find_resources("AWS::StepFunctions::StateMachine")
+    states = {}
+    for res in machines.values():
+        parts = res["Properties"]["DefinitionString"]["Fn::Join"][1]
+        definition = json.loads("".join(p if isinstance(p, str) else "x" for p in parts))
+        states.update(definition["States"])
+    for name, path in (("Prepare", "$.prepare"), ("Export", "$.export")):
+        assert states[name]["InputPath"] == path
+        assert not isinstance(states[name].get("Parameters"), str)
