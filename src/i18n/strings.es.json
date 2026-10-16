@@ -394,6 +394,8 @@
   "partResumeHint": "Podés cerrar esta página y volver con el mismo enlace: el trabajo se conserva 24 horas.",
   "partLoadingAlt": "Procesando",
   "partNewJob": "Empezar un trabajo nuevo",
+  "partPreviewDialog": "Vista previa de la partitura",
+  "partPreviewClose": "Cerrar vista previa",
   "partToolbarLabel": "Herramientas de la tablatura",
   "partBoldBass": "Resaltar el bajo",
   "partNotation": "Mostrar",
