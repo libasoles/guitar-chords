@@ -464,6 +464,21 @@ async function fillForm(page, name) {
         assert.ok(Math.abs(previewSize.score - previewSize.available * 800 / 900) < 2);
         assert.ok(previewSize.font >= 13 && previewSize.font <= 28);
 
+        // The preview is a full-viewport modal with a close button on the top right.
+        const modal = await page.locator('#partResult').evaluate(node => {
+          const r = node.getBoundingClientRect();
+          const c = node.querySelector('.part-modal-close').getBoundingClientRect();
+          return {
+            role: node.getAttribute('role'),
+            w: r.width, h: r.height, vw: innerWidth, vh: innerHeight,
+            closeRight: innerWidth - c.right, closeTop: c.top, hasIcon: !!node.querySelector('.part-modal-close svg path'),
+          };
+        });
+        assert.equal(modal.role, 'dialog');
+        assert.ok(modal.w === modal.vw && modal.h === modal.vh);
+        assert.ok(modal.hasIcon && modal.closeTop < 40 && modal.closeRight < 60);
+        assert.ok(previewSize.available > 1120);
+
         // One editor per measure, aligned to the notes by identifier.
         await page.waitForFunction(() => document.querySelectorAll('.part-measure-tab .ascii-tabs-has').length === 6);
         assert.equal(await page.locator('.part-measure-tab').count(), 2);

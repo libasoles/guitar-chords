@@ -118,6 +118,48 @@
   function clearResult() {
     resultEl.textContent = '';
     resultEl.hidden = true;
+    closeModal();
+  }
+
+  // The desktop preview lives in a full-viewport modal so the score can use
+  // more width than the page column. Closing it returns to a fresh form.
+  var modalKeydown = null;
+
+  function openModal() {
+    resultEl.classList.add('part-result-modal');
+    resultEl.setAttribute('role', 'dialog');
+    resultEl.setAttribute('aria-modal', 'true');
+    resultEl.setAttribute('aria-label', t('partPreviewDialog'));
+    document.documentElement.classList.add('part-modal-open');
+    var close = el('button', 'part-modal-close');
+    close.type = 'button';
+    close.setAttribute('aria-label', t('partPreviewClose'));
+    close.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>';
+    close.addEventListener('click', leaveModal);
+    resultEl.appendChild(close);
+    modalKeydown = function (event) {
+      if (event.key === 'Escape' && !event.defaultPrevented) leaveModal();
+    };
+    document.addEventListener('keydown', modalKeydown);
+    resultEl.scrollTop = 0;
+    close.focus();
+  }
+
+  function closeModal() {
+    resultEl.classList.remove('part-result-modal');
+    resultEl.removeAttribute('role');
+    resultEl.removeAttribute('aria-modal');
+    resultEl.removeAttribute('aria-label');
+    document.documentElement.classList.remove('part-modal-open');
+    if (modalKeydown) document.removeEventListener('keydown', modalKeydown);
+    modalKeydown = null;
+  }
+
+  function leaveModal() {
+    window.location.href = window.location.pathname;
   }
 
   function el(tag, className, text) {
@@ -891,6 +933,7 @@
   function renderPreview(preview, dropped, jobId) {
     clearResult();
     resultEl.hidden = false;
+    openModal();
     state.preview = preview;
     state.previewJobId = jobId;
 

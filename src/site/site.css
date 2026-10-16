@@ -2334,13 +2334,40 @@ footer {
   border-left: 3px solid var(--rule);
 }
 .part-rows {
-  /* The score preview may be wider than the 760px page column. */
-  --part-rows-width: min(1120px, calc(100vw - 3rem));
-  width: var(--part-rows-width);
-  margin: 1.5rem calc(50% - var(--part-rows-width) / 2);
+  margin: 1.5rem 0;
   overflow-x: auto;
   isolation: isolate;
 }
+/* Desktop preview: full-viewport modal, wider than the page column. */
+html.part-modal-open { overflow: hidden; }
+.part-result-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  margin: 0;
+  padding: 4rem max(1.5rem, 3vw) 2rem;
+  overflow-y: auto;
+  background: var(--paper);
+}
+.part-modal-close {
+  position: fixed;
+  top: 1rem;
+  right: max(1rem, 2vw);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.part-modal-close svg { width: 2rem; height: 2rem; }
+.part-modal-close:hover { background: #0000000f; }
+.part-modal-close:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 .part-row {
   margin-bottom: 1.4rem;
 }
