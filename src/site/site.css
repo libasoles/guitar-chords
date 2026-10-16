@@ -1821,8 +1821,7 @@ body.partitura-body {
 @media (prefers-reduced-motion: reduce) {
   .part-rights.needs-rights { animation: none; }
   .part-form .part-dropzone { transition: none; }
-  .part-form .part-dropzone strong,
-  .part-form .part-dropzone .part-drop-browse {
+  .part-form .part-dropzone strong {
     transition: none;
   }
 }
@@ -1848,13 +1847,10 @@ body.partitura-body {
   text-align: center;
   transition: border-color 220ms ease-out;
 }
-.part-dropzone strong,
-.part-drop-browse {
-  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
 .part-dropzone strong {
   color: var(--ink);
   font-size: 1.1rem;
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .part-upload-icon {
   width: 36px;
@@ -1885,8 +1881,7 @@ body.partitura-body {
   border-color: var(--accent);
 }
 @media (prefers-reduced-motion: no-preference) {
-  .part-dropzone[aria-disabled="false"]:hover strong,
-  .part-dropzone[aria-disabled="false"]:hover .part-drop-browse {
+  .part-dropzone[aria-disabled="false"]:hover strong {
     transform: scale(1.03);
   }
 }
