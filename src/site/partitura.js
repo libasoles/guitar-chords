@@ -1064,9 +1064,9 @@
           var scale = available / reference;
           var names = notationInput.checked;
           rowsEl.classList.toggle('part-names-mode', names);
-          var tabFont = names
-            ? Math.min(20, Math.max(11, 1.4 * staffSpace * scale))
-            : Math.min(28, Math.max(13, 2 * staffSpace * scale));
+          // One font size in both modes so the TAB height never changes;
+          // note names are shrunk per cell in CSS instead.
+          var tabFont = Math.min(28, Math.max(13, 2 * staffSpace * scale));
           tabFontPx = tabFont;
           rowViews.forEach(function (v) {
             if (!v.svg || !v.size) return;

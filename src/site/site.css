@@ -2447,8 +2447,11 @@ html.part-modal-open body { overflow: hidden; }
   --ascii-tabs-fret-background: var(--paper);
   --ascii-tabs-flat-background: transparent;
 }
-.part-names-mode .ascii-tabs-fret {
+.part-rows .ascii-tabs-fret {
   font-weight: 400;
+}
+.part-names-mode .ascii-tabs-fret {
+  font-size: 0.8em;
 }
 .part-measure-tab,
 .part-example-tab {

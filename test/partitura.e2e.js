@@ -516,9 +516,14 @@ async function fillForm(page, name) {
         await page.waitForSelector('#partRows .part-row');
         await page.waitForFunction(() => document.querySelectorAll('.part-measure-tab .ascii-tabs-has').length === 7);
         // Frets/solfege toggle.
+        const heightOf = () => page.locator('.part-measure-tab').first().evaluate(n => n.offsetHeight);
+        const tabHeight = await heightOf();
         await page.locator('#partNotation').check();
+        assert.equal(await heightOf(), tabHeight, 'toggling note names keeps the TAB height');
         assert.equal(await page.locator('.part-measure-tab').first().evaluate(n => n.notation), 'solfege');
         await page.locator('#partNotation').uncheck();
+        const plain = await page.locator('.part-measure-tab .ascii-tabs-fret').first().evaluate(n => getComputedStyle(n).fontWeight);
+        assert.ok(Number(plain) < 600, 'frets are not bold by default: ' + plain);
         await page.locator('#partBoldBass').check();
         const weights = await page.evaluate(() => {
           const m = document.querySelectorAll('.part-measure-tab')[1];
