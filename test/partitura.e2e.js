@@ -251,7 +251,8 @@ async function fillForm(page, name) {
         await page.close();
       }
 
-      // The promotional measure uses real notation and TAB, aligned on resize.
+      // The example is a full row of real notation and TAB, with the TAB clef
+      // and string names, aligned on resize.
       {
         const page = await browser.newPage();
         await mockApi(page, { jobs: [READY] });
@@ -263,20 +264,24 @@ async function fillForm(page, name) {
           await page.setViewportSize({ width, height: 1000 });
           await page.waitForFunction(() => {
             const root = document.querySelector('#partExampleScore');
-            const tabs = root.querySelector('ascii-tabs');
-            if (!tabs || root.querySelectorAll('.ascii-tabs-has').length !== 10) return false;
+            const example = window.PARTITURA_CONFIG.example;
+            const all = Array.from(root.querySelectorAll('ascii-tabs'));
+            const cells = example.measures.reduce((n, m) => n + m.reduce((k, a) => k + a.frets.filter(f => f !== null).length, 0), 0);
+            if (all.length !== example.measures.length || root.querySelectorAll('.ascii-tabs-has').length !== cells) return false;
             const center = node => {
               const box = node.getBoundingClientRect();
               return box.left + box.width / 2;
             };
-            return window.PARTITURA_CONFIG.example.attacks.every((attack, c) => {
+            return example.measures.every((attacks, m) => attacks.every((attack, c) => {
               const positions = attack.noteIds.map(id => center(root.querySelector('[data-id="' + id + '"] .notehead')));
               const x = positions.reduce((a, b) => a + b) / positions.length;
-              const cell = tabs.querySelector('.ascii-tabs-has[data-c="' + c + '"]');
-              return Math.abs(x - center(cell)) < 3;
-            });
+              const cell = all[m].querySelector('.ascii-tabs-has[data-c="' + c + '"]');
+              return cell && Math.abs(x - center(cell)) < 3;
+            }));
           });
-          assert.ok(await page.locator('.part-example ascii-tabs').evaluate(tabs => tabs.readonly));
+          assert.ok(await page.locator('.part-example ascii-tabs').first().evaluate(tabs => tabs.readonly));
+          assert.equal((await page.locator('.part-example-clef').allTextContents()).join(''), 'TAB');
+          assert.equal((await page.locator('.part-example-string').allTextContents()).join(''), 'EBGDAE');
           assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
         }
         await page.close();
