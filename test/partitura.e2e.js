@@ -461,7 +461,7 @@ async function fillForm(page, name) {
           font: parseFloat(getComputedStyle(rows.querySelector('.part-row-tabs')).getPropertyValue('--ascii-tabs-font-size')),
         }));
         assert.ok(Math.abs(previewSize.score - previewSize.available * 800 / 900) < 2);
-        assert.ok(previewSize.font >= 10 && previewSize.font <= 22);
+        assert.ok(previewSize.font >= 13 && previewSize.font <= 28);
 
         // One editor per measure, aligned to the notes by identifier.
         await page.waitForFunction(() => document.querySelectorAll('.part-measure-tab .ascii-tabs-has').length === 6);
