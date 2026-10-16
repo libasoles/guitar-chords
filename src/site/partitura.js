@@ -902,7 +902,9 @@
         var staffSpace = example.staffSpace || 7.2;
         // Same scale rule as an uploaded score; a narrow screen scrolls the
         // example instead of shrinking the digits.
-        var available = Math.max(container.clientWidth, 560);
+        var box = getComputedStyle(container);
+        var content = container.clientWidth - parseFloat(box.paddingLeft) - parseFloat(box.paddingRight);
+        var available = Math.max(content, 560);
         var scale = available / Math.max(90 * staffSpace, size.w);
         if (!(scale > 0)) return;
         var font = Math.min(28, Math.max(13, 2 * staffSpace * scale));
