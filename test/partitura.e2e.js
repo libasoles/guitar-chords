@@ -515,7 +515,9 @@ async function fillForm(page, name) {
         await page.goto(toolUrl + '?trabajo=' + JOB);
         await page.waitForSelector('#partError:not([hidden])');
         assert.equal(await page.locator('#partError').textContent(), S.partErr_expired);
-        assert.ok(await page.locator('#partResult button').count());
+        assert.equal(await page.locator('#partResult button').count(), 0);
+        assert.ok(await page.locator('#partForm').isVisible());
+        assert.ok(!page.url().includes('trabajo='));
         await page.close();
       }
 
