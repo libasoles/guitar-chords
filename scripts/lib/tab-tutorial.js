@@ -80,8 +80,8 @@ function renderTabTutorial(strings) {
   const bold = demo({
     cls: 'tab-demo--bold',
     notes: [
-      note(1, 1, 1, 'tab-demo__note--bold'), note(1, 3, 2, 'tab-demo__note--bold'),
-      // Only the selected bass note toggles; the others stay bold.
+      note(1, 1, 1), note(1, 3, 2),
+      // Only the selected bass note toggles; the others stay normal.
       note(1, 4, 3, 'tab-demo__note--bold tab-demo__note--selected'),
     ],
     keys: [key('B', 'tab-demo__key--bold')],

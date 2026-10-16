@@ -1676,10 +1676,9 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
 .tab-demo--zeros .tab-demo__key {
   animation: tab-demo-lit-zeros 6s steps(1, end) infinite;
 }
-/* Notes are bold by default; pressing B turns them to normal weight. */
+/* The selected note starts normal, B makes it bold, B again makes it normal. */
 .tab-demo__note--bold {
-  font-weight: 700;
-  animation: tab-demo-unbold 6s steps(1, end) infinite;
+  animation: tab-demo-bold 6s steps(1, end) infinite;
 }
 .tab-demo__note--selected {
   background: var(--demo-lit);
@@ -1687,11 +1686,8 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
 .tab-demo__note--selected::before {
   background: var(--demo-lit);
 }
-.tab-demo__note--bold:not(.tab-demo__note--selected) {
-  animation: none;
-}
 .tab-demo--bold .tab-demo__key {
-  animation: tab-demo-lit-zeros 6s steps(1, end) infinite;
+  animation: tab-demo-lit-bold 6s steps(1, end) infinite;
 }
 
 @keyframes tab-demo-drag {
@@ -1784,14 +1780,38 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
     opacity: 1;
   }
 }
-@keyframes tab-demo-unbold {
+@keyframes tab-demo-bold {
   0%,
-  44% {
+  19% {
+    font-weight: 400;
+  }
+  20%,
+  69% {
     font-weight: 700;
   }
-  45%,
+  70%,
   100% {
     font-weight: 400;
+  }
+}
+@keyframes tab-demo-lit-bold {
+  0%,
+  19%,
+  28%,
+  69%,
+  78%,
+  100% {
+    background: #fff;
+    border-color: var(--rule);
+    color: inherit;
+  }
+  20%,
+  27%,
+  70%,
+  77% {
+    background: var(--demo-lit);
+    border-color: var(--accent);
+    color: var(--accent);
   }
 }
 /* The keys light up in colour exactly while they are being pressed. */
