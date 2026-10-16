@@ -2063,7 +2063,8 @@ footer {
   row-gap: 0.15rem;
   align-items: center;
   min-height: 44px;
-  padding: 0.6rem;
+  padding: 0.3rem 0.6rem;
+  margin-top: -0.4rem;
   border-radius: 8px;
   font-family: var(--sans);
   font-size: 0.95rem;
@@ -2138,7 +2139,7 @@ footer {
   min-width: 0;
   border: 2px dashed #5c89a7;
   border-radius: 16px;
-  background: #edf2f8;
+  background: #f5f8fb;
   color: #3d5f7a;
   font-family: var(--sans);
   font-size: 0.85rem;
@@ -2171,8 +2172,7 @@ footer {
 }
 .part-dropzone[aria-disabled="false"]:hover,
 .part-dropzone.is-dragging {
-  border-color: #2f6a9a;
-  background: #dbe7f3;
+  background: #eaf1f8;
 }
 @media (prefers-reduced-motion: no-preference) {
   .part-dropzone[aria-disabled="false"]:hover strong {
@@ -2180,8 +2180,7 @@ footer {
   }
 }
 .part-dropzone:focus-within {
-  outline: 2px solid #2f6a9a;
-  outline-offset: 4px;
+  outline: none;
 }
 .part-toolbar select {
   font: inherit;
