@@ -488,17 +488,6 @@ function partituraPromo(strings, locale, assetsPrefix) {
     .join(assetsPrefix);
 }
 
-function partituraNav(strings, locale) {
-  if (!PARTITURA_ENABLED) return "";
-  return (
-    '<p class="v7-nav"><a href="' +
-    v7PageHref(locale, PARTITURA_SLUG) +
-    '">' +
-    strings.partNavLabel +
-    "</a></p>"
-  );
-}
-
 function render(template, strings, locale, assetsPrefix, outputMode) {
   const resolvedAssetsPrefix =
     assetsPrefix || (locale === "es" ? "assets/" : "../assets/");
@@ -546,7 +535,6 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html
     .split("%%PARTITURA_PROMO%%")
     .join(partituraPromo(strings, locale, resolvedAssetsPrefix));
-  html = html.split("%%PARTITURA_NAV%%").join(partituraNav(strings, locale));
   html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
   html = html.split("%%altLangHref%%").join(altLangHref(locale, outputMode));
   html = html.split("%%canonicalUrl%%").join(canonicalUrl(locale));
@@ -1019,7 +1007,7 @@ function renderSixthsPage(template, strings, locale) {
 }
 
 // Fill the document chrome shared by the standalone tool/policy templates.
-function fillPageChrome(html, strings, locale, slug) {
+function fillPageChrome(html, strings, locale, slug, ogImage) {
   const resolvedAssetsPrefix = locale === "es" ? "assets/" : "../assets/";
   html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
   ["htmlLang", "wordmark", "wordmarkSmall", "altLangLabel"].forEach(
@@ -1039,7 +1027,7 @@ function fillPageChrome(html, strings, locale, slug) {
     .split("%%hreflangEn%%")
     .join(SITE_BASE_URL + v7PageHref("en", slug))
     .split("%%ogImage%%")
-    .join(SITE_BASE_URL + "/assets/og-image.png")
+    .join(ogImage || SITE_BASE_URL + "/assets/og-image.png")
     .split("%%MANIFEST_HREF%%")
     .join(resolvedAssetsPrefix + "manifest." + locale + ".webmanifest")
     .split("%%SW_PATH%%")
@@ -1116,8 +1104,34 @@ function renderPartituraPage(template, strings, locale) {
     privacyHref: v7PageHref(locale, PRIVACY_SLUG),
     strings: i18n,
   };
-  let html = fillPageChrome(template, strings, locale, PARTITURA_SLUG);
+  // Link previews (og:/twitter:) reuse the home banner: its image, kicker-less
+  // title and description, rendered by scripts/og-partitura.js.
+  let html = fillPageChrome(
+    template,
+    strings,
+    locale,
+    PARTITURA_SLUG,
+    SITE_BASE_URL + "/assets/og-partitura-" + locale + ".png",
+  );
   [
+    "partPromoAlt",
+    "partHowH2",
+    "partHowIntro",
+    "partHow1Title",
+    "partHow1Body",
+    "partHow2Title",
+    "partHow2Body",
+    "partHow3Title",
+    "partHow3Body",
+    "partFaqH2",
+    "partFaq1Q",
+    "partFaq1A",
+    "partFaq2Q",
+    "partFaq2A",
+    "partFaq3Q",
+    "partFaq3A",
+    "partFaq4Q",
+    "partFaq4A",
     "partRightsLabel",
     "partFileLabel",
     "partDropTitle",
@@ -1148,18 +1162,28 @@ function renderPartituraPage(template, strings, locale) {
     .join(strings.partH1 || "")
     .split("%%PAGE_LEAD%%")
     .join(strings.partLead || "")
+    .split("%%OG_TITLE%%")
+    .join(escapeHtml(strings.partPromoTitle || ""))
+    .split("%%OG_DESCRIPTION%%")
+    .join(escapeHtml(strings.partPromoDescription || ""))
+    .split("%%ogLocale%%")
+    .join(locale === "es" ? "es_AR" : "en_US")
     .split("%%PRIVACY_HREF%%")
     .join(v7PageHref(locale, PRIVACY_SLUG))
     .split("%%PARTITURA_CONFIG%%")
     .join(JSON.stringify(config).replace(/</g, "\\u003c"));
-  return withGuideJsonLd(
-    html,
-    strings,
+  const faq = [1, 2, 3, 4].map(function (n) {
+    return { q: strings["partFaq" + n + "Q"], a: strings["partFaq" + n + "A"] };
+  });
+  const opts = structuredDataOpts(
     locale,
-    PARTITURA_SLUG,
-    "partPageTitle",
-    "partMetaDescription",
+    v7CanonicalUrl(locale, PARTITURA_SLUG),
+    strings.partPageTitle || "",
+    strings.partMetaDescription || "",
   );
+  opts.ogImage = SITE_BASE_URL + "/assets/og-partitura-" + locale + ".png";
+  opts.faq = faq;
+  return injectJsonLd(html, toolJsonLd(opts));
 }
 
 // Render the intervals lesson page (src/site/picking-intervals.html) for one
@@ -1412,6 +1436,12 @@ if (PARTITURA_ENABLED) {
     path.join(SRC_SITE, "partitura-banner.webp"),
     path.join(ASSETS_DIST, "partitura-banner.webp"),
   );
+  ["es", "en"].forEach(function (loc) {
+    copyFile(
+      path.join(SRC_SITE, "og-partitura-" + loc + ".png"),
+      path.join(ASSETS_DIST, "og-partitura-" + loc + ".png"),
+    );
+  });
 }
 // OG image (optional — skip silently if not present yet).
 const ogImageSrc = path.join(SRC_SITE, "og-image.png");
