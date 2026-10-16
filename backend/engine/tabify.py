@@ -711,7 +711,9 @@ def add_staff_tuning(xml, tuning):
 
 def add_string_names(svg, names):
     """Writes the string names left of the first TAB staff of a Verovio page,
-    one per line, left of the staff. Verovio draws no tuning."""
+    one per line, left of the staff. Verovio draws no tuning. The names are
+    centred on one column: right-aligned, glyphs of different widths leave
+    ragged left edges."""
     system = re.search(r'<g [^>]*class="system"[^>]*>', svg)
     if not system:
         return svg
@@ -726,7 +728,7 @@ def add_string_names(svg, names):
         return svg
     left = min(x for x, _ in segments)
     gap = (ys[-1] - ys[0]) / (len(ys) - 1)
-    texts = "".join(f'<text x="{left - 0.3 * gap:.0f}" y="{y + 0.34 * gap:.0f}" text-anchor="end" '
+    texts = "".join(f'<text x="{left - 0.9 * gap:.0f}" y="{y + 0.34 * gap:.0f}" text-anchor="middle" '
                     f'font-size="{0.95 * gap:.0f}px" font-family="sans-serif">{name}</text>'
                     for name, y in zip(names, ys))
     return svg[:system.end()] + f'<g class="stringNames">{texts}</g>' + svg[system.end():]
