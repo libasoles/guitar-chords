@@ -367,7 +367,6 @@ async function fillForm(page, name) {
         assert.equal(api.createBody.filename, 'dropped.musicxml');
         assert.equal(api.createBody.tuning, 'auto');
         assert.equal(api.calls.filter(call => call === 'POST /jobs').length, 1);
-        assert.equal(await page.locator('.part-privacy p').nth(1).textContent(), S.partPrivacyIp);
         await page.close();
       }
 

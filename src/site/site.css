@@ -2399,18 +2399,34 @@ footer {
   max-width: var(--max-width);
   margin: 2.5rem 0 0;
 }
+.part-how h2,
+.part-faq h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+.part-how p,
+.part-faq p,
+.part-how-steps {
+  font-size: 0.9rem;
+}
 .part-how p,
 .part-faq p {
   margin: 0.4rem 0 0;
   color: var(--ink-soft);
 }
 .part-how-steps {
-  margin: 1rem 0 0;
+  margin: 0.8rem 0 0;
   padding-left: 1.3rem;
   display: grid;
-  gap: 0.6rem;
+  gap: 0.5rem;
+  color: var(--ink-soft);
+}
+.part-how-steps strong,
+.part-faq h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
 }
 .part-faq h3 {
-  margin: 1.2rem 0 0;
-  font-size: 1.05rem;
+  margin: 1rem 0 0;
 }
