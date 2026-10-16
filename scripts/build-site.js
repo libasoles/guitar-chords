@@ -488,17 +488,6 @@ function partituraPromo(strings, locale, assetsPrefix) {
     .join(assetsPrefix);
 }
 
-function partituraNav(strings, locale) {
-  if (!PARTITURA_ENABLED) return "";
-  return (
-    '<p class="v7-nav"><a href="' +
-    v7PageHref(locale, PARTITURA_SLUG) +
-    '">' +
-    strings.partNavLabel +
-    "</a></p>"
-  );
-}
-
 function render(template, strings, locale, assetsPrefix, outputMode) {
   const resolvedAssetsPrefix =
     assetsPrefix || (locale === "es" ? "assets/" : "../assets/");
@@ -546,7 +535,6 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html
     .split("%%PARTITURA_PROMO%%")
     .join(partituraPromo(strings, locale, resolvedAssetsPrefix));
-  html = html.split("%%PARTITURA_NAV%%").join(partituraNav(strings, locale));
   html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
   html = html.split("%%altLangHref%%").join(altLangHref(locale, outputMode));
   html = html.split("%%canonicalUrl%%").join(canonicalUrl(locale));
