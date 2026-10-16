@@ -2046,7 +2046,14 @@ footer {
 }
 .part-example-score {
   margin: 1.5rem 0 0;
+  padding: 1rem 1.2rem;
   overflow-x: auto;
+  background: #fff;
+  border: 1px solid var(--rule);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+}
+.part-example-score .part-row-tabs {
+  --ascii-tabs-fret-background: #fff;
 }
 .part-example-score .part-row {
   margin-bottom: 0;
