@@ -2050,8 +2050,7 @@ footer {
   color: var(--ink);
 }
 .part-example-score {
-  margin: 1.5rem auto 0;
-  max-width: 648px;
+  margin: 1.5rem 0 0;
   overflow-x: auto;
 }
 .part-example-score .part-row {
@@ -2351,6 +2350,28 @@ footer {
   position: absolute;
   top: 0;
   display: block;
+}
+.part-example-names {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: var(--sans);
+  font-size: var(--ascii-tabs-font-size);
+  line-height: 1;
+  color: var(--ink);
+}
+.part-example-string,
+.part-example-clef {
+  position: absolute;
+  transform: translateY(-50%);
+}
+.part-example-string {
+  color: var(--ink-soft);
+}
+.part-example-clef {
+  font-weight: 700;
+  font-size: 1.25em;
+  transform: translate(-50%, -50%);
 }
 .part-measure-overflow {
   outline: 1px dashed var(--rule);

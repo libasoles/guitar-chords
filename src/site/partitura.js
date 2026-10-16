@@ -790,8 +790,9 @@
     return { width: width, positions: positions };
   }
 
-  // The example uses the engine's notation and the same TAB component and
-  // note-id geometry as an uploaded score, without creating a Job.
+  // The example is one real row of four measures: the engine's notation and
+  // the same TAB component and note-id geometry as an uploaded score, without
+  // creating a Job. The TAB clef and string names complete the staff.
   function renderExample() {
     var container = $('partExampleScore');
     var example = CFG.example;
@@ -802,6 +803,7 @@
     var row = el('div', 'part-row');
     var notation = el('div', 'part-row-notation');
     var tabsLine = el('div', 'part-row-tabs');
+    var staffNames = el('div', 'part-example-names');
     notation.appendChild(svg);
     row.appendChild(notation);
     row.appendChild(tabsLine);
@@ -810,27 +812,76 @@
     svg.setAttribute('aria-label', t('partExampleAlt'));
 
     customElements.whenDefined('ascii-tabs').then(function () {
-      var tabs = document.createElement('ascii-tabs');
-      tabs.className = 'part-example-tab';
-      tabs.setAttribute('labels', 'none');
-      tabs.setAttribute('variant', 'flat');
-      tabs.setAttribute('theme', 'light');
-      tabs.setAttribute('lang', CFG.locale === 'en' ? 'en' : 'es');
-      tabs.setAttribute('readonly', '');
-      tabs.appendChild(document.createElement('ascii-tabs-sheet'));
-      tabsLine.appendChild(tabs);
-      var value = example.attacks.map(function (attack) { return attack.frets; });
+      var values = example.measures.map(function (attacks) {
+        return attacks.map(function (attack) { return attack.frets; });
+      });
+      var elements = values.map(function () {
+        var tabs = document.createElement('ascii-tabs');
+        tabs.className = 'part-example-tab';
+        tabs.setAttribute('labels', 'none');
+        tabs.setAttribute('variant', 'flat');
+        tabs.setAttribute('theme', 'light');
+        tabs.setAttribute('lang', CFG.locale === 'en' ? 'en' : 'es');
+        tabs.setAttribute('readonly', '');
+        tabs.appendChild(document.createElement('ascii-tabs-sheet'));
+        tabsLine.appendChild(tabs);
+        return tabs;
+      });
+      tabsLine.appendChild(staffNames);
+
+      // "TAB" under the clef and the string names left of the first line.
+      function decorate() {
+        var base = tabsLine.getBoundingClientRect();
+        var areas = elements[0].querySelectorAll('.ascii-tabs-area');
+        var clef = svg.querySelector('g.clef');
+        staffNames.textContent = '';
+        if (areas.length !== STRINGS_COUNT || !clef) return;
+        var first = areas[0].getBoundingClientRect();
+        var step = (areas[STRINGS_COUNT - 1].getBoundingClientRect().top - first.top) / (STRINGS_COUNT - 1);
+        var clefBox = clef.getBoundingClientRect();
+        var names = example.stringNames || [];
+        for (var s = 0; s < STRINGS_COUNT; s++) {
+          var name = el('span', 'part-example-string', names[s] || '');
+          name.style.right = (base.right - first.left + step * 0.4) + 'px';
+          name.style.top = (first.top - base.top + step * s + first.height / 2) + 'px';
+          staffNames.appendChild(name);
+        }
+        'TAB'.split('').forEach(function (letter, i) {
+          var mark = el('span', 'part-example-clef', letter);
+          mark.style.left = (clefBox.left + clefBox.width / 2 - base.left) + 'px';
+          mark.style.top = (first.top - base.top + step * (1.5 + i) + first.height / 2) + 'px';
+          staffNames.appendChild(mark);
+        });
+      }
+
       function layout() {
-        var scale = Math.min(1, container.clientWidth / size.w);
+        var staffSpace = example.staffSpace || 7.2;
+        // Same scale rule as an uploaded score; a narrow screen scrolls the
+        // example instead of shrinking the digits.
+        var available = Math.max(container.clientWidth, 560);
+        var scale = available / Math.max(90 * staffSpace, size.w);
         if (!(scale > 0)) return;
+        var font = Math.min(22, Math.max(10, 1.5 * staffSpace * scale));
+        tabsLine.style.setProperty('--ascii-tabs-font-size', font + 'px');
         svg.setAttribute('width', String(size.w * scale));
         svg.setAttribute('height', String(size.h * scale));
-        var measure = svg.querySelector('g.measure');
-        var geometry = spaceColumns(computeLayout(example.attacks, svg, measure), value);
-        tabs.style.left = (measure.getBoundingClientRect().left - svg.getBoundingClientRect().left) + 'px';
-        tabs.style.width = geometry.width + 'px';
-        tabs.setDocument({ value: [value], columnLayout: [geometry] });
-        requestAnimationFrame(function () { tabsLine.style.height = tabs.offsetHeight + 'px'; });
+        var rowLeft = svg.getBoundingClientRect().left;
+        var nodes = svg.querySelectorAll('g.measure');
+        elements.forEach(function (tabs, k) {
+          var node = nodes[k] || null;
+          var attacks = example.measures[k];
+          var measure = computeLayout(attacks, svg, node);
+          var spaced = spaceColumns(measure, values[k]);
+          tabs.style.left = (node ? node.getBoundingClientRect().left - rowLeft : 0) + 'px';
+          tabs.style.width = Math.min(measure.width, spaced.width) + 'px';
+          tabs.setDocument({ value: [values[k]], columnLayout: [spaced] });
+        });
+        requestAnimationFrame(function () {
+          var height = 0;
+          elements.forEach(function (tabs) { height = Math.max(height, tabs.offsetHeight); });
+          if (height) tabsLine.style.height = height + 'px';
+          decorate();
+        });
       }
       layout();
       new ResizeObserver(layout).observe(container);
