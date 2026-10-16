@@ -354,7 +354,7 @@
   "partHow1Title": "Subí tu partitura",
   "partHow1Body": "Un PDF o un archivo MusicXML. Si es un PDF, reconocemos la notación primero.",
   "partHow2Title": "Calculamos la digitación",
-  "partHow2Body": "Cada nota se ubica en la cuerda y el traste más cómodos de la guitarra, en afinación estándar o Drop D.",
+  "partHow2Body": "Cada nota se ubica en la cuerda y el traste más cómodos de la guitarra, en afinación estándar o Drop D. Después podés editar la tablatura para corregirla según tu criterio.",
   "partHow3Title": "Descargá la partitura con tablatura",
   "partHow3Body": "Mirala debajo de cada compás, corregí la tablatura en el editor y bajala en PDF, MusicXML o JSON.",
   "partFaqH2": "Preguntas frecuentes",
