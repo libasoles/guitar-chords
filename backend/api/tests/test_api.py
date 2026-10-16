@@ -407,5 +407,14 @@ class OcrConcurrencyTests(unittest.TestCase):
         self.assertFalse(handler.dispatch(env.svc, event)["ok"])
 
 
+class PdfNameTest(unittest.TestCase):
+    def test_title_and_author(self):
+        self.assertEqual(core._pdf_name("Canción: x", "Bob/Dylan"), "Canción x - Bob Dylan.pdf")
+
+    def test_only_title_or_nothing(self):
+        self.assertEqual(core._pdf_name("A", ""), "A.pdf")
+        self.assertIsNone(core._pdf_name(None, None))
+
+
 if __name__ == "__main__":
     unittest.main()

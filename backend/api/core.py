@@ -48,6 +48,14 @@ TUNINGS = ("auto", "standard", "dropd")
 EXTENSIONS = {"pdf": (".pdf",), "musicxml": (".musicxml", ".xml", ".mxl")}
 
 
+def _pdf_name(title, author):
+    """`título - autor.pdf`, safe for a Content-Disposition quoted filename."""
+    parts = [" ".join(re.sub(r'[\x00-\x1f"\\/:*?<>|]', " ", p or "").split())
+             for p in (title, author)]
+    stem = " - ".join(p for p in parts if p)[:120].strip(" .")
+    return f"{stem}.pdf" if stem else None
+
+
 class ApiError(Exception):
     def __init__(self, code: str, message: str = ""):
         super().__init__(code)
@@ -303,7 +311,8 @@ class Service:
             self.store.decrement(job["pk"], "exports")
             raise ApiError("internal_error")
         fields = {"status": "exporting", "stage": "exporting", "started_at": self.clock(),
-                  "finished_at": None, "execution_arn": arn}
+                  "finished_at": None, "execution_arn": arn,
+                  "pdf_name": _pdf_name(header.get("title"), header.get("subtitle"))}
         self.store.update(job["pk"], fields)
         job.update(fields)
         job["exports"] = n
@@ -317,7 +326,7 @@ class Service:
         keys = engine_adapter.keys_for(job_id, job["kind"], job["filename"], job.get("exports", 0))
         links = {}
         if job["status"] == "exported":
-            for name, key, fname in (("pdf", "pdf", "tablatura.pdf"),
+            for name, key, fname in (("pdf", "pdf", job.get("pdf_name") or "tablatura.pdf"),
                                      ("musicxml", "final", "tablatura.musicxml"),
                                      ("tabs", "tabs", "tablaturas.json")):
                 if self.blob.size(keys[key]) is not None:
