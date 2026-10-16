@@ -612,7 +612,7 @@ async function fillForm(page, name) {
         await page.close();
       }
 
-      // Toasts float outside the form, pause on hover, and close after six seconds.
+      // Toasts float outside the form, pause on hover, and close after nine seconds.
       {
         const page = await browser.newPage({ viewport: { width: 375, height: 800 } });
         await page.clock.install();
@@ -629,9 +629,9 @@ async function fillForm(page, name) {
         assert.ok(await toast.isVisible(), 'hover pauses auto-dismiss');
         await page.mouse.move(0, 0);
         await page.clock.runFor(5000);
-        assert.ok(await toast.isVisible(), 'default lasts longer than five seconds');
-        await page.clock.runFor(1100);
-        assert.equal(await toast.count(), 0, 'default dismisses after six seconds');
+        assert.ok(await toast.isVisible(), 'alerts last longer than five seconds');
+        await page.clock.runFor(4100);
+        assert.equal(await toast.count(), 0, 'alerts dismiss after nine seconds');
         await page.locator('#partFile').setInputFiles({ name: 'bad.mp3', mimeType: 'audio/mpeg', buffer: Buffer.from('x') });
         await toast.waitFor();
         await page.getByRole('button', { name: S.toastClose }).click();
