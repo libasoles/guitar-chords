@@ -59,6 +59,7 @@
   var fileInput = $('partFile');
   var dropzone = $('partDropzone');
   var errorEl = $('partError');
+  var errorBannerEl = $('partErrorBanner');
   var progressEl = $('partProgress');
   var statusEl = $('partStatus');
   var elapsedEl = $('partElapsed');
@@ -89,6 +90,7 @@
   function showError(message) {
     errorEl.textContent = message;
     errorEl.hidden = !message;
+    errorBannerEl.hidden = !message;
   }
 
   function setBusy(busy) {
@@ -281,35 +283,14 @@
     stopPolling();
     stopElapsed();
     setStatus('');
-    showError(errorText(code));
-    setBusy(false);
-    if (form.hidden) {
-      showNewJobButton();
-    } else {
-      state.jobId = null;
-      setJobInUrl(null);
-    }
-  }
-
-  function showNewJobButton() {
     clearResult();
-    resultEl.hidden = false;
-    var btn = el('button', 'part-btn part-btn-secondary', t('partNewJob'));
-    btn.type = 'button';
-    btn.addEventListener('click', function () {
-      stopPolling();
-      stopElapsed();
-      state.jobId = null;
-      state.preview = null;
-      state.autoDownloaded = false;
-      setJobInUrl(null);
-      showError('');
-      clearResult();
-      setStatus('');
-      form.hidden = false;
-      setBusy(false);
-    });
-    resultEl.appendChild(btn);
+    state.jobId = null;
+    state.preview = null;
+    state.autoDownloaded = false;
+    setJobInUrl(null);
+    form.hidden = false;
+    setBusy(false);
+    showError(errorText(code));
   }
 
   function statusMessage(job) {
