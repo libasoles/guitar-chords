@@ -291,6 +291,7 @@ async function fillForm(page, name) {
         assert.equal(await page.locator('#partSubmit, #partTuning').count(), 0);
         assert.equal(await page.locator('#partDropzone').getAttribute('aria-disabled'), 'false');
         assert.equal(await page.locator('.part-rights span').textContent(), S.partRightsLabel);
+        assert.equal(await page.locator('#partDropTitle').textContent(), S.partDropTitle);
         const contrast = await page.evaluate(() => {
           function luminance(color) {
             const rgb = color.match(/[\d.]+/g).slice(0, 3).map(Number).map(value => {
@@ -352,7 +353,7 @@ async function fillForm(page, name) {
         assert.equal(api.calls.length, 0);
         assert.ok(await page.locator('.part-rights.needs-rights').count());
         assert.equal(await page.locator('#partError').textContent(), S.partErrRights);
-        assert.equal(await page.locator('#partSelectedFile').textContent(), 'dropped.musicxml');
+        assert.equal(await page.locator('#partDropTitle').textContent(), 'dropped.musicxml');
         assert.ok(await page.locator('#partRights').evaluate(node => node === document.activeElement));
         await page.locator('#partRights').check();
         await dropScore();
@@ -380,6 +381,13 @@ async function fillForm(page, name) {
         assert.ok(Math.abs(sizing.width - sizing.available) < 2);
         await page.locator('#partFile').setInputFiles({ name: 'pending.musicxml', mimeType: 'application/xml', buffer: Buffer.from('<score-partwise/>') });
         assert.equal(api.calls.length, 0);
+        assert.equal(await page.locator('#partDropTitle').textContent(), 'pending.musicxml');
+        const highlight = await page.locator('.part-rights').evaluate(node => {
+          const style = getComputedStyle(node);
+          return { border: style.borderTopWidth, background: style.backgroundColor };
+        });
+        assert.equal(highlight.border, '0px');
+        assert.equal(highlight.background, 'rgba(255, 215, 0, 0.15)');
         assert.equal(await page.locator('.part-rights').evaluate(node => getComputedStyle(node).animationName), 'none');
         await page.locator('#partRights').check();
         await page.waitForFunction(() => document.querySelector('#partForm').hidden);

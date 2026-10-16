@@ -1767,7 +1767,6 @@ body.partitura-body {
   align-items: center;
   min-height: 44px;
   padding: 0.6rem;
-  border: 2px solid transparent;
   border-radius: 8px;
   font-family: var(--sans);
   font-size: 0.95rem;
@@ -1804,13 +1803,12 @@ body.partitura-body {
   outline-offset: 4px;
 }
 .part-rights.needs-rights {
-  border-color: var(--accent);
-  background: #fbeeee;
+  background: rgb(255 215 0 / 15%);
   animation: part-rights-flash 900ms ease-out;
 }
 @keyframes part-rights-flash {
-  0%, 100% { background: #fbeeee; }
-  45% { background: #f0caca; }
+  0%, 100% { background: rgb(255 215 0 / 15%); }
+  45% { background: rgb(255 215 0 / 30%); }
 }
 @media (prefers-reduced-motion: reduce) {
   .part-rights.needs-rights { animation: none; }
@@ -1842,6 +1840,8 @@ body.partitura-body {
   transition: border-color 220ms ease-out;
 }
 .part-dropzone strong {
+  max-width: 100%;
+  overflow-wrap: anywhere;
   color: var(--ink);
   font-size: 1.1rem;
   transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -1860,13 +1860,6 @@ body.partitura-body {
   opacity: 0;
   cursor: pointer;
 }
-.part-selected-file {
-  max-width: 100%;
-  overflow-wrap: anywhere;
-  color: var(--ink);
-  font-weight: 600;
-}
-.part-selected-file:empty { display: none; }
 .part-dropzone[aria-disabled="true"] .part-file-input {
   cursor: not-allowed;
 }

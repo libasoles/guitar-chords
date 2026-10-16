@@ -55,7 +55,7 @@
   var form = $('partForm');
   var rightsBox = $('partRights');
   var rightsRow = $('partRightsRow');
-  var selectedFileEl = $('partSelectedFile');
+  var dropTitle = $('partDropTitle');
   var fileInput = $('partFile');
   var dropzone = $('partDropzone');
   var errorEl = $('partError');
@@ -1116,7 +1116,7 @@
     showError('');
     if (!file) return;
     state.pendingFile = null;
-    selectedFileEl.textContent = '';
+    dropTitle.textContent = t('partDropTitle');
     if (!extensionOk(file.name)) {
       showError(t('partErrBadType'));
       return;
@@ -1125,9 +1125,9 @@
       showError(errorText('too_large'));
       return;
     }
+    dropTitle.textContent = file.name;
     if (!rightsBox.checked) {
       state.pendingFile = file;
-      selectedFileEl.textContent = file.name;
       rightsRow.classList.remove('needs-rights');
       void rightsRow.offsetWidth;
       rightsRow.classList.add('needs-rights');
