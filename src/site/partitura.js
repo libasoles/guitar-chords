@@ -1119,6 +1119,19 @@
             name.style.top = (top.top - base.top + step * s + top.height / 2) + 'px';
             v.names.appendChild(name);
           }
+          // System barline joining the staff and the TAB, as in the PDF.
+          var staff = v.svg.querySelector('g.staff');
+          if (v.join) v.join.remove();
+          if (staff) {
+            var wrapBox = v.tabsLine.parentNode.getBoundingClientRect();
+            var staffBox = staff.getBoundingClientRect();
+            var bottom = top.top + step * (STRINGS_COUNT - 1) + top.height / 2;
+            v.join = el('span', 'part-row-join');
+            v.join.style.left = (staffBox.left - wrapBox.left) + 'px';
+            v.join.style.top = (staffBox.top - wrapBox.top) + 'px';
+            v.join.style.height = (bottom - staffBox.top) + 'px';
+            v.tabsLine.parentNode.appendChild(v.join);
+          }
           var clef = v.svg.querySelector('g.clef');
           if (!clef) return;
           var clefBox = clef.getBoundingClientRect();

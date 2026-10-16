@@ -2452,7 +2452,14 @@ html.part-modal-open body { overflow: hidden; }
 .part-modal-close:hover { background: #0000000f; }
 .part-modal-close:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 .part-row {
+  position: relative;
   margin-bottom: 1.4rem;
+}
+.part-row-join {
+  position: absolute;
+  width: 1.5px;
+  background: var(--ink);
+  pointer-events: none;
 }
 .part-row-notation svg {
   display: block;
