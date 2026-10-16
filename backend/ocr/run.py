@@ -31,7 +31,10 @@ def run_audiveris(pdf_path, out_dir, heap_mb, timeout):
     env = dict(os.environ, JAVA_TOOL_OPTIONS=f"-Xmx{heap_mb}m -XX:+ExitOnOutOfMemoryError")
     try:
         proc = subprocess.run(
-            ["Audiveris", "-batch", "-export", "-output", out_dir, "--", pdf_path],
+            ["Audiveris", "-batch", "-export", "-output", out_dir,
+             # Titles/authors are mostly Spanish: the default "eng" misreads accents (Falú -> Fahj)
+             "-option", "org.audiveris.omr.text.Language.defaultSpecification=spa+eng",
+             "--", pdf_path],
             capture_output=True, text=True, timeout=timeout, env=env)
     except subprocess.TimeoutExpired:
         log(f"Audiveris timed out after {timeout}s")
