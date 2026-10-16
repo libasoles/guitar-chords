@@ -87,8 +87,9 @@
           <span id="partDropHint">%%partFileLabel%%</span>
         </label>
         <label id="partRightsRow" class="part-rights">
-          <input type="checkbox" id="partRights" required />
-          <span>%%partRightsLabel%%</span>
+          <input type="checkbox" id="partRights" aria-labelledby="partRightsLabel" required />
+          <span id="partRightsLabel">%%partRightsLabel%%</span>
+          <small id="partRightsError" class="part-rights-error" role="alert" hidden></small>
         </label>
         <div id="partTurnstile" class="part-turnstile"></div>
         <figure class="part-example">

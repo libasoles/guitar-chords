@@ -290,7 +290,7 @@ async function fillForm(page, name) {
         assert.ok(await page.locator('#partFile').isEnabled());
         assert.equal(await page.locator('#partSubmit, #partTuning').count(), 0);
         assert.equal(await page.locator('#partDropzone').getAttribute('aria-disabled'), 'false');
-        assert.equal(await page.locator('.part-rights span').textContent(), S.partRightsLabel);
+        assert.equal(await page.locator('#partRightsLabel').textContent(), S.partRightsLabel);
         assert.equal(await page.locator('#partDropTitle').textContent(), S.partDropTitle);
         const contrast = await page.evaluate(() => {
           function luminance(color) {
@@ -352,7 +352,10 @@ async function fillForm(page, name) {
         await dropScore();
         assert.equal(api.calls.length, 0);
         assert.ok(await page.locator('.part-rights.needs-rights').count());
-        assert.equal(await page.locator('#partError').textContent(), S.partErrRights);
+        assert.equal(await page.locator('#partRightsError').textContent(), S.partErrRights);
+        assert.ok(await page.locator('#partRightsError').isVisible());
+        assert.ok(await page.locator('#partErrorBanner').isHidden());
+        assert.equal(await page.locator('#partRights').getAttribute('aria-describedby'), 'partRightsError');
         assert.equal(await page.locator('#partDropTitle').textContent(), 'dropped.musicxml');
         assert.ok(await page.locator('#partRights').evaluate(node => node === document.activeElement));
         await page.locator('#partRights').check();
@@ -388,10 +391,18 @@ async function fillForm(page, name) {
         });
         assert.equal(highlight.border, '0px');
         assert.equal(highlight.background, 'rgba(255, 215, 0, 0.15)');
+        const inlineError = await page.locator('#partRightsError').evaluate(node => {
+          const label = document.querySelector('#partRightsLabel');
+          const box = node.getBoundingClientRect();
+          const text = label.getBoundingClientRect();
+          return { aligned: Math.abs(box.left - text.left) < 1, gap: box.top - text.bottom, smaller: parseFloat(getComputedStyle(node).fontSize) < parseFloat(getComputedStyle(label).fontSize) };
+        });
+        assert.ok(inlineError.aligned && inlineError.gap >= 0 && inlineError.gap <= 3 && inlineError.smaller);
         assert.equal(await page.locator('.part-rights').evaluate(node => getComputedStyle(node).animationName), 'none');
         await page.locator('#partRights').check();
         await page.waitForFunction(() => document.querySelector('#partForm').hidden);
         assert.equal(api.createBody.filename, 'pending.musicxml');
+        assert.ok(await page.locator('#partRightsError').isHidden());
         await page.close();
       }
 

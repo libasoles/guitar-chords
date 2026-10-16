@@ -55,6 +55,7 @@
   var form = $('partForm');
   var rightsBox = $('partRights');
   var rightsRow = $('partRightsRow');
+  var rightsError = $('partRightsError');
   var dropTitle = $('partDropTitle');
   var fileInput = $('partFile');
   var dropzone = $('partDropzone');
@@ -91,6 +92,14 @@
     errorEl.textContent = message;
     errorEl.hidden = !message;
     errorBannerEl.hidden = !message;
+  }
+
+  function clearRightsError() {
+    rightsError.textContent = '';
+    rightsError.hidden = true;
+    rightsRow.classList.remove('needs-rights');
+    rightsBox.removeAttribute('aria-invalid');
+    rightsBox.removeAttribute('aria-describedby');
   }
 
   function setBusy(busy) {
@@ -1101,9 +1110,7 @@
   rightsBox.addEventListener('change', function () {
     setBusy(false);
     showError('');
-    rightsRow.classList.remove('needs-rights');
-    rightsBox.removeAttribute('aria-invalid');
-    rightsBox.removeAttribute('aria-describedby');
+    clearRightsError();
     if (rightsBox.checked && state.pendingFile) attachFile(state.pendingFile);
   });
 
@@ -1116,6 +1123,7 @@
     showError('');
     if (!file) return;
     state.pendingFile = null;
+    clearRightsError();
     dropTitle.textContent = t('partDropTitle');
     if (!extensionOk(file.name)) {
       showError(t('partErrBadType'));
@@ -1132,8 +1140,9 @@
       void rightsRow.offsetWidth;
       rightsRow.classList.add('needs-rights');
       rightsBox.setAttribute('aria-invalid', 'true');
-      rightsBox.setAttribute('aria-describedby', 'partError');
-      showError(t('partErrRights'));
+      rightsBox.setAttribute('aria-describedby', 'partRightsError');
+      rightsError.textContent = t('partErrRights');
+      rightsError.hidden = false;
       rightsBox.focus();
       return;
     }
