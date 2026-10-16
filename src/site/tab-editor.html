@@ -83,6 +83,13 @@
       </script>
 
       %%TAB_TUTORIAL%%
+      <script>
+        // ?tutorial opens the tutorial (linked from the partitura page).
+        if (new URLSearchParams(location.search).has("tutorial")) {
+          var tutorial = document.querySelector("details.tab-tutorial");
+          if (tutorial) tutorial.open = true;
+        }
+      </script>
     </main>
 
     <script type="module" src="%%ASSETS_PREFIX%%vendor/ascii-tabs.js"></script>

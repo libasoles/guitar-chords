@@ -1122,6 +1122,7 @@ function renderPartituraPage(template, strings, locale) {
     "partHow1Body",
     "partHow2Title",
     "partHow2Body",
+    "partHow2Learn",
     "partHow3Title",
     "partHow3Body",
     "partFaqH2",
@@ -1171,6 +1172,8 @@ function renderPartituraPage(template, strings, locale) {
     .join(locale === "es" ? "es_AR" : "en_US")
     .split("%%PRIVACY_HREF%%")
     .join(v7PageHref(locale, PRIVACY_SLUG))
+    .split("%%TAB_EDITOR_PAGE_HREF%%")
+    .join(v7PageHref(locale, TAB_EDITOR_SLUG))
     .split("%%PARTITURA_CONFIG%%")
     .join(JSON.stringify(config).replace(/</g, "\\u003c"));
   const faq = [1, 2, 3, 4].map(function (n) {
