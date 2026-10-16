@@ -109,7 +109,9 @@ class BackendStack(Stack):
 
         def engine_task(name: str, input_path: str, timeout: Duration) -> tasks.LambdaInvoke:
             return tasks.LambdaInvoke(
-                self, name, lambda_function=engine_fn, payload=sfn.TaskInput.from_json_path_at(input_path),
+                # input_path (not payload=from_json_path_at): with payload_response_only the
+                # latter reached the Lambda as the literal string "$.prepare".
+                self, name, lambda_function=engine_fn, input_path=input_path,
                 payload_response_only=True, result_path="$.engineResult",
                 task_timeout=sfn.Timeout.duration(timeout))
 
