@@ -283,6 +283,26 @@ async function fillForm(page, name) {
           });
           assert.ok(await page.locator('.part-example ascii-tabs').first().evaluate(tabs => tabs.readonly));
           assert.equal((await page.locator('.part-example-clef').allTextContents()).join(''), 'TAB');
+          assert.equal(await page.locator('.part-example .part-row-join').count(), 1);
+          // The author sits at the right, below the title, as in the PDF.
+          assert.ok(await page.evaluate(() => {
+            const title = document.querySelector('.part-example-title').getBoundingClientRect();
+            const author = document.querySelector('.part-example-header span').getBoundingClientRect();
+            const frame = document.querySelector('.part-example-score');
+            const box = getComputedStyle(frame);
+            return author.top >= title.bottom - 1 &&
+              Math.abs(frame.getBoundingClientRect().right - parseFloat(box.paddingRight) - 1 - author.right) < 3;
+          }));
+          // On desktop the row fills the frame's padding box exactly (centered).
+          if (width === 1100) assert.ok(await page.evaluate(() => {
+            const frame = document.querySelector('.part-example-score');
+            const box = getComputedStyle(frame);
+            const svg = frame.querySelector('.part-row-notation svg').getBoundingClientRect();
+            const inner = frame.getBoundingClientRect();
+            const left = svg.left - inner.left - parseFloat(box.paddingLeft);
+            const right = inner.right - svg.right - parseFloat(box.paddingRight);
+            return Math.abs(left) < 3 && Math.abs(right) < 3;
+          }));
           assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
         }
         await page.close();

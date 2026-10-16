@@ -2080,6 +2080,8 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
   color: var(--ink);
 }
 .part-example-header span {
+  display: block;
+  text-align: right;
   font-family: var(--serif);
   font-size: 0.85rem;
   color: var(--ink-soft);

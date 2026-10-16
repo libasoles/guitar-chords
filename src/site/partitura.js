@@ -855,6 +855,7 @@
     var notation = el('div', 'part-row-notation');
     var tabsLine = el('div', 'part-row-tabs');
     var staffNames = el('div', 'part-example-names');
+    var join = null;
     notation.appendChild(svg);
     row.appendChild(notation);
     row.appendChild(tabsLine);
@@ -896,13 +897,31 @@
           mark.style.top = (first.top - base.top + step * (1.5 + i) + first.height / 2) + 'px';
           staffNames.appendChild(mark);
         });
+        // System barline joining the staff and the TAB, as in the preview.
+        if (join) join.remove();
+        var staff = svg.querySelector('g.staff');
+        if (staff) {
+          var rowBox = row.getBoundingClientRect();
+          var lines = Array.prototype.filter.call(staff.children, function (n) {
+            return n.nodeName.toLowerCase() === 'path';
+          });
+          var staffBox = (lines[0] || staff).getBoundingClientRect();
+          var bottom = first.top + step * (STRINGS_COUNT - 1) + first.height / 2;
+          join = el('span', 'part-row-join');
+          join.style.left = (staffBox.left - rowBox.left) + 'px';
+          join.style.top = (staffBox.top - rowBox.top) + 'px';
+          join.style.height = (bottom - staffBox.top) + 'px';
+          row.appendChild(join);
+        }
       }
 
       function layout() {
         var staffSpace = example.staffSpace || 7.2;
         // Same scale rule as an uploaded score; a narrow screen scrolls the
         // example instead of shrinking the digits.
-        var available = Math.max(container.clientWidth, 560);
+        var box = getComputedStyle(container);
+        var content = container.clientWidth - parseFloat(box.paddingLeft) - parseFloat(box.paddingRight);
+        var available = Math.max(content, 560);
         var scale = available / Math.max(90 * staffSpace, size.w);
         if (!(scale > 0)) return;
         var font = Math.min(28, Math.max(13, 2 * staffSpace * scale));
