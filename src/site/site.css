@@ -2078,17 +2078,6 @@ footer {
   margin: 0;
   padding-left: 1.2rem;
 }
-.part-privacy {
-  max-width: var(--max-width);
-  margin: 2.5rem 0 0;
-  font-family: var(--sans);
-  font-size: 0.88rem;
-  color: var(--ink-soft);
-}
-.part-privacy summary {
-  cursor: pointer;
-  font-weight: 600;
-}
 .part-privacy-note,
 .part-mobile-ready {
   margin: 0.5rem 0;
