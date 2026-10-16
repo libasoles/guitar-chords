@@ -213,7 +213,7 @@ async function fillForm(page, name) {
     const html = fs.readFileSync(path.join(withDir, prefix + 'partitura-y-tablatura.html'), 'utf8');
     assert.ok(!/%%part\w+%%/.test(html), 'unresolved partitura translation in ' + locale);
     const strings = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/i18n/strings.' + locale + '.json'), 'utf8'));
-    assert.ok(html.includes('<p class="part-duration">' + strings.partDurationHint + '</p>'));
+    assert.ok(html.includes('<h2 class="part-duration">' + strings.partDurationHint + '</h2>'));
   }
 
   const server = await serveStatic(withDir, 0);
@@ -281,7 +281,7 @@ async function fillForm(page, name) {
           });
           assert.ok(await page.locator('.part-example ascii-tabs').first().evaluate(tabs => tabs.readonly));
           assert.equal((await page.locator('.part-example-clef').allTextContents()).join(''), 'TAB');
-          assert.equal((await page.locator('.part-example-string').allTextContents()).join(''), 'EBGDAE');
+          assert.equal(await page.locator('.part-example-string').count(), 0);
           assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
         }
         await page.close();
