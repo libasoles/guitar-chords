@@ -87,7 +87,7 @@
   // ---- UI helpers ----------------------------------------------------------
 
   function showError(message) {
-    if (message) window.SiteToast.show(message);
+    if (message) window.SiteToast.show(message, { variant: 'alert' });
     else window.SiteToast.clear();
   }
 
