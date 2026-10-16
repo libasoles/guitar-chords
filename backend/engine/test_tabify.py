@@ -161,6 +161,18 @@ class ScoreImportTests(unittest.TestCase):
         self.assertEqual(staff_end(rows[0]['svg']), staff_end(rows[1]['svg']))
         self.assertLess(staff_end(rows[2]['svg']), staff_end(rows[0]['svg']))
 
+    def test_preview_draws_no_measure_numbers(self):
+        m21 = tabify.m21
+        part = m21.stream.Part()
+        for i in range(6):
+            measure = m21.stream.Measure(number=i + 1)
+            measure.append(m21.note.Note('D4', quarterLength=4))
+            part.append(measure)
+        rows = tabify.preview_rows(part, 3)
+        self.assertEqual(len(rows), 2)
+        for row in rows:
+            self.assertNotIn('class="mNum', row['svg'])
+
     def test_preview_moves_measures_to_keep_two_digit_frets_apart(self):
         m21 = tabify.m21
         part = m21.stream.Part()
