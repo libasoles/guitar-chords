@@ -143,6 +143,11 @@ def load_score(paths):
     not carry over between Audiveris movements (see `octave_shifts`).
     """
     scores = [read_score(p) for p in paths]
+    for score in scores:
+        # Audiveris files footer and publisher text as lyrics on nearby notes;
+        # a guitar score has none, so drop them or they print under the staff.
+        for n in score.recurse().notes:
+            n.lyrics = []
     part = scores[0].parts[0]
     first = part.getElementsByClass(m21.stream.Measure).first()
     if first is not None:

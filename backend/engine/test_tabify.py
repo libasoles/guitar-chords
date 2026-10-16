@@ -21,6 +21,16 @@ def note(duration, kind="half", extra=""):
 
 
 class ScoreImportTests(unittest.TestCase):
+    def test_footer_text_filed_as_lyrics_is_dropped(self):
+        lyric = '<lyric><text>EJEMPLAR</text></lyric>'
+        xml = score_xml('<measure number="1"><attributes><divisions>1</divisions></attributes>'
+                        + note(2, extra=lyric) + '</measure>')
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "s.musicxml"
+            path.write_text(xml)
+            _, part = tabify.load_score([str(path)])
+        self.assertTrue(all(not n.lyrics for n in part.recurse().notes))
+
     def test_header_excludes_footer_and_publisher(self):
         m21 = tabify.m21
         score = m21.stream.Score()
