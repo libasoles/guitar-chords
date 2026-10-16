@@ -1683,7 +1683,6 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
 }
 .tab-demo__note--selected {
   background: var(--demo-lit);
-  box-shadow: 0 0 0 2px var(--accent);
 }
 .tab-demo__note--selected::before {
   background: var(--demo-lit);
