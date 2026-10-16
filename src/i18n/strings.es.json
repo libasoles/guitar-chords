@@ -360,7 +360,6 @@
   "partExampleCaption": "Al subir el PDF, la tablatura se agrega debajo del pentagrama.",
   "partExampleAlt": "Compases 6 a 9 de una partitura para guitarra y su tablatura en afinación estándar. Los números indican los trastes y el 0, una cuerda al aire.",
   "partHowH2": "Cómo se agrega la tablatura a la partitura",
-  "partHowIntro": "La tablatura no reemplaza a la partitura: se agrega debajo de cada pentagrama, compás por compás, para que leas la notación y veas en qué cuerda y en qué traste tocar cada nota.",
   "partHow1Title": "Subí tu partitura",
   "partHow1Body": "Un PDF o un archivo MusicXML. Si es un PDF, reconocemos la notación primero.",
   "partHow2Title": "Calculamos la digitación",
