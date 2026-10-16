@@ -333,6 +333,24 @@ async function fillForm(page, name) {
         await page.close();
       }
 
+      // Cloudflare's script and the toast bundle stay out of the page load and
+      // arrive with the first interaction with the form.
+      {
+        const page = await browser.newPage();
+        await mockApi(page, { jobs: [READY] });
+        const requested = [];
+        page.on('request', request => requested.push(request.url()));
+        await page.goto(toolUrl);
+        await page.waitForLoadState('networkidle');
+        assert.equal(requested.filter(url => /turnstile|\/toast[.\w]*\.js/.test(url)).length, 0, 'nothing before interaction');
+        assert.equal(await page.evaluate(() => typeof window.SiteToast), 'undefined');
+        await page.locator('#partRights').check();
+        await page.waitForFunction(() => window.SiteToast && document.querySelector('#partTurnstile').dataset.sitekey);
+        assert.equal(requested.filter(url => /turnstile/.test(url)).length, 1);
+        assert.equal(requested.filter(url => /\/toast[.\w]*\.js/.test(url)).length, 1);
+        await page.close();
+      }
+
       // Rights checkbox gates the upload; privacy summary expands and links.
       {
         const page = await browser.newPage();

@@ -1,0 +1,273 @@
+/* ----- Note finder home-page promotion ----- */
+
+.note-finder-promo {
+  margin: 1.2rem 0 0;
+}
+.note-finder-promo-link {
+  display: grid;
+  grid-template-columns: 172px 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1.3rem;
+  color: var(--ink);
+  background: #f7f4eb;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  text-decoration: none;
+}
+.note-finder-promo-link:hover {
+  border-color: #2a835f;
+}
+.note-finder-promo-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.note-finder-promo-notes {
+  position: relative;
+  width: 172px;
+  height: 172px;
+  font-family: var(--mono);
+  font-weight: 600;
+}
+.note-finder-promo-note {
+  position: absolute;
+  display: grid;
+  width: 3.25rem;
+  height: 3.25rem;
+  place-items: center;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  box-sizing: border-box;
+  font-size: 0.8rem;
+}
+.note-finder-promo-note-top,
+.note-finder-promo-note-bottom {
+  left: 3.75rem;
+  color: var(--ink);
+}
+.note-finder-promo-note-top {
+  top: 0;
+}
+.note-finder-promo-note-bottom {
+  bottom: 0;
+  background: #f6b2aa;
+}
+.note-finder-promo-note-upper-left {
+  top: 1.875rem;
+  left: 0.5rem;
+  background: #ddc99e;
+  color: var(--ink);
+  clip-path: polygon(0 50%, 35% 7%, 76% 7%, 100% 50%, 76% 93%, 35% 93%);
+}
+.note-finder-promo-note-lower-left {
+  bottom: 1.875rem;
+  left: 0.5rem;
+  background: #f6efe4;
+  color: var(--ink-soft);
+  clip-path: polygon(0 50%, 35% 7%, 76% 7%, 100% 50%, 76% 93%, 35% 93%);
+}
+.note-finder-promo-note-upper-right {
+  top: 1.875rem;
+  right: 0.5rem;
+  background: #edf2f8;
+  color: var(--ink-soft);
+  clip-path: polygon(0 50%, 24% 7%, 65% 7%, 100% 50%, 65% 93%, 24% 93%);
+}
+.note-finder-promo-note-lower-right {
+  bottom: 1.875rem;
+  right: 0.5rem;
+  background: #9fc2da;
+  color: var(--ink);
+  clip-path: polygon(0 50%, 24% 7%, 65% 7%, 100% 50%, 65% 93%, 24% 93%);
+}
+.note-finder-promo-note-top {
+  background: #f6b2aa;
+}
+.note-finder-promo-note-center {
+  top: 3.625rem;
+  left: 3.625rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  background: #fff;
+  border-color: var(--rule);
+  font-size: 1rem;
+}
+.note-finder-promo-copy {
+  min-width: 0;
+}
+.note-finder-promo-copy p {
+  margin: 0;
+}
+.note-finder-promo-kicker {
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #1f6b4c;
+}
+.note-finder-promo-copy h2 {
+  margin: 0.25rem 0 0.55rem;
+  padding: 0;
+  border: 0;
+  font-size: 1.45rem;
+}
+.note-finder-promo-cta {
+  display: inline-block;
+  margin-top: 1rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #12544f;
+}
+.note-finder-promo-link:hover .note-finder-promo-cta {
+  text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+  .note-finder-promo-link {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 1rem;
+  }
+  .note-finder-promo-copy {
+    text-align: center;
+  }
+}
+
+/* ----- Tab editor home-page promotion ----- */
+
+.tab-promo {
+  margin: 1.2rem 0 0;
+}
+.tab-promo-link {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1.3rem;
+  color: var(--ink);
+  background: #f7f4eb;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  text-decoration: none;
+}
+.tab-promo-link:hover {
+  border-color: var(--accent);
+}
+.tab-promo-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.tab-promo-sheet {
+  position: relative;
+  padding: 0.8rem 1rem;
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1.5;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+.tab-promo-sheet pre {
+  margin: 0;
+  font: inherit;
+}
+.tab-promo-strings {
+  color: #b3ada1;
+}
+/* The frets live on their own layer over the empty strings; widening it at a
+   steady pace "writes" the lick, then it fades and starts over. */
+.tab-promo-ink {
+  position: absolute;
+  top: 0.8rem;
+  bottom: 0.8rem;
+  left: 1rem;
+  width: 29ch;
+  overflow: hidden;
+  animation: tab-promo-write 7s infinite;
+}
+.tab-promo-ink span {
+  background: #fff;
+  color: var(--accent);
+  font-weight: 700;
+}
+.tab-promo-ink::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+}
+@keyframes tab-promo-write {
+  0%,
+  6% {
+    width: 2ch;
+    opacity: 1;
+    animation-timing-function: linear;
+  }
+  62%,
+  88% {
+    width: 29ch;
+    opacity: 1;
+  }
+  96%,
+  100% {
+    width: 29ch;
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tab-promo-ink {
+    animation: none;
+  }
+  .tab-promo-ink::after {
+    display: none;
+  }
+}
+.tab-promo-copy {
+  min-width: 0;
+}
+.tab-promo-kicker {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+.tab-promo-copy h2 {
+  margin: 0.25rem 0 0;
+  padding: 0;
+  border: 0;
+  font-size: 1.45rem;
+}
+.tab-promo-cta {
+  display: inline-block;
+  margin-top: 1rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.tab-promo-link:hover .tab-promo-cta {
+  text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+  .tab-promo-link {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 1rem;
+  }
+  .tab-promo-sheet {
+    font-size: 13px;
+  }
+  .tab-promo-copy {
+    text-align: center;
+  }
+}
+

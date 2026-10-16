@@ -21,6 +21,8 @@ const path = require("path");
 const { execSync } = require("child_process");
 const { drawIcon } = require("./lib/icon-png");
 const { fingerprintAssets } = require("./lib/fingerprint");
+const { minifyAssets } = require("./lib/minify-assets");
+const { readSiteCss, readPartituraCss } = require("./lib/site-css");
 const {
   resolveLastmods,
   loadManifest,
@@ -1377,7 +1379,7 @@ copyFile(
   path.join(SRC_SITE, "note-finder.js"),
   path.join(ASSETS_DIST, "note-finder.js"),
 );
-copyFile(path.join(SRC_SITE, "site.css"), path.join(ASSETS_DIST, "site.css"));
+fs.writeFileSync(path.join(ASSETS_DIST, "site.css"), readSiteCss(), "utf8");
 copyFile(
   path.join(SRC_SITE, "picking-render.js"),
   path.join(ASSETS_DIST, "picking-render.js"),
@@ -1429,6 +1431,12 @@ if (PARTITURA_ENABLED) {
   copyFile(
     path.join(SRC_SITE, "partitura.js"),
     path.join(ASSETS_DIST, "partitura.js"),
+  );
+  // The tool page loads only the styles it uses, not the whole site.css.
+  fs.writeFileSync(
+    path.join(ASSETS_DIST, "partitura.css"),
+    readPartituraCss(),
+    "utf8",
   );
   copyFile(
     path.join(SRC_SITE, "partitura-loading.svg"),
@@ -2025,6 +2033,17 @@ say(path.relative(ROOT, noJekyll));
 // ---- Fingerprinted assets ---------------------------------
 // Last step: every reference (HTML, JS, manifests, sw.js precache) is rewritten
 // to content-hashed URLs, so a changed file always gets a new URL.
+
+console.log("==> Minifying assets...");
+const minified = minifyAssets(ASSETS_DIST);
+say(
+  minified.files +
+    " files, " +
+    Math.round(minified.before / 1024) +
+    " KiB -> " +
+    Math.round(minified.after / 1024) +
+    " KiB",
+);
 
 console.log("==> Fingerprinting assets...");
 const fingerprinted = fingerprintAssets(DIST_SITE);

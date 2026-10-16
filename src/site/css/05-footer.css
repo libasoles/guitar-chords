@@ -1,0 +1,92 @@
+/* ----- Footer ----- */
+
+footer {
+  margin-top: 4rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.extension-cta {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.extension-cta .ext-icon {
+  width: 64px;
+  height: 64px;
+  flex: none;
+  background: url("guitar-player-cubist-left-head.svg") center / contain
+    no-repeat;
+}
+.extension-cta .ext-icon > * {
+  display: none;
+}
+.extension-cta .ext-body {
+}
+.extension-cta .ext-heading {
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 0.2rem;
+  font-size: 1rem;
+}
+.extension-cta .ext-desc {
+  margin: 0 0 0.6rem;
+  font-size: 0.88rem;
+}
+.extension-cta .ext-btn {
+  display: inline-block;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent);
+  cursor: pointer;
+}
+.extension-cta .ext-btn[href]:hover {
+  opacity: 0.88;
+  border-bottom-color: var(--accent);
+}
+.extension-cta .ext-btn[disabled] {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  h1 {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 359px) {
+  h1 {
+    font-size: 1.2rem;
+  }
+}
+
+@media print {
+  .site-header {
+    display: none;
+  }
+  body {
+    background: #fff;
+    max-width: none;
+    font-size: 14px;
+  }
+  a {
+    color: var(--ink);
+    border: none;
+  }
+  footer {
+    display: none;
+  }
+}
+

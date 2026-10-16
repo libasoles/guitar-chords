@@ -7,7 +7,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const DIST = path.join(__dirname, '..', 'dist', 'site');
-const CSS = fs.readFileSync(path.join(__dirname, '..', 'src', 'site', 'site.css'), 'utf8');
+const CSS = require('../scripts/lib/site-css').readSiteCss();
 
 function luminance(hex) {
   const [r, g, b] = hex.replace('#', '').match(/../g).map((h) => {
