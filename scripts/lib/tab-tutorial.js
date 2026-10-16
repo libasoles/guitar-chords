@@ -1,7 +1,7 @@
 'use strict';
 /* tab-tutorial.js — Markup for the "how to use the editor" dropdown at the
    foot of the tab-editor page: one looping, CSS-only mini tab per gesture
-   (drag a note, duplicate a column, fill with zeros). The keys to press are
+   (drag a note, duplicate a column, fill with zeros, toggle bold). The keys to press are
    lit in colour while the gesture plays. Styles live in site.css
    (.tab-demo*). The stage is decorative (aria-hidden); the text carries the
    instructions. */
@@ -77,11 +77,22 @@ function renderTabTutorial(strings) {
     body: s('tabZeroBody'),
   });
 
+  const bold = demo({
+    cls: 'tab-demo--bold',
+    notes: [
+      note(1, 1, 3, 'tab-demo__note--bold'), note(1, 3, 2, 'tab-demo__note--bold'),
+      note(1, 4, 0, 'tab-demo__note--bold'),
+    ],
+    keys: [key('B', 'tab-demo__key--bold')],
+    title: s('tabBoldTitle'),
+    body: s('tabBoldBody'),
+  });
+
   return (
     '<details class="tab-tutorial">' +
     '<summary>' + s('tabTutorialSummary') + '</summary>' +
     '<p class="tab-tutorial__intro">' + s('tabTutorialIntro') + '</p>' +
-    '<ul class="tab-tutorial__list">' + drag + duplicate + zeros + '</ul>' +
+    '<ul class="tab-tutorial__list">' + drag + duplicate + zeros + bold + '</ul>' +
     '</details>'
   );
 }
