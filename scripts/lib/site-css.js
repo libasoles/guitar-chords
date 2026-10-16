@@ -11,7 +11,7 @@ const CSS_DIR = path.join(__dirname, '..', '..', 'src', 'site', 'css');
 
 // Parts the Partitura y tablatura page needs, in cascade order: shared base
 // (header, typography), footer, privacy link and the tool's own styles.
-const PARTITURA_PARTS = ['01-base', '05-footer', '08-privacy', '10-partitura'];
+const PARTITURA_PARTS = ['01-base', '05-footer', '07b-tab-demo', '08-privacy', '10-partitura'];
 
 function partNames() {
   return fs.readdirSync(CSS_DIR).filter((f) => f.endsWith('.css')).sort().map((f) => f.slice(0, -4));

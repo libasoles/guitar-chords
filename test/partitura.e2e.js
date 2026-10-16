@@ -608,6 +608,21 @@ async function fillForm(page, name) {
         assert.ok(Number(upStem) < 600, 'up-stem Column not bold: ' + upStem);
         await page.locator('#partBoldBass').uncheck();
 
+        // First use: the bass tip, then the B-key tip. Expiring alone does not
+        // remember them; closing each one does.
+        const tipTitle = () => page.locator('.part-tip .part-tip-title').allTextContents();
+        const strings = await page.evaluate(() => window.PARTITURA_CONFIG.strings);
+        assert.deepEqual(await tipTitle(), [strings.partTipBassTitle], 'bass tip shown first');
+        assert.equal(await page.locator('.part-tip svg.part-tip-graphic').count(), 1);
+        assert.equal(await page.evaluate(() => localStorage.getItem('partitura.tip.bass')), null);
+        await page.locator('.part-tip-close').click();
+        assert.equal(await page.evaluate(() => localStorage.getItem('partitura.tip.bass')), '1');
+        assert.deepEqual(await tipTitle(), [strings.partTipBoldTitle], 'bold tip follows immediately');
+        assert.equal(await page.locator('.part-tip .tab-demo--bold').count(), 1);
+        await page.locator('.part-tip-close').click();
+        assert.equal(await page.evaluate(() => localStorage.getItem('partitura.tip.bold')), '1');
+        assert.equal(await page.locator('.part-tip').count(), 0);
+
         // Confirm and export: the Digitación confirmada goes to POST /export.
         assert.equal(await page.locator('#partTitle').inputValue(), 'Camino de las Tropas');
         assert.equal(await page.locator('#partAuthor').inputValue(), 'Falú · Trans. X');

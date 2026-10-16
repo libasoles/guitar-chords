@@ -739,6 +739,104 @@
     return out;
   }
 
+  // ---- First-use tips ------------------------------------------------------
+
+  // Each tip stays 12 seconds, then goes away by itself. Closing it with the
+  // button remembers that in localStorage so it never returns; letting it
+  // expire does not, so it shows again next time.
+  var TIP_MS = 12000;
+  var TIP_BASS_KEY = 'partitura.tip.bass';
+  var TIP_BOLD_KEY = 'partitura.tip.bold';
+  var tipsStarted = false;
+
+  function tipSeen(key) {
+    try { return window.localStorage.getItem(key) === '1'; } catch (e) { return false; }
+  }
+
+  function rememberTip(key) {
+    try { window.localStorage.setItem(key, '1'); } catch (e) { /* ignore */ }
+  }
+
+  // Staff with a downward-stem note (the bass) next to an upward-stem one.
+  function bassTipGraphic() {
+    var ns = 'http://www.w3.org/2000/svg';
+    function node(name, attrs, text) {
+      var n = document.createElementNS(ns, name);
+      Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+      if (text) n.textContent = text;
+      return n;
+    }
+    var svg = node('svg', { viewBox: '0 0 200 112', 'class': 'part-tip-graphic', 'aria-hidden': 'true' });
+    for (var i = 0; i < 5; i++) {
+      var y = 34 + i * 8;
+      svg.appendChild(node('line', { x1: 8, x2: 192, y1: y, y2: y, stroke: 'currentColor', 'stroke-width': 1, opacity: 0.45 }));
+    }
+    // Melody: stem up on the right of the head.
+    svg.appendChild(node('ellipse', { cx: 140, cy: 42, rx: 6.5, ry: 4.6, transform: 'rotate(-20 140 42)', fill: 'currentColor' }));
+    svg.appendChild(node('line', { x1: 146, x2: 146, y1: 41, y2: 8, stroke: 'currentColor', 'stroke-width': 1.6 }));
+    svg.appendChild(node('text', { x: 140, y: 100, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 12 }, t('partTipBassMelody')));
+    // Bass: stem down on the left of the head, highlighted.
+    svg.appendChild(node('ellipse', { cx: 60, cy: 66, rx: 6.5, ry: 4.6, transform: 'rotate(-20 60 66)', fill: 'var(--accent)' }));
+    svg.appendChild(node('line', { x1: 54, x2: 54, y1: 67, y2: 98, stroke: 'var(--accent)', 'stroke-width': 1.6 }));
+    svg.appendChild(node('path', { d: 'M54 104 l-4 -6 h8 z', fill: 'var(--accent)' }));
+    svg.appendChild(node('text', { x: 60, y: 22, 'text-anchor': 'middle', fill: 'var(--accent)', 'font-size': 12, 'font-weight': 700 }, t('partTipBassBass')));
+    return svg;
+  }
+
+  function boldTipGraphic() {
+    var template = $('partBoldTipDemo');
+    return template && template.content ? template.content.cloneNode(true) : null;
+  }
+
+  // Shows one tip; `done` runs once when it ends, closed or expired.
+  function showTip(storageKey, title, body, graphic, done) {
+    var tip = el('div', 'part-tip');
+    tip.setAttribute('role', 'status');
+    var close = el('button', 'part-tip-close');
+    close.type = 'button';
+    close.setAttribute('aria-label', t('partTipClose'));
+    close.appendChild(el('span', null, '×'));
+    close.firstChild.setAttribute('aria-hidden', 'true');
+    tip.appendChild(close);
+    tip.appendChild(el('strong', 'part-tip-title', title));
+    if (graphic) {
+      var art = el('div', 'part-tip-art');
+      art.appendChild(graphic);
+      tip.appendChild(art);
+    }
+    tip.appendChild(el('p', 'part-tip-body', body));
+    var bar = el('span', 'part-tip-timer');
+    bar.style.animationDuration = TIP_MS + 'ms';
+    tip.appendChild(bar);
+    var ended = false;
+    var timer = null;
+    function end(remember) {
+      if (ended) return;
+      ended = true;
+      clearTimeout(timer);
+      if (remember) rememberTip(storageKey);
+      tip.remove();
+      done();
+    }
+    close.addEventListener('click', function () { end(true); });
+    timer = setTimeout(function () { end(false); }, TIP_MS);
+    document.body.appendChild(tip);
+  }
+
+  // The first time the bass is highlighted: how the bass is chosen, then the B shortcut.
+  function showBassTips() {
+    if (tipsStarted) return;
+    tipsStarted = true;
+    function boldTip() {
+      if (tipSeen(TIP_BOLD_KEY)) return;
+      var demo = boldTipGraphic();
+      if (demo) demo.firstChild.classList.add('part-tip-demo');
+      showTip(TIP_BOLD_KEY, t('partTipBoldTitle'), t('partTipBoldBody'), demo, function () {});
+    }
+    if (tipSeen(TIP_BASS_KEY)) { boldTip(); return; }
+    showTip(TIP_BASS_KEY, t('partTipBassTitle'), t('partTipBassBody'), bassTipGraphic(), boldTip);
+  }
+
   // Bass: the lowest sounding String (highest index) of a Column.
   function bassString(column) {
     for (var s = STRINGS_COUNT - 1; s >= 0; s--) if (column[s] !== null) return s;
@@ -1275,6 +1373,7 @@
         });
         boldInput.addEventListener('change', function () {
           boldBass = boldInput.checked;
+          if (boldBass) showBassTips();
           elements.forEach(function (_, i) { applyValue(i, true); });
         });
         confirmBtn.addEventListener('click', function () {

@@ -40,6 +40,24 @@ function demo(opts) {
   );
 }
 
+// The bold demo without its caption: the Partitura tip supplies its own text.
+function renderBoldDemo() {
+  return (
+    '<figure class="tab-demo tab-demo--bold">' +
+    stage(boldNotes()) +
+    '<div class="tab-demo__keys" aria-hidden="true">' + key('B', 'tab-demo__key--bold') + '</div>' +
+    '</figure>'
+  );
+}
+
+function boldNotes() {
+  return [
+    note(1, 1, 1), note(1, 3, 2),
+    // Only the selected bass note toggles; the others stay normal.
+    note(1, 4, 3, 'tab-demo__note--bold tab-demo__note--selected'),
+  ];
+}
+
 function renderTabTutorial(strings) {
   const s = function (k) { return strings[k] || ''; };
   const modifier = s('tabTutorialModifierKey');
@@ -79,11 +97,7 @@ function renderTabTutorial(strings) {
 
   const bold = demo({
     cls: 'tab-demo--bold',
-    notes: [
-      note(1, 1, 1), note(1, 3, 2),
-      // Only the selected bass note toggles; the others stay normal.
-      note(1, 4, 3, 'tab-demo__note--bold tab-demo__note--selected'),
-    ],
+    notes: boldNotes(),
     keys: [key('B', 'tab-demo__key--bold')],
     title: s('tabBoldTitle'),
     body: s('tabBoldBody'),
@@ -98,4 +112,4 @@ function renderTabTutorial(strings) {
   );
 }
 
-module.exports = { renderTabTutorial };
+module.exports = { renderTabTutorial, renderBoldDemo };

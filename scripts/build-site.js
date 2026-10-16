@@ -35,7 +35,7 @@ const {
   injectJsonLd,
 } = require("./lib/structured-data");
 const { parseAsciiTab } = require("./lib/ascii-tab");
-const { renderTabTutorial } = require("./lib/tab-tutorial");
+const { renderTabTutorial, renderBoldDemo } = require("./lib/tab-tutorial");
 
 const ROOT = path.join(__dirname, "..");
 const SRC_SITE = path.join(ROOT, "src", "site");
@@ -1174,6 +1174,8 @@ function renderPartituraPage(template, strings, locale) {
     .join(v7PageHref(locale, PRIVACY_SLUG))
     .split("%%TAB_EDITOR_PAGE_HREF%%")
     .join(v7PageHref(locale, TAB_EDITOR_SLUG))
+    .split("%%PART_BOLD_DEMO%%")
+    .join(renderBoldDemo())
     .split("%%PARTITURA_CONFIG%%")
     .join(JSON.stringify(config).replace(/</g, "\\u003c"));
   const faq = [1, 2, 3, 4].map(function (n) {
