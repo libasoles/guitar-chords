@@ -1079,8 +1079,9 @@
             v.measures.forEach(function (m) {
               var node = v.svg ? v.svg.querySelectorAll('g.measure')[m.k] || null : null;
               var layout = computeLayout(m.attacks, v.svg || document.body, node);
+              // Note-names mode keeps each name at its score position; overlap is fine.
               var spaced = notationInput.checked
-                ? spaceColumns(layout, current[m.index], tabFontPx * 0.6, 3)
+                ? layout
                 : spaceColumns(layout, current[m.index]);
               layouts[m.index] = spaced;
               var left = node ? node.getBoundingClientRect().left - rowLeft : 0;
