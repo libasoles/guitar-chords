@@ -692,13 +692,14 @@
     return -1;
   }
 
-  // Bass strings come from the engine (suggestion.json bass_strings); a
-  // Column without them falls back to its lowest sounding String.
+  // Bass strings come from the engine (suggestion.json bass_strings): only
+  // notes with a downward stem. An empty list means no bass in that Column;
+  // the lowest-String fallback applies only when the engine sent no data.
   function styledTab(tab, boldBass, bassColumns) {
     if (!boldBass) return tab.map(function (column) { return column.slice(); });
     return tab.map(function (column, c) {
       var listed = bassColumns && bassColumns[c];
-      var bass = listed && listed.length ? listed : [bassString(column)];
+      var bass = listed ? listed : [bassString(column)];
       return column.map(function (fret, s) {
         return fret === null ? null : { fret: fret, bold: bass.indexOf(s) !== -1 };
       });
