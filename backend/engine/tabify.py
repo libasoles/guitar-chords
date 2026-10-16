@@ -26,6 +26,7 @@ import subprocess
 import tempfile
 from fractions import Fraction
 from xml.etree import ElementTree as ET
+from xml.sax.saxutils import escape
 
 import music21 as m21
 import verovio
@@ -56,7 +57,7 @@ PREVIEW_MAX_ROW = 100 * PREVIEW_STAFF_SPACE
 PREVIEW_MIN_ROW = 90 * PREVIEW_STAFF_SPACE
 PDF_OPTIONS = {  # A4 at Verovio's 10 units per mm
     "pageWidth": 2100, "pageHeight": 2970, "scale": 45, "breaks": "auto",
-    "pageMarginLeft": 100, "pageMarginRight": 100, "pageMarginTop": 80,
+    "pageMarginLeft": 220, "pageMarginRight": 100, "pageMarginTop": 80,  # left: brace and string names
     "pageMarginBottom": 80, "header": "auto", "footer": "none", "spacingStaff": 6,
 }
 # Verovio draws rhythm stems on tab staves; the reference layout has frets only.
@@ -575,24 +576,58 @@ def extract_header(score):
         if box.page in (1, None) and size >= 8 and not re.fullmatch(r"[\d\s/.,]*", text):
             lines.append((-float(box.style.absoluteY or 0), size, text))
     metadata = score.metadata
-    credits = []
-    if metadata:
-        for role in ("composer", "transcriber"):
-            for value in metadata[role]:
-                text = str(value).strip()
-                if text and text not in credits:
-                    credits.append(text)
-    if not lines:
+    if not lines:  # no positioned text (plain MusicXML): the declared credits
+        credits = []
+        if metadata:
+            for role in ("composer", "transcriber"):
+                for value in metadata[role]:
+                    text = str(value).strip()
+                    if text and text not in credits:
+                        credits.append(text)
         return (metadata.title if metadata else None), credits
+    # Positioned text exists: keep only what sits next to the title. Declared
+    # credits are not trusted here, OMR may have filed footer text under them.
     y, size, title = max(lines, key=lambda line: line[1])
     nearby = sorted((line for line in lines
                      if line[2] != title and abs(line[0] - y) <= size * 6),
                     key=lambda line: abs(line[0] - y))[:2]
-    return title, credits or [text for _, _, text in sorted(nearby)]
+    return title, [text for _, _, text in sorted(nearby)]
 
 
 def fix_technical(xml):
     return re.sub(r"<fingering[^>]*>(\d+)/(\d+)</fingering>", r"<string>\1</string><fret>\2</fret>", xml)
+
+
+def clean_labels(xml):
+    """No instrument name or abbreviation drawn left of the systems."""
+    xml = re.sub(r"<part-name\b[^>]*>.*?</part-name>", '<part-name print-object="no"></part-name>', xml, flags=re.S)
+    return re.sub(r"\s*<part-abbreviation\b[^>]*>.*?</part-abbreviation>", "", xml, flags=re.S)
+
+
+def notation_time_only(xml):
+    """A <time> without number applies to every staff and Verovio draws it on
+    the TAB staff too; the meter belongs to the notation staff only."""
+    return re.sub(r"<time(?![^>]*\bnumber=)", '<time number="1"', xml)
+
+
+def add_credits(xml, title, subtitles):
+    """Page header as explicit credits (Verovio ignores the composer
+    otherwise): the title centred and the authors right-aligned below it."""
+    words = []
+    if title:
+        words.append(('center', 1050, 'top', 24, title))
+    if subtitles:
+        words.append(('right', 1900, 'top', 12, " · ".join(subtitles)))
+    credits = "".join(
+        f'<credit page="1"><credit-words default-x="{x}" default-y="{1150 - i * 60}" justify="{j}" '
+        f'valign="{v}" font-size="{size}">{escape(text)}</credit-words></credit>'
+        for i, (j, x, v, size, text) in enumerate(words))
+    return xml.replace("<part-list>", credits + "<part-list>", 1)
+
+
+def soften_tab_clef(svg):
+    """Verovio draws the TAB clef (SMuFL E06D) in full black and large."""
+    return re.sub(r'(<g [^>]*class="clef")(>\s*<use xlink:href="#E06D-)', r'\1 fill="#bdbdbd"\2', svg)
 
 
 def add_staff_tuning(xml, tuning):
@@ -628,7 +663,7 @@ def add_string_names(svg, names):
     left = min(x for x, _ in segments)
     brace = re.search(r'class="grpSym">(.*?)</g>', svg[system.end():], re.S)
     if brace:  # control points: a little left of the curve itself
-        left = min([left, *(float(x) for x in re.findall(r'[ML ,C]([\d.]+),[\d.]+', brace.group(1)))])
+        left = min([left, *(float(x) for x in re.findall(r'[ML ,C](-?[\d.]+),-?[\d.]+', brace.group(1)))])
     gap = (ys[-1] - ys[0]) / (len(ys) - 1)
     texts = "".join(f'<text x="{left - 0.3 * gap:.0f}" y="{y + 0.34 * gap:.0f}" text-anchor="end" '
                     f'font-size="{0.95 * gap:.0f}px" font-family="sans-serif">{name}</text>'
@@ -646,8 +681,6 @@ def build_output(score, part, measures, tuning, title, out_base, header=None):
     for src, dst in ((copy.deepcopy(part), notation), (build_tab_staff(part, measures, tuning), tab_staff)):
         for el in src:
             dst.insert(src.elementOffset(el), el)
-    if not part.partName or part.partName == "Voice":  # Audiveris' default
-        notation.partName, notation.partAbbreviation = "Guitarra", "Guit."
     group = m21.layout.StaffGroup([notation, tab_staff], symbol="bracket", barTogether=True)
     out = m21.stream.Score([notation, tab_staff, group])
     found, subtitles = header if header is not None else extract_header(score)
@@ -656,6 +689,7 @@ def build_output(score, part, measures, tuning, title, out_base, header=None):
     if subtitles:
         out.metadata.composer = " · ".join(subtitles)
     xml = add_staff_tuning(fix_technical(to_musicxml(out)), tuning)
+    xml = add_credits(notation_time_only(clean_labels(xml)), out.metadata.title, subtitles)
     xml_path = out_base + ".musicxml"
     with open(xml_path, "w", encoding="utf-8") as f:
         f.write(xml)
@@ -666,7 +700,7 @@ def build_output(score, part, measures, tuning, title, out_base, header=None):
     with tempfile.TemporaryDirectory() as tmp:
         pages = []
         for page in range(1, toolkit.getPageCount() + 1):
-            svg = toolkit.renderToSVG(page).replace("</svg>", HIDE_TAB_RHYTHM + "</svg>", 1)
+            svg = soften_tab_clef(toolkit.renderToSVG(page)).replace("</svg>", HIDE_TAB_RHYTHM + "</svg>", 1)
             if page == 1:
                 svg = add_string_names(svg, string_names(tuning))
             path = os.path.join(tmp, f"page-{page:03d}.svg")
