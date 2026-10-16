@@ -2418,6 +2418,8 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
   margin-left: auto;
   width: min(26rem, 100%);
 }
+.part-header-row .part-header,
+.part-toolbar > .part-header { transform: translateY(-0.3rem); }
 .part-header-row { display: flex; justify-content: flex-end; margin-bottom: 0.4rem; }
 .part-header-row .part-header { width: min(26rem, 100%); }
 .part-header-input {
