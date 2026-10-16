@@ -1118,7 +1118,6 @@ function renderPartituraPage(template, strings, locale) {
   [
     "partPromoAlt",
     "partHowH2",
-    "partHowIntro",
     "partHow1Title",
     "partHow1Body",
     "partHow2Title",
