@@ -2327,8 +2327,26 @@ footer {
   align-items: center;
   gap: 0.4rem;
 }
-.part-edited {
-  color: var(--ink-soft);
+.part-footer {
+  position: sticky;
+  bottom: -2rem;
+  z-index: 2;
+  display: flex;
+  justify-content: flex-end;
+  margin: 1.5rem calc(-1 * max(1.5rem, 3vw)) -2rem;
+  padding: 0.8rem max(1.5rem, 3vw);
+  background: var(--paper);
+  border-top: 1px solid var(--rule);
+}
+.part-footer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.part-footer-icon svg {
+  display: block;
+  width: 1.2rem;
+  height: 1.2rem;
 }
 .part-note {
   margin: 0.4rem 0;
@@ -2342,12 +2360,19 @@ footer {
 }
 .part-rows {
   margin: 1.5rem 0;
-  overflow-x: auto;
   isolation: isolate;
 }
+.part-result-modal .part-toolbar,
+.part-result-modal .part-rows {
+  max-width: 64rem;
+  margin-left: auto;
+  margin-right: auto;
+}
 /* Desktop preview: full-viewport modal, wider than the page column. */
-html.part-modal-open { overflow: hidden; }
+html.part-modal-open,
+html.part-modal-open body { overflow: hidden; }
 .part-result-modal {
+  overscroll-behavior: contain;
   position: fixed;
   inset: 0;
   z-index: 500;
@@ -2412,8 +2437,11 @@ html.part-modal-open { overflow: hidden; }
   font-size: 1.25em;
   transform: translate(-50%, -50%);
 }
-.part-measure-overflow {
-  outline: 1px dashed var(--rule);
+.part-string-name {
+  position: absolute;
+  color: #8a8a8a;
+  font-size: 0.8em;
+  transform: translate(-100%, -50%);
 }
 .part-dropped {
   margin-top: 1rem;

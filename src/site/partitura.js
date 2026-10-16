@@ -660,10 +660,6 @@
     } catch (e) { /* storage unavailable: edits stay in memory */ }
   }
 
-  function clearEdits(jobId) {
-    try { window.localStorage.removeItem(STORAGE_PREFIX + jobId); } catch (e) { /* ignore */ }
-  }
-
   function fretOf(cell) {
     if (cell !== null && typeof cell === 'object') return cell.fret == null ? null : cell.fret;
     return cell == null ? null : cell;
@@ -685,25 +681,6 @@
       out.push(typeof v === 'number' && isFinite(v) ? v : null);
     }
     return out;
-  }
-
-  // Bass: the lowest sounding String (highest index) of a Column.
-  function bassString(column) {
-    for (var s = STRINGS_COUNT - 1; s >= 0; s--) if (column[s] !== null) return s;
-    return -1;
-  }
-
-  // Bass strings come from the engine (suggestion.json bass_strings); a
-  // Column without them falls back to its lowest sounding String.
-  function styledTab(tab, boldBass, bassColumns) {
-    if (!boldBass) return tab.map(function (column) { return column.slice(); });
-    return tab.map(function (column, c) {
-      var listed = bassColumns && bassColumns[c];
-      var bass = listed && listed.length ? listed : [bassString(column)];
-      return column.map(function (fret, s) {
-        return fret === null ? null : { fret: fret, bold: bass.indexOf(s) !== -1 };
-      });
-    });
   }
 
   function sanitizeSvg(markup) {
@@ -931,25 +908,17 @@
     state.previewJobId = jobId;
 
     var rows = preview.rows;
-    var bassOf = [];
 
     var persisted = loadEdits(jobId);
     var suggested = [];
     var current = [];
     var elements = [];
     var layouts = [];
-    var boldBass = false;
 
     // Toolbar.
     var toolbar = el('div', 'part-toolbar');
     toolbar.setAttribute('role', 'group');
     toolbar.setAttribute('aria-label', t('partToolbarLabel'));
-    var boldLabel = el('label', 'part-toolbar-item');
-    var boldInput = document.createElement('input');
-    boldInput.type = 'checkbox';
-    boldInput.id = 'partBoldBass';
-    boldLabel.appendChild(boldInput);
-    boldLabel.appendChild(el('span', null, t('partBoldBass')));
     var notationLabel = el('label', 'part-toolbar-item');
     notationLabel.appendChild(el('span', null, t('partNotation')));
     var notationSelect = document.createElement('select');
@@ -960,52 +929,31 @@
       notationSelect.appendChild(opt);
     });
     notationLabel.appendChild(notationSelect);
-    var editedEl = el('span', 'part-edited');
-    editedEl.id = 'partEdited';
-    editedEl.setAttribute('aria-live', 'polite');
-    var resetBtn = el('button', 'part-btn part-btn-secondary', t('partReset'));
-    resetBtn.type = 'button';
-    resetBtn.id = 'partReset';
-    var confirmBtn = el('button', 'part-btn', t('partConfirm'));
+    toolbar.appendChild(notationLabel);
+    resultEl.appendChild(toolbar);
+
+    // Sticky footer with the primary action.
+    var footer = el('div', 'part-footer');
+    var confirmBtn = el('button', 'part-btn part-footer-btn');
     confirmBtn.type = 'button';
     confirmBtn.id = 'partConfirm';
-    [boldLabel, notationLabel, editedEl, resetBtn, confirmBtn].forEach(function (n) {
-      toolbar.appendChild(n);
-    });
-    resultEl.appendChild(toolbar);
-    resultEl.appendChild(el('p', 'part-note', t('partPreviewHint')));
+    var confirmIcon = el('span', 'part-footer-icon');
+    confirmIcon.setAttribute('aria-hidden', 'true');
+    confirmIcon.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />' +
+      '<path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" />' +
+      '<path d="M16 17H8" /></svg>';
+    var confirmText = el('span', null, t('partConfirm'));
+    confirmBtn.appendChild(confirmIcon);
+    confirmBtn.appendChild(confirmText);
+    footer.appendChild(confirmBtn);
 
     var rowsEl = el('div', 'part-rows');
     rowsEl.id = 'partRows';
     resultEl.appendChild(rowsEl);
-
-    // Dropped notes.
-    if (dropped.length) {
-      var droppedBox = el('div', 'part-dropped');
-      droppedBox.id = 'partDropped';
-      droppedBox.appendChild(el('p', null, t('partDropped')));
-      var dl = el('ul');
-      dropped.forEach(function (d) {
-        var li = el('li', null, t('partDroppedItem', {
-          m: d.measure != null ? d.measure : d.compas,
-          p: d.pitch != null ? d.pitch : d.altura,
-        }));
-        dl.appendChild(li);
-      });
-      droppedBox.appendChild(dl);
-      resultEl.appendChild(droppedBox);
-    }
-
-    resultEl.appendChild(el('p', 'part-note part-note-warning', t('partNoteTabEdit')));
-    var downloadsBox = el('div', 'part-downloads');
-    downloadsBox.id = 'partDownloads';
-    resultEl.appendChild(downloadsBox);
-    var newBtn = el('button', 'part-btn part-btn-secondary', t('partNewJob'));
-    newBtn.type = 'button';
-    newBtn.addEventListener('click', function () {
-      window.location.href = window.location.pathname;
-    });
-    resultEl.appendChild(newBtn);
+    resultEl.appendChild(footer);
 
     // Build rows.
     var rowViews = [];
@@ -1020,10 +968,11 @@
           var notation = el('div', 'part-row-notation');
           var svg = markups[r] ? sanitizeSvg(markups[r]) : null;
           var tabsLine = el('div', 'part-row-tabs');
+          var names = el('div', 'part-example-names');
           wrap.appendChild(notation);
           wrap.appendChild(tabsLine);
           rowsEl.appendChild(wrap);
-          var view = { svg: svg, notation: notation, tabsLine: tabsLine, size: null, measures: [] };
+          var view = { svg: svg, notation: notation, tabsLine: tabsLine, names: names, size: null, measures: [] };
           if (svg) {
             view.size = intrinsicSize(svg);
             notation.appendChild(svg);
@@ -1033,8 +982,7 @@
           for (var k0 = 0; first + k0 <= last; k0++) (function (k) {
             var attacks = preview.measures[first + k] || [];
             var index = first + k;
-            while (suggested.length < index) { suggested.push([]); current.push([]); elements.push(null); bassOf.push([]); }
-            bassOf[index] = attacks.map(function (a) { return a.bass; });
+            while (suggested.length < index) { suggested.push([]); current.push([]); elements.push(null); }
             var base = attacks.map(function (a) { return a.frets; });
             suggested.push(base);
             var restored = persisted && persisted[index];
@@ -1052,6 +1000,7 @@
             tabsEl.dataset.measure = String(index);
             tabsEl.appendChild(document.createElement('ascii-tabs-sheet'));
             tabsLine.appendChild(tabsEl);
+            if (k === 0) tabsLine.appendChild(names);
             elements.push(tabsEl);
             var measureView = {
               index: index,
@@ -1063,9 +1012,6 @@
             tabsEl.addEventListener('change', function (event) {
               current[index] = plainTab(event.detail.value[0]);
               onEdited();
-            });
-            tabsEl.addEventListener('layoutoverflow', function () {
-              tabsEl.classList.add('part-measure-overflow');
             });
           })(k0);
           rowViews.push(view);
@@ -1105,13 +1051,43 @@
               var h = 0;
               v.measures.forEach(function (m) { h = Math.max(h, m.el.offsetHeight); });
               if (h) v.tabsLine.style.height = h + 'px';
+              decorateRow(v);
             });
+          });
+        }
+
+        // String names beside the first measure and "TAB" under the clef.
+        function decorateRow(v) {
+          v.names.textContent = '';
+          var first = v.measures[0];
+          if (!first || !v.svg) return;
+          var base = v.tabsLine.getBoundingClientRect();
+          var areas = first.el.querySelectorAll('.ascii-tabs-area');
+          if (areas.length !== STRINGS_COUNT) return;
+          var tuning = (preview.tuning || 'E B G D A E').split(/\s+/);
+          var top = areas[0].getBoundingClientRect();
+          var step = (areas[STRINGS_COUNT - 1].getBoundingClientRect().top - top.top) / (STRINGS_COUNT - 1);
+          var left = areas[0].getBoundingClientRect().left - base.left;
+          for (var s = 0; s < STRINGS_COUNT; s++) {
+            var name = el('span', 'part-string-name', tuning[s] || '');
+            name.style.left = (left - 6) + 'px';
+            name.style.top = (top.top - base.top + step * s + top.height / 2) + 'px';
+            v.names.appendChild(name);
+          }
+          var clef = v.svg.querySelector('g.clef');
+          if (!clef) return;
+          var clefBox = clef.getBoundingClientRect();
+          'TAB'.split('').forEach(function (letter, i) {
+            var mark = el('span', 'part-example-clef', letter);
+            mark.style.left = (clefBox.left + clefBox.width / 2 - base.left) + 'px';
+            mark.style.top = (top.top - base.top + step * (1.5 + i) + top.height / 2) + 'px';
+            v.names.appendChild(mark);
           });
         }
 
         function applyValue(index, withLayout) {
           var elx = elements[index];
-          var value = styledTab(current[index], boldBass, bassOf[index]);
+          var value = current[index].map(function (column) { return column.slice(); });
           try {
             if (withLayout) {
               elx.setDocument({ value: [value], columnLayout: [layouts[index]] });
@@ -1125,48 +1101,24 @@
           if (elx.notation !== notationSelect.value) elx.notation = notationSelect.value;
         }
 
-        function updateEditedCount() {
-          var n = 0;
-          current.forEach(function (tab, i) {
-            if (JSON.stringify(tab) !== JSON.stringify(suggested[i])) n++;
-          });
-          editedEl.textContent = t('partEditedCount', { n: n });
-          resetBtn.disabled = n === 0;
-          return n;
-        }
-
         function onEdited() {
           saveEdits(jobId, current);
-          updateEditedCount();
         }
 
-        boldInput.addEventListener('change', function () {
-          boldBass = boldInput.checked;
-          elements.forEach(function (_, i) { applyValue(i, true); });
-        });
         notationSelect.addEventListener('change', function () {
           elements.forEach(function (x) { x.notation = notationSelect.value; });
-        });
-        resetBtn.addEventListener('click', function () {
-          suggested.forEach(function (tab, i) {
-            current[i] = tab.map(function (c) { return c.slice(); });
-          });
-          clearEdits(jobId);
-          elements.forEach(function (_, i) { applyValue(i, true); });
-          updateEditedCount();
         });
         confirmBtn.addEventListener('click', function () {
           if (state.exporting) return;
           state.exporting = true;
           confirmBtn.disabled = true;
           showError('');
-          var label = confirmBtn.textContent;
-          confirmBtn.textContent = t('partExporting');
+          var label = confirmText.textContent;
+          confirmText.textContent = t('partExporting');
           runExport(jobId, current.map(function (tab) { return tab.map(function (c) { return c.slice(); }); }))
             .then(function (downloads) {
-              renderDownloads(downloadsBox, downloads);
-              var link = downloadsBox.querySelector('a');
-              if (link) link.focus();
+              var pdf = downloadUrl(downloads, ['pdf']);
+              if (pdf) triggerDownload(pdf);
             })
             .catch(function (err) {
               showError(errorText(err && err.code));
@@ -1174,12 +1126,11 @@
             .then(function () {
               state.exporting = false;
               confirmBtn.disabled = false;
-              confirmBtn.textContent = label;
+              confirmText.textContent = label;
             });
         });
 
         layoutAll();
-        updateEditedCount();
         var resizeTimer = null;
         window.addEventListener('resize', function () {
           clearTimeout(resizeTimer);

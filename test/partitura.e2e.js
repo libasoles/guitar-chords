@@ -213,7 +213,7 @@ async function fillForm(page, name) {
     const html = fs.readFileSync(path.join(withDir, prefix + 'partitura-y-tablatura.html'), 'utf8');
     assert.ok(!/%%part\w+%%/.test(html), 'unresolved partitura translation in ' + locale);
     const strings = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/i18n/strings.' + locale + '.json'), 'utf8'));
-    assert.ok(html.includes('<p class="part-duration">' + strings.partDurationHint + '</p>'));
+    assert.ok(html.includes('<h2 class="part-duration">' + strings.partDurationHint + '</h2>'));
   }
 
   const server = await serveStatic(withDir, 0);
@@ -281,7 +281,6 @@ async function fillForm(page, name) {
           });
           assert.ok(await page.locator('.part-example ascii-tabs').first().evaluate(tabs => tabs.readonly));
           assert.equal((await page.locator('.part-example-clef').allTextContents()).join(''), 'TAB');
-          assert.equal((await page.locator('.part-example-string').allTextContents()).join(''), 'EBGDAE');
           assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
         }
         await page.close();
@@ -477,7 +476,7 @@ async function fillForm(page, name) {
         assert.equal(modal.role, 'dialog');
         assert.ok(modal.w === modal.vw && modal.h === modal.vh);
         assert.ok(modal.hasIcon && modal.closeTop < 40 && modal.closeRight < 60);
-        assert.ok(previewSize.available > 1120);
+        assert.ok(previewSize.available <= 1024 && previewSize.available > 760);
 
         // One editor per measure, aligned to the notes by identifier.
         await page.waitForFunction(() => document.querySelectorAll('.part-measure-tab .ascii-tabs-has').length === 6);
@@ -499,58 +498,41 @@ async function fillForm(page, name) {
         });
         align.forEach(delta => assert.ok(delta < 3, 'tab column aligned with the note, off by ' + delta));
         // Common scale: both measures share the row's top-left geometry.
-        assert.ok((await page.locator('#partDropped').textContent()).includes('C#2'));
-        assert.equal(await page.locator('#partEdited').textContent(), S.partEditedCount.replace('{n}', '0'));
+        for (const gone of ['#partEdited', '#partReset', '#partBoldBass']) {
+          assert.equal(await page.locator(gone).count(), 0, gone + ' is gone');
+        }
+        assert.ok(await page.locator('.part-row .part-example-clef').count() >= 3, 'TAB clef letters');
+        assert.equal(await page.locator('.part-row .part-string-name').count() % 6, 0);
+        assert.ok(await page.locator('.part-footer #partConfirm svg').count() === 1, 'footer confirm has an icon');
 
-        // Edit a Fret: the measure counts as edited and survives a reload.
+        // Edit a Fret        // Edit a Fret: the edit survives a reload.
         const cell = page.locator('.part-measure-tab').first().locator('.ascii-tabs-cell[data-c="0"][data-s="0"]');
         await cell.click();
         await page.keyboard.type('7');
         await page.keyboard.press('Enter');
-        await page.waitForFunction(
-          n => document.querySelector('#partEdited').textContent.endsWith(n),
-          '1',
-        );
         const stored = await page.evaluate(id => localStorage.getItem('partitura.edits.v1.' + id), JOB);
         assert.ok(stored && JSON.parse(stored)[0][0][0] === 7);
         await page.reload();
         await page.waitForSelector('#partRows .part-row');
         await page.waitForFunction(() => document.querySelectorAll('.part-measure-tab .ascii-tabs-has').length === 7);
-        assert.equal(await page.locator('#partEdited').textContent(), S.partEditedCount.replace('{n}', '1'));
-
-        // Frets/solfege toggle and bass in bold.
+        // Frets/solfege toggle.
         await page.locator('#partNotation').selectOption('solfege');
         assert.equal(await page.locator('.part-measure-tab').first().evaluate(n => n.notation), 'solfege');
         await page.locator('#partNotation').selectOption('frets');
-        await page.locator('#partBoldBass').check();
-        const weights = await page.evaluate(() => {
-          const col = document.querySelectorAll('.part-measure-tab')[1].querySelector('.ascii-tabs-has[data-c="1"][data-s="5"] .ascii-tabs-fret');
-          const top = document.querySelectorAll('.part-measure-tab')[1].querySelector('.ascii-tabs-has[data-c="1"][data-s="0"] .ascii-tabs-fret');
-          return [getComputedStyle(col).fontWeight, getComputedStyle(top).fontWeight];
-        });
-        assert.ok(Number(weights[0]) >= 600 && Number(weights[1]) < 600, 'bass bold only: ' + weights);
 
         // Confirm and export: the Digitación confirmada goes to POST /export.
         await page.locator('#partConfirm').click();
-        await page.waitForSelector('#partDownloads a');
-        assert.equal(await page.locator('#partDownloads a').count(), 4);
+        await page.waitForFunction(() => !document.querySelector('#partConfirm').disabled);
         assert.equal(api.exportBody.tabs.length, 2);
         assert.equal(api.exportBody.tabs[0][0][0], 7);
         assert.deepEqual(api.exportBody.tabs[1][1], [12, null, null, null, null, 5]);
-        assert.equal(await page.locator('#partDownloads a').first().getAttribute('href'), DOWNLOADS.pdf);
+        assert.equal(await page.locator('#partDownloads').count(), 0);
 
-        // Re-export in the same Trabajo, then reset to the suggestion.
+        // Re-export in the same Trabajo.
         await page.locator('#partConfirm').click();
         await page.waitForFunction(() => !document.querySelector('#partConfirm').disabled);
         await page.waitForFunction(() => document.querySelector('#partConfirm').textContent.length > 0);
         assert.equal(api.exportCount, 2);
-        await page.locator('#partReset').click();
-        assert.equal(await page.locator('#partEdited').textContent(), S.partEditedCount.replace('{n}', '0'));
-        assert.equal(await page.evaluate(id => localStorage.getItem('partitura.edits.v1.' + id), JOB), null);
-        assert.equal(
-          await page.locator('.part-measure-tab').first().evaluate(n => n.value[0][0][0]),
-          null,
-        );
         assert.deepEqual(errors, []);
         await context.close();
       }
