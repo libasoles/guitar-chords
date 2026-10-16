@@ -936,6 +936,11 @@
           var measure = computeLayout(attacks, svg, node);
           var spaced = spaceColumns(measure, values[k]);
           tabs.style.left = (node ? node.getBoundingClientRect().left - rowLeft : 0) + 'px';
+          // The first measure's box starts a few px before the staff lines;
+          // clip the TAB lines so they begin on the system barline.
+          var staffLine = k === 0 && svg.querySelector('g.staff path');
+          var overshoot = staffLine ? staffLine.getBoundingClientRect().left - (node ? node.getBoundingClientRect().left : rowLeft) : 0;
+          tabs.style.clipPath = overshoot > 0 ? 'inset(0 0 0 ' + overshoot + 'px)' : '';
           tabs.style.width = Math.min(measure.width, spaced.width) + 'px';
           tabs.setDocument({ value: [values[k]], columnLayout: [spaced] });
         });
