@@ -7,6 +7,9 @@
   --rule: #d8d2c4;
   --accent: #8b0000;
   --note-selected: #1f5c66;
+  /* Logo palette (guitar-player-cubist-left-head.svg). */
+  --brand-blue: #4a7c93;
+  --brand-blue-dark: #293044;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --sans:
@@ -2354,6 +2357,12 @@ footer {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  border-color: var(--brand-blue);
+  background: var(--brand-blue);
+}
+.part-footer-btn:hover:not(:disabled) {
+  border-color: var(--brand-blue-dark);
+  background: var(--brand-blue-dark);
 }
 .part-footer-icon svg {
   display: block;
