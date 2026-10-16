@@ -7,6 +7,10 @@ When an agent finishes a coding task in this repo:
 3. Push `main`.
 4. Delete the worktree used for the task (`ExitWorktree` with `action: "remove"`, or `git worktree remove`) and delete the now-merged branch.
 
+Read this file before starting any task, and do not report the task as finished until steps 1–4 are done. Reporting "committed on branch X" is not completion.
+
+Sessions that entered a worktree cannot run git against the main checkout (the harness refuses `cd` to it). So after committing: call `ExitWorktree` with `action: "keep"` to return to the main checkout, run the merge, push and cleanup from there, then remove the worktree and branch.
+
 This repo does not require draft PRs for routine agent work — merge directly to `main` once the change is verified (tests/build pass, or manual verification done). Only stop to ask the user first if the change is risky, destructive, or ambiguous in scope.
 
 ## Browser tooling (offline)
