@@ -2426,8 +2426,12 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
   margin-left: auto;
   width: min(26rem, 100%);
 }
-.part-header-row .part-header,
-.part-toolbar > .part-header { transform: translateY(-0.3rem); }
+/* The author line sits on the checkboxes' bottom edge whatever the font: the
+   44px labels centre a 1.5rem box, leaving (44px - 1.5rem) / 2 beneath it. */
+.part-toolbar > .part-header {
+  align-self: flex-end;
+  margin-bottom: calc((44px - 1.5rem) / 2);
+}
 .part-header-row { display: flex; justify-content: flex-end; margin-bottom: 0.4rem; }
 .part-header-row .part-header { width: min(26rem, 100%); }
 .part-header-input {

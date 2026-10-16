@@ -551,6 +551,10 @@ async function fillForm(page, name) {
           return [s.borderBottomWidth, s.borderTopWidth, s.borderBottomLeftRadius];
         });
         assert.deepEqual(underline, ['1px', '0px', '0px']);
+        // The author line ends where the checkboxes end.
+        const bottoms = await page.evaluate(() => ['#partNotation', '#partAuthor']
+          .map(id => document.querySelector(id).getBoundingClientRect().bottom));
+        assert.ok(Math.abs(bottoms[0] - bottoms[1]) < 1, 'author underline aligned with checkboxes: ' + bottoms);
         await page.locator('#partAuthor').fill('Cuchi Leguizamón');
         await page.locator('#partConfirm').click();
         await page.waitForFunction(() => !document.querySelector('#partConfirm').disabled);
