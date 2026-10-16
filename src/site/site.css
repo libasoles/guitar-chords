@@ -1523,7 +1523,7 @@ footer {
   --demo-rh: 1.5em;
   --demo-lit: #f4ddd6;
   max-width: var(--max-width);
-  margin: 0 0 2rem;
+  margin: 3.5rem 0 2rem;
   font-family: var(--sans);
   font-size: 0.92rem;
   color: var(--ink-soft);
@@ -1610,6 +1610,15 @@ footer {
   opacity: 0;
   pointer-events: none;
 }
+.tab-demo__cursor::after {
+  content: '';
+  position: absolute;
+  left: 55%;
+  top: 45%;
+  width: 1.1em;
+  height: 1.1em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 1l11 7-5 1.2L5.5 14z' fill='%23222' stroke='%23fff' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / contain;
+}
 .tab-demo__keys {
   display: flex;
   align-items: center;
@@ -1626,9 +1635,6 @@ footer {
 }
 .tab-demo--drag .tab-demo__cursor {
   animation: tab-demo-cursor 6s ease-in-out infinite;
-}
-.tab-demo--drag .tab-demo__key {
-  animation: tab-demo-lit-drag 6s steps(1, end) infinite;
 }
 .tab-demo__note--copy-1 {
   animation: tab-demo-appear-1 6s steps(1, end) infinite;
@@ -1737,26 +1743,6 @@ footer {
   }
 }
 /* The keys light up in colour exactly while they are being pressed. */
-@keyframes tab-demo-lit-drag {
-  0%,
-  17% {
-    background: #fff;
-    border-color: var(--rule);
-    color: inherit;
-  }
-  18%,
-  60% {
-    background: var(--demo-lit);
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-  61%,
-  100% {
-    background: #fff;
-    border-color: var(--rule);
-    color: inherit;
-  }
-}
 @keyframes tab-demo-lit-duplicate {
   0%,
   26%,
@@ -1807,7 +1793,7 @@ footer {
   .tab-demo--drag .tab-demo__note--dragged {
     transform: translate(calc(2 * var(--demo-cw)), var(--demo-rh));
   }
-  .tab-demo .tab-demo__key {
+  .tab-demo:not(.tab-demo--drag) .tab-demo__key {
     background: var(--demo-lit);
     border-color: var(--accent);
     color: var(--accent);
