@@ -1781,7 +1781,9 @@ body.partitura-body {
   font-size: 0.8rem;
   line-height: 1.3;
 }
-.part-rights-error[hidden] { display: none; }
+.part-rights-error[hidden],
+.part-rights[hidden],
+.part-dropzone[hidden] { display: none; }
 .part-rights input {
   appearance: none;
   display: grid;
