@@ -148,7 +148,25 @@
     <script>
       window.PARTITURA_CONFIG = %%PARTITURA_CONFIG%%;
     </script>
-    <script type="module" src="%%ASSETS_PREFIX%%vendor/ascii-tabs.js"></script>
+    <script>
+      // ascii-tabs only draws the desktop preview and example; phones skip it.
+      (function () {
+        var query = window.matchMedia("(min-width: 768px)");
+        function load() {
+          var script = document.createElement("script");
+          script.type = "module";
+          script.src = "%%ASSETS_PREFIX%%vendor/ascii-tabs.js";
+          document.head.appendChild(script);
+        }
+        if (query.matches) load();
+        else
+          query.addEventListener("change", function onChange(event) {
+            if (!event.matches) return;
+            query.removeEventListener("change", onChange);
+            load();
+          });
+      })();
+    </script>
     <script defer src="%%ASSETS_PREFIX%%toast.js"></script>
     <script defer src="%%ASSETS_PREFIX%%partitura.js"></script>
     <script>

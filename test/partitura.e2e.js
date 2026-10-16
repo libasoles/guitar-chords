@@ -262,7 +262,7 @@ async function fillForm(page, name) {
         assert.equal(await page.locator('.part-example strong').textContent(), S.partExampleTitle);
         assert.equal(await page.locator('.part-example figcaption span').textContent(), S.partExampleCaption);
         assert.equal(await page.locator('.part-example img, .part-example image').count(), 0);
-        for (const width of [1100, 390]) {
+        for (const width of [1100, 800]) {
           await page.setViewportSize({ width, height: 1000 });
           await page.waitForFunction(() => {
             const root = document.querySelector('#partExampleScore');
@@ -312,6 +312,24 @@ async function fillForm(page, name) {
           }));
           assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
         }
+        // Phones have no preview, so the example is hidden there.
+        await page.setViewportSize({ width: 390, height: 1000 });
+        assert.ok(await page.locator('.part-example').isHidden());
+        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+        await page.close();
+      }
+
+      // On a phone the example is neither shown nor rendered, and the
+      // ascii-tabs module is not requested.
+      {
+        const page = await browser.newPage({ viewport: { width: 390, height: 800 } });
+        await mockApi(page, { jobs: [READY] });
+        const requested = [];
+        page.on('request', request => requested.push(request.url()));
+        await page.goto(toolUrl);
+        assert.ok(await page.locator('.part-example').isHidden());
+        assert.equal(await page.locator('#partExampleScore ascii-tabs').count(), 0);
+        assert.equal(requested.filter(url => /ascii-tabs/.test(url)).length, 0);
         await page.close();
       }
 

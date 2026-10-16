@@ -1339,7 +1339,7 @@
     attachFile(event.dataTransfer.files[0]);
   });
 
-  renderExample();
+  if (isDesktop()) renderExample();
   setBusy(false);
   initTurnstile();
 

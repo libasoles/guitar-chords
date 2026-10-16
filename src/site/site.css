@@ -2066,6 +2066,13 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
   min-width: 0;
   margin: 1.5rem 0 0;
 }
+/* Mobile has no on-page preview (the score is only downloaded), so the
+   example row is hidden; this also keeps it from shifting the layout. */
+@media (max-width: 767px) {
+  .part-example {
+    display: none;
+  }
+}
 .part-example figcaption {
   display: grid;
   gap: 0.25rem;
