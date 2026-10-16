@@ -2144,12 +2144,12 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
   outline-offset: 4px;
 }
 .part-rights.needs-rights {
-  background: rgb(139 0 0 / 7%);
+  background: #faf6ee;
   animation: part-rights-flash 900ms ease-out;
 }
 @keyframes part-rights-flash {
-  0%, 100% { background: rgb(139 0 0 / 7%); }
-  45% { background: rgb(139 0 0 / 14%); }
+  0%, 100% { background: #faf6ee; }
+  45% { background: #f1e9d6; }
 }
 @media (prefers-reduced-motion: reduce) {
   .part-rights.needs-rights { animation: none; }
