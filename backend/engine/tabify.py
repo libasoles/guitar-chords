@@ -502,7 +502,13 @@ def preview_rows(part, measures_per_row, measures=None):
                 break
             end -= 1
         start = end + 1
-    return packed
+    return [{**row, "svg": drop_measure_numbers(row["svg"])} for row in packed]
+
+
+def drop_measure_numbers(svg):
+    """The PDF has no measure numbers (only the title and author are text);
+    Verovio draws one at the start of every preview row."""
+    return re.sub(r'<g [^>]*class="mNum[^"]*"[^>]*>.*?</g>', "", svg, flags=re.S)
 
 
 def svg_width(svg):
