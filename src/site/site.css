@@ -1681,6 +1681,16 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
   font-weight: 700;
   animation: tab-demo-unbold 6s steps(1, end) infinite;
 }
+.tab-demo__note--selected {
+  background: var(--demo-lit);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.tab-demo__note--selected::before {
+  background: var(--demo-lit);
+}
+.tab-demo__note--bold:not(.tab-demo__note--selected) {
+  animation: none;
+}
 .tab-demo--bold .tab-demo__key {
   animation: tab-demo-lit-zeros 6s steps(1, end) infinite;
 }
