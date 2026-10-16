@@ -614,11 +614,10 @@ html.part-modal-open body { overflow: hidden; }
   text-transform: uppercase;
 }
 
-/* First-use tips (bass stems, B shortcut). Bottom-left so they never cover
-   the error toasts at the bottom-right. */
+/* First-use tips (bass stems, B shortcut), bottom-right like the toasts. */
 .part-tip {
   position: fixed;
-  left: max(1rem, env(safe-area-inset-left));
+  right: max(1rem, env(safe-area-inset-right));
   bottom: max(1rem, env(safe-area-inset-bottom));
   z-index: 1000;
   width: min(22rem, calc(100vw - 2rem));
