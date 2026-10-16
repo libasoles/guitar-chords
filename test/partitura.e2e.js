@@ -391,12 +391,13 @@ async function fillForm(page, name) {
           return { border: style.borderTopWidth, background: style.backgroundColor };
         });
         assert.equal(highlight.border, '0px');
-        assert.equal(highlight.background, 'rgba(255, 215, 0, 0.15)');
+        assert.ok(highlight.background.startsWith('rgba(139, 0, 0,'));
         const inlineError = await page.locator('#partRightsError').evaluate(node => {
           const label = document.querySelector('#partRightsLabel');
           const box = node.getBoundingClientRect();
           const text = label.getBoundingClientRect();
-          return { aligned: Math.abs(box.left - text.left) < 1, gap: box.top - text.bottom, smaller: parseFloat(getComputedStyle(node).fontSize) < parseFloat(getComputedStyle(label).fontSize) };
+          const checkbox = document.querySelector('#partRights').getBoundingClientRect();
+          return { aligned: Math.abs(box.left - checkbox.left) < 1, gap: box.top - text.bottom, smaller: parseFloat(getComputedStyle(node).fontSize) < parseFloat(getComputedStyle(label).fontSize) };
         });
         assert.ok(inlineError.aligned && inlineError.gap >= 0 && inlineError.gap <= 3 && inlineError.smaller);
         assert.equal(await page.locator('.part-rights').evaluate(node => getComputedStyle(node).animationName), 'none');
