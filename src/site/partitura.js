@@ -713,7 +713,7 @@
     return box.left + box.width / 2;
   }
 
-  var CHAR_WIDTH = 9; // px of one fret digit at the tab font size
+  var CHAR_WIDTH = 11; // px of one fret digit at the tab font size
   var MIN_GAP = 6;
 
   // Positions of each Column in CSS pixels from the measure's left edge.
@@ -861,7 +861,7 @@
         var available = Math.max(container.clientWidth, 560);
         var scale = available / Math.max(90 * staffSpace, size.w);
         if (!(scale > 0)) return;
-        var font = Math.min(22, Math.max(10, 1.5 * staffSpace * scale));
+        var font = Math.min(28, Math.max(13, 2 * staffSpace * scale));
         tabsLine.style.setProperty('--ascii-tabs-font-size', font + 'px');
         svg.setAttribute('width', String(size.w * scale));
         svg.setAttribute('height', String(size.h * scale));
@@ -1044,7 +1044,7 @@
           var staffSpace = preview.staff_space || 7.2;
           var reference = Math.max(90 * staffSpace, widest);
           var scale = available / reference;
-          var tabFont = Math.min(22, Math.max(10, 1.5 * staffSpace * scale));
+          var tabFont = Math.min(28, Math.max(13, 2 * staffSpace * scale));
           rowViews.forEach(function (v) {
             if (!v.svg || !v.size) return;
             v.tabsLine.style.setProperty('--ascii-tabs-font-size', tabFont + 'px');
