@@ -1130,6 +1130,7 @@ function renderPartituraPage(template, strings, locale) {
     "partTuningStandard",
     "partTuningDropD",
     "partSubmit",
+    "partDurationHint",
     "partResumeHint",
     "partLoadingAlt",
     "partPrivacySummary",

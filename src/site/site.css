@@ -1739,11 +1739,7 @@ body.partitura-body {
 }
 .part-example {
   min-width: 0;
-  margin: 0.5rem 0 0;
-  padding: 1.2rem;
-  border: 1px solid var(--rule);
-  border-radius: 16px;
-  background: #fff;
+  margin: 1.5rem 0 0;
 }
 .part-example figcaption {
   display: grid;
@@ -1758,14 +1754,12 @@ body.partitura-body {
   color: var(--ink);
 }
 .part-example-score {
-  margin-top: 1rem;
+  margin: 1.5rem auto 0;
+  max-width: 648px;
   overflow-x: auto;
 }
 .part-example-score .part-row {
   margin-bottom: 0;
-}
-.part-example-score .part-row-tabs {
-  --ascii-tabs-fret-background: #fff;
 }
 .part-rights {
   display: flex;
@@ -2001,7 +1995,9 @@ body.partitura-body {
   border-left: 3px solid var(--rule);
 }
 .part-rows {
-  margin: 1rem 0;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  isolation: isolate;
 }
 .part-row {
   margin-bottom: 1.4rem;
