@@ -657,9 +657,8 @@ def style_header(svg):
 
 def draw_tab_clef(svg):
     """Replaces Verovio's TAB clef (SMuFL E06D, drawn large and black) with a
-    solid light-gray T-A-B with no background. The letters sit in the three
+    solid black T-A-B with no background. The letters sit in the three
     middle spaces between lines, so no staff line crosses them."""
-    gray = "#bdbdbd"
 
     def staff(match):
         body = match.group(0)
@@ -675,7 +674,7 @@ def draw_tab_clef(svg):
             letters = "".join(
                 f'<text x="{x + 0.65 * gap:.0f}" y="{(ys[mid - 2 + i] + ys[mid - 1 + i]) / 2 + 0.43 * gap:.0f}" text-anchor="middle" '
                 f'font-family="sans-serif" font-weight="bold" font-size="{1.2 * gap:.0f}px" '
-                f'fill="{gray}" stroke="none">{ch}</text>' for i, ch in enumerate("TAB"))
+                f'fill="#000000" stroke="none">{ch}</text>' for i, ch in enumerate("TAB"))
             return f'{c.group(1)}>{letters}</g>'
 
         return re.sub(r'(<g [^>]*class="clef")>\s*<use xlink:href="#E06D[^>]*?translate\(([\d.]+), [\d.]+\)[^>]*/>\s*</g>',

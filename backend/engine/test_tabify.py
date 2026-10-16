@@ -125,13 +125,13 @@ class ScoreImportTests(unittest.TestCase):
                     for p in range(1, toolkit.getPageCount() + 1))
         self.assertEqual(drawn, 60)
 
-    def test_tab_clef_is_solid_gray_letters(self):
+    def test_tab_clef_is_solid_black_letters(self):
         lines = ''.join(f'<path d="M0 {y} L900 {y}" />' for y in range(100, 700, 100))
         svg = ('<g class="staff">' + lines + '<g id="b" class="clef">\n'
                '<use xlink:href="#E06D-x" transform="translate(50, 400) scale(0.7, 0.7)" /></g></g>')
         out = tabify.draw_tab_clef(svg)
         self.assertNotIn('E06D', out)
-        self.assertEqual(out.count('fill="#bdbdbd"'), 3)
+        self.assertEqual(out.count('fill="#000000"'), 3)
 
     def test_tab_staves_lose_meter_and_page_loses_brace(self):
         svg = ('<g class="staff"><g class="meterSig"><use /></g></g>'
