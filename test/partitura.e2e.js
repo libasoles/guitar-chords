@@ -351,7 +351,7 @@ async function fillForm(page, name) {
         await page.close();
       }
 
-      // Rights checkbox gates the upload; privacy summary expands and links.
+      // Rights checkbox gates the upload; privacy details stay visible with one footer link.
       {
         const page = await browser.newPage();
         await mockApi(page, { jobs: [READY] });
@@ -391,8 +391,10 @@ async function fillForm(page, name) {
         assert.ok(await page.locator('#partFile').isEnabled());
         assert.equal(await page.locator('#partDropzone').getAttribute('aria-disabled'), 'false');
         assert.ok(await page.locator('.part-privacy p').first().isVisible());
+        assert.equal(await page.locator('.part-privacy a').count(), 0);
+        assert.equal(await page.locator('a[href="' + prefix + '/politica-de-privacidad"]').count(), 1);
         assert.equal(
-          await page.locator('.part-privacy a').getAttribute('href'),
+          await page.locator('.privacy-link a').getAttribute('href'),
           prefix + '/politica-de-privacidad',
         );
         // Turnstile script only loads on this page, widget gets the site key.
