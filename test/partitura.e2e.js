@@ -53,7 +53,7 @@ const SUGGESTION = {
   ],
   preview_columns: [
     [{ note_ids: ['tab-note-0'], bass_strings: [3] }, { note_ids: ['tab-note-1'], bass_strings: [5] }],
-    [{ note_ids: ['tab-note-2'], bass_strings: [1] }, { note_ids: ['tab-note-3'], bass_strings: [5] }],
+    [{ note_ids: ['tab-note-2'], bass_strings: [] }, { note_ids: ['tab-note-3'], bass_strings: [5] }],
   ],
   dropped: [{ measure: 2, pitch: 'C#2' }],
 };
@@ -527,6 +527,13 @@ async function fillForm(page, name) {
           return [getComputedStyle(col).fontWeight, getComputedStyle(top).fontWeight];
         });
         assert.ok(Number(weights[0]) >= 600 && Number(weights[1]) < 600, 'bass bold only: ' + weights);
+        // A Column with no downward stems has no bass: nothing is bold there.
+        const upStem = await page.evaluate(() => {
+          const m = document.querySelectorAll('.part-measure-tab')[1];
+          const cell = m.querySelector('.ascii-tabs-has[data-c="0"][data-s="1"] .ascii-tabs-fret');
+          return getComputedStyle(cell).fontWeight;
+        });
+        assert.ok(Number(upStem) < 600, 'up-stem Column not bold: ' + upStem);
         await page.locator('#partBoldBass').uncheck();
 
         // Confirm and export: the Digitación confirmada goes to POST /export.
