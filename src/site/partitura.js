@@ -990,10 +990,14 @@
     }
     var titleInput = headerInput('partTitle', t('partTitleLabel'), preview.title);
     var authorInput = headerInput('partAuthor', t('partAuthorLabel'), preview.author);
-    var headerEl = el('div', 'part-header');
-    headerEl.appendChild(titleInput);
-    headerEl.appendChild(authorInput);
-    toolbar.appendChild(headerEl);
+    var titleRow = el('div', 'part-header-row');
+    var titleWrap = el('div', 'part-header');
+    titleWrap.appendChild(titleInput);
+    titleRow.appendChild(titleWrap);
+    resultEl.appendChild(titleRow);
+    var authorWrap = el('div', 'part-header');
+    authorWrap.appendChild(authorInput);
+    toolbar.appendChild(authorWrap);
     resultEl.appendChild(toolbar);
 
     // Sticky footer with the primary action.

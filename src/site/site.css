@@ -2409,6 +2409,8 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
   margin-left: auto;
   width: min(26rem, 100%);
 }
+.part-header-row { display: flex; justify-content: flex-end; margin-bottom: 0.4rem; }
+.part-header-row .part-header { width: min(26rem, 100%); }
 .part-header-input {
   width: 100%;
   box-sizing: border-box;
@@ -2428,6 +2430,7 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
 .part-header-title { font-size: 1.6rem; }
 .part-header-author { font-size: 1.05rem; }
 .part-result-modal .part-toolbar,
+.part-result-modal > .part-header-row,
 .part-result-modal .part-rows {
   max-width: 64rem;
   margin-left: auto;
