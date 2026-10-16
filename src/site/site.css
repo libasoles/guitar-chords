@@ -2290,7 +2290,7 @@ footer {
   display: grid;
   justify-items: center;
   gap: 0.4rem;
-  margin: 2rem 0;
+  margin: 4rem 0 2rem;
   text-align: center;
   font-family: var(--sans);
 }
