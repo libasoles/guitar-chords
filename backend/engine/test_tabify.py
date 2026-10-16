@@ -46,6 +46,37 @@ class ScoreImportTests(unittest.TestCase):
         self.assertEqual(tabify.extract_header(score),
                          ('Titulo', ['Autor', 'Transcriptor']))
 
+    def test_header_ignores_declared_credits_when_text_is_positioned(self):
+        m21 = tabify.m21
+        score = m21.stream.Score()
+        score.metadata = m21.metadata.Metadata()
+        score.metadata.composer = 'Editorial Pie de pagina'
+        for text, y, size in [('COMO EL AIRE', 1723, 26), ('Juan Falu', 1844, 21),
+                              ('Editorial Pie de pagina', 120, 12)]:
+            box = m21.text.TextBox(text, y=y, page=1)
+            box.style.fontSize = size
+            score.insert(0, box)
+        self.assertEqual(tabify.extract_header(score), ('COMO EL AIRE', ['Juan Falu']))
+
+    def test_pdf_xml_has_no_label_header_credits_and_notation_only_meter(self):
+        xml = ('<score-partwise><part-list><score-part id="P1"><part-name>Guitarra</part-name>'
+               '<part-abbreviation>Guit.</part-abbreviation></score-part></part-list>'
+               '<part id="P1"><measure number="1"><attributes><time><beats>6</beats>'
+               '<beat-type>8</beat-type></time></attributes></measure></part></score-partwise>')
+        out = tabify.add_credits(tabify.notation_time_only(tabify.clean_labels(xml)),
+                                 'Titulo', ['Autor', 'Transcriptor'])
+        self.assertNotIn('Guitarra', out)
+        self.assertNotIn('part-abbreviation', out)
+        self.assertIn('<time number="1">', out)
+        self.assertIn('>Titulo</credit-words>', out)
+        self.assertIn('>Autor · Transcriptor</credit-words>', out)
+
+    def test_tab_clef_is_softened(self):
+        svg = '<g id="a" class="clef"><use xlink:href="#E050-x" /></g><g id="b" class="clef">\n<use xlink:href="#E06D-x" /></g>'
+        out = tabify.soften_tab_clef(svg)
+        self.assertEqual(out.count('fill="#bdbdbd"'), 1)
+        self.assertIn('<g id="b" class="clef" fill="#bdbdbd">', out)
+
     def test_preview_justifies_rows_and_keeps_short_last_row(self):
         m21 = tabify.m21
         part = m21.stream.Part()
