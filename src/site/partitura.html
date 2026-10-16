@@ -62,10 +62,6 @@
       <p class="lead">%%PAGE_LEAD%%</p>
 
       <form id="partForm" class="part-form" novalidate>
-        <label id="partRightsRow" class="part-rights">
-          <input type="checkbox" id="partRights" required />
-          <span>%%partRightsLabel%%</span>
-        </label>
         <label id="partDropzone" class="part-dropzone" aria-disabled="false">
           <input
             class="part-file-input"
@@ -79,9 +75,12 @@
             <path d="M12 16V4m-4 4 4-4 4 4M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4" />
           </svg>
           <strong id="partDropTitle">%%partDropTitle%%</strong>
-          <span class="part-drop-browse">%%partDropBrowse%%</span>
           <span id="partDropHint">%%partFileLabel%%</span>
           <span id="partSelectedFile" class="part-selected-file" role="status"></span>
+        </label>
+        <label id="partRightsRow" class="part-rights">
+          <input type="checkbox" id="partRights" required />
+          <span>%%partRightsLabel%%</span>
         </label>
         <div id="partTurnstile" class="part-turnstile"></div>
         <figure class="part-example">

@@ -1120,7 +1120,6 @@ function renderPartituraPage(template, strings, locale) {
     "partRightsLabel",
     "partFileLabel",
     "partDropTitle",
-    "partDropBrowse",
     "partExampleTitle",
     "partExampleCaption",
     "partExampleAlt",
