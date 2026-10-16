@@ -30,6 +30,14 @@ def _is_conditional_failure(err):
     return err.response["Error"]["Code"] == "ConditionalCheckFailedException"
 
 
+def _disposition(filename):
+    from urllib.parse import quote
+    ascii_name = filename.encode("ascii", "replace").decode().replace("?", "_")
+    if ascii_name == filename:
+        return f'attachment; filename="{filename}"'
+    return f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''{quote(filename)}"
+
+
 class DynamoStore:
     def __init__(self, table_name):
         import boto3
@@ -134,7 +142,7 @@ class S3Blob:
         return self.s3.generate_presigned_url(
             "get_object", ExpiresIn=expires,
             Params={"Bucket": self.bucket, "Key": key,
-                    "ResponseContentDisposition": f'attachment; filename="{filename}"'})
+                    "ResponseContentDisposition": _disposition(filename)})
 
     def size(self, key):
         try:
