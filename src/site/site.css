@@ -1728,9 +1728,6 @@ footer {
 
 /* ----- Partitura y tablatura tool ----- */
 
-body.partitura-body {
-  max-width: 1120px;
-}
 .part-form {
   display: grid;
   gap: 1.1rem;
@@ -2027,7 +2024,10 @@ body.partitura-body {
   border-left: 3px solid var(--rule);
 }
 .part-rows {
-  margin: 1.5rem 0;
+  /* The score preview may be wider than the 760px page column. */
+  --part-rows-width: min(1120px, calc(100vw - 3rem));
+  width: var(--part-rows-width);
+  margin: 1.5rem calc(50% - var(--part-rows-width) / 2);
   overflow-x: auto;
   isolation: isolate;
 }
