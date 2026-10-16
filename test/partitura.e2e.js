@@ -406,7 +406,7 @@ async function fillForm(page, name) {
         await page.close();
       }
 
-      // The example disappears as soon as an upload starts.
+      // Upload controls and the example disappear as soon as an upload starts.
       {
         const page = await browser.newPage();
         await mockApi(page, { jobs: [READY] });
@@ -420,6 +420,8 @@ async function fillForm(page, name) {
         await fillForm(page);
         await page.waitForSelector('#partProgress:not([hidden])');
         assert.ok(await page.locator('.part-example').isHidden());
+        assert.ok(await page.locator('#partDropzone').isHidden());
+        assert.ok(await page.locator('#partRightsRow').isHidden());
         assert.equal(await page.locator('.part-duration').textContent(), S.partDurationHint);
         releaseUpload();
         await page.waitForSelector('#partRows .part-row');
@@ -555,6 +557,8 @@ async function fillForm(page, name) {
         await fillForm(page);
         await page.waitForSelector('.toast-description');
         assert.equal(await page.locator('.toast-description').textContent(), S['partErr_' + code], code);
+        assert.ok(await page.locator('#partDropzone').isVisible());
+        assert.ok(await page.locator('#partRightsRow').isVisible());
         await page.close();
 
         const failed = await browser.newPage({ viewport: { width: 1280, height: 900 } });

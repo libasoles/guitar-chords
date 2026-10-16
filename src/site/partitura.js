@@ -100,6 +100,8 @@
   }
 
   function setBusy(busy) {
+    dropzone.hidden = busy;
+    rightsRow.hidden = busy;
     fileInput.disabled = busy;
     dropzone.setAttribute('aria-disabled', String(fileInput.disabled));
     dropzone.classList.remove('is-dragging');
