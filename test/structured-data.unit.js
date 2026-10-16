@@ -95,3 +95,18 @@ test('una pagina-herramienta es WebApplication con migas y FAQPage sin HTML', ()
   assert.equal(faq.mainEntity[0].name, '¿Se guarda?');
   assert.equal(faq.mainEntity[0].acceptedAnswer.text, 'Sí, en tu navegador.');
 });
+
+test('partitura-y-tablatura: vista previa con el banner de la home y FAQPage (si se genero)', (t) => {
+  const file = path.join(DIST, 'partitura-y-tablatura.html');
+  if (!fs.existsSync(file)) return t.skip('la pagina solo se genera con PARTITURA_API_URL');
+  ['partitura-y-tablatura.html', 'en/partitura-y-tablatura.html'].forEach((f) => {
+    const html = fs.readFileSync(path.join(DIST, f), 'utf8');
+    const lang = html.match(/<html lang="(\w+)"/)[1];
+    assert.match(html, new RegExp('property="og:image" content="[^"]+/assets/og-partitura-' + lang + '\\.png"'), f);
+    assert.match(html, /name="twitter:card" content="summary_large_image"/, f);
+    assert.ok(fs.existsSync(path.join(DIST, 'assets', 'og-partitura-' + lang + '.png')), f);
+    const { graph } = ldOf(f);
+    const kinds = graph.map((n) => n['@type']);
+    assert.ok(kinds.includes('WebApplication') && kinds.includes('FAQPage'), f);
+  });
+});
