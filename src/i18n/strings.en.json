@@ -417,7 +417,6 @@
   "partMobileNote": "The preview and the editor are available on screens 768 px wide or more.",
   "partPrivacySummary": "What happens to my files?",
   "partPrivacyBody": "Your file is private, used only to generate the tablatures and deleted automatically after 24 hours.",
-  "partPrivacyLink": "Full privacy policy",
   "partErrDefault": "An unexpected error occurred. Try again in a few minutes.",
   "partErrNetwork": "We could not reach the service. Check your connection and try again.",
   "partErrBadType": "Unsupported format. Upload a PDF, MusicXML (.musicxml, .xml) or .mxl file.",

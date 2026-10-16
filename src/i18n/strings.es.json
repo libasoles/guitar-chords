@@ -417,7 +417,6 @@
   "partMobileNote": "La vista previa y el editor están disponibles en pantallas de 768 px o más.",
   "partPrivacySummary": "¿Qué pasa con mis archivos?",
   "partPrivacyBody": "Tu archivo es privado, se usa solo para generar las tablaturas y se borra automáticamente a las 24 horas.",
-  "partPrivacyLink": "Política de privacidad completa",
   "partErrDefault": "Ocurrió un error inesperado. Probá de nuevo en unos minutos.",
   "partErrNetwork": "No pudimos conectar con el servicio. Revisá tu conexión y probá de nuevo.",
   "partErrBadType": "Formato no admitido. Subí un PDF, MusicXML (.musicxml, .xml) o .mxl.",
