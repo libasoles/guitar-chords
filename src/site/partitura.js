@@ -1213,6 +1213,11 @@
           confirmBtn.disabled = true;
           showError('');
           var label = confirmText.textContent;
+          var idleIcon = confirmIcon.innerHTML;
+          confirmIcon.innerHTML =
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+            'stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.2-8.56" /></svg>';
+          confirmBtn.setAttribute('aria-busy', 'true');
           confirmText.textContent = t('partExporting');
           runExport(jobId, current.map(function (tab) { return tab.map(function (c) { return c.slice(); }); }),
             { title: titleInput.value, subtitle: authorInput.value })
@@ -1226,6 +1231,8 @@
             .then(function () {
               state.exporting = false;
               confirmBtn.disabled = false;
+              confirmBtn.removeAttribute('aria-busy');
+              confirmIcon.innerHTML = idleIcon;
               confirmText.textContent = label;
             });
         });

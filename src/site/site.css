@@ -2388,6 +2388,15 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
   width: 1.2rem;
   height: 1.2rem;
 }
+.part-footer-btn[aria-busy="true"] .part-footer-icon svg {
+  animation: part-spin 0.8s linear infinite;
+}
+@keyframes part-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .part-footer-btn[aria-busy="true"] .part-footer-icon svg { animation-duration: 2.4s; }
+}
 .part-note {
   margin: 0.4rem 0;
   font-size: 0.85rem;
