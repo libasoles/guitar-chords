@@ -243,6 +243,37 @@ async function fillForm(page, name) {
         await page.close();
       }
 
+      // The promotional measure uses real notation and TAB, aligned on resize.
+      {
+        const page = await browser.newPage();
+        await mockApi(page, { jobs: [READY] });
+        await page.goto(toolUrl);
+        assert.equal(await page.locator('.part-example strong').textContent(), S.partExampleTitle);
+        assert.equal(await page.locator('.part-example figcaption span').textContent(), S.partExampleCaption);
+        assert.equal(await page.locator('.part-example img, .part-example image').count(), 0);
+        for (const width of [1100, 390]) {
+          await page.setViewportSize({ width, height: 1000 });
+          await page.waitForFunction(() => {
+            const root = document.querySelector('#partExampleScore');
+            const tabs = root.querySelector('ascii-tabs');
+            if (!tabs || root.querySelectorAll('.ascii-tabs-has').length !== 10) return false;
+            const center = node => {
+              const box = node.getBoundingClientRect();
+              return box.left + box.width / 2;
+            };
+            return window.PARTITURA_CONFIG.example.attacks.every((attack, c) => {
+              const positions = attack.noteIds.map(id => center(root.querySelector('[data-id="' + id + '"] .notehead')));
+              const x = positions.reduce((a, b) => a + b) / positions.length;
+              const cell = tabs.querySelector('.ascii-tabs-has[data-c="' + c + '"]');
+              return Math.abs(x - center(cell)) < 3;
+            });
+          });
+          assert.ok(await page.locator('.part-example ascii-tabs').evaluate(tabs => tabs.readonly));
+          assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+        }
+        await page.close();
+      }
+
       // Rights checkbox gates the upload; privacy summary expands and links.
       {
         const page = await browser.newPage();

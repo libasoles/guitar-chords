@@ -797,6 +797,53 @@
     return { width: width, positions: positions };
   }
 
+  // The example uses the engine's notation and the same TAB component and
+  // note-id geometry as an uploaded score, without creating a Job.
+  function renderExample() {
+    var container = $('partExampleScore');
+    var example = CFG.example;
+    if (!container || !example) return;
+    var svg = sanitizeSvg(example.svg);
+    if (!svg) return;
+    var size = intrinsicSize(svg);
+    var row = el('div', 'part-row');
+    var notation = el('div', 'part-row-notation');
+    var tabsLine = el('div', 'part-row-tabs');
+    notation.appendChild(svg);
+    row.appendChild(notation);
+    row.appendChild(tabsLine);
+    container.appendChild(row);
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', t('partExampleAlt'));
+
+    customElements.whenDefined('ascii-tabs').then(function () {
+      var tabs = document.createElement('ascii-tabs');
+      tabs.className = 'part-example-tab';
+      tabs.setAttribute('labels', 'none');
+      tabs.setAttribute('variant', 'flat');
+      tabs.setAttribute('theme', 'light');
+      tabs.setAttribute('lang', CFG.locale === 'en' ? 'en' : 'es');
+      tabs.setAttribute('readonly', '');
+      tabs.appendChild(document.createElement('ascii-tabs-sheet'));
+      tabsLine.appendChild(tabs);
+      var value = example.attacks.map(function (attack) { return attack.frets; });
+      function layout() {
+        var scale = Math.min(1, container.clientWidth / size.w);
+        if (!(scale > 0)) return;
+        svg.setAttribute('width', String(size.w * scale));
+        svg.setAttribute('height', String(size.h * scale));
+        var measure = svg.querySelector('g.measure');
+        var geometry = spaceColumns(computeLayout(example.attacks, svg, measure), value);
+        tabs.style.left = (measure.getBoundingClientRect().left - svg.getBoundingClientRect().left) + 'px';
+        tabs.style.width = geometry.width + 'px';
+        tabs.setDocument({ value: [value], columnLayout: [geometry] });
+        requestAnimationFrame(function () { tabsLine.style.height = tabs.offsetHeight + 'px'; });
+      }
+      layout();
+      new ResizeObserver(layout).observe(container);
+    });
+  }
+
   function renderPreview(preview, dropped, jobId) {
     clearResult();
     resultEl.hidden = false;
@@ -1123,6 +1170,7 @@
     attachFile(event.dataTransfer.files[0]);
   });
 
+  renderExample();
   setBusy(false);
   initTurnstile();
 
