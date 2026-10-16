@@ -149,6 +149,11 @@ def load_score(paths):
         # a guitar score has none, so drop them or they print under the staff.
         for n in score.recurse().notes:
             n.lyrics = []
+        # The same text can arrive as free text directions (<words>); only the
+        # header credits are kept, so drop every other printed text.
+        for el in list(score.recurse().getElementsByClass(
+                (m21.expressions.TextExpression, m21.expressions.RehearsalMark, m21.tempo.TempoIndication))):
+            el.activeSite.remove(el)
     part = scores[0].parts[0]
     first = part.getElementsByClass(m21.stream.Measure).first()
     if first is not None:
