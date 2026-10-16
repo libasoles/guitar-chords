@@ -1438,6 +1438,25 @@ footer {
 
 /* ----- Tablatura ASCII (<ascii-tabs>, vendor/ascii-tabs.js) ----- */
 
+/* The library blinks a caret only in empty cells. A cell that already has a
+   fret was just highlighted, so clicking it gave no sign it was being edited:
+   blink the same caret right after the digits. */
+ascii-tabs.ascii-tabs-editing .ascii-tabs-cur .ascii-tabs-fret:not(:has(.ascii-tabs-caret))::after {
+  content: '';
+  position: absolute;
+  left: 100%;
+  top: 0.25em;
+  bottom: 0.25em;
+  width: 2px;
+  margin-left: 1px;
+  background: var(--ascii-tabs-accent);
+  animation: ascii-tabs-blink 1s steps(1) infinite;
+}
+ascii-tabs.ascii-tabs-dragging .ascii-tabs-cur .ascii-tabs-fret::after,
+ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
+  display: none;
+}
+
 .tab-editor {
   --ascii-tabs-font: var(--mono);
   --ascii-tabs-font-size: 17px;
