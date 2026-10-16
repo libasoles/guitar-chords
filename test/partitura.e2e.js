@@ -498,7 +498,7 @@ async function fillForm(page, name) {
         });
         align.forEach(delta => assert.ok(delta < 3, 'tab column aligned with the note, off by ' + delta));
         // Common scale: both measures share the row's top-left geometry.
-        for (const gone of ['#partEdited', '#partReset', '#partBoldBass']) {
+        for (const gone of ['#partEdited', '#partReset']) {
           assert.equal(await page.locator(gone).count(), 0, gone + ' is gone');
         }
         assert.ok(await page.locator('.part-row .part-example-clef').count() >= 3, 'TAB clef letters');
@@ -519,6 +519,15 @@ async function fillForm(page, name) {
         await page.locator('#partNotation').check();
         assert.equal(await page.locator('.part-measure-tab').first().evaluate(n => n.notation), 'solfege');
         await page.locator('#partNotation').uncheck();
+        await page.locator('#partBoldBass').check();
+        const weights = await page.evaluate(() => {
+          const m = document.querySelectorAll('.part-measure-tab')[1];
+          const col = m.querySelector('.ascii-tabs-has[data-c="1"][data-s="5"] .ascii-tabs-fret');
+          const top = m.querySelector('.ascii-tabs-has[data-c="1"][data-s="0"] .ascii-tabs-fret');
+          return [getComputedStyle(col).fontWeight, getComputedStyle(top).fontWeight];
+        });
+        assert.ok(Number(weights[0]) >= 600 && Number(weights[1]) < 600, 'bass bold only: ' + weights);
+        await page.locator('#partBoldBass').uncheck();
 
         // Confirm and export: the Digitación confirmada goes to POST /export.
         await page.locator('#partConfirm').click();

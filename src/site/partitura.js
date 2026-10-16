@@ -686,6 +686,25 @@
     return out;
   }
 
+  // Bass: the lowest sounding String (highest index) of a Column.
+  function bassString(column) {
+    for (var s = STRINGS_COUNT - 1; s >= 0; s--) if (column[s] !== null) return s;
+    return -1;
+  }
+
+  // Bass strings come from the engine (suggestion.json bass_strings); a
+  // Column without them falls back to its lowest sounding String.
+  function styledTab(tab, boldBass, bassColumns) {
+    if (!boldBass) return tab.map(function (column) { return column.slice(); });
+    return tab.map(function (column, c) {
+      var listed = bassColumns && bassColumns[c];
+      var bass = listed && listed.length ? listed : [bassString(column)];
+      return column.map(function (fret, s) {
+        return fret === null ? null : { fret: fret, bold: bass.indexOf(s) !== -1 };
+      });
+    });
+  }
+
   function sanitizeSvg(markup) {
     var doc = new DOMParser().parseFromString(markup, 'image/svg+xml');
     var root = doc.documentElement;
@@ -921,20 +940,31 @@
     var current = [];
     var elements = [];
     var layouts = [];
+    var bassOf = [];
+    var boldBass = false;
 
     // Toolbar.
     var toolbar = el('div', 'part-toolbar');
     toolbar.setAttribute('role', 'group');
     toolbar.setAttribute('aria-label', t('partToolbarLabel'));
-    var notationLabel = el('label', 'part-toolbar-item');
-    var notationInput = document.createElement('input');
-    notationInput.type = 'checkbox';
-    notationInput.id = 'partNotation';
-    notationLabel.appendChild(notationInput);
-    notationLabel.appendChild(el('span', null, t('partNotationNames')));
+    function toolbarCheckbox(id, text) {
+      var label = el('label', 'part-toolbar-item');
+      label.htmlFor = id;
+      var input = document.createElement('input');
+      input.type = 'checkbox';
+      input.id = id;
+      label.appendChild(input);
+      label.appendChild(el('span', null, text));
+      return { label: label, input: input };
+    }
+    var notation = toolbarCheckbox('partNotation', t('partNotationNames'));
+    var notationInput = notation.input;
+    var boldControl = toolbarCheckbox('partBoldBass', t('partBoldBass'));
+    var boldInput = boldControl.input;
     function notationValue() { return notationInput.checked ? 'solfege' : 'frets'; }
     var tabFontPx = 15;
-    toolbar.appendChild(notationLabel);
+    toolbar.appendChild(notation.label);
+    toolbar.appendChild(boldControl.label);
     resultEl.appendChild(toolbar);
 
     // Sticky footer with the primary action.
@@ -987,7 +1017,8 @@
           for (var k0 = 0; first + k0 <= last; k0++) (function (k) {
             var attacks = preview.measures[first + k] || [];
             var index = first + k;
-            while (suggested.length < index) { suggested.push([]); current.push([]); elements.push(null); }
+            while (suggested.length < index) { suggested.push([]); current.push([]); elements.push(null); bassOf.push([]); }
+            bassOf[index] = attacks.map(function (a) { return a.bass; });
             var base = attacks.map(function (a) { return a.frets; });
             suggested.push(base);
             var restored = persisted && persisted[index];
@@ -1031,7 +1062,11 @@
           var staffSpace = preview.staff_space || 7.2;
           var reference = Math.max(90 * staffSpace, widest);
           var scale = available / reference;
-          var tabFont = Math.min(20, Math.max(11, 1.4 * staffSpace * scale));
+          var names = notationInput.checked;
+          rowsEl.classList.toggle('part-names-mode', names);
+          var tabFont = names
+            ? Math.min(20, Math.max(11, 1.4 * staffSpace * scale))
+            : Math.min(28, Math.max(13, 2 * staffSpace * scale));
           tabFontPx = tabFont;
           rowViews.forEach(function (v) {
             if (!v.svg || !v.size) return;
@@ -1044,7 +1079,9 @@
             v.measures.forEach(function (m) {
               var node = v.svg ? v.svg.querySelectorAll('g.measure')[m.k] || null : null;
               var layout = computeLayout(m.attacks, v.svg || document.body, node);
-              var spaced = spaceColumns(layout, current[m.index], tabFontPx * 0.6, notationInput.checked ? 3 : 1);
+              var spaced = notationInput.checked
+                ? spaceColumns(layout, current[m.index], tabFontPx * 0.6, 3)
+                : spaceColumns(layout, current[m.index]);
               layouts[m.index] = spaced;
               var left = node ? node.getBoundingClientRect().left - rowLeft : 0;
               m.el.style.left = left + 'px';
@@ -1093,7 +1130,7 @@
 
         function applyValue(index, withLayout) {
           var elx = elements[index];
-          var value = current[index].map(function (column) { return column.slice(); });
+          var value = styledTab(current[index], boldBass, bassOf[index]);
           try {
             if (withLayout) {
               elx.setDocument({ value: [value], columnLayout: [layouts[index]] });
@@ -1113,6 +1150,10 @@
 
         notationInput.addEventListener('change', function () {
           layoutAll();
+        });
+        boldInput.addEventListener('change', function () {
+          boldBass = boldInput.checked;
+          elements.forEach(function (_, i) { applyValue(i, true); });
         });
         confirmBtn.addEventListener('click', function () {
           if (state.exporting) return;
