@@ -2417,6 +2417,9 @@ html.part-modal-open body { overflow: hidden; }
   --ascii-tabs-fret-background: var(--paper);
   --ascii-tabs-flat-background: transparent;
 }
+.part-row-tabs .ascii-tabs-fret {
+  font-weight: 400;
+}
 .part-measure-tab,
 .part-example-tab {
   position: absolute;

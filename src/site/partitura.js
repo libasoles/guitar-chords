@@ -781,24 +781,26 @@
 
   // Keep Frets from overlapping: enforce a minimum gap sized by digit count and
   // widen the area when the measure is too tight (the tab then scrolls).
-  function spaceColumns(layout, tab) {
+  function spaceColumns(layout, tab, charWidth, minChars) {
+    charWidth = charWidth || CHAR_WIDTH;
+    minChars = minChars || 1;
     var positions = layout.positions.slice();
     var width = layout.width;
     for (var c = 0; c < positions.length; c++) {
-      var digits = 1;
+      var digits = minChars;
       for (var s = 0; s < STRINGS_COUNT; s++) {
         var f = tab[c] ? fretOf(tab[c][s]) : null;
         if (f !== null) digits = Math.max(digits, String(f).length);
       }
-      var half = (digits * CHAR_WIDTH) / 2 + 1;
+      var half = (digits * charWidth) / 2 + 1;
       if (positions[c] < half) positions[c] = half;
       if (c > 0) {
-        var prevDigits = 1;
+        var prevDigits = minChars;
         for (var p = 0; p < STRINGS_COUNT; p++) {
           var pf = tab[c - 1] ? fretOf(tab[c - 1][p]) : null;
           if (pf !== null) prevDigits = Math.max(prevDigits, String(pf).length);
         }
-        var gap = (prevDigits * CHAR_WIDTH) / 2 + half + MIN_GAP;
+        var gap = (prevDigits * charWidth) / 2 + half + MIN_GAP;
         if (positions[c] < positions[c - 1] + gap) positions[c] = positions[c - 1] + gap;
       }
     }
@@ -920,15 +922,13 @@
     toolbar.setAttribute('role', 'group');
     toolbar.setAttribute('aria-label', t('partToolbarLabel'));
     var notationLabel = el('label', 'part-toolbar-item');
-    notationLabel.appendChild(el('span', null, t('partNotation')));
-    var notationSelect = document.createElement('select');
-    notationSelect.id = 'partNotation';
-    [['frets', 'partNotationFrets'], ['solfege', 'partNotationSolfege']].forEach(function (o) {
-      var opt = el('option', null, t(o[1]));
-      opt.value = o[0];
-      notationSelect.appendChild(opt);
-    });
-    notationLabel.appendChild(notationSelect);
+    var notationInput = document.createElement('input');
+    notationInput.type = 'checkbox';
+    notationInput.id = 'partNotation';
+    notationLabel.appendChild(notationInput);
+    notationLabel.appendChild(el('span', null, t('partNotationNames')));
+    function notationValue() { return notationInput.checked ? 'solfege' : 'frets'; }
+    var tabFontPx = 15;
     toolbar.appendChild(notationLabel);
     resultEl.appendChild(toolbar);
 
@@ -1026,7 +1026,8 @@
           var staffSpace = preview.staff_space || 7.2;
           var reference = Math.max(90 * staffSpace, widest);
           var scale = available / reference;
-          var tabFont = Math.min(28, Math.max(13, 2 * staffSpace * scale));
+          var tabFont = Math.min(20, Math.max(11, 1.4 * staffSpace * scale));
+          tabFontPx = tabFont;
           rowViews.forEach(function (v) {
             if (!v.svg || !v.size) return;
             v.tabsLine.style.setProperty('--ascii-tabs-font-size', tabFont + 'px');
@@ -1038,7 +1039,7 @@
             v.measures.forEach(function (m) {
               var node = v.svg ? v.svg.querySelectorAll('g.measure')[m.k] || null : null;
               var layout = computeLayout(m.attacks, v.svg || document.body, node);
-              var spaced = spaceColumns(layout, current[m.index]);
+              var spaced = spaceColumns(layout, current[m.index], tabFontPx * 0.6, notationInput.checked ? 3 : 1);
               layouts[m.index] = spaced;
               var left = node ? node.getBoundingClientRect().left - rowLeft : 0;
               m.el.style.left = left + 'px';
@@ -1098,15 +1099,15 @@
             // Invalid geometry: fall back to plain ASCII layout for this measure.
             try { elx.setDocument({ value: [value] }); } catch (e2) { /* ignore */ }
           }
-          if (elx.notation !== notationSelect.value) elx.notation = notationSelect.value;
+          if (elx.notation !== notationValue()) elx.notation = notationValue();
         }
 
         function onEdited() {
           saveEdits(jobId, current);
         }
 
-        notationSelect.addEventListener('change', function () {
-          elements.forEach(function (x) { x.notation = notationSelect.value; });
+        notationInput.addEventListener('change', function () {
+          layoutAll();
         });
         confirmBtn.addEventListener('click', function () {
           if (state.exporting) return;

@@ -516,9 +516,9 @@ async function fillForm(page, name) {
         await page.waitForSelector('#partRows .part-row');
         await page.waitForFunction(() => document.querySelectorAll('.part-measure-tab .ascii-tabs-has').length === 7);
         // Frets/solfege toggle.
-        await page.locator('#partNotation').selectOption('solfege');
+        await page.locator('#partNotation').check();
         assert.equal(await page.locator('.part-measure-tab').first().evaluate(n => n.notation), 'solfege');
-        await page.locator('#partNotation').selectOption('frets');
+        await page.locator('#partNotation').uncheck();
 
         // Confirm and export: the Digitación confirmada goes to POST /export.
         await page.locator('#partConfirm').click();
