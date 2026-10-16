@@ -1102,11 +1102,11 @@ function renderPrivacyPage(template, strings, locale) {
 
 // Render the Partitura y tablatura tool page (src/site/partitura.html). The
 // client script reads window.PARTITURA_CONFIG: API base URL, Turnstile site
-// key and every part* string for the locale.
+// key and every part* and toast* string for the locale.
 function renderPartituraPage(template, strings, locale) {
   const i18n = {};
   Object.keys(strings).forEach(function (key) {
-    if (key.indexOf("part") === 0) i18n[key] = strings[key];
+    if (key.indexOf("part") === 0 || key.indexOf("toast") === 0) i18n[key] = strings[key];
   });
   const config = {
     apiUrl: PARTITURA_API_URL,
@@ -1392,6 +1392,14 @@ copyFile(
   path.join(VENDOR_DIST, "ascii-tabs.js"),
 );
 if (PARTITURA_ENABLED) {
+  require("esbuild").buildSync({
+    entryPoints: [path.join(SRC_SITE, "toast.js")],
+    outfile: path.join(ASSETS_DIST, "toast.js"),
+    bundle: true,
+    minify: true,
+    format: "iife",
+    define: { "process.env.NODE_ENV": '"production"' },
+  });
   copyFile(
     path.join(SRC_SITE, "partitura.js"),
     path.join(ASSETS_DIST, "partitura.js"),

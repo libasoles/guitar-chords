@@ -411,5 +411,8 @@
   "partErr_invalid_score": "The score could not be read. Check that the MusicXML is valid or try another file.",
   "partErr_export_failed": "The files could not be generated. Try again.",
   "partErr_internal_error": "Internal service error. Try again in a few minutes.",
-  "partErr_not_found": "We could not find this job. Start a new one."
+  "partErr_not_found": "We could not find this job. Start a new one.",
+  "toastLabel": "Notification",
+  "toastViewportLabel": "Notifications ({hotkey})",
+  "toastClose": "Dismiss notification"
 }

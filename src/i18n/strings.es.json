@@ -411,5 +411,8 @@
   "partErr_invalid_score": "No se pudo leer la partitura. Revisá que el MusicXML sea válido o probá con otro archivo.",
   "partErr_export_failed": "No se pudieron generar los archivos. Probá de nuevo.",
   "partErr_internal_error": "Error interno del servicio. Probá de nuevo en unos minutos.",
-  "partErr_not_found": "No encontramos este trabajo. Empezá uno nuevo."
+  "partErr_not_found": "No encontramos este trabajo. Empezá uno nuevo.",
+  "toastLabel": "Notificación",
+  "toastViewportLabel": "Notificaciones ({hotkey})",
+  "toastClose": "Cerrar notificación"
 }

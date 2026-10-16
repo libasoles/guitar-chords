@@ -61,15 +61,6 @@
       <h1>%%PAGE_H1%%</h1>
       <p class="lead">%%PAGE_LEAD%%</p>
 
-      <div id="partErrorBanner" class="part-error" hidden>
-        <svg class="part-error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" x2="12" y1="8" y2="12" />
-          <line x1="12" x2="12.01" y1="16" y2="16" />
-        </svg>
-        <p id="partError" role="alert" hidden></p>
-      </div>
-
       <form id="partForm" class="part-form" novalidate>
         <label id="partDropzone" class="part-dropzone" aria-disabled="false">
           <input
@@ -129,6 +120,7 @@
       window.PARTITURA_CONFIG = %%PARTITURA_CONFIG%%;
     </script>
     <script type="module" src="%%ASSETS_PREFIX%%vendor/ascii-tabs.js"></script>
+    <script defer src="%%ASSETS_PREFIX%%toast.js"></script>
     <script defer src="%%ASSETS_PREFIX%%partitura.js"></script>
     <script>
       if ("serviceWorker" in navigator) {

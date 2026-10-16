@@ -354,7 +354,7 @@ async function fillForm(page, name) {
         assert.ok(await page.locator('.part-rights.needs-rights').count());
         assert.equal(await page.locator('#partRightsError').textContent(), S.partErrRights);
         assert.ok(await page.locator('#partRightsError').isVisible());
-        assert.ok(await page.locator('#partErrorBanner').isHidden());
+        assert.equal(await page.locator('.toast').count(), 0);
         assert.equal(await page.locator('#partRights').getAttribute('aria-describedby'), 'partRightsError');
         assert.equal(await page.locator('#partDropTitle').textContent(), 'dropped.musicxml');
         assert.ok(await page.locator('#partRights').evaluate(node => node === document.activeElement));
@@ -553,26 +553,58 @@ async function fillForm(page, name) {
         await mockApi(page, { createError: code, jobs: [READY] });
         await page.goto(toolUrl);
         await fillForm(page);
-        await page.waitForSelector('#partError:not([hidden])');
-        assert.equal(await page.locator('#partError').textContent(), S['partErr_' + code], code);
+        await page.waitForSelector('.toast-description');
+        assert.equal(await page.locator('.toast-description').textContent(), S['partErr_' + code], code);
         await page.close();
 
         const failed = await browser.newPage({ viewport: { width: 1280, height: 900 } });
         await mockApi(failed, { jobs: [{ status: 'failed', error: code }] });
         await failed.goto(toolUrl + '?trabajo=' + JOB);
-        await failed.waitForSelector('#partError:not([hidden])');
-        assert.equal(await failed.locator('#partError').textContent(), S['partErr_' + code], 'job ' + code);
+        await failed.waitForSelector('.toast-description');
+        assert.equal(await failed.locator('.toast-description').textContent(), S['partErr_' + code], 'job ' + code);
         await failed.close();
       }
       {
         const page = await browser.newPage();
         await mockApi(page, { jobs: [{ httpStatus: 410, error: 'expired' }] });
         await page.goto(toolUrl + '?trabajo=' + JOB);
-        await page.waitForSelector('#partError:not([hidden])');
-        assert.equal(await page.locator('#partError').textContent(), S.partErr_expired);
+        await page.waitForSelector('.toast-description');
+        assert.equal(await page.locator('.toast-description').textContent(), S.partErr_expired);
         assert.equal(await page.locator('#partResult button').count(), 0);
         assert.ok(await page.locator('#partForm').isVisible());
         assert.ok(!page.url().includes('trabajo='));
+        await page.close();
+      }
+
+      // Toasts float outside the form, pause on hover, and close after six seconds.
+      {
+        const page = await browser.newPage({ viewport: { width: 375, height: 800 } });
+        await page.clock.install();
+        await mockApi(page, { createError: 'rate_limited', jobs: [READY] });
+        await page.goto(toolUrl);
+        await fillForm(page);
+        const toast = page.locator('.toast');
+        await toast.waitFor();
+        assert.equal(await page.locator('#partErrorBanner').count(), 0);
+        const box = await toast.boundingBox();
+        assert.ok(box.x >= 0 && box.x + box.width <= 375, 'toast fits mobile viewport');
+        await toast.hover();
+        await page.clock.runFor(7000);
+        assert.ok(await toast.isVisible(), 'hover pauses auto-dismiss');
+        await page.mouse.move(0, 0);
+        await page.clock.runFor(5000);
+        assert.ok(await toast.isVisible(), 'default lasts longer than five seconds');
+        await page.clock.runFor(1100);
+        assert.equal(await toast.count(), 0, 'default dismisses after six seconds');
+        await page.locator('#partFile').setInputFiles({ name: 'bad.mp3', mimeType: 'audio/mpeg', buffer: Buffer.from('x') });
+        await toast.waitFor();
+        await page.getByRole('button', { name: S.toastClose }).click();
+        assert.equal(await toast.count(), 0, 'close button dismisses immediately');
+        await page.locator('#partFile').setInputFiles({ name: 'bad.mp3', mimeType: 'audio/mpeg', buffer: Buffer.from('x') });
+        await toast.waitFor();
+        await toast.focus();
+        await page.keyboard.press('Escape');
+        assert.equal(await toast.count(), 0, 'Escape dismisses repeated messages');
         await page.close();
       }
 
@@ -583,13 +615,13 @@ async function fillForm(page, name) {
         await page.goto(toolUrl);
         await page.locator('#partRights').check();
         await page.locator('#partFile').setInputFiles({ name: 'cancion.mp3', mimeType: 'audio/mpeg', buffer: Buffer.from('x') });
-        assert.equal(await page.locator('#partError').textContent(), S.partErrBadType);
+        assert.equal(await page.locator('.toast-description').textContent(), S.partErrBadType);
         await page.locator('#partFile').setInputFiles({
           name: 'big.pdf',
           mimeType: 'application/pdf',
           buffer: Buffer.alloc(20 * 1024 * 1024 + 1),
         });
-        assert.equal(await page.locator('#partError').textContent(), S.partErr_too_large);
+        assert.equal(await page.locator('.toast-description').textContent(), S.partErr_too_large);
         await page.close();
       }
 

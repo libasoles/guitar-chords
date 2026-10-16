@@ -6,8 +6,8 @@
    notes, edit, confirm -> POST /jobs/:id/export -> downloads;
    mobile: direct download of the PDF with the Digitación sugerida.
 
-   API and preview contract: docs/partitura-api.md. Plain ES5-style JS, no
-   dependencies besides vendor/ascii-tabs.js. Configuration comes from
+   API and preview contract: docs/partitura-api.md. Plain ES5-style JS;
+   uses vendor/ascii-tabs.js and the shared toast bundle. Configuration comes from
    window.PARTITURA_CONFIG (see scripts/build-site.js). */
 (function () {
   'use strict';
@@ -59,8 +59,6 @@
   var dropTitle = $('partDropTitle');
   var fileInput = $('partFile');
   var dropzone = $('partDropzone');
-  var errorEl = $('partError');
-  var errorBannerEl = $('partErrorBanner');
   var progressEl = $('partProgress');
   var statusEl = $('partStatus');
   var elapsedEl = $('partElapsed');
@@ -89,9 +87,8 @@
   // ---- UI helpers ----------------------------------------------------------
 
   function showError(message) {
-    errorEl.textContent = message;
-    errorEl.hidden = !message;
-    errorBannerEl.hidden = !message;
+    if (message) window.SiteToast.show(message);
+    else window.SiteToast.clear();
   }
 
   function clearRightsError() {
