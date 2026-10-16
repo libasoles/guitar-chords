@@ -1515,6 +1515,14 @@ footer {
   }
 }
 
+/* Tab editor page: main fills the viewport so the tutorial dropdown sits at
+   the bottom edge by default (margin-top: auto on .tab-tutorial). */
+.tab-editor-page {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100svh - 8rem);
+}
+
 /* Tab editor: "how to use" dropdown with looping CSS-only demos. The keys to
    press light up in colour while each gesture plays; reduced motion shows the
    end state with the keys lit. Markup: scripts/lib/tab-tutorial.js. */
@@ -1523,7 +1531,8 @@ footer {
   --demo-rh: 1.5em;
   --demo-lit: #f4ddd6;
   max-width: var(--max-width);
-  margin: 3.5rem 0 2rem;
+  margin: auto 0 2rem;
+  padding-top: 3.5rem;
   font-family: var(--sans);
   font-size: 0.92rem;
   color: var(--ink-soft);
@@ -2397,7 +2406,8 @@ footer {
 .part-how,
 .part-faq {
   max-width: var(--max-width);
-  margin: 2.5rem 0 0;
+  margin: 5rem 0 0;
+  font-family: var(--serif);
 }
 .part-how h2,
 .part-faq h2 {
