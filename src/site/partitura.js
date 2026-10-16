@@ -394,7 +394,6 @@
       case 'exported':
         stopPolling();
         stopElapsed();
-        setStatus('');
         onReady(job);
         return;
       default:
@@ -508,6 +507,7 @@
   function onReady(job) {
     var jobId = state.jobId;
     if (!isDesktop()) {
+      setStatus('');
       mobileDownload(job);
       return;
     }
@@ -909,6 +909,8 @@
     clearResult();
     resultEl.hidden = false;
     openModal();
+    // Keep the loading visible until the modal is up.
+    setStatus('');
     state.preview = preview;
     state.previewJobId = jobId;
 
