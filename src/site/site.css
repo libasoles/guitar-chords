@@ -2299,8 +2299,11 @@ footer {
   margin: 0;
   font-weight: 600;
 }
+.part-duration {
+  margin: 0 0 0.4rem;
+  font-size: 1.3rem;
+}
 .part-elapsed,
-.part-duration,
 .part-resume {
   margin: 0;
   font-size: 0.85rem;
