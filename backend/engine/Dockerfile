@@ -19,6 +19,12 @@ RUN mkdir -p /usr/share/fonts/leipzig \
     && python -c "import urllib.request as u; u.urlretrieve('https://raw.githubusercontent.com/rism-digital/leipzig/${LEIPZIG_VERSION}/Leipzig.otf', '/usr/share/fonts/leipzig/Leipzig.otf')" \
     && fc-cache -f
 
+# The PDF header (title and authors) is set in Playfair Display, an elegant
+# serif; Amazon Linux ships no serif font, so it would fall back to sans.
+RUN mkdir -p /usr/share/fonts/playfair \
+    && python -c "import urllib.request as u; u.urlretrieve('https://raw.githubusercontent.com/google/fonts/main/ofl/playfairdisplay/PlayfairDisplay%5Bwght%5D.ttf', '/usr/share/fonts/playfair/PlayfairDisplay.ttf')" \
+    && fc-cache -f
+
 # Lambda's filesystem is read-only except /tmp; music21 and fontconfig write caches.
 ENV HOME=/tmp XDG_CACHE_HOME=/tmp PYTHONUNBUFFERED=1
 

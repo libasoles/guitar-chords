@@ -628,7 +628,7 @@ def add_credits(xml, title, subtitles):
     return xml.replace("<part-list>", credits + "<part-list>", 1)
 
 
-HEADER_FONT = "Times New Roman, Liberation Serif, DejaVu Serif, serif"
+HEADER_FONT = "Playfair Display, Times New Roman, Liberation Serif, DejaVu Serif, serif"
 
 
 def style_header(svg):
