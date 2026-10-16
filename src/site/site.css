@@ -2047,10 +2047,25 @@ footer {
 .part-example-score {
   margin: 1.5rem 0 0;
   padding: 1rem 1.2rem;
-  overflow-x: auto;
+  overflow: hidden;
   background: #fff;
   border: 1px solid var(--rule);
   box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+}
+.part-example-header {
+  margin: 0 0 1rem;
+  text-align: center;
+}
+.part-example-header .part-example-title {
+  display: block;
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  color: var(--ink);
+}
+.part-example-header span {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
 }
 .part-example-score .part-row-tabs {
   --ascii-tabs-fret-background: #fff;
@@ -2067,7 +2082,7 @@ footer {
   min-height: 44px;
   padding: 0.3rem 0.6rem;
   margin-top: -0.4rem;
-  border-radius: 8px;
+  border-radius: 0;
   font-family: var(--sans);
   font-size: 0.95rem;
   color: var(--ink);
@@ -2139,9 +2154,9 @@ footer {
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  border: 2px dashed #8a7d62;
+  border: 2px dashed #958b78;
   border-radius: 0;
-  background: #f6efe4;
+  background: #faf6ee;
   color: var(--ink-soft);
   font-family: var(--sans);
   font-size: 0.85rem;
@@ -2172,9 +2187,13 @@ footer {
 .part-dropzone[aria-disabled="true"] .part-file-input {
   cursor: not-allowed;
 }
-.part-dropzone[aria-disabled="false"]:hover,
+.part-dropzone[aria-disabled="false"]:hover {
+  border-color: #7d725d;
+  background: #f6f0e3;
+}
 .part-dropzone.is-dragging {
-  background: #efe5d4;
+  border-color: var(--accent);
+  background: #f6efe6;
 }
 @media (prefers-reduced-motion: no-preference) {
   .part-dropzone[aria-disabled="false"]:hover strong {
@@ -2414,7 +2433,7 @@ footer {
 .part-faq {
   max-width: var(--max-width);
   margin: 5rem 0 0;
-  font-family: var(--serif);
+  font-family: var(--sans);
 }
 .part-how h2,
 .part-faq h2 {
