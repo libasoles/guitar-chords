@@ -2039,8 +2039,9 @@ footer {
   color: var(--ink);
 }
 .part-example-score {
-  margin: 1.5rem 0 0;
-  padding: 1rem 1.2rem;
+  max-width: 44rem;
+  margin: 1.5rem auto 0;
+  padding: 2rem 2.2rem 1.6rem;
   overflow: hidden;
   background: #fff;
   border: 1px solid var(--rule);
@@ -2057,7 +2058,7 @@ footer {
   color: var(--ink);
 }
 .part-example-header span {
-  font-family: var(--sans);
+  font-family: var(--serif);
   font-size: 0.85rem;
   color: var(--ink-soft);
 }
@@ -2404,15 +2405,9 @@ html.part-modal-open { overflow: hidden; }
   line-height: 1;
   color: var(--ink);
 }
-.part-example-string,
 .part-example-clef {
   position: absolute;
-  transform: translateY(-50%);
-}
-.part-example-string {
-  color: var(--ink-soft);
-}
-.part-example-clef {
+  color: #8a8a8a;
   font-weight: 700;
   font-size: 1.25em;
   transform: translate(-50%, -50%);

@@ -834,7 +834,7 @@
 
   // The example is one real row of four measures: the engine's notation and
   // the same TAB component and note-id geometry as an uploaded score, without
-  // creating a Job. The TAB clef and string names complete the staff.
+  // creating a Job. The TAB clef completes the staff.
   function renderExample() {
     var container = $('partExampleScore');
     var example = CFG.example;
@@ -871,7 +871,7 @@
       });
       tabsLine.appendChild(staffNames);
 
-      // "TAB" under the clef and the string names left of the first line.
+      // "TAB" under the clef.
       function decorate() {
         var base = tabsLine.getBoundingClientRect();
         var areas = elements[0].querySelectorAll('.ascii-tabs-area');
@@ -881,13 +881,6 @@
         var first = areas[0].getBoundingClientRect();
         var step = (areas[STRINGS_COUNT - 1].getBoundingClientRect().top - first.top) / (STRINGS_COUNT - 1);
         var clefBox = clef.getBoundingClientRect();
-        var names = example.stringNames || [];
-        for (var s = 0; s < STRINGS_COUNT; s++) {
-          var name = el('span', 'part-example-string', names[s] || '');
-          name.style.right = (base.right - first.left + step * 0.4) + 'px';
-          name.style.top = (first.top - base.top + step * s + first.height / 2) + 'px';
-          staffNames.appendChild(name);
-        }
         'TAB'.split('').forEach(function (letter, i) {
           var mark = el('span', 'part-example-clef', letter);
           mark.style.left = (clefBox.left + clefBox.width / 2 - base.left) + 'px';
