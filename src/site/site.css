@@ -2301,7 +2301,7 @@ footer {
   font-weight: 600;
 }
 .part-duration {
-  margin: 0 0 0.4rem;
+  margin: 0 0 -0.3rem;
   padding: 0;
   border: 0;
   font-size: 1.3rem;
