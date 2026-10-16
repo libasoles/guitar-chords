@@ -2309,9 +2309,16 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
   display: grid;
   justify-items: center;
   gap: 0.4rem;
-  margin: 4rem 0 2rem;
+  margin: 6rem 0 5rem;
   text-align: center;
   font-family: var(--sans);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .part-progress:not([hidden]) { animation: part-progress-in 700ms ease-out; }
+  @keyframes part-progress-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 }
 .part-loading {
   width: 240px;
