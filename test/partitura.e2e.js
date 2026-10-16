@@ -284,6 +284,13 @@ async function fillForm(page, name) {
           assert.ok(await page.locator('.part-example ascii-tabs').first().evaluate(tabs => tabs.readonly));
           assert.equal((await page.locator('.part-example-clef').allTextContents()).join(''), 'TAB');
           assert.equal(await page.locator('.part-example .part-row-join').count(), 1);
+          // The TAB lines start on the barline, never left of it.
+          assert.ok(await page.evaluate(() => {
+            const join = document.querySelector('.part-example .part-row-join').getBoundingClientRect();
+            const tabs = document.querySelector('.part-example ascii-tabs');
+            const inset = parseFloat((tabs.style.clipPath.match(/inset\(0px 0px 0px ([\d.]+)px\)|inset\(0 0 0 ([\d.]+)px\)/) || [])[1] || (tabs.style.clipPath.match(/([\d.]+)px\)/) || [])[1] || 0);
+            return tabs.getBoundingClientRect().left + inset >= join.left - 0.5;
+          }));
           // The author sits at the right, below the title, as in the PDF.
           assert.ok(await page.evaluate(() => {
             const title = document.querySelector('.part-example-title').getBoundingClientRect();
