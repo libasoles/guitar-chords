@@ -2302,6 +2302,8 @@ footer {
 }
 .part-duration {
   margin: 0 0 0.4rem;
+  padding: 0;
+  border: 0;
   font-size: 1.3rem;
 }
 .part-elapsed,
