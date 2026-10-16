@@ -1124,7 +1124,12 @@
           if (v.join) v.join.remove();
           if (staff) {
             var wrapBox = v.tabsLine.parentNode.getBoundingClientRect();
-            var staffBox = staff.getBoundingClientRect();
+            // The staff group's box includes stems, clef and ornaments; the
+            // barline must start at the first staff line itself.
+            var lines = Array.prototype.filter.call(staff.children, function (n) {
+              return n.nodeName.toLowerCase() === 'path';
+            });
+            var staffBox = (lines[0] || staff).getBoundingClientRect();
             var bottom = top.top + step * (STRINGS_COUNT - 1) + top.height / 2;
             v.join = el('span', 'part-row-join');
             v.join.style.left = (staffBox.left - wrapBox.left) + 'px';
