@@ -62,6 +62,10 @@ async function run() {
     const firstFret = page.locator('.ascii-tabs-cell[data-c="0"][data-s="4"] .ascii-tabs-fret');
     const labels = () => page.locator('.ascii-tabs-label').allTextContents();
     assert.strictEqual(await firstFret.textContent(), '3');
+    const displayMenu = page.getByRole('button', { name: 'Opciones de visualización' });
+    assert.strictEqual(await noteNames.isVisible(), false);
+    await displayMenu.focus();
+    await page.keyboard.press('Enter');
     await noteNames.check();
     assert.strictEqual(await firstFret.textContent(), 'do');
     assert.deepStrictEqual(await labels(), ['1 ', '2 ', '3 ', '4 ', '5 ', '6 ']);
@@ -75,6 +79,10 @@ async function run() {
     assert.deepStrictEqual(await labels(), ['1 ', '2 ', '3 ', '4 ', '5 ', '6 ']);
     assert.deepStrictEqual(await page.evaluate(() => document.querySelector('ascii-tabs').value), originalTabs);
     assert.strictEqual(await page.evaluate(() => localStorage.getItem('tabEditor.tabs')), originalStorage);
+
+    await page.keyboard.press('Escape');
+    assert.strictEqual(await noteNames.isVisible(), false);
+    assert.ok(await displayMenu.evaluate(el => el === document.activeElement));
 
     // The "how to use" dropdown at the foot starts closed and holds one
     // looping demo per gesture, each with the keys to press.
@@ -131,8 +139,19 @@ async function run() {
     assert.strictEqual(mobileTools.sheetDirection, 'column');
     assert.strictEqual(mobileTools.sliderDisplay, 'none');
     assert.ok(mobileTools.toolsTop < mobileTools.tabTop);
+    await displayMenu.click();
     assert.ok(await noteNames.isVisible());
     assert.ok(await letterLabels.isVisible());
+    const menuLayout = await page.evaluate(() => {
+      const title = document.querySelector('h1').getBoundingClientRect();
+      const button = document.querySelector('.tab-editor-menu summary').getBoundingClientRect();
+      const panel = document.querySelector('.tab-editor-options').getBoundingClientRect();
+      return { titleRight: title.right, buttonLeft: button.left, panelLeft: panel.left, panelRight: panel.right, viewport: innerWidth };
+    });
+    assert.ok(menuLayout.buttonLeft > menuLayout.titleRight);
+    assert.ok(menuLayout.panelLeft >= 0 && menuLayout.panelRight <= menuLayout.viewport);
+    await page.locator('h1').click();
+    assert.strictEqual(await noteNames.isVisible(), false);
 
     // ascii-tabs 0.2.0 duplicates the whole column, including empty strings,
     // with either shortcut. The cursor advances and storage receives one edit.
@@ -316,6 +335,7 @@ async function run() {
     await page.evaluate(() => {
       document.querySelector('ascii-tabs').value = [[[0, null, null, null, null, null]]];
     });
+    await page.getByRole('button', { name: 'Display options' }).click();
     await page.getByRole('checkbox', { name: 'Show note names' }).check();
     assert.strictEqual(await page.locator('.ascii-tabs-cell[data-c="0"][data-s="0"] .ascii-tabs-fret').textContent(), 'E');
     await page.getByRole('checkbox', { name: 'String labels as letters' }).check();

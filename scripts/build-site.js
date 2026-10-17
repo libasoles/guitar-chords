@@ -903,6 +903,7 @@ function renderTabEditorPage(template, strings, locale) {
     "wordmark",
     "wordmarkSmall",
     "altLangLabel",
+    "tabDisplayOptions",
     "tabNoteNames",
     "tabLetterLabels",
   ];
