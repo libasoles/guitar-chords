@@ -898,7 +898,14 @@ function renderTabEditorPage(template, strings, locale) {
   const ogImage = SITE_BASE_URL + "/assets/og-image.png";
   let html = template;
 
-  const simpleKeys = ["htmlLang", "wordmark", "wordmarkSmall", "altLangLabel"];
+  const simpleKeys = [
+    "htmlLang",
+    "wordmark",
+    "wordmarkSmall",
+    "altLangLabel",
+    "tabNoteNames",
+    "tabLetterLabels",
+  ];
   simpleKeys.forEach(function (key) {
     html = html.split("%%" + key + "%%").join(strings[key] || "");
   });

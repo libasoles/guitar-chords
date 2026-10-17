@@ -54,6 +54,28 @@ async function run() {
     assert.strictEqual(editor.hintFontSize, editor.spacingFontSize);
     assert.strictEqual(editor.hintTop, editor.spacingTop);
 
+    // Display switches are independent, reversible, and preserve saved frets.
+    const originalTabs = await page.evaluate(() => document.querySelector('ascii-tabs').value);
+    const originalStorage = await page.evaluate(() => localStorage.getItem('tabEditor.tabs'));
+    const noteNames = page.getByRole('checkbox', { name: 'Mostrar notas' });
+    const letterLabels = page.getByRole('checkbox', { name: 'Etiquetas de cuerdas' });
+    const firstFret = page.locator('.ascii-tabs-cell[data-c="0"][data-s="4"] .ascii-tabs-fret');
+    const labels = () => page.locator('.ascii-tabs-label').allTextContents();
+    assert.strictEqual(await firstFret.textContent(), '3');
+    await noteNames.check();
+    assert.strictEqual(await firstFret.textContent(), 'do');
+    assert.deepStrictEqual(await labels(), ['1 ', '2 ', '3 ', '4 ', '5 ', '6 ']);
+    await letterLabels.check();
+    assert.deepStrictEqual(await labels(), ['e|', 'B|', 'G|', 'D|', 'A|', 'E|']);
+    assert.strictEqual(await firstFret.textContent(), 'do');
+    await noteNames.uncheck();
+    assert.strictEqual(await firstFret.textContent(), '3');
+    assert.deepStrictEqual(await labels(), ['e|', 'B|', 'G|', 'D|', 'A|', 'E|']);
+    await letterLabels.uncheck();
+    assert.deepStrictEqual(await labels(), ['1 ', '2 ', '3 ', '4 ', '5 ', '6 ']);
+    assert.deepStrictEqual(await page.evaluate(() => document.querySelector('ascii-tabs').value), originalTabs);
+    assert.strictEqual(await page.evaluate(() => localStorage.getItem('tabEditor.tabs')), originalStorage);
+
     // The "how to use" dropdown at the foot starts closed and holds one
     // looping demo per gesture, each with the keys to press.
     const tutorial = await page.evaluate(() => {
@@ -109,6 +131,8 @@ async function run() {
     assert.strictEqual(mobileTools.sheetDirection, 'column');
     assert.strictEqual(mobileTools.sliderDisplay, 'none');
     assert.ok(mobileTools.toolsTop < mobileTools.tabTop);
+    assert.ok(await noteNames.isVisible());
+    assert.ok(await letterLabels.isVisible());
 
     // ascii-tabs 0.2.0 duplicates the whole column, including empty strings,
     // with either shortcut. The cursor advances and storage receives one edit.
@@ -289,6 +313,13 @@ async function run() {
     assert.strictEqual(en.tabs, 3);
     assert.strictEqual(en.readonly, false);
     assert.ok(/click/i.test(en.hint), 'English hint: ' + en.hint);
+    await page.evaluate(() => {
+      document.querySelector('ascii-tabs').value = [[[0, null, null, null, null, null]]];
+    });
+    await page.getByRole('checkbox', { name: 'Show note names' }).check();
+    assert.strictEqual(await page.locator('.ascii-tabs-cell[data-c="0"][data-s="0"] .ascii-tabs-fret').textContent(), 'E');
+    await page.getByRole('checkbox', { name: 'String labels as letters' }).check();
+    assert.deepStrictEqual(await labels(), ['e|', 'B|', 'G|', 'D|', 'A|', 'E|']);
     await page.goto(base + '/en/ejercicio-de-sextas');
     await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
     const enSixths = await page.evaluate(() => {

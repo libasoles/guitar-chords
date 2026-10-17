@@ -61,6 +61,17 @@
       <h1>%%PAGE_H1%%</h1>
       <p class="lead">%%PAGE_LEAD%%</p>
 
+      <div class="tab-editor-options">
+        <label>
+          <input type="checkbox" id="tabNoteNames" aria-controls="tabEditor" />
+          %%tabNoteNames%%
+        </label>
+        <label>
+          <input type="checkbox" id="tabLetterLabels" aria-controls="tabEditor" />
+          %%tabLetterLabels%%
+        </label>
+      </div>
+
       <ascii-tabs
         class="tab-editor"
         id="tabEditor"
@@ -93,6 +104,21 @@
     </main>
 
     <script type="module" src="%%ASSETS_PREFIX%%vendor/ascii-tabs.js"></script>
+    <script type="module">
+      await customElements.whenDefined("ascii-tabs");
+      const editor = document.getElementById("tabEditor");
+      const noteNames = document.getElementById("tabNoteNames");
+      const letterLabels = document.getElementById("tabLetterLabels");
+      function updateDisplay() {
+        editor.notation = noteNames.checked
+          ? (editor.lang === "es" ? "solfege" : "letters")
+          : "frets";
+        editor.labels = letterLabels.checked ? "notes" : "numbers";
+      }
+      noteNames.addEventListener("change", updateDisplay);
+      letterLabels.addEventListener("change", updateDisplay);
+      updateDisplay();
+    </script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {

@@ -247,6 +247,8 @@
   "tabPageTitle": "Free Online Guitar Tab Maker · ASCII Tab Editor",
   "tabMetaDescription": "Free online guitar tab editor: type fret numbers on all six strings, drag notes around and copy the tab as plain ASCII text to paste anywhere.",
   "tabH1": "Create guitar tabs",
+  "tabNoteNames": "Show note names (C, D, E)",
+  "tabLetterLabels": "String labels as letters (E, B, G)",
   "tabLead": "Licks, riffs, arpeggios.",
   "tabHowToH2": "How to create a tab",
   "tabHowTo1": "Click (or tap, on a phone) the string and beat where the note goes.",

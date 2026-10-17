@@ -247,6 +247,8 @@
   "tabPageTitle": "Crear tablaturas de guitarra online gratis · Tablatura ASCII",
   "tabMetaDescription": "Editor de tablaturas de guitarra online y gratis: escribí los trastes en las seis cuerdas, mové notas arrastrándolas y copiá la tablatura en texto ASCII para pegarla en cualquier lado.",
   "tabH1": "Creá tablaturas de guitarra",
+  "tabNoteNames": "Mostrar notas (do, re, mi)",
+  "tabLetterLabels": "Etiquetas de cuerdas con letras (E, B, G)",
   "tabLead": "Punteos, riffs, arpegios.",
   "tabHowToH2": "Cómo crear una tablatura",
   "tabHowTo1": "Hacé clic (o tocá, en el celular) sobre la cuerda y el tiempo donde va la nota.",
