@@ -1276,7 +1276,8 @@ function renderPickingPage(template, strings, locale, page) {
 // single Spanish page at the root — GitHub Pages only serves one 404.html
 // at the domain root, so there's no per-locale variant.
 function render404Page(template, strings) {
-  const resolvedAssetsPrefix = "assets/";
+  // Pages serves this document at the missing URL, potentially nested.
+  const resolvedAssetsPrefix = "/assets/";
   const ogImage = SITE_BASE_URL + "/assets/og-image.png";
   let html = template;
 
