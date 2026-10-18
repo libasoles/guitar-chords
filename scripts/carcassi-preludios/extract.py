@@ -106,7 +106,7 @@ def ocr(number):
 
 OUT_DIR = os.path.join(ROOT, "downloads", "carcassi-preludios")
 # Compases por sistema del libro: la vista previa muestra sus dos primeros sistemas.
-PER_ROW = {1: 4, 2: 2, 3: 2, 4: 3, 5: 2}
+PER_ROW = {1: 4, 2: 2, 3: 2, 4: 3, 5: 2, 6: 4}
 PREVIEW_DIR = os.path.join(ROOT, "src", "site", "articles", "carcassi-preludios")
 CORRECTED = os.path.join(HERE, "corrected")
 AUTHOR = "Matteo Carcassi"
@@ -145,14 +145,30 @@ def write_preview(number, prepared):
 
 
 SANS = "Helvetica, Arial, DejaVu Sans, sans-serif"
+STAFF = re.compile(r'<g id="[^"]*" class="staff">')
+TUPLET_NUM = re.compile(r'<g id="[^"]*" class="tupletNum">.*?</g>', re.S)
 
 
-def sans_tab_digits(tabify):
+def drop_tab_tuplets(svg):
+    """The tab staff copies the notation's tuplets; the numbers belong only above the notation (the 2nd staff of
+    every measure is the tab)."""
+    starts = [m.start() for m in STAFF.finditer(svg)] + [len(svg)]
+    out, last = [], 0
+    for i, (a, b) in enumerate(zip(starts, starts[1:])):
+        out.append(svg[last:a])
+        out.append(TUPLET_NUM.sub("", svg[a:b]) if i % 2 == 1 else svg[a:b])
+        last = b
+    return "".join(out) + svg[last:]
+
+
+def patch_engine(tabify):
     """Verovio draws the fret digits in the page's default font, `Times, serif`. On macOS that is a real serif,
     while the web converter's Lambda image (Amazon Linux, no serif font) falls back to a sans. Make the page
-    default a sans so these PDFs match the converter; the title sets its own serif family and keeps its look."""
+    default a sans so these PDFs match the converter; the title sets its own serif family and keeps its look.
+    Also keeps tuplet numbers out of the tab staff."""
     original = tabify.drop_brace
-    tabify.drop_brace = lambda svg: original(svg).replace('font-family="Times, serif"', f'font-family="{SANS}"', 1)
+    tabify.drop_brace = lambda svg: drop_tab_tuplets(
+        original(svg).replace('font-family="Times, serif"', f'font-family="{SANS}"', 1))
 
 
 def build(number):
@@ -172,7 +188,7 @@ def build(number):
         raise SystemExit(f"falta el MusicXML corregido: {source}")
     title = name_of(number)
     with tempfile.TemporaryDirectory() as tmp:
-        sans_tab_digits(tabify)
+        patch_engine(tabify)
         prepared = os.path.join(tmp, "prepared")
         tabify.prepare(source, "musicxml", "standard", prepared, per_row=PER_ROW.get(number, 4))
         exported = os.path.join(tmp, "export")
