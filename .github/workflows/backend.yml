@@ -33,6 +33,11 @@ jobs:
         run: |
           pip install pytest
           python -m pytest backend/api -q
+      - name: OCR preprocessing tests
+        run: |
+          sudo apt-get install -y --no-install-recommends poppler-utils
+          pip install pytest numpy pillow
+          python -m pytest backend/ocr -q
       - name: Infra template tests
         run: |
           pip install -r infra/requirements.txt

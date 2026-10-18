@@ -5,7 +5,7 @@ Spec: issue #16 (tickets #18, #19, #20). Dos imágenes de contenedor arm64:
 | Directorio | Qué hace | Dónde corre |
 |---|---|---|
 | `engine/` | `prepare` y `export` (music21 + Verovio + rsvg-convert + Leipzig, sin Java) | Lambda (imagen de contenedor) |
-| `ocr/` | Audiveris 5.11.0: PDF -> MusicXML intermedio | Tarea Fargate efímera |
+| `ocr/` | Audiveris 5.11.0: PDF -> MusicXML intermedio (los escaneos se enderezan antes, `deskew.py`) | Tarea Fargate efímera |
 
 El motor es una copia independiente del laboratorio (`music21/tools/score_tabs`).
 No tiene sesiones: todo estado vive en artefactos en S3.
