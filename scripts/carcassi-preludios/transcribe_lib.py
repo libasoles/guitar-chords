@@ -57,6 +57,12 @@ def pitch_xml(step, alter, octave):
 
 def note_xml(event, voice, stem, acc, beams=None):
     pos, dur, pitch, finger = event
+    if "+" in pitch:  # acorde: "C#5:1+A5:4" (cada nota con su dedo); las siguientes llevan <chord/>
+        parts = pitch.split("+")
+        return "".join(
+            note_xml((pos, dur, p.partition(":")[0], p.partition(":")[2] or None), voice, stem, acc, beams).replace(
+                "<note>", "<note><chord/>" if i else "<note>", 1)
+            for i, p in enumerate(parts))
     kind = f"<type>{TYPES[dur]}</type>" + ("<dot/>" if dur in DOTTED else "")
     if pitch == "R":
         return f"<note><rest/><duration>{dur}</duration><voice>{voice}</voice>{kind}</note>"
