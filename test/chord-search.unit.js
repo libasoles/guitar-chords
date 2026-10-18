@@ -284,3 +284,14 @@ test('modo español: sílabas completas siguen resolviendo con la "d" ampliada',
   assert.equal(normalize('Mi', 'es'), 'e');
   assert.equal(normalize('Sol', 'es'), 'g');
 });
+
+test('oncenas: nombres y alias enarmónicos se encuentran en el buscador', () => {
+  for (const [query, name] of [
+    ['E11', 'E11'], ['Em11', 'Em11'], ['EM11', 'Emaj11'],
+    ['Eadd11', 'E(add11)'], ['Miadd11', 'E(add11)'], ['Eadd4', 'E(add11)'],
+    ['C#11', 'D♭11'], ['C#m11', 'D♭m11'],
+    ['C#maj11', 'D♭maj11'], ['C#add11', 'D♭(add11)'],
+  ]) {
+    assert.ok(names(query).includes(name), `${query} → ${name}`);
+  }
+});

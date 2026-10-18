@@ -102,3 +102,37 @@ test('matchByNotes: enarmónicos (D♭ y C♯) son la misma clase de altura', ()
   const result = matchByNotes([1], [chordsByName['D♭']]);
   assert.deepEqual(result.map((m) => m.chord.name), ['D♭']);
 });
+
+const eleventhRoots = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B'];
+const eleventhVoicings = {
+  '11': [0, 2, 4, 5, 10], // Sin quinta.
+  'm11': [0, 2, 3, 5, 10], // Sin quinta.
+  'maj11': [0, 4, 5, 7, 11], // Sin novena.
+  '(add11)': [0, 4, 5, 7], // Sin séptima ni novena.
+};
+
+for (const [suffix, intervals] of Object.entries(eleventhVoicings)) {
+  test(`acordes ${suffix}: doce raíces, notas correctas y reconocibles por el widget`, () => {
+    for (const root of eleventhRoots) {
+      const name = root + suffix;
+      const chord = chordsByName[name];
+      assert.ok(chord, `Falta ${name}`);
+      const expected = intervals.map((i) => (pitchClass(root) + i) % 12).sort((a, b) => a - b);
+      const positions = getPositions(chord);
+      for (const position of positions) {
+        const actual = [...new Set(voicingNotes(chord, position).map((n) => n.pc))].sort((a, b) => a - b);
+        assert.deepEqual(actual, expected, name);
+        const frets = Object.values(soundingFrets(position.fingers, position.barres)).filter((f) => f > 0);
+        assert.ok(Math.max(...frets) - Math.min(...frets) <= 3, `${name}: extensión de la mano`);
+      }
+      assert.ok(matchByNotes(expected, CHORDS, getPositions).some((m) => m.chord.name === name), name);
+    }
+  });
+}
+
+test('Mi–Sol♯–Si–La encuentra E(add11) como coincidencia exacta', () => {
+  const results = matchByNotes([4, 8, 11, 9], CHORDS, getPositions);
+  assert.ok(results.some((m) => m.chord.name === 'E(add11)'));
+  assert.equal(results[0].chord.name, 'E(add11)');
+  assert.equal(results[0].positions[0].notes, 'E A E G♯ B E');
+});

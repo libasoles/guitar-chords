@@ -125,6 +125,14 @@ async function run() {
     const after = { diagram: await dm7.locator('.diagram').textContent(), notes: await dm7.locator('.notes').textContent() };
     assert.notStrictEqual(after.diagram, before.diagram, 'the next chevron should switch to another position');
     assert.notStrictEqual(after.notes, before.notes, 'the notes should follow the shown position');
+    // Mi–Sol♯–Si–La must identify the newly catalogued added eleventh.
+    await page.locator('#noteFinderClear').click();
+    for (const i of [4, 0, 1]) await firstGrid.locator('.note-finder-note-natural').nth(i).click();
+    await firstGrid.locator('.note-finder-note-sharp').nth(1).click();
+    const addedEleventh = page.locator('#noteFinderGrid .v7-card').filter({ has: page.locator('.name', { hasText: /^E\(add11\)$/ }) });
+    assert.strictEqual(await addedEleventh.count(), 1);
+    assert.strictEqual(await addedEleventh.locator('.notes').textContent(), 'E A E G♯ B E');
+    assert.deepStrictEqual(JSON.parse(await addedEleventh.locator('.diagram').textContent()), [[6, 'o'], [5, 'o'], [4, 2, '3'], [3, 1, '2'], [2, 'o'], [1, 'o']]);
     await page.locator('#noteFinderClear').click();
     for (const i of [6, 4, 2]) await firstGrid.locator('.note-finder-note-natural').nth(i).click();
     await firstGrid.locator('.note-finder-note-flat').nth(0).click();
