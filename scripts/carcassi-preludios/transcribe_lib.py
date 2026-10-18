@@ -109,12 +109,12 @@ def _split(n):
 
 def beam_states(events, length=16, group_size=4):
     """Barras por grupo (un pulso: 4 posiciones en 4/4, 6 en 6/8): begin/continue/end. Semicorcheas con dos
-    barras, corcheas con una."""
+    barras, corcheas con una. `group_size` puede ser una lista de limites [0, 12, 18, 24] para agrupar a medida."""
+    bounds = list(group_size) if isinstance(group_size, (list, tuple)) else list(range(0, length + 1, group_size))
     beamed = {}
     for dur, bars in ((1, (1, 2)), (2, (1,))):
-        for beat in range(length // group_size):
-            group = sorted(e for e in events if e[1] == dur and e[2] != "R"
-                           and beat * group_size <= e[0] < (beat + 1) * group_size)
+        for start, end in zip(bounds, bounds[1:]):
+            group = sorted(e for e in events if e[1] == dur and e[2] != "R" and start <= e[0] < end)
             for i, e in enumerate(group):
                 if len(group) > 1:
                     state = "begin" if i == 0 else "end" if i == len(group) - 1 else "continue"
@@ -151,7 +151,7 @@ def measure_xml(number, fifths, bass, up, first=False, time=(4, 4), group=None):
 
 def write(path, title, fifths, measures, time=(4, 4), group=None):
     """`measures`: [{"bass": [...], "up": [...]}]; escribe el MusicXML corregido en `path`."""
-    body = "".join(measure_xml(i + 1, fifths, m["bass"], m["up"], first=i == 0, time=time, group=group) for i, m in enumerate(measures))
+    body = "".join(measure_xml(i + 1, fifths, m["bass"], m["up"], first=i == 0, time=time, group=m.get("group", group)) for i, m in enumerate(measures))
     xml = ('<?xml version="1.0" encoding="UTF-8"?>'
            f'<score-partwise version="3.1"><work><work-title>{escape(title)}</work-title></work>'
            '<identification><creator type="composer">Matteo Carcassi</creator></identification>'
