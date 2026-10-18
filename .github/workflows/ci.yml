@@ -29,20 +29,26 @@ jobs:
       - name: Build site
         run: npm run build:site
 
+      - name: Build extensions
+        run: npm run build:ext
+
       - name: Unit tests
         run: npm run test:unit
 
       - name: E2E tests
         run: npm run test:e2e
 
-      - name: Build extension
-        run: npm run build:ext
-
-      - name: Upload extension artifact
+      - name: Upload Guitar Chords artifact
         uses: actions/upload-artifact@v7
         with:
-          name: extension-zip
-          path: dist/extension.zip
+          name: guitar-chords-extension
+          path: dist/extensions/chords.zip
+
+      - name: Upload Guitar Tabs artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: guitar-tabs-extension
+          path: dist/extensions/tabs.zip
 
   deploy:
     needs: test-and-build

@@ -34,16 +34,17 @@ const {
   toolJsonLd,
   injectJsonLd,
 } = require("./lib/structured-data");
+const { renderSharedTabEditor } = require("./lib/tab-editor");
 const { parseAsciiTab } = require("./lib/ascii-tab");
-const { renderTabTutorial, renderBoldDemo } = require("./lib/tab-tutorial");
+const { renderBoldDemo } = require("./lib/tab-tutorial");
 
 const ROOT = path.join(__dirname, "..");
 const SRC_SITE = path.join(ROOT, "src", "site");
 const SRC_SHARED = path.join(ROOT, "src", "shared");
 const SRC_I18N = path.join(ROOT, "src", "i18n");
-const SRC_EXT = path.join(ROOT, "src", "extension");
+const SRC_EXT = path.join(ROOT, "src", "extensions", "chords");
 const SRC_VENDOR = path.join(ROOT, "vendor");
-const SRC_STORE = path.join(ROOT, "store");
+const SRC_STORE = path.join(ROOT, "store", "chords");
 // SITE_OUT_DIR lets tests build variants (with/without the API URL) side by side.
 const DIST_SITE = process.env.SITE_OUT_DIR
   ? path.resolve(process.env.SITE_OUT_DIR)
@@ -917,7 +918,7 @@ function renderTabEditorPage(template, strings, locale) {
     .join(strings.tabMetaDescription || "");
   html = html.split("%%PAGE_H1%%").join(strings.tabH1 || "");
   html = html.split("%%PAGE_LEAD%%").join(strings.tabLead || "");
-  html = html.split("%%TAB_TUTORIAL%%").join(renderTabTutorial(strings));
+  html = html.split("%%TAB_EDITOR%%").join(renderSharedTabEditor(strings, locale));
   html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
   html = html.split("%%homeHref%%").join(homeHref(locale));
   html = html
@@ -1337,6 +1338,7 @@ ensureDir(VENDOR_DIST);
   "chord-search.js",
   "note-names.js",
   "note-match.js",
+  "tab-editor.js",
 ].forEach(function (f) {
   copyFile(path.join(SRC_SHARED, f), path.join(ASSETS_DIST, f));
 });
@@ -1607,6 +1609,7 @@ const precacheUrls = [
   "/assets/vendor/svguitar.umd.js",
   "/assets/vendor/fuzzysort.js",
   "/assets/vendor/ascii-tabs.js",
+  "/assets/tab-editor.js",
   "/assets/icons/icon-192.png",
   "/assets/icons/icon-512.png",
   "/assets/picking-render.js",

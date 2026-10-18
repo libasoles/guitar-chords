@@ -13,7 +13,7 @@ Recommended shots (5 max in the store):
 ## How to capture
 
 1. `npm run build:ext`
-2. Load unpacked from `dist/extension/` in Chrome
+2. Load unpacked from `dist/extensions/chords/` in Chrome
 3. Open the extension popup, resize to ~380×600 px
 4. Take a screenshot with the OS screenshot tool or Chrome DevTools device emulator
 5. Save here as `01-search.png`, etc.

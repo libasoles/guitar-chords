@@ -21,13 +21,35 @@ async function run() {
     await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
     const fresh = await page.evaluate(() => document.querySelector('ascii-tabs').value);
     assert.deepStrictEqual(fresh, [[], [], []]);
+    assert.strictEqual(await page.evaluate(() => localStorage.getItem('tabEditor.tabs')), null);
+
+    // The reusable editor also works under an extension-style policy that
+    // permits only local scripts: defaults, display controls and tutorial
+    // opening cannot depend on inline executable scripts.
+    const restricted = await browser.newPage();
+    await restricted.route('**/crear-tablaturas-de-guitarra?*', async route => {
+      const response = await route.fetch();
+      await route.fulfill({ response, headers: {
+        ...response.headers(), 'content-security-policy': "script-src 'self'",
+      } });
+    });
+    await restricted.goto(base + '/crear-tablaturas-de-guitarra?tutorial');
+    await restricted.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
+    assert.deepStrictEqual(await restricted.locator('ascii-tabs').evaluate(el => el.value), [[], [], []]);
+    assert.strictEqual(await restricted.locator('.tab-tutorial').evaluate(el => el.open), true);
+    await restricted.getByRole('button', { name: 'Opciones de visualización' }).click();
+    await restricted.getByRole('checkbox', { name: 'Mostrar notas' }).check();
+    assert.strictEqual(await restricted.locator('ascii-tabs').evaluate(el => el.notation), 'solfege');
+    await restricted.close();
 
     // Tabs saved by the previous editor (same key, frets as text) still load.
     await page.evaluate(() => {
       localStorage.setItem('tabEditor.tabs', JSON.stringify([[['', '', '', '', '3', ''], ['0', '', '', '2', '', '']]]));
     });
+    const legacyStored = await page.evaluate(() => localStorage.getItem('tabEditor.tabs'));
     await page.reload();
     await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
+    assert.strictEqual(await page.evaluate(() => localStorage.getItem('tabEditor.tabs')), legacyStored);
     const editor = await page.evaluate(() => {
       const el = document.querySelector('ascii-tabs');
       return {

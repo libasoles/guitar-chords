@@ -34,7 +34,7 @@ function serve() {
 }
 
 function watch() {
-  const dirs = ['src/site', 'src/shared', 'src/i18n'].map((d) => path.join(ROOT, d));
+  const dirs = ['src/site', 'src/shared', 'src/i18n', 'scripts/lib'].map((d) => path.join(ROOT, d));
   let pending = false;
   const trigger = () => {
     if (pending) return;

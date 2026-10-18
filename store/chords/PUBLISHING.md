@@ -2,16 +2,16 @@
 
 ## Pre-submission
 
-- [ ] `npm run build:ext` — produces `dist/extension.zip`
+- [ ] `npm run build:ext:chords` — produces `dist/extensions/chords.zip`
 - [ ] Load unpacked in Chrome and smoke-test the popup (search, pin, unpin)
 - [ ] Verify the extension works in both English and Spanish Chrome installs
-- [ ] Place `store/screenshots/*.png` files (see below)
-- [ ] Host `store/privacy-policy.html` at a public URL (e.g. GitHub Pages `store/` path)
+- [ ] Place `store/chords/screenshots/*.png` files (see below)
+- [ ] Build the site; `store/chords/privacy-policy.html` is published at the existing `/store/privacy-policy.html` URL
 
 ## Dashboard — https://chrome.google.com/webstore/devconsole
 
 ### 1. Package
-Upload `dist/extension.zip`.
+Upload `dist/extensions/chords.zip`.
 
 ### 2. Store listing
 Use the copy in [`listing.md`](listing.md).
@@ -28,12 +28,12 @@ Use the copy in [`listing.md`](listing.md).
 
 | Asset | Size | Notes |
 |---|---|---|
-| Icon | 128×128 | Already in `dist/extension/icons/icon-128.png` |
+| Icon | 128×128 | Already in `dist/extensions/chords/icons/icon-128.png` |
 | Screenshots | 1280×800 or 640×400 | At least 1 required; 5 recommended |
 | Small promo tile | 440×280 | Optional but helps discoverability |
 | Marquee | 1400×560 | Optional; shown on homepage features |
 
-Place screenshot PNGs in `store/screenshots/`:
+Place screenshot PNGs in `store/chords/screenshots/`:
 - `01-search.png` — typing a chord name, diagram shown
 - `02-pinned.png` — pinned chords panel
 - `03-filters.png` — filter pills active
@@ -43,7 +43,7 @@ Place screenshot PNGs in `store/screenshots/`:
 - **Single purpose:** Look up guitar chord diagrams.
 - **Permissions:** none (the extension declares no special permissions).
 - **Data collection:** none — all chord data is bundled locally; nothing is sent over the network.
-- **Privacy policy URL:** host `store/privacy-policy.html` and paste the URL.
+- **Privacy policy URL:** `https://acordesdeguitarra.com.ar/store/privacy-policy.html` (the site build preserves this URL).
 
 ### 5. Pricing
 Free.

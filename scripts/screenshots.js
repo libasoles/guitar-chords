@@ -2,10 +2,10 @@
 'use strict';
 /* screenshots.js — Captures all Chrome Web Store screenshots + og-image.
    Outputs:
-     store/screenshots/01-search.png   (1280×800)
-     store/screenshots/02-pinned.png   (1280×800)
+     store/chords/screenshots/01-search.png   (1280×800)
+     store/chords/screenshots/02-pinned.png   (1280×800)
      src/site/og-image.png             (1200×630)
-   Usage: node scripts/screenshots.js  (requires dist/extension/ to be built first) */
+   Usage: node scripts/screenshots.js  (requires dist/extensions/chords/ to be built first) */
 
 const path = require('path');
 const fs   = require('fs');
@@ -13,8 +13,8 @@ const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('./lib/chrome-path');
 
 const ROOT   = path.join(__dirname, '..');
-const POPUP  = 'file://' + path.join(ROOT, 'dist', 'extension', 'popup.html');
-const STORE  = path.join(ROOT, 'store', 'screenshots');
+const POPUP  = 'file://' + path.join(ROOT, 'dist', 'extensions', 'chords', 'popup.html');
+const STORE  = path.join(ROOT, 'store', 'chords', 'screenshots');
 const SITE   = path.join(ROOT, 'src', 'site');
 
 fs.mkdirSync(STORE, { recursive: true });

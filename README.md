@@ -17,17 +17,17 @@ Built with vanilla JS, no framework, no build step beyond a Node.js assembly scr
 src/
   shared/          # Chord DB, diagram renderer, search — used by both site and extension
   site/            # Web app: template.html, chord-finder component, css/ (site.css parts)
-  extension/       # Chrome extension: manifest, popup, icons, _locales/
+  extensions/      # Independent Chrome extensions: chords/ and tabs/
   i18n/            # Strings for the site (strings.es.json, strings.en.json)
 vendor/            # Bundled third-party libs (svguitar, fuzzysort, jsPDF, ascii-tabs)
 scripts/
   build-site.js    # Assembles dist/site/
-  build-ext.js     # Assembles dist/extension/ and extension.zip
+  build-ext.js     # Builds product directories and ZIPs in dist/extensions/
   vendor.js        # Downloads / updates vendor assets
 test/
   chord-search.unit.js   # Unit tests (Node, no browser)
   *.e2e.js               # E2E tests (Playwright)
-dist/              # Build output — not committed (except extension.zip for releases)
+dist/              # Build output — not committed (except release archives)
 ```
 
 ## Getting started
@@ -60,7 +60,9 @@ Individual build targets:
 
 ```bash
 npm run build:site  # → dist/site/
-npm run build:ext   # → dist/extension/ + dist/extension.zip
+npm run build:ext   # → all products under dist/extensions/
+npm run build:ext:chords # → dist/extensions/chords/ + dist/extensions/chords.zip
+npm run build:ext:tabs   # → dist/extensions/tabs/ + dist/extensions/tabs.zip
 ```
 
 ### Environment variables
@@ -95,28 +97,31 @@ GitHub Actions CI (`.github/workflows/ci.yml`) runs tests on every push.
 
 ---
 
-## Chrome extension
+## Chrome extensions
 
 | Search | Pinned chords |
 |:---:|:---:|
-| ![Search](store/screenshots/01-search.png) | ![Pinned chords](store/screenshots/02-pinned.png) |
+| ![Search](store/chords/screenshots/01-search.png) | ![Pinned chords](store/chords/screenshots/02-pinned.png) |
 
 ### Load unpacked (development)
 
-1. `npm run build:ext`
-2. Open `chrome://extensions` → **Load unpacked** → select `dist/extension/`
+1. `npm run build:ext` builds Guitar Chords and Guitar Tabs.
+2. Open `chrome://extensions` → enable **Developer mode** → **Load unpacked**.
+3. Select `dist/extensions/chords/` for Guitar Chords or `dist/extensions/tabs/` for Guitar Tabs; load each directory to use both.
+
+Guitar Tabs opens the shared tablature editor in a 780 × 580 popup. It works offline, saves edits locally between openings, and uses Spanish or English according to the browser language. Its data is separate from the website and Guitar Chords.
 
 ### Publish to Chrome Web Store
 
-See [`store/PUBLISHING.md`](store/PUBLISHING.md) for the full checklist and store listing copy.
+See [`store/chords/PUBLISHING.md`](store/chords/PUBLISHING.md) for Guitar Chords and [`store/tabs/PUBLISHING.md`](store/tabs/PUBLISHING.md) for Guitar Tabs. Each product has its own listing and graphics.
 
 Quick steps:
-1. `npm run build:ext` — produces `dist/extension.zip`
+1. `npm run build:ext:chords` — produces `dist/extensions/chords.zip`
 2. Go to the [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
-3. Upload `dist/extension.zip`
-4. Fill in the store listing using the copy in `store/listing.md`
-5. Upload screenshots from `store/screenshots/` (1280×800 or 640×400)
-6. Set the privacy policy URL (host `store/privacy-policy.html` somewhere public, e.g. GitHub Pages)
+3. Upload `dist/extensions/chords.zip`
+4. Fill in the store listing using the copy in `store/chords/listing.md`
+5. Upload screenshots from `store/chords/screenshots/` (1280×800 or 640×400)
+6. Set the privacy policy URL to `https://acordesdeguitarra.com.ar/store/privacy-policy.html` (built from `store/chords/privacy-policy.html`)
 7. Submit for review
 
 ---

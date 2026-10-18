@@ -2,13 +2,13 @@
 'use strict';
 /* screenshot.js — Captures a popup screenshot for og:image / social sharing.
    Output: src/site/og-image.png
-   Usage: node scripts/screenshot.js  (requires dist/extension/ to be built first) */
+   Usage: node scripts/screenshot.js  (requires dist/extensions/chords/ to be built first) */
 
 const path = require('path');
 const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('./lib/chrome-path');
 
-const POPUP = 'file://' + path.join(__dirname, '..', 'dist', 'extension', 'popup.html');
+const POPUP = 'file://' + path.join(__dirname, '..', 'dist', 'extensions', 'chords', 'popup.html');
 const OUT   = path.join(__dirname, '..', 'src', 'site', 'og-image.png');
 
 async function waitForCards(page) {

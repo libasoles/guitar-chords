@@ -14,11 +14,18 @@ const CSS_DIR = path.join(__dirname, '..', '..', 'src', 'site', 'css');
 const PARTITURA_PARTS = ['01-base', '05-footer', '07b-tab-demo', '08-privacy', '10-partitura'];
 
 function partNames() {
-  return fs.readdirSync(CSS_DIR).filter((f) => f.endsWith('.css')).sort().map((f) => f.slice(0, -4));
+  return [...fs.readdirSync(CSS_DIR).filter((f) => f.endsWith('.css')).map((f) => f.slice(0, -4)), '07b-tab-demo'].sort();
 }
 
 function readParts(names) {
-  return names.map((name) => fs.readFileSync(path.join(CSS_DIR, name + '.css'), 'utf8')).join('');
+  const shared = path.join(__dirname, '..', '..', 'src', 'shared');
+  return names.map((name) => {
+    if (name === '07b-tab-demo') return fs.readFileSync(path.join(shared, 'tab-demo.css'), 'utf8');
+    const css = fs.readFileSync(path.join(CSS_DIR, name + '.css'), 'utf8');
+    return name === '07-tab-editor'
+      ? fs.readFileSync(path.join(shared, 'tab-editor.css'), 'utf8') + css
+      : css;
+  }).join('');
 }
 
 const readSiteCss = () => readParts(partNames());

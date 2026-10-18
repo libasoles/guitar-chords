@@ -1,0 +1,42 @@
+html {
+  width: 780px;
+  height: 580px;
+  overflow: hidden;
+  background: #fdfaf5;
+}
+
+body {
+  box-sizing: border-box;
+  width: 780px;
+  height: 580px;
+  max-width: none;
+  margin: 0;
+  padding: 18px 22px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  font-size: 17px;
+}
+
+.tab-editor-heading h1 {
+  font-size: 1.8rem;
+}
+
+.lead {
+  margin-bottom: 1rem;
+}
+
+.tab-editor .ascii-tabs-sheet {
+  min-width: 0;
+}
+
+.tab-editor .ascii-tabs-tab {
+  overflow-x: auto;
+}
+
+.tab-editor .ascii-tabs-tools {
+  flex-shrink: 0;
+}
+
+.tab-tutorial {
+  margin-top: 2rem;
+}

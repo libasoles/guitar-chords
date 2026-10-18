@@ -58,85 +58,10 @@
     </header>
 
     <main>
-      <div class="tab-editor-heading">
-        <h1>%%PAGE_H1%%</h1>
-        <details class="tab-editor-menu">
-          <summary role="button" aria-label="%%tabDisplayOptions%%" title="%%tabDisplayOptions%%">
-            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-              <path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-            </svg>
-          </summary>
-          <div class="tab-editor-options">
-            <label>
-              <input type="checkbox" id="tabNoteNames" aria-controls="tabEditor" />
-              %%tabNoteNames%%
-            </label>
-            <label>
-              <input type="checkbox" id="tabLetterLabels" aria-controls="tabEditor" />
-              %%tabLetterLabels%%
-            </label>
-          </div>
-        </details>
-      </div>
-      <p class="lead">%%PAGE_LEAD%%</p>
-
-      <ascii-tabs
-        class="tab-editor"
-        id="tabEditor"
-        lang="%%htmlLang%%"
-        theme="light"
-        spacing="2"
-      >
-        <ascii-tabs-storage key="tabEditor.tabs"></ascii-tabs-storage>
-        <ascii-tabs-hint></ascii-tabs-hint>
-        <ascii-tabs-spacing></ascii-tabs-spacing>
-        <ascii-tabs-sheet>
-          <ascii-tabs-copy></ascii-tabs-copy>
-          <ascii-tabs-delete></ascii-tabs-delete>
-        </ascii-tabs-sheet>
-        <ascii-tabs-add></ascii-tabs-add>
-      </ascii-tabs>
-      <script>
-        // Three empty tabs to start; tabs saved in localStorage take precedence.
-        document.getElementById("tabEditor").value = [[], [], []];
-      </script>
-
-      %%TAB_TUTORIAL%%
-      <script>
-        // ?tutorial opens the tutorial (linked from the partitura page).
-        if (new URLSearchParams(location.search).has("tutorial")) {
-          var tutorial = document.querySelector("details.tab-tutorial");
-          if (tutorial) tutorial.open = true;
-        }
-      </script>
+      %%TAB_EDITOR%%
     </main>
 
-    <script type="module" src="%%ASSETS_PREFIX%%vendor/ascii-tabs.js"></script>
-    <script type="module">
-      await customElements.whenDefined("ascii-tabs");
-      const editor = document.getElementById("tabEditor");
-      const noteNames = document.getElementById("tabNoteNames");
-      const letterLabels = document.getElementById("tabLetterLabels");
-      function updateDisplay() {
-        editor.notation = noteNames.checked
-          ? (editor.lang === "es" ? "solfege" : "letters")
-          : "frets";
-        editor.labels = letterLabels.checked ? "notes" : "numbers";
-      }
-      noteNames.addEventListener("change", updateDisplay);
-      letterLabels.addEventListener("change", updateDisplay);
-      updateDisplay();
-      const menu = document.querySelector(".tab-editor-menu");
-      document.addEventListener("click", (event) => {
-        if (!menu.contains(event.target)) menu.open = false;
-      });
-      document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && menu.open) {
-          menu.open = false;
-          menu.querySelector("summary").focus();
-        }
-      });
-    </script>
+    <script type="module" src="%%ASSETS_PREFIX%%tab-editor.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
