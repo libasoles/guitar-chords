@@ -90,7 +90,6 @@ const DIST = path.join(__dirname, '..', 'dist', 'site');
 const HASHED = /\.[0-9a-f]{10}\.(js|css|svg)$/;
 
 test('build: HTML solo referencia assets propios con hash y todos existen', () => {
-  const pages = ['index.html', 'en/index.html', 'note-finder.html', 'canciones'];
   const htmls = [];
   (function collect(d) {
     fs.readdirSync(d, { withFileTypes: true }).forEach((e) => {
@@ -98,7 +97,7 @@ test('build: HTML solo referencia assets propios con hash y todos existen', () =
       if (e.isDirectory()) { if (e.name !== 'assets') collect(p); } else if (p.endsWith('.html')) htmls.push(p);
     });
   })(DIST);
-  assert.ok(htmls.length > 5 && pages.length);
+  assert.ok(htmls.length > 5);
   htmls.forEach((f) => {
     const html = fs.readFileSync(f, 'utf8');
     for (const m of html.matchAll(/(?:src|href)="([^"]*assets\/[^"]+\.(?:js|css|svg))"/g)) {

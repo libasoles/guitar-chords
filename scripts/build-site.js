@@ -1400,16 +1400,6 @@ copyFile(
   path.join(SRC_SITE, "guitar-player-cubist-left-head.svg"),
   path.join(ASSETS_DIST, "guitar-player-cubist-left-head.svg"),
 );
-// Song-sheet mechanism (cancionero: lyrics-with-chords pages under /canciones,
-// not linked from nav — discoverable via SEO/sitemap only).
-copyFile(
-  path.join(SRC_SHARED, "song-sheet.js"),
-  path.join(ASSETS_DIST, "song-sheet.js"),
-);
-copyFile(
-  path.join(SRC_SHARED, "chord-modal.js"),
-  path.join(ASSETS_DIST, "chord-modal.js"),
-);
 copyFile(
   path.join(SRC_SITE, "guitar-player-cubist-left-head.svg"),
   path.join(ASSETS_DIST, "favicon.svg"),
@@ -1479,21 +1469,6 @@ copyFile(
   path.join(SRC_STORE, "privacy-policy.html"),
   path.join(storeDist, "privacy-policy.html"),
 );
-
-// Song pages ("cancionero"): standalone lyrics-with-chords pages under
-// /canciones. Static, not part of the i18n template pipeline, and NOT linked
-// from the nav/index anywhere — discoverable only via sitemap.xml/SEO. Copies
-// every file in src/site/canciones/ verbatim (HTML + the page's own CSS).
-const SRC_CANCIONES = path.join(SRC_SITE, "canciones");
-const CANCIONES_SLUGS = [];
-if (fs.existsSync(SRC_CANCIONES)) {
-  const cancionesDist = path.join(DIST_SITE, "canciones");
-  ensureDir(cancionesDist);
-  fs.readdirSync(SRC_CANCIONES).forEach(function (file) {
-    copyFile(path.join(SRC_CANCIONES, file), path.join(cancionesDist, file));
-    if (file.endsWith(".html")) CANCIONES_SLUGS.push(file);
-  });
-}
 
 // ---- PWA: icons ------------------------------------------------------------
 // PNG icons for the web app manifest, generated from the site logo.
@@ -1845,8 +1820,8 @@ console.log("==> Rendering 404 page...");
 }
 
 // ---- Privacy policy link at the bottom of every page -------------------------
-// Runs on the built HTML so every page — including the standalone song sheets
-// and pages without a footer — links to the policy in its own language.
+// Runs on the built HTML so every page, including pages without a footer,
+// links to the policy in its own language.
 
 console.log("==> Linking the privacy policy at the bottom of every page...");
 function addPrivacyLinks(dir) {
@@ -1972,15 +1947,6 @@ sitemapEntries.push({
   changefreq: "yearly",
   priority: "0.3",
 });
-CANCIONES_SLUGS.forEach(function (file) {
-  sitemapEntries.push({
-    loc: "/canciones/" + file,
-    file: "canciones/" + file,
-    changefreq: "yearly",
-    priority: "0.4",
-  });
-});
-
 const lastmodManifestFile = path.join(
   ROOT,
   "src",
