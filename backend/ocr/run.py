@@ -1,18 +1,24 @@
-"""Fargate task entry point: PDF in S3 -> Audiveris -> MusicXML in S3.
+"""Fargate task entry point: PDF in S3 -> OMR (homr / Audiveris) -> MusicXML in S3.
 
 Environment (set by the Step Functions task overrides):
   BUCKET                 S3 bucket (required)
   INPUT_KEY              key of the uploaded PDF (required)
   OUTPUT_PREFIX          key prefix ending in '/' for the output (required)
   OMR_MAX_HEAP_MB        JVM -Xmx, default 5120 (for the 8 GB task)
-  OMR_TIMEOUT_SECONDS    kill Audiveris after this long, default 780
+  OMR_TIMEOUT_SECONDS    total budget for all OMR attempts, default 780
 
-Scanned PDFs are straightened first (deskew.py); Audiveris loses notes and time
-signatures on slightly skewed staves.
+Two engines, tried in turn within that budget. Scans (every page one raster image)
+go to homr first: on old or blurred scans Audiveris loses clefs, time signatures
+and whole voices. Vector PDFs go to Audiveris first. If the first reading is poor
+(few measures whose rhythm adds up, see quality.py) and time remains, the other
+engine runs too and the better reading wins; a tie keeps the first. Audiveris
+gets scans straightened first (deskew.py); homr straightens them itself.
 
-Writes OUTPUT_PREFIX + "omr-01.mxl" (and omr-02.mxl, ... one per movement).
-Exit codes: 0 ok, 2 Audiveris produced no MusicXML / failed / timed out
-(-> omr_failed), 3 bad configuration, 4 S3 error. Never leaves 0 on failure.
+Pages without music (covers, blanks) are dropped by both engines.
+
+Writes OUTPUT_PREFIX + "omr-01.mxl" (and omr-02.mxl, ... one per movement/page).
+Exit codes: 0 ok, 2 no engine produced MusicXML / timed out (-> omr_failed),
+3 bad configuration, 4 S3 error. Never leaves 0 on failure.
 """
 
 import glob
@@ -20,12 +26,18 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 
-from deskew import deskew_pdf
+from deskew import deskew_pdf, is_scan
+from homr_engine import run_homr
+from quality import measure_quality
 
 EXIT_OMR = 2
 EXIT_CONFIG = 3
 EXIT_S3 = 4
+
+ACCEPT_RATIO = 0.7  # share of measures with consistent rhythm that needs no second opinion
+MIN_FALLBACK_SECONDS = 120  # not worth starting the second engine with less than this left
 
 
 def log(message):
@@ -52,6 +64,54 @@ def run_audiveris(pdf_path, out_dir, heap_mb, timeout):
     return files
 
 
+def _quality(files, log):
+    try:
+        return measure_quality(files)
+    except Exception as exc:  # noqa: BLE001 - an unreadable result is just a bad one
+        log(f"cannot assess result: {exc}")
+        return {"measures": 0, "consistent": 0, "notes": 0}
+
+
+def recognize(pdf, work, deadline, heap_mb, log=log):
+    """MusicXML files of the best reading of the PDF, [] if no engine produced one.
+
+    `deadline` is a time.monotonic() value shared by every attempt.
+    """
+    def audiveris():
+        straight_dir = os.path.join(work, "deskew")
+        os.makedirs(straight_dir, exist_ok=True)
+        straight = deskew_pdf(pdf, straight_dir, log)
+        return run_audiveris(straight, os.path.join(work, "audiveris"), heap_mb,
+                             max(1, int(deadline - time.monotonic())))
+
+    def homr():
+        return run_homr(pdf, os.path.join(work, "homr"), deadline, log)
+
+    order = [("homr", homr), ("audiveris", audiveris)] if is_scan(pdf) else [("audiveris", audiveris), ("homr", homr)]
+    log("engine order: " + " then ".join(name for name, _ in order))
+    best = None
+    for name, run in order:
+        if best is not None:
+            q = best["quality"]
+            if q["measures"] and q["consistent"] >= ACCEPT_RATIO * q["measures"]:
+                break
+            if deadline - time.monotonic() < MIN_FALLBACK_SECONDS:
+                log("no time left for a second opinion")
+                break
+        files = run()
+        if not files:
+            log(f"{name}: no MusicXML")
+            continue
+        quality = _quality(files, log)
+        log(f"{name}: {len(files)} file(s), {quality['consistent']}/{quality['measures']} measures with consistent rhythm, "
+            f"{quality['notes']} notes")
+        if best is None or quality["consistent"] > best["quality"]["consistent"]:
+            best = {"name": name, "files": files, "quality": quality}
+    if best:
+        log(f"using {best['name']}")
+    return best["files"] if best else []
+
+
 def main():
     try:
         bucket = os.environ["BUCKET"]
@@ -76,8 +136,7 @@ def main():
             log(f"download failed: {exc}")
             return EXIT_S3
         log(f"downloaded {input_key} ({os.path.getsize(pdf)} bytes)")
-        pdf = deskew_pdf(pdf, work, log)
-        files = run_audiveris(pdf, os.path.join(work, "omr"), heap_mb, timeout)
+        files = recognize(pdf, work, time.monotonic() + timeout, heap_mb)
         if not files:
             return EXIT_OMR
         try:

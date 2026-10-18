@@ -33,7 +33,7 @@ jobs:
         run: |
           pip install pytest
           python -m pytest backend/api -q
-      - name: OCR preprocessing tests
+      - name: OCR task tests
         run: |
           sudo apt-get install -y --no-install-recommends poppler-utils
           pip install pytest numpy pillow

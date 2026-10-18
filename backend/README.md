@@ -5,7 +5,7 @@ Spec: issue #16 (tickets #18, #19, #20). Dos imágenes de contenedor arm64:
 | Directorio | Qué hace | Dónde corre |
 |---|---|---|
 | `engine/` | `prepare` y `export` (music21 + Verovio + rsvg-convert + Leipzig, sin Java) | Lambda (imagen de contenedor) |
-| `ocr/` | Audiveris 5.11.0: PDF -> MusicXML intermedio (los escaneos se enderezan antes, `deskew.py`) | Tarea Fargate efímera |
+| `ocr/` | Audiveris 5.11.0 y homr: PDF -> MusicXML intermedio (ver «Tarea OCR») | Tarea Fargate efímera |
 
 El motor es una copia independiente del laboratorio (`music21/tools/score_tabs`).
 No tiene sesiones: todo estado vive en artefactos en S3.
@@ -137,7 +137,26 @@ Un timeout o falla de memoria de Lambda aparece como error de Step Functions
 ## Tarea OCR (`ocr/run.py`)
 
 Imagen: `backend/ocr/Dockerfile` (Audiveris 5.11.0 compilado desde fuente sobre
-`eclipse-temurin:25-jre`, arm64 nativo, ENTRYPOINT `python3 /opt/ocr/run.py`).
+`eclipse-temurin:25-jre`, arm64 nativo, más homr fijado a un commit con sus modelos ya
+descargados: la tarea no baja nada al ejecutar; ENTRYPOINT `python3 /opt/ocr/run.py`).
+
+**Dos motores y cuál se usa.** Medidos con partituras de guitarra de Mutopia (MIDI de referencia)
+y escaneos reales de Internet Archive: en partituras nítidas rinden igual, en escaneos viejos o
+difusos homr lee mucho mejor (Giuliani Op. 100, escaneo real: 0,95 de notas con la altura
+correcta frente a 0,34 de Audiveris). `run.py` elige así:
+
+1. Un PDF cuyas páginas son todas una imagen (un escaneo, `deskew.is_scan`) va primero a homr;
+   un PDF vectorial, primero a Audiveris.
+2. Si la lectura es pobre (menos del 70 % de los compases con el ritmo coherente, `quality.py`)
+   y quedan al menos 2 minutos del presupuesto, corre el otro motor y gana la mejor lectura;
+   un empate conserva la primera. Si el primero no produce nada, se usa el otro.
+3. Las páginas sin música (carátulas, en blanco) se descartan: Audiveris las salta por sí
+   mismo y homr se corre página por página, ignorando las que dan «No staffs found».
+4. A Audiveris se le da el escaneo enderezado (`deskew.py`); homr lo endereza solo.
+
+`OMR_TIMEOUT_SECONDS` es el presupuesto total de ambos motores, no de cada uno. homr es
+AGPL-3.0, igual que Audiveris; sus pesos se entrenaron en parte con datos no comerciales
+(ver `LICENSE_FAQ.md` de homr), a tener en cuenta si el sitio llega a ser comercial.
 Tamaño inicial: 2 vCPU / 8 GB. Permisos del rol de la tarea: `s3:GetObject` sobre el PDF y
 `s3:PutObject` bajo el prefijo de salida. Subred pública con IP pública, sin tráfico entrante.
 
@@ -149,9 +168,9 @@ Variables de entorno (container overrides de `ecs:RunTask`):
 | `INPUT_KEY` | si | Clave del PDF subido |
 | `OUTPUT_PREFIX` | si | Prefijo terminado en `/`, p. ej. `jobs/<id>/omr/` |
 | `OMR_MAX_HEAP_MB` | no | `-Xmx` de la JVM (default 5120; dejar ~2-3 GB para el resto del proceso en 8 GB) |
-| `OMR_TIMEOUT_SECONDS` | no | Mata a Audiveris pasado este tiempo (default 780, bajo el corte de 15 min del Trabajo) |
+| `OMR_TIMEOUT_SECONDS` | no | Presupuesto total de los motores OCR; pasado ese tiempo se corta (default 780, bajo el corte de 15 min del Trabajo) |
 
-Salida: `OUTPUT_PREFIX + omr-01.mxl` (más `omr-02.mxl`, ... si Audiveris separa movimientos).
+Salida: `OUTPUT_PREFIX + omr-01.mxl` (más `omr-02.mxl`, ... un archivo por movimiento de Audiveris o por página con música de homr).
 `omr-01.mxl` es el **MusicXML intermedio** descargable. Después, `prepare` con
 `input_prefix = OUTPUT_PREFIX` y `kind = "pdf-ocr-output"`.
 
@@ -160,7 +179,7 @@ Códigos de salida (distinto de 0 = tarea fallida, mapear a `omr_failed`):
 | Código | Significado |
 |---|---|
 | 0 | ok |
-| 2 | Audiveris falló, no exportó MusicXML o superó `OMR_TIMEOUT_SECONDS` |
+| 2 | Ningún motor produjo MusicXML, o se superó `OMR_TIMEOUT_SECONDS` |
 | 3 | configuración inválida (variables) |
 | 4 | error de S3 (descarga o subida) |
 
