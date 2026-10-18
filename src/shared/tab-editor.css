@@ -40,7 +40,7 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
   justify-content: center;
   width: 44px;
   height: 44px;
-  border: 1px solid var(--rule);
+  border: 0;
   border-radius: 6px;
   color: var(--ink-soft);
   cursor: pointer;
