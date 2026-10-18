@@ -73,6 +73,20 @@
   width: 100%;
   height: auto;
 }
+/* Verovio's own <style> is stripped from the inlined previews (see article-carcassi-preludes.js). */
+.example-card .score-svg g.fing {
+  font-weight: bold;
+}
+.example-card .score-svg ellipse,
+.example-card .score-svg path,
+.example-card .score-svg polygon,
+.example-card .score-svg polyline,
+.example-card .score-svg rect {
+  stroke: currentColor;
+}
+.score-glyphs {
+  position: absolute;
+}
 .example-download {
   display: block;
   margin-top: 0.4rem;
