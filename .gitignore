@@ -13,3 +13,6 @@ cdk.out/
 cdk.context.json
 .pytest_cache/
 .venv/
+.work/
+.venv-carcassi/
+.DS_Store
