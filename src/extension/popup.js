@@ -347,6 +347,7 @@
   function render() {
     renderPinned();
     renderResults();
+    document.getElementById('panel-footer').hidden = input.value.trim() === '';
     syncPopupHeight();
     syncResultsFade();
   }
