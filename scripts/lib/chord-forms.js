@@ -32,17 +32,15 @@ function fingersToForm(fingers) {
   return form;
 }
 
-/* Forma completa (posicion abierta estandar) de un Acorde de la base. */
-function fullForm(name) {
-  const chord = chordsDb().find((c) => c.name === name);
-  if (!chord) throw new Error('Acorde fuera de la base: ' + name);
-  return fingersToForm(chord.fingers);
-}
-
 function chordFingers(name) {
   const chord = chordsDb().find((c) => c.name === name);
   if (!chord) throw new Error('Acorde fuera de la base: ' + name);
   return chord.fingers;
+}
+
+/* Forma completa (posicion abierta estandar) de un Acorde de la base. */
+function fullForm(name) {
+  return fingersToForm(chordFingers(name));
 }
 
 /* Cifras de la forma separadas por espacios; `x` marca la cuerda que no suena. */
@@ -88,4 +86,4 @@ function diagramSvg(fingers, label) {
   return parts.join('') + '</svg>';
 }
 
-module.exports = { fullForm, chordFingers, fingersToForm, formText, formTab, diagramSvg, STRING_LABELS };
+module.exports = { fullForm, chordFingers, formText, formTab, diagramSvg };

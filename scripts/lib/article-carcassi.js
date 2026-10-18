@@ -86,4 +86,4 @@ function pdfFiles() {
   });
 }
 
-module.exports = { renderBody, pdfFiles, DECOMPOSED, PDFS, ASSETS_URL };
+module.exports = { renderBody, pdfFiles, PDFS };

@@ -80,6 +80,12 @@ const PDFS = [
       assert.ok(sitemap.includes('<loc>' + BASE_URL + pagePath(key, locale) + '</loc>'), key + ' ' + locale);
     }));
 
+    // Sitemap entries carry the es/en hreflang pair.
+    const esUrl = BASE_URL + pagePath('articulo-carcassi', 'es');
+    const enUrl = BASE_URL + pagePath('articulo-carcassi', 'en');
+    const entry = sitemap.split('<url>').find((chunk) => chunk.includes('<loc>' + esUrl + '</loc>'));
+    assert.ok(entry.includes('hreflang="es" href="' + esUrl + '"') && entry.includes('hreflang="en" href="' + enUrl + '"'));
+
     assert.deepEqual(errors, []);
     console.log('articles e2e: ok');
   } finally {

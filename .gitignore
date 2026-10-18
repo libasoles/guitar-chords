@@ -12,3 +12,4 @@ __pycache__/
 cdk.out/
 cdk.context.json
 .pytest_cache/
+.venv/

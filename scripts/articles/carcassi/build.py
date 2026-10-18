@@ -5,7 +5,7 @@ Cada ejemplo se describe con (cuerda, traste) por nota: la altura sale de la
 afinacion estandar, asi la partitura y la tablatura no pueden contradecirse.
 Los MusicXML y los SVG se versionan; los SVG los dibuja Verovio.
 
-    python3 -m venv .venv && .venv/bin/pip install "verovio==6.*"
+    python3 -m venv .venv && .venv/bin/pip install -r scripts/articles/carcassi/requirements.txt
     .venv/bin/python scripts/articles/carcassi/build.py
 """
 import os
@@ -57,7 +57,7 @@ def beam_states(groups):
     return states
 
 
-def event_xml(ev, voice, staff, stem, states, tab):
+def event_xml(ev, voice, staff, stem, states):
     dur = ev.dur
     if isinstance(ev, R):
         # La TAB no dibuja silencios.
@@ -81,7 +81,7 @@ def event_xml(ev, voice, staff, stem, states, tab):
 
 def voice_xml(events, groups, voice, staff, stem):
     states = beam_states(groups)
-    return "".join(event_xml(ev, voice, staff, stem, states, False) for ev in events)
+    return "".join(event_xml(ev, voice, staff, stem, states) for ev in events)
 
 
 def measure_xml(number, bars, first, time, left_repeat=False, right_repeat=False, implicit=False):
@@ -123,15 +123,6 @@ def score_xml(title, measures):
             "<work><work-title>%s</work-title></work>\n"
             '<part-list><score-part id="P1"><part-name print-object="no"></part-name></score-part></part-list>\n'
             '<part id="P1">\n%s\n</part>\n</score-partwise>\n' % (escape(title), "\n".join(measures)))
-
-
-def arpeggio(bass, melody_frets, split, last=None):
-    """Compas de arpegio en semicorcheas: bajo en blanca, silencio oculto de
-    semicorchea y la melodia en dos grupos. `split` = cuantas notas van en el
-    primer grupo de barra."""
-    notes = [N(s, f, 1) for s, f in melody_frets]
-    events = [R(1, hidden=True)] + notes
-    return {"melody": (events, [notes[:split], notes[split:]]), "bass": ([N(*bass, 8)], [])}
 
 
 # ---- Ejemplo 1: Allegretto in C, compases 1-4 (con anacrusa) -----------------
@@ -236,6 +227,7 @@ def render(musicxml_path, svg_path):
         "pageMarginLeft": 20, "pageMarginRight": 20,
         "header": "none", "footer": "none",
         "spacingStaff": 4,
+        "xmlIdSeed": 1,  # ids estables: regenerar no cambia los SVG versionados
     })
     if not tk.loadFile(musicxml_path):
         raise SystemExit("Verovio no pudo leer " + musicxml_path)
