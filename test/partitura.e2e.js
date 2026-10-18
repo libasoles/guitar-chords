@@ -106,10 +106,10 @@ async function mockApi(page, options) {
   await page.route(FILES + '/**', route => {
     const url = route.request().url();
     if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: CORS });
-    if (url.endsWith('/preview.json')) return json(route, PREVIEW);
+    if (url.endsWith('/preview.json')) return json(route, options.preview || PREVIEW);
     if (url.endsWith('/suggestion.json')) return json(route, SUGGESTION);
     if (url.endsWith('/preview-01.svg')) {
-      return route.fulfill({ contentType: 'image/svg+xml', headers: CORS, body: SVG });
+      return route.fulfill({ contentType: 'image/svg+xml', headers: CORS, body: options.svg || SVG });
     }
     if (url.endsWith('.pdf')) {
       return route.fulfill({
@@ -535,6 +535,53 @@ async function fillForm(page, name) {
         releaseUpload();
         if (viewport.width >= 768) await page.waitForSelector('#partRows .part-row');
         else await page.waitForSelector('.part-mobile-ready');
+        await page.close();
+      }
+
+      // Each system clips the first TAB measure to the vertical joining barline.
+      {
+        const page = await browser.newPage();
+        const ready = Object.assign({}, READY, {
+          preview: Object.assign({}, READY.preview, {
+            svgs: [FILES + '/preview-01.svg', FILES + '/preview-01.svg'],
+          }),
+        });
+        await mockApi(page, {
+          jobs: [ready],
+          preview: { staff_space: 10, rows: [
+            { first: 0, last: 0 }, { first: 1, last: 1 },
+          ] },
+          // As in Verovio, the measure box extends left of the staff paths.
+          svg: '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="140">' +
+            '<g class="measure"><path d="M0 60H400" stroke="black"/>' +
+            '<g class="staff"><path d="M8 60H400 M8 70H400 M8 80H400 M8 90H400 M8 100H400" stroke="black"/></g>' +
+            '</g></svg>',
+        });
+        await page.goto(toolUrl + '?trabajo=' + JOB);
+        await page.waitForSelector('#partRows .part-row-join');
+        for (const width of [1280, 900]) {
+          await page.setViewportSize({ width, height: 900 });
+          // Wait for both layout animation frames after a resize.
+          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+          const starts = await page.locator('#partRows .part-row').evaluateAll(rows => rows.map(row => {
+            const tabs = row.querySelector('ascii-tabs');
+            const clip = getComputedStyle(tabs).clipPath;
+            const values = clip.startsWith('inset(') ? clip.slice(6, -1).split(/\s+/).map(parseFloat) : [];
+            const inset = values.length === 4 ? values[3] : 0;
+            return {
+              start: tabs.getBoundingClientRect().left + inset,
+              barline: row.querySelector('.part-row-join').getBoundingClientRect().left,
+            };
+          }));
+          assert.equal(starts.length, 2);
+          starts.forEach((row, i) => assert.ok(Math.abs(row.start - row.barline) < 0.5,
+            'system ' + (i + 1) + ' TAB lines start at the barline: ' + JSON.stringify(row)));
+        }
+        await page.locator('#partNotation').check();
+        await page.waitForFunction(() => [...document.querySelectorAll('#partRows .part-row')].every(row => {
+          const tabs = row.querySelector('ascii-tabs');
+          return getComputedStyle(tabs).clipPath.startsWith('inset(');
+        }));
         await page.close();
       }
 

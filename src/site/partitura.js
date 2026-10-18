@@ -1302,6 +1302,11 @@
               layouts[m.index] = spaced;
               var left = node ? node.getBoundingClientRect().left - rowLeft : 0;
               m.el.style.left = left + 'px';
+              // Each system's first measure can extend left of its staff;
+              // keep its TAB lines flush with the joining barline.
+              var staffLine = m.k === 0 && v.svg && v.svg.querySelector('g.staff path');
+              var overshoot = staffLine ? staffLine.getBoundingClientRect().left - rowLeft - left : 0;
+              m.el.style.clipPath = overshoot > 0 ? 'inset(0 0 0 ' + overshoot + 'px)' : '';
               m.el.style.width = Math.min(layout.width, spaced.width) + 'px';
               applyValue(m.index, true);
             });
