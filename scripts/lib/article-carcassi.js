@@ -95,4 +95,11 @@ function pdfFiles() {
   });
 }
 
-module.exports = { renderBody, pdfFiles, PDFS };
+/* Partitura del preludio: la imagen de la tarjeta del indice. */
+const CARD_IMAGE = 'prelude-compases-3-4.svg';
+
+function cardImage() {
+  return { src: path.join(ARTICLE_DIR, CARD_IMAGE), name: CARD_IMAGE, url: ASSETS_URL + CARD_IMAGE };
+}
+
+module.exports = { renderBody, pdfFiles, cardImage, PDFS };

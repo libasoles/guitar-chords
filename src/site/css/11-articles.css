@@ -14,6 +14,13 @@
   background: #fff;
   color: var(--ink);
 }
+.article-card-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 0 0.8rem;
+  background: #fff;
+}
 .article-card h2 {
   margin: 0 0 0.3rem;
   padding: 0;
@@ -100,4 +107,28 @@
   font-size: 0.8rem;
   line-height: 1.25;
   overflow-x: hidden;
+}
+
+/* Reading type: sans for body text (easier on screen); serif stays on titles.
+   Same criteria as elsilbador.com.ar/articulos. */
+.article-page,
+.article-page .lead,
+.article-card p {
+  font-family: var(--sans);
+}
+.article-page h1,
+.article-page h2,
+.article-page h3,
+.article-card h2 {
+  font-family: var(--serif);
+  line-height: 1.2;
+}
+.article-page code,
+.article-page pre,
+.article-page .form-text {
+  font-family: var(--mono);
+}
+.article-page {
+  font-size: 1.05rem;
+  line-height: 1.65;
 }

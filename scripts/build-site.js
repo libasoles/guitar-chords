@@ -1147,10 +1147,12 @@ function renderArticlesIndex(strings, locale) {
   const card =
     '<a class="article-card" href="' +
     href +
-    '"><h2>' +
+    '"><img class="article-card-image" src="' +
+    articleCarcassi.cardImage().url +
+    '" alt="" width="539" height="192" loading="lazy"><h2>' +
     escapeHtml(strings.artCarcH1) +
     "</h2><p>" +
-    escapeHtml(strings.artCarcMetaDescription) +
+    escapeHtml(strings.artCarcCardSummary) +
     "</p></a>";
   return renderArticlePage(
     strings,
@@ -1569,6 +1571,10 @@ ensureDir(articlePdfDist);
 articleCarcassi.pdfFiles().forEach(function (pdf) {
   copyFile(pdf.src, path.join(articlePdfDist, pdf.name));
 });
+copyFile(
+  articleCarcassi.cardImage().src,
+  path.join(articlePdfDist, articleCarcassi.cardImage().name),
+);
 // Store-facing static pages.
 const storeDist = path.join(DIST_SITE, "store");
 ensureDir(storeDist);
