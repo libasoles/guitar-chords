@@ -107,7 +107,14 @@ def main(number):
     k = max(3, int(round(.62 * spacing)))
     heads = opening(mask, k)
     area0 = .8 * spacing * spacing
-    notes = [c for c in components(heads) if .35 * area0 < c[0] < 3 * area0 and c[3] < 2.2 * spacing and c[4] < 2 * spacing]
+    notes = []
+    for c in components(heads):
+        if not (.35 * area0 < c[0] < 7 * area0 and c[3] < 2.2 * spacing and c[4] < 5.5 * spacing):
+            continue
+        # cabezas apiladas (acorde de terceras) salen fundidas: la altura dice cuantas son
+        n = max(1, round((c[4] - .95 * spacing) / spacing) + 1) if c[4] > 1.4 * spacing else 1
+        for i in range(n):
+            notes.append((c[0] / n, c[1], c[2] + (i - (n - 1) / 2) * spacing, c[3], c[4] / n))
     print(f"{len(staves)} sistemas, espaciado {spacing:.1f}px")
     measure_no = 1
     for si, five in enumerate(staves):
@@ -120,7 +127,15 @@ def main(number):
         spans = [(a, b) for a, b in zip(edges, edges[1:]) if b - a > 4 * spacing]
         for a, b in spans:
             inside = sorted((c for c in mine if a < c[1] < b), key=lambda c: c[1])
-            seq = " ".join(name(round((five[4] - c[2]) / (spacing / 2))) for c in inside)
+            # las cabezas con la misma x son un acorde: se imprimen como [agudo ... grave]
+            columns = []
+            for c in inside:
+                if columns and abs(c[1] - columns[-1][-1][1]) < .45 * spacing:
+                    columns[-1].append(c)
+                else:
+                    columns.append([c])
+            names = [[name(round((five[4] - c[2]) / (spacing / 2))) for c in sorted(col, key=lambda c: c[2])] for col in columns]
+            seq = " ".join(n[0] if len(n) == 1 else "[" + " ".join(n) + "]" for n in names)
             if inside:
                 print(f"  c.{measure_no}: {seq}")
                 measure_no += 1

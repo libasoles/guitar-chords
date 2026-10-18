@@ -106,7 +106,7 @@ def ocr(number):
 
 OUT_DIR = os.path.join(ROOT, "downloads", "carcassi-preludios")
 # Compases por sistema del libro: la vista previa muestra sus dos primeros sistemas.
-PER_ROW = {1: 4, 2: 2, 3: 2, 4: 3, 5: 2, 6: 4, 7: 3, 8: 3, 9: 2, 10: 2, 11: 3, 12: 3, 13: 3, 14: 3}
+PER_ROW = {1: 4, 2: 2, 3: 2, 4: 3, 5: 2, 6: 4, 7: 3, 8: 3, 9: 2, 10: 2, 11: 3, 12: 3, 13: 3, 14: 3, 15: 2}
 # Smaller engraving on a proportionally larger virtual page (the PDF stays A4) for the long ones, so a
 # 12-measure prelude does not spill its last system onto a second page.
 PDF_OVERRIDES = {12: {"scale": 40, "pageWidth": 2363, "pageHeight": 3341}}
@@ -117,7 +117,7 @@ AUTHOR = "Matteo Carcassi"
 
 # The source titles lose the sharp glyph ("F Minor" for a piece with three sharps): the key is fixed here
 # after checking each key signature.
-TITLES = {8: "Prelude 8 in F# Minor", 10: "Prelude 10 in C# Minor", 12: "Prelude 12 in D Minor", 13: "Prelude 13 in Bb Major"}
+TITLES = {8: "Prelude 8 in F# Minor", 10: "Prelude 10 in C# Minor", 12: "Prelude 12 in D Minor", 13: "Prelude 13 in Bb Major", 15: "Prelude 15 in Eb Major"}
 
 
 def name_of(number):

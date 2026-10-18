@@ -1,6 +1,6 @@
 """Tiras de ayuda para leer a ojo los bajos (cabezas huecas) de un preludio.
 
-    python scripts/carcassi-preludios/bass_strips.py N [sistema ...]
+    python scripts/carcassi-preludios/bass_strips.py N [alto] [sistema ...]   # "alto": incluye notas sobre el pentagrama
 
 Escribe `.work/strips-NN.png`: por cada mitad de sistema, el pentagrama y la zona de los bajos con una guia
 gris por semitono (paso diatonico) rotulada con la nota. Mira donde cae el centro de cada cabeza.
@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import detect_notes as d  # noqa: E402
 
 
-def main(number, only):
+def main(number, only, tall=False):
     png = os.path.join(d.WORK, f"prelude-{number:02d}.png")
     image = Image.open(png).convert("RGB")
     mask = np.array(image.convert("L")) < 140
@@ -25,7 +25,7 @@ def main(number, only):
     for si, five in enumerate(staves):
         if only and si + 1 not in only:
             continue
-        top, bottom = int(five[0] - spacing * .6), int(five[4] + spacing * 4.2)
+        top, bottom = int(five[0] - spacing * (4.2 if tall else .6)), int(five[4] + spacing * 4.2)
         for half in range(2):
             x0, x1 = (0, 1700) if half == 0 else (1600, image.width)
             strip = image.crop((x0, top, x1, bottom))
@@ -33,7 +33,7 @@ def main(number, only):
             pix = np.array(strip)
             overlay = Image.new("RGB", strip.size, (255, 255, 255))
             od = ImageDraw.Draw(overlay)
-            for k in range(-9, 10):
+            for k in range(-9, 16):
                 y = five[4] - k * step - top
                 if 0 <= y < strip.height:
                     od.line([(0, y), (strip.width, y)], fill=(255, 150, 150) if k % 2 == 0 else (150, 170, 255), width=1)
@@ -46,18 +46,19 @@ def main(number, only):
             strips.append(strip)
     # tres tiras por imagen para que se lean a tamano real
     out = []
-    for i in range(0, len(strips), 4):
-        group = strips[i:i + 4]
+    for i in range(0, len(strips), 3 if tall else 4):
+        group = strips[i:i + (3 if tall else 4)]
         sheet = Image.new("RGB", (max(s.width for s in group), sum(s.height for s in group)), "white")
         y = 0
         for s in group:
             sheet.paste(s, (0, y))
             y += s.height
-        path = os.path.join(os.path.dirname(d.WORK), f"strips-{number:02d}-{i // 4 + 1}.png")
+        path = os.path.join(os.path.dirname(d.WORK), f"strips-{number:02d}-{i // (3 if tall else 4) + 1}.png")
         sheet.save(path)
         out.append(path)
     print("\n".join(out))
 
 
 if __name__ == "__main__":
-    main(int(sys.argv[1]), {int(a) for a in sys.argv[2:]})
+    args = sys.argv[2:]
+    main(int(sys.argv[1]), {int(a) for a in args if a.isdigit()}, "alto" in args)
