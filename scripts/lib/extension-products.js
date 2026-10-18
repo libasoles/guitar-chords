@@ -22,6 +22,7 @@ module.exports = {
       { from: 'src/shared/tab-editor.css', to: 'tab-editor.css' },
       { from: 'src/shared/tab-demo.css', to: 'tab-demo.css' },
       { from: 'src/site/css/01-base.css', to: 'base.css' },
+      { from: 'src/site/guitar-player-cubist-left-head.svg', to: 'guitar-player-cubist-left-head.svg' },
       { from: 'vendor/ascii-tabs.js', to: 'vendor/ascii-tabs.js' },
     ],
     icons: { source: 'src/extensions/tabs/icon.svg', fallback: require('./tab-icon').drawTabIcon },
