@@ -106,7 +106,7 @@ def ocr(number):
 
 OUT_DIR = os.path.join(ROOT, "downloads", "carcassi-preludios")
 # Compases por sistema del libro: la vista previa muestra sus dos primeros sistemas.
-PER_ROW = {1: 4, 2: 2, 3: 2, 4: 3, 5: 2, 6: 4, 7: 3, 8: 3, 9: 2}
+PER_ROW = {1: 4, 2: 2, 3: 2, 4: 3, 5: 2, 6: 4, 7: 3, 8: 3, 9: 2, 10: 2}
 PREVIEW_DIR = os.path.join(ROOT, "src", "site", "articles", "carcassi-preludios")
 CORRECTED = os.path.join(HERE, "corrected")
 AUTHOR = "Matteo Carcassi"
@@ -114,7 +114,7 @@ AUTHOR = "Matteo Carcassi"
 
 # The source titles lose the sharp glyph ("F Minor" for a piece with three sharps): the key is fixed here
 # after checking each key signature.
-TITLES = {8: "Prelude 8 in F# Minor"}
+TITLES = {8: "Prelude 8 in F# Minor", 10: "Prelude 10 in C# Minor"}
 
 
 def name_of(number):

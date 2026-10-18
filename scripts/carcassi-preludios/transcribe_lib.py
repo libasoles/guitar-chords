@@ -108,19 +108,21 @@ def _split(n):
 
 
 def beam_states(events, length=16, group_size=4):
-    """Barras de semicorchea por grupo (un pulso: 4 posiciones en 4/4, 6 en 6/8): begin/continue/end."""
+    """Barras por grupo (un pulso: 4 posiciones en 4/4, 6 en 6/8): begin/continue/end. Semicorcheas con dos
+    barras, corcheas con una."""
     beamed = {}
-    for beat in range(length // group_size):
-        group = sorted(e for e in events if e[1] == 1 and e[2] != "R"
-                       and beat * group_size <= e[0] < (beat + 1) * group_size)
-        for i, e in enumerate(group):
-            if len(group) > 1:
-                state = "begin" if i == 0 else "end" if i == len(group) - 1 else "continue"
-                beamed[e[0]] = {1: state, 2: state}
+    for dur, bars in ((1, (1, 2)), (2, (1,))):
+        for beat in range(length // group_size):
+            group = sorted(e for e in events if e[1] == dur and e[2] != "R"
+                           and beat * group_size <= e[0] < (beat + 1) * group_size)
+            for i, e in enumerate(group):
+                if len(group) > 1:
+                    state = "begin" if i == 0 else "end" if i == len(group) - 1 else "continue"
+                    beamed[e[0]] = {n: state for n in bars}
     return beamed
 
 
-def measure_xml(number, fifths, bass, up, first=False, time=(4, 4)):
+def measure_xml(number, fifths, bass, up, first=False, time=(4, 4), group=None):
     acc = Accidentals(fifths)
     beats, beat_type = time
     length = beats * 16 // beat_type
@@ -130,7 +132,7 @@ def measure_xml(number, fifths, bass, up, first=False, time=(4, 4)):
         attrs = (f"<attributes><divisions>{DIVISIONS}</divisions><key><fifths>{fifths}</fifths></key>"
                  f"<time{symbol}><beats>{beats}</beats><beat-type>{beat_type}</beat-type></time>"
                  "<clef><sign>G</sign><line>2</line></clef></attributes>")
-    beams = beam_states(up, length, 4 if beat_type == 4 else 6)
+    beams = beam_states(up, length, group or (4 if beat_type == 4 else 6))
     v1 = ""
     # alteraciones en orden de lectura: se recorre cada voz en su orden y se mezcla por posicion
     order = sorted([(e[0], 0, e) for e in up] + [(e[0], 1, e) for e in bass])
@@ -146,9 +148,9 @@ def measure_xml(number, fifths, bass, up, first=False, time=(4, 4)):
     return (f'<measure number="{number}">{attrs}{v1}<backup><duration>{length}</duration></backup>{v2}</measure>')
 
 
-def write(path, title, fifths, measures, time=(4, 4)):
+def write(path, title, fifths, measures, time=(4, 4), group=None):
     """`measures`: [{"bass": [...], "up": [...]}]; escribe el MusicXML corregido en `path`."""
-    body = "".join(measure_xml(i + 1, fifths, m["bass"], m["up"], first=i == 0, time=time) for i, m in enumerate(measures))
+    body = "".join(measure_xml(i + 1, fifths, m["bass"], m["up"], first=i == 0, time=time, group=group) for i, m in enumerate(measures))
     xml = ('<?xml version="1.0" encoding="UTF-8"?>'
            f'<score-partwise version="3.1"><work><work-title>{escape(title)}</work-title></work>'
            '<identification><creator type="composer">Matteo Carcassi</creator></identification>'
