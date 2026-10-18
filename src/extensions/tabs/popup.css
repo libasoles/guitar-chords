@@ -33,6 +33,17 @@ body {
   overflow-x: auto;
 }
 
+/* The shared engine lays out long tabs as six-string staves. In the popup,
+   place those staves beside each other inside the tab's scroll area. */
+.tab-editor .ascii-tabs-staff {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.tab-editor .ascii-tabs-staff + .ascii-tabs-staff {
+  margin: 0 0 0 1rem;
+}
+
 .tab-editor .ascii-tabs-tools {
   flex-shrink: 0;
 }

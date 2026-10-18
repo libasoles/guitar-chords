@@ -30,8 +30,10 @@ async function withExtensions(locale, run) {
   try {
     context = await chromium.launchPersistentContext(profile, {
       executablePath: chromePath(), channel: 'chromium', headless: true,
-      locale, viewport: { width: 780, height: 580 },
-      args: [`--lang=${locale}`, `--disable-extensions-except=${directories.join(',')}`, `--load-extension=${directories.join(',')}`],
+      locale, viewport: { width: 1280, height: 900 },
+      // Chromium's default headless screen is too short for a 580px action
+      // popup, so provide enough physical screen space as well as a viewport.
+      args: ['--screen-info={1280x900}', '--window-size=1280,900', `--lang=${locale}`, `--disable-extensions-except=${directories.join(',')}`, `--load-extension=${directories.join(',')}`],
     });
     const installed = await installedExtensions(context);
     const urls = {};
@@ -67,6 +69,73 @@ async function openEditor(context, url) {
 
 const value = page => page.locator('ascii-tabs').evaluate(editor => editor.value);
 const cell = (page, c, s) => page.locator(`.ascii-tabs-sheet`).first().locator(`.ascii-tabs-cell[data-c="${c}"][data-s="${s}"]`);
+
+async function eventually(read, description) {
+  const deadline = Date.now() + 10000;
+  while (Date.now() < deadline) {
+    const result = await read();
+    if (result) return result;
+    await new Promise(resolve => setTimeout(resolve, 40));
+  }
+  assert.fail(description);
+}
+
+// Playwright does not expose Chromium's toolbar action popup as a Page.
+// Attach to its real target and send browser input/inspect public DOM over CDP.
+async function nativePopup(context, url) {
+  const launcher = await openEditor(context, url);
+  const cdp = await context.browser().newBrowserCDPSession();
+  const origin = url.slice(0, url.lastIndexOf('/'));
+  let commandId = 0;
+  try {
+    for (const reopened of [false, true]) {
+      const before = new Set((await cdp.send('Target.getTargets')).targetInfos.map(target => target.targetId));
+      await launcher.evaluate(() => chrome.action.openPopup());
+      const target = await eventually(async () => (await cdp.send('Target.getTargets')).targetInfos.find(item =>
+        !before.has(item.targetId) && item.type === 'page' && item.url.startsWith(origin + '/')), 'Chrome action creates a native popup target');
+      const { sessionId } = await cdp.send('Target.attachToTarget', { targetId: target.targetId, flatten: false });
+      const send = (method, params = {}) => new Promise((resolve, reject) => {
+        const id = ++commandId;
+        const timeout = setTimeout(() => { cdp.off('Target.receivedMessageFromTarget', receive); reject(new Error(`Native popup timed out: ${method}`)); }, 10000);
+        const receive = event => {
+          if (event.sessionId !== sessionId) return;
+          const message = JSON.parse(event.message);
+          if (message.id !== id) return;
+          clearTimeout(timeout);
+          cdp.off('Target.receivedMessageFromTarget', receive);
+          if (message.error) reject(new Error(message.error.message));
+          else resolve(message.result);
+        };
+        cdp.on('Target.receivedMessageFromTarget', receive);
+        cdp.send('Target.sendMessageToTarget', { sessionId, message: JSON.stringify({ id, method, params }) }).catch(error => { clearTimeout(timeout); cdp.off('Target.receivedMessageFromTarget', receive); reject(error); });
+      });
+      const evaluate = async expression => {
+        const result = await send('Runtime.evaluate', { expression, returnByValue: true });
+        assert.equal(result.exceptionDetails, undefined, 'native popup evaluates without runtime errors');
+        return result.result.value;
+      };
+      try {
+        await eventually(() => evaluate('Boolean(customElements.get("ascii-tabs"))'), 'native popup editor initializes');
+        assert.deepEqual(await evaluate('({ width: innerWidth, height: innerHeight })'), { width: 780, height: 580 }, 'native action popup uses the specified size');
+        const expected = reopened ? [[[8, null, null, null, null, null]], [], []] : [[], [], []];
+        assert.deepEqual(await evaluate('document.querySelector("ascii-tabs").value'), expected, reopened ? 'native popup reopening preserves the edit' : 'native popup starts with three empty tabs');
+        if (!reopened) {
+          const point = await evaluate('(() => { const r = document.querySelector(".ascii-tabs-cell[data-c=\\"0\\"][data-s=\\"0\\"]").getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()');
+          await send('Input.dispatchMouseEvent', { type: 'mousePressed', button: 'left', clickCount: 1, ...point });
+          await send('Input.dispatchMouseEvent', { type: 'mouseReleased', button: 'left', clickCount: 1, ...point });
+          await send('Input.dispatchKeyEvent', { type: 'keyDown', key: '8', code: 'Digit8', text: '8' });
+          await send('Input.dispatchKeyEvent', { type: 'keyUp', key: '8', code: 'Digit8' });
+          assert.deepEqual(await evaluate('document.querySelector("ascii-tabs").value'), [[[8, null, null, null, null, null]], [], []], 'native popup accepts keyboard editing');
+        }
+      } finally {
+        await cdp.send('Target.closeTarget', { targetId: target.targetId });
+      }
+    }
+  } finally {
+    await cdp.detach();
+    await launcher.close();
+  }
+}
 
 async function editing(page) {
   await cell(page, 0, 0).click();
@@ -177,6 +246,10 @@ async function layoutAndTools(page) {
   assert.ok(await sheet.evaluate(el => el.scrollWidth > el.clientWidth), 'long tabs overflow horizontally');
   await sheet.evaluate(el => { el.scrollLeft = el.scrollWidth; });
   assert.ok(await sheet.evaluate(el => el.scrollLeft > 0), 'long tabs scroll horizontally');
+  await cell(page, 99, 0).click();
+  await page.keyboard.press('9');
+  await page.keyboard.press('ArrowLeft');
+  assert.equal((await value(page))[0][99][0], 9, 'last columns remain editable after horizontal scroll');
   await page.locator('.ascii-tabs-copy').first().scrollIntoViewIfNeeded();
   const copy = await page.locator('.ascii-tabs-copy').first().boundingBox();
   assert.ok(copy.x >= 0 && copy.x + copy.width <= 780, 'sheet controls remain on screen after horizontal scroll');
@@ -206,6 +279,7 @@ async function chords(context, url) {
 }
 
 async function run() {
+  await withExtensions('en-US', (context, urls) => nativePopup(context, urls.tabs));
   await withExtensions('en-US', async (context, urls) => {
     const page = await openEditor(context, urls.tabs);
     assert.deepEqual(await value(page), [[], [], []], 'first opening has three empty tabs');
@@ -216,8 +290,8 @@ async function run() {
     await page.close();
     const reopened = await openEditor(context, urls.tabs);
     assert.deepEqual(await value(reopened), saved, 'closing and reopening on the same profile preserves edits');
-    await layoutAndTools(reopened);
     await chords(context, urls.chords);
+    await layoutAndTools(reopened);
   });
   await withExtensions('es-AR', async (context, urls) => {
     const page = await openEditor(context, urls.tabs);

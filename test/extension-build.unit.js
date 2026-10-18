@@ -53,9 +53,9 @@ test('both products build independently and Tabs packages its local editor resou
   const build = (...args) => execFileSync(process.execPath, ['scripts/build-ext.js', ...args, '--out-dir', output], { cwd: ROOT, stdio: 'pipe' });
   build();
   const chordsZip = fs.readFileSync(path.join(output, 'chords.zip'));
-  const tabsZip = fs.readFileSync(path.join(output, 'tabs.zip'));
   build('tabs');
   assert.deepEqual(fs.readFileSync(path.join(output, 'chords.zip')), chordsZip);
+  const tabsZip = fs.readFileSync(path.join(output, 'tabs.zip'));
   build('chords');
   assert.deepEqual(fs.readFileSync(path.join(output, 'tabs.zip')), tabsZip);
   const extension = path.join(output, 'tabs');

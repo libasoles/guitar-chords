@@ -32,7 +32,7 @@ function build(id, outputRoot) {
   fs.mkdirSync(output, { recursive: true });
   for (const file of config.files) copy(path.join(ROOT, config.source, file), path.join(output, file));
   for (const resource of config.resources) copy(path.join(ROOT, resource.from), path.join(output, resource.to));
-  if (config.prepare) config.prepare({ root: ROOT, output, copyFile, copyDir });
+  if (config.prepare) config.prepare({ root: ROOT, output });
 
   const icons = config.icons;
   const iconsDir = path.join(output, 'icons');
