@@ -36,6 +36,22 @@ _Avoid_: Notas perdidas, errores
 El MusicXML que produce el reconocimiento óptico a partir de un PDF. Es descargable para corregir errores de reconocimiento en un editor externo y volver a subirlo.
 _Avoid_: OCR, MusicXML original (el original es el que sube el visitante)
 
+**Acorde de la base**:
+Un acorde de la base de datos de acordes del sitio, con una o más posiciones. Su posición abierta estándar es la Forma completa del acorde.
+_Avoid_: Digitación (eso es el dato por Ataque de una partitura)
+
+**Forma completa**:
+La tablatura de un acorde con todas sus notas (`G7 | 1 0 0 0 2 3`). Las cifras son trastes.
+_Avoid_: Digitación completa, posición de dedos
+
+**Forma descompuesta**:
+La tablatura de un acorde con solo las notas que se usan al arpegiar (o en un plaqué o contrapunto); las cuerdas que no suenan quedan sin cifra (`G7 | 1 0 0 x x 3`).
+_Avoid_: Forma reducida, digitación parcial
+
+**Descomposición**:
+Tomar algunas notas de un acorde en vez de su Forma completa para generar un arpegio, plaqué o contrapunto.
+_Avoid_: Simplificación
+
 ## Relationships
 
 - Un **Trabajo** parte de un PDF o MusicXML, produce un **MusicXML intermedio** (solo PDF) y una **Digitación sugerida**.
