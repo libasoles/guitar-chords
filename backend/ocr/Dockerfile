@@ -21,11 +21,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       curl \
       fonts-liberation \
       libgtk-3-0t64 \
+      poppler-utils \
       python3 \
       python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir --break-system-packages boto3
+RUN pip install --no-cache-dir --break-system-packages boto3 numpy pillow
 
 COPY --from=audiveris /opt/audiveris /opt/audiveris
 # Tesseract language data for titles/lyrics (notes do not need it)
@@ -34,7 +35,7 @@ RUN mkdir -p /opt/tessdata \
     && curl -fsSL https://github.com/tesseract-ocr/tessdata/raw/4.1.0/eng.traineddata -o /opt/tessdata/eng.traineddata \
     && curl -fsSL https://github.com/tesseract-ocr/tessdata/raw/4.1.0/spa.traineddata -o /opt/tessdata/spa.traineddata
 
-COPY run.py /opt/ocr/run.py
+COPY run.py deskew.py /opt/ocr/
 
 # Unprivileged user; Audiveris writes its config/cache under HOME.
 RUN useradd --create-home --uid 10001 ocr

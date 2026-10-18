@@ -7,6 +7,9 @@ Environment (set by the Step Functions task overrides):
   OMR_MAX_HEAP_MB        JVM -Xmx, default 5120 (for the 8 GB task)
   OMR_TIMEOUT_SECONDS    kill Audiveris after this long, default 780
 
+Scanned PDFs are straightened first (deskew.py); Audiveris loses notes and time
+signatures on slightly skewed staves.
+
 Writes OUTPUT_PREFIX + "omr-01.mxl" (and omr-02.mxl, ... one per movement).
 Exit codes: 0 ok, 2 Audiveris produced no MusicXML / failed / timed out
 (-> omr_failed), 3 bad configuration, 4 S3 error. Never leaves 0 on failure.
@@ -17,6 +20,8 @@ import os
 import subprocess
 import sys
 import tempfile
+
+from deskew import deskew_pdf
 
 EXIT_OMR = 2
 EXIT_CONFIG = 3
@@ -71,6 +76,7 @@ def main():
             log(f"download failed: {exc}")
             return EXIT_S3
         log(f"downloaded {input_key} ({os.path.getsize(pdf)} bytes)")
+        pdf = deskew_pdf(pdf, work, log)
         files = run_audiveris(pdf, os.path.join(work, "omr"), heap_mb, timeout)
         if not files:
             return EXIT_OMR
