@@ -182,3 +182,23 @@
   font-size: 1.05rem;
   line-height: 1.65;
 }
+
+/* Carcassi preludes: a grid of score cards, one per prelude. */
+.prelude-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: 0.4rem 1.4rem;
+}
+.prelude-card {
+  min-width: 0;
+}
+.prelude-card .prelude-card-title {
+  margin: 0 0 0.4rem;
+  padding: 0;
+  border: 0;
+  font-size: 1.1rem;
+}
+
+.article-card + .article-card {
+  margin-top: 1rem;
+}

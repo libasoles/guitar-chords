@@ -56,7 +56,7 @@ function card(prelude, locale, strings) {
   return '<a class="example-card prelude-card" href="' + ASSETS_URL + encodeURIComponent(prelude.pdf) + '" download="' + escapeAttr(prelude.pdf) + '">' +
     '<h2 class="prelude-card-title">' + name + '</h2>' +
     inlineScore(svg, strings.artPreludesAltPrefix + ' ' + name) +
-    '<span class="example-download">' + strings.artDownloadPdf + '</span></a>';
+    '<span class="example-download">' + strings.artPreludesDownload + '</span></a>';
 }
 
 function renderBody(locale, strings) {

@@ -38,6 +38,7 @@ const { renderSharedTabEditor } = require("./lib/tab-editor");
 const { parseAsciiTab } = require("./lib/ascii-tab");
 const { renderBoldDemo } = require("./lib/tab-tutorial");
 const articleCarcassi = require("./lib/article-carcassi");
+const articlePreludes = require("./lib/article-carcassi-preludes");
 const {
   pagePath,
   pageFile,
@@ -383,6 +384,7 @@ const PRIVACY_SLUG = "politica-de-privacidad";
 // only through the sitemap — no link from the home page or the footer.
 const ARTICLES_SLUG = "articulos";
 const ARTICLE_CARCASSI_SLUG = "articulo-carcassi";
+const ARTICLE_PRELUDES_SLUG = "articulo-preludios-carcassi";
 // YouTube video the exercise was taken from, embedded below the tabs.
 const SIXTHS_VIDEO_ID = "NNwTR8Q8JN4";
 const SIXTHS_TABS = [
@@ -1142,18 +1144,42 @@ function renderArticlePage(strings, locale, slug, keys, bodyHtml, backHtml) {
   return withGuideJsonLd(html, strings, locale, slug, keys.title, keys.meta);
 }
 
-function renderArticlesIndex(strings, locale) {
-  const href = pagePath(ARTICLE_CARCASSI_SLUG, locale);
-  const card =
+function articleCard(slug, locale, image, size, title, summary) {
+  return (
     '<a class="article-card" href="' +
-    href +
+    pagePath(slug, locale) +
     '"><img class="article-card-image" src="' +
-    articleCarcassi.cardImage().url +
-    '" alt="" width="539" height="192" loading="lazy"><h2>' +
-    escapeHtml(strings.artCarcH1) +
+    image +
+    '" alt="" width="' +
+    size[0] +
+    '" height="' +
+    size[1] +
+    '" loading="lazy"><h2>' +
+    escapeHtml(title) +
     "</h2><p>" +
-    escapeHtml(strings.artCarcCardSummary) +
-    "</p></a>";
+    escapeHtml(summary) +
+    "</p></a>"
+  );
+}
+
+function renderArticlesIndex(strings, locale) {
+  const card =
+    articleCard(
+      ARTICLE_CARCASSI_SLUG,
+      locale,
+      articleCarcassi.cardImage().url,
+      [539, 192],
+      strings.artCarcH1,
+      strings.artCarcCardSummary,
+    ) +
+    articleCard(
+      ARTICLE_PRELUDES_SLUG,
+      locale,
+      articlePreludes.cardImage().url,
+      [684, 204],
+      strings.artPreludesH1,
+      strings.artPreludesCardSummary,
+    );
   return renderArticlePage(
     strings,
     locale,
@@ -1191,10 +1217,33 @@ function renderCarcassiArticle(strings, locale) {
   );
 }
 
+function renderPreludesArticle(strings, locale) {
+  const back =
+    '<p class="article-back"><a href="' +
+    pagePath(ARTICLES_SLUG, locale) +
+    '">' +
+    escapeHtml(strings.artBackToIndex) +
+    "</a></p>";
+  return renderArticlePage(
+    strings,
+    locale,
+    ARTICLE_PRELUDES_SLUG,
+    {
+      title: "artPreludesPageTitle",
+      meta: "artPreludesMetaDescription",
+      h1: "artPreludesH1",
+      lead: "artPreludesLead",
+    },
+    articlePreludes.renderBody(locale, strings),
+    back,
+  );
+}
+
 function writeArticlePages(strings, locale) {
   [
     [ARTICLES_SLUG, renderArticlesIndex],
     [ARTICLE_CARCASSI_SLUG, renderCarcassiArticle],
+    [ARTICLE_PRELUDES_SLUG, renderPreludesArticle],
   ].forEach(function (entry) {
     const outFile = path.join(DIST_SITE, pageFile(entry[0], locale));
     ensureDir(path.dirname(outFile));
@@ -1574,6 +1623,16 @@ articleCarcassi.pdfFiles().forEach(function (pdf) {
 copyFile(
   articleCarcassi.cardImage().src,
   path.join(articlePdfDist, articleCarcassi.cardImage().name),
+);
+// Prelude PDFs (and the index card image) of the Carcassi preludes page.
+const preludesDist = path.join(ASSETS_DIST, "articles", "carcassi-preludios");
+ensureDir(preludesDist);
+articlePreludes.pdfFiles().forEach(function (pdf) {
+  copyFile(pdf.src, path.join(preludesDist, pdf.name));
+});
+copyFile(
+  articlePreludes.cardImage().src,
+  path.join(preludesDist, articlePreludes.cardImage().name),
 );
 // Store-facing static pages.
 const storeDist = path.join(DIST_SITE, "store");
@@ -2044,7 +2103,7 @@ addSlugPages(
 addSlugPages([DIM_SLUG, NOTE_FINDER_SLUG, SIXTHS_SLUG]);
 addSlugPages([TAB_EDITOR_SLUG], ["0.7", "0.6"]);
 addSlugPages([PRIVACY_SLUG], ["0.3", "0.3"]);
-addSlugPages([ARTICLES_SLUG, ARTICLE_CARCASSI_SLUG]);
+addSlugPages([ARTICLES_SLUG, ARTICLE_CARCASSI_SLUG, ARTICLE_PRELUDES_SLUG]);
 if (PARTITURA_ENABLED) addSlugPages([PARTITURA_SLUG], ["0.7", "0.6"]);
 addSlugPages(
   ALL_PICKING_PAGES.map(function (page) {
