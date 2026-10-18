@@ -389,7 +389,7 @@ body {
 
 .panel-footer {
   padding-top: 0.75rem;
-  text-align: center;
+  text-align: left;
   font-family: var(--sans);
   font-size: 0.75rem;
 }
@@ -398,7 +398,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  color: var(--ink-soft);
+  color: #888;
   text-decoration: none;
 }
 
