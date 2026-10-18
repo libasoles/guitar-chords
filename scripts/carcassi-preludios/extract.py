@@ -106,7 +106,10 @@ def ocr(number):
 
 OUT_DIR = os.path.join(ROOT, "downloads", "carcassi-preludios")
 # Compases por sistema del libro: la vista previa muestra sus dos primeros sistemas.
-PER_ROW = {1: 4, 2: 2, 3: 2, 4: 3, 5: 2, 6: 4, 7: 3, 8: 3, 9: 2, 10: 2, 11: 3}
+PER_ROW = {1: 4, 2: 2, 3: 2, 4: 3, 5: 2, 6: 4, 7: 3, 8: 3, 9: 2, 10: 2, 11: 3, 12: 3}
+# Smaller engraving on a proportionally larger virtual page (the PDF stays A4) for the long ones, so a
+# 12-measure prelude does not spill its last system onto a second page.
+PDF_OVERRIDES = {12: {"scale": 40, "pageWidth": 2363, "pageHeight": 3341}}
 PREVIEW_DIR = os.path.join(ROOT, "src", "site", "articles", "carcassi-preludios")
 CORRECTED = os.path.join(HERE, "corrected")
 AUTHOR = "Matteo Carcassi"
@@ -114,7 +117,7 @@ AUTHOR = "Matteo Carcassi"
 
 # The source titles lose the sharp glyph ("F Minor" for a piece with three sharps): the key is fixed here
 # after checking each key signature.
-TITLES = {8: "Prelude 8 in F# Minor", 10: "Prelude 10 in C# Minor"}
+TITLES = {8: "Prelude 8 in F# Minor", 10: "Prelude 10 in C# Minor", 12: "Prelude 12 in D Minor"}
 
 
 def name_of(number):
@@ -194,6 +197,7 @@ def build(number):
     if not os.path.exists(source):
         raise SystemExit(f"falta el MusicXML corregido: {source}")
     title = name_of(number)
+    tabify.PDF_OPTIONS = {**tabify.PDF_OPTIONS, **PDF_OVERRIDES.get(number, {})}
     with tempfile.TemporaryDirectory() as tmp:
         patch_engine(tabify)
         prepared = os.path.join(tmp, "prepared")

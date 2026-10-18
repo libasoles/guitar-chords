@@ -133,13 +133,14 @@ def measure_xml(number, fifths, bass, up, first=False, time=(4, 4), group=None):
                  f"<time{symbol}><beats>{beats}</beats><beat-type>{beat_type}</beat-type></time>"
                  "<clef><sign>G</sign><line>2</line></clef></attributes>")
     beams = beam_states(up, length, group or (4 if beat_type == 4 else 6))
+    bass_beams = beam_states(bass, length, group or (4 if beat_type == 4 else 6))
     v1 = ""
     # alteraciones en orden de lectura: se recorre cada voz en su orden y se mezcla por posicion
     order = sorted([(e[0], 0, e) for e in up] + [(e[0], 1, e) for e in bass])
     rendered = {}
     for pos, voice_index, event in order:
         voice, stem = (1, "up") if voice_index == 0 else (2, "down")
-        rendered[(voice, event[0])] = note_xml(event, voice, stem, acc, beams.get(event[0]) if voice == 1 else None)
+        rendered[(voice, event[0])] = note_xml(event, voice, stem, acc, (beams if voice == 1 else bass_beams).get(event[0]))
     for kind, item in fill(up, 1, length):
         v1 += hidden_rest(item, 1) if kind == "gap" else rendered[(1, item[0])]
     v2 = ""
