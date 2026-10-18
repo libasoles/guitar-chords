@@ -11,7 +11,7 @@ const path = require('path');
 const { publishedPreludes, DOWNLOADS_DIR } = require('../scripts/lib/article-carcassi-preludes');
 
 /* Compases de cada preludio, contados una vez sobre la partitura del libro. */
-const MEASURES = { 1: 8, 2: 8, 3: 7, 4: 8, 5: 8, 6: 16, 7: 8 };
+const MEASURES = { 1: 8, 2: 8, 3: 7, 4: 8, 5: 8, 6: 16, 7: 8, 8: 11 };
 
 /* Cadenas del PDF de origen: nombre del archivo, productor del original, editor, licencia de la edicion. */
 const SOURCE_TRACES = [/CarcassiMethod/i, /Ghostscript/i, /Santisteban/i, /Mutopia/i, /LilyPond/i, /Preludes in Progressive/i];
@@ -68,7 +68,9 @@ for (const prelude of preludes) {
     }
     const info = text.match(/\/Title\s*\(([^)]*)\)/);
     assert.ok(info, 'el PDF declara /Title');
-    assert.equal(info[1], prelude.base.split(' - ')[0]);
+    // El PDF escapa algunos caracteres (p. ej. # como \043).
+    const title = info[1].replace(/\\(\d{3})/g, (_, octal) => String.fromCharCode(parseInt(octal, 8)));
+    assert.equal(title, prelude.base.split(' - ')[0]);
     assert.match(text, /\/Author\s*\(Matteo Carcassi\)/);
     assert.doesNotMatch(text, /\/Producer|\/Creator|\/CreationDate|\/ModDate/);
     assert.doesNotMatch(text, /<x:xmpmeta|\/Metadata/);

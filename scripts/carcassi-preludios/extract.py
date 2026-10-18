@@ -106,14 +106,21 @@ def ocr(number):
 
 OUT_DIR = os.path.join(ROOT, "downloads", "carcassi-preludios")
 # Compases por sistema del libro: la vista previa muestra sus dos primeros sistemas.
-PER_ROW = {1: 4, 2: 2, 3: 2, 4: 3, 5: 2, 6: 4, 7: 3}
+PER_ROW = {1: 4, 2: 2, 3: 2, 4: 3, 5: 2, 6: 4, 7: 3, 8: 3}
 PREVIEW_DIR = os.path.join(ROOT, "src", "site", "articles", "carcassi-preludios")
 CORRECTED = os.path.join(HERE, "corrected")
 AUTHOR = "Matteo Carcassi"
 
 
+# The source titles lose the sharp glyph ("F Minor" for a piece with three sharps): the key is fixed here
+# after checking each key signature.
+TITLES = {8: "Prelude 8 in F# Minor"}
+
+
 def name_of(number):
     """«Prelude N in <Key>», read from the title line of the source (by position)."""
+    if number in TITLES:
+        return TITLES[number]
     ws, _ = words(source_pdf())
     for i, (page, text, x0, y0, _, _) in enumerate(ws[:-1]):
         if text == "Prelude" and x0 < 40 and ws[i + 1][1] == str(number):
