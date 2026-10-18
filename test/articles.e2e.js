@@ -41,19 +41,27 @@ const PDFS = [
       await page.goto(base + article);
       assert.equal(await page.locator('.example-card .score-svg').count(), 2);
       assert.equal(await page.locator('.chord-diagram').count(), 2);
-      assert.equal(await page.locator('.chord-card').count(), 6);
-      // E7: full form, then the easy decomposition, then Carcassi's.
-      const e7 = await page.locator('.chord-card', { has: page.locator('h3', { hasText: /^E7$/ }) }).locator('.form-text').allTextContents();
-      assert.deepEqual(e7, ['0 0 1 0 2 0', '0 0 1 x x 0', '0 3 1 x 2 x']);
+      assert.equal(await page.locator('.chord-card').count(), 2);
+      // Tabs are read-only <ascii-tabs>: no copy button, no hint, no `x` marks.
+      await page.waitForSelector('ascii-tabs .ascii-tabs-tab');
+      assert.equal(await page.locator('pre').count(), 0);
+      assert.equal(await page.locator('.ascii-tabs-copy, .ascii-tabs-hint').count(), 0);
+      assert.ok(!(await page.locator('main').textContent()).includes(' x '));
+      // The four Prelude chords share one tab per form, plus the E7 comparison.
+      const values = await page.locator('.sequence-forms ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0]));
+      assert.equal(values.length, 3);
+      assert.deepEqual(values[0].filter((c) => c.some((f) => f !== null)).length, 4);
+      // E7: the easy decomposition, then Carcassi's.
+      assert.deepEqual(values[2].filter((c) => c.some((f) => f !== null)), [[0, 0, 1, null, null, 0], [0, 3, 1, null, 2, null]]);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       assert.ok(overflow <= 0, 'scroll horizontal de ' + overflow + 'px en ' + article);
       // The score cards fit inside the viewport.
       const boxes = await page.locator('.example-card').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().right));
       boxes.forEach((right) => assert.ok(right <= 375, 'tarjeta fuera del viewport'));
 
-      // No scripts besides analytics: the examples are not drawn client-side.
+      // Only analytics and ascii-tabs: the scores are static SVG.
       const scripts = await page.locator('script[src]').evaluateAll((els) => els.map((el) => el.src));
-      assert.ok(scripts.every((src) => src.includes('googletagmanager')), scripts.join(','));
+      assert.ok(scripts.every((src) => src.includes('googletagmanager') || /vendor\/ascii-tabs/.test(src)), scripts.join(','));
 
       // Each card downloads its score PDF.
       const cards = page.locator('.example-card');

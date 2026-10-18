@@ -101,12 +101,23 @@
   color: var(--ink);
   letter-spacing: 0.08em;
 }
-.form pre {
+/* Read-only <ascii-tabs>: just the strings and frets. */
+.article-tab {
+  --ascii-tabs-font: var(--mono);
+  --ascii-tabs-font-size: 15px;
+  --ascii-tabs-fret-background: #fff;
+  display: block;
+  max-width: 100%;
   margin: 0.2rem 0 0;
-  font-family: var(--mono);
-  font-size: 0.8rem;
-  line-height: 1.25;
-  overflow-x: hidden;
+}
+.sequence-forms {
+  margin: 1.2rem 0;
+}
+.sequence-forms .form {
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.8rem;
+  background: #fff;
+  border: 1px solid var(--rule);
 }
 
 /* Reading type: sans for body text (easier on screen); serif stays on titles.
@@ -124,7 +135,6 @@
   line-height: 1.2;
 }
 .article-page code,
-.article-page pre,
 .article-page .form-text {
   font-family: var(--mono);
 }

@@ -1,7 +1,7 @@
 'use strict';
 /* chord-forms.js — Formas de acorde estaticas para los articulos: la Forma
    completa sale de la base de acordes del sitio (src/shared/chords-db.js) y se
-   dibuja como diagrama SVG y como TAB de texto, sin JS en el navegador.
+   dibuja como diagrama SVG; la TAB la dibuja <ascii-tabs> en el navegador.
 
    Una forma es un arreglo de 6 posiciones, de la cuerda 1 (mi agudo) a la 6:
    un traste (0 = al aire) o null si la cuerda no suena (`x`). */
@@ -11,7 +11,6 @@ const path = require('path');
 const vm = require('vm');
 
 const CHORDS_DB = path.join(__dirname, '..', '..', 'src', 'shared', 'chords-db.js');
-const STRING_LABELS = ['e', 'B', 'G', 'D', 'A', 'E'];
 
 let chords;
 function chordsDb() {
@@ -41,16 +40,6 @@ function chordFingers(name) {
 /* Forma completa (posicion abierta estandar) de un Acorde de la base. */
 function fullForm(name) {
   return fingersToForm(chordFingers(name));
-}
-
-/* Cifras de la forma separadas por espacios; `x` marca la cuerda que no suena. */
-function formText(form) {
-  return form.map((fret) => (fret === null ? 'x' : String(fret))).join(' ');
-}
-
-/* TAB de una sola columna, de la cuerda 1 a la 6, para un <pre>. */
-function formTab(form) {
-  return form.map((fret, i) => STRING_LABELS[i] + '|-' + (fret === null ? 'x' : fret) + '-').join('\n');
 }
 
 /* Diagrama de acorde: cuerda grave a la izquierda, cejuela arriba. Los
@@ -86,4 +75,4 @@ function diagramSvg(fingers, label) {
   return parts.join('') + '</svg>';
 }
 
-module.exports = { fullForm, chordFingers, formText, formTab, diagramSvg };
+module.exports = { fullForm, chordFingers, diagramSvg };

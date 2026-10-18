@@ -2,21 +2,17 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { fullForm, chordFingers, formText, formTab, diagramSvg } = require('../scripts/lib/chord-forms');
+const { fullForm, chordFingers, diagramSvg } = require('../scripts/lib/chord-forms');
 
 test('la Forma completa sale de la base de acordes, cuerda 1 primero', () => {
-  assert.equal(formText(fullForm('G7')), '1 0 0 0 2 3');
-  assert.equal(formText(fullForm('C')), '0 1 0 2 3 x');
-  assert.equal(formText(fullForm('Am')), '0 1 2 2 0 x');
-  assert.equal(formText(fullForm('E7')), '0 0 1 0 2 0');
+  assert.deepEqual(fullForm('G7'), [1, 0, 0, 0, 2, 3]);
+  assert.deepEqual(fullForm('C'), [0, 1, 0, 2, 3, null]);
+  assert.deepEqual(fullForm('Am'), [0, 1, 2, 2, 0, null]);
+  assert.deepEqual(fullForm('E7'), [0, 0, 1, 0, 2, 0]);
 });
 
 test('un acorde fuera de la base falla', () => {
   assert.throws(() => fullForm('Zm'), /fuera de la base/);
-});
-
-test('TAB de una columna con x en la cuerda que no suena', () => {
-  assert.equal(formTab([1, 0, 0, null, null, 3]), 'e|-1-\nB|-0-\nG|-0-\nD|-x-\nA|-x-\nE|-3-');
 });
 
 test('el diagrama es SVG estatico: un dedo por nota pisada y marcadores arriba', () => {
