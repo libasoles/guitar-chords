@@ -7,6 +7,7 @@ const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
 const { serveStatic } = require('../scripts/lib/static-server');
 const { pagePath } = require('../scripts/lib/slugs');
+const { publishedPreludes } = require('../scripts/lib/article-carcassi-preludes');
 
 const DIST = path.join(__dirname, '..', 'dist/site');
 const BASE_URL = 'https://acordesdeguitarra.com.ar';
@@ -31,11 +32,14 @@ const PDFS = [
       const index = pagePath('articulos', locale);
       const article = pagePath('articulo-carcassi', locale);
 
-      // Index: a single card, linking to the article.
+      // Index: one card per article, linking to it.
       await page.goto(base + index);
-      assert.equal(await page.locator('.article-card').count(), 1);
-      assert.equal(await page.locator('.article-card').getAttribute('href'), article);
-      assert.match(await page.locator('.article-card p').textContent(), /Carcassi/);
+      assert.equal(await page.locator('.article-card').count(), 2);
+      assert.equal(await page.locator('.article-card').first().getAttribute('href'), article);
+      assert.equal(await page.locator('.article-card').nth(1).getAttribute('href'), pagePath('articulo-preludios-carcassi', locale));
+      assert.match(await page.locator('.article-card p').first().textContent(), /Carcassi/);
+      // No text link in the list besides the cards (the banner is the link).
+      assert.equal(await page.locator('main a[href*="preludios"], main a[href*="preludes"]').count(), 1);
 
       // Article: static examples, no horizontal scroll on mobile.
       await page.goto(base + article);
@@ -84,6 +88,41 @@ const PDFS = [
       assert.ok(links.some(([lang, href]) => lang === 'en' && href === BASE_URL + pagePath('articulo-carcassi', 'en')));
     }
 
+    // Carcassi preludes: one card per published prelude, in numeric order.
+    const published = publishedPreludes();
+    for (const locale of ['es', 'en']) {
+      const url = pagePath('articulo-preludios-carcassi', locale);
+      await page.goto(base + url);
+      const cards = page.locator('.prelude-card');
+      assert.equal(await cards.count(), published.length);
+      const hrefs = await cards.evaluateAll((els) => els.map((el) => decodeURIComponent(el.getAttribute('href'))));
+      assert.deepEqual(hrefs.map((href) => href.split('/').pop()), published.map((p) => p.pdf));
+      const titles = await cards.locator('h2').allTextContents();
+      titles.forEach((title, i) => assert.match(title, new RegExp('^' + (locale === 'es' ? 'Preludio ' : 'Prelude ') + published[i].number + ' (en|in) ')));
+      // Inline static SVG with alternative text naming the prelude; no extra JS.
+      assert.equal(await cards.locator('svg.score-svg').count(), published.length);
+      const alts = await cards.locator('svg.score-svg').evaluateAll((els) => els.map((el) => el.getAttribute('aria-label')));
+      alts.forEach((alt, i) => assert.ok(alt.includes(titles[i]), alt));
+      const scripts = await page.locator('script[src]').evaluateAll((els) => els.map((el) => el.src));
+      assert.ok(scripts.every((src) => src.includes('googletagmanager')), scripts.join(','));
+      // Fits the phone viewport without horizontal scroll.
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      assert.ok(overflow <= 0, 'scroll horizontal de ' + overflow + 'px en ' + url);
+      const rights = await cards.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().right));
+      rights.forEach((right) => assert.ok(right <= 375, 'tarjeta fuera del viewport'));
+      // Click downloads the prelude PDF with the expected name.
+      for (let i = 0; i < published.length; i++) {
+        const [download] = await Promise.all([page.waitForEvent('download'), cards.nth(i).click()]);
+        assert.equal(download.suggestedFilename(), published[i].pdf);
+        const saved = path.join(tmp, 'prelude-' + i + '.pdf');
+        await download.saveAs(saved);
+        assert.equal(fs.readFileSync(saved).subarray(0, 4).toString(), '%PDF');
+      }
+      const links = await page.locator('link[rel=canonical], link[rel=alternate]').evaluateAll((els) => els.map((el) => [el.getAttribute('hreflang'), el.href]));
+      assert.ok(links.some(([, href]) => href === BASE_URL + url));
+      ['es', 'en'].forEach((l) => assert.ok(links.some(([lang, href]) => lang === l && href === BASE_URL + pagePath('articulo-preludios-carcassi', l))));
+    }
+
     // Discoverable only through the sitemap: neither the home pages nor the
     // footer link to the section.
     for (const file of ['index.html', 'en.html']) {
@@ -91,7 +130,7 @@ const PDFS = [
       assert.ok(!/href="[^"]*(articulos|articles)/.test(html), file + ' enlaza a los articulos');
     }
     const sitemap = fs.readFileSync(path.join(DIST, 'sitemap.xml'), 'utf8');
-    ['articulos', 'articulo-carcassi'].forEach((key) => ['es', 'en'].forEach((locale) => {
+    ['articulos', 'articulo-carcassi', 'articulo-preludios-carcassi'].forEach((key) => ['es', 'en'].forEach((locale) => {
       assert.ok(sitemap.includes('<loc>' + BASE_URL + pagePath(key, locale) + '</loc>'), key + ' ' + locale);
     }));
 
