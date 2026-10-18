@@ -73,55 +73,57 @@
       <h1>%%PAGE_H1%% <span class="beta-badge">Beta</span></h1>
       <p class="lead">%%PAGE_LEAD%%</p>
 
-      <form id="partForm" class="part-form" novalidate>
-        <label id="partDropzone" class="part-dropzone" aria-disabled="false">
-          <input
-            class="part-file-input"
-            type="file"
-            id="partFile"
-            accept=".pdf,.mxl,.musicxml,.xml,application/pdf"
-            aria-labelledby="partDropTitle"
-            aria-describedby="partDropHint"
-          />
-          <svg class="part-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-            <path d="M12 16V4m-4 4 4-4 4 4M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4" />
-          </svg>
-          <strong id="partDropTitle" aria-live="polite">%%partDropTitle%%</strong>
-          <span id="partDropHint">%%partFileLabel%%</span>
-        </label>
-        <label id="partRightsRow" class="part-rights">
-          <input type="checkbox" id="partRights" aria-labelledby="partRightsLabel" required />
-          <span id="partRightsLabel">%%partRightsLabel%%</span>
-          <small id="partRightsError" class="part-rights-error" role="alert" hidden></small>
-        </label>
-        <div id="partTurnstile" class="part-turnstile"></div>
-        <figure class="part-example">
-          <figcaption>
-            <strong>%%partExampleTitle%%</strong>
-            <span>%%partExampleCaption%%</span>
-          </figcaption>
-          <div id="partExampleScore" class="part-example-score" role="group" aria-label="%%partExampleAlt%%">
-            <div class="part-example-header">
-              <b class="part-example-title">Camino de las Tropas</b>
-              <span>Carlos Moscardini</span>
+      <div class="part-stage" id="partStage">
+        <form id="partForm" class="part-form" novalidate>
+          <label id="partDropzone" class="part-dropzone" aria-disabled="false">
+            <input
+              class="part-file-input"
+              type="file"
+              id="partFile"
+              accept=".pdf,.mxl,.musicxml,.xml,application/pdf"
+              aria-labelledby="partDropTitle"
+              aria-describedby="partDropHint"
+            />
+            <svg class="part-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="M12 16V4m-4 4 4-4 4 4M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4" />
+            </svg>
+            <strong id="partDropTitle" aria-live="polite">%%partDropTitle%%</strong>
+            <span id="partDropHint">%%partFileLabel%%</span>
+          </label>
+          <label id="partRightsRow" class="part-rights">
+            <input type="checkbox" id="partRights" aria-labelledby="partRightsLabel" required />
+            <span id="partRightsLabel">%%partRightsLabel%%</span>
+            <small id="partRightsError" class="part-rights-error" role="alert" hidden></small>
+          </label>
+          <div id="partTurnstile" class="part-turnstile"></div>
+          <figure class="part-example">
+            <figcaption>
+              <strong>%%partExampleTitle%%</strong>
+              <span>%%partExampleCaption%%</span>
+            </figcaption>
+            <div id="partExampleScore" class="part-example-score" role="group" aria-label="%%partExampleAlt%%">
+              <div class="part-example-header">
+                <b class="part-example-title">Camino de las Tropas</b>
+                <span>Carlos Moscardini</span>
+              </div>
             </div>
-          </div>
-        </figure>
-      </form>
+          </figure>
+        </form>
 
-      <section id="partProgress" class="part-progress" aria-live="polite" hidden>
-        <h2 class="part-duration">%%partDurationHint%%</h2>
-        <p class="part-resume">%%partResumeHint%%</p>
-        <img
-          class="part-loading"
-          src="%%ASSETS_PREFIX%%partitura-loading.svg"
-          width="240"
-          height="261"
-          alt="%%partLoadingAlt%%"
-        />
-        <p id="partStatus" class="part-status"></p>
-        <p id="partElapsed" class="part-elapsed"></p>
-      </section>
+        <section id="partProgress" class="part-progress" aria-live="polite" hidden>
+          <h2 class="part-duration">%%partDurationHint%%</h2>
+          <p class="part-resume">%%partResumeHint%%</p>
+          <img
+            class="part-loading"
+            src="%%ASSETS_PREFIX%%partitura-loading.svg"
+            width="240"
+            height="261"
+            alt="%%partLoadingAlt%%"
+          />
+          <p id="partStatus" class="part-status"></p>
+          <p id="partElapsed" class="part-elapsed"></p>
+        </section>
+      </div>
 
       <section id="partResult" class="part-result" hidden></section>
 

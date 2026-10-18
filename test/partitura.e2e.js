@@ -467,16 +467,17 @@ async function fillForm(page, name) {
         });
         assert.ok(inlineError.aligned && inlineError.gap >= 0 && inlineError.gap <= 3 && inlineError.smaller);
         assert.equal(await page.locator('.part-rights').evaluate(node => getComputedStyle(node).animationName), 'none');
+        const processed = page.waitForResponse(response => response.url().endsWith('/process'));
         await page.locator('#partRights').check();
-        await page.waitForFunction(() => document.querySelector('#partForm').hidden);
+        await processed;
         assert.equal(api.createBody.filename, 'pending.musicxml');
         assert.ok(await page.locator('#partRightsError').isHidden());
         await page.close();
       }
 
-      // Upload controls and the example disappear as soon as an upload starts.
-      {
-        const page = await browser.newPage();
+      // Consent remains visible for 500 ms, then both panels crossfade in place.
+      for (const viewport of [{ width: 1280, height: 900 }, { width: 375, height: 800 }]) {
+        const page = await browser.newPage({ viewport });
         await mockApi(page, { jobs: [READY] });
         let releaseUpload;
         const gate = new Promise(resolve => { releaseUpload = resolve; });
@@ -485,14 +486,45 @@ async function fillForm(page, name) {
           return route.fulfill({ status: 200, headers: CORS });
         });
         await page.goto(toolUrl);
-        await fillForm(page);
+        await page.locator('#partFile').setInputFiles({ name: 'score.musicxml', mimeType: 'application/xml', buffer: Buffer.from('<score-partwise/>') });
+        await page.locator('#partRights').check();
+        const before = await page.locator('.part-how').boundingBox();
+        assert.ok(await page.locator('#partRights').isChecked());
+        assert.ok(await page.locator('#partRightsRow').isVisible());
+        assert.ok(await page.locator('#partProgress').isHidden());
+        await page.waitForTimeout(250);
+        assert.ok(await page.locator('#partRightsRow').isVisible());
+        assert.ok(await page.locator('#partProgress').isHidden());
         await page.waitForSelector('#partProgress:not([hidden])');
+        const entrance = await page.locator('#partProgress').evaluate(node => {
+          const animation = node.getAnimations()[0];
+          return animation.effect.getKeyframes().map(frame => ({ opacity: frame.opacity, transform: frame.transform }));
+        });
+        assert.equal(entrance[0].opacity, '0');
+        assert.equal(entrance[0].transform, 'scale(0.85)');
+        await page.waitForFunction(() => getComputedStyle(document.querySelector('#partForm')).visibility === 'hidden');
+        const geometry = await page.evaluate(() => {
+          const form = document.querySelector('#partForm').getBoundingClientRect();
+          const loading = document.querySelector('#partProgress').getBoundingClientRect();
+          return {
+            form: { top: form.top, height: form.height },
+            loading: { top: loading.top, height: loading.height },
+            title: getComputedStyle(document.querySelector('.part-duration')).textAlign,
+            subtitle: getComputedStyle(document.querySelector('.part-resume')).textAlign,
+          };
+        });
+        assert.deepEqual(geometry.form, geometry.loading);
+        assert.equal(geometry.title, 'left');
+        assert.equal(geometry.subtitle, 'left');
+        const after = await page.locator('.part-how').boundingBox();
+        assert.ok(Math.abs(before.y - after.y) < 1, 'content below the upload does not shift');
         assert.ok(await page.locator('.part-example').isHidden());
         assert.ok(await page.locator('#partDropzone').isHidden());
         assert.ok(await page.locator('#partRightsRow').isHidden());
         assert.equal(await page.locator('.part-duration').textContent(), S.partDurationHint);
         releaseUpload();
-        await page.waitForSelector('#partRows .part-row');
+        if (viewport.width >= 768) await page.waitForSelector('#partRows .part-row');
+        else await page.waitForSelector('.part-mobile-ready');
         await page.close();
       }
 
