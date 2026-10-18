@@ -11,7 +11,7 @@ const path = require('path');
 const { publishedPreludes, DOWNLOADS_DIR } = require('../scripts/lib/article-carcassi-preludes');
 
 /* Compases de cada preludio, contados una vez sobre la partitura del libro. */
-const MEASURES = { 1: 8, 2: 8, 3: 7, 4: 8 };
+const MEASURES = { 1: 8, 2: 8, 3: 7, 4: 8, 5: 8 };
 
 /* Cadenas del PDF de origen: nombre del archivo, productor del original, editor, licencia de la edicion. */
 const SOURCE_TRACES = [/CarcassiMethod/i, /Ghostscript/i, /Santisteban/i, /Mutopia/i, /LilyPond/i, /Preludes in Progressive/i];
