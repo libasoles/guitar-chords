@@ -104,6 +104,10 @@ window.CHORDS = [
     fingers: [[6,'x'],[5,'x'],[4,'o'],[3,2,'2'],[2,1,'1'],[1,2,'3']] },
   { name: 'E7', families: ['dom7'], aliases: [],
     notes: 'E B D G♯ B E',
+    alternatePositions: [{
+      fingers: [[6,'o'],[5,2,'2'],[4,'o'],[3,1,'1'],[2,3,'3'],[1,'o']],
+      barres: [], position: 1, hasBarre: false, kind: 'open',
+    }],
     fingers: [[6,'o'],[5,2,'2'],[4,'o'],[3,1,'1'],[2,'o'],[1,'o']] },
   { name: 'G7', families: ['dom7'], aliases: [],
     notes: 'G B D G B F',

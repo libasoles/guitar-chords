@@ -2,15 +2,16 @@
    Muchos acordes (mayor, menor, 7, m7) se pueden tocar en más de un sitio del
    diapasón: en posición abierta o con una forma movible de cejilla basada en
    el acorde de Mi (cejilla en la 6ª cuerda) o en el de La (cejilla en la 5ª).
-   `chords-db.js` sólo guarda una digitación por acorde (la que se muestra por
-   defecto); este módulo calcula, a partir de esa forma y del nombre del
+   `chords-db.js` guarda la digitación por defecto y, opcionalmente, otras
+   digitaciones; este módulo calcula, a partir de esa forma y del nombre del
    acorde, una segunda posición "alternativa" usando la forma de cejilla que
    todavía no se está usando.
 
    window.ChordPositions.getPositions(chord) siempre devuelve al menos
    [{ fingers, barres, position, label, hasBarre }] con la posición por
    defecto del propio `chord`, y añade una segunda entrada cuando la familia
-   del acorde (mayor/menor/7/m7) soporta el cálculo. */
+   del acorde (mayor/menor/7/m7) soporta el cálculo. Las digitaciones extra
+   de `chord.alternatePositions` se añaden después de las calculadas. */
 (function () {
   'use strict';
 
@@ -158,7 +159,7 @@
     if (/dim7$/i.test(chord.name || '')) return dim7Positions(chord, base);
 
     var alt = computeAlternate(chord);
-    return alt ? [base, alt] : [base];
+    return (alt ? [base, alt] : [base]).concat(chord.alternatePositions || []);
   }
 
   window.ChordPositions = { getPositions: getPositions };
