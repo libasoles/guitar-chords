@@ -320,7 +320,7 @@
   align-self: center;
 }
 .part-status {
-  margin: 0;
+  margin: -0.2rem 0 0;
   font-weight: 600;
 }
 .part-duration,
@@ -339,6 +339,9 @@
   margin: 0;
   font-size: 0.85rem;
   color: var(--ink-soft);
+}
+.part-resume {
+  margin-bottom: 1rem;
 }
 .part-result {
   margin: 1.5rem 0;

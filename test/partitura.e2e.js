@@ -523,9 +523,9 @@ async function fillForm(page, name) {
         assert.deepEqual(geometry.form, geometry.loading);
         assert.equal(geometry.title, 'left');
         assert.equal(geometry.subtitle, 'left');
-        for (const gap of [geometry.svgGapAbove, geometry.svgGapBelow, geometry.elapsedGap]) {
-          assert.ok(gap >= 0 && gap <= 8, 'loader content stays closely grouped: ' + JSON.stringify(geometry));
-        }
+        assert.ok(geometry.svgGapAbove >= 20 && geometry.svgGapAbove <= 24, 'loader has extra space above: ' + JSON.stringify(geometry));
+        assert.ok(geometry.svgGapBelow >= 0 && geometry.svgGapBelow <= 4, 'loader has a small gap below: ' + JSON.stringify(geometry));
+        assert.ok(geometry.elapsedGap >= 0 && geometry.elapsedGap <= 8, 'loader status and elapsed time stay closely grouped: ' + JSON.stringify(geometry));
         const after = await page.locator('.part-how').boundingBox();
         assert.ok(Math.abs(before.y - after.y) < 1, 'content below the upload does not shift');
         assert.ok(await page.locator('.part-example').isHidden());
