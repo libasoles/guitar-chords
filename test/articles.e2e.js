@@ -42,6 +42,9 @@ const PDFS = [
       assert.equal(await page.locator('.example-card .score-svg').count(), 2);
       assert.equal(await page.locator('.chord-diagram').count(), 2);
       assert.equal(await page.locator('.chord-card').count(), 6);
+      // E7: full form, then the easy decomposition, then Carcassi's.
+      const e7 = await page.locator('.chord-card', { has: page.locator('h3', { hasText: /^E7$/ }) }).locator('.form-text').allTextContents();
+      assert.deepEqual(e7, ['0 0 1 0 2 0', '0 0 1 x x 0', '0 3 1 x 2 x']);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       assert.ok(overflow <= 0, 'scroll horizontal de ' + overflow + 'px en ' + article);
       // The score cards fit inside the viewport.

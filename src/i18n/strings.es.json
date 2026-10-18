@@ -464,5 +464,7 @@
   "artDownloadPdf": "Descargar la partitura completa (PDF)",
   "artChordDiagramLabel": "Diagrama del acorde",
   "artAllegrettoAlt": "Partitura y tablatura de los compases 1 a 4 del Allegretto in C de Carcassi, con barras de repetición en los compases 3 y 4.",
-  "artPreludeAlt": "Partitura y tablatura de los compases 3 y 4 del Prelude A Minor, Op.59 de Carcassi, con barras de repetición alrededor de ambos."
+  "artPreludeAlt": "Partitura y tablatura de los compases 3 y 4 del Prelude A Minor, Op.59 de Carcassi, con barras de repetición alrededor de ambos.",
+  "artFormDecomposedEasy": "Forma descompuesta fácil",
+  "artFormDecomposedCarcassi": "Forma descompuesta de Carcassi"
 }

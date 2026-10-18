@@ -25,6 +25,11 @@ const DECOMPOSED = {
   E7: [0, 3, 1, null, 2, null],
 };
 
+/* Descomposicion facil, para comparar con la que usa Carcassi. */
+const EASY_DECOMPOSED = {
+  E7: [0, 0, 1, null, null, 0],
+};
+
 const ALLEGRETTO_CHORDS = ['C', 'G7'];
 const PRELUDE_CHORDS = ['Am', 'G7', 'C', 'E7'];
 
@@ -62,9 +67,13 @@ function formFigure(caption, form) {
 function comparisons(names, strings, withDiagrams) {
   const cards = names.map(function (name) {
     const diagram = withDiagrams ? diagramSvg(chordFingers(name), strings.artChordDiagramLabel + ' ' + name) : '';
+    // Where an easier decomposition exists it comes first, then Carcassi's.
+    const easy = EASY_DECOMPOSED[name];
+    const decomposed = easy
+      ? formFigure(strings.artFormDecomposedEasy, easy) + formFigure(strings.artFormDecomposedCarcassi, DECOMPOSED[name])
+      : formFigure(strings.artFormDecomposed, DECOMPOSED[name]);
     return '<div class="chord-card"><h3>' + name + '</h3>' + diagram +
-      formFigure(strings.artFormFull, fullForm(name)) +
-      formFigure(strings.artFormDecomposed, DECOMPOSED[name]) + '</div>';
+      formFigure(strings.artFormFull, fullForm(name)) + decomposed + '</div>';
   });
   return '<div class="chord-grid">' + cards.join('') + '</div>';
 }
