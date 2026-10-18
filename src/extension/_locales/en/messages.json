@@ -19,6 +19,14 @@
     "message": "Clear",
     "description": "Button to remove all pinned chords"
   },
+  "noteFinderLabel": {
+    "message": "Identify chords by note",
+    "description": "Link to the chord identifier in the footer"
+  },
+  "noteFinderUrl": {
+    "message": "https://acordesdeguitarra.com.ar/en/identificar-acordes-por-notas",
+    "description": "URL of the chord identifier in English"
+  },
   "noResults": {
     "message": "No matching chords.",
     "description": "Message shown when search returns no results"

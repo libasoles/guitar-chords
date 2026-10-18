@@ -19,6 +19,14 @@
     "message": "Limpiar",
     "description": "Botón para quitar todos los acordes pineados"
   },
+  "noteFinderLabel": {
+    "message": "Identificar acordes por nota",
+    "description": "Enlace al identificador de acordes en el footer"
+  },
+  "noteFinderUrl": {
+    "message": "https://acordesdeguitarra.com.ar/identificar-acordes-por-notas",
+    "description": "URL del identificador de acordes en español"
+  },
   "noResults": {
     "message": "No hay acordes que coincidan.",
     "description": "Mensaje cuando la búsqueda no devuelve resultados"

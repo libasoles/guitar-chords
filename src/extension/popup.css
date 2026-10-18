@@ -385,6 +385,32 @@ body {
   margin-top: 0.15rem;
 }
 
+/* ----- Footer ----- */
+
+.panel-footer {
+  padding-top: 0.75rem;
+  text-align: center;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+}
+
+.panel-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.panel-footer a:hover {
+  text-decoration: underline;
+}
+
+.panel-footer a:focus-visible {
+  outline: 2px solid var(--ink-soft);
+  outline-offset: 3px;
+}
+
 /* ----- Estado sin coincidencias ----- */
 
 .msg {
