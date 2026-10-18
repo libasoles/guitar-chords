@@ -105,6 +105,8 @@ def ocr(number):
 
 
 OUT_DIR = os.path.join(ROOT, "downloads", "carcassi-preludios")
+# Compases por sistema del libro: la vista previa muestra sus dos primeros sistemas.
+PER_ROW = {1: 4, 2: 2, 3: 2}
 PREVIEW_DIR = os.path.join(ROOT, "src", "site", "articles", "carcassi-preludios")
 CORRECTED = os.path.join(HERE, "corrected")
 AUTHOR = "Matteo Carcassi"
@@ -160,7 +162,7 @@ def build(number):
     title = name_of(number)
     with tempfile.TemporaryDirectory() as tmp:
         prepared = os.path.join(tmp, "prepared")
-        tabify.prepare(source, "musicxml", "standard", prepared)
+        tabify.prepare(source, "musicxml", "standard", prepared, per_row=PER_ROW.get(number, 4))
         exported = os.path.join(tmp, "export")
         with open(os.path.join(prepared, tabify.SUGGESTION_NAME), encoding="utf-8") as f:
             suggestion = json.load(f)
