@@ -60,13 +60,16 @@ def note_xml(event, voice, stem, acc, beams=None):
     kind = f"<type>{TYPES[dur]}</type>" + ("<dot/>" if dur in DOTTED else "")
     if pitch == "R":
         return f"<note><rest/><duration>{dur}</duration><voice>{voice}</voice>{kind}</note>"
-    step, alter, octave = parse(pitch)
+    harmonic = pitch.endswith("*")  # armonico natural: cabeza de rombo
+    step, alter, octave = parse(pitch.rstrip("*"))
     accidental = acc.xml(step, alter, octave)
     accidental = f"<accidental>{accidental}</accidental>" if accidental else ""
     beam = "".join(f'<beam number="{n}">{state}</beam>' for n, state in (beams or {}).items())
-    notations = f"<notations><technical><fingering>{finger}</fingering></technical></notations>" if finger else ""
+    technical = (f"<fingering>{finger}</fingering>" if finger else "") + ("<harmonic/>" if harmonic else "")
+    notations = f"<notations><technical>{technical}</technical></notations>" if technical else ""
+    head = "<notehead>diamond</notehead>" if harmonic else ""
     return (f"<note>{pitch_xml(step, alter, octave)}<duration>{dur}</duration><voice>{voice}</voice>{kind}"
-            f"{accidental}<stem>{stem}</stem>{beam}{notations}</note>")
+            f"{accidental}<stem>{stem}</stem>{head}{beam}{notations}</note>")
 
 
 def hidden_rest(dur, voice):
@@ -98,11 +101,12 @@ def _split(n):
     return parts
 
 
-def beam_states(events):
-    """Barras de semicorchea por pulso (4 posiciones): begin/continue/end entre las notas de un pulso."""
+def beam_states(events, length=16, group_size=4):
+    """Barras de semicorchea por grupo (un pulso: 4 posiciones en 4/4, 6 en 6/8): begin/continue/end."""
     beamed = {}
-    for beat in range(4):
-        group = sorted(e for e in events if e[1] == 1 and e[2] != "R" and beat * 4 <= e[0] < beat * 4 + 4)
+    for beat in range(length // group_size):
+        group = sorted(e for e in events if e[1] == 1 and e[2] != "R"
+                       and beat * group_size <= e[0] < (beat + 1) * group_size)
         for i, e in enumerate(group):
             if len(group) > 1:
                 state = "begin" if i == 0 else "end" if i == len(group) - 1 else "continue"
@@ -110,14 +114,17 @@ def beam_states(events):
     return beamed
 
 
-def measure_xml(number, fifths, bass, up, first=False):
+def measure_xml(number, fifths, bass, up, first=False, time=(4, 4)):
     acc = Accidentals(fifths)
+    beats, beat_type = time
+    length = beats * 16 // beat_type
     attrs = ""
     if first:
+        symbol = ' symbol="common"' if time == (4, 4) else ""
         attrs = (f"<attributes><divisions>{DIVISIONS}</divisions><key><fifths>{fifths}</fifths></key>"
-                 '<time symbol="common"><beats>4</beats><beat-type>4</beat-type></time>'
+                 f"<time{symbol}><beats>{beats}</beats><beat-type>{beat_type}</beat-type></time>"
                  "<clef><sign>G</sign><line>2</line></clef></attributes>")
-    beams = beam_states(up)
+    beams = beam_states(up, length, 4 if beat_type == 4 else 6)
     v1 = ""
     # alteraciones en orden de lectura: se recorre cada voz en su orden y se mezcla por posicion
     order = sorted([(e[0], 0, e) for e in up] + [(e[0], 1, e) for e in bass])
@@ -125,17 +132,17 @@ def measure_xml(number, fifths, bass, up, first=False):
     for pos, voice_index, event in order:
         voice, stem = (1, "up") if voice_index == 0 else (2, "down")
         rendered[(voice, event[0])] = note_xml(event, voice, stem, acc, beams.get(event[0]) if voice == 1 else None)
-    for kind, item in fill(up, 1):
+    for kind, item in fill(up, 1, length):
         v1 += hidden_rest(item, 1) if kind == "gap" else rendered[(1, item[0])]
     v2 = ""
-    for kind, item in fill(bass, 2):
+    for kind, item in fill(bass, 2, length):
         v2 += hidden_rest(item, 2) if kind == "gap" else rendered[(2, item[0])]
-    return (f'<measure number="{number}">{attrs}{v1}<backup><duration>16</duration></backup>{v2}</measure>')
+    return (f'<measure number="{number}">{attrs}{v1}<backup><duration>{length}</duration></backup>{v2}</measure>')
 
 
-def write(path, title, fifths, measures):
+def write(path, title, fifths, measures, time=(4, 4)):
     """`measures`: [{"bass": [...], "up": [...]}]; escribe el MusicXML corregido en `path`."""
-    body = "".join(measure_xml(i + 1, fifths, m["bass"], m["up"], first=i == 0) for i, m in enumerate(measures))
+    body = "".join(measure_xml(i + 1, fifths, m["bass"], m["up"], first=i == 0, time=time) for i, m in enumerate(measures))
     xml = ('<?xml version="1.0" encoding="UTF-8"?>'
            f'<score-partwise version="3.1"><work><work-title>{escape(title)}</work-title></work>'
            '<identification><creator type="composer">Matteo Carcassi</creator></identification>'

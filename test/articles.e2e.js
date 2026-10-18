@@ -111,12 +111,16 @@ const PDFS = [
       const rights = await cards.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().right));
       rights.forEach((right) => assert.ok(right <= 375, 'tarjeta fuera del viewport'));
       // Click downloads the prelude PDF with the expected name.
+      // A fresh tab per download: Chromium stops honouring downloads after ~10 in one tab.
       for (let i = 0; i < published.length; i++) {
-        const [download] = await Promise.all([page.waitForEvent('download'), cards.nth(i).click()]);
+        const tab = await context.newPage();
+        await tab.goto(base + url);
+        const [download] = await Promise.all([tab.waitForEvent('download'), tab.locator('.prelude-card').nth(i).click()]);
         assert.equal(download.suggestedFilename(), published[i].pdf);
         const saved = path.join(tmp, 'prelude-' + i + '.pdf');
         await download.saveAs(saved);
         assert.equal(fs.readFileSync(saved).subarray(0, 4).toString(), '%PDF');
+        await tab.close();
       }
       const links = await page.locator('link[rel=canonical], link[rel=alternate]').evaluateAll((els) => els.map((el) => [el.getAttribute('hreflang'), el.href]));
       assert.ok(links.some(([, href]) => href === BASE_URL + url));
