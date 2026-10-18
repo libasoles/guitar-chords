@@ -614,7 +614,31 @@ async function fillForm(page, name) {
         assert.equal(await page.locator('.part-row .part-string-name').count() % 6, 0);
         assert.ok(await page.locator('.part-footer #partConfirm svg').count() === 1, 'footer confirm has an icon');
 
-        // Edit a Fret        // Edit a Fret: the edit survives a reload.
+        // Positioned frets must not mask the library's selection background.
+        const firstMeasure = page.locator('.part-measure-tab').first();
+        const selectedNote = firstMeasure.locator('.ascii-tabs-cell[data-c="0"][data-s="3"]');
+        async function assertHighlight(locator) {
+          const colors = await locator.evaluate(node => ({
+            cell: getComputedStyle(node).backgroundColor,
+            fret: getComputedStyle(node.querySelector('.ascii-tabs-fret')).backgroundColor,
+          }));
+          assert.notEqual(colors.cell, 'rgba(0, 0, 0, 0)', 'selection has a visible background');
+          assert.equal(colors.fret, colors.cell, 'fret does not mask the selected cell');
+        }
+        await selectedNote.click();
+        await assertHighlight(selectedNote);
+        const startSelection = await firstMeasure.locator('.ascii-tabs-cell[data-c="0"][data-s="4"]').boundingBox();
+        const endSelection = await firstMeasure.locator('.ascii-tabs-cell[data-c="1"][data-s="2"]').boundingBox();
+        await page.mouse.move(startSelection.x, startSelection.y + startSelection.height);
+        await page.mouse.down();
+        await page.mouse.move(endSelection.x + endSelection.width, endSelection.y, { steps: 8 });
+        await page.mouse.up();
+        const selectedNotes = firstMeasure.locator('.ascii-tabs-selected');
+        assert.equal(await selectedNotes.count(), 2);
+        for (const note of await selectedNotes.all()) await assertHighlight(note);
+        await page.keyboard.press('Escape');
+
+        // Edit a Fret: the edit survives a reload.
         const cell = page.locator('.part-measure-tab').first().locator('.ascii-tabs-cell[data-c="0"][data-s="0"]');
         await cell.click();
         await page.keyboard.type('7');

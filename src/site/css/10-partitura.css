@@ -525,6 +525,12 @@ html.part-modal-open body { overflow: hidden; }
 .part-rows .ascii-tabs-fret {
   font-weight: 400;
 }
+/* Positioned frets mask the string with paper. Follow the cell background
+   during interaction so that mask does not cover ascii-tabs' own highlight. */
+.part-rows ascii-tabs .ascii-tabs-area .ascii-tabs-cell:is(:hover, .ascii-tabs-selected, .ascii-tabs-drop) .ascii-tabs-fret,
+.part-rows ascii-tabs.ascii-tabs-editing .ascii-tabs-area .ascii-tabs-cur .ascii-tabs-fret {
+  background: inherit;
+}
 .part-names-mode .ascii-tabs-fret {
   font-size: 0.8em;
 }
