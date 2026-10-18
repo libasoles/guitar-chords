@@ -48,7 +48,8 @@ test('las URL inglesas viejas redirigen con noindex y no estan en el sitemap', (
     assert.ok(html.includes('rel="canonical" href="' + BASE + r.to + '"'), r.file);
     assert.ok(html.includes('noindex'), r.file);
     assert.ok(fs.existsSync(path.join(DIST, fileForUrl(BASE + r.to))), r.to);
-    assert.ok(!xml.includes(r.file.replace(/\.html$/, '') .replace(/^en\//, '/en/') + '<'), r.file);
+    const oldUrl = BASE + '/' + r.file.replace(/\.html$/, '');
+    assert.ok(!entries.some((e) => e.loc === oldUrl), oldUrl + ' no debe estar en el sitemap');
   });
 });
 
