@@ -432,7 +432,7 @@
   "partErrBadType": "Formato no admitido. Subí un PDF, MusicXML (.musicxml, .xml) o .mxl.",
   "partErrNoFile": "Elegí un archivo para continuar.",
   "partErrRights": "Marcá la casilla para confirmar que tenés derecho a usar el archivo.",
-  "partErr_rate_limited": "Alcanzaste el límite diario de trabajos. Probá de nuevo mañana.",
+  "partErr_rate_limited": "Alcanzaste el límite de trabajos por hora. Probá de nuevo en una hora.",
   "partErr_busy": "El sistema está ocupado procesando otras partituras. Reintentá en unos minutos.",
   "partErr_budget_paused": "El servicio está pausado temporalmente. Volvé a intentar más tarde.",
   "partErr_turnstile_failed": "No pudimos verificar que sos una persona. Recargá la página y probá de nuevo.",

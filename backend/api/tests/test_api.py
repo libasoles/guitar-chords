@@ -201,7 +201,7 @@ class TurnstileTests(unittest.TestCase):
 
 
 class LimitTests(unittest.TestCase):
-    def test_third_pdf_of_day_rate_limited_other_ip_ok(self):
+    def test_third_pdf_of_hour_rate_limited_other_ip_ok(self):
         env = Env()
         self.assertEqual(env.create("pdf")[0], 201)
         self.assertEqual(env.create("pdf")[0], 201)
@@ -210,7 +210,20 @@ class LimitTests(unittest.TestCase):
         self.assertEqual(env.create("pdf", ip="5.6.7.8")[0], 201)
         self.assertEqual(env.create("musicxml")[0], 201)   # separate kind counter
 
-    def test_limit_resets_next_day(self):
+    def test_limit_resets_next_hour(self):
+        for kind, limit in (("pdf", 2), ("musicxml", 10)):
+            with self.subTest(kind=kind):
+                env = Env()
+                env.now = (env.now // 3600) * 3600
+                for _ in range(limit):
+                    self.assertEqual(env.create(kind)[0], 201)
+                env.now += 3599
+                status, body, _ = env.create(kind)
+                self.assertEqual((status, body["error"]["code"]), (429, "rate_limited"))
+                env.now += 1
+                self.assertEqual(env.create(kind)[0], 201)
+
+    def test_hourly_limit_does_not_reuse_previous_days_counter(self):
         env = Env()
         env.create("pdf"), env.create("pdf")
         env.now += 86400

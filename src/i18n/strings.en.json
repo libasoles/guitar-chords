@@ -432,7 +432,7 @@
   "partErrBadType": "Unsupported format. Upload a PDF, MusicXML (.musicxml, .xml) or .mxl file.",
   "partErrNoFile": "Choose a file to continue.",
   "partErrRights": "Tick the box to confirm you have the right to use the file.",
-  "partErr_rate_limited": "You reached the daily job limit. Try again tomorrow.",
+  "partErr_rate_limited": "You reached the hourly job limit. Try again in an hour.",
   "partErr_busy": "The system is busy processing other scores. Try again in a few minutes.",
   "partErr_budget_paused": "The service is temporarily paused. Please try again later.",
   "partErr_turnstile_failed": "We could not verify that you are a person. Reload the page and try again.",

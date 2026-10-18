@@ -129,8 +129,8 @@ class Service:
     def _hash(self, value: str) -> str:
         return hashlib.sha256((self.cfg.salt + value).encode()).hexdigest()[:32]
 
-    def _day(self) -> str:
-        return time.strftime("%Y%m%d", time.gmtime(self.clock()))
+    def _hour(self) -> str:
+        return time.strftime("%Y%m%d%H", time.gmtime(self.clock()))
 
     def budget_paused(self) -> bool:
         flag = self.store.get("flag#budget")
@@ -192,10 +192,10 @@ class Service:
         if self.budget_paused():
             raise ApiError("budget_paused")
         self._check_turnstile(token, ip)
-        day = self._day()
+        hour = self._hour()
         ip_hash = self._hash(ip)
-        ok = self.store.increment(f"limit#{day}#{kind}#{ip_hash}", "count",
-                                  self.cfg.limits[kind], ttl=int(self.clock()) + 2 * 86400)
+        ok = self.store.increment(f"limit#{hour}#{kind}#{ip_hash}", "count",
+                                  self.cfg.limits[kind], ttl=int(self.clock()) + 2 * 3600)
         if not ok:
             raise ApiError("rate_limited")
         job_id = self.new_id()
