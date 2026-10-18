@@ -186,8 +186,8 @@
 /* Carcassi preludes: a grid of score cards, one per prelude. */
 .prelude-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
-  gap: 0.4rem 1.4rem;
+  grid-template-columns: 1fr;
+  gap: 0.4rem;
 }
 .prelude-card {
   min-width: 0;
@@ -201,4 +201,13 @@
 
 .article-card + .article-card {
   margin-top: 1rem;
+}
+
+/* Author and book names stand out in the reading text. */
+.article-page .hl {
+  color: var(--accent);
+  font-weight: 600;
+}
+.article-page em.hl {
+  font-weight: 500;
 }
