@@ -1,9 +1,20 @@
 /* ----- Partitura y tablatura tool ----- */
 
+/* The hidden form keeps its intrinsic height while the loader overlays it. */
+.part-stage {
+  position: relative;
+  margin: 1.4rem 0;
+}
+.part-stage .part-form[hidden] { display: grid !important; }
+.part-stage.is-busy .part-form {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
 .part-form {
   display: grid;
   gap: 1.1rem;
-  margin: 1.4rem 0;
+  margin: 0;
   width: 100%;
 }
 .part-example {
@@ -278,28 +289,43 @@
   }
 }
 .part-progress {
+  position: absolute;
+  inset: 0;
   display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
   justify-items: center;
   gap: 0.4rem;
-  margin: 6rem 0 5rem;
+  margin: 0;
   text-align: center;
   font-family: var(--sans);
 }
 @media (prefers-reduced-motion: no-preference) {
-  .part-progress:not([hidden]) { animation: part-progress-in 700ms ease-out; }
+  .part-stage.is-busy:not(.is-resuming) .part-form {
+    transition: opacity 300ms ease-out, visibility 0s linear 300ms;
+  }
+  .part-progress:not([hidden]) { animation: part-progress-in 300ms ease-out; }
   @keyframes part-progress-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from { opacity: 0; transform: scale(0.85); }
+    to { opacity: 1; transform: scale(1); }
   }
 }
 .part-loading {
   width: 240px;
   max-width: 100%;
-  height: auto;
+  height: 100%;
+  min-height: 0;
+  max-height: 261px;
+  object-fit: contain;
+  align-self: center;
 }
 .part-status {
   margin: 0;
   font-weight: 600;
+}
+.part-duration,
+.part-resume {
+  justify-self: stretch;
+  text-align: left;
 }
 .part-duration {
   margin: 0 0 -0.3rem;

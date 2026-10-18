@@ -53,6 +53,7 @@
   // ---- DOM references ------------------------------------------------------
 
   var form = $('partForm');
+  var stage = $('partStage');
   var rightsBox = $('partRights');
   var rightsRow = $('partRightsRow');
   var rightsError = $('partRightsError');
@@ -131,15 +132,15 @@
     rightsBox.removeAttribute('aria-describedby');
   }
 
-  function setBusy(busy) {
-    dropzone.hidden = busy;
-    rightsRow.hidden = busy;
+  function setBusy(busy, immediate) {
+    stage.classList.toggle('is-busy', busy);
+    stage.classList.toggle('is-resuming', busy && !!immediate);
+    form.hidden = busy;
+    form.inert = busy;
     fileInput.disabled = busy;
     dropzone.setAttribute('aria-disabled', String(fileInput.disabled));
     dropzone.classList.remove('is-dragging');
     rightsBox.disabled = busy;
-    var example = form.querySelector('.part-example');
-    if (example) example.hidden = busy;
   }
 
   function setStatus(message) {
@@ -451,11 +452,17 @@
   function startJob(file, tuning) {
     showError('');
     clearResult();
-    setBusy(true);
-    setStatus(t('partVerifying'));
-    startElapsed(0);
+    fileInput.disabled = true;
+    rightsBox.disabled = true;
+    dropzone.setAttribute('aria-disabled', 'true');
     var kind = /\.pdf$/i.test(file.name) ? 'pdf' : 'musicxml';
-    takeToken()
+    new Promise(function (resolve) { setTimeout(resolve, 500); })
+      .then(function () {
+        setBusy(true);
+        setStatus(t('partVerifying'));
+        startElapsed(0);
+        return takeToken();
+      })
       .then(function (token) {
         setStatus(t('partUploading'));
         return request('POST', '/jobs', {
@@ -487,8 +494,7 @@
 
   function resumeJob(id) {
     state.jobId = id;
-    form.hidden = true;
-    setBusy(true);
+    setBusy(true, true);
     setStatus(t('partQueued'));
     startElapsed(0);
     poll();
