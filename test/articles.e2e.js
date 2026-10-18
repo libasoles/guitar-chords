@@ -47,12 +47,16 @@ const PDFS = [
       assert.equal(await page.locator('pre').count(), 0);
       assert.equal(await page.locator('.ascii-tabs-copy, .ascii-tabs-hint').count(), 0);
       assert.ok(!(await page.locator('main').textContent()).includes(' x '));
-      // The four Prelude chords share one tab per form, plus the E7 comparison.
-      const values = await page.locator('.sequence-forms ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0]));
+      // The four Prelude chords share one tab per form: full, easy E7, Carcassi.
+      const values = await page.locator('.sequence-forms ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((c) => c.some((f) => f !== null))));
       assert.equal(values.length, 3);
-      assert.deepEqual(values[0].filter((c) => c.some((f) => f !== null)).length, 4);
-      // E7: the easy decomposition, then Carcassi's.
-      assert.deepEqual(values[2].filter((c) => c.some((f) => f !== null)), [[0, 0, 1, null, null, 0], [0, 3, 1, null, 2, null]]);
+      values.forEach((chords) => assert.equal(chords.length, 4));
+      // Only the E7 changes between the two decomposed sequences.
+      assert.deepEqual(values[1].slice(0, 3), values[2].slice(0, 3));
+      assert.deepEqual(values[1][3], [0, 0, 1, null, null, 0]);
+      assert.deepEqual(values[2][3], [0, 3, 1, null, 2, null]);
+      // Letter labels on the strings.
+      assert.match(await page.locator('.sequence-forms ascii-tabs').first().locator('.ascii-tabs-tab').first().innerText(), /^e\|/);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       assert.ok(overflow <= 0, 'scroll horizontal de ' + overflow + 'px en ' + article);
       // The score cards fit inside the viewport.

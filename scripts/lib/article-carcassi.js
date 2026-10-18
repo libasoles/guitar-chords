@@ -73,11 +73,12 @@ function formsColumns(forms) {
 /* TAB de solo lectura, sin boton de copiar (la <ascii-tabs-sheet> vacia
    reemplaza las herramientas por defecto) ni pista de edicion. */
 function asciiTab(forms, locale) {
-  // Width fits the columns (label + 4 characters each) so the strings do not
-  // run on with empty dashes.
-  const width = 4 * formsColumns(forms).length + 3;
-  return '<ascii-tabs class="article-tab" readonly theme="light" variant="flat" spacing="3" lang="' + locale + '"' +
-    ' style="width:' + width + 'ch"' +
+  // Width fits the columns (label + 4 characters each) plus the sheet's
+  // padding and border, so the strings do not run on with empty dashes.
+  // ascii-tabs never draws a Staff narrower than 18 characters.
+  const width = Math.max(18, 4 * formsColumns(forms).length + 3);
+  return '<ascii-tabs class="article-tab" readonly theme="light" labels="notes" spacing="3" lang="' + locale + '"' +
+    ' style="width:calc(' + width + 'ch + 42px)"' +
     ' data-value=\'' + JSON.stringify([formsColumns(forms)]) + '\'><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>';
 }
 
@@ -98,19 +99,22 @@ function comparisons(names, strings, locale) {
   return '<div class="chord-grid">' + cards.join('') + '</div>';
 }
 
-/* Los cuatro acordes del preludio en un mismo TAB por forma: completa y
-   descompuesta de Carcassi. El E7 suma aparte la descomposicion facil. */
+/* Los cuatro acordes del preludio en un mismo TAB por forma: completa, la
+   descompuesta con el E7 facil y la de Carcassi. Siempre la secuencia entera;
+   solo cambia como se toca el E7. */
 function sequenceComparison(names, strings, locale) {
+  const decomposed = function (overrides) {
+    return names.map(function (name) { return overrides[name] || DECOMPOSED[name]; });
+  };
   const row = function (caption, forms) {
     return '<figure class="form sequence"><figcaption>' + caption + ' <span class="form-text">' + names.join(' ') + '</span></figcaption>' +
       asciiTab(forms, locale) + '</figure>';
   };
-  const e7 = '<figure class="form sequence"><figcaption>' + strings.artFormE7Compare + ' <span class="form-text">E7</span></figcaption>' +
-    asciiTab([EASY_DECOMPOSED.E7, DECOMPOSED.E7], locale) + '</figure>';
   return '<div class="sequence-forms">' +
     row(strings.artFormFull, names.map(fullForm)) +
-    row(strings.artFormDecomposedCarcassi, names.map(function (name) { return DECOMPOSED[name]; })) +
-    e7 + '</div>';
+    row(strings.artFormDecomposedEasy, decomposed(EASY_DECOMPOSED)) +
+    row(strings.artFormDecomposedCarcassi, decomposed({})) +
+    '</div>';
 }
 
 /* Carga la libreria y le pasa a cada TAB su valor. */
