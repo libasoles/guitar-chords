@@ -1,7 +1,8 @@
 'use strict';
 /* slugs.js — Registro unico de slugs por idioma (ver docs/adr/0003).
    La clave de cada pagina es su slug en espanol; el ingles puede diferir.
-   Toda pagina nueva registra su slug en es y en. */
+   Toda pagina nueva registra su slug en es y en y se marca `isNew: true`: no
+   existia con otra URL, asi que no deja redireccion. */
 
 const SLUGS = {
   'v7': { es: 'v7', en: 'v7' },
@@ -16,6 +17,8 @@ const SLUGS = {
   'partitura-y-tablatura': { es: 'partitura-y-tablatura', en: 'sheet-music-to-tab' },
   'punteo-terceras-sextas-decimas': { es: 'punteo-terceras-sextas-decimas', en: 'picking-thirds-sixths-tenths' },
   'politica-de-privacidad': { es: 'politica-de-privacidad', en: 'privacy-policy' },
+  'articulos': { es: 'articulos', en: 'articles', isNew: true },
+  'articulo-carcassi': { es: 'articulos/descomposicion-de-acordes-en-carcassi', en: 'articles/chord-decomposition-in-carcassi', isNew: true },
 };
 
 function slugFor(key, locale) {
@@ -35,7 +38,7 @@ function pageFile(key, locale) {
 }
 
 function renamedKeys() {
-  return Object.keys(SLUGS).filter((key) => SLUGS[key].en !== SLUGS[key].es);
+  return Object.keys(SLUGS).filter((key) => !SLUGS[key].isNew && SLUGS[key].en !== SLUGS[key].es);
 }
 
 /* Paginas inglesas que existian con slug en espanol y hoy cambian de URL. */

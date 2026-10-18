@@ -449,5 +449,20 @@
   "partErr_not_found": "No encontramos este trabajo. Empezá uno nuevo.",
   "toastLabel": "Notificación",
   "toastViewportLabel": "Notificaciones ({hotkey})",
-  "toastClose": "Cerrar notificación"
+  "toastClose": "Cerrar notificación",
+  "artIndexPageTitle": "Artículos · Acordes de guitarra",
+  "artIndexMetaDescription": "Artículos sobre guitarra con ejemplos de partitura y tablatura: cómo se descomponen los acordes al arpegiar, con obras de Carcassi.",
+  "artIndexH1": "Artículos",
+  "artIndexLead": "Lecturas breves con ejemplos de partitura y tablatura.",
+  "artCarcPageTitle": "Descomposición de acordes para arpegios en Carcassi · Acordes de guitarra",
+  "artCarcH1": "Descomposición de acordes para arpegios en Carcassi",
+  "artCarcMetaDescription": "Usamos a Carcassi para ejemplificar la descomposición de dos secuencias de acordes: C G7 en el Allegretto in C y Am G7 C E7 en el Prelude A Minor, Op.59.",
+  "artCarcLead": "Un arpegio casi nunca toca las seis cuerdas del acorde. Con dos obras de Carcassi vemos qué notas se toman de cada acorde y cuáles se dejan.",
+  "artBackToIndex": "← Artículos",
+  "artFormFull": "Forma completa",
+  "artFormDecomposed": "Forma descompuesta",
+  "artDownloadPdf": "Descargar la partitura completa (PDF)",
+  "artChordDiagramLabel": "Diagrama del acorde",
+  "artAllegrettoAlt": "Partitura y tablatura de los compases 1 a 4 del Allegretto in C de Carcassi, con barras de repetición en los compases 3 y 4.",
+  "artPreludeAlt": "Partitura y tablatura de los compases 3 y 4 del Prelude A Minor, Op.59 de Carcassi, con barras de repetición alrededor de ambos."
 }

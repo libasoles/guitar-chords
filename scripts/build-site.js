@@ -37,6 +37,7 @@ const {
 const { renderSharedTabEditor } = require("./lib/tab-editor");
 const { parseAsciiTab } = require("./lib/ascii-tab");
 const { renderBoldDemo } = require("./lib/tab-tutorial");
+const articleCarcassi = require("./lib/article-carcassi");
 const {
   pagePath,
   pageFile,
@@ -166,6 +167,10 @@ const tabEditorPromoTemplate = fs.readFileSync(
 );
 const privacyTemplate = fs.readFileSync(
   path.join(SRC_SITE, "privacy.html"),
+  "utf8",
+);
+const articleTemplate = fs.readFileSync(
+  path.join(SRC_SITE, "article.html"),
   "utf8",
 );
 const partituraTemplate = fs.readFileSync(
@@ -373,6 +378,11 @@ const SIXTHS_SLUG = "ejercicio-de-sextas";
 // and the site-wide privacy policy (src/site/privacy.html).
 const PARTITURA_SLUG = "partitura-y-tablatura";
 const PRIVACY_SLUG = "politica-de-privacidad";
+
+// Articles section (src/site/article.html): an index and one article, found
+// only through the sitemap — no link from the home page or the footer.
+const ARTICLES_SLUG = "articulos";
+const ARTICLE_CARCASSI_SLUG = "articulo-carcassi";
 // YouTube video the exercise was taken from, embedded below the tabs.
 const SIXTHS_VIDEO_ID = "NNwTR8Q8JN4";
 const SIXTHS_TABS = [
@@ -1107,6 +1117,90 @@ function renderPrivacyPage(template, strings, locale) {
   );
 }
 
+// Render a page of the articles section. These pages live one level deeper
+// (/articulos/x, /en/articles/x), so they load assets from the domain root.
+function renderArticlePage(strings, locale, slug, keys, bodyHtml, backHtml) {
+  let html = articleTemplate
+    .split("%%ASSETS_PREFIX%%")
+    .join("/assets/")
+    .split("%%MANIFEST_HREF%%")
+    .join("/assets/manifest." + locale + ".webmanifest");
+  html = fillPageChrome(html, strings, locale, slug);
+  html = html
+    .split("%%PAGE_TITLE%%")
+    .join(strings[keys.title])
+    .split("%%PAGE_META_DESCRIPTION%%")
+    .join(strings[keys.meta])
+    .split("%%PAGE_H1%%")
+    .join(strings[keys.h1])
+    .split("%%PAGE_LEAD%%")
+    .join(strings[keys.lead])
+    .split("%%ARTICLE_BACK%%")
+    .join(backHtml)
+    .split("%%ARTICLE_BODY%%")
+    .join(bodyHtml);
+  return withGuideJsonLd(html, strings, locale, slug, keys.title, keys.meta);
+}
+
+function renderArticlesIndex(strings, locale) {
+  const href = pagePath(ARTICLE_CARCASSI_SLUG, locale);
+  const card =
+    '<a class="article-card" href="' +
+    href +
+    '"><h2>' +
+    escapeHtml(strings.artCarcH1) +
+    "</h2><p>" +
+    escapeHtml(strings.artCarcMetaDescription) +
+    "</p></a>";
+  return renderArticlePage(
+    strings,
+    locale,
+    ARTICLES_SLUG,
+    {
+      title: "artIndexPageTitle",
+      meta: "artIndexMetaDescription",
+      h1: "artIndexH1",
+      lead: "artIndexLead",
+    },
+    card,
+    "",
+  );
+}
+
+function renderCarcassiArticle(strings, locale) {
+  const back =
+    '<p class="article-back"><a href="' +
+    pagePath(ARTICLES_SLUG, locale) +
+    '">' +
+    escapeHtml(strings.artBackToIndex) +
+    "</a></p>";
+  return renderArticlePage(
+    strings,
+    locale,
+    ARTICLE_CARCASSI_SLUG,
+    {
+      title: "artCarcPageTitle",
+      meta: "artCarcMetaDescription",
+      h1: "artCarcH1",
+      lead: "artCarcLead",
+    },
+    articleCarcassi.renderBody(locale, strings),
+    back,
+  );
+}
+
+function writeArticlePages(strings, locale) {
+  [
+    [ARTICLES_SLUG, renderArticlesIndex],
+    [ARTICLE_CARCASSI_SLUG, renderCarcassiArticle],
+  ].forEach(function (entry) {
+    const outFile = path.join(DIST_SITE, pageFile(entry[0], locale));
+    ensureDir(path.dirname(outFile));
+    fs.writeFileSync(outFile, entry[1](strings, locale), "utf8");
+    say(path.relative(ROOT, outFile));
+  });
+}
+
 // Render the Partitura y tablatura tool page (src/site/partitura.html). The
 // client script reads window.PARTITURA_CONFIG: API base URL, Turnstile site
 // key and every part* and toast* string for the locale.
@@ -1469,6 +1563,12 @@ if (fs.existsSync(ogImageSrc)) {
 } else {
   say("(src/site/og-image.png not found — og:image will 404 until added)");
 }
+// Score PDFs the article examples download.
+const articlePdfDist = path.join(ASSETS_DIST, "articles", "carcassi");
+ensureDir(articlePdfDist);
+articleCarcassi.pdfFiles().forEach(function (pdf) {
+  copyFile(pdf.src, path.join(articlePdfDist, pdf.name));
+});
 // Store-facing static pages.
 const storeDist = path.join(DIST_SITE, "store");
 ensureDir(storeDist);
@@ -1691,6 +1791,8 @@ LOCALES.forEach(function (locale) {
       say(path.relative(ROOT, privacyOutFile));
     }
 
+    writeArticlePages(strings, locale);
+
     if (PARTITURA_ENABLED) {
       const partOutFile = path.join(DIST_SITE, PARTITURA_SLUG + ".html");
       fs.writeFileSync(
@@ -1792,6 +1894,8 @@ LOCALES.forEach(function (locale) {
     );
     say(path.relative(ROOT, privacyOutFile));
   }
+
+  writeArticlePages(strings, locale);
 
   if (PARTITURA_ENABLED) {
     const partOutFile = path.join(DIST_SITE, pageFile(PARTITURA_SLUG, "en"));
@@ -1934,6 +2038,7 @@ addSlugPages(
 addSlugPages([DIM_SLUG, NOTE_FINDER_SLUG, SIXTHS_SLUG]);
 addSlugPages([TAB_EDITOR_SLUG], ["0.7", "0.6"]);
 addSlugPages([PRIVACY_SLUG], ["0.3", "0.3"]);
+addSlugPages([ARTICLES_SLUG, ARTICLE_CARCASSI_SLUG]);
 if (PARTITURA_ENABLED) addSlugPages([PARTITURA_SLUG], ["0.7", "0.6"]);
 addSlugPages(
   ALL_PICKING_PAGES.map(function (page) {

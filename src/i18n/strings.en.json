@@ -449,5 +449,20 @@
   "partErr_not_found": "We could not find this job. Start a new one.",
   "toastLabel": "Notification",
   "toastViewportLabel": "Notifications ({hotkey})",
-  "toastClose": "Dismiss notification"
+  "toastClose": "Dismiss notification",
+  "artIndexPageTitle": "Articles · Guitar Chords",
+  "artIndexMetaDescription": "Guitar articles with sheet music and tab examples: how chords are decomposed when arpeggiating, with works by Carcassi.",
+  "artIndexH1": "Articles",
+  "artIndexLead": "Short reads with sheet music and tab examples.",
+  "artCarcPageTitle": "Chord decomposition for arpeggios in Carcassi · Guitar Chords",
+  "artCarcH1": "Chord decomposition for arpeggios in Carcassi",
+  "artCarcMetaDescription": "We use Carcassi to illustrate the decomposition of two chord sequences: C G7 in Allegretto in C and Am G7 C E7 in Prelude A Minor, Op.59.",
+  "artCarcLead": "An arpeggio almost never plays all six strings of the chord. With two works by Carcassi we see which notes are taken from each chord and which are left out.",
+  "artBackToIndex": "← Articles",
+  "artFormFull": "Full form",
+  "artFormDecomposed": "Decomposed form",
+  "artDownloadPdf": "Download the full score (PDF)",
+  "artChordDiagramLabel": "Chord diagram",
+  "artAllegrettoAlt": "Sheet music and tab of measures 1 to 4 of Carcassi’s Allegretto in C, with repeat bars on measures 3 and 4.",
+  "artPreludeAlt": "Sheet music and tab of measures 3 and 4 of Carcassi’s Prelude A Minor, Op.59, with repeat bars around both."
 }
