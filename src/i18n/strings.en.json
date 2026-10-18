@@ -415,6 +415,7 @@
   "partNotationNames": "Show note names",
   "partConfirm": "Confirm and export",
   "partExporting": "Exporting…",
+  "partPdfDownloaded": "PDF downloaded.",
   "partDropped": "Dropped notes (no possible position on the guitar):",
   "partDroppedItem": "measure {m}: {p}",
   "partNoteTabEdit": "Editing the tab does not fix errors in the notation. If the score has recognition errors, download the intermediate MusicXML, fix it in a notation editor and upload it again.",

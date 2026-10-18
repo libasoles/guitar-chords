@@ -1124,6 +1124,13 @@
     var layouts = [];
     var bassOf = [];
     var boldBass = false;
+    var editRevision = 0;
+    var downloadedRevision = null;
+
+    function markEdited() {
+      editRevision += 1;
+      confirmBtn.disabled = state.exporting;
+    }
 
     // Toolbar.
     var toolbar = el('div', 'part-toolbar');
@@ -1164,6 +1171,8 @@
     }
     var titleInput = headerInput('partTitle', t('partTitleLabel'), preview.title);
     var authorInput = headerInput('partAuthor', t('partAuthorLabel'), preview.author);
+    titleInput.addEventListener('input', markEdited);
+    authorInput.addEventListener('input', markEdited);
     var titleRow = el('div', 'part-header-row');
     var titleWrap = el('div', 'part-header');
     titleWrap.appendChild(titleInput);
@@ -1372,6 +1381,7 @@
 
         function onEdited() {
           saveEdits(jobId, current);
+          markEdited();
         }
 
         notationInput.addEventListener('change', function () {
@@ -1383,7 +1393,8 @@
           elements.forEach(function (_, i) { applyValue(i, true); });
         });
         confirmBtn.addEventListener('click', function () {
-          if (state.exporting) return;
+          if (state.exporting || downloadedRevision === editRevision) return;
+          var exportingRevision = editRevision;
           state.exporting = true;
           confirmBtn.disabled = true;
           showError('');
@@ -1398,14 +1409,20 @@
             { title: titleInput.value, subtitle: authorInput.value })
             .then(function (downloads) {
               var pdf = downloadUrl(downloads, ['pdf']);
-              if (pdf) triggerDownload(pdf);
+              if (pdf) {
+                triggerDownload(pdf);
+                downloadedRevision = exportingRevision;
+                loadToast().then(function () {
+                  window.SiteToast.show(t('partPdfDownloaded'), { duration: 6000 });
+                }, function () { /* Download succeeded even if the toast cannot load. */ });
+              }
             })
             .catch(function (err) {
               showError(errorText(err && err.code));
             })
             .then(function () {
               state.exporting = false;
-              confirmBtn.disabled = false;
+              confirmBtn.disabled = downloadedRevision === editRevision;
               confirmBtn.removeAttribute('aria-busy');
               confirmIcon.innerHTML = idleIcon;
               confirmText.textContent = label;

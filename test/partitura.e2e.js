@@ -669,7 +669,16 @@ async function fillForm(page, name) {
         assert.ok(Math.abs(bottoms[0] - bottoms[1]) < 1, 'author underline aligned with checkboxes: ' + bottoms);
         await page.locator('#partAuthor').fill('Cuchi Leguizamón');
         await page.locator('#partConfirm').click();
-        await page.waitForFunction(() => !document.querySelector('#partConfirm').disabled);
+        await page.waitForFunction(() => !document.querySelector('#partConfirm').hasAttribute('aria-busy'));
+        assert.ok(await page.locator('#partConfirm').isDisabled());
+        assert.ok(await page.locator('.part-result-modal').isVisible());
+        await page.waitForSelector('.toast-description');
+        assert.equal(await page.locator('.toast-description').textContent(), strings.partPdfDownloaded);
+        await page.mouse.move(0, 0);
+        await page.waitForTimeout(4000);
+        assert.ok(await page.locator('.toast').isVisible(), 'success toast stays visible before six seconds');
+        await page.locator('.toast').waitFor({ state: 'hidden', timeout: 4000 });
+        assert.ok(await page.locator('#partConfirm').isDisabled(), 'toast dismissal does not allow another download');
         assert.equal(api.exportBody.title, 'Camino de las Tropas');
         assert.equal(api.exportBody.subtitle, 'Cuchi Leguizamón');
         assert.equal(api.exportBody.tabs.length, 2);
@@ -677,11 +686,18 @@ async function fillForm(page, name) {
         assert.deepEqual(api.exportBody.tabs[1][1], [12, null, null, null, null, 5]);
         assert.equal(await page.locator('#partDownloads').count(), 0);
 
-        // Re-export in the same Trabajo.
+        // Editing a tab enables a new export in the same Trabajo.
+        await page.locator('.part-measure-tab').first()
+          .locator('.ascii-tabs-cell[data-c="0"][data-s="0"]').click();
+        await page.keyboard.type('8');
+        assert.ok(await page.locator('#partConfirm').isEnabled());
         await page.locator('#partConfirm').click();
-        await page.waitForFunction(() => !document.querySelector('#partConfirm').disabled);
-        await page.waitForFunction(() => document.querySelector('#partConfirm').textContent.length > 0);
+        await page.waitForFunction(() => !document.querySelector('#partConfirm').hasAttribute('aria-busy'));
+        assert.ok(await page.locator('#partConfirm').isDisabled());
         assert.equal(api.exportCount, 2);
+        assert.equal(api.exportBody.tabs[0][0][0], 8);
+        await page.locator('#partTitle').fill('Nuevo título');
+        assert.ok(await page.locator('#partConfirm').isEnabled(), 'PDF header edits also enable downloading');
         assert.deepEqual(errors, []);
         await context.close();
       }
