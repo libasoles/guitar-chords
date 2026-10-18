@@ -70,21 +70,39 @@ function formsColumns(forms) {
   return columns;
 }
 
+/* Caracteres de ancho de una TAB: etiqueta de cuerda + 4 por columna. ascii-tabs
+   nunca dibuja un Staff de menos de 18. */
+function tabChars(forms) {
+  return Math.max(18, 4 * formsColumns(forms).length + 3);
+}
+
 /* TAB de solo lectura, sin boton de copiar (la <ascii-tabs-sheet> vacia
    reemplaza las herramientas por defecto) ni pista de edicion. */
 function asciiTab(forms, locale) {
-  // Width fits the columns (label + 4 characters each) plus the sheet's
-  // padding and border, so the strings do not run on with empty dashes.
-  // ascii-tabs never draws a Staff narrower than 18 characters.
-  const width = Math.max(18, 4 * formsColumns(forms).length + 3);
   return '<ascii-tabs class="article-tab" readonly theme="light" labels="notes" spacing="3" lang="' + locale + '"' +
-    ' style="width:calc(' + width + 'ch + 42px)"' +
     ' data-value=\'' + JSON.stringify([formsColumns(forms)]) + '\'><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>';
 }
 
+/* Nombres de los acordes, uno sobre la columna de su forma (la misma
+   cuadricula de 4 caracteres que la TAB, con la columna vacia entre acordes). */
+function chordNames(names) {
+  const cells = [];
+  names.forEach(function (name, i) {
+    if (i > 0) cells.push('<span></span>');
+    cells.push('<span>' + name + '</span>');
+  });
+  return '<div class="tab-chords" aria-hidden="true">' + cells.join('') + '</div>';
+}
+
+/* Titulo (y nombres de acorde) por fuera de la hoja blanca de la TAB. El
+   tamano de letra se comparte para que los nombres queden sobre sus columnas. */
+function tabFigure(caption, forms, locale, names) {
+  return '<figure class="form tab-figure" style="--chars:' + tabChars(forms) + '"><figcaption>' + caption + '</figcaption>' +
+    (names ? chordNames(names) : '') + asciiTab(forms, locale) + '</figure>';
+}
+
 function formFigure(caption, form, locale) {
-  return '<figure class="form"><figcaption>' + caption + '</figcaption>' +
-    asciiTab([form], locale) + '</figure>';
+  return tabFigure(caption, [form], locale);
 }
 
 /* Diagramas de la Forma completa (solo los acordes del primer ejemplo) y,
@@ -107,8 +125,7 @@ function sequenceComparison(names, strings, locale) {
     return names.map(function (name) { return overrides[name] || DECOMPOSED[name]; });
   };
   const row = function (caption, forms) {
-    return '<figure class="form sequence"><figcaption>' + caption + ' <span class="form-text">' + names.join(' ') + '</span></figcaption>' +
-      asciiTab(forms, locale) + '</figure>';
+    return tabFigure(caption, forms, locale, names);
   };
   return '<div class="sequence-forms">' +
     row(strings.artFormFull, names.map(fullForm)) +

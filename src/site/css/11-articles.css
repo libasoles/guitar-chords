@@ -88,7 +88,7 @@
 /* Chord comparison: each chord stacks its diagram, full form and decomposed form. */
 .chord-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
   gap: 1.2rem 0.8rem;
   margin: 1.2rem 0;
 }
@@ -112,28 +112,46 @@
 .form {
   margin: 0 0 0.8rem;
 }
-/* Title and description sit outside the tab's white sheet. */
+/* Title and chord names sit outside the tab's white sheet. */
 .form figcaption {
+  margin: 0 0 0.3rem;
   font-family: var(--sans);
-  font-size: 0.8rem;
-  color: var(--ink-soft);
-}
-.form-text {
-  display: block;
-  font-family: var(--mono);
+  font-size: 1.15rem;
+  font-weight: 600;
   color: var(--ink);
-  letter-spacing: 0.08em;
+}
+/* One size for the digits and the chord names, so each name sits over its
+   column. It shrinks on narrow screens to keep the whole tab on one line
+   (a monospace character is 0.6em wide; the sheet adds 42px). */
+.tab-figure {
+  --tab-size: min(24px, calc((100cqw - 42px) / (var(--chars) * 0.6)));
+}
+.tab-chords {
+  display: flex;
+  /* sheet padding and border, string label, half a column to centre the name */
+  padding-left: calc(21px + 2.5ch);
+  font-family: var(--mono);
+  font-size: var(--tab-size);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.tab-chords span {
+  flex: none;
+  width: 4ch;
+  text-align: center;
 }
 /* Read-only <ascii-tabs>: the editor's white sheet, no tools. */
 .article-tab {
   --ascii-tabs-font: var(--mono);
-  --ascii-tabs-font-size: 15px;
+  --ascii-tabs-font-size: var(--tab-size);
   /* The width is set in ch, so the element needs the tab's own font. */
   font-family: var(--mono);
-  font-size: 15px;
+  font-size: var(--tab-size);
   display: block;
+  width: calc(var(--chars) * 1ch + 42px);
   max-width: 100%;
-  margin: 0.3rem 0 0;
+  margin: 0;
 }
 .sequence-forms {
   margin: 1.2rem 0;
@@ -156,11 +174,11 @@
   font-family: var(--serif);
   line-height: 1.2;
 }
-.article-page code,
-.article-page .form-text {
+.article-page code {
   font-family: var(--mono);
 }
 .article-page {
+  container-type: inline-size;
   font-size: 1.05rem;
   line-height: 1.65;
 }
