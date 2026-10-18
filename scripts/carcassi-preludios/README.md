@@ -43,5 +43,6 @@ npm test
   el `build` fija los metadatos (título «Prelude N in <Key>», autor Matteo Carcassi, sin productor ni
   fechas) y quita el bloque `<encoding>` del MusicXML. `test/carcassi-preludios.unit.js` lo comprueba.
 - **Digitación**: la sugerida por el motor con afinación Estándar.
+- **Fuente de los dígitos del TAB**: sans (como el conversor web). `build` cambia la fuente por defecto de la página (`Times, serif`) por una sans; los preludios 1 a 3 se publicaron antes con serif y se dejaron así.
 
 Informes de calidad: `reports/prelude-NN.md`.

@@ -144,6 +144,17 @@ def write_preview(number, prepared):
         f.write(out)
 
 
+SANS = "Helvetica, Arial, DejaVu Sans, sans-serif"
+
+
+def sans_tab_digits(tabify):
+    """Verovio draws the fret digits in the page's default font, `Times, serif`. On macOS that is a real serif,
+    while the web converter's Lambda image (Amazon Linux, no serif font) falls back to a sans. Make the page
+    default a sans so these PDFs match the converter; the title sets its own serif family and keeps its look."""
+    original = tabify.drop_brace
+    tabify.drop_brace = lambda svg: original(svg).replace('font-family="Times, serif"', f'font-family="{SANS}"', 1)
+
+
 def build(number):
     """Corrected MusicXML -> `Prelude N in <Key> - Matteo Carcassi`.pdf/.musicxml in downloads/.
 
@@ -161,6 +172,7 @@ def build(number):
         raise SystemExit(f"falta el MusicXML corregido: {source}")
     title = name_of(number)
     with tempfile.TemporaryDirectory() as tmp:
+        sans_tab_digits(tabify)
         prepared = os.path.join(tmp, "prepared")
         tabify.prepare(source, "musicxml", "standard", prepared, per_row=PER_ROW.get(number, 4))
         exported = os.path.join(tmp, "export")
