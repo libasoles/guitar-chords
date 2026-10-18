@@ -13,6 +13,7 @@ const { spawnSync } = require('node:child_process');
 const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
 const { serveStatic } = require('../scripts/lib/static-server');
+const { pagePath, pageFile } = require('../scripts/lib/slugs');
 
 const ROOT = path.join(__dirname, '..');
 const API = 'https://api.partitura.test';
@@ -197,22 +198,21 @@ async function fillForm(page, name) {
   build(withDir, { PARTITURA_API_URL: API });
 
   // Without the API URL the tool, its banner and its home links do not exist.
-  for (const file of ['partitura-y-tablatura.html', 'en/partitura-y-tablatura.html']) {
+  for (const file of [pageFile('partitura-y-tablatura', 'es'), pageFile('partitura-y-tablatura', 'en')]) {
     assert.ok(!fs.existsSync(path.join(withoutDir, file)), file + ' must not be generated');
   }
   for (const file of ['index.html', 'en/index.html']) {
     const html = fs.readFileSync(path.join(withoutDir, file), 'utf8');
-    assert.ok(!html.includes('partitura-y-tablatura'), file + ' links to the tool');
+    assert.ok(!html.includes('partitura-y-tablatura') && !html.includes('sheet-music-to-tab'), file + ' links to the tool');
     assert.ok(!html.includes('part-promo'), file + ' has the banner');
   }
-  assert.ok(!fs.readFileSync(path.join(withoutDir, 'sitemap.xml'), 'utf8').includes('partitura-y-tablatura'));
-  for (const file of ['politica-de-privacidad.html', 'en/politica-de-privacidad.html']) {
+  assert.ok(!/partitura-y-tablatura|sheet-music-to-tab/.test(fs.readFileSync(path.join(withoutDir, 'sitemap.xml'), 'utf8')));
+  for (const file of [pageFile('politica-de-privacidad', 'es'), pageFile('politica-de-privacidad', 'en')]) {
     assert.ok(fs.existsSync(path.join(withoutDir, file)), file + ' must always be generated');
   }
 
   for (const locale of ['es', 'en']) {
-    const prefix = locale === 'en' ? 'en/' : '';
-    const html = fs.readFileSync(path.join(withDir, prefix + 'partitura-y-tablatura.html'), 'utf8');
+    const html = fs.readFileSync(path.join(withDir, pageFile('partitura-y-tablatura', locale)), 'utf8');
     assert.ok(!/%%part\w+%%/.test(html), 'unresolved partitura translation in ' + locale);
     const strings = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/i18n/strings.' + locale + '.json'), 'utf8'));
     assert.ok(html.includes('<h2 class="part-duration">' + strings.partDurationHint + '</h2>'));
@@ -224,23 +224,23 @@ async function fillForm(page, name) {
   try {
     browser = await chromium.launch({ executablePath: playwrightExecutablePath() });
     const sitemap = fs.readFileSync(path.join(withDir, 'sitemap.xml'), 'utf8');
-    assert.ok(sitemap.includes('/partitura-y-tablatura') && sitemap.includes('/en/partitura-y-tablatura'));
-    assert.ok(sitemap.includes('/politica-de-privacidad') && sitemap.includes('/en/politica-de-privacidad'));
+    assert.ok(sitemap.includes(pagePath('partitura-y-tablatura', 'es') + '<') && sitemap.includes(pagePath('partitura-y-tablatura', 'en') + '<'));
+    assert.ok(sitemap.includes(pagePath('politica-de-privacidad', 'es') + '<') && sitemap.includes(pagePath('politica-de-privacidad', 'en') + '<'));
 
     for (const locale of ['es', 'en']) {
       const prefix = locale === 'en' ? '/en' : '';
       const S = JSON.parse(fs.readFileSync(path.join(ROOT, 'src', 'i18n', 'strings.' + locale + '.json'), 'utf8'));
-      const toolUrl = base + prefix + '/partitura-y-tablatura';
+      const toolUrl = base + pagePath('partitura-y-tablatura', locale);
 
       // Privacy policy and the footer link on every kind of page.
       {
         const page = await browser.newPage();
-        await page.goto(base + prefix + '/politica-de-privacidad');
+        await page.goto(base + pagePath('politica-de-privacidad', locale));
         assert.equal(await page.locator('h1').textContent(), S.privH1);
         assert.ok((await page.locator('main').textContent()).includes('hola@acordesdeguitarra.com.ar'));
-        for (const url of [prefix + '/', prefix + '/crear-tablaturas-de-guitarra', prefix + '/circulo-de-quintas', prefix + '/partitura-y-tablatura']) {
+        for (const url of [prefix + '/', pagePath('crear-tablaturas-de-guitarra', locale), pagePath('circulo-de-quintas', locale), pagePath('partitura-y-tablatura', locale)]) {
           await page.goto(base + url);
-          const link = page.locator('a[href="' + prefix + '/politica-de-privacidad"]').last();
+          const link = page.locator('a[href="' + pagePath('politica-de-privacidad', locale) + '"]').last();
           assert.ok(await link.count(), 'footer privacy link on ' + url);
         }
         // Home banner: lazy, fixed dimensions, links to the tool.
@@ -249,7 +249,7 @@ async function fillForm(page, name) {
         assert.equal(await img.getAttribute('loading'), 'lazy');
         assert.equal(await img.getAttribute('width'), '480');
         assert.equal(await img.getAttribute('height'), '436');
-        assert.equal(await page.locator('.part-promo-link').getAttribute('href'), prefix + '/partitura-y-tablatura');
+        assert.equal(await page.locator('.part-promo-link').getAttribute('href'), pagePath('partitura-y-tablatura', locale));
         await page.close();
       }
 
@@ -392,10 +392,10 @@ async function fillForm(page, name) {
         assert.equal(await page.locator('#partDropzone').getAttribute('aria-disabled'), 'false');
         assert.ok(await page.locator('.part-privacy p').first().isVisible());
         assert.equal(await page.locator('.part-privacy a').count(), 0);
-        assert.equal(await page.locator('a[href="' + prefix + '/politica-de-privacidad"]').count(), 1);
+        assert.equal(await page.locator('a[href="' + pagePath('politica-de-privacidad', locale) + '"]').count(), 1);
         assert.equal(
           await page.locator('.privacy-link a').getAttribute('href'),
-          prefix + '/politica-de-privacidad',
+          pagePath('politica-de-privacidad', locale),
         );
         // Turnstile script only loads on this page, widget gets the site key.
         await page.waitForFunction(() => document.querySelector('#partTurnstile').dataset.sitekey);

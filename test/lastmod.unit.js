@@ -23,6 +23,15 @@ test('solo la URL cuyo contenido cambio renueva su fecha', () => {
   assert.equal(second.lastmods['/b'], '2026-01-01');
 });
 
+test('una URL renombrada conserva la fecha de la URL vieja', () => {
+  const first = resolveLastmods({}, { '/en/old': 'x' }, '2026-01-01');
+  const second = resolveLastmods(first.manifest, { '/en/new': 'x2' }, '2026-10-03', { '/en/new': '/en/old' });
+  assert.equal(second.lastmods['/en/new'], '2026-01-01');
+  assert.deepEqual(Object.keys(second.manifest), ['/en/new']);
+  const third = resolveLastmods(second.manifest, { '/en/new': 'x3' }, '2026-11-01', { '/en/new': '/en/old' });
+  assert.equal(third.lastmods['/en/new'], '2026-11-01');
+});
+
 test('URLs retiradas se descartan del manifest', () => {
   const first = resolveLastmods({}, { '/a': 'x', '/b': 'y' }, '2026-01-01');
   const second = resolveLastmods(first.manifest, { '/a': 'x' }, '2026-10-03');

@@ -71,9 +71,9 @@ function ldOf(file) {
 }
 
 test('home y guias generadas emiten JSON-LD con canonica e idioma de la pagina', () => {
-  const files = ['index.html', 'en.html', 'v7.html', 'en/v7-menor.html', 'acordes-mayores-y-sus-notas.html',
-    'acordes-disminuidos.html', 'en/acordes-disminuidos.html', 'punteo-terceras-sextas-decimas.html',
-    'en/punteo-terceras-sextas-decimas.html'];
+  const files = ['index.html', 'en.html', 'v7.html', 'en/v7-minor.html', 'acordes-mayores-y-sus-notas.html',
+    'acordes-disminuidos.html', 'en/diminished-chords.html', 'punteo-terceras-sextas-decimas.html',
+    'en/picking-thirds-sixths-tenths.html'];
   files.forEach((file) => {
     const { graph, canonical, lang } = ldOf(file);
     const typed = graph.filter((n) => n.url);

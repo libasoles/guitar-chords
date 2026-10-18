@@ -24,7 +24,7 @@
     "description": "Link to the chord identifier in the footer"
   },
   "noteFinderUrl": {
-    "message": "https://acordesdeguitarra.com.ar/en/identificar-acordes-por-notas",
+    "message": "https://acordesdeguitarra.com.ar/en/identify-chords-by-notes",
     "description": "URL of the chord identifier in English"
   },
   "noResults": {

@@ -4,6 +4,7 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
 const { serveStatic } = require('../scripts/lib/static-server');
+const { pagePath } = require('../scripts/lib/slugs');
 
 (async function () {
   const server = await serveStatic(path.join(__dirname, '..', 'dist/site'), 0);
@@ -15,7 +16,7 @@ const { serveStatic } = require('../scripts/lib/static-server');
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     for (const locale of ['', '/en']) {
-      await page.goto(base + locale + '/punteo-terceras-sextas-decimas');
+      await page.goto(base + pagePath('punteo-terceras-sextas-decimas', locale ? 'en' : 'es'));
       await page.waitForSelector('.picking-note');
       assert.equal(await page.locator('.picking-diagram svg').count(), 4);
       assert.deepEqual(await page.locator('.picking-diagram').evaluateAll(els => els.map(el => el.dataset.pattern)), ['3', '1', '2', '4']);

@@ -25,3 +25,7 @@ Playwright and Lighthouse are dev dependencies, so `npm ci` is the only install 
 - Keep manual review screenshots in a separate, untracked script or invocation. Commit screenshots in tests only when an assertion consumes them or CI explicitly collects them.
 - Resolve test fixtures from the repository. For temporary artifacts, use `os.tmpdir()` with `fs.mkdtemp()` and create output directories before writing; never assume a developer's absolute path exists on the Linux CI runner.
 - Before committing test changes, inspect their file reads and writes for machine-specific paths and leftover review artifacts. Local test success alone does not verify filesystem portability; check the pushed CI result before reporting CI as passing.
+
+## New pages
+
+Every new page registers its slug in Spanish and English in `scripts/lib/slugs.js` (see `docs/adr/0003-slugs-por-idioma-y-redireccion-de-urls-viejas.md`). New pages get no redirect.

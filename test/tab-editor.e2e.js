@@ -7,6 +7,7 @@ const assert = require('assert');
 const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
 const { serveStatic } = require('../scripts/lib/static-server');
+const { pagePath } = require('../scripts/lib/slugs');
 
 const DIST_SITE = path.join(__dirname, '..', 'dist', 'site');
 
@@ -345,7 +346,7 @@ async function run() {
 
     // The English pages run the same component with the English UI.
     await page.evaluate(() => localStorage.clear());
-    await page.goto(base + '/en/crear-tablaturas-de-guitarra');
+    await page.goto(base + pagePath('crear-tablaturas-de-guitarra', 'en'));
     await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
     const en = await page.evaluate(() => {
       const el = document.querySelector('ascii-tabs');
@@ -362,7 +363,7 @@ async function run() {
     assert.strictEqual(await page.locator('.ascii-tabs-cell[data-c="0"][data-s="0"] .ascii-tabs-fret').textContent(), 'E');
     await page.getByRole('checkbox', { name: 'String labels as letters' }).check();
     assert.deepStrictEqual(await labels(), ['e|', 'B|', 'G|', 'D|', 'A|', 'E|']);
-    await page.goto(base + '/en/ejercicio-de-sextas');
+    await page.goto(base + pagePath('ejercicio-de-sextas', 'en'));
     await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
     const enSixths = await page.evaluate(() => {
       const el = document.querySelector('ascii-tabs');

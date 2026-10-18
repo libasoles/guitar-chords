@@ -18,7 +18,7 @@
   document.getElementById('pinned-clear').textContent = i18n('clearPinned', 'Clear');
   document.title = i18n('appName', 'Guitar Chords');
   document.getElementById('note-finder-label').textContent = i18n('noteFinderLabel', 'Identify chords by note');
-  document.getElementById('note-finder-link').href = i18n('noteFinderUrl', 'https://acordesdeguitarra.com.ar/en/identificar-acordes-por-notas');
+  document.getElementById('note-finder-link').href = i18n('noteFinderUrl', 'https://acordesdeguitarra.com.ar/en/identify-chords-by-notes');
 
   const input = document.getElementById('q');
   const results = document.getElementById('results');

@@ -21,13 +21,16 @@ function loadManifest(file) {
 
 /* entries: { [url]: content (string|Buffer) }. Devuelve { lastmods, manifest }
    donde manifest solo contiene las URLs vigentes (las retiradas se descartan). */
-function resolveLastmods(previous, entries, today) {
+function resolveLastmods(previous, entries, today, renames) {
   const manifest = {};
   const lastmods = {};
   Object.keys(entries).sort().forEach((url) => {
     const hash = hashOf(entries[url]);
-    const prev = previous[url];
-    const lastmod = prev && prev.hash === hash ? prev.lastmod : today;
+    /* renames { urlNueva: urlVieja }: la primera vez, una URL renombrada hereda
+       la fecha de la vieja aunque su contenido ya cambio (enlaces nuevos). */
+    const migrated = !previous[url] && renames && renames[url] && previous[renames[url]];
+    const prev = previous[url] || migrated;
+    const lastmod = prev && (migrated || prev.hash === hash) ? prev.lastmod : today;
     manifest[url] = { hash, lastmod };
     lastmods[url] = lastmod;
   });

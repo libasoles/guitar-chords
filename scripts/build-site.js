@@ -37,6 +37,13 @@ const {
 const { renderSharedTabEditor } = require("./lib/tab-editor");
 const { parseAsciiTab } = require("./lib/ascii-tab");
 const { renderBoldDemo } = require("./lib/tab-tutorial");
+const {
+  pagePath,
+  pageFile,
+  legacyEnglishRedirects,
+  lastmodRenames,
+  redirectHtml,
+} = require("./lib/slugs");
 
 const ROOT = path.join(__dirname, "..");
 const SRC_SITE = path.join(ROOT, "src", "site");
@@ -267,8 +274,7 @@ function canonicalUrl(locale) {
 }
 
 function v7PageHref(locale, slug) {
-  const s = slug || "v7";
-  return locale === "es" ? "/" + s : "/en/" + s;
+  return pagePath(slug || "v7", locale);
 }
 
 function v7CanonicalUrl(locale, slug) {
@@ -1724,7 +1730,7 @@ LOCALES.forEach(function (locale) {
 
   V7_PAGES.forEach(function (page) {
     const v7Html = renderV7Page(v7Template, strings, locale, page);
-    const v7OutFile = path.join(localeDir, page.slug + ".html");
+    const v7OutFile = path.join(DIST_SITE, pageFile(page.slug, "en"));
     fs.writeFileSync(v7OutFile, v7Html, "utf8");
     say(path.relative(ROOT, v7OutFile));
   });
@@ -1736,14 +1742,14 @@ LOCALES.forEach(function (locale) {
       locale,
       page,
     );
-    const circleOutFile = path.join(localeDir, page.slug + ".html");
+    const circleOutFile = path.join(DIST_SITE, pageFile(page.slug, "en"));
     fs.writeFileSync(circleOutFile, circleHtml, "utf8");
     say(path.relative(ROOT, circleOutFile));
   });
 
   {
     const dimHtml = renderDimPage(dimTemplate, strings, locale);
-    const dimOutFile = path.join(localeDir, DIM_SLUG + ".html");
+    const dimOutFile = path.join(DIST_SITE, pageFile(DIM_SLUG, "en"));
     fs.writeFileSync(dimOutFile, dimHtml, "utf8");
     say(path.relative(ROOT, dimOutFile));
   }
@@ -1754,7 +1760,7 @@ LOCALES.forEach(function (locale) {
       strings,
       locale,
     );
-    const noteFinderOutFile = path.join(localeDir, NOTE_FINDER_SLUG + ".html");
+    const noteFinderOutFile = path.join(DIST_SITE, pageFile(NOTE_FINDER_SLUG, "en"));
     fs.writeFileSync(noteFinderOutFile, noteFinderHtml, "utf8");
     say(path.relative(ROOT, noteFinderOutFile));
   }
@@ -1765,20 +1771,20 @@ LOCALES.forEach(function (locale) {
       strings,
       locale,
     );
-    const tabEditorOutFile = path.join(localeDir, TAB_EDITOR_SLUG + ".html");
+    const tabEditorOutFile = path.join(DIST_SITE, pageFile(TAB_EDITOR_SLUG, "en"));
     fs.writeFileSync(tabEditorOutFile, tabEditorHtml, "utf8");
     say(path.relative(ROOT, tabEditorOutFile));
   }
 
   {
     const sixthsHtml = renderSixthsPage(sixthsTemplate, strings, locale);
-    const sixthsOutFile = path.join(localeDir, SIXTHS_SLUG + ".html");
+    const sixthsOutFile = path.join(DIST_SITE, pageFile(SIXTHS_SLUG, "en"));
     fs.writeFileSync(sixthsOutFile, sixthsHtml, "utf8");
     say(path.relative(ROOT, sixthsOutFile));
   }
 
   {
-    const privacyOutFile = path.join(localeDir, PRIVACY_SLUG + ".html");
+    const privacyOutFile = path.join(DIST_SITE, pageFile(PRIVACY_SLUG, "en"));
     fs.writeFileSync(
       privacyOutFile,
       renderPrivacyPage(privacyTemplate, strings, locale),
@@ -1788,7 +1794,7 @@ LOCALES.forEach(function (locale) {
   }
 
   if (PARTITURA_ENABLED) {
-    const partOutFile = path.join(localeDir, PARTITURA_SLUG + ".html");
+    const partOutFile = path.join(DIST_SITE, pageFile(PARTITURA_SLUG, "en"));
     fs.writeFileSync(
       partOutFile,
       renderPartituraPage(partituraTemplate, strings, locale),
@@ -1804,7 +1810,7 @@ LOCALES.forEach(function (locale) {
       locale,
       page,
     );
-    const pickingOutFile = path.join(localeDir, page.slug + ".html");
+    const pickingOutFile = path.join(DIST_SITE, pageFile(page.slug, "en"));
     fs.writeFileSync(pickingOutFile, pickingHtml, "utf8");
     say(path.relative(ROOT, pickingOutFile));
   });
@@ -1837,7 +1843,7 @@ function addPrivacyLinks(dir) {
     const rel = path.relative(DIST_SITE, full).split(path.sep).join("/");
     const isEn = rel === "en.html" || rel.indexOf("en/") === 0;
     const label = isEn ? "Privacy policy" : "Política de privacidad";
-    const href = "/" + (isEn ? "en/" : "") + PRIVACY_SLUG;
+    const href = pagePath(PRIVACY_SLUG, isEn ? "en" : "es");
     let html = fs.readFileSync(full, "utf8");
     if (html.indexOf('class="privacy-link"') !== -1) return;
     const link =
@@ -1849,6 +1855,20 @@ function addPrivacyLinks(dir) {
   });
 }
 addPrivacyLinks(DIST_SITE);
+
+// ---- Redirects for the old English URLs (Spanish slugs under /en/) ---------
+// GitHub Pages has no server redirects: minimal HTML with canonical, meta
+// refresh and noindex. Not in the sitemap. See docs/adr/0003.
+
+console.log("==> Writing redirects for the old English URLs...");
+legacyEnglishRedirects().forEach(function (redirect) {
+  // The old Partitura URL never existed unless the tool is published.
+  if (!PARTITURA_ENABLED && redirect.file === "en/" + PARTITURA_SLUG + ".html")
+    return;
+  const redirectFile = path.join(DIST_SITE, redirect.file);
+  fs.writeFileSync(redirectFile, redirectHtml(SITE_BASE_URL, redirect.to), "utf8");
+  say(path.relative(ROOT, redirectFile));
+});
 
 // ---- robots.txt ------------------------------------------------------------
 
@@ -1892,51 +1912,29 @@ function addBilingual(esPath, esFile, enPath, enFile, priorities) {
   });
 }
 addBilingual("/", "index.html", "/en", "en.html", ["1.0", "0.9"]);
-addBilingual("/v7", "v7.html", "/en/v7", "en/v7.html", ["0.6", "0.5"]);
-addBilingual("/v7-menor", "v7-menor.html", "/en/v7-menor", "en/v7-menor.html", [
-  "0.5",
-  "0.4",
-]);
-function addSlugPages(slugs) {
+// Pages are keyed by their registered slug (scripts/lib/slugs.js).
+function addSlugPages(slugs, priorities) {
   slugs.forEach(function (slug) {
     addBilingual(
-      "/" + slug,
-      slug + ".html",
-      "/en/" + slug,
-      "en/" + slug + ".html",
-      ["0.5", "0.4"],
+      pagePath(slug, "es"),
+      pageFile(slug, "es"),
+      pagePath(slug, "en"),
+      pageFile(slug, "en"),
+      priorities || ["0.5", "0.4"],
     );
   });
 }
+addSlugPages(["v7"], ["0.6", "0.5"]);
+addSlugPages(["v7-menor"]);
 addSlugPages(
   CIRCLE_PAGES.map(function (page) {
     return page.slug;
   }),
 );
 addSlugPages([DIM_SLUG, NOTE_FINDER_SLUG, SIXTHS_SLUG]);
-addBilingual(
-  "/" + TAB_EDITOR_SLUG,
-  TAB_EDITOR_SLUG + ".html",
-  "/en/" + TAB_EDITOR_SLUG,
-  "en/" + TAB_EDITOR_SLUG + ".html",
-  ["0.7", "0.6"],
-);
-addBilingual(
-  "/" + PRIVACY_SLUG,
-  PRIVACY_SLUG + ".html",
-  "/en/" + PRIVACY_SLUG,
-  "en/" + PRIVACY_SLUG + ".html",
-  ["0.3", "0.3"],
-);
-if (PARTITURA_ENABLED) {
-  addBilingual(
-    "/" + PARTITURA_SLUG,
-    PARTITURA_SLUG + ".html",
-    "/en/" + PARTITURA_SLUG,
-    "en/" + PARTITURA_SLUG + ".html",
-    ["0.7", "0.6"],
-  );
-}
+addSlugPages([TAB_EDITOR_SLUG], ["0.7", "0.6"]);
+addSlugPages([PRIVACY_SLUG], ["0.3", "0.3"]);
+if (PARTITURA_ENABLED) addSlugPages([PARTITURA_SLUG], ["0.7", "0.6"]);
 addSlugPages(
   ALL_PICKING_PAGES.map(function (page) {
     return page.slug;
@@ -1962,6 +1960,7 @@ const resolvedLastmods = resolveLastmods(
   loadManifest(lastmodManifestFile),
   lastmodContent,
   today,
+  lastmodRenames(),
 );
 saveManifest(lastmodManifestFile, resolvedLastmods.manifest);
 

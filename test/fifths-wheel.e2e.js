@@ -4,6 +4,7 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
 const { serveStatic } = require('../scripts/lib/static-server');
+const { pagePath } = require('../scripts/lib/slugs');
 
 (async function () {
   const server = await serveStatic(path.join(__dirname, '..', 'dist/site'), 0);
@@ -15,7 +16,7 @@ const { serveStatic } = require('../scripts/lib/static-server');
     page.on('pageerror', error => errors.push(error.message));
     const base = 'http://localhost:' + server.address().port;
     for (const locale of ['', '/en']) {
-      await page.goto(base + locale + '/circulo-de-quintas');
+      await page.goto(base + pagePath('circulo-de-quintas', locale ? 'en' : 'es'));
       const key = label => page.getByRole('button', { name: label, exact: true });
       const es = !locale;
       const chords = () => page.locator('.fifths-chord strong').allTextContents();
