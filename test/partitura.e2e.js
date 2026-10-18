@@ -506,9 +506,16 @@ async function fillForm(page, name) {
         const geometry = await page.evaluate(() => {
           const form = document.querySelector('#partForm').getBoundingClientRect();
           const loading = document.querySelector('#partProgress').getBoundingClientRect();
+          const svg = document.querySelector('.part-loading').getBoundingClientRect();
+          const subtitle = document.querySelector('.part-resume').getBoundingClientRect();
+          const status = document.querySelector('#partStatus').getBoundingClientRect();
+          const elapsed = document.querySelector('#partElapsed').getBoundingClientRect();
           return {
             form: { top: form.top, height: form.height },
             loading: { top: loading.top, height: loading.height },
+            svgGapAbove: svg.top - subtitle.bottom,
+            svgGapBelow: status.top - svg.bottom,
+            elapsedGap: elapsed.top - status.bottom,
             title: getComputedStyle(document.querySelector('.part-duration')).textAlign,
             subtitle: getComputedStyle(document.querySelector('.part-resume')).textAlign,
           };
@@ -516,6 +523,9 @@ async function fillForm(page, name) {
         assert.deepEqual(geometry.form, geometry.loading);
         assert.equal(geometry.title, 'left');
         assert.equal(geometry.subtitle, 'left');
+        for (const gap of [geometry.svgGapAbove, geometry.svgGapBelow, geometry.elapsedGap]) {
+          assert.ok(gap >= 0 && gap <= 8, 'loader content stays closely grouped: ' + JSON.stringify(geometry));
+        }
         const after = await page.locator('.part-how').boundingBox();
         assert.ok(Math.abs(before.y - after.y) < 1, 'content below the upload does not shift');
         assert.ok(await page.locator('.part-example').isHidden());

@@ -292,7 +292,8 @@
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  grid-template-rows: auto auto minmax(0, 261px) auto auto;
+  align-content: start;
   justify-items: center;
   gap: 0.4rem;
   margin: 0;
