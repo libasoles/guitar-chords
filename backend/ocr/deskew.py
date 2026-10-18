@@ -64,6 +64,15 @@ def _page_count(pdf_path):
     raise ValueError("pdfinfo reported no page count")
 
 
+def is_scan(pdf_path):
+    """True when every page is exactly one raster image: a scan, not a vector export."""
+    try:
+        rows = _run("pdfimages", "-list", pdf_path).splitlines()[2:]
+        return bool(rows) and len(rows) == _page_count(pdf_path)
+    except Exception:  # noqa: BLE001 - unreadable PDFs are not scans
+        return False
+
+
 def deskew_pdf(pdf_path, work_dir, log=print):
     """Path of a straightened copy of the PDF, or `pdf_path` itself if there is nothing to do.
 

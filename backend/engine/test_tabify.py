@@ -329,6 +329,11 @@ class TuningTests(unittest.TestCase):
         self.assertEqual(tabify.dropped_notes(measures), [])
         self.assertEqual(measures[0]['columns'][0]['cells'], [None] * 5 + [0])
 
+    def test_a_misread_note_below_the_guitar_does_not_hide_drop_d(self):
+        measures, _, tuning = self.tab(['D2', 'A2', 'D3', 'C2'])
+        self.assertEqual(tuning, tabify.DROP_D_TUNING)
+        self.assertEqual([p for _, p in tabify.dropped_notes(measures)], ['C2'])
+
     def test_standard_when_nothing_is_below_e(self):
         measures, _, tuning = self.tab(['E2', 'A2'])
         self.assertEqual(tuning, tabify.STANDARD_TUNING)
@@ -336,6 +341,18 @@ class TuningTests(unittest.TestCase):
     def test_plain_treble_written_d_is_still_shifted_down(self):
         _, shift, tuning = self.tab(['D3', 'A3'], tabify.m21.clef.TrebleClef())
         self.assertEqual((shift, tuning), (-12, tabify.DROP_D_TUNING))
+
+    def test_one_misread_low_note_does_not_flip_the_piece_to_sounding_pitch(self):
+        # Lamento, read by homr: a single stray C3 among 323 notes put every note an octave up.
+        pitches = ['E3', 'G3', 'B3', 'E4'] * 10 + ['C3']
+        measures, shift = tabify.build_columns(self.part(pitches, tabify.m21.clef.TrebleClef()))
+        self.assertEqual(shift, -12)
+        self.assertEqual(measures[0]['columns'][0]['notes'][0][1], 40)  # E3 written = E2 sounding
+
+    def test_a_score_with_many_low_notes_is_already_in_sound(self):
+        pitches = ['E2', 'A2', 'D3', 'G3', 'B3', 'E4']
+        _, shift, _ = self.tab(pitches, tabify.m21.clef.TrebleClef())
+        self.assertEqual(shift, 0)
 
     def test_clefless_pickup_movement_is_written_pitch(self):
         # Falú, "Como el aire": Audiveris put the pickup D (below the staff) in

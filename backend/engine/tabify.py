@@ -42,6 +42,9 @@ MAX_FRET = 19
 MAX_SPAN = 4  # frets the hand covers without stretching
 CANDIDATES_PER_COLUMN = 40
 GUITAR_LOWEST = 38  # D2, the 6th string in Drop D
+# Share of notes below the written guitar range that marks a score as already in sound.
+# One misread note (OMR noise) must not flip a whole piece an octave.
+IN_SOUND_SHARE = 0.05
 
 PREVIEW_OPTIONS = {
     "pageWidth": 2100, "pageHeight": 60000, "scale": 40, "adjustPageHeight": True,
@@ -190,8 +193,9 @@ def octave_shifts(measures):
         octave_clef.append(getattr(clef, "octaveChange", 0) == -1)
     written = [p.midi for m, octave in zip(measures, octave_clef) if not octave
                for n in m.recurse().notes for p in n.pitches]
-    # Notes too low to be written guitar pitch: the score is already in sound.
-    plain = 0 if written and min(written) - 12 < GUITAR_LOWEST else -12
+    # Many notes too low to be written guitar pitch: the score is already in sound.
+    too_low = sum(1 for midi in written if midi - 12 < GUITAR_LOWEST)
+    plain = 0 if too_low and too_low > IN_SOUND_SHARE * len(written) else -12
     return [0 if octave else plain for octave in octave_clef]
 
 
@@ -236,9 +240,11 @@ def build_columns(part, shifts=None):
 def guess_tuning(measures):
     """Standard, unless the part goes below E2 and Drop D (6th string in D, the
     usual scordatura in guitar music) reaches it."""
-    midis = [m for meas in measures for col in meas["columns"] for _, m in col["notes"]]
+    drop_d = open_midis(DROP_D_TUNING)[-1]
+    # Notes below Drop D are out of reach in any tuning; a misread one must not hide the real bass.
+    midis = [m for meas in measures for col in meas["columns"] for _, m in col["notes"] if m >= drop_d]
     lowest = open_midis(STANDARD_TUNING)[-1]
-    if midis and open_midis(DROP_D_TUNING)[-1] <= min(midis) < lowest:
+    if midis and min(midis) < lowest:
         return DROP_D_TUNING
     return STANDARD_TUNING
 
