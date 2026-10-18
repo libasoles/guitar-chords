@@ -45,4 +45,23 @@ npm test
 - **Digitación**: la sugerida por el motor con afinación Estándar.
 - **Fuente de los dígitos del TAB**: sans (como el conversor web). `build` cambia la fuente por defecto de la página (`Times, serif`) por una sans; los preludios 1 a 3 se publicaron antes con serif y se regeneraron después con sans.
 
+## Transcripción manual (la vía de los 16 preludios publicados)
+
+El OCR confunde dedos con notas, así que cada preludio se transcribió a mano desde la imagen con ayudas:
+
+```bash
+$PY scripts/carcassi-preludios/detect_notes.py N          # alturas de las cabezas macizas por compás (acordes apilados incluidos)
+$PY scripts/carcassi-preludios/bass_strips.py N [alto]    # tiras con guías de altura para leer a ojo los bajos huecos
+$PY scripts/carcassi-preludios/transcribe_NN.py           # escribe corrected/prelude-NN.musicxml
+scripts/carcassi-preludios/build_one.sh N                 # transcribe + build + PNG de revisión en .work/
+```
+
+- `transcribe_lib.py`: compases de 4/4, 3/4, 6/8 y 12/8 con bajo en voz 2 y el resto en voz 1; acordes
+  (`"C#5:1+A5:4"`), armónicos (`"E6*"`), barras de semicorchea y de corchea (con grupos a medida por compás).
+  `transcribe_triplets.py`: tresillos y ligaduras (Preludio 6).
+- Hay que escribir las alteraciones: el detector da letras sin armadura. Los títulos del libro pierden los
+  sostenidos y bemoles; se corrigen en `TITLES` de `extract.py` tras mirar cada armadura.
+- Un preludio largo que dejaría un sistema solo en una segunda hoja se graba con otra maquetación
+  (`PDF_OVERRIDES` en `extract.py`, Preludio 12).
+
 Informes de calidad: `reports/prelude-NN.md`.
