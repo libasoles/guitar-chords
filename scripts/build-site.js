@@ -424,13 +424,39 @@ const INTERVALS_PAGE = {
 };
 const ALL_PICKING_PAGES = [INTERVALS_PAGE];
 
+// Reserve the extension screenshot for the home page. Other pages share
+// raster previews of the existing notation + TAB examples (social crawlers
+// do not reliably display SVG images).
+function socialImage(url) {
+  if (url === SITE_BASE_URL + homeHref("es") ||
+      url === SITE_BASE_URL + homeHref("en")) {
+    return SITE_BASE_URL + "/assets/og-image.png";
+  }
+  for (const locale of ["es", "en"]) {
+    if (url === v7CanonicalUrl(locale, "circulo-de-quintas")) {
+      return SITE_BASE_URL + "/assets/og-fifths-" + locale + ".png";
+    }
+    if (url === v7CanonicalUrl(locale, TAB_EDITOR_SLUG)) {
+      return SITE_BASE_URL + "/assets/og-tab-editor.png";
+    }
+    if (url === v7CanonicalUrl(locale, NOTE_FINDER_SLUG)) {
+      return SITE_BASE_URL + "/assets/og-note-finder-" + locale + ".png";
+    }
+  }
+  const carcassi = ["es", "en"].some(function (locale) {
+    return url === v7CanonicalUrl(locale, ARTICLE_CARCASSI_SLUG);
+  });
+  return SITE_BASE_URL + "/assets/og-score-" +
+    (carcassi ? "carcassi" : "preludes") + ".png";
+}
+
 // JSON-LD options shared by the home and guide renderers; mirrors the values
 // already used for canonical/hreflang/meta so structured data matches the page.
 function structuredDataOpts(locale, url, name, description, homeUrl) {
   return {
     baseUrl: SITE_BASE_URL,
     siteName: "Guitar Chords",
-    ogImage: SITE_BASE_URL + "/assets/og-image.png",
+    ogImage: socialImage(url),
     locale: locale,
     url: url,
     homeUrl: homeUrl || SITE_BASE_URL + homeHref(locale),
@@ -513,7 +539,7 @@ function partituraPromo(strings, locale, assetsPrefix) {
 function render(template, strings, locale, assetsPrefix, outputMode) {
   const resolvedAssetsPrefix =
     assetsPrefix || (locale === "es" ? "assets/" : "../assets/");
-  const ogImage = SITE_BASE_URL + "/assets/og-image.png";
+  const ogImage = socialImage(canonicalUrl(locale));
   let html = template;
 
   // Simple key substitutions.
@@ -603,7 +629,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
 // entries in V7_PAGES) for one locale.
 function renderV7Page(template, strings, locale, page) {
   const resolvedAssetsPrefix = locale === "es" ? "assets/" : "../assets/";
-  const ogImage = SITE_BASE_URL + "/assets/og-image.png";
+  const ogImage = socialImage();
   let html = template;
 
   const simpleKeys = [
@@ -687,7 +713,7 @@ function renderV7Page(template, strings, locale, page) {
 // data script).
 function renderCirclePage(template, strings, locale, page) {
   const resolvedAssetsPrefix = locale === "es" ? "assets/" : "../assets/";
-  const ogImage = SITE_BASE_URL + "/assets/og-image.png";
+  const ogImage = socialImage(v7CanonicalUrl(locale, page.slug));
   let html = template;
 
   const simpleKeys = [
@@ -764,7 +790,7 @@ function renderCirclePage(template, strings, locale, page) {
 // dim7 diagrams, grouped by which string carries the root.
 function renderDimPage(template, strings, locale) {
   const resolvedAssetsPrefix = locale === "es" ? "assets/" : "../assets/";
-  const ogImage = SITE_BASE_URL + "/assets/og-image.png";
+  const ogImage = socialImage();
   let html = template;
 
   const simpleKeys = [
@@ -833,7 +859,7 @@ function renderDimPage(template, strings, locale) {
 // and src/shared/note-match.js).
 function renderNoteFinderPage(template, strings, locale) {
   const resolvedAssetsPrefix = locale === "es" ? "assets/" : "../assets/";
-  const ogImage = SITE_BASE_URL + "/assets/og-image.png";
+  const ogImage = socialImage(v7CanonicalUrl(locale, NOTE_FINDER_SLUG));
   let html = template;
 
   const simpleKeys = [
@@ -914,7 +940,7 @@ function renderNoteFinderPage(template, strings, locale) {
 // Render the tab editor page (src/site/tab-editor.html) for one locale.
 function renderTabEditorPage(template, strings, locale) {
   const resolvedAssetsPrefix = locale === "es" ? "assets/" : "../assets/";
-  const ogImage = SITE_BASE_URL + "/assets/og-image.png";
+  const ogImage = socialImage(v7CanonicalUrl(locale, TAB_EDITOR_SLUG));
   let html = template;
 
   const simpleKeys = [
@@ -973,7 +999,7 @@ function renderTabEditorPage(template, strings, locale) {
 // Render the "Ejercicio de sextas" page (src/site/sixths-exercise.html) for one locale.
 function renderSixthsPage(template, strings, locale) {
   const resolvedAssetsPrefix = locale === "es" ? "assets/" : "../assets/";
-  const ogImage = SITE_BASE_URL + "/assets/og-image.png";
+  const ogImage = socialImage();
   let html = template;
 
   const simpleKeys = [
@@ -1058,7 +1084,7 @@ function fillPageChrome(html, strings, locale, slug, ogImage) {
     .split("%%hreflangEn%%")
     .join(SITE_BASE_URL + v7PageHref("en", slug))
     .split("%%ogImage%%")
-    .join(ogImage || SITE_BASE_URL + "/assets/og-image.png")
+    .join(ogImage || socialImage(v7CanonicalUrl(locale, slug)))
     .split("%%MANIFEST_HREF%%")
     .join(resolvedAssetsPrefix + "manifest." + locale + ".webmanifest")
     .split("%%SW_PATH%%")
@@ -1357,7 +1383,7 @@ function renderPartituraPage(template, strings, locale) {
 // src/site/picking-render.js; no client-side data script.
 function renderPickingPage(template, strings, locale, page) {
   const resolvedAssetsPrefix = locale === "es" ? "assets/" : "../assets/";
-  const ogImage = SITE_BASE_URL + "/assets/og-image.png";
+  const ogImage = socialImage();
   const p = page.prefix;
   let html = template;
 
@@ -1429,7 +1455,7 @@ function renderPickingPage(template, strings, locale, page) {
 function render404Page(template, strings) {
   // Pages serves this document at the missing URL, potentially nested.
   const resolvedAssetsPrefix = "/assets/";
-  const ogImage = SITE_BASE_URL + "/assets/og-image.png";
+  const ogImage = socialImage();
   let html = template;
 
   const simpleKeys = [
@@ -1607,6 +1633,17 @@ if (PARTITURA_ENABLED) {
     );
   });
 }
+// Raster score previews used by article and guide link cards.
+["carcassi", "preludes"].forEach(function (name) {
+  copyFile(
+    path.join(SRC_SITE, "og-score-" + name + ".png"),
+    path.join(ASSETS_DIST, "og-score-" + name + ".png"),
+  );
+});
+["og-tab-editor.png", "og-note-finder-es.png", "og-note-finder-en.png",
+  "og-fifths-es.png", "og-fifths-en.png"].forEach(function (name) {
+  copyFile(path.join(SRC_SITE, name), path.join(ASSETS_DIST, name));
+});
 // OG image (optional — skip silently if not present yet).
 const ogImageSrc = path.join(SRC_SITE, "og-image.png");
 if (fs.existsSync(ogImageSrc)) {

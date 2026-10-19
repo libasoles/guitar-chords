@@ -70,6 +70,42 @@ function ldOf(file) {
   };
 }
 
+test('las vistas previas usan la imagen de cada pagina y reservan la extension para el inicio', () => {
+  const { pagePath } = require('../scripts/lib/slugs');
+  for (const locale of ['es', 'en']) {
+    const cases = [
+      ['articulos', 'og-score-preludes.png'],
+      ['articulo-carcassi', 'og-score-carcassi.png'],
+      ['articulo-preludios-carcassi', 'og-score-preludes.png'],
+      ['crear-tablaturas-de-guitarra', 'og-tab-editor.png'],
+      ['identificar-acordes-por-notas', `og-note-finder-${locale}.png`],
+      ['circulo-de-quintas', `og-fifths-${locale}.png`],
+    ];
+    for (const [slug, image] of cases) {
+      const file = pagePath(slug, locale).slice(1) + '.html';
+      const html = fs.readFileSync(path.join(DIST, file), 'utf8');
+      const og = html.match(/property="og:image" content="([^"]+)"/)[1];
+      const twitter = html.match(/name="twitter:image" content="([^"]+)"/)[1];
+      assert.ok(og.endsWith('/assets/' + image), file + ': ' + og);
+      assert.equal(twitter, og, file);
+      if (html.includes('type="application/ld+json"')) {
+        ldOf(file).graph.filter((n) => n.image).forEach((n) => assert.equal(n.image, og, file));
+      }
+      const png = fs.readFileSync(path.join(DIST, 'assets', image));
+      assert.equal(png.subarray(1, 4).toString(), 'PNG');
+      assert.equal(png.readUInt32BE(16), 1200);
+      assert.equal(png.readUInt32BE(20), 630);
+    }
+  }
+  for (const file of fs.readdirSync(DIST, { recursive: true }).filter((f) => f.endsWith('.html'))) {
+    const html = fs.readFileSync(path.join(DIST, file), 'utf8');
+    const og = html.match(/property="og:image" content="([^"]+)"/);
+    if (!og) continue;
+    const home = ['index.html', 'en.html', 'en/index.html'].includes(file);
+    assert.equal(og[1].endsWith('/assets/og-image.png'), home, file);
+  }
+});
+
 test('home y guias generadas emiten JSON-LD con canonica e idioma de la pagina', () => {
   const files = ['index.html', 'en.html', 'v7.html', 'en/v7-minor.html', 'acordes-mayores-y-sus-notas.html',
     'acordes-disminuidos.html', 'en/diminished-chords.html', 'punteo-terceras-sextas-decimas.html',
