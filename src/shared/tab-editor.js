@@ -7,6 +7,12 @@ await customElements.whenDefined('ascii-tabs');
 
 const noteNames = document.getElementById('tabNoteNames');
 const letterLabels = document.getElementById('tabLetterLabels');
+const LETTER_LABELS_KEY = 'tabLetterLabels';
+try {
+  letterLabels.checked = localStorage.getItem(LETTER_LABELS_KEY) === '1';
+} catch {
+  // localStorage may be unavailable; keep the default.
+}
 function updateDisplay() {
   editor.notation = noteNames.checked
     ? (editor.lang === 'es' ? 'solfege' : 'letters')
@@ -14,7 +20,14 @@ function updateDisplay() {
   editor.labels = letterLabels.checked ? 'notes' : 'numbers';
 }
 noteNames.addEventListener('change', updateDisplay);
-letterLabels.addEventListener('change', updateDisplay);
+letterLabels.addEventListener('change', () => {
+  try {
+    localStorage.setItem(LETTER_LABELS_KEY, letterLabels.checked ? '1' : '0');
+  } catch {
+    // localStorage may be unavailable; ignore.
+  }
+  updateDisplay();
+});
 updateDisplay();
 
 const menu = document.querySelector('.tab-editor-menu');
