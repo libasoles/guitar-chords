@@ -14,12 +14,4 @@ function modal({ id, label, closeLabel, className, content }) {
     content + '</div>';
 }
 
-/* Iframe que carga su documento recien al abrir el modal: 16 modales no descargan 16 PDF con la pagina. */
-function lazyFrame(src, title) {
-  return '<iframe class="modal-frame" data-src="' + escapeAttr(src) + '" title="' + escapeAttr(title) + '"></iframe>';
-}
-
-const LAZY_FRAME_LOADER = '<script>document.addEventListener("toggle",function(e){if(e.newState!=="open")return;' +
-  'var f=e.target.querySelector("iframe[data-src]");if(f&&!f.src)f.src=f.dataset.src;},true);</script>';
-
-module.exports = { modal, lazyFrame, LAZY_FRAME_LOADER };
+module.exports = { modal };

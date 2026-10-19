@@ -155,6 +155,53 @@ def write_preview(number, prepared, exported):
         f.write("\n".join(line.rstrip() for line in svg.strip().splitlines()) + "\n")
 
 
+PAGES_DIR = os.path.join(PREVIEW_DIR, "full")
+
+
+def write_pages(number, xml):
+    """Every page of the downloadable PDF as an SVG (`full/prelude-NN-pP.svg`), same layout and post-processing
+    as `tabify.build_output`. The site shows them in the full-screen modal instead of the PDF."""
+    import tabify
+
+    # adjustPageHeight trims the white below the last system: the modal is not a sheet of paper.
+    toolkit = tabify.new_toolkit({**tabify.PDF_OPTIONS, **PDF_OVERRIDES.get(number, {}), "adjustPageHeight": True})
+    if not toolkit.loadData(xml):
+        raise RuntimeError("Verovio no pudo leer el MusicXML con tablatura")
+    os.makedirs(PAGES_DIR, exist_ok=True)
+    for old in os.listdir(PAGES_DIR):
+        if old.startswith(f"prelude-{number:02d}-p"):
+            os.remove(os.path.join(PAGES_DIR, old))
+    for page in range(1, toolkit.getPageCount() + 1):
+        svg = toolkit.renderToSVG(page)
+        if page == 1:
+            svg = tabify.style_header(tabify.add_string_names(svg, tabify.string_names(tabify.STANDARD_TUNING)))
+        svg = tabify.drop_brace(tabify.draw_tab_clef(tabify.drop_tab_meter(svg)))
+        svg = svg.replace("</svg>", tabify.HIDE_TAB_RHYTHM + "</svg>", 1)
+        svg = re.sub(r'\sdata-id="[^"]*"', "", svg)
+        with open(os.path.join(PAGES_DIR, f"prelude-{number:02d}-p{page}.svg"), "w", encoding="utf-8") as f:
+            f.write("\n".join(line.rstrip() for line in svg.strip().splitlines()) + "\n")
+
+
+def pages(number):
+    """Regenerates the full-page SVGs from the published MusicXML (no OCR or source PDF needed)."""
+    sys.path.insert(0, os.path.join(ROOT, "backend", "engine"))
+    import tabify
+
+    patch_engine(tabify)
+    path = os.path.join(OUT_DIR, f"{name_of_published(number)} - {AUTHOR}.musicxml")
+    with open(path, encoding="utf-8") as f:
+        write_pages(number, f.read())
+    print("paginas:", PAGES_DIR)
+
+
+def name_of_published(number):
+    prefix = f"Prelude {number} in "
+    for file in os.listdir(OUT_DIR):
+        if file.startswith(prefix) and file.endswith(".musicxml"):
+            return file[:-len(f" - {AUTHOR}.musicxml")]
+    raise SystemExit(f"no hay MusicXML publicado del preludio {number}")
+
+
 SANS = "Helvetica, Arial, DejaVu Sans, sans-serif"
 STAFF = re.compile(r'<g id="[^"]*" class="staff">')
 TUPLET_NUM = re.compile(r'<g id="[^"]*" class="tupletNum">.*?</g>', re.S)
@@ -300,6 +347,8 @@ def build(number):
                       avoid_repeated_strings(suggestion["tabs"], tabify.open_midis(tabify.STANDARD_TUNING)),
                       "standard", exported, title=title, subtitle=AUTHOR)
         write_preview(number, prepared, exported)
+        with open(os.path.join(exported, "score.musicxml"), encoding="utf-8") as f:
+            write_pages(number, f.read())
         os.makedirs(OUT_DIR, exist_ok=True)
         base = os.path.join(OUT_DIR, f"{title} - {AUTHOR}")
         with open(os.path.join(exported, "score.musicxml"), encoding="utf-8") as f:
@@ -318,4 +367,4 @@ def build(number):
 
 
 if __name__ == "__main__":
-    {"crop": crop, "ocr": ocr, "build": build}[sys.argv[1]](int(sys.argv[2]))
+    {"crop": crop, "ocr": ocr, "build": build, "pages": pages}[sys.argv[1]](int(sys.argv[2]))

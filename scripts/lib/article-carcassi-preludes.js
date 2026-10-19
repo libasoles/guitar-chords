@@ -7,12 +7,13 @@
 
 const fs = require('fs');
 const path = require('path');
-const { modal, lazyFrame, LAZY_FRAME_LOADER } = require('./modal');
+const { modal } = require('./modal');
 
 const ROOT = path.join(__dirname, '..', '..');
 const DOWNLOADS_DIR = path.join(ROOT, 'downloads', 'carcassi-preludios');
 const PREVIEW_DIR = path.join(ROOT, 'src', 'site', 'articles', 'carcassi-preludios');
 const ASSETS_URL = '/assets/articles/carcassi-preludios/';
+const FULL_DIR = path.join(PREVIEW_DIR, 'full');
 
 const KEYS = {
   es: { C: 'Do', D: 'Re', E: 'Mi', F: 'Fa', G: 'Sol', A: 'La', B: 'Si', Major: 'mayor', Minor: 'menor' },
@@ -79,15 +80,36 @@ function card(prelude, locale, strings, sharedGlyphs) {
   const svg = fs.readFileSync(path.join(PREVIEW_DIR, 'prelude-' + String(prelude.number).padStart(2, '0') + '.svg'), 'utf8');
   const id = 'prelude-score-' + prelude.number;
   const href = ASSETS_URL + encodeURIComponent(prelude.pdf);
-  /* El titulo es el boton que abre la partitura completa (el PDF) en un modal; su ::after cubre toda la tarjeta.
+  const download = '<a class="example-download" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' + strings.artPreludesDownload + '</a>';
+  /* El titulo es el boton que abre la partitura completa en un modal; su ::after cubre toda la tarjeta.
      El enlace de descarga del pie queda por encima. */
   return '<article class="example-card prelude-card">' +
     '<h2 class="prelude-card-title"><button type="button" class="prelude-open" popovertarget="' + id + '" aria-haspopup="dialog" ' +
       'aria-label="' + escapeAttr(strings.artPreludesView + ' ' + name) + '">' + name + '</button></h2>' +
     inlineScore(svg, strings.artPreludesAltPrefix + ' ' + name, sharedGlyphs) +
-    '<a class="example-download" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' + strings.artPreludesDownload + '</a>' +
-    modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', content: lazyFrame(href + '#view=FitH', name) }) +
+    download +
+    modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', content: fullScore(prelude, name, download) }) +
     '</article>';
+}
+
+/* Paginas de la partitura completa (full/prelude-NN-pP.svg, ver extract.py) como <img> perezosas: dentro del
+   modal cerrado (display: none) el navegador no las pide hasta que se abre. width/height evitan saltos de layout. */
+function pageFiles(prelude) {
+  const prefix = 'prelude-' + String(prelude.number).padStart(2, '0') + '-p';
+  return fs.existsSync(FULL_DIR)
+    ? fs.readdirSync(FULL_DIR).filter((file) => file.startsWith(prefix) && file.endsWith('.svg'))
+      .sort((a, b) => parseInt(a.slice(prefix.length), 10) - parseInt(b.slice(prefix.length), 10))
+    : [];
+}
+
+function fullScore(prelude, name, download) {
+  const pages = pageFiles(prelude).map((file, i, all) => {
+    const head = fs.readFileSync(path.join(FULL_DIR, file), 'utf8').slice(0, 300);
+    const [, width, height] = head.match(/<svg width="(\d+)(?:\.\d+)?px" height="(\d+)(?:\.\d+)?px"/);
+    return '<img class="modal-page" src="' + ASSETS_URL + 'full/' + file + '" width="' + width + '" height="' + height +
+      '" loading="lazy" decoding="async" alt="' + escapeAttr(name + (all.length > 1 ? ' (' + (i + 1) + '/' + all.length + ')' : '')) + '">';
+  });
+  return '<div class="modal-actions">' + download + '</div><div class="modal-pages">' + pages.join('') + '</div>';
 }
 
 function renderBody(locale, strings) {
@@ -96,13 +118,18 @@ function renderBody(locale, strings) {
   const cards = publishedPreludes().map((p) => card(p, locale, strings, sharedGlyphs)).join('');
   const glyphs = '<svg class="score-glyphs" width="0" height="0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" ' +
     'xmlns:xlink="http://www.w3.org/1999/xlink"><defs>' + Array.from(sharedGlyphs.values()).join('') + '</defs></svg>';
-  const grid = glyphs + '<div class="prelude-grid">' + cards + '</div>' + LAZY_FRAME_LOADER;
+  const grid = glyphs + '<div class="prelude-grid">' + cards + '</div>';
   return prose.split('%%PRELUDES%%').join(grid);
 }
 
 /* Archivos que el build copia a dist/site/assets/articles/carcassi-preludios/. */
 function pdfFiles() {
   return publishedPreludes().map((p) => ({ src: path.join(DOWNLOADS_DIR, p.pdf), name: p.pdf }));
+}
+
+/* Paginas SVG de la partitura completa, que el build copia a .../carcassi-preludios/full/. */
+function pageSvgFiles() {
+  return publishedPreludes().flatMap((p) => pageFiles(p).map((name) => ({ src: path.join(FULL_DIR, name), name })));
 }
 
 /* Imagen de la tarjeta del indice: la vista previa del primer preludio. */
@@ -112,4 +139,4 @@ function cardImage() {
   return { src: path.join(PREVIEW_DIR, name), name, url: ASSETS_URL + name };
 }
 
-module.exports = { publishedPreludes, renderBody, pdfFiles, cardImage, keyName, DOWNLOADS_DIR, PREVIEW_DIR };
+module.exports = { publishedPreludes, renderBody, pdfFiles, pageSvgFiles, cardImage, keyName, DOWNLOADS_DIR, PREVIEW_DIR };

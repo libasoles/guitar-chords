@@ -1702,6 +1702,11 @@ copyFile(
   articlePreludes.cardImage().src,
   path.join(preludesDist, articlePreludes.cardImage().name),
 );
+// Full-score pages shown in the preludes' modal.
+ensureDir(path.join(preludesDist, "full"));
+articlePreludes.pageSvgFiles().forEach(function (page) {
+  copyFile(page.src, path.join(preludesDist, "full", page.name));
+});
 const arpeggiosDist = path.join(ASSETS_DIST, "articles", "arpeggios");
 ensureDir(arpeggiosDist);
 copyFile(articleArpeggios.cardImage().src, path.join(arpeggiosDist, articleArpeggios.cardImage().name));

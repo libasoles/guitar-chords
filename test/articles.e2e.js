@@ -216,7 +216,7 @@ const PDFS = [
       await page.goto(base + url);
       const cards = page.locator('.prelude-card');
       assert.equal(await cards.count(), published.length);
-      const hrefs = await cards.locator('.example-download').evaluateAll((els) => els.map((el) => decodeURIComponent(el.getAttribute('href'))));
+      const hrefs = await page.locator('.prelude-card > .example-download').evaluateAll((els) => els.map((el) => decodeURIComponent(el.getAttribute('href'))));
       assert.deepEqual(hrefs.map((href) => href.split('/').pop()), published.map((p) => p.pdf));
       const titles = await cards.locator('h2').allTextContents();
       titles.forEach((title, i) => assert.match(title, new RegExp('^' + (locale === 'es' ? 'Preludio ' : 'Prelude ') + published[i].number + ' (en|in) ')));
@@ -231,17 +231,22 @@ const PDFS = [
       assert.ok(overflow <= 0, 'scroll horizontal de ' + overflow + 'px en ' + url);
       const rights = await cards.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().right));
       rights.forEach((right) => assert.ok(right <= 375, 'tarjeta fuera del viewport'));
-      // Clicking the card opens a full-screen modal with the PDF, loaded only on open; the X closes it.
+      // Clicking the card opens a full-screen modal with the score pages (SVG), requested only on open; the X closes it.
+      const fullRequests = () => page.evaluate(() => performance.getEntriesByType('resource').filter((e) => e.name.includes('/full/')).length);
       assert.equal(await page.locator('.modal-full:popover-open').count(), 0);
-      assert.equal(await page.locator('.modal-frame[src]').count(), 0);
+      // (Blink loads lazy images that are already in its memory cache, so only the first visit is checked.)
+      if (locale === 'es') assert.equal(await fullRequests(), 0);
       await cards.first().click();
       const modal = page.locator('.modal-full:popover-open');
       assert.equal(await modal.count(), 1);
       const box = await modal.evaluate((el) => { const r = el.getBoundingClientRect(); return [r.width, r.height]; });
       assert.deepEqual(box, [375, 800]);
-      // `toggle` fires asynchronously: wait for the loader to set the src.
-      await page.waitForSelector('.modal-full:popover-open .modal-frame[src]');
-      assert.match(await modal.locator('.modal-frame').getAttribute('src'),/Prelude%201%20in%20C%20Major.*\.pdf#view=FitH$/);
+      const first = modal.locator('img.modal-page').first();
+      await first.evaluate((img) => img.decode());
+      assert.ok(await first.evaluate((img) => img.naturalWidth > 0 && img.getBoundingClientRect().right <= 375));
+      assert.match(await first.getAttribute('src'), /\/full\/prelude-01-p1(?:\.[a-f0-9]+)?\.svg$/);
+      assert.ok(await fullRequests() >= 1);
+      assert.equal(decodeURIComponent(await modal.locator('.modal-actions a').getAttribute('href')).split('/').pop(), published[0].pdf);
       await modal.locator('.modal-close').click();
       assert.equal(await page.locator('.modal-full:popover-open').count(), 0);
       // The footer link downloads the prelude PDF with the expected name.
@@ -249,7 +254,7 @@ const PDFS = [
       for (let i = 0; i < published.length; i++) {
         const tab = await context.newPage();
         await tab.goto(base + url);
-        const [download] = await Promise.all([tab.waitForEvent('download'), tab.locator('.prelude-card .example-download').nth(i).click()]);
+        const [download] = await Promise.all([tab.waitForEvent('download'), tab.locator('.prelude-card > .example-download').nth(i).click()]);
         assert.equal(download.suggestedFilename(), published[i].pdf);
         const saved = path.join(tmp, 'prelude-' + i + '.pdf');
         await download.saveAs(saved);
