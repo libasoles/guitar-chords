@@ -262,6 +262,15 @@
   overflow-y: auto;
   overscroll-behavior: contain;
 }
+/* Only while open: a `display` on the closed popover would defeat its default `display: none`.
+   A short score still leaves the footer at the bottom of the viewport. */
+.modal-full:popover-open {
+  display: flex;
+  flex-direction: column;
+}
+.modal-full > * {
+  flex-shrink: 0;
+}
 .modal-full::backdrop {
   background: var(--paper);
 }
@@ -295,8 +304,10 @@
 .modal-full .modal-close:hover {
   background: #0000000f;
 }
+/* The pages sit straight on the paper (no white card) and use most of the width. */
 .modal-pages {
-  max-width: 64rem;
+  width: 100%;
+  max-width: 100rem;
   margin: 0 auto;
 }
 .modal-page {
@@ -304,10 +315,6 @@
   width: 100%;
   height: auto;
   margin: 0 auto 1.4rem;
-  background: #fff;
-  box-shadow:
-    0 1px 2px rgba(60, 40, 20, 0.18),
-    0 3px 8px rgba(60, 40, 20, 0.1);
 }
 .modal-footer {
   position: sticky;
@@ -315,7 +322,7 @@
   z-index: 2;
   display: flex;
   justify-content: flex-end;
-  margin: 1.5rem calc(-1 * max(1.5rem, 3vw)) 0;
+  margin: auto calc(-1 * max(1.5rem, 3vw)) 0;
   padding: 0.8rem max(1.5rem, 3vw);
   background: var(--paper);
   border-top: 1px solid var(--rule);

@@ -241,6 +241,9 @@ const PDFS = [
       assert.equal(await modal.count(), 1);
       const box = await modal.evaluate((el) => { const r = el.getBoundingClientRect(); return [r.width, r.height]; });
       assert.deepEqual(box, [375, 800]);
+      // The footer sits at the bottom of the viewport even though the score is short, and the pages have no card background.
+      assert.equal(await page.evaluate(() => innerHeight - Math.round(document.querySelector('.modal-full:popover-open .modal-footer').getBoundingClientRect().bottom)), 0);
+      assert.equal(await modal.locator('img.modal-page').first().evaluate((img) => getComputedStyle(img).backgroundColor), 'rgba(0, 0, 0, 0)');
       const first = modal.locator('img.modal-page').first();
       await first.evaluate((img) => img.decode());
       assert.ok(await first.evaluate((img) => img.naturalWidth > 0 && img.getBoundingClientRect().right <= 375));
