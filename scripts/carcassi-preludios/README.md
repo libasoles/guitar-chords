@@ -6,6 +6,7 @@ Issues #33 y #34. Deja, por preludio, en `downloads/carcassi-preludios/`:
 - `Prelude N in <Key> - Matteo Carcassi.musicxml`: MusicXML final (notación + TAB), solo para uso interno.
 
 y en `src/site/articles/carcassi-preludios/prelude-NN.svg` la vista previa (un sistema con notación y TAB).
+Y en `src/site/articles/carcassi-preludios/full/prelude-NN-pP.svg` cada página del PDF como SVG (la modal de pantalla completa del sitio). `extract.py build N` las genera; `extract.py pages N` las regenera desde el MusicXML publicado, sin OCR ni PDF fuente.
 El MusicXML intermedio del OCR **no** se commitea (vive en `.work/`, ignorado); sí el corregido,
 en `corrected/prelude-NN.musicxml`, para reprocesar sin repetir el OCR.
 
