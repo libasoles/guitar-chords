@@ -14,16 +14,15 @@ on:
       - "infra/**"
       - ".github/workflows/backend.yml"
 
-concurrency:
-  group: backend-${{ github.ref }}
-  cancel-in-progress: false
-
 permissions:
   contents: read
 
 jobs:
   test:
     runs-on: ubuntu-24.04-arm
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-checks
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
@@ -51,6 +50,9 @@ jobs:
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04-arm
+    concurrency:
+      group: ${{ github.workflow }}-deploy
+      cancel-in-progress: false
     permissions:
       id-token: write
       contents: read
