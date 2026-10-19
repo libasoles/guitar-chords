@@ -266,3 +266,40 @@
   line-height: 1;
   cursor: pointer;
 }
+
+/* Variants of the same root share one visible tablature. */
+.arpeggio-group {
+  margin-bottom: 1.5rem;
+}
+.arpeggio-group h2 {
+  margin: 0 0 0.5rem;
+}
+.arpeggio-group [role="tablist"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--accent);
+}
+.arpeggio-group [role="tab"] {
+  padding: 0.45rem 0.65rem;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.arpeggio-group [role="tab"][aria-selected="true"] {
+  border-bottom-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+.arpeggio-group [role="tab"]:focus-visible,
+.arpeggio-group [role="tabpanel"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.arpeggio-group figcaption {
+  display: none;
+}

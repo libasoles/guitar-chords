@@ -96,19 +96,19 @@ const PDFS = [
       assert.ok(links.some(([lang, href]) => lang === 'en' && href === BASE_URL + pagePath('articulo-carcassi', 'en')));
     }
 
-    // Arpeggio positions: separate qualities, localized lesson link and aligned names.
+    // Arpeggio positions: qualities share accessible tabs per root.
     for (const locale of ['es', 'en']) {
       const url = pagePath('articulo-tablaturas-arpegios', locale);
       await page.goto(base + url);
       await page.waitForSelector('ascii-tabs .ascii-tabs-tab');
       assert.equal(await page.locator('h1').textContent(), locale === 'es' ? 'Tablaturas para arpegios' : 'Tabs for arpeggios');
       assert.equal(await page.locator('.lead a').getAttribute('href'), pagePath('articulo-carcassi', locale));
-      assert.equal(await page.locator('ascii-tabs[readonly]').count(), 14);
+      assert.equal(await page.locator('ascii-tabs[readonly]').count(), 16);
       const titles = await page.locator('figcaption').allTextContents();
-      assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Re mayor', 'Re menor'] : ['C major', 'D major', 'D minor']);
+      assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Do menor', 'Do séptima'] : ['C major', 'C minor', 'C seventh']);
       const groups = await page.locator('ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
       groups.flat().forEach((form) => assert.equal(form.filter((f) => f !== null).length, 4));
-      assert.deepEqual(groups[6][1], [0, 3, 1, null, 2, null]);
+      assert.deepEqual(groups[8][1], [0, 3, 1, null, 2, null]);
       assert.equal(await page.locator('.tab-chords').count(), groups.length);
       const weights = await page.locator('.ascii-tabs-has').evaluateAll((cells) => cells.map((cell) => ({
         string: Number(cell.dataset.s),
@@ -117,13 +117,30 @@ const PDFS = [
       weights.forEach(({ string, weight }) => assert.equal(weight, string >= 3 ? '700' : '400'));
       if (locale === 'es') assert.match(await page.locator('.lead a').textContent(), /^descomposición/);
       // The names are buttons above the tab, outside the white sheet, without underline.
-      assert.deepEqual(await page.locator('.tab-chords').nth(3).locator('.arpeggio-chord').allTextContents(), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
+      assert.deepEqual(await page.locator('.tab-chords').nth(5).locator('.arpeggio-chord').allTextContents(), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
       assert.equal(await page.locator('ascii-tabs .arpeggio-chord').count(), 0);
       assert.equal(await page.locator('.arpeggio-chord').first().evaluate((el) => getComputedStyle(el).textDecorationLine), 'none');
-      assert.deepEqual(groups[3], [
+      assert.deepEqual(groups[5], [
         [2, 1, 2, 0, null, null], [2, 1, 2, 4, null, null],
         [2, 1, 2, null, 0, null], [2, 1, 2, null, 3, null],
       ]);
+      assert.equal(await page.locator('.arpeggio-group').count(), 7);
+      assert.equal(await page.locator('[role="tabpanel"]:visible').count(), 7);
+      const firstGroup = page.locator('.arpeggio-group').first();
+      const qualityTabs = firstGroup.getByRole('tab');
+      await qualityTabs.first().focus();
+      await page.keyboard.press('ArrowRight');
+      assert.equal(await qualityTabs.nth(1).getAttribute('aria-selected'), 'true');
+      assert.ok(await qualityTabs.nth(1).evaluate((el) => el === document.activeElement));
+      assert.deepEqual(await firstGroup.locator('[role="tabpanel"]:visible .arpeggio-chord').allTextContents(), ['Cm', 'Cm/Eb', 'Cm/G']);
+      await page.keyboard.press('End');
+      assert.equal(await qualityTabs.nth(2).getAttribute('aria-selected'), 'true');
+      await page.keyboard.press('ArrowRight');
+      assert.equal(await qualityTabs.first().getAttribute('aria-selected'), 'true');
+      await page.keyboard.press('ArrowLeft');
+      assert.equal(await qualityTabs.nth(2).getAttribute('aria-selected'), 'true');
+      await page.keyboard.press('Home');
+      assert.equal(await qualityTabs.first().getAttribute('aria-selected'), 'true');
       // Every annotation opens its own exact four-string fingering, including inversions.
       const buttons = page.locator('.arpeggio-chord');
       assert.equal(await buttons.count(), groups.flat().length);
@@ -131,6 +148,9 @@ const PDFS = [
         const button = buttons.nth(i);
         const name = await button.textContent();
         const target = await button.getAttribute('popovertarget');
+        const panel = button.locator('xpath=ancestor::*[@role="tabpanel"]');
+        const tabId = await panel.getAttribute('aria-labelledby');
+        await page.locator('#' + tabId).click();
         await button.click();
         const popup = page.locator('#' + target);
         assert.ok(await popup.evaluate((el) => el.matches(':popover-open')));
@@ -140,6 +160,7 @@ const PDFS = [
         await popup.locator('button').click();
         assert.ok(!(await popup.evaluate((el) => el.matches(':popover-open'))));
       }
+      await qualityTabs.first().click();
       // The annotation is keyboard operable; Escape dismisses and returns focus.
       await buttons.first().focus();
       await page.keyboard.press('Enter');
@@ -154,6 +175,10 @@ const PDFS = [
       for (const width of [320, 375, 1280]) {
         await page.setViewportSize({ width, height: 800 });
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
+        for (const tab of await page.getByRole('tab').all()) {
+          await tab.click();
+          assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
+        }
         // Native annotations anchor at the fret, including after resizing.
         await page.waitForFunction(() => Array.from(document.querySelectorAll('.ascii-tabs-annotation')).every((annotation) => {
           const staff = annotation.closest('.ascii-tabs-staff');

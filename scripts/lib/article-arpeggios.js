@@ -9,6 +9,13 @@ const GROUPS = [
   ['Do', 'C', 'Major', ['C', 'C/E', 'C/G'], [
     [0, 1, 0, null, 3, null], [0, 1, 0, 2, null, null], [0, 1, 0, null, null, 3],
   ]],
+  ['Do', 'C', 'Minor', ['Cm', 'Cm/Eb', 'Cm/G'], [
+    [3, 4, 0, null, 3, null], [3, 4, 0, 1, null, null], [3, 4, 0, null, null, 3],
+  ]],
+  ['Do', 'C', 'Seventh', ['C7', 'C7/E', 'C7/G', 'C7/Bb'], [
+    [0, 1, 3, null, 3, null], [0, 1, 3, 2, null, null],
+    [0, 1, 3, null, null, 3], [0, 1, 3, null, 1, null],
+  ]],
   ['Re', 'D', 'Major', ['D', 'D/F#', 'D/A'], [
     [2, 3, 2, 0, null, null], [2, 3, 2, null, null, 2], [2, 3, 2, null, 0, null],
   ]],
@@ -56,6 +63,8 @@ const GROUPS = [
 // Repeated 1s indicate a barre; each diagram uses the exact four-string form.
 const FINGERINGS = {
   C: '010-3-', 'C/E': '0102--', 'C/G': '010--3',
+  Cm: '230-1-', 'Cm/Eb': '2301--', 'Cm/G': '230--1',
+  C7: '014-3-', 'C7/E': '0142--', 'C7/G': '014--3', 'C7/Bb': '014-1-',
   D: '2310--', 'D/F#': '131--1', 'D/A': '231-0-',
   Dm: '1320--', 'Dm/F': '1423--', 'Dm/A': '132-0-',
   D7: '3120--', 'D7/F#': '3124--', 'D7/A': '312-0-', 'D7/C': '312-4-',
@@ -83,7 +92,8 @@ function chordPopover(id, name, form, strings) {
 
 function renderBody(locale, strings) {
   const popovers = [];
-  const tabs = GROUPS.map(function ([es, en, quality, names, forms], group) {
+  const roots = new Map();
+  GROUPS.forEach(function ([es, en, quality, names, forms], group) {
     const title = (locale === 'es' ? es : en) + ' ' + strings['artArpeggios' + quality];
     // The names sit above the white sheet, one per chord column, as buttons.
     const buttons = names.map(function (name, i) {
@@ -96,11 +106,52 @@ function renderBody(locale, strings) {
         return fret === null ? null : { fret, bold: string >= 3 };
       });
     });
-    return tabFigure(title, styledForms, locale, buttons, null, true);
+    if (!roots.has(en)) roots.set(en, { title: locale === 'es' ? es : en, variants: [] });
+    roots.get(en).variants.push({ title, figure: tabFigure(title, styledForms, locale, buttons, null, true) });
+  });
+  const tabs = Array.from(roots, function ([root, { title, variants }]) {
+    const id = 'arpeggio-' + root;
+    return '<section class="arpeggio-group" aria-labelledby="' + id + '"><h2 id="' + id + '">' + title + '</h2>' +
+      '<div role="tablist" aria-labelledby="' + id + '">' + variants.map(function (variant, i) {
+        return '<button type="button" role="tab" id="' + id + '-tab-' + i + '" aria-controls="' + id + '-panel-' + i +
+          '" aria-selected="' + (i === 0) + '" tabindex="' + (i === 0 ? '0' : '-1') + '">' + variant.title + '</button>';
+      }).join('') + '</div>' + variants.map(function (variant, i) {
+        return '<div role="tabpanel" id="' + id + '-panel-' + i + '" aria-labelledby="' + id + '-tab-' + i +
+          '" tabindex="0"' + (i === 0 ? '' : ' hidden') + '>' + variant.figure + '</div>';
+      }).join('') + '</section>';
   });
   return '<p>' + strings.artArpeggiosIntro + '</p><div class="sequence-forms">' +
-    tabs.join('') + '</div>' + popovers.join('') + CHORD_CARD_LOADER + TAB_LOADER;
+    tabs.join('') + '</div>' + popovers.join('') + CHORD_CARD_LOADER + TAB_LOADER + QUALITY_TABS_LOADER;
 }
+
+// Each root keeps its own selection. Arrow keys follow the horizontal tab pattern.
+const QUALITY_TABS_LOADER = `<script>
+document.querySelectorAll('.arpeggio-group').forEach(function(group) {
+  var tabs = Array.from(group.querySelectorAll('[role="tab"]'));
+  function select(tab) {
+    tabs.forEach(function(item) {
+      var selected = item === tab;
+      item.setAttribute('aria-selected', String(selected));
+      item.tabIndex = selected ? 0 : -1;
+      document.getElementById(item.getAttribute('aria-controls')).hidden = !selected;
+    });
+  }
+  tabs.forEach(function(tab, index) {
+    tab.addEventListener('click', function() { select(tab); });
+    tab.addEventListener('keydown', function(event) {
+      var next;
+      if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+      else if (event.key === 'ArrowLeft') next = (index + tabs.length - 1) % tabs.length;
+      else if (event.key === 'Home') next = 0;
+      else if (event.key === 'End') next = tabs.length - 1;
+      else return;
+      event.preventDefault();
+      select(tabs[next]);
+      tabs[next].focus();
+    });
+  });
+});
+</script>`;
 
 function cardImage() {
   return {
