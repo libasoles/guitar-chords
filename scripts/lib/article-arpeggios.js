@@ -111,8 +111,8 @@ function renderBody(locale, strings) {
   });
   const tabs = Array.from(roots, function ([root, { title, variants }]) {
     const id = 'arpeggio-' + root;
-    return '<section class="arpeggio-group" aria-labelledby="' + id + '"><h2 id="' + id + '">' + title + '</h2>' +
-      '<div role="tablist" aria-labelledby="' + id + '">' + variants.map(function (variant, i) {
+    return '<section class="arpeggio-group" aria-label="' + title + '">' +
+      '<div role="tablist" aria-label="' + title + '">' + variants.map(function (variant, i) {
         return '<button type="button" role="tab" id="' + id + '-tab-' + i + '" aria-controls="' + id + '-panel-' + i +
           '" aria-selected="' + (i === 0) + '" tabindex="' + (i === 0 ? '0' : '-1') + '">' + variant.title + '</button>';
       }).join('') + '</div>' + variants.map(function (variant, i) {

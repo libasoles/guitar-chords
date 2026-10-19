@@ -271,15 +271,11 @@
 .arpeggio-group {
   margin-bottom: 1.5rem;
 }
-.arpeggio-group h2 {
-  margin: 0 0 0.5rem;
-}
 .arpeggio-group [role="tablist"] {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem;
   margin-bottom: 0.75rem;
-  border-bottom: 1px solid var(--accent);
 }
 .arpeggio-group [role="tab"] {
   padding: 0.45rem 0.65rem;
