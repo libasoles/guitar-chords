@@ -8,7 +8,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { fullForm, chordFingers, diagramSvg } = require('./chord-forms');
+const { fullForm, chordObject, chordCard, CHORD_CARD_LOADER } = require('./chord-forms');
 const { PREVIEW_DIR } = require('./article-carcassi-preludes');
 
 const ARTICLE_DIR = path.join(__dirname, '..', '..', 'src', 'site', 'articles', 'carcassi');
@@ -103,20 +103,20 @@ function asciiTab(forms, locale, annotations) {
 
 /* Nombres de los acordes, uno sobre la columna de su forma (la misma
    cuadricula de 4 caracteres que la TAB, con la columna vacia entre acordes). */
-function chordNames(names) {
+function chordNames(names, interactive) {
   const cells = [];
   names.forEach(function (name, i) {
     if (i > 0) cells.push('<span></span>');
     cells.push('<span>' + name + '</span>');
   });
-  return '<div class="tab-chords" aria-hidden="true">' + cells.join('') + '</div>';
+  return '<div class="tab-chords"' + (interactive ? '' : ' aria-hidden="true"') + '>' + cells.join('') + '</div>';
 }
 
 /* Titulo (y nombres de acorde) por fuera de la hoja blanca de la TAB. El
    tamano de letra se comparte para que los nombres queden sobre sus columnas. */
-function tabFigure(caption, forms, locale, names, annotations) {
+function tabFigure(caption, forms, locale, names, annotations, interactive) {
   return '<figure class="form tab-figure" style="--chars:' + tabChars(forms) + '"><figcaption>' + caption + '</figcaption>' +
-    (names && !annotations ? chordNames(names) : '') + asciiTab(forms, locale, annotations) + '</figure>';
+    (names && !annotations ? chordNames(names, interactive) : '') + asciiTab(forms, locale, annotations) + '</figure>';
 }
 
 function formFigure(caption, form, locale) {
@@ -127,8 +127,8 @@ function formFigure(caption, form, locale) {
    debajo, la comparacion apilada: completa arriba, descompuesta abajo. */
 function comparisons(names, strings, locale) {
   const cards = names.map(function (name) {
-    const diagram = diagramSvg(chordFingers(name), strings.artChordDiagramLabel + ' ' + name);
-    return '<div class="chord-card"><h3>' + name + '</h3>' + diagram +
+    const card = chordCard(chordObject(name), strings.artChordDiagramLabel + ' ' + name);
+    return '<div class="chord-card">' + card +
       formFigure(strings.artFormFull, fullForm(name), locale) +
       formFigure(strings.artFormDecomposed, DECOMPOSED[name], locale) + '</div>';
   });
@@ -170,7 +170,7 @@ function renderBody(locale, strings) {
         return tabFigure(name, forms, locale);
       }).join('') + '</div>')
     .split('%%FORM_C_G_BASS%%').join(formFigure('C', [0, 1, 0, null, null, 3], locale))
-    .concat(TAB_LOADER);
+    .concat(CHORD_CARD_LOADER, TAB_LOADER);
 }
 
 /* Archivos que el build copia a dist/site/assets/articles/carcassi/. */

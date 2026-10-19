@@ -113,19 +113,8 @@
 .chord-card {
   min-width: 0;
 }
-.chord-card h3 {
-  margin: 0 0 0.4rem;
-  font-size: 1.1rem;
-}
-/* The diagram keeps a white background, like on the other pages. */
-.chord-diagram {
-  display: block;
-  width: 100%;
-  max-width: 8rem;
-  height: auto;
+.chord-card .finder-card {
   margin: 0 0 0.8rem;
-  padding: 0.3rem;
-  background: #fff;
 }
 .form {
   margin: 0 0 0.8rem;
@@ -230,7 +219,7 @@
   font-weight: 500;
 }
 
-/* Chord names are native column annotations; popovers show their exact form. */
+/* Chord names sit above the tab, outside the sheet; each opens a popover with the chord card. */
 .arpeggio-chord {
   padding: 0;
   border: 0;
@@ -240,8 +229,6 @@
   font-weight: 700;
   line-height: inherit;
   white-space: nowrap;
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
   cursor: pointer;
 }
 .arpeggio-chord:focus-visible,
@@ -250,36 +237,32 @@
   outline-offset: 3px;
 }
 .chord-popover {
-  width: 16rem;
+  width: fit-content;
   max-width: calc(100vw - 3rem);
-  padding: 1.2rem;
-  border: 1px solid var(--rule);
-  border-radius: 8px;
-  background: #fff;
-  color: var(--ink);
-  box-shadow: 0 8px 32px #0003;
-}
-.chord-popover h2 {
-  margin: 0 2rem 0.8rem 0;
-  padding: 0;
-  border: 0;
-  font-size: 1.3rem;
-}
-.chord-popover .chord-diagram {
-  width: 12rem;
-  max-width: 100%;
-  margin: 0 auto;
-}
-.chord-popover-close {
-  position: absolute;
-  top: 0.4rem;
-  right: 0.4rem;
-  width: 2.5rem;
-  height: 2.5rem;
   padding: 0;
   border: 0;
   background: transparent;
+  overflow: visible;
+}
+.chord-popover::backdrop {
+  background: rgba(26, 26, 26, 0.25);
+}
+.chord-popover .finder-card {
+  box-shadow: 0 8px 32px #0003;
+}
+.chord-popover-close {
+  position: absolute;
+  top: -0.7rem;
+  right: -0.7rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
   color: var(--ink);
-  font-size: 1.5rem;
+  box-shadow: 0 2px 8px #0003;
+  font-size: 1.2rem;
+  line-height: 1;
   cursor: pointer;
 }

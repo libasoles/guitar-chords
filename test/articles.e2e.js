@@ -48,8 +48,12 @@ const PDFS = [
       await page.goto(base + article);
       const pdfs = locale === 'es' ? PDFS.concat('Prelude 1 in C Major - Matteo Carcassi.pdf') : PDFS;
       assert.equal(await page.locator('.example-card .score-svg').count(), pdfs.length);
-      assert.equal(await page.locator('.chord-diagram').count(), 2);
       assert.equal(await page.locator('.chord-card').count(), 2);
+      // Chord cards are the finder's component: narrow, with the chord name.
+      await page.waitForSelector('.chord-card .finder-card svg');
+      assert.equal(await page.locator('.chord-card .finder-card').count(), 2);
+      assert.ok(await page.locator('.chord-card .finder-card').first().evaluate((el) => el.getBoundingClientRect().width <= 180));
+      assert.equal(await page.locator('.chord-card .finder-card .name').first().textContent(), 'C');
       // Tabs are read-only <ascii-tabs>: no copy button, no hint, no `x` marks.
       await page.waitForSelector('ascii-tabs .ascii-tabs-tab');
       assert.equal(await page.locator('pre').count(), 0);
@@ -71,9 +75,9 @@ const PDFS = [
       const boxes = await page.locator('.example-card').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().right));
       boxes.forEach((right) => assert.ok(right <= 375, 'tarjeta fuera del viewport'));
 
-      // Only analytics and ascii-tabs: the scores are static SVG.
+      // Only analytics, ascii-tabs and the site's own chord card scripts: the scores are static SVG.
       const scripts = await page.locator('script[src]').evaluateAll((els) => els.map((el) => el.src));
-      assert.ok(scripts.every((src) => src.includes('googletagmanager') || /vendor\/ascii-tabs/.test(src)), scripts.join(','));
+      assert.ok(scripts.every((src) => src.includes('googletagmanager') || /vendor\/(ascii-tabs|svguitar)|\/assets\/chord-(diagram|card)/.test(src)), scripts.join(','));
 
       // Each card downloads its score PDF.
       const cards = page.locator('.example-card');
@@ -105,15 +109,17 @@ const PDFS = [
       const groups = await page.locator('ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
       groups.flat().forEach((form) => assert.equal(form.filter((f) => f !== null).length, 4));
       assert.deepEqual(groups[6][1], [0, 3, 1, null, 2, null]);
-      assert.equal(await page.locator('.tab-chords').count(), 0);
+      assert.equal(await page.locator('.tab-chords').count(), groups.length);
       const weights = await page.locator('.ascii-tabs-has').evaluateAll((cells) => cells.map((cell) => ({
         string: Number(cell.dataset.s),
         weight: getComputedStyle(cell.querySelector('.ascii-tabs-fret')).fontWeight,
       })));
       weights.forEach(({ string, weight }) => assert.equal(weight, string >= 3 ? '700' : '400'));
       if (locale === 'es') assert.match(await page.locator('.lead a').textContent(), /^descomposición/);
-      const annotations = await page.locator('ascii-tabs').evaluateAll((els) => els.map((el) => el.annotations[0]));
-      assert.deepEqual(annotations[3].map(({ text }) => text), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
+      // The names are buttons above the tab, outside the white sheet, without underline.
+      assert.deepEqual(await page.locator('.tab-chords').nth(3).locator('.arpeggio-chord').allTextContents(), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
+      assert.equal(await page.locator('ascii-tabs .arpeggio-chord').count(), 0);
+      assert.equal(await page.locator('.arpeggio-chord').first().evaluate((el) => getComputedStyle(el).textDecorationLine), 'none');
       assert.deepEqual(groups[3], [
         [2, 1, 2, 0, null, null], [2, 1, 2, 4, null, null],
         [2, 1, 2, null, 0, null], [2, 1, 2, null, 3, null],
@@ -128,11 +134,9 @@ const PDFS = [
         await button.click();
         const popup = page.locator('#' + target);
         assert.ok(await popup.evaluate((el) => el.matches(':popover-open')));
-        assert.equal(await popup.locator('h2').textContent(), name);
-        const form = groups.flat()[i];
-        assert.equal(await popup.locator('.muted').count(), 2);
-        assert.equal(await popup.locator('.open').count(), form.filter((fret) => fret === 0).length);
-        assert.equal(await popup.locator('circle:not(.open)').count(), form.filter((fret) => fret > 0).length);
+        await popup.locator('.finder-card svg').waitFor();
+        assert.equal(await popup.locator('.finder-card .name').textContent(), name);
+        assert.ok(await popup.locator('.finder-card').evaluate((el) => el.getBoundingClientRect().width <= 180));
         await popup.locator('button').click();
         assert.ok(!(await popup.evaluate((el) => el.matches(':popover-open'))));
       }

@@ -1542,6 +1542,7 @@ ensureDir(VENDOR_DIST);
 [
   "chords-db.js",
   "chord-diagram.js",
+  "chord-card.js",
   "chord-positions.js",
   "chord-search.js",
   "note-names.js",

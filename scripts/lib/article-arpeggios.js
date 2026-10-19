@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('path');
-const { diagramSvg } = require('./chord-forms');
+const { chordCard, CHORD_CARD_LOADER } = require('./chord-forms');
 const { tabFigure, TAB_LOADER } = require('./article-carcassi');
 
 // Each position sounds three treble strings and one bass. String 1 first.
@@ -74,34 +74,31 @@ function chordPopover(id, name, form, strings) {
   const fingers = form.map(function (fret, string) {
     return [string + 1, fret === null ? 'x' : fret === 0 ? 'o' : fret, Number(FINGERINGS[name][string]) || undefined];
   });
-  return '<div id="' + id + '" class="chord-popover" popover role="dialog" aria-labelledby="' + id + '-title">' +
-    '<h2 id="' + id + '-title">' + name + '</h2>' +
+  const label = strings.artChordDiagramLabel + ' ' + name;
+  return '<div id="' + id + '" class="chord-popover" popover role="dialog" aria-label="' + label + '">' +
     '<button type="button" class="chord-popover-close" popovertarget="' + id + '" popovertargetaction="hide" aria-label="' + strings.artArpeggiosClose + '">×</button>' +
-    diagramSvg(fingers, strings.artChordDiagramLabel + ' ' + name) + '</div>';
+    chordCard({ name, fingers, barres: [], position: 1 }, label) + '</div>';
 }
 
 function renderBody(locale, strings) {
   const popovers = [];
   const tabs = GROUPS.map(function ([es, en, quality, names, forms], group) {
     const title = (locale === 'es' ? es : en) + ' ' + strings['artArpeggios' + quality];
-    const annotations = names.map(function (name, i) {
+    // The names sit above the white sheet, one per chord column, as buttons.
+    const buttons = names.map(function (name, i) {
       const id = 'arpeggio-chord-' + group + '-' + i;
       popovers.push(chordPopover(id, name, forms[i], strings));
-      return {
-        column: i * 2,
-        text: name,
-        html: '<button type="button" class="arpeggio-chord" popovertarget="' + id + '" aria-label="' + strings.artArpeggiosShowFingering + ' ' + name + '">' + name + '</button>',
-      };
+      return '<button type="button" class="arpeggio-chord" popovertarget="' + id + '" aria-label="' + strings.artArpeggiosShowFingering + ' ' + name + '">' + name + '</button>';
     });
     const styledForms = forms.map(function (form) {
       return form.map(function (fret, string) {
         return fret === null ? null : { fret, bold: string >= 3 };
       });
     });
-    return tabFigure(title, styledForms, locale, null, annotations);
+    return tabFigure(title, styledForms, locale, buttons, null, true);
   });
   return '<p>' + strings.artArpeggiosIntro + '</p><div class="sequence-forms">' +
-    tabs.join('') + '</div>' + popovers.join('') + TAB_LOADER;
+    tabs.join('') + '</div>' + popovers.join('') + CHORD_CARD_LOADER + TAB_LOADER;
 }
 
 function cardImage() {
