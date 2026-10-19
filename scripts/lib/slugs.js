@@ -19,6 +19,7 @@ const SLUGS = {
   'politica-de-privacidad': { es: 'politica-de-privacidad', en: 'privacy-policy' },
   'articulos': { es: 'articulos', en: 'articles', isNew: true },
   'articulo-carcassi': { es: 'articulos/descomposicion-de-acordes-en-carcassi', en: 'articles/chord-decomposition-in-carcassi', isNew: true },
+  'articulo-tablaturas-arpegios': { es: 'articulos/tablaturas-para-arpegios', en: 'articles/tabs-for-arpeggios', isNew: true },
   'articulo-preludios-carcassi': { es: 'articulos/preludios-de-carcassi', en: 'articles/carcassi-preludes', isNew: true },
 };
 

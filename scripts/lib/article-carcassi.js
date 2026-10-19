@@ -186,4 +186,4 @@ function cardImage() {
   return { src: path.join(ARTICLE_DIR, CARD_IMAGE), name: CARD_IMAGE, url: ASSETS_URL + CARD_IMAGE };
 }
 
-module.exports = { renderBody, pdfFiles, cardImage, PDFS };
+module.exports = { renderBody, pdfFiles, cardImage, PDFS, tabFigure, TAB_LOADER };

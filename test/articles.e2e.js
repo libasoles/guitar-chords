@@ -34,7 +34,7 @@ const PDFS = [
 
       // Index: one card per article, linking to it.
       await page.goto(base + index);
-      assert.equal(await page.locator('.article-card').count(), 2);
+      assert.equal(await page.locator('.article-card').count(), 3);
       assert.equal(await page.locator('.article-card').first().getAttribute('href'), article);
       assert.equal(await page.locator('.article-card').nth(1).getAttribute('href'), pagePath('articulo-preludios-carcassi', locale));
       assert.match(await page.locator('.article-card p').first().textContent(), /Carcassi/);
@@ -89,6 +89,33 @@ const PDFS = [
       assert.ok(links.some(([lang, href]) => lang === 'en' && href === BASE_URL + pagePath('articulo-carcassi', 'en')));
     }
 
+    // Arpeggio positions: separate qualities, localized lesson link and aligned names.
+    for (const locale of ['es', 'en']) {
+      const url = pagePath('articulo-tablaturas-arpegios', locale);
+      await page.goto(base + url);
+      await page.waitForSelector('ascii-tabs .ascii-tabs-tab');
+      assert.equal(await page.locator('h1').textContent(), locale === 'es' ? 'Tablaturas para arpegios' : 'Tabs for arpeggios');
+      assert.equal(await page.locator('.lead a').getAttribute('href'), pagePath('articulo-carcassi', locale));
+      assert.equal(await page.locator('ascii-tabs[readonly]').count(), 13);
+      const titles = await page.locator('figcaption').allTextContents();
+      assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Re mayor', 'Re menor'] : ['C major', 'D major', 'D minor']);
+      const groups = await page.locator('ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null))));
+      groups.flat().forEach((form) => assert.equal(form.filter((f) => f !== null).length, 4));
+      assert.deepEqual(groups[5][1], [0, 3, 1, null, 2, null]);
+      for (const width of [375, 1280]) {
+        await page.setViewportSize({ width, height: 800 });
+        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
+        // Names and fret digits use the same column spacing and font size.
+        const alignment = await page.locator('.tab-figure').evaluateAll((figures) => figures.map((figure) => {
+          const name = figure.querySelector('.tab-chords span');
+          const tab = figure.querySelector('.ascii-tabs-tab');
+          return { nameSize: getComputedStyle(name).fontSize, tabSize: getComputedStyle(tab).fontSize };
+        }));
+        alignment.forEach(({ nameSize, tabSize }) => assert.equal(nameSize, tabSize));
+      }
+      await page.setViewportSize({ width: 375, height: 800 });
+    }
+
     // Carcassi preludes: one card per published prelude, in numeric order.
     const published = publishedPreludes();
     for (const locale of ['es', 'en']) {
@@ -135,7 +162,7 @@ const PDFS = [
       assert.ok(!/href="[^"]*(articulos|articles)/.test(html), file + ' enlaza a los articulos');
     }
     const sitemap = fs.readFileSync(path.join(DIST, 'sitemap.xml'), 'utf8');
-    ['articulos', 'articulo-carcassi', 'articulo-preludios-carcassi'].forEach((key) => ['es', 'en'].forEach((locale) => {
+    ['articulos', 'articulo-carcassi', 'articulo-preludios-carcassi', 'articulo-tablaturas-arpegios'].forEach((key) => ['es', 'en'].forEach((locale) => {
       assert.ok(sitemap.includes('<loc>' + BASE_URL + pagePath(key, locale) + '</loc>'), key + ' ' + locale);
     }));
 
