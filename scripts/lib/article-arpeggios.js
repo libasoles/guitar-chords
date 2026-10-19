@@ -93,7 +93,12 @@ function renderBody(locale, strings) {
         html: '<button type="button" class="arpeggio-chord" popovertarget="' + id + '" aria-label="' + strings.artArpeggiosShowFingering + ' ' + name + '">' + name + '</button>',
       };
     });
-    return tabFigure(title, forms, locale, null, annotations);
+    const styledForms = forms.map(function (form) {
+      return form.map(function (fret, string) {
+        return fret === null ? null : { fret, bold: string >= 3 };
+      });
+    });
+    return tabFigure(title, styledForms, locale, null, annotations);
   });
   return '<p>' + strings.artArpeggiosIntro + '</p><div class="sequence-forms">' +
     tabs.join('') + '</div>' + popovers.join('') + TAB_LOADER;

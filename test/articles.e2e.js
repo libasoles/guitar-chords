@@ -102,10 +102,16 @@ const PDFS = [
       assert.equal(await page.locator('ascii-tabs[readonly]').count(), 14);
       const titles = await page.locator('figcaption').allTextContents();
       assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Re mayor', 'Re menor'] : ['C major', 'D major', 'D minor']);
-      const groups = await page.locator('ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null))));
+      const groups = await page.locator('ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
       groups.flat().forEach((form) => assert.equal(form.filter((f) => f !== null).length, 4));
       assert.deepEqual(groups[6][1], [0, 3, 1, null, 2, null]);
       assert.equal(await page.locator('.tab-chords').count(), 0);
+      const weights = await page.locator('.ascii-tabs-has').evaluateAll((cells) => cells.map((cell) => ({
+        string: Number(cell.dataset.s),
+        weight: getComputedStyle(cell.querySelector('.ascii-tabs-fret')).fontWeight,
+      })));
+      weights.forEach(({ string, weight }) => assert.equal(weight, string >= 3 ? '700' : '400'));
+      if (locale === 'es') assert.match(await page.locator('.lead a').textContent(), /^descomposición/);
       const annotations = await page.locator('ascii-tabs').evaluateAll((els) => els.map((el) => el.annotations[0]));
       assert.deepEqual(annotations[3].map(({ text }) => text), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
       assert.deepEqual(groups[3], [
