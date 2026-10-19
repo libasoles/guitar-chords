@@ -348,8 +348,16 @@
   background: var(--paper);
   border-top: 1px solid var(--rule);
 }
-.modal-relative {
+.modal-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
   margin-right: auto;
+}
+.modal-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.5rem 1rem;
   border: 1px solid var(--brand-blue);
   border-radius: 4px;
@@ -360,8 +368,17 @@
   font-weight: 600;
   cursor: pointer;
 }
-.modal-relative:hover {
+.modal-key:hover {
   background: #0000000a;
+}
+.modal-key svg {
+  display: block;
+  width: 1.2rem;
+  height: 1.2rem;
+}
+.modal-key-label {
+  color: #767676;
+  font-weight: 400;
 }
 .modal-download {
   display: inline-flex;

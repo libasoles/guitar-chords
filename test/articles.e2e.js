@@ -266,15 +266,24 @@ const PDFS = [
       assert.ok(await fullRequests() >= 1);
       assert.equal(decodeURIComponent(await modal.locator('.modal-footer .modal-download').getAttribute('href')).split('/').pop(), published[0].pdf);
       assert.equal(await modal.locator('.modal-pages').evaluate((el) => getComputedStyle(el).maxWidth), '1440px');
-      // The footer links to the relative key's preview (C major -> A minor), which replaces this one.
-      const relative = modal.locator('.modal-footer .modal-relative');
-      assert.equal(await relative.count(), 1);
-      assert.match(await relative.textContent(), locale === 'es' ? /^Relativo menor: Preludio \d+ en La menor$/ : /^Relative minor: Prelude \d+ in A minor$/);
-      await relative.click();
-      assert.equal(await page.locator('.modal-full:popover-open').count(), 1);
-      assert.match(await page.locator('.modal-full:popover-open').getAttribute('aria-label'), locale === 'es' ? /La menor$/ : /A minor$/);
-      await page.locator('.modal-full:popover-open .modal-close').click();
-      assert.equal(await page.locator('.modal-full:popover-open').count(), 0);
+      // The footer links to the relative key (C major -> A minor) and the dominant (G major), each replacing this preview.
+      const keys = modal.locator('.modal-footer .modal-key');
+      assert.equal(await keys.count(), 2);
+      assert.equal(await keys.nth(0).locator('svg').count(), 1);
+      assert.equal(await keys.nth(0).locator('.modal-key-label').evaluate((el) => getComputedStyle(el).color), 'rgb(118, 118, 118)');
+      const expected = locale === 'es'
+        ? [/^Relativo menor Preludio \d+ en La menor$/, /^Dominante Preludio \d+ en Sol mayor$/]
+        : [/^Relative minor Prelude \d+ in A minor$/, /^Dominant Prelude \d+ in G major$/];
+      const suffix = locale === 'es' ? [/La menor$/, /Sol mayor$/] : [/A minor$/, /G major$/];
+      for (let k = 0; k < 2; k++) {
+        assert.match(await keys.nth(k).evaluate((el) => Array.from(el.querySelectorAll('span')).map((s) => s.textContent).join(' ')), expected[k]);
+        await keys.nth(k).click();
+        assert.equal(await page.locator('.modal-full:popover-open').count(), 1);
+        assert.match(await page.locator('.modal-full:popover-open').getAttribute('aria-label'), suffix[k]);
+        await page.locator('.modal-full:popover-open .modal-close').click();
+        assert.equal(await page.locator('.modal-full:popover-open').count(), 0);
+        if (k === 0) await cards.first().click();
+      }
       await page.setViewportSize({ width: 375, height: 800 });
       // The footer link downloads the prelude PDF with the expected name.
       // A fresh tab per download: Chromium stops honouring downloads after ~10 in one tab.
