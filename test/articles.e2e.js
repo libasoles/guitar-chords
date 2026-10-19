@@ -220,7 +220,7 @@ const PDFS = [
       assert.equal(await cards.count(), published.length);
       const hrefs = await page.locator('.prelude-card > .example-download').evaluateAll((els) => els.map((el) => decodeURIComponent(el.getAttribute('href'))));
       assert.deepEqual(hrefs.map((href) => href.split('/').pop()), published.map((p) => p.pdf));
-      const titles = await cards.locator('h2').allTextContents();
+      const titles = await cards.locator('.prelude-open').allTextContents();
       titles.forEach((title, i) => assert.match(title, new RegExp('^' + (locale === 'es' ? 'Preludio ' : 'Prelude ') + published[i].number + ' (en|in) ')));
       // Inline static SVG with alternative text naming the prelude; no extra JS.
       assert.equal(await cards.locator('svg.score-svg').count(), published.length);
@@ -233,27 +233,49 @@ const PDFS = [
       assert.ok(overflow <= 0, 'scroll horizontal de ' + overflow + 'px en ' + url);
       const rights = await cards.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().right));
       rights.forEach((right) => assert.ok(right <= 375, 'tarjeta fuera del viewport'));
-      // Clicking the card opens a full-screen modal with the score pages (SVG), requested only on open; the X closes it.
+      // On a phone the card does not open the preview: its title downloads the PDF directly.
+      assert.equal(await cards.first().locator('.prelude-open').isVisible(), false);
+      assert.equal(decodeURIComponent(await cards.first().locator('.prelude-pdf-link').getAttribute('href')).split('/').pop(), published[0].pdf);
+      {
+        const tab = await context.newPage();
+        await tab.setViewportSize({ width: 375, height: 800 });
+        await tab.goto(base + url);
+        const [download] = await Promise.all([tab.waitForEvent('download'), tab.locator('.prelude-card').first().click()]);
+        assert.equal(download.suggestedFilename(), published[0].pdf);
+        assert.equal(await tab.locator('.modal-full:popover-open').count(), 0);
+        await tab.close();
+      }
+      // On desktop, clicking the card opens a full-screen modal with the score pages (SVG), requested only on open; the X closes it.
       const fullRequests = () => page.evaluate(() => performance.getEntriesByType('resource').filter((e) => e.name.includes('/full/')).length);
       assert.equal(await page.locator('.modal-full:popover-open').count(), 0);
+      await page.setViewportSize({ width: 1280, height: 800 });
       // (Blink loads lazy images that are already in its memory cache, so only the first visit is checked.)
       if (locale === 'es') assert.equal(await fullRequests(), 0);
       await cards.first().click();
       const modal = page.locator('.modal-full:popover-open');
       assert.equal(await modal.count(), 1);
       const box = await modal.evaluate((el) => { const r = el.getBoundingClientRect(); return [r.width, r.height]; });
-      assert.deepEqual(box, [375, 800]);
+      assert.deepEqual(box, [1280, 800]);
       // The footer sits at the bottom of the viewport even though the score is short, and the pages have no card background.
       assert.equal(await page.evaluate(() => innerHeight - Math.round(document.querySelector('.modal-full:popover-open .modal-footer').getBoundingClientRect().bottom)), 0);
       assert.equal(await modal.locator('img.modal-page').first().evaluate((img) => getComputedStyle(img).backgroundColor), 'rgba(0, 0, 0, 0)');
       const first = modal.locator('img.modal-page').first();
       await first.evaluate((img) => img.decode());
-      assert.ok(await first.evaluate((img) => img.naturalWidth > 0 && img.getBoundingClientRect().right <= 375));
+      assert.ok(await first.evaluate((img) => img.naturalWidth > 0 && img.getBoundingClientRect().right <= 1280 && img.getBoundingClientRect().width <= 1440));
       assert.match(await first.getAttribute('src'), /\/full\/prelude-01-p1(?:\.[a-f0-9]+)?\.svg$/);
       assert.ok(await fullRequests() >= 1);
       assert.equal(decodeURIComponent(await modal.locator('.modal-footer .modal-download').getAttribute('href')).split('/').pop(), published[0].pdf);
-      await modal.locator('.modal-close').click();
+      assert.equal(await modal.locator('.modal-pages').evaluate((el) => getComputedStyle(el).maxWidth), '1440px');
+      // The footer links to the relative key's preview (C major -> A minor), which replaces this one.
+      const relative = modal.locator('.modal-footer .modal-relative');
+      assert.equal(await relative.count(), 1);
+      assert.match(await relative.textContent(), locale === 'es' ? /^Relativo menor: Preludio \d+ en La menor$/ : /^Relative minor: Prelude \d+ in A minor$/);
+      await relative.click();
+      assert.equal(await page.locator('.modal-full:popover-open').count(), 1);
+      assert.match(await page.locator('.modal-full:popover-open').getAttribute('aria-label'), locale === 'es' ? /La menor$/ : /A minor$/);
+      await page.locator('.modal-full:popover-open .modal-close').click();
       assert.equal(await page.locator('.modal-full:popover-open').count(), 0);
+      await page.setViewportSize({ width: 375, height: 800 });
       // The footer link downloads the prelude PDF with the expected name.
       // A fresh tab per download: Chromium stops honouring downloads after ~10 in one tab.
       for (let i = 0; i < published.length; i++) {

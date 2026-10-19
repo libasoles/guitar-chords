@@ -75,8 +75,25 @@ function inlineScore(svg, alt, sharedGlyphs) {
     });
 }
 
-function card(prelude, locale, strings, sharedGlyphs) {
-  const name = (locale === 'es' ? 'Preludio ' : 'Prelude ') + prelude.number + (locale === 'es' ? ' en ' : ' in ') + keyName(prelude, locale);
+const PITCH_CLASS = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+
+function pitchClass(tonic) {
+  return (PITCH_CLASS[tonic[0]] + (tonic[1] === '#' ? 1 : tonic[1] === 'b' ? -1 : 0) + 12) % 12;
+}
+
+/* El preludio publicado en la tonalidad relativa (menor de un mayor y viceversa), o undefined si no esta. */
+function relativeOf(prelude, all) {
+  const major = prelude.mode === 'Major';
+  const target = (pitchClass(prelude.tonic) + (major ? 9 : 3)) % 12;
+  return all.find((p) => p.mode !== prelude.mode && pitchClass(p.tonic) === target);
+}
+
+function preludeName(prelude, locale) {
+  return (locale === 'es' ? 'Preludio ' : 'Prelude ') + prelude.number + (locale === 'es' ? ' en ' : ' in ') + keyName(prelude, locale);
+}
+
+function card(prelude, locale, strings, sharedGlyphs, all) {
+  const name = preludeName(prelude, locale);
   const svg = fs.readFileSync(path.join(PREVIEW_DIR, 'prelude-' + String(prelude.number).padStart(2, '0') + '.svg'), 'utf8');
   const id = 'prelude-score-' + prelude.number;
   const href = ASSETS_URL + encodeURIComponent(prelude.pdf);
@@ -85,10 +102,11 @@ function card(prelude, locale, strings, sharedGlyphs) {
      El enlace de descarga del pie queda por encima. */
   return '<article class="example-card prelude-card">' +
     '<h2 class="prelude-card-title"><button type="button" class="prelude-open" popovertarget="' + id + '" aria-haspopup="dialog" ' +
-      'aria-label="' + escapeAttr(strings.artPreludesView + ' ' + name) + '">' + name + '</button></h2>' +
+      'aria-label="' + escapeAttr(strings.artPreludesView + ' ' + name) + '">' + name + '</button>' +
+      '<a class="prelude-pdf-link" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' + name + '</a></h2>' +
     inlineScore(svg, strings.artPreludesAltPrefix + ' ' + name, sharedGlyphs) +
     download +
-    modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', closeContent: CLOSE_ICON, content: fullScore(prelude, name, href, strings) }) +
+    modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', closeContent: CLOSE_ICON, content: fullScore(prelude, name, href, strings, relativeOf(prelude, all), locale) }) +
     '</article>';
 }
 
@@ -105,7 +123,7 @@ function pageFiles(prelude) {
 const DOWNLOAD_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
   'stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>';
 
-function fullScore(prelude, name, href, strings) {
+function fullScore(prelude, name, href, strings, relative, locale) {
   const pages = pageFiles(prelude).map((file, i, all) => {
     const head = fs.readFileSync(path.join(FULL_DIR, file), 'utf8').slice(0, 300);
     const [, width, height] = head.match(/<svg width="(\d+)(?:\.\d+)?px" height="(\d+)(?:\.\d+)?px"/);
@@ -113,18 +131,27 @@ function fullScore(prelude, name, href, strings) {
       '" loading="lazy" decoding="async" alt="' + escapeAttr(name + (all.length > 1 ? ' (' + (i + 1) + '/' + all.length + ')' : '')) + '">';
   });
   /* El boton azul de descarga va en un pie fijo, como el de Partitura y tablatura. */
+  const relativeButton = relative
+    ? '<button type="button" class="modal-relative" popovertarget="prelude-score-' + relative.number + '" popovertargetaction="show">' +
+      (relative.mode === 'Minor' ? strings.artPreludesRelativeMinor : strings.artPreludesRelativeMajor) + ': ' +
+      escapeAttr(preludeName(relative, locale)) + '</button>'
+    : '';
   return '<div class="modal-pages">' + pages.join('') + '</div>' +
-    '<div class="modal-footer"><a class="modal-download" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' +
+    '<div class="modal-footer">' + relativeButton + '<a class="modal-download" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' +
     DOWNLOAD_ICON + '<span>' + strings.artPreludesDownload + '</span></a></div>';
 }
 
 function renderBody(locale, strings) {
   const prose = fs.readFileSync(path.join(PREVIEW_DIR, 'body.' + locale + '.html'), 'utf8');
   const sharedGlyphs = new Map();
-  const cards = publishedPreludes().map((p) => card(p, locale, strings, sharedGlyphs)).join('');
+  const all = publishedPreludes();
+  const cards = all.map((p) => card(p, locale, strings, sharedGlyphs, all)).join('');
   const glyphs = '<svg class="score-glyphs" width="0" height="0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" ' +
     'xmlns:xlink="http://www.w3.org/1999/xlink"><defs>' + Array.from(sharedGlyphs.values()).join('') + '</defs></svg>';
-  const grid = glyphs + '<div class="prelude-grid">' + cards + '</div>';
+  /* Un popover abierto desde dentro de otro queda apilado; el boton de la tonalidad relativa cierra el actual. */
+  const closer = '<script>document.querySelectorAll(".modal-relative").forEach(function(b){b.addEventListener("click",function(){' +
+    'b.closest("[popover]").hidePopover();});});</script>';
+  const grid = glyphs + '<div class="prelude-grid">' + cards + '</div>' + closer;
   return prose.split('%%PRELUDES%%').join(grid);
 }
 

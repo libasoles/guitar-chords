@@ -232,6 +232,25 @@
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+/* Phones download the PDF straight from the title instead of opening the preview. */
+.prelude-pdf-link {
+  display: none;
+  color: inherit;
+  text-decoration: none;
+}
+.prelude-pdf-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+@media (max-width: 48rem) {
+  .prelude-open {
+    display: none;
+  }
+  .prelude-pdf-link {
+    display: inline;
+  }
+}
 .prelude-card .example-download {
   position: relative;
   width: fit-content;
@@ -307,7 +326,7 @@
 /* The pages sit straight on the paper (no white card) and use most of the width. */
 .modal-pages {
   width: 100%;
-  max-width: 100rem;
+  max-width: 90rem;
   margin: 0 auto;
 }
 .modal-page {
@@ -317,6 +336,8 @@
   margin: 0 auto 1.4rem;
 }
 .modal-footer {
+  align-items: center;
+  gap: 1rem;
   position: sticky;
   bottom: 0;
   z-index: 2;
@@ -326,6 +347,21 @@
   padding: 0.8rem max(1.5rem, 3vw);
   background: var(--paper);
   border-top: 1px solid var(--rule);
+}
+.modal-relative {
+  margin-right: auto;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--brand-blue);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--brand-blue);
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.modal-relative:hover {
+  background: #0000000a;
 }
 .modal-download {
   display: inline-flex;
