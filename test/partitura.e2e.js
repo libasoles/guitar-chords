@@ -660,6 +660,9 @@ async function fillForm(page, name) {
         assert.ok(await page.locator('.part-row .part-example-clef').count() >= 3, 'TAB clef letters');
         assert.equal(await page.locator('.part-row .part-string-name').count() % 6, 0);
         assert.ok(await page.locator('.part-footer #partConfirm svg').count() === 1, 'footer confirm has an icon');
+        // A short score still leaves the footer flush with the bottom of the viewport.
+        const footerGap = await page.evaluate(() => innerHeight - document.querySelector('.part-footer').getBoundingClientRect().bottom);
+        assert.ok(Math.abs(footerGap) <= 1, 'footer a ' + footerGap + 'px del borde inferior');
 
         // Positioned frets must not mask the library's selection background.
         const firstMeasure = page.locator('.part-measure-tab').first();

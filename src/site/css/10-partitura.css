@@ -456,6 +456,7 @@
 .part-result-modal .part-toolbar,
 .part-result-modal > .part-header-row,
 .part-result-modal .part-rows {
+  width: 100%;
   max-width: 64rem;
   margin-left: auto;
   margin-right: auto;
@@ -472,7 +473,12 @@ html.part-modal-open body { overflow: hidden; }
   padding: 5.5rem max(1.5rem, 3vw) 2rem;
   overflow-y: auto;
   background: var(--paper);
+  /* A short score leaves the footer pinned to the bottom of the viewport, not right under the score. */
+  display: flex;
+  flex-direction: column;
 }
+.part-result-modal > .part-footer { margin-top: auto; }
+.part-result-modal > * { flex-shrink: 0; }
 .part-modal-close {
   position: fixed;
   top: 1rem;
