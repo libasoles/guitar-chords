@@ -196,7 +196,7 @@ const PDFS = [
       await page.goto(base + url);
       const cards = page.locator('.prelude-card');
       assert.equal(await cards.count(), published.length);
-      const hrefs = await cards.evaluateAll((els) => els.map((el) => decodeURIComponent(el.getAttribute('href'))));
+      const hrefs = await cards.locator('.example-download').evaluateAll((els) => els.map((el) => decodeURIComponent(el.getAttribute('href'))));
       assert.deepEqual(hrefs.map((href) => href.split('/').pop()), published.map((p) => p.pdf));
       const titles = await cards.locator('h2').allTextContents();
       titles.forEach((title, i) => assert.match(title, new RegExp('^' + (locale === 'es' ? 'Preludio ' : 'Prelude ') + published[i].number + ' (en|in) ')));
@@ -211,12 +211,23 @@ const PDFS = [
       assert.ok(overflow <= 0, 'scroll horizontal de ' + overflow + 'px en ' + url);
       const rights = await cards.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().right));
       rights.forEach((right) => assert.ok(right <= 375, 'tarjeta fuera del viewport'));
-      // Click downloads the prelude PDF with the expected name.
+      // Clicking the card opens a full-screen modal with the PDF, loaded only on open; the X closes it.
+      assert.equal(await page.locator('.modal-full:popover-open').count(), 0);
+      assert.equal(await page.locator('.modal-frame[src]').count(), 0);
+      await cards.first().click();
+      const modal = page.locator('.modal-full:popover-open');
+      assert.equal(await modal.count(), 1);
+      const box = await modal.evaluate((el) => { const r = el.getBoundingClientRect(); return [r.width, r.height]; });
+      assert.deepEqual(box, [375, 800]);
+      assert.match(await modal.locator('.modal-frame').getAttribute('src'), /Prelude%201%20in%20C%20Major.*\.pdf#view=FitH$/);
+      await modal.locator('.modal-close').click();
+      assert.equal(await page.locator('.modal-full:popover-open').count(), 0);
+      // The footer link downloads the prelude PDF with the expected name.
       // A fresh tab per download: Chromium stops honouring downloads after ~10 in one tab.
       for (let i = 0; i < published.length; i++) {
         const tab = await context.newPage();
         await tab.goto(base + url);
-        const [download] = await Promise.all([tab.waitForEvent('download'), tab.locator('.prelude-card').nth(i).click()]);
+        const [download] = await Promise.all([tab.waitForEvent('download'), tab.locator('.prelude-card .example-download').nth(i).click()]);
         assert.equal(download.suggestedFilename(), published[i].pdf);
         const saved = path.join(tmp, 'prelude-' + i + '.pdf');
         await download.saveAs(saved);

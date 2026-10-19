@@ -197,6 +197,7 @@
   gap: 0.4rem;
 }
 .prelude-card {
+  position: relative;
   min-width: 0;
 }
 .prelude-card .prelude-card-title {
@@ -204,6 +205,69 @@
   padding: 0;
   border: 0;
   font-size: 1.1rem;
+}
+/* The title button opens the full score; its ::after stretches over the whole card so any click on the preview opens it. */
+.prelude-open {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.prelude-open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.prelude-open:focus-visible {
+  outline: none;
+}
+.prelude-open:focus-visible::after {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.prelude-card .example-download {
+  position: relative;
+  width: fit-content;
+  margin-left: auto;
+}
+.prelude-card:hover .example-download {
+  text-decoration: none;
+}
+.prelude-card .example-download:hover {
+  text-decoration: underline;
+}
+
+/* Full-screen modal (see scripts/lib/modal.js): the score PDF fills the viewport. */
+.modal-full {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  box-sizing: border-box;
+  padding: 3rem 0 0;
+  border: 0;
+  background: #fff;
+  overflow: hidden;
+}
+/* The close button sits in a strip above the frame so it never covers the PDF viewer's own toolbar. */
+.modal-full .modal-close {
+  top: 0.6rem;
+  right: 0.75rem;
+}
+.modal-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+body:has(.modal-full:popover-open) {
+  overflow: hidden;
 }
 
 .article-card + .article-card {
@@ -232,7 +296,7 @@
   cursor: pointer;
 }
 .arpeggio-chord:focus-visible,
-.chord-popover-close:focus-visible {
+.modal-close:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
@@ -250,7 +314,7 @@
 .chord-popover .finder-card {
   box-shadow: 0 8px 32px #0003;
 }
-.chord-popover-close {
+.modal-close {
   position: absolute;
   top: -0.7rem;
   right: -0.7rem;

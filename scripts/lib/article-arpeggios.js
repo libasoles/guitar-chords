@@ -3,6 +3,7 @@
 const path = require('path');
 const { chordCard, CHORD_CARD_LOADER } = require('./chord-forms');
 const { tabFigure, TAB_LOADER } = require('./article-carcassi');
+const { modal } = require('./modal');
 
 // Each position sounds three treble strings and one bass. String 1 first.
 const GROUPS = [
@@ -85,9 +86,10 @@ function chordPopover(id, name, form, strings) {
     return [string + 1, fret === null ? 'x' : fret === 0 ? 'o' : fret, fret > 0 ? Number(FINGERINGS[name][string]) || undefined : undefined];
   });
   const label = strings.artChordDiagramLabel + ' ' + name;
-  return '<div id="' + id + '" class="chord-popover" popover role="dialog" aria-label="' + label + '">' +
-    '<button type="button" class="chord-popover-close" popovertarget="' + id + '" popovertargetaction="hide" aria-label="' + strings.artArpeggiosClose + '">×</button>' +
-    chordCard({ name, fingers, barres: [], position: 1 }, label) + '</div>';
+  return modal({
+    id, label, closeLabel: strings.artArpeggiosClose, className: 'chord-popover',
+    content: chordCard({ name, fingers, barres: [], position: 1 }, label),
+  });
 }
 
 function renderBody(locale, strings) {

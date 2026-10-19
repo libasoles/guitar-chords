@@ -7,6 +7,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { modal, lazyFrame, LAZY_FRAME_LOADER } = require('./modal');
 
 const ROOT = path.join(__dirname, '..', '..');
 const DOWNLOADS_DIR = path.join(ROOT, 'downloads', 'carcassi-preludios');
@@ -76,10 +77,17 @@ function inlineScore(svg, alt, sharedGlyphs) {
 function card(prelude, locale, strings, sharedGlyphs) {
   const name = (locale === 'es' ? 'Preludio ' : 'Prelude ') + prelude.number + (locale === 'es' ? ' en ' : ' in ') + keyName(prelude, locale);
   const svg = fs.readFileSync(path.join(PREVIEW_DIR, 'prelude-' + String(prelude.number).padStart(2, '0') + '.svg'), 'utf8');
-  return '<a class="example-card prelude-card" href="' + ASSETS_URL + encodeURIComponent(prelude.pdf) + '" download="' + escapeAttr(prelude.pdf) + '">' +
-    '<h2 class="prelude-card-title">' + name + '</h2>' +
+  const id = 'prelude-score-' + prelude.number;
+  const href = ASSETS_URL + encodeURIComponent(prelude.pdf);
+  /* El titulo es el boton que abre la partitura completa (el PDF) en un modal; su ::after cubre toda la tarjeta.
+     El enlace de descarga del pie queda por encima. */
+  return '<article class="example-card prelude-card">' +
+    '<h2 class="prelude-card-title"><button type="button" class="prelude-open" popovertarget="' + id + '" aria-haspopup="dialog" ' +
+      'aria-label="' + escapeAttr(strings.artPreludesView + ' ' + name) + '">' + name + '</button></h2>' +
     inlineScore(svg, strings.artPreludesAltPrefix + ' ' + name, sharedGlyphs) +
-    '<span class="example-download">' + strings.artPreludesDownload + '</span></a>';
+    '<a class="example-download" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' + strings.artPreludesDownload + '</a>' +
+    modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', content: lazyFrame(href + '#view=FitH', name) }) +
+    '</article>';
 }
 
 function renderBody(locale, strings) {
@@ -88,7 +96,7 @@ function renderBody(locale, strings) {
   const cards = publishedPreludes().map((p) => card(p, locale, strings, sharedGlyphs)).join('');
   const glyphs = '<svg class="score-glyphs" width="0" height="0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" ' +
     'xmlns:xlink="http://www.w3.org/1999/xlink"><defs>' + Array.from(sharedGlyphs.values()).join('') + '</defs></svg>';
-  const grid = glyphs + '<div class="prelude-grid">' + cards + '</div>';
+  const grid = glyphs + '<div class="prelude-grid">' + cards + '</div>' + LAZY_FRAME_LOADER;
   return prose.split('%%PRELUDES%%').join(grid);
 }
 
