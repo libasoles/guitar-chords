@@ -257,13 +257,17 @@ function decoderRows(strings) {
 }
 
 // Build the extension CTA button.
-function ctaButton(strings) {
-  const storeUrl =
+function extensionStoreUrl() {
+  return (
     process.env.EXTENSION_STORE_URL ||
-    "https://chromewebstore.google.com/detail/guitar-chords/chigeaalpomifocjjhgcpblcepigajme";
+    "https://chromewebstore.google.com/detail/guitar-chords/chigeaalpomifocjjhgcpblcepigajme"
+  );
+}
+
+function ctaButton(strings) {
   return (
     '<a class="ext-btn" href="' +
-    storeUrl +
+    extensionStoreUrl() +
     '" target="_blank" rel="noopener">' +
     strings.extensionAddButton +
     "</a>"
@@ -2059,6 +2063,95 @@ console.log("==> Rendering 404 page...");
   const notFoundOutFile = path.join(DIST_SITE, "404.html");
   fs.writeFileSync(notFoundOutFile, notFoundHtml, "utf8");
   say(path.relative(ROOT, notFoundOutFile));
+}
+
+// ---- Hamburger menu in the header of every page ----------------------------
+// Replaces the old EN/ES toggle. Runs on the built HTML, like the privacy
+// link below, so every template only carries the <!--SITE_MENU--> marker.
+
+const SITE_MENU_SCRIPT =
+  "<script>(function(){var m=document.currentScript.previousElementSibling;" +
+  "function c(){m.removeAttribute('open')}" +
+  "document.addEventListener('click',function(e){if(!m.contains(e.target))c()});" +
+  "document.addEventListener('keydown',function(e){if(e.key==='Escape')c()});" +
+  "})()</script>";
+
+function siteMenu(strings, locale) {
+  const link = function (href, label) {
+    return '<a href="' + href + '">' + escapeHtml(label) + "</a>";
+  };
+  const items = [
+    link(homeHref(locale), strings.menuChordFinder),
+    link(pagePath(TAB_EDITOR_SLUG, locale), strings.menuCreateTabs),
+    link(pagePath("identificar-acordes-por-notas", locale), strings.menuIdentifyChords),
+  ];
+  if (PARTITURA_ENABLED)
+    items.push(link(pagePath(PARTITURA_SLUG, locale), strings.menuAddTabs));
+  items.push(link(pagePath("circulo-de-quintas", locale), strings.menuFifths));
+  const articles = [
+    [ARTICLE_CARCASSI_SLUG, strings.artCarcH1],
+    [ARTICLE_PRELUDES_SLUG, strings.artPreludesH1],
+    [ARTICLE_ARPEGGIOS_SLUG, strings.artArpeggiosH1],
+  ];
+  return (
+    '<details class="site-menu"><summary aria-label="' +
+    escapeHtml(strings.menuButtonLabel) +
+    '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></summary>' +
+    '<nav class="site-menu-panel" aria-label="' +
+    escapeHtml(strings.menuButtonLabel) +
+    '">' +
+    items.join("") +
+    '<p class="site-menu-heading">' +
+    link(pagePath(ARTICLES_SLUG, locale), strings.menuArticles) +
+    "</p>" +
+    articles
+      .map(function (a) {
+        return '<span class="site-menu-sub">' + link(pagePath(a[0], locale), a[1]) + "</span>";
+      })
+      .join("") +
+    '<p class="site-menu-heading">' +
+    escapeHtml(strings.menuExtensions) +
+    "</p>" +
+    '<a class="site-menu-ext" href="' +
+    extensionStoreUrl() +
+    '" target="_blank" rel="noopener"><strong>' +
+    escapeHtml(strings.extensionHeading) +
+    "</strong><small>" +
+    escapeHtml(strings.extensionDescription) +
+    "</small></a></nav></details>" +
+    SITE_MENU_SCRIPT
+  );
+}
+
+console.log("==> Adding the hamburger menu to every page...");
+{
+  const menuStrings = {};
+  LOCALES.forEach(function (locale) {
+    menuStrings[locale] = JSON.parse(
+      fs.readFileSync(path.join(SRC_I18N, "strings." + locale + ".json"), "utf8"),
+    );
+  });
+  const addSiteMenu = function (dir) {
+    fs.readdirSync(dir, { withFileTypes: true }).forEach(function (entry) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name === "assets" || entry.name === "store") return;
+        addSiteMenu(full);
+        return;
+      }
+      if (!entry.name.endsWith(".html")) return;
+      const rel = path.relative(DIST_SITE, full).split(path.sep).join("/");
+      const locale = rel === "en.html" || rel.indexOf("en/") === 0 ? "en" : "es";
+      const html = fs.readFileSync(full, "utf8");
+      if (html.indexOf("<!--SITE_MENU-->") === -1) return;
+      fs.writeFileSync(
+        full,
+        html.split("<!--SITE_MENU-->").join(siteMenu(menuStrings[locale], locale)),
+        "utf8",
+      );
+    });
+  };
+  addSiteMenu(DIST_SITE);
 }
 
 // ---- Privacy policy link at the bottom of every page -------------------------

@@ -199,11 +199,13 @@ const PDFS = [
       ['es', 'en'].forEach((l) => assert.ok(links.some(([lang, href]) => lang === l && href === BASE_URL + pagePath('articulo-preludios-carcassi', l))));
     }
 
-    // Discoverable only through the sitemap: neither the home pages nor the
-    // footer link to the section.
+    // The home pages link to the section only from the hamburger menu.
     for (const file of ['index.html', 'en.html']) {
       const html = fs.readFileSync(path.join(DIST, file), 'utf8');
-      assert.ok(!/href="[^"]*(articulos|articles)/.test(html), file + ' enlaza a los articulos');
+      const locale = file === 'en.html' ? 'en' : 'es';
+      const outsideMenu = html.replace(/<details class="site-menu">[\s\S]*?<\/details>/, '');
+      assert.ok(html.includes('href="' + pagePath('articulos', locale) + '"'), file + ' no enlaza a los articulos desde el menu');
+      assert.ok(!/href="[^"]*(articulos|articles)/.test(outsideMenu), file + ' enlaza a los articulos fuera del menu');
     }
     const sitemap = fs.readFileSync(path.join(DIST, 'sitemap.xml'), 'utf8');
     ['articulos', 'articulo-carcassi', 'articulo-preludios-carcassi', 'articulo-tablaturas-arpegios'].forEach((key) => ['es', 'en'].forEach((locale) => {
