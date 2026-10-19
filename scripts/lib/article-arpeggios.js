@@ -22,8 +22,9 @@ const GROUPS = [
   ['Mi', 'E', 'Major', ['E', 'E/G#', 'E/B'], [
     [0, 0, 1, null, null, 0], [0, 0, 1, null, null, 4], [0, 0, 1, null, 2, null],
   ]],
-  ['Mi', 'E', 'Minor', ['Em', 'Em/G', 'Em/B'], [
-    [0, 0, 0, null, null, 0], [0, 0, 0, null, null, 3], [0, 0, 0, null, 2, null],
+  ['Mi', 'E', 'Minor', ['Em', 'Em', 'Em/G', 'Em/B'], [
+    [0, 0, 0, null, null, 0], [3, 0, 0, null, null, 0],
+    [0, 0, 0, null, null, 3], [0, 0, 0, null, 2, null],
   ]],
   ['Mi', 'E', 'Seventh', ['E7', 'E7/B'], [
     [0, 0, 1, null, null, 0], [0, 3, 1, null, 2, null],
@@ -59,7 +60,7 @@ const FINGERINGS = {
   Dm: '1320--', 'Dm/F': '1423--', 'Dm/A': '132-0-',
   D7: '3120--', 'D7/F#': '3124--', 'D7/A': '312-0-', 'D7/C': '312-4-',
   E: '001--0', 'E/G#': '001--4', 'E/B': '001-2-',
-  Em: '000--0', 'Em/G': '000--3', 'Em/B': '000-2-',
+  Em: '300--0', 'Em/G': '000--3', 'Em/B': '000-2-',
   E7: '001--0', 'E7/B': '041-2-',
   F: '1123--', 'F/A': '112-0-', 'F/C': '112-3-',
   G: '300--2', 'G/B': '300-1-', 'G/D': '3000--',
@@ -72,7 +73,7 @@ const FINGERINGS = {
 
 function chordPopover(id, name, form, strings) {
   const fingers = form.map(function (fret, string) {
-    return [string + 1, fret === null ? 'x' : fret === 0 ? 'o' : fret, Number(FINGERINGS[name][string]) || undefined];
+    return [string + 1, fret === null ? 'x' : fret === 0 ? 'o' : fret, fret > 0 ? Number(FINGERINGS[name][string]) || undefined : undefined];
   });
   const label = strings.artChordDiagramLabel + ' ' + name;
   return '<div id="' + id + '" class="chord-popover" popover role="dialog" aria-label="' + label + '">' +
