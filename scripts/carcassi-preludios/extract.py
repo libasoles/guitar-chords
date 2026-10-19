@@ -182,6 +182,27 @@ def patch_engine(tabify):
         original(svg).replace('font-family="Times, serif"', f'font-family="{SANS}"', 1))
 
 
+def avoid_repeated_strings(tabs, opens, max_fret=12):
+    """In an arpeggio the same note must not be plucked twice in a row on one string (0-3-0 on the B string):
+    the second pluck of a pitch that returns after a note on its own string moves to the next lower string.
+    `tabs`: one list of columns per measure, cells string 1 first; `opens`: open-string MIDI, string 1 first."""
+    for measure in tabs:
+        pitches = [[opens[s] + f for s, f in enumerate(col) if f is not None] for col in measure]
+        for i in range(2, len(measure)):
+            col, prev = measure[i], measure[i - 1]
+            if len(pitches[i]) != 1 or len(pitches[i - 1]) != 1 or pitches[i] != pitches[i - 2]:
+                continue
+            string = next(s for s, f in enumerate(col) if f is not None)
+            if prev[string] is None:
+                continue
+            for target in range(string + 1, 6):
+                fret = pitches[i][0] - opens[target]
+                if 0 <= fret <= max_fret and col[target] is None:
+                    col[target], col[string] = fret, None
+                    break
+    return tabs
+
+
 def build(number):
     """Corrected MusicXML -> `Prelude N in <Key> - Matteo Carcassi`.pdf/.musicxml in downloads/.
 
@@ -207,7 +228,8 @@ def build(number):
         with open(os.path.join(prepared, tabify.SUGGESTION_NAME), encoding="utf-8") as f:
             suggestion = json.load(f)
         tabify.export(os.path.join(prepared, tabify.NORMALIZED_NAME), os.path.join(prepared, tabify.SUGGESTION_NAME),
-                      suggestion["tabs"], "standard", exported, title=title, subtitle=AUTHOR)
+                      avoid_repeated_strings(suggestion["tabs"], tabify.open_midis(tabify.STANDARD_TUNING)),
+                      "standard", exported, title=title, subtitle=AUTHOR)
         write_preview(number, prepared, exported)
         os.makedirs(OUT_DIR, exist_ok=True)
         base = os.path.join(OUT_DIR, f"{title} - {AUTHOR}")
