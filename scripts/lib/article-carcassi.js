@@ -158,6 +158,7 @@ function renderBody(locale, strings) {
       Object.entries(C_MAJOR_FORMS).map(function ([name, forms]) {
         return tabFigure(name, forms, locale);
       }).join('') + '</div>')
+    .split('%%FORM_C_G_BASS%%').join(formFigure('C', [0, 1, 0, null, null, 3], locale))
     .concat(TAB_LOADER);
 }
 
