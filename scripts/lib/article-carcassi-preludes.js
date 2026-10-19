@@ -7,7 +7,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { modal } = require('./modal');
+const { modal, CLOSE_ICON } = require('./modal');
 
 const ROOT = path.join(__dirname, '..', '..');
 const DOWNLOADS_DIR = path.join(ROOT, 'downloads', 'carcassi-preludios');
@@ -88,7 +88,7 @@ function card(prelude, locale, strings, sharedGlyphs) {
       'aria-label="' + escapeAttr(strings.artPreludesView + ' ' + name) + '">' + name + '</button></h2>' +
     inlineScore(svg, strings.artPreludesAltPrefix + ' ' + name, sharedGlyphs) +
     download +
-    modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', content: fullScore(prelude, name, download) }) +
+    modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', closeContent: CLOSE_ICON, content: fullScore(prelude, name, href, strings) }) +
     '</article>';
 }
 
@@ -102,14 +102,20 @@ function pageFiles(prelude) {
     : [];
 }
 
-function fullScore(prelude, name, download) {
+const DOWNLOAD_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
+  'stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>';
+
+function fullScore(prelude, name, href, strings) {
   const pages = pageFiles(prelude).map((file, i, all) => {
     const head = fs.readFileSync(path.join(FULL_DIR, file), 'utf8').slice(0, 300);
     const [, width, height] = head.match(/<svg width="(\d+)(?:\.\d+)?px" height="(\d+)(?:\.\d+)?px"/);
     return '<img class="modal-page" src="' + ASSETS_URL + 'full/' + file + '" width="' + width + '" height="' + height +
       '" loading="lazy" decoding="async" alt="' + escapeAttr(name + (all.length > 1 ? ' (' + (i + 1) + '/' + all.length + ')' : '')) + '">';
   });
-  return '<div class="modal-actions">' + download + '</div><div class="modal-pages">' + pages.join('') + '</div>';
+  /* El boton azul de descarga va en un pie fijo, como el de Partitura y tablatura. */
+  return '<div class="modal-pages">' + pages.join('') + '</div>' +
+    '<div class="modal-footer"><a class="modal-download" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' +
+    DOWNLOAD_ICON + '<span>' + strings.artPreludesDownload + '</span></a></div>';
 }
 
 function renderBody(locale, strings) {

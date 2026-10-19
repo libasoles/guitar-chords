@@ -244,7 +244,8 @@
   text-decoration: underline;
 }
 
-/* Full-screen modal (see scripts/lib/modal.js): the score pages fill the viewport. */
+/* Full-screen modal (see scripts/lib/modal.js), styled like the Partitura y tablatura preview: paper background,
+   logo top left, big close icon top right without a background, and a sticky footer with the blue action. */
 .modal-full {
   position: fixed;
   inset: 0;
@@ -254,47 +255,92 @@
   max-height: none;
   margin: 0;
   box-sizing: border-box;
-  padding: 3rem 0 0;
+  padding: 5.5rem max(1.5rem, 3vw) 0;
   border: 0;
-  background: #fff;
-  overflow: hidden;
-}
-/* The close button sits in a strip above the scrolling pages. */
-.modal-full .modal-close {
-  top: 0.6rem;
-  right: 0.75rem;
-}
-.modal-actions {
-  position: absolute;
-  top: 0.6rem;
-  right: 3.6rem;
-  display: flex;
-  align-items: center;
-  height: 1.8rem;
-}
-.modal-actions .example-download {
-  margin: 0;
-}
-.modal-actions .example-download:hover {
-  text-decoration: underline;
-}
-/* The pages scroll inside the modal; the strip with the close button stays put. */
-.modal-pages {
-  height: 100%;
+  background: var(--paper);
+  color: var(--ink);
   overflow-y: auto;
-  padding: 0.75rem 0.75rem 1.5rem;
-  background: #ece8e1;
+  overscroll-behavior: contain;
+}
+.modal-full::backdrop {
+  background: var(--paper);
+}
+.modal-full::before {
+  content: "";
+  position: fixed;
+  top: 0.4rem;
+  left: max(1rem, 2vw);
+  z-index: 1;
+  width: 72px;
+  height: 72px;
+  background: url("guitar-player-cubist-left-head.svg") center / contain no-repeat;
+  pointer-events: none;
+}
+.modal-full .modal-close {
+  position: fixed;
+  top: 1rem;
+  right: max(1rem, 2vw);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  background: transparent;
+  box-shadow: none;
+}
+.modal-full .modal-close svg {
+  width: 2rem;
+  height: 2rem;
+}
+.modal-full .modal-close:hover {
+  background: #0000000f;
+}
+.modal-pages {
+  max-width: 64rem;
+  margin: 0 auto;
 }
 .modal-page {
   display: block;
   width: 100%;
-  max-width: 62rem;
   height: auto;
-  margin: 0 auto 1rem;
+  margin: 0 auto 1.4rem;
   background: #fff;
   box-shadow:
     0 1px 2px rgba(60, 40, 20, 0.18),
     0 3px 8px rgba(60, 40, 20, 0.1);
+}
+.modal-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: flex-end;
+  margin: 1.5rem calc(-1 * max(1.5rem, 3vw)) 0;
+  padding: 0.8rem max(1.5rem, 3vw);
+  background: var(--paper);
+  border-top: 1px solid var(--rule);
+}
+.modal-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--brand-blue);
+  border-radius: 4px;
+  background: var(--brand-blue);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.modal-download:hover {
+  border-color: var(--brand-blue-dark);
+  background: var(--brand-blue-dark);
+}
+.modal-download svg {
+  display: block;
+  width: 1.2rem;
+  height: 1.2rem;
 }
 body:has(.modal-full:popover-open) {
   overflow: hidden;

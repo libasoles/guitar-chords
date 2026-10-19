@@ -8,10 +8,14 @@ function escapeAttr(text) {
   return String(text).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
 
-function modal({ id, label, closeLabel, className, content }) {
+/* La X del modal a pantalla completa: la misma del preview de Partitura y tablatura. */
+const CLOSE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
+  'stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+
+function modal({ id, label, closeLabel, className, content, closeContent = '×' }) {
   return '<div id="' + id + '" class="modal ' + className + '" popover role="dialog" aria-label="' + escapeAttr(label) + '">' +
-    '<button type="button" class="modal-close" popovertarget="' + id + '" popovertargetaction="hide" aria-label="' + escapeAttr(closeLabel) + '">×</button>' +
+    '<button type="button" class="modal-close" popovertarget="' + id + '" popovertargetaction="hide" aria-label="' + escapeAttr(closeLabel) + '">' + closeContent + '</button>' +
     content + '</div>';
 }
 
-module.exports = { modal };
+module.exports = { modal, CLOSE_ICON };

@@ -246,7 +246,7 @@ const PDFS = [
       assert.ok(await first.evaluate((img) => img.naturalWidth > 0 && img.getBoundingClientRect().right <= 375));
       assert.match(await first.getAttribute('src'), /\/full\/prelude-01-p1(?:\.[a-f0-9]+)?\.svg$/);
       assert.ok(await fullRequests() >= 1);
-      assert.equal(decodeURIComponent(await modal.locator('.modal-actions a').getAttribute('href')).split('/').pop(), published[0].pdf);
+      assert.equal(decodeURIComponent(await modal.locator('.modal-footer .modal-download').getAttribute('href')).split('/').pop(), published[0].pdf);
       await modal.locator('.modal-close').click();
       assert.equal(await page.locator('.modal-full:popover-open').count(), 0);
       // The footer link downloads the prelude PDF with the expected name.
