@@ -124,6 +124,14 @@
     });
   }
 
+  // An informational toast (not an error): a scan the OCR could only read with doubts. It lasts long enough
+  // to read it while the preview opens, and is simply skipped if the toast bundle cannot load.
+  function showScanAdvice() {
+    loadToast().then(function () {
+      window.SiteToast.show(t('partLowQualityScan'), { duration: 12000 });
+    }, function () { /* the preview is the main thing; no fallback dialog for a tip */ });
+  }
+
   function clearRightsError() {
     rightsError.textContent = '';
     rightsError.hidden = true;
@@ -560,6 +568,7 @@
 
   function onReady(job) {
     var jobId = state.jobId;
+    if (job.lowQualityScan) showScanAdvice();
     if (!isDesktop()) {
       setStatus('');
       mobileDownload(job);

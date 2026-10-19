@@ -793,6 +793,24 @@ async function fillForm(page, name) {
         await page.close();
       }
 
+      // A scan the OCR could only read with doubts asks for a better copy; any other reading says nothing.
+      for (const doubtful of [true, false]) {
+        const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+        await mockApi(page, { jobs: [Object.assign({}, READY, { lowQualityScan: doubtful })] });
+        await page.goto(toolUrl);
+        await fillForm(page, 'score.pdf');
+        await page.waitForSelector('#partRows .part-row');
+        if (doubtful) {
+          await page.waitForSelector('.toast-description');
+          assert.equal(await page.locator('.toast-description').textContent(), S.partLowQualityScan);
+          assert.equal(await page.locator('.toast-alert').count(), 0, 'advice, not an error');
+        } else {
+          await page.waitForTimeout(600);
+          assert.equal(await page.locator('.toast').count(), 0, 'no advice for a good reading');
+        }
+        await page.close();
+      }
+
       // Every error code is translated, on creation and when a job fails.
       const codes = ['rate_limited', 'busy', 'budget_paused', 'turnstile_failed', 'too_large', 'omr_failed', 'no_notes', 'timeout', 'export_limit', 'expired'];
       for (const code of codes) {

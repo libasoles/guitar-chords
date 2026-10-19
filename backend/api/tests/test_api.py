@@ -256,6 +256,35 @@ class LimitTests(unittest.TestCase):
 
 
 class StateTests(unittest.TestCase):
+    def finish_with(self, ocr):
+        """A job whose process step completed with this OCR reading note (None = no note at all)."""
+        env = Env()
+        jid = env.create()[1]["id"]
+        env.upload(jid)
+        env.call("POST /jobs/{id}/process", job=jid)
+        result = {"ok": True, "tuning": "standard", "measures": 4, "keys": {"preview_svgs": []}}
+        if ocr is not None:
+            result["ocr"] = ocr
+        env.svc.internal({"internal": "complete", "jobId": jid, "action": "process", "result": result})
+        return env.call("GET /jobs/{id}", job=jid)[1]
+
+    def test_a_doubtful_reading_of_a_scan_is_reported(self):
+        self.assertIs(self.finish_with({"scan": True, "suspect": True})["lowQualityScan"], True)
+
+    def test_a_doubtful_reading_of_a_vector_pdf_is_not_a_scan_problem(self):
+        self.assertIs(self.finish_with({"scan": False, "suspect": True})["lowQualityScan"], False)
+
+    def test_a_good_reading_of_a_scan_is_not_reported(self):
+        self.assertIs(self.finish_with({"scan": True, "suspect": False})["lowQualityScan"], False)
+
+    def test_jobs_without_an_ocr_note_report_nothing(self):
+        self.assertIs(self.finish_with(None)["lowQualityScan"], False)
+
+    def test_a_job_still_processing_reports_nothing(self):
+        env = Env()
+        jid = env.create()[1]["id"]
+        self.assertIs(env.call("GET /jobs/{id}", job=jid)[1]["lowQualityScan"], False)
+
     def test_musicxml_flow_states_and_downloads(self):
         env = Env()
         jid = env.create()[1]["id"]
