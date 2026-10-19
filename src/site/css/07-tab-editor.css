@@ -109,6 +109,7 @@
   .fifths-chord strong { font-size: .85rem; }
   .fifths-chords { gap: .2rem; }
   .fifths-signature { gap: .25rem; }
+  .fifths-signature .fifths-staff { width: 150px; height: 70px; overflow: visible; }
   .fifths-svg { width: calc(100% + 2rem); max-width: none; margin-left: -1rem; }
 }
 @media (prefers-reduced-motion: reduce) { .fifths-key path { transition: none; } }
