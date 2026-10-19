@@ -187,10 +187,11 @@ def _hand(option):
     return min(fretted) if fretted else None
 
 
-def _solve(layers):
+def _solve(layers, opens):
     """Viterbi over layers [(options, original)]: the cheapest option per layer. Costs: leaving the engine's
     choice, high frets, hand movement (the hand keeps its position over open strings) and, biggest, two
-    consecutive single notes on one string."""
+    consecutive single notes on one string. The exception is a repeated note (same pitch twice in a row):
+    it stays on its string and changing string costs instead."""
     def own(option, original):
         h = _hand(option)
         return (0 if option == original else 0.5) + (0.4 * max(0, h - 4) if h else 0)
@@ -212,8 +213,12 @@ def _solve(layers):
                 if h is not None and ph is not None:
                     c += 0.6 * abs(h - ph)
                 now, was = single(option), single(prev)
-                if now and was and now[0] == was[0]:
-                    c += 8
+                if now and was:
+                    same_pitch = opens[now[0]] + now[1] == opens[was[0]] + was[1]
+                    if same_pitch and now[0] != was[0]:
+                        c += 3
+                    elif not same_pitch and now[0] == was[0]:
+                        c += 8
                 if best is None or c < best[0]:
                     best = (c, j)
             row.append((option, h if h is not None else states[i - 1][best[1]][1]))
@@ -232,7 +237,8 @@ def _solve(layers):
 
 def avoid_repeated_strings(tabs, opens, max_fret=9, open_reach=6):
     """Arpeggio rules for the TAB of a prelude:
-    1. No two consecutive notes on the same string (0-3, 3-0 or 0-3-0 on the B string).
+    1. No two consecutive different notes on the same string (0-3, 3-0 or 0-3-0 on the B string); a repeated
+       note stays on its string.
     2. A measure that mixes open strings with notes from fret `open_reach` to 11 (a stretch away from the open
        chord) is fingered as a full chord shape in position, like a barre, with no open strings.
     Single-note columns are re-chosen over the whole piece (see `_solve`); chords keep their cells.
@@ -249,7 +255,7 @@ def avoid_repeated_strings(tabs, opens, max_fret=9, open_reach=6):
         options = [((s, pitch - o),) for s, o in enumerate(opens) if 0 <= pitch - o <= max_fret]
         layers.append((options or [cells], cells))
 
-    chosen = _solve(layers)
+    chosen = _solve(layers, opens)
     frets = {}
     for m, option in zip(owner, chosen):
         frets.setdefault(m, []).extend(f for _, f in option)
@@ -257,7 +263,7 @@ def avoid_repeated_strings(tabs, opens, max_fret=9, open_reach=6):
     if stretched:
         layers = [([o for o in options if m not in stretched or len(o) != 1 or o[0][1] > 0] or options, original)
                   for m, (options, original) in zip(owner, layers)]
-        chosen = _solve(layers)
+        chosen = _solve(layers, opens)
     for col, option in zip(flat, chosen):
         for s in range(len(col)):
             col[s] = None
