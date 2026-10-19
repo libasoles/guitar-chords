@@ -107,15 +107,16 @@ function renderBody(locale, strings) {
       });
     });
     if (!roots.has(en)) roots.set(en, { title: locale === 'es' ? es : en, variants: [] });
-    roots.get(en).variants.push({ title, figure: tabFigure(title, styledForms, locale, buttons, null, true) });
+    roots.get(en).variants.push({ title: strings['artArpeggios' + quality], figure: tabFigure(title, styledForms, locale, buttons, null, true) });
   });
   const tabs = Array.from(roots, function ([root, { title, variants }]) {
     const id = 'arpeggio-' + root;
     return '<section class="arpeggio-group" aria-label="' + title + '">' +
-      '<div role="tablist" aria-label="' + title + '">' + variants.map(function (variant, i) {
+      '<div class="arpeggio-group-header"><span class="arpeggio-root" id="' + id + '-root">' + title + '</span>' +
+      '<div role="tablist" aria-labelledby="' + id + '-root">' + variants.map(function (variant, i) {
         return '<button type="button" role="tab" id="' + id + '-tab-' + i + '" aria-controls="' + id + '-panel-' + i +
           '" aria-selected="' + (i === 0) + '" tabindex="' + (i === 0 ? '0' : '-1') + '">' + variant.title + '</button>';
-      }).join('') + '</div>' + variants.map(function (variant, i) {
+      }).join('') + '</div></div>' + variants.map(function (variant, i) {
         return '<div role="tabpanel" id="' + id + '-panel-' + i + '" aria-labelledby="' + id + '-tab-' + i +
           '" tabindex="0"' + (i === 0 ? '' : ' hidden') + '>' + variant.figure + '</div>';
       }).join('') + '</section>';

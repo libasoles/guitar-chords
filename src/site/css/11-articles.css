@@ -271,11 +271,20 @@
 .arpeggio-group {
   margin-bottom: 1.5rem;
 }
+.arpeggio-group-header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.arpeggio-root {
+  font-weight: 700;
+}
 .arpeggio-group [role="tablist"] {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem;
-  margin-bottom: 0.75rem;
 }
 .arpeggio-group [role="tab"] {
   padding: 0.45rem 0.65rem;
@@ -287,13 +296,13 @@
   cursor: pointer;
 }
 .arpeggio-group [role="tab"][aria-selected="true"] {
-  border-bottom-color: var(--accent);
-  color: var(--accent);
+  border-bottom-color: var(--blue-france);
+  color: var(--blue-france);
   font-weight: 700;
 }
 .arpeggio-group [role="tab"]:focus-visible,
 .arpeggio-group [role="tabpanel"]:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--blue-france);
   outline-offset: 2px;
 }
 .arpeggio-group figcaption {
