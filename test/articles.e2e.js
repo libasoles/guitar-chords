@@ -103,12 +103,12 @@ const PDFS = [
       await page.waitForSelector('ascii-tabs .ascii-tabs-tab');
       assert.equal(await page.locator('h1').textContent(), locale === 'es' ? 'Tablaturas para arpegios' : 'Tabs for arpeggios');
       assert.equal(await page.locator('.lead a').getAttribute('href'), pagePath('articulo-carcassi', locale));
-      assert.equal(await page.locator('ascii-tabs[readonly]').count(), 21);
+      assert.equal(await page.locator('ascii-tabs[readonly]').count(), 28);
       const titles = await page.locator('figcaption').allTextContents();
-      assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Do menor', 'Do séptima'] : ['C major', 'C minor', 'C seventh']);
+      assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Do menor', 'Do 7 mayor'] : ['C major', 'C minor', 'C major 7']);
       const groups = await page.locator('ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
       groups.flat().forEach((form) => assert.equal(form.filter((f) => f !== null).length, 4));
-      assert.deepEqual(groups[8][1], [0, 3, 1, null, 2, null]);
+      assert.deepEqual(groups[10][1], [0, 3, 1, null, 2, null]);
       assert.equal(await page.locator('.tab-chords').count(), groups.length);
       const weights = await page.locator('.ascii-tabs-has').evaluateAll((cells) => cells.map((cell) => ({
         string: Number(cell.dataset.s),
@@ -117,16 +117,23 @@ const PDFS = [
       weights.forEach(({ string, weight }) => assert.equal(weight, string >= 3 ? '700' : '400'));
       if (locale === 'es') assert.match(await page.locator('.lead a').textContent(), /^descomposición/);
       // The names are buttons above the tab, outside the white sheet, without underline.
-      assert.deepEqual(await page.locator('.tab-chords').nth(5).locator('.arpeggio-chord').allTextContents(), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
+      assert.deepEqual(await page.locator('.tab-chords').nth(6).locator('.arpeggio-chord').allTextContents(), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
       assert.equal(await page.locator('ascii-tabs .arpeggio-chord').count(), 0);
       assert.equal(await page.locator('.arpeggio-chord').first().evaluate((el) => getComputedStyle(el).textDecorationLine), 'none');
-      assert.deepEqual(groups[5], [
+      assert.deepEqual(groups[6], [
         [2, 1, 2, 0, null, null], [2, 1, 2, 4, null, null],
         [2, 1, 2, null, 0, null], [2, 1, 2, null, 3, null],
       ]);
       assert.equal(await page.locator('.arpeggio-group').count(), 7);
       assert.equal(await page.locator('[role="tabpanel"]:visible').count(), 7);
       for (const [root, quality, names, chordNotes, bassNotes] of [
+        ['C', 'MinorSeventh', ['Cm7', 'Cm7/Eb', 'Cm7/G', 'Cm7/Bb'], [0, 3, 7, 10], [0, 3, 7, 10]],
+        ['D', 'MinorSeventh', ['Dm7', 'Dm7/F', 'Dm7/A', 'Dm7/C'], [2, 5, 9, 0], [2, 5, 9, 0]],
+        ['E', 'MinorSeventh', ['Em7', 'Em7/G', 'Em7/B', 'Em7/D'], [4, 7, 11, 2], [4, 7, 11, 2]],
+        ['F', 'MinorSeventh', ['Fm7', 'Fm7/Ab', 'Fm7/C', 'Fm7/Eb'], [5, 8, 0, 3], [5, 8, 0, 3]],
+        ['G', 'MinorSeventh', ['Gm7', 'Gm7/Bb', 'Gm7/D', 'Gm7/F'], [7, 10, 2, 5], [7, 10, 2, 5]],
+        ['A', 'MinorSeventh', ['Am7', 'Am7/C', 'Am7/E', 'Am7/G'], [9, 0, 4, 7], [9, 0, 4, 7]],
+        ['B', 'MinorSeventh', ['Bm7', 'Bm7/D', 'Bm7/F#', 'Bm7/A'], [11, 2, 6, 9], [11, 2, 6, 9]],
         ['F', 'Minor', ['Fm', 'Fm/Ab', 'Fm/C'], [5, 8, 0], [5, 8, 0]],
         ['F', 'Seventh', ['F7', 'F7/A', 'F7/C', 'F7/Eb'], [5, 9, 0, 3], [5, 9, 0, 3]],
         ['G', 'Minor', ['Gm', 'Gm/Bb', 'Gm/D'], [7, 10, 2], [7, 10, 2]],
@@ -145,7 +152,7 @@ const PDFS = [
           sounding.forEach((pitch) => assert.ok(chordNotes.includes(pitch % 12), names[i] + ' uses chord tones'));
           assert.equal(Math.min(...sounding) % 12, bassNotes[i], names[i] + ' bass');
           assert.ok(sounding.some((pitch) => pitch % 12 === chordNotes[1]), names[i] + ' third');
-          if (quality === 'Seventh') assert.ok(sounding.some((pitch) => pitch % 12 === chordNotes[3]), names[i] + ' seventh');
+          if (quality.endsWith('Seventh')) assert.ok(sounding.some((pitch) => pitch % 12 === chordNotes[3]), names[i] + ' seventh');
         });
       }
       const firstGroup = page.locator('.arpeggio-group').first();
@@ -156,11 +163,11 @@ const PDFS = [
       assert.ok(await qualityTabs.nth(1).evaluate((el) => el === document.activeElement));
       assert.deepEqual(await firstGroup.locator('[role="tabpanel"]:visible .arpeggio-chord').allTextContents(), ['Cm', 'Cm/Eb', 'Cm/G']);
       await page.keyboard.press('End');
-      assert.equal(await qualityTabs.nth(2).getAttribute('aria-selected'), 'true');
+      assert.equal(await qualityTabs.nth(3).getAttribute('aria-selected'), 'true');
       await page.keyboard.press('ArrowRight');
       assert.equal(await qualityTabs.first().getAttribute('aria-selected'), 'true');
       await page.keyboard.press('ArrowLeft');
-      assert.equal(await qualityTabs.nth(2).getAttribute('aria-selected'), 'true');
+      assert.equal(await qualityTabs.nth(3).getAttribute('aria-selected'), 'true');
       await page.keyboard.press('Home');
       assert.equal(await qualityTabs.first().getAttribute('aria-selected'), 'true');
       // Every annotation opens its own exact four-string fingering, including inversions.
