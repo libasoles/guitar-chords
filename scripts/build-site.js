@@ -2079,7 +2079,13 @@ const SITE_MENU_SCRIPT =
 
 function siteMenu(strings, locale) {
   const link = function (href, label) {
-    return '<a href="' + href + '">' + escapeHtml(label) + "</a>";
+    const externalLabel =
+      label + " — " + (locale === "en" ? "Open in a new tab" : "Abrir en otra pestaña");
+    return '<div class="site-menu-row"><a href="' + href + '">' + escapeHtml(label) +
+      '</a><a class="site-menu-external" href="' + href +
+      '" target="_blank" rel="noopener" aria-label="' + escapeHtml(externalLabel) +
+      '" title="' + escapeHtml(externalLabel) +
+      '"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M21 14v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg></a></div>';
   };
   const items = [
     link(homeHref(locale), strings.menuChordFinder),
@@ -2102,12 +2108,10 @@ function siteMenu(strings, locale) {
     escapeHtml(strings.menuButtonLabel) +
     '">' +
     items.join("") +
-    '<p class="site-menu-heading">' +
     link(pagePath(ARTICLES_SLUG, locale), strings.menuArticles) +
-    "</p>" +
     articles
       .map(function (a) {
-        return '<span class="site-menu-sub">' + link(pagePath(a[0], locale), a[1]) + "</span>";
+        return link(pagePath(a[0], locale), a[1]);
       })
       .join("") +
     '<p class="site-menu-heading">' +

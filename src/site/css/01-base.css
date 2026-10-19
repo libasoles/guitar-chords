@@ -130,10 +130,20 @@ body {
   color: var(--accent);
   background: rgba(139, 0, 0, 0.05);
 }
-.site-menu-panel .site-menu-sub a {
-  padding-left: 2rem;
-  font-size: 0.88rem;
-  color: var(--ink-soft);
+.site-menu-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2.75rem;
+}
+.site-menu-row > a {
+  display: flex;
+  align-items: center;
+}
+.site-menu-row .site-menu-external {
+  justify-content: center;
+  padding: 0.45rem 0;
+}
+.site-menu-external svg {
+  flex-shrink: 0;
 }
 .site-menu-panel .site-menu-heading {
   margin: 0.4rem 0 0;
@@ -142,14 +152,6 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--ink-soft);
-}
-.site-menu-panel .site-menu-heading a {
-  display: inline;
-  padding: 0;
-  color: inherit;
-}
-.site-menu-panel .site-menu-heading a:hover {
-  background: none;
 }
 .site-menu-panel .site-menu-ext {
   display: flex;
