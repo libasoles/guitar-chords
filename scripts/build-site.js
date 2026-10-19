@@ -2114,11 +2114,11 @@ function siteMenu(strings, locale) {
     "</p>" +
     '<a class="site-menu-ext" href="' +
     extensionStoreUrl() +
-    '" target="_blank" rel="noopener"><strong>' +
-    escapeHtml(strings.extensionHeading) +
+    '" target="_blank" rel="noopener"><span><strong>' +
+    escapeHtml(strings.menuChordFinder) +
     "</strong><small>" +
     escapeHtml(strings.extensionDescription) +
-    "</small></a></nav></details>" +
+    '</small></span><img src="/assets/guitar-player-cubist-left-head.svg" alt="" width="48" height="48"></a></nav></details>' +
     SITE_MENU_SCRIPT
   );
 }
