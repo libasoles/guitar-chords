@@ -2107,8 +2107,13 @@ function siteMenu(strings, locale) {
     '<nav class="site-menu-panel" aria-label="' +
     escapeHtml(strings.menuButtonLabel) +
     '">' +
+    '<p class="site-menu-heading">' +
+    escapeHtml(strings.menuResources) +
+    "</p>" +
     items.join("") +
-    link(pagePath(ARTICLES_SLUG, locale), strings.menuArticles) +
+    '<p class="site-menu-heading">' +
+    escapeHtml(strings.menuArticles) +
+    "</p>" +
     articles
       .map(function (a) {
         return link(pagePath(a[0], locale), a[1]);
