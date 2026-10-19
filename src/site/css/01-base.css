@@ -33,6 +33,12 @@ body {
   font-size: 19px;
 }
 
+@media (max-width: 767px) {
+  body {
+    margin-bottom: 1.5rem;
+  }
+}
+
 /* ----- Header ----- */
 
 .site-header {
