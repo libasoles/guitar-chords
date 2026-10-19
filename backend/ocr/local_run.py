@@ -27,9 +27,11 @@ def main(source, out_dir):
             shutil.copy(source, pdf)
         else:
             Image.open(source).convert("L").save(pdf, resolution=400)
-        files = recognize(pdf, work, time.monotonic() + TIMEOUT, HEAP_MB)
+        info = {}
+        files = recognize(pdf, work, time.monotonic() + TIMEOUT, HEAP_MB, info=info)
         if not files:
             return 2
+        print("reading:", info)
         for i, path in enumerate(files, 1):
             shutil.copy(path, os.path.join(out_dir, f"omr-{i:02d}.mxl"))
     return 0
