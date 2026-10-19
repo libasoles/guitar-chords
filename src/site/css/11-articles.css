@@ -6,6 +6,10 @@
   font-size: 0.9rem;
 }
 
+.article-back a {
+  color: var(--blue-france);
+}
+
 .article-card {
   display: block;
   padding: 1rem 1.2rem;
