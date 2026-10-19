@@ -182,42 +182,30 @@ def patch_engine(tabify):
         original(svg).replace('font-family="Times, serif"', f'font-family="{SANS}"', 1))
 
 
-def avoid_repeated_strings(tabs, opens, max_fret=9):
-    """Arpeggio rule: no two consecutive notes on the same string (0-3, 3-0 or 0-3-0 on the B string).
-    Single-note columns are re-chosen over the whole piece (Viterbi) with a cost per violation, a small one
-    for leaving the engine's choice, and others for hand movement and high frets. Chords keep their cells. `tabs`: one list of columns per measure, cells
-    string 1 first; `opens`: open-string MIDI, string 1 first."""
-    flat = [col for measure in tabs for col in measure]
-    layers = []
-    for col in flat:
-        cells = tuple((s, f) for s, f in enumerate(col) if f is not None)
-        if len(cells) != 1:
-            layers.append(([cells], cells))
-            continue
-        pitch = opens[cells[0][0]] + cells[0][1]
-        options = [((s, pitch - o),) for s, o in enumerate(opens) if 0 <= pitch - o <= max_fret]
-        layers.append((options or [cells], cells))
+def _hand(option):
+    fretted = [f for _, f in option if f > 0]
+    return min(fretted) if fretted else None
 
-    def hand(option):
-        fretted = [f for _, f in option if f > 0]
-        return min(fretted) if fretted else None
 
+def _solve(layers):
+    """Viterbi over layers [(options, original)]: the cheapest option per layer. Costs: leaving the engine's
+    choice, high frets, hand movement (the hand keeps its position over open strings) and, biggest, two
+    consecutive single notes on one string."""
     def own(option, original):
-        h = hand(option)
+        h = _hand(option)
         return (0 if option == original else 0.5) + (0.4 * max(0, h - 4) if h else 0)
 
     def single(option):
         return option[0] if len(option) == 1 else None
 
-    # state per option: (option, last fretted position, i.e. where the hand is, even after open strings)
-    states = [[(o, hand(o)) for o in layers[0][0]]]
+    states = [[(o, _hand(o)) for o in layers[0][0]]]
     cost = [[own(o, layers[0][1]) for o, _ in states[0]]]
     back = [[None] * len(states[0])]
     for i in range(1, len(layers)):
         options, original = layers[i]
         row, costs, backs = [], [], []
         for option in options:
-            h = hand(option)
+            h = _hand(option)
             best = None
             for j, (prev, ph) in enumerate(states[i - 1]):
                 c = cost[i - 1][j] + own(option, original)
@@ -235,13 +223,46 @@ def avoid_repeated_strings(tabs, opens, max_fret=9):
         cost.append(costs)
         back.append(backs)
     k = min(range(len(cost[-1])), key=lambda j: cost[-1][j])
+    chosen = [None] * len(layers)
     for i in range(len(layers) - 1, -1, -1):
-        col = flat[i]
+        chosen[i] = states[i][k][0]
+        k = back[i][k]
+    return chosen
+
+
+def avoid_repeated_strings(tabs, opens, max_fret=9, open_reach=6):
+    """Arpeggio rules for the TAB of a prelude:
+    1. No two consecutive notes on the same string (0-3, 3-0 or 0-3-0 on the B string).
+    2. A measure that mixes open strings with notes from fret `open_reach` to 11 (a stretch away from the open
+       chord) is fingered as a full chord shape in position, like a barre, with no open strings.
+    Single-note columns are re-chosen over the whole piece (see `_solve`); chords keep their cells.
+    `tabs`: one list of columns per measure, cells string 1 first; `opens`: open-string MIDI, string 1 first."""
+    flat = [col for measure in tabs for col in measure]
+    owner = [m for m, measure in enumerate(tabs) for _ in measure]
+    layers = []
+    for col in flat:
+        cells = tuple((s, f) for s, f in enumerate(col) if f is not None)
+        if len(cells) != 1:
+            layers.append(([cells], cells))
+            continue
+        pitch = opens[cells[0][0]] + cells[0][1]
+        options = [((s, pitch - o),) for s, o in enumerate(opens) if 0 <= pitch - o <= max_fret]
+        layers.append((options or [cells], cells))
+
+    chosen = _solve(layers)
+    frets = {}
+    for m, option in zip(owner, chosen):
+        frets.setdefault(m, []).extend(f for _, f in option)
+    stretched = {m for m, fs in frets.items() if 0 in fs and any(open_reach <= f < 12 for f in fs)}  # fret 12 is a harmonic
+    if stretched:
+        layers = [([o for o in options if m not in stretched or len(o) != 1 or o[0][1] > 0] or options, original)
+                  for m, (options, original) in zip(owner, layers)]
+        chosen = _solve(layers)
+    for col, option in zip(flat, chosen):
         for s in range(len(col)):
             col[s] = None
-        for s, f in states[i][k][0]:
+        for s, f in option:
             col[s] = f
-        k = back[i][k]
     return tabs
 
 
