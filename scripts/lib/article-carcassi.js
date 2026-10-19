@@ -35,6 +35,14 @@ const EASY_DECOMPOSED = {
 const ALLEGRETTO_CHORDS = ['C', 'G7'];
 const PRELUDE_CHORDS = ['Am', 'G7', 'C', 'E7'];
 
+/* Prelude 1 in C Major: dos formas con distintos bajos en los
+   compases 1 (C), 3 (Dm) y 4 (G7). Cuerda 1 primero. */
+const C_MAJOR_FORMS = {
+  C: [[0, 1, 0, null, 3, null], [0, 1, 0, 2, null, null]],
+  Dm: [[1, 3, 2, 0, null, null], [1, 3, 2, 3, null, null]],
+  G7: [[1, 0, 0, null, null, 3], [1, 3, 0, null, 2, null]],
+};
+
 function escapeAttr(text) {
   return String(text).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
@@ -146,6 +154,10 @@ function renderBody(locale, strings) {
     .split('%%FORMS_ALLEGRETTO%%').join(comparisons(ALLEGRETTO_CHORDS, strings, locale))
     .split('%%EXAMPLE_PRELUDE%%').join(exampleCard('prelude-compases-3-4', strings.artPreludeAlt, strings))
     .split('%%FORMS_PRELUDE%%').join(sequenceComparison(PRELUDE_CHORDS, strings, locale))
+    .split('%%FORMS_C_MAJOR%%').join('<div class="bass-forms">' +
+      Object.entries(C_MAJOR_FORMS).map(function ([name, forms]) {
+        return tabFigure(name, forms, locale);
+      }).join('') + '</div>')
     .concat(TAB_LOADER);
 }
 
