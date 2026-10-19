@@ -208,8 +208,8 @@ const PDFS = [
       const html = fs.readFileSync(path.join(DIST, file), 'utf8');
       const locale = file === 'en.html' ? 'en' : 'es';
       const outsideMenu = html.replace(/<details class="site-menu">[\s\S]*?<\/details>/, '');
-      assert.ok(html.includes('href="' + pagePath('articulos', locale) + '"'), file + ' no enlaza a los articulos desde el menu');
-      assert.ok(!/href="[^"]*(articulos|articles)/.test(outsideMenu), file + ' enlaza a los articulos fuera del menu');
+      assert.ok(html.includes('href="' + pagePath('articulo-carcassi', locale) + '"'), file + ' no enlaza a los articulos desde el menu');
+      assert.ok(!/href="[^"]*(articulo|article)/.test(outsideMenu), file + ' enlaza a los articulos fuera del menu');
     }
     const sitemap = fs.readFileSync(path.join(DIST, 'sitemap.xml'), 'utf8');
     ['articulos', 'articulo-carcassi', 'articulo-preludios-carcassi', 'articulo-tablaturas-arpegios'].forEach((key) => ['es', 'en'].forEach((locale) => {
