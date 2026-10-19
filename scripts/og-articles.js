@@ -10,6 +10,7 @@ const { playwrightExecutablePath } = require('./lib/chrome-path');
 
 const SITE = path.join(__dirname, '..', 'src', 'site');
 const previews = {
+  arpeggios: require('./lib/article-arpeggios').cardImage(),
   carcassi: require('./lib/article-carcassi').cardImage(),
   preludes: require('./lib/article-carcassi-preludes').cardImage(),
 };

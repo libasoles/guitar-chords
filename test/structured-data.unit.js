@@ -77,6 +77,7 @@ test('las vistas previas usan la imagen de cada pagina y reservan la extension p
       ['articulos', 'og-score-preludes.png'],
       ['articulo-carcassi', 'og-score-carcassi.png'],
       ['articulo-preludios-carcassi', 'og-score-preludes.png'],
+      ['articulo-tablaturas-arpegios', 'og-score-arpeggios.png'],
       ['crear-tablaturas-de-guitarra', 'og-tab-editor.png'],
       ['identificar-acordes-por-notas', `og-note-finder-${locale}.png`],
       ['circulo-de-quintas', `og-fifths-${locale}.png`],

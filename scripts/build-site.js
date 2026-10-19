@@ -441,6 +441,9 @@ function socialImage(url) {
     if (url === v7CanonicalUrl(locale, TAB_EDITOR_SLUG)) {
       return SITE_BASE_URL + "/assets/og-tab-editor.png";
     }
+    if (url === v7CanonicalUrl(locale, ARTICLE_ARPEGGIOS_SLUG)) {
+      return SITE_BASE_URL + "/assets/og-score-arpeggios.png";
+    }
     if (url === v7CanonicalUrl(locale, NOTE_FINDER_SLUG)) {
       return SITE_BASE_URL + "/assets/og-note-finder-" + locale + ".png";
     }
@@ -1208,8 +1211,14 @@ function renderArticlesIndex(strings, locale) {
       strings.artPreludesH1,
       strings.artPreludesCardSummary,
     ) +
-    '<a class="article-card" href="' + pagePath(ARTICLE_ARPEGGIOS_SLUG, locale) + '"><h2>' +
-    escapeHtml(strings.artArpeggiosH1) + '</h2><p>' + escapeHtml(strings.artArpeggiosIntro) + '</p></a>';
+    articleCard(
+      ARTICLE_ARPEGGIOS_SLUG,
+      locale,
+      articleArpeggios.cardImage().url,
+      [684, 240],
+      strings.artArpeggiosH1,
+      strings.artArpeggiosIntro,
+    );
   return renderArticlePage(
     strings,
     locale,
@@ -1651,7 +1660,7 @@ if (PARTITURA_ENABLED) {
   });
 }
 // Raster score previews used by article and guide link cards.
-["carcassi", "preludes"].forEach(function (name) {
+["carcassi", "preludes", "arpeggios"].forEach(function (name) {
   copyFile(
     path.join(SRC_SITE, "og-score-" + name + ".png"),
     path.join(ASSETS_DIST, "og-score-" + name + ".png"),
@@ -1688,6 +1697,9 @@ copyFile(
   articlePreludes.cardImage().src,
   path.join(preludesDist, articlePreludes.cardImage().name),
 );
+const arpeggiosDist = path.join(ASSETS_DIST, "articles", "arpeggios");
+ensureDir(arpeggiosDist);
+copyFile(articleArpeggios.cardImage().src, path.join(arpeggiosDist, articleArpeggios.cardImage().name));
 // Store-facing static pages.
 const storeDist = path.join(DIST_SITE, "store");
 ensureDir(storeDist);

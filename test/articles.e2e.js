@@ -38,6 +38,9 @@ const PDFS = [
       assert.equal(await page.locator('.article-card').first().getAttribute('href'), article);
       assert.equal(await page.locator('.article-card').nth(1).getAttribute('href'), pagePath('articulo-preludios-carcassi', locale));
       assert.match(await page.locator('.article-card p').first().textContent(), /Carcassi/);
+      const arpeggiosImage = page.locator('.article-card').nth(2).locator('img');
+      assert.match(await arpeggiosImage.getAttribute('src'), /^\/assets\/articles\/arpeggios\/preview(?:\.[a-f0-9]+)?\.svg$/);
+      await arpeggiosImage.evaluate((img) => img.decode());
       // No text link in the list besides the cards (the banner is the link).
       assert.equal(await page.locator('main a[href*="preludios"], main a[href*="preludes"]').count(), 1);
 

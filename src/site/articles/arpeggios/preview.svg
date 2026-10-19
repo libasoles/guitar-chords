@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="684" height="240" viewBox="0 0 684 240">
+  <title>C Dm Em F G Am</title>
+  <rect width="684" height="240" fill="#fff"/>
+  <g font-family="monospace" font-size="22" text-anchor="middle" fill="#252525">
+    <text x="110" y="32" font-weight="700">C</text>
+    <text x="210" y="32" font-weight="700">Dm</text>
+    <text x="310" y="32" font-weight="700">Em</text>
+    <text x="410" y="32" font-weight="700">F</text>
+    <text x="510" y="32" font-weight="700">G</text>
+    <text x="610" y="32" font-weight="700">Am</text>
+    <text x="28" y="72" fill="#777">e</text>
+    <path d="M50 65H656" stroke="#bbb" stroke-width="2"/>
+    <rect x="100" y="53" width="20" height="25" fill="#fff"/>
+    <text x="110" y="72" font-weight="700">0</text>
+    <rect x="200" y="53" width="20" height="25" fill="#fff"/>
+    <text x="210" y="72" font-weight="700">1</text>
+    <rect x="300" y="53" width="20" height="25" fill="#fff"/>
+    <text x="310" y="72" font-weight="700">0</text>
+    <rect x="400" y="53" width="20" height="25" fill="#fff"/>
+    <text x="410" y="72" font-weight="700">1</text>
+    <rect x="500" y="53" width="20" height="25" fill="#fff"/>
+    <text x="510" y="72" font-weight="700">3</text>
+    <rect x="600" y="53" width="20" height="25" fill="#fff"/>
+    <text x="610" y="72" font-weight="700">0</text>
+    <text x="28" y="100" fill="#777">B</text>
+    <path d="M50 93H656" stroke="#bbb" stroke-width="2"/>
+    <rect x="100" y="81" width="20" height="25" fill="#fff"/>
+    <text x="110" y="100" font-weight="700">1</text>
+    <rect x="200" y="81" width="20" height="25" fill="#fff"/>
+    <text x="210" y="100" font-weight="700">3</text>
+    <rect x="300" y="81" width="20" height="25" fill="#fff"/>
+    <text x="310" y="100" font-weight="700">0</text>
+    <rect x="400" y="81" width="20" height="25" fill="#fff"/>
+    <text x="410" y="100" font-weight="700">1</text>
+    <rect x="500" y="81" width="20" height="25" fill="#fff"/>
+    <text x="510" y="100" font-weight="700">0</text>
+    <rect x="600" y="81" width="20" height="25" fill="#fff"/>
+    <text x="610" y="100" font-weight="700">1</text>
+    <text x="28" y="128" fill="#777">G</text>
+    <path d="M50 121H656" stroke="#bbb" stroke-width="2"/>
+    <rect x="100" y="109" width="20" height="25" fill="#fff"/>
+    <text x="110" y="128" font-weight="700">0</text>
+    <rect x="200" y="109" width="20" height="25" fill="#fff"/>
+    <text x="210" y="128" font-weight="700">2</text>
+    <rect x="300" y="109" width="20" height="25" fill="#fff"/>
+    <text x="310" y="128" font-weight="700">0</text>
+    <rect x="400" y="109" width="20" height="25" fill="#fff"/>
+    <text x="410" y="128" font-weight="700">2</text>
+    <rect x="500" y="109" width="20" height="25" fill="#fff"/>
+    <text x="510" y="128" font-weight="700">0</text>
+    <rect x="600" y="109" width="20" height="25" fill="#fff"/>
+    <text x="610" y="128" font-weight="700">2</text>
+    <text x="28" y="156" fill="#777">D</text>
+    <path d="M50 149H656" stroke="#bbb" stroke-width="2"/>
+    <rect x="200" y="137" width="20" height="25" fill="#fff"/>
+    <text x="210" y="156" font-weight="700">0</text>
+    <rect x="400" y="137" width="20" height="25" fill="#fff"/>
+    <text x="410" y="156" font-weight="700">3</text>
+    <text x="28" y="184" fill="#777">A</text>
+    <path d="M50 177H656" stroke="#bbb" stroke-width="2"/>
+    <rect x="100" y="165" width="20" height="25" fill="#fff"/>
+    <text x="110" y="184" font-weight="700">3</text>
+    <rect x="600" y="165" width="20" height="25" fill="#fff"/>
+    <text x="610" y="184" font-weight="700">0</text>
+    <text x="28" y="212" fill="#777">E</text>
+    <path d="M50 205H656" stroke="#bbb" stroke-width="2"/>
+    <rect x="300" y="193" width="20" height="25" fill="#fff"/>
+    <text x="310" y="212" font-weight="700">0</text>
+    <rect x="500" y="193" width="20" height="25" fill="#fff"/>
+    <text x="510" y="212" font-weight="700">3</text>
+  </g>
+</svg>

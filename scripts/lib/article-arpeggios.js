@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const { tabFigure, TAB_LOADER } = require('./article-carcassi');
 
 // Each position sounds three treble strings and one bass. String 1 first.
@@ -53,4 +54,12 @@ function renderBody(locale, strings) {
     }).join('') + '</div>' + TAB_LOADER;
 }
 
-module.exports = { renderBody };
+function cardImage() {
+  return {
+    src: path.join(__dirname, '../../src/site/articles/arpeggios/preview.svg'),
+    name: 'preview.svg',
+    url: '/assets/articles/arpeggios/preview.svg',
+  };
+}
+
+module.exports = { renderBody, cardImage };
