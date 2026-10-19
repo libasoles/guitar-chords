@@ -1,0 +1,25 @@
+'use strict';
+/* modal.js — Ventana modal reutilizable para los articulos: un <div popover> nativo (sin JS para abrir, cerrar con
+   Esc o con la X) y su boton de cerrar. Se abre con un boton que lleve popovertarget="<id>". `className` da la
+   variante: `chord-popover` (tarjeta chica con fondo) o `modal-full` (pantalla completa). Los estilos estan en
+   11-articles.css. */
+
+function escapeAttr(text) {
+  return String(text).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+function modal({ id, label, closeLabel, className, content }) {
+  return '<div id="' + id + '" class="modal ' + className + '" popover role="dialog" aria-label="' + escapeAttr(label) + '">' +
+    '<button type="button" class="modal-close" popovertarget="' + id + '" popovertargetaction="hide" aria-label="' + escapeAttr(closeLabel) + '">×</button>' +
+    content + '</div>';
+}
+
+/* Iframe que carga su documento recien al abrir el modal: 16 modales no descargan 16 PDF con la pagina. */
+function lazyFrame(src, title) {
+  return '<iframe class="modal-frame" data-src="' + escapeAttr(src) + '" title="' + escapeAttr(title) + '"></iframe>';
+}
+
+const LAZY_FRAME_LOADER = '<script>document.addEventListener("toggle",function(e){if(e.newState!=="open")return;' +
+  'var f=e.target.querySelector("iframe[data-src]");if(f&&!f.src)f.src=f.dataset.src;},true);</script>';
+
+module.exports = { modal, lazyFrame, LAZY_FRAME_LOADER };
