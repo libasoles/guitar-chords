@@ -145,6 +145,7 @@ body {
 }
 .site-menu-external svg {
   flex-shrink: 0;
+  color: var(--blue-france);
 }
 .site-menu-panel .site-menu-heading {
   margin: 0.4rem 0 0;

@@ -269,14 +269,14 @@
 
 /* Variants of the same root share one visible tablature. */
 .arpeggio-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 3rem;
 }
 .arpeggio-group-header {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1.25rem;
 }
 .arpeggio-root {
   font-weight: 700;
@@ -287,9 +287,9 @@
   gap: 0.25rem;
 }
 .arpeggio-group [role="tab"] {
-  padding: 0.45rem 0.65rem;
+  padding: 0.15rem 0.65rem;
   border: 0;
-  border-bottom: 3px solid transparent;
+  border-bottom: 1px solid transparent;
   background: transparent;
   color: var(--ink);
   font: inherit;
