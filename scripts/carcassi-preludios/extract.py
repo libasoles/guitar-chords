@@ -182,24 +182,66 @@ def patch_engine(tabify):
         original(svg).replace('font-family="Times, serif"', f'font-family="{SANS}"', 1))
 
 
-def avoid_repeated_strings(tabs, opens, max_fret=12):
-    """In an arpeggio the same note must not be plucked twice in a row on one string (0-3-0 on the B string):
-    the second pluck of a pitch that returns after a note on its own string moves to the next lower string.
-    `tabs`: one list of columns per measure, cells string 1 first; `opens`: open-string MIDI, string 1 first."""
-    for measure in tabs:
-        pitches = [[opens[s] + f for s, f in enumerate(col) if f is not None] for col in measure]
-        for i in range(2, len(measure)):
-            col, prev = measure[i], measure[i - 1]
-            if len(pitches[i]) != 1 or len(pitches[i - 1]) != 1 or pitches[i] != pitches[i - 2]:
-                continue
-            string = next(s for s, f in enumerate(col) if f is not None)
-            if prev[string] is None:
-                continue
-            for target in range(string + 1, 6):
-                fret = pitches[i][0] - opens[target]
-                if 0 <= fret <= max_fret and col[target] is None:
-                    col[target], col[string] = fret, None
-                    break
+def avoid_repeated_strings(tabs, opens, max_fret=9):
+    """Arpeggio rule: no two consecutive notes on the same string (0-3, 3-0 or 0-3-0 on the B string).
+    Single-note columns are re-chosen over the whole piece (Viterbi) with a cost per violation, a small one
+    for leaving the engine's choice, and others for hand movement and high frets. Chords keep their cells. `tabs`: one list of columns per measure, cells
+    string 1 first; `opens`: open-string MIDI, string 1 first."""
+    flat = [col for measure in tabs for col in measure]
+    layers = []
+    for col in flat:
+        cells = tuple((s, f) for s, f in enumerate(col) if f is not None)
+        if len(cells) != 1:
+            layers.append(([cells], cells))
+            continue
+        pitch = opens[cells[0][0]] + cells[0][1]
+        options = [((s, pitch - o),) for s, o in enumerate(opens) if 0 <= pitch - o <= max_fret]
+        layers.append((options or [cells], cells))
+
+    def hand(option):
+        fretted = [f for _, f in option if f > 0]
+        return min(fretted) if fretted else None
+
+    def own(option, original):
+        h = hand(option)
+        return (0 if option == original else 0.5) + (0.4 * max(0, h - 4) if h else 0)
+
+    def single(option):
+        return option[0] if len(option) == 1 else None
+
+    # state per option: (option, last fretted position, i.e. where the hand is, even after open strings)
+    states = [[(o, hand(o)) for o in layers[0][0]]]
+    cost = [[own(o, layers[0][1]) for o, _ in states[0]]]
+    back = [[None] * len(states[0])]
+    for i in range(1, len(layers)):
+        options, original = layers[i]
+        row, costs, backs = [], [], []
+        for option in options:
+            h = hand(option)
+            best = None
+            for j, (prev, ph) in enumerate(states[i - 1]):
+                c = cost[i - 1][j] + own(option, original)
+                if h is not None and ph is not None:
+                    c += 0.6 * abs(h - ph)
+                now, was = single(option), single(prev)
+                if now and was and now[0] == was[0]:
+                    c += 8
+                if best is None or c < best[0]:
+                    best = (c, j)
+            row.append((option, h if h is not None else states[i - 1][best[1]][1]))
+            costs.append(best[0])
+            backs.append(best[1])
+        states.append(row)
+        cost.append(costs)
+        back.append(backs)
+    k = min(range(len(cost[-1])), key=lambda j: cost[-1][j])
+    for i in range(len(layers) - 1, -1, -1):
+        col = flat[i]
+        for s in range(len(col)):
+            col[s] = None
+        for s, f in states[i][k][0]:
+            col[s] = f
+        k = back[i][k]
     return tabs
 
 
