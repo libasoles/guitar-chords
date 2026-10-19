@@ -103,7 +103,7 @@ const PDFS = [
       await page.waitForSelector('ascii-tabs .ascii-tabs-tab');
       assert.equal(await page.locator('h1').textContent(), locale === 'es' ? 'Tablaturas para arpegios' : 'Tabs for arpeggios');
       assert.equal(await page.locator('.lead a').getAttribute('href'), pagePath('articulo-carcassi', locale));
-      assert.equal(await page.locator('ascii-tabs[readonly]').count(), 19);
+      assert.equal(await page.locator('ascii-tabs[readonly]').count(), 21);
       const titles = await page.locator('figcaption').allTextContents();
       assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Do menor', 'Do séptima'] : ['C major', 'C minor', 'C seventh']);
       const groups = await page.locator('ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
@@ -130,6 +130,8 @@ const PDFS = [
         ['F', 'Minor', ['Fm', 'Fm/Ab', 'Fm/C'], [5, 8, 0], [5, 8, 0]],
         ['F', 'Seventh', ['F7', 'F7/A', 'F7/C', 'F7/Eb'], [5, 9, 0, 3], [5, 9, 0, 3]],
         ['G', 'Minor', ['Gm', 'Gm/Bb', 'Gm/D'], [7, 10, 2], [7, 10, 2]],
+        ['A', 'Seventh', ['A7', 'A7/C#', 'A7/E', 'A7/G'], [9, 1, 4, 7], [9, 1, 4, 7]],
+        ['B', 'Minor', ['Bm', 'Bm/D', 'Bm/F#'], [11, 2, 6], [11, 2, 6]],
       ]) {
         const label = require('../src/i18n/strings.' + locale + '.json')['artArpeggios' + quality];
         await page.locator('#arpeggio-' + root + '-root').locator('..').getByRole('tab', { name: label, exact: true }).click();
@@ -143,7 +145,7 @@ const PDFS = [
           sounding.forEach((pitch) => assert.ok(chordNotes.includes(pitch % 12), names[i] + ' uses chord tones'));
           assert.equal(Math.min(...sounding) % 12, bassNotes[i], names[i] + ' bass');
           assert.ok(sounding.some((pitch) => pitch % 12 === chordNotes[1]), names[i] + ' third');
-          if (quality === 'Seventh') assert.ok(sounding.some((pitch) => pitch % 12 === 3), names[i] + ' seventh');
+          if (quality === 'Seventh') assert.ok(sounding.some((pitch) => pitch % 12 === chordNotes[3]), names[i] + ' seventh');
         });
       }
       const firstGroup = page.locator('.arpeggio-group').first();
