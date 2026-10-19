@@ -75,6 +75,45 @@ class HandlerTests(unittest.TestCase):
         self.assertTrue(res["ok"], res)
         self.assertEqual(res["tuning"], "dropd")
 
+    def put_ocr_output(self, meta=None):
+        import io
+        import zipfile
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as z:
+            z.writestr("META-INF/container.xml", '<container><rootfiles><rootfile '
+                       'full-path="score.xml"/></rootfiles></container>')
+            z.writestr("score.xml", SCORE)
+        self.s3.objects[("b", "jobs/1/omr/omr-01.mxl")] = buf.getvalue()
+        if meta is not None:
+            self.s3.objects[("b", "jobs/1/omr/omr-meta.json")] = meta
+
+    def prepare_ocr(self):
+        return lambda_handler.handler({
+            "action": "prepare", "bucket": "b", "input_prefix": "jobs/1/omr/",
+            "kind": "pdf-ocr-output", "tuning": "auto", "out_prefix": "jobs/1/prepared/"})
+
+    def test_prepare_forwards_how_the_ocr_reading_went(self):
+        meta = {"engine": "homr", "scan": True, "suspect": True, "measures": 8, "consistent": 8, "out_of_key": 0.25}
+        self.put_ocr_output(json.dumps(meta).encode())
+        res = self.prepare_ocr()
+        self.assertTrue(res["ok"], res)
+        self.assertEqual(res["ocr"], {"scan": True, "suspect": True})
+
+    def test_prepare_without_ocr_metadata_has_none(self):
+        self.put_ocr_output()
+        res = self.prepare_ocr()
+        self.assertTrue(res["ok"], res)
+        self.assertNotIn("ocr", res)
+
+    def test_unreadable_ocr_metadata_is_ignored(self):
+        self.put_ocr_output(b"not json")
+        res = self.prepare_ocr()
+        self.assertTrue(res["ok"], res)
+        self.assertNotIn("ocr", res)
+
+    def test_musicxml_input_has_no_ocr_metadata(self):
+        self.assertNotIn("ocr", self.prepare())
+
     def test_errors_are_returned(self):
         self.s3.objects[("b", "bad")] = b"<score-partwise/>"
         res = lambda_handler.handler({"action": "prepare", "bucket": "b", "input_key": "bad",

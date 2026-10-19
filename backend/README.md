@@ -86,11 +86,13 @@ bifurque con un `Choice` sobre `$.ok` y guarde `$.error` como código del Trabaj
   `.mxl/.musicxml/.xml` bajo el prefijo, ordenados; úsalo para la salida del OCR: `jobs/<id>/omr/`).
 - `out_prefix` debe terminar en `/`. `kind` e `input_*` obligatorios salvo lo anterior; `tuning` default `auto`.
 
-Respuesta ok:
+Respuesta ok (`ocr` solo aparece si hay `input_prefix` y el OCR dejó `omr-meta.json` junto a su salida:
+`scan` = el PDF era un escaneo, `suspect` = la lectura es dudosa; la API lo expone como `lowQualityScan`):
 
 ```json
 {"ok": true, "tuning": "standard", "title": "...", "measures": 24,
  "dropped": [{"measure": 3, "pitch": "D2"}],
+ "ocr": {"scan": true, "suspect": true},
  "keys": {"musicxml": "<out_prefix>normalized.musicxml",
           "suggestion": "<out_prefix>suggestion.json",
           "preview": "<out_prefix>preview.json",
@@ -141,15 +143,21 @@ Imagen: `backend/ocr/Dockerfile` (Audiveris 5.11.0 compilado desde fuente sobre
 descargados: la tarea no baja nada al ejecutar; ENTRYPOINT `python3 /opt/ocr/run.py`).
 
 **Dos motores y cuál se usa.** Medidos con partituras de guitarra de Mutopia (MIDI de referencia)
-y escaneos reales de Internet Archive: en partituras nítidas rinden igual, en escaneos viejos o
-difusos homr lee mucho mejor (Giuliani Op. 100, escaneo real: 0,95 de notas con la altura
-correcta frente a 0,34 de Audiveris). `run.py` elige así:
+y escaneos reales de Internet Archive: en partituras nítidas sin anotaciones rinden igual, en escaneos
+viejos o difusos homr lee mucho mejor (Giuliani Op. 100, escaneo real: 0,95 de notas con la altura
+correcta frente a 0,34 de Audiveris), y con dedos o letras p-i-m-a (Carcassi Op. 59) es al revés:
+Audiveris acierta ~0,99 y homr ~0,70 porque las lee como notas. `run.py` elige así:
 
 1. Un PDF cuyas páginas son todas una imagen (un escaneo, `deskew.is_scan`) va primero a homr;
    un PDF vectorial, primero a Audiveris.
-2. Si la lectura es pobre (menos del 70 % de los compases con el ritmo coherente, `quality.py`)
-   y quedan al menos 2 minutos del presupuesto, corre el otro motor y gana la mejor lectura;
-   un empate conserva la primera. Si el primero no produce nada, se usa el otro.
+2. Si la lectura es dudosa (menos del 70 % de los compases con el ritmo coherente, o más del 12 %
+   de las notas fuera de la tonalidad que mejor encaja, `quality.py`) y quedan al menos 2 minutos
+   del presupuesto, corre el otro motor. Gana la lectura con mejor puntuación (compases coherentes
+   × notas dentro de la tonalidad); la segunda tiene que ganar por un margen y leer al menos el 60 %
+   de las notas de la primera (no una página de cinco). Si el primero no produce nada, se usa el otro.
+   Las notas fuera de la tonalidad cazan lo que el ritmo no ve: dedos y letras p-i-m-a que homr lee
+   como notas y alteraciones dejan los compases «coherentes» pero con el 13–27 % de notas ajenas,
+   frente al 1–9 % de una lectura correcta (ver `docs/ocr-evaluacion.md`).
 3. Las páginas sin música (carátulas, en blanco) se descartan: Audiveris las salta por sí
    mismo y homr se corre página por página, ignorando las que dan «No staffs found».
 4. A Audiveris se le da el escaneo enderezado (`deskew.py`); homr lo endereza solo.
@@ -170,7 +178,9 @@ Variables de entorno (container overrides de `ecs:RunTask`):
 | `OMR_MAX_HEAP_MB` | no | `-Xmx` de la JVM (default 5120; dejar ~2-3 GB para el resto del proceso en 8 GB) |
 | `OMR_TIMEOUT_SECONDS` | no | Presupuesto total de los motores OCR; pasado ese tiempo se corta (default 780, bajo el corte de 15 min del Trabajo) |
 
-Salida: `OUTPUT_PREFIX + omr-01.mxl` (más `omr-02.mxl`, ... un archivo por movimiento de Audiveris o por página con música de homr).
+Salida: `OUTPUT_PREFIX + omr-01.mxl` (más `omr-02.mxl`, ... un archivo por movimiento de Audiveris o por página con música de homr)
+y `OUTPUT_PREFIX + omr-meta.json` con `{engine, scan, suspect, measures, consistent, out_of_key}`: el Lambda del motor
+reenvía `scan` y `suspect` al Job, que la API expone como `lowQualityScan` (escaneo de lectura dudosa).
 `omr-01.mxl` es el **MusicXML intermedio** descargable. Después, `prepare` con
 `input_prefix = OUTPUT_PREFIX` y `kind = "pdf-ocr-output"`.
 
@@ -212,6 +222,7 @@ del export), `export/<n>/{score.pdf,score.musicxml,tabs.json}` (n = numero de ex
  "stage": "ocr|preparing|exporting|null", "kind": "pdf|musicxml", "tuning": "standard|dropd|auto",
  "error": null, "elapsedSeconds": 12, "expiresAt": 0, "exports": 0,
  "discardedNotes": [{"measure": 3, "pitch": "D2"}], "measures": 24, "title": "...|null",
+ "lowQualityScan": false,
  "preview": {"json": "<signed url preview.json>",
              "suggestion": "<signed url suggestion.json: tabs, preview_columns, ...>",
              "svgs": ["<signed url preview-01.svg>", "<signed url preview-02.svg>"]}}

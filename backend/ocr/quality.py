@@ -45,6 +45,40 @@ def _measures(root):
     return out
 
 
+MIN_NOTES_FOR_KEY = 12  # with fewer notes the key says nothing
+STEP_PITCH_CLASS = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
+MAJOR_SCALE = (0, 2, 4, 5, 7, 9, 11)
+
+
+def _pitch_classes(root):
+    part = root.find("part")
+    if part is None:
+        return []
+    classes = []
+    for pitch in part.iter("pitch"):
+        step = STEP_PITCH_CLASS.get(pitch.findtext("step"))
+        if step is not None:
+            classes.append((step + round(float(pitch.findtext("alter") or 0))) % 12)
+    return classes
+
+
+def out_of_key_ratio(paths):
+    """Share of notes outside the best-fitting major scale (relative minors fit the same one).
+
+    A correct reading of tonal music keeps this low (a few chromatic notes). Misread fingerings and
+    letters show up as accidentals and stray notes and push it up, even when every measure's rhythm
+    adds up, which is all `measure_quality` can see. 0.0 when there are too few notes to tell.
+    """
+    classes = []
+    for path in paths:
+        classes += _pitch_classes(_score_xml(path))
+    if len(classes) < MIN_NOTES_FOR_KEY:
+        return 0.0
+    counts = collections.Counter(classes)
+    best = max(sum(counts[(tonic + degree) % 12] for degree in MAJOR_SCALE) for tonic in range(12))
+    return round(1 - best / len(classes), 3)
+
+
 def measure_quality(paths):
     """{'measures', 'consistent', 'notes'} summed over the MusicXML files of one result."""
     measures = []

@@ -272,7 +272,9 @@ class Service:
                "elapsedSeconds": int(max(0, end - started)) if started else 0,
                "expiresAt": job["expires_at"], "exports": job.get("exports", 0),
                "discardedNotes": job.get("dropped", []), "measures": job.get("measures"),
-               "title": job.get("title"), "preview": None}
+               "title": job.get("title"), "preview": None,
+               # a scan the OCR could only read doubtfully: the page suggests finding a better copy
+               "lowQualityScan": bool((job.get("ocr") or {}).get("scan") and (job.get("ocr") or {}).get("suspect"))}
         if job["status"] in ("ready", "exporting", "exported"):
             keys = self._keys(job["id"], job["kind"], job["filename"])
             ttl = self.cfg.url_ttl
@@ -360,7 +362,7 @@ class Service:
                     fields["dropped"] = result.get("dropped") or []
                     fields["preview_svgs"] = list((result.get("keys") or {}).get("preview_svgs") or [])
                     for src, dst in (("tuning", "resolved_tuning"), ("measures", "measures"),
-                                     ("title", "title")):
+                                     ("title", "title"), ("ocr", "ocr")):
                         if result.get(src) is not None:
                             fields[dst] = result[src]
                 self.store.update(job["pk"], fields)

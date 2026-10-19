@@ -72,6 +72,15 @@ def _list_scores(bucket, prefix):
     return keys
 
 
+def _ocr_reading(bucket, prefix):
+    """What the OCR task wrote about its reading (`omr-meta.json`), reduced to what the Job reports, or None."""
+    try:
+        meta = json.loads(s3().get_object(Bucket=bucket, Key=prefix + "omr-meta.json")["Body"].read())
+        return {"scan": bool(meta["scan"]), "suspect": bool(meta["suspect"])}
+    except Exception:  # optional: older jobs, missing or malformed file
+        return None
+
+
 def handle_prepare(event, workdir):
     bucket, prefix = event["bucket"], _prefix(event["out_prefix"])
     keys = event.get("input_keys") or ([event["input_key"]] if event.get("input_key") else None)
@@ -85,7 +94,7 @@ def handle_prepare(event, workdir):
                             out_dir, per_row=int(event.get("per_row", 4)))
     for name in sorted(os.listdir(out_dir)):
         _upload(bucket, prefix + name, os.path.join(out_dir, name))
-    return {
+    out = {
         "ok": True,
         "keys": {
             "musicxml": prefix + tabify.NORMALIZED_NAME,
@@ -98,6 +107,10 @@ def handle_prepare(event, workdir):
         "dropped": result["dropped"],
         "measures": result["measures"],
     }
+    reading = _ocr_reading(bucket, event["input_prefix"]) if event.get("input_prefix") else None
+    if reading:
+        out["ocr"] = reading
+    return out
 
 
 def handle_export(event, workdir):
