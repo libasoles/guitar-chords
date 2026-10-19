@@ -29,7 +29,7 @@ body {
   flex: none;
   width: 40px;
   height: 40px;
-  background: url("guitar-player-cubist-left-head.svg") center / contain no-repeat;
+  background: url("icon.svg") center / contain no-repeat;
 }
 
 .tab-editor-menu summary {
