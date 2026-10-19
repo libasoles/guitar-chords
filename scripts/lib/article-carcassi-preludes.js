@@ -41,7 +41,7 @@ function escapeAttr(text) {
 }
 
 /* Cada vista previa lleva su propio <defs> (clave, cabezas, alteraciones), metadatos y estilos de Verovio: con
-   16 tarjetas la pagina pesaba 620 KB. Se quitan los metadatos y los estilos (las dos reglas que hacian falta
+   16 tarjetas la pagina pesaba 620 KB. Se quitan los metadatos y los estilos (las reglas que hacen falta
    estan en 11-articles.css) y las glifos, identicos entre previews, se declaran una sola vez en la pagina. */
 const GLYPH_SUFFIX = /(E[0-9A-F]{3,4})-[a-z0-9]{6,9}/g;
 
@@ -58,7 +58,7 @@ function slimScore(svg, sharedGlyphs) {
       return '';
     })
     .replace(/ data-class="[^"]*"/g, '')
-    .replace(/ class="(?!fing")[^"]*"/g, '')
+    .replace(/ class="(?!(?:fing|tabDurSym|tabRhythm)")[^"]*"/g, '')
     .replace(/ overflow="visible"/g, '')
     .replace(/ id="[a-z0-9]{6,9}"/g, '');
 }

@@ -5,7 +5,7 @@ Issues #33 y #34. Deja, por preludio, en `downloads/carcassi-preludios/`:
 - `Prelude N in <Key> - Matteo Carcassi.pdf`: pentagrama + pentagrama TAB, lo que descarga el visitante.
 - `Prelude N in <Key> - Matteo Carcassi.musicxml`: MusicXML final (notación + TAB), solo para uso interno.
 
-y en `src/site/articles/carcassi-preludios/prelude-NN.svg` la vista previa (dos sistemas, solo notación).
+y en `src/site/articles/carcassi-preludios/prelude-NN.svg` la vista previa (un sistema con notación y TAB).
 El MusicXML intermedio del OCR **no** se commitea (vive en `.work/`, ignorado); sí el corregido,
 en `corrected/prelude-NN.musicxml`, para reprocesar sin repetir el OCR.
 

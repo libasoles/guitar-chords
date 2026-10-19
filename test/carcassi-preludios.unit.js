@@ -8,7 +8,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const { publishedPreludes, DOWNLOADS_DIR } = require('../scripts/lib/article-carcassi-preludes');
+const { publishedPreludes, DOWNLOADS_DIR, PREVIEW_DIR } = require('../scripts/lib/article-carcassi-preludes');
 
 /* Compases de cada preludio, contados una vez sobre la partitura del libro. */
 const MEASURES = { 1: 8, 2: 8, 3: 7, 4: 8, 5: 8, 6: 16, 7: 8, 8: 11, 9: 8, 10: 10, 11: 8, 12: 12, 13: 8, 14: 8, 15: 8, 16: 10 };
@@ -55,6 +55,16 @@ for (const prelude of preludes) {
     const shape = scoreShape(xml);
     assert.equal(shape.staves, 2, 'notacion + pentagrama TAB');
     assert.equal(shape.measures, MEASURES[prelude.number]);
+  });
+
+  test('preludio ' + prelude.number + ': preview de un sistema con partitura y TAB', () => {
+    const svg = fs.readFileSync(path.join(PREVIEW_DIR, 'prelude-' + String(prelude.number).padStart(2, '0') + '.svg'), 'utf8');
+    assertWellFormed(svg);
+    assert.equal((svg.match(/ class="system"/g) || []).length, 1);
+    const measures = (svg.match(/ class="measure"/g) || []).length;
+    assert.ok(measures > 0);
+    assert.equal((svg.match(/ class="staff"/g) || []).length, measures * 2);
+    assert.match(svg, / class="tabGrp"/);
   });
 
   test('preludio ' + prelude.number + ': independiente del PDF de origen', () => {

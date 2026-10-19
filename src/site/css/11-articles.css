@@ -74,6 +74,10 @@
   height: auto;
 }
 /* Verovio's own <style> is stripped from the inlined previews (see article-carcassi-preludes.js). */
+.example-card .score-svg g.tabDurSym,
+.example-card .score-svg g.tabRhythm {
+  display: none;
+}
 .example-card .score-svg g.fing {
   font-weight: bold;
 }

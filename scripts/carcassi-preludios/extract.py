@@ -105,7 +105,7 @@ def ocr(number):
 
 
 OUT_DIR = os.path.join(ROOT, "downloads", "carcassi-preludios")
-# Compases por sistema del libro: la vista previa muestra sus dos primeros sistemas.
+# Compases por sistema del libro: la vista previa muestra el primero con su TAB.
 PER_ROW = {1: 4, 2: 2, 3: 2, 4: 3, 5: 2, 6: 4, 7: 3, 8: 3, 9: 2, 10: 2, 11: 3, 12: 3, 13: 3, 14: 3, 15: 2, 16: 3}
 # Smaller engraving on a proportionally larger virtual page (the PDF stays A4) for the long ones, so a
 # 12-measure prelude does not spill its last system onto a second page.
@@ -132,26 +132,27 @@ def name_of(number):
     raise SystemExit(f"no encuentro el titulo del preludio {number}")
 
 
-def write_preview(number, prepared):
-    """Modo lectura: the first two systems (notation only) as one static SVG, committed."""
+def write_preview(number, prepared, exported):
+    """First system with notation and the same TAB fingering as the downloadable PDF."""
+    import tabify
+
     with open(os.path.join(prepared, "preview.json"), encoding="utf-8") as f:
-        rows = json.load(f)["rows"][:2]
-    svgs = []
-    for row in rows:
-        with open(os.path.join(prepared, row["svg"]), encoding="utf-8") as f:
-            svgs.append(f.read())
-    sizes = [tuple(map(float, re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"', s).groups())) for s in svgs]
-    width = max(w for w, _ in sizes)
-    gap, y, parts = 12, 0, []
-    for svg, (w, h) in zip(svgs, sizes):
-        svg = re.sub(r"\sdata-id=\"[^\"]*\"", "", svg)
-        parts.append(re.sub(r"^<svg\b", f'<svg x="0" y="{y}" width="{w}" height="{h}"', svg.strip()))
-        y += h + gap
-    out = (f'<svg viewBox="0 0 {width:g} {y - gap:g}" version="1.1" xmlns="http://www.w3.org/2000/svg" '
-           f'xmlns:xlink="http://www.w3.org/1999/xlink">' + "".join(parts) + "</svg>\n")
+        first_row = json.load(f)["rows"][0]
+    with open(os.path.join(exported, "score.musicxml"), encoding="utf-8") as f:
+        xml = f.read()
+    toolkit = tabify.new_toolkit({**tabify.PREVIEW_OPTIONS, "spacingStaff": 9})
+    if not toolkit.loadData(xml):
+        raise RuntimeError("Verovio no pudo leer el MusicXML con tablatura")
+    toolkit.select({"measureRange": f"1-{first_row['last'] + 1}"})
+    toolkit.redoLayout()
+    svg = toolkit.renderToSVG(1)
+    svg = drop_tab_tuplets(tabify.drop_brace(tabify.draw_tab_clef(tabify.drop_tab_meter(svg))))
+    svg = svg.replace('font-family="Times, serif"', f'font-family="{SANS}"', 1)
+    svg = svg.replace("</svg>", tabify.HIDE_TAB_RHYTHM + "</svg>", 1)
+    svg = re.sub(r'\sdata-id="[^"]*"', "", svg)
     os.makedirs(PREVIEW_DIR, exist_ok=True)
     with open(os.path.join(PREVIEW_DIR, f"prelude-{number:02d}.svg"), "w", encoding="utf-8") as f:
-        f.write(out)
+        f.write("\n".join(line.rstrip() for line in svg.strip().splitlines()) + "\n")
 
 
 SANS = "Helvetica, Arial, DejaVu Sans, sans-serif"
@@ -207,7 +208,7 @@ def build(number):
             suggestion = json.load(f)
         tabify.export(os.path.join(prepared, tabify.NORMALIZED_NAME), os.path.join(prepared, tabify.SUGGESTION_NAME),
                       suggestion["tabs"], "standard", exported, title=title, subtitle=AUTHOR)
-        write_preview(number, prepared)
+        write_preview(number, prepared, exported)
         os.makedirs(OUT_DIR, exist_ok=True)
         base = os.path.join(OUT_DIR, f"{title} - {AUTHOR}")
         with open(os.path.join(exported, "score.musicxml"), encoding="utf-8") as f:
