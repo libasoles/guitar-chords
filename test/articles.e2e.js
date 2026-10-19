@@ -219,7 +219,9 @@ const PDFS = [
       assert.equal(await modal.count(), 1);
       const box = await modal.evaluate((el) => { const r = el.getBoundingClientRect(); return [r.width, r.height]; });
       assert.deepEqual(box, [375, 800]);
-      assert.match(await modal.locator('.modal-frame').getAttribute('src'), /Prelude%201%20in%20C%20Major.*\.pdf#view=FitH$/);
+      // `toggle` fires asynchronously: wait for the loader to set the src.
+      await page.waitForSelector('.modal-full:popover-open .modal-frame[src]');
+      assert.match(await modal.locator('.modal-frame').getAttribute('src'),/Prelude%201%20in%20C%20Major.*\.pdf#view=FitH$/);
       await modal.locator('.modal-close').click();
       assert.equal(await page.locator('.modal-full:popover-open').count(), 0);
       // The footer link downloads the prelude PDF with the expected name.
