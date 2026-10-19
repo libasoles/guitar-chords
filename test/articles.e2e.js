@@ -99,22 +99,57 @@ const PDFS = [
       await page.waitForSelector('ascii-tabs .ascii-tabs-tab');
       assert.equal(await page.locator('h1').textContent(), locale === 'es' ? 'Tablaturas para arpegios' : 'Tabs for arpeggios');
       assert.equal(await page.locator('.lead a').getAttribute('href'), pagePath('articulo-carcassi', locale));
-      assert.equal(await page.locator('ascii-tabs[readonly]').count(), 13);
+      assert.equal(await page.locator('ascii-tabs[readonly]').count(), 14);
       const titles = await page.locator('figcaption').allTextContents();
       assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Re mayor', 'Re menor'] : ['C major', 'D major', 'D minor']);
       const groups = await page.locator('ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null))));
       groups.flat().forEach((form) => assert.equal(form.filter((f) => f !== null).length, 4));
-      assert.deepEqual(groups[5][1], [0, 3, 1, null, 2, null]);
-      for (const width of [375, 1280]) {
+      assert.deepEqual(groups[6][1], [0, 3, 1, null, 2, null]);
+      assert.equal(await page.locator('.tab-chords').count(), 0);
+      const annotations = await page.locator('ascii-tabs').evaluateAll((els) => els.map((el) => el.annotations[0]));
+      assert.deepEqual(annotations[3].map(({ text }) => text), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
+      assert.deepEqual(groups[3], [
+        [2, 1, 2, 0, null, null], [2, 1, 2, 4, null, null],
+        [2, 1, 2, null, 0, null], [2, 1, 2, null, 3, null],
+      ]);
+      // Every annotation opens its own exact four-string fingering, including inversions.
+      const buttons = page.locator('.arpeggio-chord');
+      assert.equal(await buttons.count(), groups.flat().length);
+      for (let i = 0; i < await buttons.count(); i++) {
+        const button = buttons.nth(i);
+        const name = await button.textContent();
+        const target = await button.getAttribute('popovertarget');
+        await button.click();
+        const popup = page.locator('#' + target);
+        assert.ok(await popup.evaluate((el) => el.matches(':popover-open')));
+        assert.equal(await popup.locator('h2').textContent(), name);
+        const form = groups.flat()[i];
+        assert.equal(await popup.locator('.muted').count(), 2);
+        assert.equal(await popup.locator('.open').count(), form.filter((fret) => fret === 0).length);
+        assert.equal(await popup.locator('circle:not(.open)').count(), form.filter((fret) => fret > 0).length);
+        await popup.locator('button').click();
+        assert.ok(!(await popup.evaluate((el) => el.matches(':popover-open'))));
+      }
+      // The annotation is keyboard operable; Escape dismisses and returns focus.
+      await buttons.first().focus();
+      await page.keyboard.press('Enter');
+      assert.equal(await page.locator('.chord-popover:popover-open').count(), 1);
+      await page.keyboard.press('Escape');
+      assert.equal(await page.locator('.chord-popover:popover-open').count(), 0);
+      assert.ok(await buttons.first().evaluate((el) => el === document.activeElement));
+      // Clicking outside dismisses the native popup.
+      await buttons.first().click();
+      await page.locator('h1').click();
+      assert.equal(await page.locator('.chord-popover:popover-open').count(), 0);
+      for (const width of [320, 375, 1280]) {
         await page.setViewportSize({ width, height: 800 });
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
-        // Names and fret digits use the same column spacing and font size.
-        const alignment = await page.locator('.tab-figure').evaluateAll((figures) => figures.map((figure) => {
-          const name = figure.querySelector('.tab-chords span');
-          const tab = figure.querySelector('.ascii-tabs-tab');
-          return { nameSize: getComputedStyle(name).fontSize, tabSize: getComputedStyle(tab).fontSize };
+        // Native annotations anchor at the fret, including after resizing.
+        await page.waitForFunction(() => Array.from(document.querySelectorAll('.ascii-tabs-annotation')).every((annotation) => {
+          const staff = annotation.closest('.ascii-tabs-staff');
+          const fret = staff.querySelector('.ascii-tabs-cell[data-c="' + annotation.dataset.column + '"][data-s="0"] .ascii-tabs-fret');
+          return Math.abs(annotation.getBoundingClientRect().left - fret.getBoundingClientRect().left) < 1;
         }));
-        alignment.forEach(({ nameSize, tabSize }) => assert.equal(nameSize, tabSize));
       }
       await page.setViewportSize({ width: 375, height: 800 });
     }

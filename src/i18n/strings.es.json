@@ -465,6 +465,8 @@
   "artArpeggiosMetaDescription": "Posiciones para practicar arpegios con 4 cuerdas, con variantes de bajo e inversiones.",
   "artArpeggiosLead": "Como hemos visto en <a href=\"%%CARCASSI_HREF%%\">Descomposición de acordes para arpegios</a>, un acorde puede descomponerse de varias formas. Por ejemplo, cambiando el bajo, o invirtiéndolo.",
   "artArpeggiosIntro": "Estas son algunas posiciones para practicar arpegios con 4 cuerdas",
+  "artArpeggiosClose": "Cerrar",
+  "artArpeggiosShowFingering": "Ver digitación de",
   "artArpeggiosMajor": "mayor",
   "artArpeggiosMinor": "menor",
   "artArpeggiosSeventh": "séptima",

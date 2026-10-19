@@ -95,8 +95,9 @@ function tabChars(forms) {
 
 /* TAB de solo lectura, sin boton de copiar (la <ascii-tabs-sheet> vacia
    reemplaza las herramientas por defecto) ni pista de edicion. */
-function asciiTab(forms, locale) {
+function asciiTab(forms, locale, annotations) {
   return '<ascii-tabs class="article-tab" readonly theme="light" labels="notes" spacing="3" lang="' + locale + '"' +
+    (annotations ? ' data-annotations="' + escapeAttr(JSON.stringify([annotations])) + '"' : '') +
     ' data-value=\'' + JSON.stringify([formsColumns(forms)]) + '\'><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>';
 }
 
@@ -113,9 +114,9 @@ function chordNames(names) {
 
 /* Titulo (y nombres de acorde) por fuera de la hoja blanca de la TAB. El
    tamano de letra se comparte para que los nombres queden sobre sus columnas. */
-function tabFigure(caption, forms, locale, names) {
+function tabFigure(caption, forms, locale, names, annotations) {
   return '<figure class="form tab-figure" style="--chars:' + tabChars(forms) + '"><figcaption>' + caption + '</figcaption>' +
-    (names ? chordNames(names) : '') + asciiTab(forms, locale) + '</figure>';
+    (names && !annotations ? chordNames(names) : '') + asciiTab(forms, locale, annotations) + '</figure>';
 }
 
 function formFigure(caption, form, locale) {
@@ -153,7 +154,7 @@ function sequenceComparison(names, strings, locale) {
 
 /* Carga la libreria y le pasa a cada TAB su valor. */
 const TAB_LOADER = '<script type="module" src="/assets/vendor/ascii-tabs.js"></script>' +
-  '<script>document.querySelectorAll("ascii-tabs[data-value]").forEach(function(el){el.value=JSON.parse(el.dataset.value);});</script>';
+  '<script>customElements.whenDefined("ascii-tabs").then(function(){document.querySelectorAll("ascii-tabs[data-value]").forEach(function(el){el.setDocument({value:JSON.parse(el.dataset.value),annotations:el.dataset.annotations?JSON.parse(el.dataset.annotations):null});});});</script>';
 
 /* Cuerpo del articulo para un idioma: la prosa vive en body.<locale>.html. */
 function renderBody(locale, strings) {

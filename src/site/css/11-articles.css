@@ -229,3 +229,57 @@
 .article-page em.hl {
   font-weight: 500;
 }
+
+/* Chord names are native column annotations; popovers show their exact form. */
+.arpeggio-chord {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 700;
+  line-height: inherit;
+  white-space: nowrap;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+}
+.arpeggio-chord:focus-visible,
+.chord-popover-close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.chord-popover {
+  width: 16rem;
+  max-width: calc(100vw - 3rem);
+  padding: 1.2rem;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 8px 32px #0003;
+}
+.chord-popover h2 {
+  margin: 0 2rem 0.8rem 0;
+  padding: 0;
+  border: 0;
+  font-size: 1.3rem;
+}
+.chord-popover .chord-diagram {
+  width: 12rem;
+  max-width: 100%;
+  margin: 0 auto;
+}
+.chord-popover-close {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
