@@ -272,8 +272,8 @@ const PDFS = [
       assert.equal(await keys.nth(0).locator('svg').count(), 1);
       assert.equal(await keys.nth(0).locator('.modal-key-label').evaluate((el) => getComputedStyle(el).color), 'rgb(118, 118, 118)');
       const expected = locale === 'es'
-        ? [/^Relativo menor Preludio \d+ en La menor$/, /^Dominante Preludio \d+ en Sol mayor$/]
-        : [/^Relative minor Prelude \d+ in A minor$/, /^Dominant Prelude \d+ in G major$/];
+        ? [/^Preludio \d+ en La menor Relativo menor$/, /^Preludio \d+ en Sol mayor Dominante$/]
+        : [/^Prelude \d+ in A minor Relative minor$/, /^Prelude \d+ in G major Dominant$/];
       const suffix = locale === 'es' ? [/La menor$/, /Sol mayor$/] : [/A minor$/, /G major$/];
       for (let k = 0; k < 2; k++) {
         assert.match(await keys.nth(k).evaluate((el) => Array.from(el.querySelectorAll('span')).map((s) => s.textContent).join(' ')), expected[k]);

@@ -95,7 +95,7 @@ function dominantOf(prelude, all) {
 }
 
 const MUSIC_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
-  'stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+  'stroke-linejoin="round" aria-hidden="true"><path d="m19 6-5.2-3.9a.5.5 0 0 0-.8.4V18"/><circle cx="9" cy="18" r="4"/></svg>';
 
 function preludeName(prelude, locale) {
   return (locale === 'es' ? 'Preludio ' : 'Prelude ') + prelude.number + (locale === 'es' ? ' en ' : ' in ') + keyName(prelude, locale);
@@ -142,7 +142,7 @@ function fullScore(prelude, name, href, strings, all, locale) {
   /* El boton azul de descarga va en un pie fijo, como el de Partitura y tablatura. */
   const keyButton = (target, label) => target
     ? '<button type="button" class="modal-key" popovertarget="prelude-score-' + target.number + '" popovertargetaction="show">' +
-      MUSIC_ICON + '<span class="modal-key-label">' + label + '</span><span>' + escapeAttr(preludeName(target, locale)) + '</span></button>'
+      MUSIC_ICON + '<span>' + escapeAttr(preludeName(target, locale)) + '</span><span class="modal-key-label">' + label + '</span></button>'
     : '';
   const relative = relativeOf(prelude, all);
   const keyButtons = '<div class="modal-keys">' +
