@@ -84,6 +84,7 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
 }
 .tab-editor-options input {
   accent-color: var(--accent);
+  cursor: pointer;
 }
 
 .tab-editor {
