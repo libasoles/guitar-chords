@@ -9,6 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 const { fullForm, chordFingers, diagramSvg } = require('./chord-forms');
+const { PREVIEW_DIR } = require('./article-carcassi-preludes');
 
 const ARTICLE_DIR = path.join(__dirname, '..', '..', 'src', 'site', 'articles', 'carcassi');
 const ASSETS_URL = '/assets/articles/carcassi/';
@@ -64,6 +65,14 @@ function exampleCard(name, alt, strings) {
   const pdf = name.startsWith('allegretto') ? PDFS.allegretto : PDFS.prelude;
   return '<a class="example-card" href="' + ASSETS_URL + encodeURIComponent(pdf) + '" download="' + escapeAttr(pdf) + '">' +
     inlineScore(svg, alt) +
+    '<span class="example-download">' + strings.artDownloadPdf + '</span></a>';
+}
+
+function cMajorExampleCard(strings) {
+  const pdf = 'Prelude 1 in C Major - Matteo Carcassi.pdf';
+  const svg = fs.readFileSync(path.join(PREVIEW_DIR, 'prelude-01.svg'), 'utf8');
+  return '<a class="example-card" href="/assets/articles/carcassi-preludios/' + encodeURIComponent(pdf) + '" download="' + pdf + '">' +
+    inlineScore(svg, 'Prelude 1 in C Major — Matteo Carcassi') +
     '<span class="example-download">' + strings.artDownloadPdf + '</span></a>';
 }
 
@@ -154,6 +163,7 @@ function renderBody(locale, strings) {
     .split('%%FORMS_ALLEGRETTO%%').join(comparisons(ALLEGRETTO_CHORDS, strings, locale))
     .split('%%EXAMPLE_PRELUDE%%').join(exampleCard('prelude-compases-3-4', strings.artPreludeAlt, strings))
     .split('%%FORMS_PRELUDE%%').join(sequenceComparison(PRELUDE_CHORDS, strings, locale))
+    .split('%%EXAMPLE_C_MAJOR%%').join(cMajorExampleCard(strings))
     .split('%%FORMS_C_MAJOR%%').join('<div class="bass-forms">' +
       Object.entries(C_MAJOR_FORMS).map(function ([name, forms]) {
         return tabFigure(name, forms, locale);

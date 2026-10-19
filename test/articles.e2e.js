@@ -43,7 +43,8 @@ const PDFS = [
 
       // Article: static examples, no horizontal scroll on mobile.
       await page.goto(base + article);
-      assert.equal(await page.locator('.example-card .score-svg').count(), 2);
+      const pdfs = locale === 'es' ? PDFS.concat('Prelude 1 in C Major - Matteo Carcassi.pdf') : PDFS;
+      assert.equal(await page.locator('.example-card .score-svg').count(), pdfs.length);
       assert.equal(await page.locator('.chord-diagram').count(), 2);
       assert.equal(await page.locator('.chord-card').count(), 2);
       // Tabs are read-only <ascii-tabs>: no copy button, no hint, no `x` marks.
@@ -73,9 +74,9 @@ const PDFS = [
 
       // Each card downloads its score PDF.
       const cards = page.locator('.example-card');
-      for (let i = 0; i < PDFS.length; i++) {
+      for (let i = 0; i < pdfs.length; i++) {
         const [download] = await Promise.all([page.waitForEvent('download'), cards.nth(i).click()]);
-        assert.equal(download.suggestedFilename(), PDFS[i]);
+        assert.equal(download.suggestedFilename(), pdfs[i]);
         const saved = path.join(tmp, 'download-' + i + '.pdf');
         await download.saveAs(saved);
         assert.equal(fs.readFileSync(saved).subarray(0, 4).toString(), '%PDF');
