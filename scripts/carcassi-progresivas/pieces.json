@@ -1,6 +1,6 @@
 {
   "1": {"form": "Andantino grazioso", "es": "Andantino grazioso", "tempo": "Andantino grazioso", "words": [[17, "Fin"]]},
-  "2": {"form": "Waltz", "es": "Vals"},
+  "2": {"form": "Waltz", "es": "Vals", "ignore_marks": true, "words": [[0, "@segno"], [-1, "@segno"], [-1, "D.C."]]},
   "3": {"form": "Andante", "es": "Andante"},
   "4": {"form": "Allegretto", "es": "Allegretto"},
   "5": {"form": "Waltz", "es": "Vals"},

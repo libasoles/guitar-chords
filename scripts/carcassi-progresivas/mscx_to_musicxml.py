@@ -70,7 +70,8 @@ def rich_text(element):
 
 
 class Converter:
-    def __init__(self, root, title, words=(), tempo=None):
+    def __init__(self, root, title, words=(), tempo=None, ignore_marks=False):
+        self.ignore_marks = ignore_marks  # descarta Fine/D.C. del MuseScore cuando el libro marca otra cosa
         self.extra_words = list(words)  # [(numero de compas, texto)] que el libro imprime y el MuseScore no trae
         self.tempo = tempo  # texto de tempo del libro: reemplaza al del MuseScore
         self.score = root.find('Score')
@@ -117,8 +118,11 @@ class Converter:
         left, right = self.barlines(measure, measures, index)
         body = self.directions(measure, index)
         for at, text in self.extra_words:
-            if at == number:
-                body += words_dir(text, right=text.rstrip('.').lower() in ('fin', 'fine', 'd.c', 'd.s'))
+            if at == number or (at == -1 and index == len(measures) - 1):
+                if text == '@segno':
+                    body += '<direction placement="above"><direction-type><segno/></direction-type></direction>'
+                else:
+                    body += words_dir(text, right=text.rstrip('.').lower() in ('fin', 'fine', 'd.c', 'd.s'))
         for k, (voice, number_, stem) in enumerate(self.plan(voices)):
             if k:
                 body += '<backup><duration>%d</duration></backup>' % int(length * DIVISIONS)
@@ -160,25 +164,27 @@ class Converter:
                 ('<barline location="right">%s</barline>' % right) if right else '')
 
     def directions(self, measure, index=0):
+        """Textos y marcas de repeticion del compas. Marker y Jump cuelgan del compas; el resto, de sus voces."""
         out = ''
-        for voice in measure.findall('voice'):
-            for el in voice:
-                if el.tag in ('StaffText', 'Expression'):
-                    text = rich_text(el)
-                    if self.tempo and index == 0 and el.tag == 'StaffText' and text:
-                        text, self.tempo = self.tempo, None
-                    if text:
-                        out += words_dir(text, italic=el.tag == 'Expression')
-                elif el.tag == 'Marker':
-                    label = (el.findtext('label') or '').lower()
-                    if label == 'segno':
-                        out += '<direction placement="above"><direction-type><segno/></direction-type></direction>'
-                    elif label == 'coda':
-                        out += '<direction placement="above"><direction-type><coda/></direction-type></direction>'
-                    elif MARKERS.get(label):
-                        out += words_dir(MARKERS[label], right=True)
-                elif el.tag == 'Jump':
-                    out += words_dir(rich_text(el) or 'D.C.', right=True)
+        marks = [] if self.ignore_marks else [*measure.findall('Marker'), *measure.findall('Jump')]
+        elements = [*marks, *(e for v in measure.findall('voice') for e in v)]
+        for el in elements:
+            if el.tag in ('StaffText', 'Expression'):
+                text = rich_text(el)
+                if self.tempo and index == 0 and el.tag == 'StaffText' and text:
+                    text, self.tempo = self.tempo, None
+                if text:
+                    out += words_dir(text, italic=el.tag == 'Expression')
+            elif el.tag == 'Marker':
+                label = (el.findtext('label') or '').lower()
+                if label == 'segno':
+                    out += '<direction placement="above"><direction-type><segno/></direction-type></direction>'
+                elif label == 'coda':
+                    out += '<direction placement="above"><direction-type><coda/></direction-type></direction>'
+                elif MARKERS.get(label):
+                    out += words_dir(MARKERS[label], right=True)
+            elif el.tag == 'Jump':
+                out += words_dir(rich_text(el) or 'D.C.', right=True)
         return out
 
     def plan(self, voices):
