@@ -44,17 +44,17 @@ footer {
   font-weight: 600;
   font-size: 0.85rem;
   padding: 0.4rem 0.9rem;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent-brand);
   border-radius: 4px;
-  background: var(--accent);
-  color: #fff;
+  background: var(--accent-brand);
+  color: var(--ink);
   text-decoration: none;
-  border-bottom: 1px solid var(--accent);
+  border-bottom: 1px solid var(--accent-brand);
   cursor: pointer;
 }
 .extension-cta .ext-btn[href]:hover {
   opacity: 0.88;
-  border-bottom-color: var(--accent);
+  border-bottom-color: var(--accent-brand);
 }
 .extension-cta .ext-btn[disabled] {
   opacity: 0.8;

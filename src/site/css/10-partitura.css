@@ -110,8 +110,8 @@
   cursor: pointer;
 }
 .part-rights input:checked {
-  border-color: var(--accent);
-  background: var(--accent);
+  border-color: var(--accent-brand);
+  background: var(--accent-brand);
 }
 .part-rights input:checked::after {
   content: "";
@@ -191,7 +191,7 @@
   background: #f6f0e3;
 }
 .part-dropzone.is-dragging {
-  border-color: var(--accent);
+  border-color: var(--accent-brand);
   background: #f6efe6;
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -215,10 +215,10 @@
   font-weight: 600;
   font-size: 0.9rem;
   padding: 0.5rem 1rem;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent-brand);
   border-radius: 4px;
-  background: var(--accent);
-  color: #fff;
+  background: var(--accent-brand);
+  color: var(--ink);
   cursor: pointer;
   justify-self: start;
 }

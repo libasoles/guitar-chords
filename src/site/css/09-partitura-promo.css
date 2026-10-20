@@ -16,7 +16,7 @@
   text-decoration: none;
 }
 .part-promo-link:hover {
-  border-color: var(--accent);
+  border-color: var(--accent-brand);
 }
 .part-promo-link:focus-visible {
   outline: 2px solid var(--accent);
