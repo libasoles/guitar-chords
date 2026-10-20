@@ -2,7 +2,45 @@
 
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
-const { renderBody } = require('../scripts/lib/article-arpeggios');
+const { renderBody, GROUPS } = require('../scripts/lib/article-arpeggios');
+
+const PITCH = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+const OPEN = [64, 59, 55, 50, 45, 40];
+
+function pitchClass(note) {
+  return (PITCH[note[0]] + (note[1] === '#' ? 1 : note[1] === 'b' ? -1 : 0) + 12) % 12;
+}
+
+function sounding(form) {
+  return form.map((fret, string) => fret === null ? null : OPEN[string] + fret).filter((pitch) => pitch !== null);
+}
+
+test('diminished positions use only the chord tones and are named by their bass', () => {
+  for (const [, , quality, names, forms] of GROUPS.filter(([, , quality]) => quality === 'Diminished')) {
+    names.forEach((name, i) => {
+      const [chord, bass = chord.replace(/dim$/, '')] = name.split('/');
+      const root = pitchClass(chord.replace(/dim$/, ''));
+      const pitches = sounding(forms[i]);
+      assert.equal(pitches.length, 4, name + ' sounds four strings');
+      pitches.forEach((pitch) => assert.ok([0, 3, 6].includes((pitch - root + 12) % 12), name + ' only has dim triad tones'));
+      assert.equal(Math.min(...pitches) % 12, pitchClass(bass), name + ' bass');
+    });
+  }
+});
+
+test('diminished seventh positions hold all four tones of their set and are named by their bass', () => {
+  const sets = GROUPS.filter(([, en]) => en === 'Dim7');
+  assert.equal(sets.length, 3);
+  for (const [, , , names, forms] of sets) {
+    const root = pitchClass(names[0].replace(/dim7$/, ''));
+    names.forEach((name, i) => {
+      const pitches = sounding(forms[i]);
+      assert.equal(pitches.length, 4, name + ' sounds four strings');
+      assert.deepEqual([...new Set(pitches.map((pitch) => (pitch - root + 12) % 12))].sort((a, b) => a - b), [0, 3, 6, 9], name + ' tones');
+      assert.equal(Math.min(...pitches) % 12, pitchClass(name.replace(/dim7$/, '')), name + ' bass');
+    });
+  }
+});
 
 for (const locale of ['es', 'en']) {
   test('arpeggios keep both B7/F# voicings with their exact diagrams in ' + locale, () => {

@@ -597,7 +597,13 @@ body:has(.modal-full:popover-open) {
 .arpeggio-group[hidden] {
   display: none;
 }
+.arpeggio-note {
+  margin: 0 0 0.75rem;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
 .arpeggio-group.is-filtering [role="tablist"],
+.arpeggio-group.is-filtering .arpeggio-note,
 .arpeggio-group.is-filtering [role="tabpanel"] {
   display: none;
 }

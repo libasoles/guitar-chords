@@ -147,7 +147,46 @@ const GROUPS = [
     [2, 4, 3, null, 2, null], [2, 0, 3, 1, null, null],
     [6, 4, 4, null, null, 2], [2, 4, 4, null, 1, null],
   ]],
+  ['Do', 'C', 'Diminished', ['Cdim', 'Cdim/Eb', 'Cdim/Gb'], [
+    [2, 4, 5, null, 3, null], [2, 4, 5, null, 6, null], [2, 4, 5, 4, null, null],
+  ]],
+  ['Re', 'D', 'Diminished', ['Ddim', 'Ddim/F', 'Ddim/Ab'], [
+    [1, 3, 1, 0, null, null], [1, 3, 1, 3, null, null], [1, 3, 1, null, null, 4],
+  ]],
+  ['Mi', 'E', 'Diminished', ['Edim', 'Edim/G', 'Edim/Bb'], [
+    [3, 5, 3, 2, null, null], [3, 5, 3, null, null, 3], [3, 5, 3, null, null, 6],
+  ]],
+  ['Fa', 'F', 'Diminished', ['Fdim', 'Fdim/Ab', 'Fdim/B'], [
+    [1, 0, 1, 3, null, null], [1, 0, 1, null, null, 4], [1, 0, 1, null, 2, null],
+  ]],
+  ['Sol', 'G', 'Diminished', ['Gdim', 'Gdim/Bb', 'Gdim/Db'], [
+    [3, 2, 3, 5, null, null], [3, 2, 3, null, 1, null], [3, 2, 3, null, 4, null],
+  ]],
+  ['La', 'A', 'Diminished', ['Adim', 'Adim/C', 'Adim/Eb'], [
+    [5, 4, 5, null, 0, null], [5, 4, 5, null, 3, null], [5, 4, 5, null, 6, null],
+  ]],
+  ['Si', 'B', 'Diminished', ['Bdim', 'Bdim/D', 'Bdim/F'], [
+    [1, 3, 4, null, 2, null], [1, 3, 4, 0, null, null], [1, 3, 4, 3, null, null],
+  ]],
+  // A diminished seventh is symmetric: each chord has four equivalent names, so the positions are grouped by
+  // their notes instead of by key, and named by their bass.
+  ['dim7', 'Dim7', 'Dim7C', ['Cdim7', 'Ebdim7', 'Gbdim7', 'Adim7'], [
+    [2, 4, 2, null, 3, null], [2, 1, 2, 1, null, null], [5, 4, 5, 4, null, null], [2, 4, 5, null, 0, null],
+  ]],
+  ['dim7', 'Dim7', 'Dim7Db', ['C#dim7', 'Edim7', 'Gdim7', 'Bbdim7'], [
+    [3, 5, 3, null, 4, null], [3, 2, 3, 2, null, null], [0, 2, 3, null, null, 3], [0, 2, 0, null, 1, null],
+  ]],
+  ['dim7', 'Dim7', 'Dim7D', ['Ddim7', 'Fdim7', 'Abdim7', 'Bdim7'], [
+    [1, 0, 1, 0, null, null], [4, 3, 4, 3, null, null], [1, 3, 4, null, null, 4], [1, 3, 1, null, 2, null],
+  ]],
 ];
+
+// The tab labels of the diminished seventh groups: the notes they share.
+const DIM7_LABELS = { Dim7C: 'C · Eb · Gb · A', Dim7Db: 'C# · E · G · Bb', Dim7D: 'D · F · Ab · B' };
+
+function qualityLabel(quality, strings) {
+  return DIM7_LABELS[quality] || strings['artArpeggios' + quality];
+}
 
 // Suggested left-hand fingers, string 1 first: 0 = open, - = silent.
 // Repeated 1s indicate a barre; each diagram uses the exact four-string form.
@@ -189,6 +228,16 @@ const FINGERINGS = {
   Gmaj7: '100--2', 'Gmaj7/B': '230-1-', 'Gmaj7/D': '1000--', 'Gmaj7/F#': '224--1',
   Amaj7: '021-0-', 'Amaj7/C#': '341-3-', 'Amaj7/E': '411--0', 'Amaj7/G#': '011--3',
   Bmaj7: '143-1-', 'Bmaj7/D#': '2031--', 'Bmaj7/F#': '422--1', 'Bmaj7/A#': '234-1-',
+  Cdim: '134-2-', 'Cdim/Eb': '123-4-', 'Cdim/Gb': '1243--',
+  Ddim: '1310--', 'Ddim/F': '1314--', 'Ddim/Ab': '131--4',
+  Edim: '2421--', 'Edim/G': '131--1', 'Edim/Bb': '131--4',
+  Fdim: '1013--', 'Fdim/Ab': '101--4', 'Fdim/B': '101-2-',
+  Gdim: '2134--', 'Gdim/Bb': '324-1-', 'Gdim/Db': '213-4-',
+  Adim: '314-0-', 'Adim/C': '324-1-', 'Adim/Eb': '213-4-',
+  Bdim: '134-2-', 'Bdim/D': '1340--', 'Bdim/F': '1243--',
+  Cdim7: '141-3-', Ebdim7: '3141--', Gbdim7: '3141--', Adim7: '123-0-',
+  'C#dim7': '131-2-', Edim7: '3141--', Gdim7: '012--3', Bbdim7: '020-1-',
+  Ddim7: '1020--', Fdim7: '3141--', Abdim7: '123--4', Bdim7: '131-2-',
 };
 
 function chordPopover(id, name, form, strings) {
@@ -207,7 +256,7 @@ function renderBody(locale, strings) {
   const popovers = [];
   const roots = new Map();
   GROUPS.forEach(function ([es, en, quality, names, forms], group) {
-    const title = (locale === 'es' ? es : en) + ' ' + strings['artArpeggios' + quality];
+    const title = (locale === 'es' ? es : en) + ' ' + qualityLabel(quality, strings);
     // The names sit above the white sheet, one per chord column, as buttons.
     const buttons = names.map(function (name, i) {
       const id = 'arpeggio-chord-' + group + '-' + i;
@@ -220,17 +269,17 @@ function renderBody(locale, strings) {
         return fret === null ? null : { fret, bold: string >= 3 };
       });
     });
-    if (!roots.has(en)) roots.set(en, { title: locale === 'es' ? es : en, variants: [] });
-    roots.get(en).variants.push({ title: strings['artArpeggios' + quality], figure: tabFigure(title, styledForms, locale, null, buttons) });
+    if (!roots.has(en)) roots.set(en, { title: en === 'Dim7' ? strings.artArpeggiosDim7Title : locale === 'es' ? es : en, note: en === 'Dim7' ? strings.artArpeggiosDim7Note : '', variants: [] });
+    roots.get(en).variants.push({ title: qualityLabel(quality, strings), figure: tabFigure(title, styledForms, locale, null, buttons) });
   });
-  const tabs = Array.from(roots, function ([root, { title, variants }]) {
+  const tabs = Array.from(roots, function ([root, { title, note, variants }]) {
     const id = 'arpeggio-' + root;
     return '<section class="arpeggio-group" aria-label="' + title + '">' +
       '<div class="arpeggio-group-header"><span class="arpeggio-root" id="' + id + '-root">' + title + '</span>' +
       '<div role="tablist" aria-labelledby="' + id + '-root">' + variants.map(function (variant, i) {
         return '<button type="button" role="tab" id="' + id + '-tab-' + i + '" aria-controls="' + id + '-panel-' + i +
           '" aria-selected="' + (i === 0) + '" tabindex="' + (i === 0 ? '0' : '-1') + '">' + variant.title + '</button>';
-      }).join('') + '</div></div>' + variants.map(function (variant, i) {
+      }).join('') + '</div></div>' + (note ? '<p class="arpeggio-note">' + note + '</p>' : '') + variants.map(function (variant, i) {
         return '<div role="tabpanel" id="' + id + '-panel-' + i + '" aria-labelledby="' + id + '-tab-' + i +
           '" tabindex="0"' + (i === 0 ? '' : ' hidden') + '>' + variant.figure + '</div>';
       }).join('') + '</section>';
@@ -421,4 +470,4 @@ function cardImage() {
   };
 }
 
-module.exports = { renderBody, cardImage, searchControl };
+module.exports = { renderBody, cardImage, searchControl, GROUPS };
