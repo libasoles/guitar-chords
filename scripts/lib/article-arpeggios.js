@@ -93,8 +93,8 @@ const GROUPS = [
   ['La', 'A', 'Minor', ['Am', 'Am/C', 'Am/E'], [
     [0, 1, 2, null, 0, null], [0, 1, 2, null, 3, null], [0, 1, 2, null, null, 0],
   ]],
-  ['La', 'A', 'Seventh', ['A7', 'A7/C#', 'A7/E', 'A7/G'], [
-    [0, 2, 0, null, 0, null], [0, 2, 0, null, 4, null],
+  ['La', 'A', 'Seventh', ['A7', 'A7', 'A7/C#', 'A7/E', 'A7/G'], [
+    [0, 2, 0, null, 0, null], [3, 2, 0, null, 0, null], [0, 2, 0, null, 4, null],
     [0, 2, 0, null, null, 0], [0, 2, 0, null, null, 3],
   ]],
   ['La', 'A', 'MinorSeventh', ['Am7', 'Am7/C', 'Am7/E', 'Am7/G'], [
@@ -214,6 +214,8 @@ const FINGERINGS = {
   A: '032-0-', 'A/C#': '021-4-', 'A/E': '032--0',
   Am: '012-0-', 'Am/C': '012-3-', 'Am/E': '012--0',
   A7: '020-0-', 'A7/C#': '010-4-', 'A7/E': '020--0', 'A7/G': '010--3',
+  // Alternate A7 voicing with the seventh on string 1 and the fifth omitted.
+  '3 2 0 x 0 x': '210-0-',
   Am7: '010-0-', 'Am7/C': '010-3-', 'Am7/E': '010--0', 'Am7/G': '010--3',
   B: '143-1-', 'B/D#': '2431--', 'B/F#': '134--1',
   Bm: '124-1-', 'Bm/D': '1240--', 'Bm/F#': '124--1',

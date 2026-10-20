@@ -202,7 +202,7 @@ const PDFS = [
         ['F', 'Minor', ['Fm', 'Fm/Ab', 'Fm/C'], [5, 8, 0], [5, 8, 0]],
         ['F', 'Seventh', ['F7', 'F7/A', 'F7/C', 'F7/Eb'], [5, 9, 0, 3], [5, 9, 0, 3]],
         ['G', 'Minor', ['Gm', 'Gm/Bb', 'Gm/D'], [7, 10, 2], [7, 10, 2]],
-        ['A', 'Seventh', ['A7', 'A7/C#', 'A7/E', 'A7/G'], [9, 1, 4, 7], [9, 1, 4, 7]],
+        ['A', 'Seventh', ['A7', 'A7', 'A7/C#', 'A7/E', 'A7/G'], [9, 1, 4, 7], [9, 9, 1, 4, 7]],
         ['B', 'Minor', ['Bm', 'Bm/D', 'Bm/F#'], [11, 2, 6], [11, 2, 6]],
         ['B', 'Seventh', ['B7', 'B7', 'B7/D#', 'B7/F#', 'B7/F#'], [11, 3, 6, 9], [11, 11, 3, 6, 6]],
       ]) {
@@ -211,6 +211,9 @@ const PDFS = [
         const panel = page.locator('.arpeggio-group').filter({ has: page.locator('#arpeggio-' + root + '-root') }).locator('[role="tabpanel"]:visible');
         assert.deepEqual(await panel.locator('.arpeggio-chord').allTextContents(), names);
         const forms = await panel.locator('ascii-tabs').evaluate((el) => el.value[0].filter((column) => column.some((note) => note !== null)));
+        if (root === 'A' && quality === 'Seventh') {
+          assert.deepEqual(forms[1].map((note) => note === null ? null : note.fret), [3, 2, 0, null, 0, null]);
+        }
         forms.forEach((form, i) => {
           const pitches = form.map((note, string) => note === null ? null : ([64, 59, 55, 50, 45, 40][string] + note.fret));
           const sounding = pitches.filter((pitch) => pitch !== null);
