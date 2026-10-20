@@ -66,7 +66,7 @@ def convert(number, mscz):
     piece = PIECES[number]
     xml = mscx_to_musicxml.Converter(mscx_to_musicxml.read_mscx(mscz), title_of(number),
                                      words=[tuple(w) for w in piece.get('words', [])] + ([(0, '@segno'), (-1, '@segno')] if piece.get('segno') else []), tempo=piece.get('tempo'),
-                                     ignore_marks=piece.get('ignore_marks', False)).convert()
+                                     ignore_marks=piece.get('ignore_marks', False), texts=piece.get('texts')).convert()
     with open(target, 'w', encoding='utf-8') as f:
         f.write(xml)
     print('fuente:', target)

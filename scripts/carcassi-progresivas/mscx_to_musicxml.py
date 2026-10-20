@@ -70,7 +70,8 @@ def rich_text(element):
 
 
 class Converter:
-    def __init__(self, root, title, words=(), tempo=None, ignore_marks=False):
+    def __init__(self, root, title, words=(), tempo=None, ignore_marks=False, texts=None):
+        self.texts = texts or {}  # {texto del MuseScore: texto del libro}
         self.ignore_marks = ignore_marks  # descarta Fine/D.C. del MuseScore cuando el libro marca otra cosa
         self.extra_words = list(words)  # [(numero de compas, texto)] que el libro imprime y el MuseScore no trae
         self.tempo = tempo  # texto de tempo del libro: reemplaza al del MuseScore
@@ -170,7 +171,7 @@ class Converter:
         elements = [*marks, *(e for v in measure.findall('voice') for e in v)]
         for el in elements:
             if el.tag in ('StaffText', 'Expression'):
-                text = rich_text(el)
+                text = self.texts.get(rich_text(el), rich_text(el))
                 if self.tempo and index == 0 and el.tag == 'StaffText' and text:
                     text, self.tempo = self.tempo, None
                 if text:
