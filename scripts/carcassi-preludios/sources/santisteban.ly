@@ -891,4 +891,3 @@ preludeSixteen = \context Staff = "S" <<
     \transposition c % guitar plays octave lower than written
   }
 }
-
