@@ -1,4 +1,4 @@
-"""MusicXML corregido del Preludio 16 (Do menor, 3/4), transcrito a mano de la imagen.
+"""Edición Santisteban: MusicXML del Preludio 16 (Do menor, 3/4), transcrito a mano de la imagen.
 
 Las alturas salen de `detect_notes.py` (bajos de negra macizos incluidos); dedos, alteraciones y el acorde
 final se leyeron a ojo. Ver reports/prelude-16.md.
@@ -9,7 +9,7 @@ import os
 
 from transcribe_lib import bass, slots, write
 
-TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "corrected", "prelude-16.musicxml")
+TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "santisteban", "prelude-16.musicxml")
 N = None  # celda ocupada por el bajo
 KEY_FIFTHS = -3  # Si bemol, Mi bemol, La bemol
 

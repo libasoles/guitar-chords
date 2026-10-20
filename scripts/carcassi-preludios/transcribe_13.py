@@ -1,4 +1,4 @@
-"""MusicXML corregido del Preludio 13 (Si bemol mayor, 12/8), transcrito a mano de la imagen.
+"""Edición Santisteban: MusicXML del Preludio 13 (Si bemol mayor, 12/8), transcrito a mano de la imagen.
 
 Las alturas de las corcheas salen de `detect_notes.py`; los bajos huecos (con `bass_strips.py`), dedos y
 alteraciones se leyeron a ojo. Ver reports/prelude-13.md.
@@ -9,7 +9,7 @@ import os
 
 from transcribe_lib import bass, write
 
-TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "corrected", "prelude-13.musicxml")
+TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "santisteban", "prelude-13.musicxml")
 KEY_FIFTHS = -2  # Si bemol, Mi bemol
 
 

@@ -1,4 +1,4 @@
-"""MusicXML corregido del Preludio 14 (Sol menor, 12/8), transcrito a mano de la imagen.
+"""Edición Santisteban: MusicXML del Preludio 14 (Sol menor, 12/8), transcrito a mano de la imagen.
 
 Las alturas de las corcheas salen de `detect_notes.py`; los bajos huecos (con `bass_strips.py`), dedos,
 acordes y alteraciones se leyeron a ojo. Ver reports/prelude-14.md.
@@ -9,7 +9,7 @@ import os
 
 from transcribe_lib import bass, write
 
-TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "corrected", "prelude-14.musicxml")
+TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "santisteban", "prelude-14.musicxml")
 KEY_FIFTHS = -2  # Si bemol, Mi bemol
 HALF, BEATS = [0, 12, 24], [0, 12, 18, 24]  # agrupacion de barras: dos mitades / mitad + dos pulsos
 

@@ -61,11 +61,6 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">3</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-1">
         <pitch>
@@ -80,11 +75,6 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">1</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-2">
         <pitch>
@@ -111,17 +101,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">2</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-4">
         <pitch>
-          <step>E</step>
-          <alter>-1</alter>
-          <octave>5</octave>
+          <step>G</step>
+          <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -146,8 +130,9 @@
       <note id="tab-note-6">
         <chord />
         <pitch>
-          <step>G</step>
-          <octave>4</octave>
+          <step>E</step>
+          <alter>-1</alter>
+          <octave>5</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -216,17 +201,12 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">4</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-11">
         <pitch>
           <step>B</step>
           <alter>-1</alter>
-          <octave>5</octave>
+          <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -253,7 +233,7 @@
         <pitch>
           <step>B</step>
           <alter>-1</alter>
-          <octave>4</octave>
+          <octave>5</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -275,11 +255,6 @@
         <type>half</type>
         <stem>down</stem>
         <staff>1</staff>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">4</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-15">
         <pitch>
@@ -614,11 +589,6 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">3</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-17">
         <pitch>
@@ -633,11 +603,6 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">2</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-18">
         <pitch>
@@ -665,15 +630,10 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">4</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-20">
         <pitch>
-          <step>A</step>
+          <step>C</step>
           <octave>5</octave>
         </pitch>
         <duration>5040</duration>
@@ -699,7 +659,7 @@
       <note id="tab-note-22">
         <chord />
         <pitch>
-          <step>C</step>
+          <step>A</step>
           <octave>5</octave>
         </pitch>
         <duration>5040</duration>
@@ -728,11 +688,6 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">2</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-24">
         <pitch>
@@ -746,11 +701,6 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">3</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-25">
         <pitch>
@@ -779,17 +729,12 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">4</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-27">
         <pitch>
-          <step>A</step>
+          <step>B</step>
           <alter>-1</alter>
-          <octave>5</octave>
+          <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -813,9 +758,9 @@
       <note id="tab-note-29">
         <chord />
         <pitch>
-          <step>B</step>
+          <step>A</step>
           <alter>-1</alter>
-          <octave>4</octave>
+          <octave>5</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -836,11 +781,6 @@
         <type>half</type>
         <stem>down</stem>
         <staff>1</staff>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">1</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-31">
         <pitch>
@@ -853,11 +793,6 @@
         <type>half</type>
         <stem>down</stem>
         <staff>1</staff>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">1</fingering>
-          </technical>
-        </notations>
       </note>
       <backup>
         <duration>40320</duration>
@@ -1176,25 +1111,22 @@
       </note>
       <note id="tab-note-33">
         <pitch>
-          <step>D</step>
-          <octave>5</octave>
+          <step>B</step>
+          <alter>0</alter>
+          <octave>4</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
         <type>16th</type>
+        <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">3</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-34">
         <pitch>
-          <step>D</step>
+          <step>G</step>
           <octave>4</octave>
         </pitch>
         <duration>2520</duration>
@@ -1207,7 +1139,7 @@
       </note>
       <note id="tab-note-35">
         <pitch>
-          <step>G</step>
+          <step>F</step>
           <octave>5</octave>
         </pitch>
         <duration>5040</duration>
@@ -1216,16 +1148,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">4</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-36">
         <pitch>
           <step>G</step>
-          <octave>5</octave>
+          <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -1237,8 +1164,8 @@
       <note id="tab-note-37">
         <chord />
         <pitch>
-          <step>D</step>
-          <octave>5</octave>
+          <step>B</step>
+          <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -1249,8 +1176,8 @@
       <note id="tab-note-38">
         <chord />
         <pitch>
-          <step>G</step>
-          <octave>4</octave>
+          <step>F</step>
+          <octave>5</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -1277,29 +1204,21 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">3</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-40">
         <pitch>
-          <step>C</step>
-          <octave>5</octave>
+          <step>B</step>
+          <alter>-1</alter>
+          <octave>4</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
         <type>16th</type>
+        <accidental>flat</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">4</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-41">
         <pitch>
@@ -1326,17 +1245,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">2</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-43">
         <pitch>
-          <step>E</step>
-          <alter>-1</alter>
-          <octave>5</octave>
+          <step>G</step>
+          <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -1348,8 +1261,9 @@
       <note id="tab-note-44">
         <chord />
         <pitch>
-          <step>C</step>
-          <octave>5</octave>
+          <step>B</step>
+          <alter>-1</alter>
+          <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -1360,8 +1274,9 @@
       <note id="tab-note-45">
         <chord />
         <pitch>
-          <step>G</step>
-          <octave>4</octave>
+          <step>E</step>
+          <alter>-1</alter>
+          <octave>5</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -1384,11 +1299,6 @@
         <accidental>natural</accidental>
         <stem>down</stem>
         <staff>1</staff>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">1</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-47">
         <pitch>
@@ -1400,11 +1310,6 @@
         <type>half</type>
         <stem>down</stem>
         <staff>1</staff>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">1</fingering>
-          </technical>
-        </notations>
       </note>
       <backup>
         <duration>40320</duration>
@@ -1434,23 +1339,7 @@
       </note>
       <note>
         <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>2520</duration>
-        <voice>1</voice>
-        <type>16th</type>
-        <stem>none</stem>
-        <staff>2</staff>
-        <notations>
-          <technical>
-            <string>2</string><fret>3</fret>
-          </technical>
-        </notations>
-      </note>
-      <note>
-        <pitch>
-          <step>D</step>
+          <step>B</step>
           <octave>3</octave>
         </pitch>
         <duration>2520</duration>
@@ -1460,13 +1349,29 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>0</fret>
+            <string>2</string><fret>0</fret>
           </technical>
         </notations>
       </note>
       <note>
         <pitch>
           <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2520</duration>
+        <voice>1</voice>
+        <type>16th</type>
+        <stem>none</stem>
+        <staff>2</staff>
+        <notations>
+          <technical>
+            <string>3</string><fret>0</fret>
+          </technical>
+        </notations>
+      </note>
+      <note>
+        <pitch>
+          <step>F</step>
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
@@ -1476,13 +1381,13 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>3</fret>
+            <string>1</string><fret>1</fret>
           </technical>
         </notations>
       </note>
       <note>
         <pitch>
-          <step>G</step>
+          <step>F</step>
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
@@ -1492,15 +1397,15 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>3</fret>
+            <string>1</string><fret>1</fret>
           </technical>
         </notations>
       </note>
       <note>
         <chord />
         <pitch>
-          <step>D</step>
-          <octave>4</octave>
+          <step>B</step>
+          <octave>3</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -1508,7 +1413,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>3</fret>
+            <string>2</string><fret>0</fret>
           </technical>
         </notations>
       </note>
@@ -1547,23 +1452,25 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>0</fret>
+            <string>4</string><fret>5</fret>
           </technical>
         </notations>
       </note>
       <note>
         <pitch>
-          <step>C</step>
-          <octave>4</octave>
+          <step>B</step>
+          <alter>-1</alter>
+          <octave>3</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
         <type>16th</type>
+        <accidental>flat</accidental>
         <stem>none</stem>
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>1</fret>
+            <string>3</string><fret>3</fret>
           </technical>
         </notations>
       </note>
@@ -1579,7 +1486,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>0</fret>
+            <string>4</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -1622,16 +1529,18 @@
       <note>
         <chord />
         <pitch>
-          <step>C</step>
-          <octave>4</octave>
+          <step>B</step>
+          <alter>-1</alter>
+          <octave>3</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
+        <accidental>flat</accidental>
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>5</fret>
+            <string>3</string><fret>3</fret>
           </technical>
         </notations>
       </note>
@@ -1709,11 +1618,6 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">3</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-49">
         <pitch>
@@ -1727,11 +1631,6 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">2</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-50">
         <pitch>
@@ -1758,16 +1657,12 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">4</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-52">
         <pitch>
-          <step>F</step>
-          <octave>5</octave>
+          <step>A</step>
+          <alter>-1</alter>
+          <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -1791,9 +1686,8 @@
       <note id="tab-note-54">
         <chord />
         <pitch>
-          <step>A</step>
-          <alter>-1</alter>
-          <octave>4</octave>
+          <step>F</step>
+          <octave>5</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -1820,11 +1714,6 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">3</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-56">
         <pitch>
@@ -1864,16 +1753,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">4</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-59">
         <pitch>
-          <step>D</step>
-          <octave>5</octave>
+          <step>F</step>
+          <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -1898,8 +1782,8 @@
       <note id="tab-note-61">
         <chord />
         <pitch>
-          <step>F</step>
-          <octave>4</octave>
+          <step>D</step>
+          <octave>5</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
@@ -1921,11 +1805,6 @@
         <type>half</type>
         <stem>down</stem>
         <staff>1</staff>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">1</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-63">
         <pitch>
@@ -2251,11 +2130,6 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">3</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-65">
         <pitch>
@@ -2297,11 +2171,6 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">2</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-68">
         <pitch>
@@ -2453,11 +2322,6 @@
         <type>half</type>
         <stem>down</stem>
         <staff>1</staff>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">4</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-78">
         <pitch>
@@ -2809,11 +2673,6 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">2</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-81">
         <pitch>
@@ -2827,11 +2686,6 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">3</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-82">
         <pitch>
@@ -2849,8 +2703,7 @@
       </note>
       <note id="tab-note-83">
         <pitch>
-          <step>A</step>
-          <alter>-1</alter>
+          <step>F</step>
           <octave>5</octave>
         </pitch>
         <duration>2520</duration>
@@ -2860,11 +2713,6 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">4</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-84">
         <pitch>
@@ -2916,8 +2764,7 @@
       </note>
       <note id="tab-note-87">
         <pitch>
-          <step>B</step>
-          <alter>-1</alter>
+          <step>F</step>
           <octave>4</octave>
         </pitch>
         <duration>2520</duration>
@@ -2930,12 +2777,14 @@
       </note>
       <note id="tab-note-88">
         <pitch>
-          <step>D</step>
-          <octave>5</octave>
+          <step>A</step>
+          <alter>0</alter>
+          <octave>4</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
         <type>16th</type>
+        <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">continue</beam>
@@ -2943,8 +2792,7 @@
       </note>
       <note id="tab-note-89">
         <pitch>
-          <step>B</step>
-          <alter>-1</alter>
+          <step>F</step>
           <octave>4</octave>
         </pitch>
         <duration>2520</duration>
@@ -2957,8 +2805,7 @@
       </note>
       <note id="tab-note-90">
         <pitch>
-          <step>A</step>
-          <alter>-1</alter>
+          <step>D</step>
           <octave>5</octave>
         </pitch>
         <duration>2520</duration>
@@ -2971,8 +2818,7 @@
       </note>
       <note id="tab-note-91">
         <pitch>
-          <step>B</step>
-          <alter>-1</alter>
+          <step>F</step>
           <octave>4</octave>
         </pitch>
         <duration>2520</duration>
@@ -2985,8 +2831,8 @@
       </note>
       <note id="tab-note-92">
         <pitch>
-          <step>D</step>
-          <octave>5</octave>
+          <step>A</step>
+          <octave>4</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
@@ -2998,8 +2844,7 @@
       </note>
       <note id="tab-note-93">
         <pitch>
-          <step>B</step>
-          <alter>-1</alter>
+          <step>F</step>
           <octave>4</octave>
         </pitch>
         <duration>2520</duration>
@@ -3023,11 +2868,6 @@
         <type>half</type>
         <stem>down</stem>
         <staff>1</staff>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">1</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-95">
         <pitch>
@@ -3040,11 +2880,6 @@
         <type>half</type>
         <stem>down</stem>
         <staff>1</staff>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">1</fingering>
-          </technical>
-        </notations>
       </note>
       <backup>
         <duration>40320</duration>
@@ -3110,19 +2945,17 @@
       </note>
       <note>
         <pitch>
-          <step>G</step>
-          <alter>1</alter>
+          <step>F</step>
           <octave>4</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
         <type>16th</type>
-        <accidental>sharp</accidental>
         <stem>none</stem>
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>4</fret>
+            <string>1</string><fret>1</fret>
           </technical>
         </notations>
       </note>
@@ -3187,19 +3020,49 @@
       </note>
       <note>
         <pitch>
-          <step>B</step>
-          <alter>-1</alter>
+          <step>F</step>
           <octave>3</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
         <type>16th</type>
-        <accidental>flat</accidental>
         <stem>none</stem>
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>3</fret>
+            <string>4</string><fret>3</fret>
+          </technical>
+        </notations>
+      </note>
+      <note>
+        <pitch>
+          <step>A</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2520</duration>
+        <voice>1</voice>
+        <type>16th</type>
+        <stem>none</stem>
+        <staff>2</staff>
+        <notations>
+          <technical>
+            <string>3</string><fret>2</fret>
+          </technical>
+        </notations>
+      </note>
+      <note>
+        <pitch>
+          <step>F</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2520</duration>
+        <voice>1</voice>
+        <type>16th</type>
+        <stem>none</stem>
+        <staff>2</staff>
+        <notations>
+          <technical>
+            <string>4</string><fret>3</fret>
           </technical>
         </notations>
       </note>
@@ -3221,89 +3084,49 @@
       </note>
       <note>
         <pitch>
-          <step>B</step>
-          <alter>-1</alter>
+          <step>F</step>
           <octave>3</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
         <type>16th</type>
-        <accidental>flat</accidental>
         <stem>none</stem>
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>3</fret>
+            <string>4</string><fret>3</fret>
           </technical>
         </notations>
       </note>
       <note>
         <pitch>
-          <step>G</step>
-          <alter>1</alter>
-          <octave>4</octave>
-        </pitch>
-        <duration>2520</duration>
-        <voice>1</voice>
-        <type>16th</type>
-        <accidental>sharp</accidental>
-        <stem>none</stem>
-        <staff>2</staff>
-        <notations>
-          <technical>
-            <string>1</string><fret>4</fret>
-          </technical>
-        </notations>
-      </note>
-      <note>
-        <pitch>
-          <step>B</step>
-          <alter>-1</alter>
+          <step>A</step>
           <octave>3</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
         <type>16th</type>
-        <accidental>flat</accidental>
         <stem>none</stem>
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>3</fret>
+            <string>3</string><fret>2</fret>
           </technical>
         </notations>
       </note>
       <note>
         <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>2520</duration>
-        <voice>1</voice>
-        <type>16th</type>
-        <stem>none</stem>
-        <staff>2</staff>
-        <notations>
-          <technical>
-            <string>2</string><fret>3</fret>
-          </technical>
-        </notations>
-      </note>
-      <note>
-        <pitch>
-          <step>B</step>
-          <alter>-1</alter>
+          <step>F</step>
           <octave>3</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
         <type>16th</type>
-        <accidental>flat</accidental>
         <stem>none</stem>
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>3</fret>
+            <string>4</string><fret>3</fret>
           </technical>
         </notations>
       </note>
@@ -3356,8 +3179,7 @@
       </note>
       <note id="tab-note-96">
         <pitch>
-          <step>B</step>
-          <alter>-1</alter>
+          <step>G</step>
           <octave>4</octave>
         </pitch>
         <duration>2520</duration>
@@ -3370,9 +3192,9 @@
       </note>
       <note id="tab-note-97">
         <pitch>
-          <step>E</step>
+          <step>B</step>
           <alter>-1</alter>
-          <octave>5</octave>
+          <octave>4</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
@@ -3381,16 +3203,10 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">2</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-98">
         <pitch>
-          <step>B</step>
-          <alter>-1</alter>
+          <step>G</step>
           <octave>4</octave>
         </pitch>
         <duration>2520</duration>
@@ -3403,7 +3219,8 @@
       </note>
       <note id="tab-note-99">
         <pitch>
-          <step>G</step>
+          <step>E</step>
+          <alter>-1</alter>
           <octave>5</octave>
         </pitch>
         <duration>2520</duration>
@@ -3415,6 +3232,19 @@
         <beam number="2">begin</beam>
       </note>
       <note id="tab-note-100">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2520</duration>
+        <voice>1</voice>
+        <type>16th</type>
+        <stem>up</stem>
+        <staff>1</staff>
+        <beam number="1">continue</beam>
+        <beam number="2">continue</beam>
+      </note>
+      <note id="tab-note-101">
         <pitch>
           <step>B</step>
           <alter>-1</alter>
@@ -3428,24 +3258,9 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
       </note>
-      <note id="tab-note-101">
-        <pitch>
-          <step>E</step>
-          <alter>-1</alter>
-          <octave>5</octave>
-        </pitch>
-        <duration>2520</duration>
-        <voice>1</voice>
-        <type>16th</type>
-        <stem>up</stem>
-        <staff>1</staff>
-        <beam number="1">continue</beam>
-        <beam number="2">continue</beam>
-      </note>
       <note id="tab-note-102">
         <pitch>
-          <step>B</step>
-          <alter>-1</alter>
+          <step>G</step>
           <octave>4</octave>
         </pitch>
         <duration>2520</duration>
@@ -3475,11 +3290,6 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">3</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-104">
         <pitch>
@@ -3571,11 +3381,6 @@
         <type>half</type>
         <stem>down</stem>
         <staff>1</staff>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">4</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-110">
         <pitch>
@@ -3613,37 +3418,17 @@
       </note>
       <note>
         <pitch>
-          <step>B</step>
-          <alter>-1</alter>
+          <step>G</step>
           <octave>3</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
         <type>16th</type>
-        <accidental>flat</accidental>
         <stem>none</stem>
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>3</fret>
-          </technical>
-        </notations>
-      </note>
-      <note>
-        <pitch>
-          <step>E</step>
-          <alter>-1</alter>
-          <octave>4</octave>
-        </pitch>
-        <duration>2520</duration>
-        <voice>1</voice>
-        <type>16th</type>
-        <accidental>flat</accidental>
-        <stem>none</stem>
-        <staff>2</staff>
-        <notations>
-          <technical>
-            <string>2</string><fret>4</fret>
+            <string>4</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -3668,34 +3453,16 @@
       <note>
         <pitch>
           <step>G</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>2520</duration>
-        <voice>1</voice>
-        <type>16th</type>
-        <stem>none</stem>
-        <staff>2</staff>
-        <notations>
-          <technical>
-            <string>1</string><fret>3</fret>
-          </technical>
-        </notations>
-      </note>
-      <note>
-        <pitch>
-          <step>B</step>
-          <alter>-1</alter>
           <octave>3</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
         <type>16th</type>
-        <accidental>flat</accidental>
         <stem>none</stem>
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>3</fret>
+            <string>4</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -3719,6 +3486,22 @@
       </note>
       <note>
         <pitch>
+          <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2520</duration>
+        <voice>1</voice>
+        <type>16th</type>
+        <stem>none</stem>
+        <staff>2</staff>
+        <notations>
+          <technical>
+            <string>4</string><fret>5</fret>
+          </technical>
+        </notations>
+      </note>
+      <note>
+        <pitch>
           <step>B</step>
           <alter>-1</alter>
           <octave>3</octave>
@@ -3732,6 +3515,22 @@
         <notations>
           <technical>
             <string>3</string><fret>3</fret>
+          </technical>
+        </notations>
+      </note>
+      <note>
+        <pitch>
+          <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2520</duration>
+        <voice>1</voice>
+        <type>16th</type>
+        <stem>none</stem>
+        <staff>2</staff>
+        <notations>
+          <technical>
+            <string>4</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -3870,7 +3669,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>1</fret>
+            <string>5</string><fret>6</fret>
           </technical>
         </notations>
       </note>
@@ -3915,9 +3714,8 @@
     <measure implicit="no" number="8">
       <note id="tab-note-112">
         <pitch>
-          <step>E</step>
-          <alter>-1</alter>
-          <octave>5</octave>
+          <step>G</step>
+          <octave>4</octave>
         </pitch>
         <duration>20160</duration>
         <voice>1</voice>
@@ -3941,8 +3739,9 @@
       <note id="tab-note-114">
         <chord />
         <pitch>
-          <step>G</step>
-          <octave>4</octave>
+          <step>E</step>
+          <alter>-1</alter>
+          <octave>5</octave>
         </pitch>
         <duration>20160</duration>
         <voice>1</voice>
@@ -3972,7 +3771,7 @@
         <stem>down</stem>
         <staff>1</staff>
       </note>
-      <note>
+      <note print-object="no" print-spacing="yes">
         <rest />
         <duration>20160</duration>
         <voice>2</voice>
@@ -4069,6 +3868,9 @@
         <type>half</type>
         <staff>2</staff>
       </note>
+      <barline location="right">
+        <bar-style>light-heavy</bar-style>
+      </barline>
     </measure>
   </part>
 </score-partwise>

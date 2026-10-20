@@ -113,23 +113,37 @@ PDF_OVERRIDES = {12: {"scale": 40, "pageWidth": 2363, "pageHeight": 3341}}
 PREVIEW_DIR = os.path.join(ROOT, "src", "site", "articles", "carcassi-preludios")
 CORRECTED = os.path.join(HERE, "corrected")
 AUTHOR = "Matteo Carcassi"
+EDITION = "carcassi"
+SCORE_PREFIX = "prelude-"
 
 
 # The source titles lose the sharp glyph ("F Minor" for a piece with three sharps): the key is fixed here
 # after checking each key signature.
-TITLES = {8: "Prelude 8 in F# Minor", 10: "Prelude 10 in C# Minor", 12: "Prelude 12 in D Minor", 13: "Prelude 13 in Bb Major", 15: "Prelude 15 in Eb Major"}
+TITLES = dict(enumerate([
+    "Prelude 1 in C Major", "Prelude 2 in A Minor", "Prelude 3 in G Major", "Prelude 4 in E Minor",
+    "Prelude 5 in D Major", "Prelude 6 in B Minor", "Prelude 7 in A Major", "Prelude 8 in F# Minor",
+    "Prelude 9 in E Major", "Prelude 10 in C# Minor", "Prelude 11 in F Major", "Prelude 12 in D Minor",
+    "Prelude 13 in Bb Major", "Prelude 14 in G Minor", "Prelude 15 in Eb Major", "Prelude 16 in C Minor",
+], 1))
+
+
+def select_edition(edition):
+    """Select independent notation inputs and published assets; no source PDF needed to build."""
+    global EDITION, CORRECTED, OUT_DIR, PREVIEW_DIR, PAGES_DIR, SCORE_PREFIX
+    EDITION = edition
+    SCORE_PREFIX = "santisteban-prelude-" if edition == "santisteban" else "prelude-"
+    folder = "carcassi-preludios" if edition == "carcassi" else "santisteban-preludios"
+    CORRECTED = os.path.join(HERE, "corrected" if edition == "carcassi" else "santisteban")
+    OUT_DIR = os.path.join(ROOT, "downloads", folder)
+    PREVIEW_DIR = os.path.join(ROOT, "src", "site", "articles", folder)
+    PAGES_DIR = os.path.join(PREVIEW_DIR, "full")
+
 
 
 def name_of(number):
-    """«Prelude N in <Key>», read from the title line of the source (by position)."""
-    if number in TITLES:
-        return TITLES[number]
-    ws, _ = words(source_pdf())
-    for i, (page, text, x0, y0, _, _) in enumerate(ws[:-1]):
-        if text == "Prelude" and x0 < 40 and ws[i + 1][1] == str(number):
-            line = [w[1] for w in ws[i:] if w[0] == page and abs(w[3] - y0) < 3]
-            return " ".join(line)
-    raise SystemExit(f"no encuentro el titulo del preludio {number}")
+    """Stable titles shared by both editions, independent of the reference scan."""
+    return TITLES[number]
+
 
 
 def write_preview(number, prepared, exported):
@@ -151,7 +165,7 @@ def write_preview(number, prepared, exported):
     svg = svg.replace("</svg>", tabify.HIDE_TAB_RHYTHM + "</svg>", 1)
     svg = re.sub(r'\sdata-id="[^"]*"', "", svg)
     os.makedirs(PREVIEW_DIR, exist_ok=True)
-    with open(os.path.join(PREVIEW_DIR, f"prelude-{number:02d}.svg"), "w", encoding="utf-8") as f:
+    with open(os.path.join(PREVIEW_DIR, f"{SCORE_PREFIX}{number:02d}.svg"), "w", encoding="utf-8") as f:
         f.write("\n".join(line.rstrip() for line in svg.strip().splitlines()) + "\n")
 
 
@@ -169,7 +183,7 @@ def write_pages(number, xml):
         raise RuntimeError("Verovio no pudo leer el MusicXML con tablatura")
     os.makedirs(PAGES_DIR, exist_ok=True)
     for old in os.listdir(PAGES_DIR):
-        if old.startswith(f"prelude-{number:02d}-p"):
+        if old.startswith(f"{SCORE_PREFIX}{number:02d}-p"):
             os.remove(os.path.join(PAGES_DIR, old))
     for page in range(1, toolkit.getPageCount() + 1):
         svg = toolkit.renderToSVG(page)
@@ -178,7 +192,7 @@ def write_pages(number, xml):
         svg = tabify.drop_brace(tabify.draw_tab_clef(tabify.drop_tab_meter(svg)))
         svg = svg.replace("</svg>", tabify.HIDE_TAB_RHYTHM + "</svg>", 1)
         svg = re.sub(r'\sdata-id="[^"]*"', "", svg)
-        with open(os.path.join(PAGES_DIR, f"prelude-{number:02d}-p{page}.svg"), "w", encoding="utf-8") as f:
+        with open(os.path.join(PAGES_DIR, f"{SCORE_PREFIX}{number:02d}-p{page}.svg"), "w", encoding="utf-8") as f:
             f.write("\n".join(line.rstrip() for line in svg.strip().splitlines()) + "\n")
 
 
@@ -334,23 +348,26 @@ def build(number):
     source = os.path.join(CORRECTED, f"prelude-{number:02d}.musicxml")
     if not os.path.exists(source):
         raise SystemExit(f"falta el MusicXML corregido: {source}")
-    title = name_of(number)
+    title = name_of(number) + (" (Santisteban)" if EDITION == "santisteban" else "")
+    subtitle = AUTHOR + (" · Ed. G. C. Santisteban (1906)" if EDITION == "santisteban" else "")
     tabify.PDF_OPTIONS = {**tabify.PDF_OPTIONS, **PDF_OVERRIDES.get(number, {})}
     with tempfile.TemporaryDirectory() as tmp:
         patch_engine(tabify)
         prepared = os.path.join(tmp, "prepared")
-        tabify.prepare(source, "musicxml", "standard", prepared, per_row=PER_ROW.get(number, 4))
+        result = tabify.prepare(source, "musicxml", "standard", prepared, per_row=PER_ROW.get(number, 4))
+        if result["dropped"]:
+            raise RuntimeError(f"Notas descartadas en {EDITION} {number}: {result['dropped']}")
         exported = os.path.join(tmp, "export")
         with open(os.path.join(prepared, tabify.SUGGESTION_NAME), encoding="utf-8") as f:
             suggestion = json.load(f)
         tabify.export(os.path.join(prepared, tabify.NORMALIZED_NAME), os.path.join(prepared, tabify.SUGGESTION_NAME),
                       avoid_repeated_strings(suggestion["tabs"], tabify.open_midis(tabify.STANDARD_TUNING)),
-                      "standard", exported, title=title, subtitle=AUTHOR)
+                      "standard", exported, title=title, subtitle=subtitle)
         write_preview(number, prepared, exported)
         with open(os.path.join(exported, "score.musicxml"), encoding="utf-8") as f:
             write_pages(number, f.read())
         os.makedirs(OUT_DIR, exist_ok=True)
-        base = os.path.join(OUT_DIR, f"{title} - {AUTHOR}")
+        base = os.path.join(OUT_DIR, f"{name_of(number)} - {AUTHOR}" + (" - Santisteban" if EDITION == "santisteban" else ""))
         with open(os.path.join(exported, "score.musicxml"), encoding="utf-8") as f:
             xml = f.read()
         # No encoding block: no software, date or support notes of the intermediate processing.
@@ -367,4 +384,11 @@ def build(number):
 
 
 if __name__ == "__main__":
-    {"crop": crop, "ocr": ocr, "build": build, "pages": pages}[sys.argv[1]](int(sys.argv[2]))
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("command", choices=["crop", "ocr", "build", "pages"])
+    parser.add_argument("number", type=int, choices=range(1, 17))
+    parser.add_argument("--edition", choices=["carcassi", "santisteban"], default="carcassi")
+    args = parser.parse_args()
+    select_edition(args.edition)
+    {"crop": crop, "ocr": ocr, "build": build, "pages": pages}[args.command](args.number)

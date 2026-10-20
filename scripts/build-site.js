@@ -391,6 +391,7 @@ const ARTICLES_SLUG = "articulos";
 const ARTICLE_CARCASSI_SLUG = "articulo-carcassi";
 const ARTICLE_ARPEGGIOS_SLUG = "articulo-tablaturas-arpegios";
 const ARTICLE_PRELUDES_SLUG = "articulo-preludios-carcassi";
+const ARTICLE_SANTISTEBAN_SLUG = "articulo-preludios-santisteban";
 // YouTube video the exercise was taken from, embedded below the tabs.
 const SIXTHS_VIDEO_ID = "NNwTR8Q8JN4";
 const SIXTHS_TABS = [
@@ -1222,7 +1223,8 @@ function renderArticlesIndex(strings, locale) {
       [684, 240],
       strings.artArpeggiosH1,
       strings.artArpeggiosIntro,
-    );
+    ) +
+    articleCard(ARTICLE_SANTISTEBAN_SLUG, locale, articlePreludes.santisteban.cardImage().url, [684, 204], strings.artSantistebanH1, strings.artSantistebanCardSummary);
   return renderArticlePage(
     strings,
     locale,
@@ -1272,7 +1274,12 @@ function renderArpeggiosArticle(strings, locale) {
     .split("%%CARCASSI_HREF%%").join(pagePath(ARTICLE_CARCASSI_SLUG, locale));
 }
 
-function renderPreludesArticle(strings, locale) {
+function renderPreludesArticle(strings, locale, santisteban = false) {
+  const edition = santisteban ? articlePreludes.santisteban : articlePreludes;
+  const prefix = santisteban ? "artSantisteban" : "artPreludes";
+  const other = santisteban ? ARTICLE_PRELUDES_SLUG : ARTICLE_SANTISTEBAN_SLUG;
+  const otherLabel = santisteban ? strings.artPreludesOriginalLink : strings.artPreludesSantistebanLink;
+  const crossLink = '<p class="article-back"><a href="' + pagePath(other, locale) + '">' + escapeHtml(otherLabel) + '</a></p>';
   const back =
     '<p class="article-back"><a href="' +
     pagePath(ARTICLES_SLUG, locale) +
@@ -1282,14 +1289,14 @@ function renderPreludesArticle(strings, locale) {
   return renderArticlePage(
     strings,
     locale,
-    ARTICLE_PRELUDES_SLUG,
+    santisteban ? ARTICLE_SANTISTEBAN_SLUG : ARTICLE_PRELUDES_SLUG,
     {
-      title: "artPreludesPageTitle",
-      meta: "artPreludesMetaDescription",
-      h1: "artPreludesH1",
-      lead: "artPreludesLead",
+      title: prefix + "PageTitle",
+      meta: prefix + "MetaDescription",
+      h1: prefix + "H1",
+      lead: prefix + "Lead",
     },
-    articlePreludes.renderBody(locale, strings),
+    edition.renderBody(locale, strings) + crossLink,
     back,
   );
 }
@@ -1299,6 +1306,7 @@ function writeArticlePages(strings, locale) {
     [ARTICLES_SLUG, renderArticlesIndex],
     [ARTICLE_CARCASSI_SLUG, renderCarcassiArticle],
     [ARTICLE_PRELUDES_SLUG, renderPreludesArticle],
+    [ARTICLE_SANTISTEBAN_SLUG, (strings, locale) => renderPreludesArticle(strings, locale, true)],
     [ARTICLE_ARPEGGIOS_SLUG, renderArpeggiosArticle],
   ].forEach(function (entry) {
     const outFile = path.join(DIST_SITE, pageFile(entry[0], locale));
@@ -1692,20 +1700,15 @@ copyFile(
   articleCarcassi.cardImage().src,
   path.join(articlePdfDist, articleCarcassi.cardImage().name),
 );
-// Prelude PDFs (and the index card image) of the Carcassi preludes page.
-const preludesDist = path.join(ASSETS_DIST, "articles", "carcassi-preludios");
-ensureDir(preludesDist);
-articlePreludes.pdfFiles().forEach(function (pdf) {
-  copyFile(pdf.src, path.join(preludesDist, pdf.name));
-});
-copyFile(
-  articlePreludes.cardImage().src,
-  path.join(preludesDist, articlePreludes.cardImage().name),
-);
-// Full-score pages shown in the preludes' modal.
-ensureDir(path.join(preludesDist, "full"));
-articlePreludes.pageSvgFiles().forEach(function (page) {
-  copyFile(page.src, path.join(preludesDist, "full", page.name));
+// Independent score downloads and modal pages for each edition.
+[articlePreludes, articlePreludes.santisteban].forEach(function (edition) {
+  const folder = path.basename(edition.PREVIEW_DIR);
+  const target = path.join(ASSETS_DIST, "articles", folder);
+  ensureDir(path.join(target, "full"));
+  edition.pdfFiles().forEach((pdf) => copyFile(pdf.src, path.join(target, pdf.name)));
+  const image = edition.cardImage();
+  copyFile(image.src, path.join(target, image.name));
+  edition.pageSvgFiles().forEach((page) => copyFile(page.src, path.join(target, "full", page.name)));
 });
 const arpeggiosDist = path.join(ASSETS_DIST, "articles", "arpeggios");
 ensureDir(arpeggiosDist);
@@ -2103,6 +2106,7 @@ function siteMenu(strings, locale) {
   const articles = [
     [ARTICLE_CARCASSI_SLUG, strings.artCarcH1],
     [ARTICLE_PRELUDES_SLUG, strings.artPreludesH1],
+    [ARTICLE_SANTISTEBAN_SLUG, strings.artSantistebanH1],
     [ARTICLE_ARPEGGIOS_SLUG, strings.artArpeggiosH1],
   ];
   return (
@@ -2277,7 +2281,7 @@ addSlugPages(
 addSlugPages([DIM_SLUG, NOTE_FINDER_SLUG, SIXTHS_SLUG]);
 addSlugPages([TAB_EDITOR_SLUG], ["0.7", "0.6"]);
 addSlugPages([PRIVACY_SLUG], ["0.3", "0.3"]);
-addSlugPages([ARTICLES_SLUG, ARTICLE_CARCASSI_SLUG, ARTICLE_PRELUDES_SLUG, ARTICLE_ARPEGGIOS_SLUG]);
+addSlugPages([ARTICLES_SLUG, ARTICLE_CARCASSI_SLUG, ARTICLE_PRELUDES_SLUG, ARTICLE_SANTISTEBAN_SLUG, ARTICLE_ARPEGGIOS_SLUG]);
 if (PARTITURA_ENABLED) addSlugPages([PARTITURA_SLUG], ["0.7", "0.6"]);
 addSlugPages(
   ALL_PICKING_PAGES.map(function (page) {

@@ -1,68 +1,65 @@
-# Preludios de Carcassi: extracción local de un preludio
+# Preludios de Carcassi: dos ediciones
 
-Issues #33 y #34. Deja, por preludio, en `downloads/carcassi-preludios/`:
+El sitio publica los mismos 16 números en dos colecciones independientes:
 
-- `Prelude N in <Key> - Matteo Carcassi.pdf`: pentagrama + pentagrama TAB, lo que descarga el visitante.
-- `Prelude N in <Key> - Matteo Carcassi.musicxml`: MusicXML final (notación + TAB), solo para uso interno.
+- **Carcassi**: `/articulos/preludios-de-carcassi`, transcrito del ejemplar anterior
+  a Santisteban que aportó el usuario. Entradas: `corrected/prelude-NN.musicxml`.
+- **Santisteban**: `/articulos/preludios-de-carcassi-santisteban`, revisión de 1906
+  según Mutopia. Entradas: `santisteban/prelude-NN.musicxml`.
 
-y en `src/site/articles/carcassi-preludios/prelude-NN.svg` la vista previa (un sistema con notación y TAB).
-Y en `src/site/articles/carcassi-preludios/full/prelude-NN-pP.svg` cada página del PDF como SVG (la modal de pantalla completa del sitio). `extract.py build N` las genera; `extract.py pages N` las regenera desde el MusicXML publicado, sin OCR ni PDF fuente.
-El MusicXML intermedio del OCR **no** se commitea (vive en `.work/`, ignorado); sí el corregido,
-en `corrected/prelude-NN.musicxml`, para reprocesar sin repetir el OCR.
+[Fuentes, páginas y convenciones de transcripción](sources/README.md).
 
-Todo corre en local: el motor (`backend/engine/tabify.py`: `prepare` + `export`) en un venv de Python y
-el OCR en el contenedor Docker `guitar-chords-ocr` (Audiveris + homr; sin AWS ni S3).
+## Reproducir
 
-## Requisitos (una vez)
+Se usa el motor local `backend/engine/tabify.py`, con Music21 y Verovio:
 
-```bash
-docker build -t guitar-chords-ocr backend/ocr          # 15-25 min la primera vez (o reutiliza la imagen)
+```sh
 uv venv --python 3.13 .venv-carcassi
 uv pip install --python .venv-carcassi/bin/python -r backend/engine/requirements.txt pillow pypdf
-brew install poppler librsvg                           # pdftoppm, pdftotext, rsvg-convert
+brew install poppler librsvg
 ```
 
-El PDF fuente no se versiona: `resources/CarcassiMethodPreludes-a4.pdf` o `$CARCASSI_SOURCE_PDF`.
+Rehacer las entradas originales o una entrada de Santisteban:
 
-## Uso (por número de preludio)
-
-```bash
-PY=.venv-carcassi/bin/python
-$PY scripts/carcassi-preludios/extract.py crop N    # recorta el preludio por posición (400 dpi)
-$PY scripts/carcassi-preludios/extract.py ocr  N    # + OCR en contenedor -> .work/carcassi-preludios/omr-NN/
-# corregir el MusicXML intermedio -> scripts/carcassi-preludios/corrected/prelude-NN.musicxml
-$PY scripts/carcassi-preludios/extract.py build N   # PDF + MusicXML + vista previa
-npm test
+```sh
+.venv-carcassi/bin/python scripts/carcassi-preludios/transcribe_originals.py
+.venv-carcassi/bin/python scripts/carcassi-preludios/transcribe_05.py
 ```
 
-- **Recorte por posición**: `pdftotext` devuelve los preludios desordenados; `extract.py` busca los
-  títulos por coordenadas (`pdftotext -bbox`) y recorta de un título al siguiente (o al pie), uniendo
-  los tramos que cruzan de página.
-- **Corrección**: dedos y letras p-i-m-a confunden al OCR (los dedos salen como notas). Si la
-  corrección es inviable, se transcribe a mano desde la imagen con un script como `transcribe_01.py`.
-- **Independencia de la fuente**: el PDF se genera desde cero con el motor, no recortando el original;
-  el `build` fija los metadatos (título «Prelude N in <Key>», autor Matteo Carcassi, sin productor ni
-  fechas) y quita el bloque `<encoding>` del MusicXML. `test/carcassi-preludios.unit.js` lo comprueba.
-- **Digitación**: la sugerida por el motor con afinación Estándar.
-- **Fuente de los dígitos del TAB**: sans (como el conversor web). `build` cambia la fuente por defecto de la página (`Times, serif`) por una sans; los preludios 1 a 3 se publicaron antes con serif y se regeneraron después con sans.
+Grabar un preludio de cada edición (no requiere los PDF fuente):
 
-## Transcripción manual (la vía de los 16 preludios publicados)
-
-El OCR confunde dedos con notas, así que cada preludio se transcribió a mano desde la imagen con ayudas:
-
-```bash
-$PY scripts/carcassi-preludios/detect_notes.py N          # alturas de las cabezas macizas por compás (acordes apilados incluidos)
-$PY scripts/carcassi-preludios/bass_strips.py N [alto]    # tiras con guías de altura para leer a ojo los bajos huecos
-$PY scripts/carcassi-preludios/transcribe_NN.py           # escribe corrected/prelude-NN.musicxml
-scripts/carcassi-preludios/build_one.sh N                 # transcribe + build + PNG de revisión en .work/
+```sh
+.venv-carcassi/bin/python scripts/carcassi-preludios/extract.py build 5
+.venv-carcassi/bin/python scripts/carcassi-preludios/extract.py build 5 --edition santisteban
 ```
 
-- `transcribe_lib.py`: compases de 4/4, 3/4, 6/8 y 12/8 con bajo en voz 2 y el resto en voz 1; acordes
-  (`"C#5:1+A5:4"`), armónicos (`"E6*"`), barras de semicorchea y de corchea (con grupos a medida por compás).
-  `transcribe_triplets.py`: tresillos y ligaduras (Preludio 6).
-- Hay que escribir las alteraciones: el detector da letras sin armadura. Los títulos del libro pierden los
-  sostenidos y bemoles; se corrigen en `TITLES` de `extract.py` tras mirar cada armadura.
-- Un preludio largo que dejaría un sistema solo en una segunda hoja se graba con otra maquetación
-  (`PDF_OVERRIDES` en `extract.py`, Preludio 12).
+O transcribir, grabar y generar PNG de revisión, siempre fuera del control de versiones:
 
-Informes de calidad: `reports/prelude-NN.md`.
+```sh
+scripts/carcassi-preludios/build_one.sh 5 carcassi
+scripts/carcassi-preludios/build_one.sh 5 santisteban
+```
+
+Cada grabado produce PDF y MusicXML con notación y TAB en
+`downloads/carcassi-preludios/` o `downloads/santisteban-preludios/`, una vista
+previa de un sistema en `src/site/articles/<colección>/` y todas las páginas SVG
+para la modal en `full/`. Los PDF de Santisteban llevan su nombre en el archivo,
+el título y el subtítulo para distinguirlos una vez descargados. El build falla
+si el motor descarta notas.
+
+El PDF se genera desde el MusicXML: no es un recorte del libro. Se fijan autor y
+título y se eliminan productor, fechas y bloque `encoding`. El motor propone la
+digitación de la TAB con afinación estándar; `avoid_repeated_strings` evita saltos
+innecesarios a la misma cuerda. El visor y la descarga usan la misma digitación.
+
+## Herramientas anteriores de OCR
+
+`extract.py crop N` y `ocr N`, `detect_notes.py`, `bass_strips.py` y los informes
+históricos de `reports/` trabajan sobre la fuente de **Santisteban**
+`resources/CarcassiMethodPreludes-a4.pdf` (o `$CARCASSI_SOURCE_PDF`). Los informes
+no son una certificación de las nuevas entradas originales. Los scripts
+`transcribe_01.py` a `transcribe_16.py` reproducen la colección Santisteban;
+`transcribe_lib.py` y `transcribe_triplets.py` son sus utilidades de notación.
+
+Verificación: `npm test`. Las imágenes para revisar manualmente se guardan en
+`.work/` o en un directorio temporal, nunca como fixtures sin aserciones.

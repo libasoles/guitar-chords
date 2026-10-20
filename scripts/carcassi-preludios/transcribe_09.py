@@ -1,4 +1,4 @@
-"""MusicXML corregido del Preludio 9 (Mi mayor), transcrito a mano de la imagen.
+"""Edición Santisteban: MusicXML del Preludio 9 (Mi mayor), transcrito a mano de la imagen.
 
 Las alturas de las semicorcheas salen de `detect_notes.py`; los bajos huecos (con `bass_strips.py`), dedos y
 alteraciones se leyeron a ojo. Ver reports/prelude-09.md.
@@ -9,7 +9,7 @@ import os
 
 from transcribe_lib import bass, slots, write
 
-TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "corrected", "prelude-09.musicxml")
+TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "santisteban", "prelude-09.musicxml")
 N = None  # celda ocupada por el bajo
 KEY_FIFTHS = 4  # Fa#, Do#, Sol#, Re#
 

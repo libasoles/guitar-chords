@@ -1,4 +1,4 @@
-"""MusicXML corregido del Preludio 10 (Do# menor, 12/8), transcrito a mano de la imagen.
+"""Edición Santisteban: MusicXML del Preludio 10 (Do# menor, 12/8), transcrito a mano de la imagen.
 
 Las alturas de las corcheas salen de `detect_notes.py`; los bajos huecos (con `bass_strips.py`), dedos y
 alteraciones se leyeron a ojo. Ver reports/prelude-10.md.
@@ -9,7 +9,7 @@ import os
 
 from transcribe_lib import bass, write
 
-TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "corrected", "prelude-10.musicxml")
+TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "santisteban", "prelude-10.musicxml")
 KEY_FIFTHS = 4  # Fa#, Do#, Sol#, Re#
 
 
@@ -39,7 +39,7 @@ MEASURES = [
     # 9: la segunda mitad lleva si# con sostenido (sol#7 sobre sol#3)
     measure(("E3", "E4:2", "G#4:1", "C#5:3", "G#4", "E4"), ("G#3:4", "D#4", "G#4", "B#4", "G#4", "D#4")),
     # 10: cierre, arpegio ascendente de seis corcheas, do#6 de blanca (el libro lo antecede con una
-    # apoyatura que no se dibuja) y silencio de negra
+    # apoyatura de sol#5) y silencio de negra
     {"bass": [],
      "up": [cell(t, 2 * i) for i, t in enumerate(["C#4:4", "E4:2", "G#4:1", "C#5:1", "E5:4", "G#5:4"])]
      + [(12, 8, "C#6", "4"), (20, 4, "R", None)]},
@@ -47,3 +47,12 @@ MEASURES = [
 
 if __name__ == "__main__":
     write(TARGET, "Prelude 10 in C# Minor", KEY_FIFTHS, MEASURES, time=(12, 8), group=12)
+
+    # Keep the acciaccatura preceding the final C-sharp, present in Mutopia's source.
+    import xml.etree.ElementTree as ET
+    xml = ET.parse(TARGET)
+    final = xml.findall('.//measure')[-1]
+    target = next(n for n in final.findall('note') if n.findtext('pitch/octave') == '6')
+    grace = ET.fromstring('<note><grace slash="yes"/><pitch><step>G</step><alter>1</alter><octave>5</octave></pitch><voice>1</voice><type>eighth</type><stem>up</stem></note>')
+    final.insert(list(final).index(target), grace)
+    xml.write(TARGET, encoding='utf-8', xml_declaration=True)

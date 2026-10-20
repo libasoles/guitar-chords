@@ -1,4 +1,4 @@
-# Informe de calidad: Preludio 4 en Mi menor
+# Informe de calidad: Preludio 4 en Mi menor (Santisteban)
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 
 - Bajo de negra con puntillo por mitad de compás; las cinco semicorcheas siguientes forman el arpegio.
 - Fuera de la armadura: re♯ (c. 3), fa natural y sol♯ (c. 5, el sol♯ vale hasta el final del compás).
-- Compás 8: mi grave y armónico natural de mi (traste 12, cuerda 1) con rombo. Se dibuja el rombo; el calderón y la barra unida del libro no.
+- Compás 8: mi4 con puntillo en la voz superior y armónico de mi6 en la última corchea con puntillo; el bajo mi4 dura una negra. Se corrigió la entrada anticipada del armónico cotejando la fuente de Mutopia. Se dibuja el rombo; el calderón y la barra unida del libro no.
 
 ## Verificación
 
