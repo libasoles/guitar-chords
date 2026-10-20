@@ -2,9 +2,9 @@
 <!DOCTYPE score-partwise  PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
 <score-partwise version="4.0">
   <work>
-    <work-title>Prelude 11 in F Major (Santisteban)</work-title>
+    <work-title>Prelude 11 in F Major</work-title>
   </work>
-  <movement-title>Prelude 11 in F Major (Santisteban)</movement-title>
+  <movement-title>Prelude 11 in F Major</movement-title>
   <identification>
     <creator type="composer">Matteo Carcassi · Ed. G. C. Santisteban (1906)</creator>
   </identification>
@@ -14,7 +14,7 @@
       <tenths>40</tenths>
     </scaling>
   </defaults>
-  <credit page="1"><credit-words default-x="1050" default-y="1150" justify="center" valign="top">Prelude 11 in F Major (Santisteban)</credit-words></credit><credit page="1"><credit-words default-x="1900" default-y="1090" justify="right" valign="top">Matteo Carcassi · Ed. G. C. Santisteban (1906)</credit-words></credit><credit page="1"><credit-words default-x="1050" default-y="1030" justify="center" valign="top"> </credit-words></credit><part-list>
+  <credit page="1"><credit-words default-x="1050" default-y="1150" justify="center" valign="top">Prelude 11 in F Major</credit-words></credit><credit page="1"><credit-words default-x="1900" default-y="1090" justify="right" valign="top">Matteo Carcassi · Ed. G. C. Santisteban (1906)</credit-words></credit><credit page="1"><credit-words default-x="1050" default-y="1030" justify="center" valign="top"> </credit-words></credit><part-list>
     <score-part id="P1">
       <part-name print-object="no"></part-name>
     </score-part>

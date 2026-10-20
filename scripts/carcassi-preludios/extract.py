@@ -351,7 +351,7 @@ def build(number):
     source = os.path.join(CORRECTED, f"prelude-{number:02d}.musicxml")
     if not os.path.exists(source):
         raise SystemExit(f"falta el MusicXML corregido: {source}")
-    title = name_of(number) + (" (Santisteban)" if EDITION == "santisteban" else "")
+    title = name_of(number)
     subtitle = AUTHOR + (" · Ed. G. C. Santisteban (1906)" if EDITION == "santisteban" else "")
     tabify.PDF_OPTIONS = {**tabify.PDF_OPTIONS, **PDF_OVERRIDES.get(number, {})}
     with tempfile.TemporaryDirectory() as tmp:

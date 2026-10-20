@@ -111,7 +111,15 @@ for (const [edition, catalog] of [['carcassi', editions], ['santisteban', editio
       assert.ok(info, 'el PDF declara /Title');
       // El PDF escapa algunos caracteres (p. ej. # como \043).
       const title = info[1].replace(/\\(\d{3})/g, (_, octal) => String.fromCharCode(parseInt(octal, 8))).replace(/\\([()\\])/g, '$1');
-      assert.equal(title, prelude.base.split(' - ')[0] + (edition === 'santisteban' ? ' (Santisteban)' : ''));
+      assert.equal(title, prelude.base.split(' - ')[0]);
+      assert.ok(xml.includes('<work-title>' + title + '</work-title>'));
+      if (edition === 'santisteban') {
+        assert.doesNotMatch(xml, /\(Santisteban\)/);
+        assert.match(xml, /Matteo Carcassi · Ed\. G\. C\. Santisteban \(1906\)/);
+        const full = fs.readFileSync(path.join(PREVIEW_DIR, 'full', catalog.SCORE_PREFIX + String(prelude.number).padStart(2, '0') + '-p1.svg'), 'utf8');
+        assert.doesNotMatch(full, /\(Santisteban\)/);
+        assert.match(full, /Matteo Carcassi · Ed\. G\. C\. Santisteban \(1906\)/);
+      }
       assert.match(text, /\/Author\s*\(Matteo Carcassi\)/);
       assert.doesNotMatch(text, /\/Producer|\/Creator|\/CreationDate|\/ModDate/);
       assert.doesNotMatch(text, /<x:xmpmeta|\/Metadata/);
