@@ -35,15 +35,15 @@ def stroke_widths(drawings):
     """Grosores de cada clase de trazo; cambian de un PDF a otro, asi que se deducen: la linea de pentagrama es
     el grosor horizontal mas comun, la plica el vertical fino y la barra de compas el vertical siguiente."""
     horizontal = [round(d['width'] or 0, 2) for d in drawings if d['type'] == 's' and d['rect'].height < 0.01 and d['rect'].width > 1]
-    vertical = sorted({round(d['width'] or 0, 2) for d in drawings if d['type'] == 's' and d['rect'].width < 0.01 and d['rect'].height > 1})
+    vertical = [round(d['width'] or 0, 2) for d in drawings if d['type'] == 's' and d['rect'].width < 0.01 and d['rect'].height > 1]
     staff = max(set(horizontal), key=horizontal.count)
-    thin = [w for w in vertical if w < 2]
-    return {'staff': staff, 'stem': thin[0], 'bar': thin[-1] if len(thin) > 1 else None}
+    common = sorted(w for w in set(vertical) if w < 2 and vertical.count(w) >= 8)  # descarta trazos sueltos (ligaduras, etc.)
+    return {'staff': staff, 'stem': common[0], 'bar': common[-1] if len(common) > 1 else None}
 
 
 def staff_groups(drawings, width):
     ys = sorted({round(d['rect'].y0, 2) for d in drawings if d['type'] == 's' and abs((d['width'] or 0) - width) < 0.02
-                 and d['rect'].height < 0.01})
+                 and d['rect'].height < 0.01 and d['rect'].width > 30})  # las lineas adicionales son cortas
     if not ys:
         return []
     groups, cur = [], [ys[0]]
@@ -136,28 +136,48 @@ def measure(a, b, inside, stems, beams, top, bottom, space):
     sys_stems = [s for s in stems if s.y1 >= top - 12 * space and s.y0 <= bottom + 12 * space and a - 1 < s.x0 < b + 1]
     sys_beams = [p for p in beams if a - 2 < min(q[0] for q in p) and max(q[0] for q in p) < b + 2
                  and top - 12 * space <= min(q[1] for q in p) and max(q[1] for q in p) <= bottom + 12 * space]
+    sys_stems = merge_stems(sys_stems)
     accs = [g for g in inside if g[0] in ACCIDENTAL and mine(g)]
     dots = [g for g in inside if g[0] == DOT and mine(g)]
     flags = [g for g in inside if g[0] in FLAGS and mine(g)]
     items = []
     for code, x, y, size in (g for g in inside if g[0] in HEAD and mine(g)):
         pos = round((bottom - y) / half)
+        twins = sum(1 for g in inside if g[0] in HEAD and abs(g[1] - x) < 2 and abs(g[2] - y) < 0.5)
         taken = {id(o['stem']) for o in items if o['stem'] is not None and o['pos'] == pos and abs(o['x'] - x) < 2}
-        stem, best = None, 1e9
+        best_side = {}
         for s in sys_stems:
-            if id(s) in taken or not (s.y0 - 1.8 <= y <= s.y1 + 1.8):
+            if not (s.y0 - 1.8 <= y <= s.y1 + 1.8):
                 continue
-            # plica a la derecha (hacia arriba) o a la izquierda (hacia abajo) de la cabeza
-            distance = min(abs(s.x0 - (x + hw - 0.45)), abs(s.x0 - (x + 0.45)))
-            if distance < 1.2 and distance < best:
-                stem, best = s, distance
+            # plica a la derecha (hacia arriba) o a la izquierda (hacia abajo) de la cabeza; una por lado
+            for side, edge in (('R', x + hw - 0.45), ('L', x + 0.45)):
+                distance = abs(s.x0 - edge)
+                if distance < 1.2 and distance < best_side.get(side, (9, None))[0]:
+                    best_side[side] = (distance, s)
+        matches = sorted(best_side.values(), key=lambda t: t[0])
+        if twins > 1:  # dos cabezas iguales (unionísono): cada una toma una plica distinta
+            matches = [t for t in matches if id(t[1]) not in taken][:1]
+        stems_found = [t[1] for t in matches][:2]
+        stem = stems_found[0] if stems_found else None
         cand = [g for g in accs if abs(g[2] - y) < 0.3 and 0 < x - g[1] < 14]
         acc = ACCIDENTAL[max(cand, key=lambda g: g[1])[0]] if cand else None
         dot = any(0 < d[1] - x < 14 and abs(d[2] - y) < half + 0.3 for d in dots)
-        items.append({'code': code, 'x': x, 'y': y, 'pos': pos, 'stem': stem, 'acc': acc, 'dot': dot, 'grace': size < 17})
+        items.append({'code': code, 'x': x, 'y': y, 'pos': pos, 'stem': stem, 'stems': stems_found, 'acc': acc, 'dot': dot, 'grace': size < 17})
     rests = [{'dur': RESTS[c], 'x': x, 'y': y} for c, x, y, _ in inside if c in RESTS and mine((c, x, y))]
     return {'items': items, 'rests': rests, 'flags': flags, 'beams': sys_beams, 'stems': sys_stems, 'space': space,
             'top': top, 'bottom': bottom, 'left': a, 'right': b, 'dots': dots}
+
+
+def merge_stems(stems):
+    """MuseScore dibuja la plica de un acorde en tramos (uno por cabeza): se unen los que se tocan."""
+    merged = []
+    for s in sorted(stems, key=lambda r: (round(r.x0, 1), r.y0)):
+        last = merged[-1] if merged else None
+        if last is not None and abs(last.x0 - s.x0) < 0.3 and s.y0 <= last.y1 + 1.0:
+            merged[-1] = pymupdf.Rect(last.x0, last.y0, last.x1, max(last.y1, s.y1))
+        else:
+            merged.append(pymupdf.Rect(s))
+    return merged
 
 
 def stem_groups(m):
@@ -165,14 +185,25 @@ def stem_groups(m):
     half = m['space'] / 2
     groups = {}
     for it in m['items']:
-        key = id(it['stem']) if it['stem'] is not None else ('free', round(it['x']))
-        groups.setdefault(key, []).append(it)
+        for st in it['stems'] or [None]:
+            key = id(st) if st is not None else ('free', round(it['x']))
+            groups.setdefault(key, []).append((it, st))
     out = []
-    for heads in groups.values():
-        stem = heads[0]['stem']
+    for pairs in groups.values():
+        heads = [h for h, _ in pairs]
+        stem = pairs[0][1]
         base = HEAD[heads[0]['code']]
         if stem is None:
-            out.append({'dir': 'up', 'x': heads[0]['x'], 'heads': heads, 'dur': 16, 'stem': None})
+            # sin plica dibujada: dentro de un grupo con barras toma la duracion de las barras que lo cubren
+            hx, hy = heads[0]['x'] + 3, heads[0]['y']
+            covering = [q for q in m['beams'] if min(p[0] for p in q) - 1 <= hx <= max(p[0] for p in q) + 1
+                        and abs(sum(p[1] for p in q[:4]) / 4 - hy) < 25]
+            dur = {0: base, 1: 2, 2: 1}.get(len(covering), 1)
+            grace = all(h['grace'] for h in heads)
+            if grace:  # nota de adorno sin plica (solo corchete): una corchea pequena
+                dur = 2
+            out.append({'dir': 'up', 'x': heads[0]['x'], 'heads': heads, 'dur': 0 if grace else dur, 'stem': None,
+                        'beams': len(covering), 'grace': grace, 'grace_type': dur})
             continue
         ys = [h['y'] for h in heads]
         up = min(abs(stem.y1 - y) for y in ys) < min(abs(stem.y0 - y) for y in ys)
@@ -203,10 +234,15 @@ def stem_groups(m):
             dur = FLAGS[flag[0][0]]
         else:
             dur = base
-        dotted = any(h['dot'] for h in heads)
         grace = all(h['grace'] for h in heads)
-        out.append({'dir': 'up' if up else 'down', 'x': sx, 'heads': sorted(heads, key=lambda h: h['y']), 'dur': 0 if grace else dur * (1.5 if dotted else 1),
+        out.append({'dir': 'up' if up else 'down', 'x': sx, 'heads': sorted(heads, key=lambda h: h['y']), 'dur': 0 if grace else dur,
                     'stem': stem, 'beams': count, 'grace': grace, 'grace_type': dur})
+    # una cabeza con dos plicas es una sola nota: el puntillo y la duracion completa son de la voz mas larga
+    for group in out:
+        dotted = any(h['dot'] for h in group['heads'])
+        longest = all(group['dur'] >= other['dur'] for other in out if any(h is g for h in group['heads'] for g in other['heads']))
+        group['shared'] = [h for h in group['heads'] if any(h is g for other in out if other is not group for g in other['heads'])]
+        group['dur'] = group['dur'] * (1.5 if dotted and longest else 1)
     return sorted(out, key=lambda g: g['x'])
 
 

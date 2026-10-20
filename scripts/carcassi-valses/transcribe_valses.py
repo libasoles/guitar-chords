@@ -46,7 +46,9 @@ def convert_measure(m, fifths, full, scale=1):
     directions = {g['dir'] for g in groups}
     items = []
     for g in groups:
-        pitch = '+'.join(names[id(h)] for h in reversed(g['heads']))  # de grave a agudo
+        # una cabeza con dos plicas suena una vez: la voz mas corta no la repite
+        shorter = [h for h in g['shared'] if any(o is not g and o['dur'] > g['dur'] and any(h is x for x in o['heads']) for o in groups)]
+        pitch = '+'.join(names[id(h)] for h in reversed(g['heads']) if not any(h is x for x in shorter))  # de grave a agudo
         items.append({'x': g['x'], 'dur': round(g['dur'] * scale), 'pitch': pitch, 'dir': g['dir'] if len(directions) == 2 else 'up',
                       'grace': g['grace'], 'grace_type': g['grace_type'], 'beams': g['beams']})
     graces = [i for i in items if i['grace']]
@@ -54,6 +56,13 @@ def convert_measure(m, fifths, full, scale=1):
     for r in m['rests']:
         items.append({'x': r['x'], 'dur': full if r['dur'] == 16 else round(r['dur'] * scale), 'pitch': 'R',  # el silencio de redonda llena el compas
                       'dir': ('up' if r['y'] < mid else 'down') if len(directions) == 2 else 'up'})
+    # una nota compartida con otra voz deja un hueco (no suena dos veces); su duracion cuenta para el tiempo de su
+    # direccion solo si con ella el compas queda completo
+    for name in ('up', 'down'):
+        with_ghost = sum(i['dur'] for i in items if i['dir'] == name)
+        without = sum(i['dur'] for i in items if i['dir'] == name and i['pitch'])
+        if without == full or with_ghost != full:
+            items = [i for i in items if not (i['dir'] == name and not i['pitch'])]
     for name in ('up', 'down'):
         mine = sorted((i for i in items if i['dir'] == name), key=lambda i: i['x'])
         pos = 0
@@ -71,6 +80,7 @@ def convert_measure(m, fifths, full, scale=1):
             for i in items:
                 if i['dir'] != ref:
                     i['onset'] = max(0, min(full - 1, round(interpolate(axis, i['x']))))
+    items = [i for i in items if i['pitch']]
     lanes = {'up': [], 'down': []}
     for name in ('up', 'down'):
         for i in sorted((i for i in items if i['dir'] == name), key=lambda i: (i['onset'], i['x'])):
@@ -134,7 +144,8 @@ def grace_xml(grace, index, count, voice, stem, acc):
         state = 'begin' if index == 0 else 'end' if index == count - 1 else 'continue'
         beam = ''.join(f'<beam number="{b}">{state}</beam>' for b in range(1, bars + 1)) if count > 1 else ''
         chord = '<chord/>' if n else ''
-        notes.append(f"<note><grace/>{chord}{pitch_xml(step, alter, octave)}<voice>{voice}</voice><type>{kind}</type>"
+        slash = ' slash="yes"' if count == 1 and kind == 'eighth' else ''
+        notes.append(f"<note><grace{slash}/>{chord}{pitch_xml(step, alter, octave)}<voice>{voice}</voice><type>{kind}</type>"
                      f"{accidental}<stem>{stem}</stem>{beam}</note>")
     return ''.join(notes)
 
