@@ -48,7 +48,7 @@ const GROUPS = [
     [0, 0, 0, null, null, 3], [0, 0, 0, null, 2, null],
   ]],
   ['Mi', 'E', 'Seventh', ['E7', 'E7/B'], [
-    [0, 0, 1, null, null, 0], [0, 3, 1, null, 2, null],
+    [0, 3, 1, null, null, 0], [0, 3, 1, null, 2, null],
   ]],
   ['Mi', 'E', 'MinorSeventh', ['Em7', 'Em7/G', 'Em7/B', 'Em7/D'], [
     [3, 3, 4, null, null, 0],
@@ -110,13 +110,41 @@ const GROUPS = [
     [2, 3, 4, null, 2, null], [2, 3, 4, 0, null, null], [2, 3, 4, null, null, 2],
   ]],
   ['Si', 'B', 'Seventh', ['B7', 'B7/D#', 'B7/F#'], [
-    [2, 0, 2, null, 2, null], [2, 0, 2, 1, null, null], [2, 0, 2, null, null, 2],
+    [2, 4, 2, null, 2, null], [2, 0, 2, 1, null, null], [2, 4, 2, null, null, 2],
   ]],
   ['Si', 'B', 'MinorSeventh', ['Bm7', 'Bm7/D', 'Bm7/F#', 'Bm7/A'], [
     [2, 3, 2, null, 2, null],
-    [2, 3, 2, 0, null, null],
+    [2, 0, 2, 0, null, null],
     [2, 3, 2, null, null, 2],
     [2, 3, 2, null, 0, null],
+  ]],
+  ['Do', 'C', 'MajorSeventh', ['Cmaj7', 'Cmaj7/E', 'Cmaj7/G', 'Cmaj7/B'], [
+    [0, 0, 0, null, 3, null], [3, 1, 4, null, null, 0],
+    [0, 1, 4, null, null, 3], [0, 1, 0, null, 2, null],
+  ]],
+  ['Re', 'D', 'MajorSeventh', ['Dmaj7', 'Dmaj7/F#', 'Dmaj7/A', 'Dmaj7/C#'], [
+    [2, 2, 2, 0, null, null], [5, 3, 6, null, null, 2],
+    [2, 3, 6, null, 0, null], [2, 3, 2, null, 4, null],
+  ]],
+  ['Mi', 'E', 'MajorSeventh', ['Emaj7', 'Emaj7/G#', 'Emaj7/B', 'Emaj7/D#'], [
+    [4, 4, 4, null, null, 0], [0, 4, 4, null, null, 4],
+    [0, 4, 1, null, 2, null], [0, 0, 1, 1, null, null],
+  ]],
+  ['Fa', 'F', 'MajorSeventh', ['Fmaj7', 'Fmaj7/A', 'Fmaj7/C', 'Fmaj7/E'], [
+    [0, 1, 2, null, null, 1], [0, 1, 5, null, 0, null],
+    [1, 5, 2, null, 3, null], [1, 1, 2, null, null, 0],
+  ]],
+  ['Sol', 'G', 'MajorSeventh', ['Gmaj7', 'Gmaj7/B', 'Gmaj7/D', 'Gmaj7/F#'], [
+    [2, 0, 0, null, null, 3], [2, 3, 0, null, 2, null],
+    [2, 0, 0, 0, null, null], [3, 3, 4, null, null, 2],
+  ]],
+  ['La', 'A', 'MajorSeventh', ['Amaj7', 'Amaj7/C#', 'Amaj7/E', 'Amaj7/G#'], [
+    [0, 2, 1, null, 0, null], [4, 5, 2, null, 4, null],
+    [4, 2, 2, null, null, 0], [0, 2, 2, null, null, 4],
+  ]],
+  ['Si', 'B', 'MajorSeventh', ['Bmaj7', 'Bmaj7/D#', 'Bmaj7/F#', 'Bmaj7/A#'], [
+    [2, 4, 3, null, 2, null], [2, 0, 3, 1, null, null],
+    [6, 4, 4, null, null, 2], [2, 4, 4, null, 1, null],
   ]],
 ];
 
@@ -133,7 +161,7 @@ const FINGERINGS = {
   Dm7: '1120--', 'Dm7/F': '1123--', 'Dm7/A': '112-0-', 'Dm7/C': '112-3-',
   E: '001--0', 'E/G#': '001--4', 'E/B': '001-2-',
   Em: '3002-0', 'Em/G': '000--3', 'Em/B': '000-2-',
-  E7: '001--0', 'E7/B': '041-2-',
+  E7: '041--0', 'E7/B': '041-2-',
   Em7: '112--0', 'Em7/G': '112--1', 'Em7/B': '224-1-', 'Em7/D': '1120--',
   F: '1123--', 'F/A': '112-0-', 'F/C': '112-3-',
   Fm: '1113--', 'Fm/Ab': '111--4', 'Fm/C': '111-3-',
@@ -149,8 +177,15 @@ const FINGERINGS = {
   Am7: '010-0-', 'Am7/C': '010-3-', 'Am7/E': '010--0', 'Am7/G': '010--3',
   B: '143-1-', 'B/D#': '2431--', 'B/F#': '134--1',
   Bm: '124-1-', 'Bm/D': '1240--', 'Bm/F#': '124--1',
-  B7: '403-2-', 'B7/D#': '4031--', 'B7/F#': '403--2',
-  Bm7: '131-1-', 'Bm7/D': '1310--', 'Bm7/F#': '131--1', 'Bm7/A': '131-0-',
+  B7: '141-1-', 'B7/D#': '4031--', 'B7/F#': '141--1',
+  Bm7: '131-1-', 'Bm7/D': '1020--', 'Bm7/F#': '131--1', 'Bm7/A': '131-0-',
+  Cmaj7: '000-3-', 'Cmaj7/E': '314--0', 'Cmaj7/G': '014--3', 'Cmaj7/B': '010-2-',
+  Dmaj7: '1110--', 'Dmaj7/F#': '324--1', 'Dmaj7/A': '124-0-', 'Dmaj7/C#': '121-4-',
+  Emaj7: '111--0', 'Emaj7/G#': '011--1', 'Emaj7/B': '041-2-', 'Emaj7/D#': '0011--',
+  Fmaj7: '012--1', 'Fmaj7/A': '014-0-', 'Fmaj7/C': '142-3-', 'Fmaj7/E': '112--0',
+  Gmaj7: '100--2', 'Gmaj7/B': '230-1-', 'Gmaj7/D': '1000--', 'Gmaj7/F#': '224--1',
+  Amaj7: '021-0-', 'Amaj7/C#': '341-3-', 'Amaj7/E': '411--0', 'Amaj7/G#': '011--3',
+  Bmaj7: '143-1-', 'Bmaj7/D#': '2031--', 'Bmaj7/F#': '422--1', 'Bmaj7/A#': '234-1-',
 };
 
 function chordPopover(id, name, form, strings) {

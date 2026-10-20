@@ -14,6 +14,7 @@ for (const locale of ['es', 'en']) {
       ['G', 'Minor', ['Gm', 'Gm/Bb', 'Gm/D']],
       ['A', 'Seventh', ['A7', 'A7/C#', 'A7/E', 'A7/G']],
       ['B', 'Minor', ['Bm', 'Bm/D', 'Bm/F#']],
+      ['C', 'MajorSeventh', ['Cmaj7', 'Cmaj7/E', 'Cmaj7/G', 'Cmaj7/B']],
     ]) {
       const section = html.split('<section').find((part) => part.includes('id="arpeggio-' + root + '-root"'))?.split('</section>')[0];
       assert.ok(section, root + ' group exists');

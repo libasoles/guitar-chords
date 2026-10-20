@@ -127,7 +127,7 @@ const PDFS = [
       assert.equal(await page.locator('.lead a').getAttribute('href'), pagePath('articulo-carcassi', locale));
       assert.equal(await page.locator('ascii-tabs[readonly]').count(), 28);
       const titles = await page.locator('figcaption').allTextContents();
-      assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Do menor', 'Do 7 mayor'] : ['C major', 'C minor', 'C major 7']);
+      assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Do menor', 'Do 7'] : ['C major', 'C minor', 'C 7']);
       const groups = await page.locator('ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
       groups.flat().forEach((form) => assert.equal(form.filter((f) => f !== null).length, 4));
       assert.deepEqual(groups[10][1], [0, 3, 1, null, 2, null]);
