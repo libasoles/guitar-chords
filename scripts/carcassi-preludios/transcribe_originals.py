@@ -117,7 +117,8 @@ def originals():
         return flow([low, chord, chord, chord], [(0, 8, low)], 2)
     scores[9] = [
         chords('E3', 'G#4+B4+E5'), chords('E3', 'A4+C#5+E5'),
-        flow(['-', '-', 'A4+D5+F5', 'A4+C#5+E5', 'A4+D5+F5', 'A4+C#5+E5', 'A4+D5+F5', 'A4+C#5+E5'], [(0, 8, 'E3')]),
+        # Bar 3: B–E dyads alternate with a single D natural, over the sustained E bass.
+        flow(['-', '-', 'B4+E5', 'D5', 'B4+E5', 'D5', 'B4+E5', 'D5'], [(0, 8, 'E3')]),
         chords('A3', 'A4+C#5+E5'), chords('A#3', 'G4+C#5+E5'), chords('B3', 'G#4+B4+E5'),
         chords('D4', 'A4+B4+F#5'), chords('E4', 'G4+B4+G5'),
         chords('D4', 'G4+B4+F5'), chords('C4', 'G4+C5+E5'),
