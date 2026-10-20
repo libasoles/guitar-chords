@@ -122,13 +122,13 @@ const PDFS = [
     for (const locale of ['es', 'en']) {
       const url = pagePath('articulo-tablaturas-arpegios', locale);
       await page.goto(base + url);
-      await page.waitForSelector('ascii-tabs .ascii-tabs-tab');
+      await page.waitForSelector('.arpeggio-group ascii-tabs .ascii-tabs-tab');
       assert.equal(await page.locator('h1').textContent(), locale === 'es' ? 'Tablaturas para arpegios' : 'Tabs for arpeggios');
       assert.equal(await page.locator('.lead a').getAttribute('href'), pagePath('articulo-carcassi', locale));
       assert.equal(await page.locator('ascii-tabs[readonly]').count(), 35);
-      const titles = await page.locator('figcaption').allTextContents();
+      const titles = await page.locator('.arpeggio-group figcaption').allTextContents();
       assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Do menor', 'Do 7'] : ['C major', 'C minor', 'C 7']);
-      const groups = await page.locator('ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
+      const groups = await page.locator('.arpeggio-group ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
       groups.flat().forEach((form) => assert.equal(form.filter((f) => f !== null).length, 4));
       assert.deepEqual(groups[12][1], [0, 3, 1, null, 2, null]);
       assert.equal(await page.locator('ascii-tabs[variant="flat"]').count(), groups.length);
@@ -139,9 +139,9 @@ const PDFS = [
       weights.forEach(({ string, weight }) => assert.equal(weight, string >= 3 ? '700' : '400'));
       if (locale === 'es') assert.match(await page.locator('.lead a').textContent(), /^descomposición/);
       // The names are annotation buttons above the strings, without underline.
-      assert.deepEqual(await page.locator('ascii-tabs').nth(7).locator('.ascii-tabs-annotations .arpeggio-chord').allTextContents(), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
+      assert.deepEqual(await page.locator('.arpeggio-group ascii-tabs').nth(7).locator('.ascii-tabs-annotations .arpeggio-chord').allTextContents(), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
       // The white paper starts below the names.
-      const [nameBottom, paperTop] = await page.locator('ascii-tabs').first().evaluate((el) => [
+      const [nameBottom, paperTop] = await page.locator('.arpeggio-group ascii-tabs').first().evaluate((el) => [
         el.querySelector('.arpeggio-chord').getBoundingClientRect().bottom,
         el.querySelector('.ascii-tabs-staff').getBoundingClientRect().bottom - parseFloat(getComputedStyle(el.querySelector('.ascii-tabs-staff'), '::before').height),
       ]);
@@ -152,6 +152,27 @@ const PDFS = [
         [2, 1, 2, null, 0, null], [2, 1, 2, null, 3, null],
       ]);
       assert.equal(await page.locator('.arpeggio-group').count(), 7);
+
+      // Note search: typed frets keep every chord of each root that has them, in one tab per root.
+      const toggle = page.locator('.arpeggio-search-toggle');
+      assert.equal(await page.locator('.arpeggio-search-popup').isHidden(), true);
+      await toggle.click();
+      await page.waitForFunction(() => document.activeElement && document.activeElement.classList.contains('ascii-tabs-input'));
+      await page.keyboard.type('0');
+      await page.keyboard.press('ArrowDown');
+      await page.keyboard.type('1');
+      await page.keyboard.press('ArrowRight');
+      assert.equal(await page.locator('.arpeggio-search ascii-tabs').evaluate((el) => el.value[0].length), 1);
+      assert.deepEqual(await page.locator('.arpeggio-group:visible .arpeggio-root').allTextContents(), locale === 'es' ? ['Do', 'Fa', 'La'] : ['C', 'F', 'A']);
+      assert.deepEqual(await page.locator('.arpeggio-group:visible').first().locator('.arpeggio-results .arpeggio-chord').allTextContents().then((names) => names.slice(0, 3)), ['C', 'C/E', 'C/G']);
+      assert.equal(await page.locator('.arpeggio-group:visible [role="tabpanel"]:visible').count(), 0);
+      await page.mouse.click(10, 700);
+      assert.equal(await page.locator('.arpeggio-search-popup').isHidden(), true);
+      assert.equal(await page.locator('.arpeggio-group:visible').count(), 3);
+      await toggle.click();
+      assert.equal(await page.locator('.arpeggio-group:visible').count(), 7);
+      assert.equal(await page.locator('.arpeggio-group:visible [role="tabpanel"]:visible').count(), 7);
+      assert.equal(await toggle.getAttribute('aria-label'), locale === 'es' ? 'Buscar por notas' : 'Search by notes');
       assert.equal(await page.locator('[role="tabpanel"]:visible').count(), 7);
       for (const [root, quality, names, chordNotes, bassNotes] of [
         ['C', 'MinorSeventh', ['Cm7', 'Cm7/Eb', 'Cm7/G', 'Cm7/Bb'], [0, 3, 7, 10], [0, 3, 7, 10]],
@@ -199,7 +220,7 @@ const PDFS = [
       await page.keyboard.press('Home');
       assert.equal(await qualityTabs.first().getAttribute('aria-selected'), 'true');
       // Every annotation opens its own exact four-string fingering, including inversions.
-      const buttons = page.locator('.arpeggio-chord');
+      const buttons = page.locator('[role="tabpanel"] .arpeggio-chord');
       assert.equal(await buttons.count(), groups.flat().length);
       for (let i = 0; i < await buttons.count(); i++) {
         const button = buttons.nth(i);

@@ -1157,7 +1157,7 @@ function renderPrivacyPage(template, strings, locale) {
 
 // Render a page of the articles section. These pages live one level deeper
 // (/articulos/x, /en/articles/x), so they load assets from the domain root.
-function renderArticlePage(strings, locale, slug, keys, bodyHtml, backHtml) {
+function renderArticlePage(strings, locale, slug, keys, bodyHtml, backHtml, headingActions = "") {
   let html = articleTemplate
     .split("%%ASSETS_PREFIX%%")
     .join("/assets/")
@@ -1171,6 +1171,8 @@ function renderArticlePage(strings, locale, slug, keys, bodyHtml, backHtml) {
     .join(strings[keys.meta])
     .split("%%PAGE_H1%%")
     .join(strings[keys.h1])
+    .split("%%PAGE_H1_ACTIONS%%")
+    .join(headingActions)
     .split("%%PAGE_LEAD%%")
     .join(strings[keys.lead])
     .split("%%ARTICLE_BACK%%")
@@ -1270,7 +1272,7 @@ function renderArpeggiosArticle(strings, locale) {
     meta: "artArpeggiosMetaDescription",
     h1: "artArpeggiosH1",
     lead: "artArpeggiosLead",
-  }, articleArpeggios.renderBody(locale, strings), back)
+  }, articleArpeggios.renderBody(locale, strings), back, articleArpeggios.searchControl(strings))
     .split("%%CARCASSI_HREF%%").join(pagePath(ARTICLE_CARCASSI_SLUG, locale));
 }
 

@@ -236,7 +236,36 @@ function renderBody(locale, strings) {
       }).join('') + '</section>';
   });
   return '<p>' + strings.artArpeggiosIntro + '</p><div class="sequence-forms">' +
-    tabs.join('') + '</div>' + popovers.join('') + CHORD_CARD_LOADER + TAB_LOADER + QUALITY_TABS_LOADER;
+    tabs.join('') + '</div>' + popovers.join('') + CHORD_CARD_LOADER + TAB_LOADER + QUALITY_TABS_LOADER +
+    searchIndex(locale, strings) + SEARCH_LOADER;
+}
+
+// Every chord form per root, in page order, for the note search.
+function searchIndex(locale, strings) {
+  const roots = new Map();
+  GROUPS.forEach(function ([es, en, , names, forms], group) {
+    if (!roots.has(en)) roots.set(en, { id: 'arpeggio-' + en, chords: [] });
+    names.forEach(function (name, i) {
+      roots.get(en).chords.push({ name, form: forms[i], popover: 'arpeggio-chord-' + group + '-' + i });
+    });
+  });
+  const data = { locale, showFingering: strings.artArpeggiosShowFingering, roots: Array.from(roots.values()) };
+  return '<script type="application/json" id="arpeggio-search-data">' + JSON.stringify(data).replace(/</g, '\\u003c') + '</script>';
+}
+
+// lucide "search" and "x".
+const SEARCH_ICON = '<svg class="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>';
+const CLEAR_ICON = '<svg class="icon-clear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+
+// Beside the page title: the trigger and the narrow popup with a one-column tab to write notes in.
+function searchControl(strings) {
+  return '<div class="arpeggio-search">' +
+    '<button type="button" class="arpeggio-search-toggle" aria-label="' + strings.artArpeggiosSearch + '" aria-expanded="false" data-search="' +
+    strings.artArpeggiosSearch + '" data-clear="' + strings.artArpeggiosClearSearch + '">' + SEARCH_ICON + CLEAR_ICON + '</button>' +
+    '<div class="arpeggio-search-popup" role="dialog" aria-label="' + strings.artArpeggiosSearch + '" hidden>' +
+    '<ascii-tabs class="article-tab" theme="light" labels="notes" spacing="3"><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs></div></div>';
 }
 
 // Each root keeps its own selection. Arrow keys follow the horizontal tab pattern.
@@ -268,6 +297,117 @@ document.querySelectorAll('.arpeggio-group').forEach(function(group) {
 });
 </script>`;
 
+// Typed frets (string -> fret) keep, per root, every chord that has them all. Matches replace the quality tabs
+// with a single tab per root.
+const SEARCH_LOADER = `<script>
+(function() {
+  var search = document.querySelector('.arpeggio-search');
+  var toggle = search.querySelector('.arpeggio-search-toggle');
+  var popup = search.querySelector('.arpeggio-search-popup');
+  var input = popup.querySelector('ascii-tabs');
+  var data = JSON.parse(document.getElementById('arpeggio-search-data').textContent);
+  var EMPTY = [[null, null, null, null, null, null]];
+  var query = [];
+  var open = false;
+
+  function fretOf(note) { return note !== null && typeof note === 'object' ? note.fret : note; }
+  function active() { return query.some(function(fret) { return fret !== null; }); }
+
+  function render() {
+    var on = active();
+    toggle.setAttribute('aria-label', on || open ? toggle.dataset.clear : toggle.dataset.search);
+    toggle.setAttribute('aria-expanded', String(open));
+    search.classList.toggle('is-active', on || open);
+    popup.hidden = !open;
+  }
+
+  function filter() {
+    var on = active();
+    data.roots.forEach(function(root) {
+      var section = document.getElementById(root.id + '-root').closest('.arpeggio-group');
+      var results = section.querySelector('.arpeggio-results');
+      var matches = root.chords.filter(function(chord) {
+        return query.every(function(fret, s) { return fret === null || chord.form[s] === fret; });
+      });
+      section.classList.toggle('is-filtering', on);
+      section.hidden = on && !matches.length;
+      if (!results && on) {
+        results = document.createElement('figure');
+        results.className = 'form tab-figure arpeggio-results';
+        results.innerHTML = '<ascii-tabs class="article-tab" readonly theme="light" labels="notes" spacing="3" variant="flat" lang="' + data.locale + '"><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>';
+        section.appendChild(results);
+      }
+      if (!on) { if (results) results.hidden = true; return; }
+      results.hidden = false;
+      var columns = [];
+      var annotations = [];
+      matches.forEach(function(chord, i) {
+        if (i > 0) columns.push([null, null, null, null, null, null]);
+        annotations.push({ column: columns.length, text: chord.name, html: '<button type="button" class="arpeggio-chord" popovertarget="' + chord.popover + '" aria-label="' + data.showFingering + ' ' + chord.name + '">' + chord.name + '</button>' });
+        columns.push(chord.form.map(function(fret, s) { return fret === null ? null : { fret: fret, bold: s >= 3 }; }));
+      });
+      results.style.setProperty('--chars', Math.max(23, 4 * columns.length + 3));
+      var tab = results.querySelector('ascii-tabs');
+      customElements.whenDefined('ascii-tabs').then(function() {
+        tab.setDocument({ value: [columns], annotations: [annotations] });
+      });
+    });
+  }
+
+  // Focus is given by replaying a press on the first cell, which has no real pointer to capture.
+  input.setPointerCapture = function() {};
+
+  function focusFirstCell() {
+    var cell = input.querySelector('.ascii-tabs-cell');
+    if (cell) cell.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerType: 'touch' }));
+    document.dispatchEvent(new PointerEvent('pointerup', { pointerType: 'touch' }));
+  }
+
+  function resetInput() {
+    input.setDocument({ value: [EMPTY.map(function(column) { return column.slice(); })] });
+  }
+
+  customElements.whenDefined('ascii-tabs').then(resetInput);
+
+  // One column only: sideways keys never reach the tab, and Enter confirms the search.
+  input.addEventListener('keydown', function(event) {
+    if (['ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].indexOf(event.key) === -1) return;
+    event.stopPropagation();
+    if (event.key === 'Enter') { event.preventDefault(); open = false; render(); toggle.focus(); }
+    else if (event.key !== 'Tab') event.preventDefault();
+  }, true);
+
+  input.addEventListener('change', function(event) {
+    var tab = event.detail.value[0] || [];
+    query = (tab[0] || EMPTY[0]).map(function(note) { return note === null ? null : fretOf(note); });
+    filter();
+    render();
+    if (tab.length > 1) {
+      input.setDocument({ value: [[(tab[0] || EMPTY[0]).slice()]] });
+      focusFirstCell();
+    }
+  });
+
+  toggle.addEventListener('click', function() {
+    if (active() || open) {
+      query = [];
+      open = false;
+      resetInput();
+      filter();
+    } else {
+      open = true;
+    }
+    render();
+    if (open) customElements.whenDefined('ascii-tabs').then(function() { requestAnimationFrame(focusFirstCell); });
+  });
+
+  document.addEventListener('pointerdown', function(event) {
+    // The path is fixed at dispatch: the tab re-renders its cells, so the target may be detached by now.
+    if (open && !event.composedPath().includes(search)) { open = false; render(); }
+  });
+})();
+</script>`;
+
 function cardImage() {
   return {
     src: path.join(__dirname, '../../src/site/articles/arpeggios/preview.svg'),
@@ -276,4 +416,4 @@ function cardImage() {
   };
 }
 
-module.exports = { renderBody, cardImage };
+module.exports = { renderBody, cardImage, searchControl };
