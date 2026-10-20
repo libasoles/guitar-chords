@@ -4728,7 +4728,7 @@
       <note>
         <pitch>
           <step>B</step>
-          <octave>2</octave>
+          <octave>4</octave>
         </pitch>
         <duration>20160</duration>
         <voice>2</voice>
@@ -4737,7 +4737,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>5</string><fret>2</fret>
+            <string>1</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -4850,7 +4850,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>6</fret>
+            <string>3</string><fret>1</fret>
           </technical>
         </notations>
       </note>

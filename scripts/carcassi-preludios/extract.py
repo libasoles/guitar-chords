@@ -363,8 +363,17 @@ def build(number):
         exported = os.path.join(tmp, "export")
         with open(os.path.join(prepared, tabify.SUGGESTION_NAME), encoding="utf-8") as f:
             suggestion = json.load(f)
+        tabs = avoid_repeated_strings(suggestion["tabs"], tabify.open_midis(tabify.STANDARD_TUNING))
+        if EDITION == "carcassi" and number == 9:
+            # Requested TAB voicing: raise the B bass two octaves in m. 15,
+            # and play G# on the third string in the closing chord (m. 16).
+            for measure, old_string, old_fret, new_string, new_fret in [(14, 4, 2, 0, 7), (15, 3, 6, 2, 1)]:
+                for column in tabs[measure]:
+                    if column[old_string] == old_fret:
+                        column[old_string] = None
+                        column[new_string] = new_fret
         tabify.export(os.path.join(prepared, tabify.NORMALIZED_NAME), os.path.join(prepared, tabify.SUGGESTION_NAME),
-                      avoid_repeated_strings(suggestion["tabs"], tabify.open_midis(tabify.STANDARD_TUNING)),
+                      tabs,
                       "standard", exported, title=title, subtitle=subtitle)
         write_preview(number, prepared, exported)
         with open(os.path.join(exported, "score.musicxml"), encoding="utf-8") as f:
