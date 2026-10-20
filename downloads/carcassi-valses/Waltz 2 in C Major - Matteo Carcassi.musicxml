@@ -3565,12 +3565,6 @@
       <backup>
         <duration>10080</duration>
       </backup>
-      <direction placement="above">
-        <direction-type>
-          <words font-weight="bold" justify="right">Fine</words>
-        </direction-type>
-        <staff>2</staff>
-      </direction>
       <note>
         <pitch>
           <step>C</step>
@@ -5813,12 +5807,6 @@
       <backup>
         <duration>10080</duration>
       </backup>
-      <direction placement="above">
-        <direction-type>
-          <words font-weight="bold" justify="right">D.C. al Fine</words>
-        </direction-type>
-        <staff>2</staff>
-      </direction>
       <note>
         <pitch>
           <step>C</step>

@@ -533,7 +533,7 @@ def build_tab_staff(part, measures, tuning):
     tab = copy.deepcopy(part)
     drop = (m21.clef.Clef, m21.key.KeySignature, m21.meter.TimeSignature, m21.spanner.Spanner,
             m21.expressions.TextExpression, m21.tempo.TempoIndication, m21.dynamics.Dynamic,
-            m21.expressions.RehearsalMark, m21.layout.LayoutBase)
+            m21.expressions.RehearsalMark, m21.repeat.RepeatExpression, m21.layout.LayoutBase)
     for el in list(tab.recurse().getElementsByClass(drop)):
         el.activeSite.remove(el)
     first = tab.getElementsByClass(m21.stream.Measure).first()

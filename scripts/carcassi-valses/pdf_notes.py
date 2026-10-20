@@ -111,7 +111,7 @@ def read_system(lines, glyph, stems, bars, thick, beams):
     inside_bars = sorted({round(r.x0, 1) for r in bars if r.y0 <= top + 0.5 and r.y1 >= bottom - 0.5 and r.y1 < bottom + 3 * space})
     thick_x = sorted(round(r.x0, 1) for r in thick if r.y0 <= top + 0.5 and r.y1 >= bottom - 0.5 and r.y1 < bottom + 3 * space)
     edges = []
-    for x in sorted(set([start] + [x for x in inside_bars if x > start + 1] + thick_x)):
+    for x in sorted(set([start] + [x for x in inside_bars + thick_x if x > start + 1])):
         if not edges or x - edges[-1] > 8:
             edges.append(x)
     repeat_dots = [g for g in inside if g[0] == 0xE044]
@@ -121,7 +121,8 @@ def read_system(lines, glyph, stems, bars, thick, beams):
         m['repeat_start'] = any(a - 3 <= d[1] <= a + 14 for d in repeat_dots) and any(abs(a - t) < 8 for t in thick_x)
         m['repeat_end'] = any(b - 14 <= d[1] <= b + 3 for d in repeat_dots) and any(abs(b - t) < 12 for t in thick_x)
         m['end_x'] = b
-        measures.append(m)
+        if m['items'] or m['rests'] or b - a > 25:
+            measures.append(m)  # un tramo vacio y estrecho es la barra de repeticion junto a la armadura
     return {'key': key, 'time': time, 'measures': measures}
 
 
