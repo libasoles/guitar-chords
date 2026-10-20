@@ -6,6 +6,8 @@
   --paper: #fdfaf5;
   --rule: #d8d2c4;
   --accent: #8b0000;
+  /* Logo pink-red: for borders, fills and buttons. Too light for body text. */
+  --accent-brand: #d85b70;
   --note-selected: #1f5c66;
   --blue-france: #0066cc;
   /* Logo palette (guitar-player-cubist-left-head.svg). */
@@ -207,10 +209,10 @@ p {
 a {
   color: var(--accent);
   text-decoration: none;
-  border-bottom: 1px solid rgba(139, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(216, 91, 112, 0.5);
 }
 a:hover {
-  border-bottom-color: var(--accent);
+  border-bottom-color: var(--accent-brand);
 }
 
 .lead {
