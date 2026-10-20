@@ -27,7 +27,7 @@ body {
   color: var(--ink);
   background: var(--paper);
   max-width: var(--max-width);
-  margin: 1.5rem auto 6rem;
+  margin: 1.5rem auto 2rem;
   padding: 0 1.5rem;
   line-height: 1.55;
   font-size: 19px;
