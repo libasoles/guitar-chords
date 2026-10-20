@@ -1459,7 +1459,12 @@
     return /\.(pdf|mxl|musicxml|xml)$/i.test(name);
   }
 
+  // Remember the rights confirmation so returning visitors find it ticked.
+  var RIGHTS_KEY = 'partitura.rights';
+  try { rightsBox.checked = window.localStorage.getItem(RIGHTS_KEY) === '1'; } catch (e) { /* ignore */ }
+
   rightsBox.addEventListener('change', function () {
+    try { window.localStorage.setItem(RIGHTS_KEY, rightsBox.checked ? '1' : '0'); } catch (e) { /* ignore */ }
     setBusy(false);
     showError('');
     clearRightsError();
