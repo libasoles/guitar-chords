@@ -181,6 +181,16 @@ const PDFS = [
       assert.equal(await page.locator('.arpeggio-group:visible [role="tabpanel"]:visible').count(), 7);
       assert.equal(await toggle.getAttribute('aria-label'), locale === 'es' ? 'Buscar por notas' : 'Search by notes');
       assert.equal(await page.locator('[role="tabpanel"]:visible').count(), 7);
+      // Footer button: clears the typed notes, keeps the popup open and puts the cursor back on the first string.
+      await toggle.click();
+      await page.waitForFunction(() => document.activeElement && document.activeElement.classList.contains('ascii-tabs-input'));
+      await page.keyboard.type('0');
+      await page.locator('.arpeggio-search-clear').click();
+      assert.equal(await page.locator('.arpeggio-group:visible').count(), 7);
+      assert.equal(await page.locator('.arpeggio-search-popup').isVisible(), true);
+      assert.equal(await page.locator('.arpeggio-search ascii-tabs').evaluate((el) => (el.value[0][0] || []).every((n) => n === null)), true);
+      await page.waitForFunction(() => document.activeElement && document.activeElement.classList.contains('ascii-tabs-input'));
+      await toggle.click();
       for (const [root, quality, names, chordNotes, bassNotes] of [
         ['C', 'MinorSeventh', ['Cm7', 'Cm7/Eb', 'Cm7/G', 'Cm7/Bb'], [0, 3, 7, 10], [0, 3, 7, 10]],
         ['D', 'MinorSeventh', ['Dm7', 'Dm7/F', 'Dm7/A', 'Dm7/C'], [2, 5, 9, 0], [2, 5, 9, 0]],

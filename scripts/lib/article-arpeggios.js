@@ -266,7 +266,8 @@ function searchControl(strings) {
     '<button type="button" class="arpeggio-search-toggle" aria-label="' + strings.artArpeggiosSearch + '" aria-expanded="false" data-search="' +
     strings.artArpeggiosSearch + '" data-clear="' + strings.artArpeggiosClearSearch + '">' + SEARCH_ICON + CLEAR_ICON + '</button>' +
     '<div class="arpeggio-search-popup" role="dialog" aria-label="' + strings.artArpeggiosSearch + '" hidden>' +
-    '<ascii-tabs class="article-tab" theme="light" labels="notes" spacing="3"><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs></div></div>';
+    '<ascii-tabs class="article-tab" theme="light" labels="notes" spacing="3"><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>' +
+    '<div class="arpeggio-search-footer"><button type="button" class="arpeggio-search-clear">' + strings.artArpeggiosClearNotes + '</button></div></div></div>';
 }
 
 // Each root keeps its own selection. Arrow keys follow the horizontal tab pattern.
@@ -404,6 +405,14 @@ const SEARCH_LOADER = `<script>
     }
     render();
     if (open) customElements.whenDefined('ascii-tabs').then(function() { requestAnimationFrame(focusFirstCell); });
+  });
+
+  popup.querySelector('.arpeggio-search-clear').addEventListener('click', function() {
+    query = [];
+    resetInput();
+    filter();
+    render();
+    requestAnimationFrame(focusFirstCell);
   });
 
   document.addEventListener('pointerdown', function(event) {
