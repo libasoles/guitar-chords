@@ -8,6 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 const { modal, CLOSE_ICON } = require('./modal');
+const { escapeAttr, inlineScore, glyphDefs, DOWNLOAD_ICON } = require('./score-svg');
 
 const ROOT = path.join(__dirname, '..', '..');
 function createEdition(edition) {
@@ -41,43 +42,6 @@ function createEdition(edition) {
     if (locale === 'en') return prelude.tonic + ' ' + (prelude.mode === 'Major' ? 'major' : 'minor');
     const k = KEYS.es;
     return k[prelude.tonic[0]] + accidental + ' ' + k[prelude.mode];
-  }
-
-  function escapeAttr(text) {
-    return String(text).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-  }
-
-  /* Cada vista previa lleva su propio <defs> (clave, cabezas, alteraciones), metadatos y estilos de Verovio: con
-     16 tarjetas la pagina pesaba 620 KB. Se quitan los metadatos y los estilos (las reglas que hacen falta
-     estan en 11-articles.css) y las glifos, identicos entre previews, se declaran una sola vez en la pagina. */
-  const GLYPH_SUFFIX = /(E[0-9A-F]{3,4})-[a-z0-9]{6,9}/g;
-
-  function slimScore(svg, sharedGlyphs) {
-    return svg
-      .replace(GLYPH_SUFFIX, '$1')
-      .replace(/<desc>[\s\S]*?<\/desc>/g, '')
-      .replace(/<title\b[^>]*>[\s\S]*?<\/title>/g, '')
-      .replace(/<style\b[\s\S]*?<\/style>/g, '')
-      .replace(/<defs>([\s\S]*?)<\/defs>/g, function (_, body) {
-        for (const glyph of body.matchAll(/<g id="(E[0-9A-F]{3,4})">[\s\S]*?<\/g>/g)) {
-          sharedGlyphs.set(glyph[1], glyph[0].replace(/>\s+</g, '><'));
-        }
-        return '';
-      })
-      .replace(/ data-class="[^"]*"/g, '')
-      .replace(/ class="(?!(?:fing|tabDurSym|tabRhythm)")[^"]*"/g, '')
-      .replace(/ overflow="visible"/g, '')
-      .replace(/ id="[a-z0-9]{6,9}"/g, '');
-  }
-
-  /* El SVG de Verovio sin saltos entre etiquetas y sin tamano fijo: se escala al ancho de la tarjeta. */
-  function inlineScore(svg, alt, sharedGlyphs) {
-    return slimScore(svg, sharedGlyphs)
-      .trim()
-      .replace(/>\s+</g, '><')
-      .replace(/^<svg\b([^>]*)>/, function (_, attrs) {
-        return '<svg class="score-svg"' + attrs + ' role="img" aria-label="' + escapeAttr(alt) + '">';
-      });
   }
 
   const PITCH_CLASS = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
@@ -134,9 +98,6 @@ function createEdition(edition) {
       : [];
   }
 
-  const DOWNLOAD_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
-    'stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>';
-
   function fullScore(prelude, name, href, strings, all, locale) {
     const pages = pageFiles(prelude).map((file, i, all) => {
       const head = fs.readFileSync(path.join(FULL_DIR, file), 'utf8').slice(0, 300);
@@ -163,8 +124,7 @@ function createEdition(edition) {
     const sharedGlyphs = new Map();
     const all = publishedPreludes();
     const cards = all.map((p) => card(p, locale, strings, sharedGlyphs, all)).join('');
-    const glyphs = '<svg class="score-glyphs" width="0" height="0" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" ' +
-      'xmlns:xlink="http://www.w3.org/1999/xlink"><defs>' + Array.from(sharedGlyphs.values()).join('') + '</defs></svg>';
+    const glyphs = glyphDefs(sharedGlyphs);
     /* Un popover abierto desde dentro de otro queda apilado; el boton de la tonalidad relativa cierra el actual. */
     const closer = '<script>document.querySelectorAll(".modal-key").forEach(function(b){b.addEventListener("click",function(){' +
       'b.closest("[popover]").hidePopover();});});</script>';

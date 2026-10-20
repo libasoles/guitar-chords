@@ -8,6 +8,7 @@ const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
 const { serveStatic } = require('../scripts/lib/static-server');
 const { pagePath } = require('../scripts/lib/slugs');
 const { publishedPreludes, santisteban } = require('../scripts/lib/article-carcassi-preludes');
+const progressive = require('../scripts/lib/article-carcassi-progressive');
 
 const DIST = path.join(__dirname, '..', 'dist/site');
 const BASE_URL = 'https://acordesdeguitarra.com.ar';
@@ -34,7 +35,7 @@ const PDFS = [
 
       // Index: one card per article, linking to it.
       await page.goto(base + index);
-      assert.equal(await page.locator('.article-card').count(), 5);
+      assert.equal(await page.locator('.article-card').count(), 6);
       assert.equal(await page.locator('.article-card').first().getAttribute('href'), article);
       assert.equal(await page.locator('.article-card').nth(1).getAttribute('href'), pagePath('articulo-preludios-carcassi', locale));
       assert.match(await page.locator('.article-card p').first().textContent(), /Carcassi/);
@@ -387,6 +388,43 @@ const PDFS = [
         ['es', 'en'].forEach((l) => assert.ok(links.some(([lang, href]) => lang === l && href === BASE_URL + pagePath(editionKey, l))));
       }
 
+    }
+
+    // Progressive pieces: one card per published piece, in numeric order, with a score modal and a PDF download.
+    {
+      const published = progressive.publishedPieces();
+      for (const locale of ['es', 'en']) {
+        const url = pagePath('articulo-piezas-progresivas-carcassi', locale);
+        await page.setViewportSize({ width: 1280, height: 800 });
+        await page.goto(base + url);
+        const cards = page.locator('.prelude-card');
+        assert.equal(await cards.count(), published.length);
+        const hrefs = await page.locator('.prelude-card > .example-download').evaluateAll((els) => els.map((el) => decodeURIComponent(el.getAttribute('href'))));
+        assert.deepEqual(hrefs.map((href) => href.split('/').pop()), published.map((p) => p.pdf));
+        const titles = await cards.locator('.prelude-open').allTextContents();
+        titles.forEach((title, i) => assert.match(title, new RegExp('^' + (locale === 'es' ? 'Pieza ' : 'Piece ') + published[i].number + ': ')));
+        assert.equal(await cards.locator('svg.score-svg').count(), published.length);
+        assert.equal(await page.locator('.article-back a[href="' + pagePath('articulos', locale) + '"]').count(), 1);
+        assert.equal(await page.locator('main a[href="' + pagePath('articulo-preludios-carcassi', locale) + '"]').count(), 1);
+        await cards.first().click();
+        const modal = page.locator('.modal-full:popover-open');
+        assert.equal(await modal.count(), 1);
+        const first = modal.locator('img.modal-page').first();
+        await first.evaluate((img) => img.decode());
+        assert.ok(await first.evaluate((img) => img.naturalWidth > 0));
+        assert.match(await first.getAttribute('src'), /\/full\/progressive-01-p1(?:\.[a-f0-9]+)?\.svg$/);
+        assert.equal(decodeURIComponent(await modal.locator('.modal-footer .modal-download').getAttribute('href')).split('/').pop(), published[0].pdf);
+        await modal.locator('.modal-close').click();
+        assert.equal(await page.locator('.modal-full:popover-open').count(), 0);
+        await page.setViewportSize({ width: 375, height: 800 });
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+        assert.ok(overflow <= 0, 'scroll horizontal de ' + overflow + 'px en ' + url);
+        const tab = await context.newPage();
+        await tab.goto(base + url);
+        const [download] = await Promise.all([tab.waitForEvent('download'), tab.locator('.prelude-card > .example-download').first().click()]);
+        assert.equal(download.suggestedFilename(), published[0].pdf);
+        await tab.close();
+      }
     }
 
     // The home pages link to the section only from the hamburger menu.

@@ -45,6 +45,7 @@ GUITAR_LOWEST = 38  # D2, the 6th string in Drop D
 # Share of notes below the written guitar range that marks a score as already in sound.
 # One misread note (OMR noise) must not flip a whole piece an octave.
 IN_SOUND_SHARE = 0.05
+KEEP_TEXT = False  # keep <words> directions; off for uploads, where they are OCR noise
 
 PREVIEW_OPTIONS = {
     "pageWidth": 2100, "pageHeight": 60000, "scale": 40, "adjustPageHeight": True,
@@ -154,8 +155,11 @@ def load_score(paths):
             n.lyrics = []
         # The same text can arrive as free text directions (<words>); only the
         # header credits are kept, so drop every other printed text.
+        # Curated scores (the site's Carcassi collections) set KEEP_TEXT to print their tempo and D.C. marks.
         for el in list(score.recurse().getElementsByClass(
                 (m21.expressions.TextExpression, m21.expressions.RehearsalMark, m21.tempo.TempoIndication))):
+            if KEEP_TEXT and isinstance(el, m21.expressions.TextExpression):
+                continue
             el.activeSite.remove(el)
     part = scores[0].parts[0]
     first = part.getElementsByClass(m21.stream.Measure).first()
