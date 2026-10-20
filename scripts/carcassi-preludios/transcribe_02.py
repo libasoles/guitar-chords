@@ -1,4 +1,4 @@
-"""MusicXML corregido del Preludio 2 (La menor), transcrito a mano de la imagen.
+"""Edición Santisteban: MusicXML del Preludio 2 (La menor), transcrito a mano de la imagen.
 
 homr leyó los 8 compases con las alturas casi correctas, pero los dedos aparecieron como
 alteraciones y octavas absurdas (`Ab4`, `Cb5`) y no conservó dedos ni alteraciones reales.
@@ -10,7 +10,7 @@ import os
 
 from transcribe_lib import bass, slots, write
 
-TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "corrected", "prelude-02.musicxml")
+TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "santisteban", "prelude-02.musicxml")
 N = None  # celda ocupada por el bajo
 
 MEASURES = [

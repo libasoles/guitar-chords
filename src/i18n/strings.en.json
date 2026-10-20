@@ -491,13 +491,20 @@
   "artFormDecomposedCarcassi": "Carcassi’s decomposed form",
   "artPreludesPageTitle": "Carcassi’s Preludes · Guitar Chords",
   "artPreludesH1": "Carcassi’s Preludes",
-  "artPreludesMetaDescription": "Preludes in progressive keys from Matteo Carcassi’s Complete Method for Guitar, Op. 59: preview and PDF download with sheet music and tab.",
+  "artPreludesMetaDescription": "The sixteen original preludes from Matteo Carcassi’s Complete Method for Guitar, Op. 59, with sheet music and tablature to download as PDF.",
   "artPreludesCardSummary": "The Preludes in progressive keys from Carcassi’s Op. 59, with sheet music and tab to download",
-  "artPreludesLead": "Sixteen preludes in progressive keys from Matteo Carcassi’s (1792–1853) Complete Method for Guitar, Op. 59, with sheet music and tab to download.",
+  "artPreludesLead": "Sixteen original preludes from Matteo Carcassi’s (1792–1853) Complete Method for Guitar, Op. 59, with sheet music and tab to download.",
   "artPreludesDownload": "Download PDF",
   "artPreludesView": "View the score of",
   "artPreludesRelativeMinor": "Relative minor",
   "artPreludesRelativeMajor": "Relative major",
   "artPreludesDominant": "Dominant",
-  "artPreludesAltPrefix": "First measures of"
+  "artPreludesAltPrefix": "First measures of",
+  "artPreludesOriginalLink": "View Carcassi’s original preludes",
+  "artPreludesSantistebanLink": "View Santisteban’s revision",
+  "artSantistebanPageTitle": "Carcassi’s Preludes: Santisteban’s Revision · Guitar Chords",
+  "artSantistebanH1": "Carcassi’s Preludes: Santisteban’s Revision",
+  "artSantistebanMetaDescription": "Carcassi’s sixteen preludes in G. C. Santisteban’s 1906 revision, with sheet music and tablature to download as PDF.",
+  "artSantistebanLead": "Sixteen preludes from Carcassi’s method in G. C. Santisteban’s revision, with sheet music and tab to download.",
+  "artSantistebanCardSummary": "Santisteban’s 1906 revision, with sheet music and tab to download"
 }

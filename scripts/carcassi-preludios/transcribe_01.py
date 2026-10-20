@@ -1,4 +1,4 @@
-"""MusicXML corregido del Preludio 1 (Do mayor), transcrito a mano de la imagen.
+"""Edición Santisteban: MusicXML del Preludio 1 (Do mayor), transcrito a mano de la imagen.
 
 homr leyó los 8 compases pero confundió los números de dedo con notas (C-14, D-15...)
 y duplicó voces; ver informe de calidad. Este script es la corrección: cada compás es
@@ -11,7 +11,7 @@ p-i-m-a (`pluck`) como en la edición.
 import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-TARGET = os.path.join(ROOT, "scripts", "carcassi-preludios", "corrected", "prelude-01.musicxml")
+TARGET = os.path.join(ROOT, "scripts", "carcassi-preludios", "santisteban", "prelude-01.musicxml")
 
 # note = (pitch, left-hand finger | None, pluck letter | None)
 N = lambda p, f=None, l=None: (p, f, l)  # noqa: E731

@@ -1,4 +1,4 @@
-"""MusicXML corregido del Preludio 7 (La mayor, 6/8), transcrito a mano de la imagen.
+"""Edición Santisteban: MusicXML del Preludio 7 (La mayor, 6/8), transcrito a mano de la imagen.
 
 Las alturas salen de `detect_notes.py`; bajos huecos, dedos, alteraciones y el acorde final se leyeron a ojo.
 Ver reports/prelude-07.md.
@@ -9,7 +9,7 @@ import os
 
 from transcribe_lib import bass, slots, write
 
-TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "corrected", "prelude-07.musicxml")
+TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "santisteban", "prelude-07.musicxml")
 N = None  # celda ocupada por el bajo
 KEY_FIFTHS = 3  # Fa#, Do#, Sol#
 

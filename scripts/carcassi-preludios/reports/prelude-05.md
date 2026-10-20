@@ -1,4 +1,4 @@
-# Informe de calidad: Preludio 5 en Re mayor
+# Informe de calidad: Preludio 5 en Re mayor (Santisteban)
 
 | | |
 |---|---|
@@ -11,7 +11,7 @@
 - Por mitad de compás: bajo de blanca (voz 2) y siete semicorcheas (voz 1).
 - Fuera de la armadura: re♯ del bajo (c. 1), do natural (c. 4) y sol♯ (c. 5); el sol natural del c. 2 y c. 4 no necesita signo.
 - Compás 8: re4 de blanca, re4 de negra y silencio de negra en las dos voces.
-- Se dudó entre mi4 y re4 en el bajo de la segunda mitad del compás 5: se eligió mi4 por armonía (acorde de Mi).
+- Cotejo con la fuente LilyPond de Mutopia: el compás 5 lleva re5 en los arpegios y mi3/mi4 en los bajos; el segundo bajo del compás 7 es fa#4. Se corrigieron los si4 y el la4 erróneos de nuestra transcripción.
 
 ## Verificación
 

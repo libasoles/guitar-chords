@@ -1,4 +1,4 @@
-"""MusicXML corregido del Preludio 6 (Si menor, 3/4 con tresillos), transcrito a mano de la imagen.
+"""Edición Santisteban: MusicXML del Preludio 6 (Si menor, 3/4 con tresillos), transcrito a mano de la imagen.
 
 Las alturas de las corcheas salen de `detect_notes.py`; bajos, dedos, alteraciones y ligadura se leyeron
 a ojo. Ver reports/prelude-06.md.
@@ -10,7 +10,7 @@ import os
 from transcribe_lib import bass, slots
 from transcribe_triplets import write
 
-TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "corrected", "prelude-06.musicxml")
+TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "santisteban", "prelude-06.musicxml")
 N = None  # posicion 0: la ocupa el bajo, unido a la barra del primer tresillo
 KEY_FIFTHS = 2  # Fa#, Do#
 

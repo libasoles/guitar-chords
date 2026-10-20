@@ -1,4 +1,4 @@
-"""MusicXML corregido del Preludio 4 (Mi menor, 6/8), transcrito a mano de la imagen.
+"""Edición Santisteban: MusicXML del Preludio 4 (Mi menor, 6/8), transcrito a mano de la imagen.
 
 Ver reports/prelude-04.md.
 
@@ -8,7 +8,7 @@ import os
 
 from transcribe_lib import bass, slots, write
 
-TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "corrected", "prelude-04.musicxml")
+TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "santisteban", "prelude-04.musicxml")
 N = None  # celda ocupada por el bajo
 KEY_FIFTHS = 1  # Fa#
 
@@ -28,8 +28,8 @@ MEASURES = [
     measure(("C4:4", "A4:3", "C5:1", "E5", "A4", "C5"), ("A3", "A4", "C5", "F#5:4", "A4", "C5")),
     measure(("B3:2", "G4", "B4", "E5", "G4", "B4"), ("B3", "A4:3", "B4", "F#5:4", "A4", "B4")),
     # 8: cierre, mi4 grave y armonico de mi (12 traste, cuerda 1) con calderon
-    {"bass": bass((0, 6, "E3"), (6, 6, "E4")),
-     "up": slots([N, "G4", "B4", "E5", "G4", "B4"]) + [(6, 6, "E6*", None)]},
+    {"bass": bass((0, 6, "E3"), (6, 4, "E4")),
+     "up": slots([N, "G4", "B4", "E5", "G4", "B4"]) + [(9, 3, "E6*", None)]},
 ]
 
 if __name__ == "__main__":

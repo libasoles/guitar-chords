@@ -1,4 +1,4 @@
-"""MusicXML corregido del Preludio 3 (Sol mayor), transcrito a mano de la imagen.
+"""Edición Santisteban: MusicXML del Preludio 3 (Sol mayor), transcrito a mano de la imagen.
 
 homr leyó los 7 compases con el ritmo coherente, pero los dedos aparecieron como
 alteraciones y octavas absurdas (`Gb3`, `Cb5`) y el final quedó duplicado.
@@ -10,7 +10,7 @@ import os
 
 from transcribe_lib import bass, slots, write
 
-TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "corrected", "prelude-03.musicxml")
+TARGET = os.path.join(os.path.dirname(os.path.abspath(__file__)), "santisteban", "prelude-03.musicxml")
 N = None  # celda ocupada por el bajo
 KEY_FIFTHS = 1  # Sol mayor: Fa#
 
