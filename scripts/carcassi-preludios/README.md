@@ -43,8 +43,8 @@ scripts/carcassi-preludios/build_one.sh 5 santisteban
 Cada grabado produce PDF y MusicXML con notación y TAB en
 `downloads/carcassi-preludios/` o `downloads/santisteban-preludios/`, una vista
 previa de un sistema en `src/site/articles/<colección>/` y todas las páginas SVG
-para la modal en `full/`. Los PDF de Santisteban llevan su nombre en el archivo,
-el título y el subtítulo para distinguirlos una vez descargados. El build falla
+para la modal en `full/`. Los PDF de Santisteban llevan su nombre en el archivo
+y en el subtítulo para distinguirlos una vez descargados. El build falla
 si el motor descarta notas.
 
 El PDF se genera desde el MusicXML: no es un recorte del libro. Se fijan autor y
