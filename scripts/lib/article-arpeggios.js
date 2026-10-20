@@ -235,8 +235,9 @@ function renderBody(locale, strings) {
           '" tabindex="0"' + (i === 0 ? '' : ' hidden') + '>' + variant.figure + '</div>';
       }).join('') + '</section>';
   });
-  return '<p>' + strings.artArpeggiosIntro + '</p><div class="sequence-forms">' +
-    tabs.join('') + '</div>' + popovers.join('') + CHORD_CARD_LOADER + TAB_LOADER + QUALITY_TABS_LOADER +
+  return '<p>' + strings.artArpeggiosIntro + '</p><h2 class="arpeggio-results-title" id="arpeggio-results-title" hidden>' + strings.artArpeggiosResults +
+    '</h2><p class="arpeggio-no-results" id="arpeggio-no-results" role="status" hidden>' + strings.artArpeggiosNoResults +
+    '</p><div class="sequence-forms">' + tabs.join('') + '</div>' + popovers.join('') + CHORD_CARD_LOADER + TAB_LOADER + QUALITY_TABS_LOADER +
     searchIndex(locale, strings) + SEARCH_LOADER;
 }
 
@@ -323,6 +324,7 @@ const SEARCH_LOADER = `<script>
 
   function filter() {
     var on = active();
+    var found = false;
     data.roots.forEach(function(root) {
       var section = document.getElementById(root.id + '-root').closest('.arpeggio-group');
       var results = section.querySelector('.arpeggio-results');
@@ -331,6 +333,7 @@ const SEARCH_LOADER = `<script>
       });
       section.classList.toggle('is-filtering', on);
       section.hidden = on && !matches.length;
+      if (matches.length) found = true;
       if (!results && on) {
         results = document.createElement('figure');
         results.className = 'form tab-figure arpeggio-results';
@@ -352,6 +355,8 @@ const SEARCH_LOADER = `<script>
         tab.setDocument({ value: [columns], annotations: [annotations] });
       });
     });
+    document.getElementById('arpeggio-results-title').hidden = !on;
+    document.getElementById('arpeggio-no-results').hidden = !on || found;
   }
 
   // Focus is given by replaying a press on the first cell, which has no real pointer to capture.

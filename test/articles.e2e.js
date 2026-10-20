@@ -166,11 +166,18 @@ const PDFS = [
       assert.deepEqual(await page.locator('.arpeggio-group:visible .arpeggio-root').allTextContents(), locale === 'es' ? ['Do', 'Fa', 'La'] : ['C', 'F', 'A']);
       assert.deepEqual(await page.locator('.arpeggio-group:visible').first().locator('.arpeggio-results .arpeggio-chord').allTextContents().then((names) => names.slice(0, 3)), ['C', 'C/E', 'C/G']);
       assert.equal(await page.locator('.arpeggio-group:visible [role="tabpanel"]:visible').count(), 0);
+      assert.equal(await page.locator('#arpeggio-results-title').isVisible(), true);
+      assert.equal(await page.locator('#arpeggio-no-results').isHidden(), true);
+      await page.keyboard.type('9');
+      assert.equal(await page.locator('.arpeggio-group:visible').count(), 0);
+      assert.equal(await page.locator('#arpeggio-no-results').isVisible(), true);
+      await page.keyboard.press('Backspace');
       await page.mouse.click(10, 700);
       assert.equal(await page.locator('.arpeggio-search-popup').isHidden(), true);
       assert.equal(await page.locator('.arpeggio-group:visible').count(), 3);
       await toggle.click();
       assert.equal(await page.locator('.arpeggio-group:visible').count(), 7);
+      assert.equal(await page.locator('#arpeggio-results-title').isHidden(), true);
       assert.equal(await page.locator('.arpeggio-group:visible [role="tabpanel"]:visible').count(), 7);
       assert.equal(await toggle.getAttribute('aria-label'), locale === 'es' ? 'Buscar por notas' : 'Search by notes');
       assert.equal(await page.locator('[role="tabpanel"]:visible').count(), 7);

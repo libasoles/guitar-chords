@@ -478,6 +478,8 @@
   "artArpeggiosShowFingering": "Show fingering for",
   "artArpeggiosSearch": "Search by notes",
   "artArpeggiosClearSearch": "Clear search",
+  "artArpeggiosResults": "Search results:",
+  "artArpeggiosNoResults": "No chord matches those notes.",
   "artArpeggiosMajor": "major",
   "artArpeggiosMinor": "minor",
   "artArpeggiosSeventh": "7",

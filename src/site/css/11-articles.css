@@ -605,3 +605,11 @@ body:has(.modal-full:popover-open) {
 .arpeggio-search-popup .ascii-tabs-cell:not([data-c="0"]) {
   display: none;
 }
+.arpeggio-results-title {
+  margin: 2rem 0 1rem;
+  font-size: 1.25rem;
+}
+.arpeggio-results-title[hidden],
+.arpeggio-no-results[hidden] {
+  display: none;
+}

@@ -478,6 +478,8 @@
   "artArpeggiosShowFingering": "Ver digitación de",
   "artArpeggiosSearch": "Buscar por notas",
   "artArpeggiosClearSearch": "Borrar búsqueda",
+  "artArpeggiosResults": "Resultados de búsqueda:",
+  "artArpeggiosNoResults": "Ningún acorde coincide con esas notas.",
   "artArpeggiosMajor": "mayor",
   "artArpeggiosMinor": "menor",
   "artArpeggiosSeventh": "7",
