@@ -1,0 +1,3 @@
+interface:
+  display_name: "Partituras con tablatura"
+  short_description: "Publish a page of public-domain scores with generated tablature"
