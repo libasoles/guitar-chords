@@ -107,6 +107,8 @@ def ocr(number):
 OUT_DIR = os.path.join(ROOT, "downloads", "carcassi-preludios")
 # Compases por sistema del libro: la vista previa muestra el primero con su TAB.
 PER_ROW = {1: 4, 2: 2, 3: 2, 4: 3, 5: 2, 6: 4, 7: 3, 8: 3, 9: 2, 10: 2, 11: 3, 12: 3, 13: 3, 14: 3, 15: 2, 16: 3}
+# Los compases breves del original 9 necesitan una vista previa mas amplia.
+PREVIEW_MEASURES = {"carcassi": {9: 4}}
 # Smaller engraving on a proportionally larger virtual page (the PDF stays A4) for the long ones, so a
 # 12-measure prelude does not spill its last system onto a second page.
 PDF_OVERRIDES = {12: {"scale": 40, "pageWidth": 2363, "pageHeight": 3341}}
@@ -147,7 +149,7 @@ def name_of(number):
 
 
 def write_preview(number, prepared, exported):
-    """First system with notation and the same TAB fingering as the downloadable PDF."""
+    """Opening measures with notation and the same TAB fingering as the downloadable PDF."""
     import tabify
 
     with open(os.path.join(prepared, "preview.json"), encoding="utf-8") as f:
@@ -157,7 +159,8 @@ def write_preview(number, prepared, exported):
     toolkit = tabify.new_toolkit({**tabify.PREVIEW_OPTIONS, "spacingStaff": 9})
     if not toolkit.loadData(xml):
         raise RuntimeError("Verovio no pudo leer el MusicXML con tablatura")
-    toolkit.select({"measureRange": f"1-{first_row['last'] + 1}"})
+    last = PREVIEW_MEASURES.get(EDITION, {}).get(number, first_row['last'] + 1)
+    toolkit.select({"measureRange": f"1-{last}"})
     toolkit.redoLayout()
     svg = toolkit.renderToSVG(1)
     svg = drop_tab_tuplets(tabify.drop_brace(tabify.draw_tab_clef(tabify.drop_tab_meter(svg))))
