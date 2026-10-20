@@ -7133,6 +7133,12 @@
     </measure>
     <!--========================= Measure 25 =========================-->
     <measure implicit="no" number="25">
+      <direction placement="above">
+        <direction-type>
+          <words font-style="italic">Dim.</words>
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-229">
         <pitch>
           <step>F</step>

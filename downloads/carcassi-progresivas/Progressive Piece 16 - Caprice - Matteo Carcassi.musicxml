@@ -10477,6 +10477,13 @@
     </measure>
     <!--========================= Measure 20 =========================-->
     <measure implicit="no" number="20">
+      <direction placement="above">
+        <direction-type>
+          <words font-style="italic">Dim.</words>
+        </direction-type>
+        <offset>2520</offset>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-364" print-object="no" print-spacing="yes">
         <pitch>
           <step>D</step>

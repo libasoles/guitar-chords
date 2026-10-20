@@ -74,7 +74,7 @@ class Converter:
         self.texts = texts or {}  # {texto del MuseScore: texto del libro}
         self.ignore_marks = ignore_marks  # descarta Fine/D.C. del MuseScore cuando el libro marca otra cosa
         self.extra_words = list(words)  # [(numero de compas, texto)] que el libro imprime y el MuseScore no trae
-        self.tempo = tempo  # texto de tempo del libro: reemplaza al del MuseScore
+        self.tempo = self.tempo_text = tempo  # texto de tempo del libro: reemplaza al del MuseScore
         self.score = root.find('Score')
         self.staff = self.score.findall('Staff')[0]
         self.title = title
@@ -83,10 +83,28 @@ class Converter:
         self.clef_written = False
 
     def convert(self):
+        """Dos pasadas: la primera empareja cada inicio de regulador con su final (por posicion, aunque esten en
+        voces distintas) para saber que finales cierran un «cresc.»/«dim.» de texto y no una cuña."""
+        self.text_ends = set()
+        self.hair_events = []
+        self.render()
+        open_starts = []
+        for _, is_start, kind, el in sorted(self.hair_events, key=lambda e: (e[0], e[1])):
+            if is_start:
+                open_starts.append(kind)
+            elif open_starts and open_starts.pop(0) in ('2', '3'):
+                self.text_ends.add(id(el))
+        self.hair_events = []
+        return self.render()
+
+    def render(self):
         measures = [m for m in self.staff.findall('Measure')]
         self.plan_voltas(measures)
+        self.tempo = self.tempo_text
+        self.fifths, self.time, self.clef_written = 0, (4, 4), False
         out = []
         for index, measure in enumerate(measures):
+            self.index = index
             out.append(self.measure(index, measure, measures))
         header = ('<?xml version="1.0" encoding="UTF-8"?>\n<score-partwise version="3.1"><work><work-title>' +
                   escape(self.title) + '</work-title></work><identification><creator type="composer">Matteo Carcassi'
@@ -212,6 +230,7 @@ class Converter:
         out, total = '', Fraction(0)
         tuplet = None
         pending = []  # direcciones que esperan a la proxima nota
+        fermata = False  # una Fermata de MuseScore precede al acorde que corona
         events = []  # figuras de la voz, para repartir las barras
         for el in list(voice):
             tag = el.tag
@@ -228,11 +247,17 @@ class Converter:
                                    '</direction-type></direction>' % kind)
             elif tag == 'Spanner' and el.get('type') == 'HairPin':
                 hair = el.find('HairPin')
-                if hair is not None:
-                    wedge = 'crescendo' if hair.findtext('subtype') == '0' else 'diminuendo'
+                kind = hair.findtext('subtype') if hair is not None else None
+                self.hair_events.append(((self.index, offset + total), 1 if hair is not None else 0, kind, el))
+                if hair is not None and kind in ('2', '3'):  # «cresc.» / «dim.» con linea: el libro imprime solo el texto
+                    pending.append(words_dir('Cres.' if kind == '2' else 'Dim.', italic=True))
+                elif hair is not None:
+                    wedge = 'crescendo' if kind == '0' else 'diminuendo'
                     pending.append('<direction placement="below"><direction-type><wedge type="%s"/></direction-type></direction>' % wedge)
-                elif el.find('prev') is not None:
+                elif el.find('prev') is not None and id(el) not in self.text_ends:
                     pending.append('<direction><direction-type><wedge type="stop"/></direction-type></direction>')
+            elif tag == 'Fermata':
+                fermata = True
             elif tag == 'Rest':
                 dur, kind = duration_of(el, length, tuplet)
                 events.append({'level': 0, 'pos': offset + total})
@@ -250,7 +275,8 @@ class Converter:
                 if not grace:
                     level = BEAM_LEVEL.get(kind, 0)
                     events.append({'level': level, 'pos': offset + total, 'mode': el.findtext('BeamMode')})
-                out += self.chord(el, dur, kind, number, stem, tuplet, grace, len(events) - 1)
+                out += self.chord(el, dur, kind, number, stem, tuplet, grace, len(events) - 1, fermata and not grace)
+                fermata = fermata and grace
                 if not grace:
                     total += dur
                 if tuplet and not grace:
@@ -322,7 +348,7 @@ class Converter:
                 (' print-object="no"' if hidden else '', mark, ticks, number, '' if measure_rest else '<type>%s</type>' % kind,
                  '<dot/>' * dots, time_mod(tuplet) if tuplet else ''))
 
-    def chord(self, el, dur, kind, number, stem, tuplet, grace, event=-1):
+    def chord(self, el, dur, kind, number, stem, tuplet, grace, event=-1, fermata=False):
         out = ''
         for i, note in enumerate(el.findall('Note')):
             pitch = int(note.findtext('pitch'))
@@ -369,7 +395,7 @@ class Converter:
                             notations += '<slur type="start" number="1"/>'
                         elif spanner.find('prev') is not None:
                             notations += '<slur type="stop" number="1"/>'
-                if el.find('Fermata') is not None:
+                if fermata or el.find('Fermata') is not None:
                     notations += '<fermata type="upright"/>'
             if notations:
                 parts.append('<notations>%s</notations>' % notations)

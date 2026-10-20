@@ -5835,6 +5835,13 @@
     </measure>
     <!--========================= Measure 23 =========================-->
     <measure implicit="no" number="23">
+      <direction placement="above">
+        <direction-type>
+          <words font-style="italic">Dim.</words>
+        </direction-type>
+        <offset>10080</offset>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-202">
         <pitch>
           <step>A</step>
@@ -5887,12 +5894,6 @@
         <beam number="1">end</beam>
         <beam number="2">end</beam>
       </note>
-      <direction placement="below">
-        <direction-type>
-          <wedge number="1" spread="15" type="diminuendo" />
-        </direction-type>
-        <staff>1</staff>
-      </direction>
       <note id="tab-note-206">
         <pitch>
           <step>E</step>
@@ -5906,12 +5907,6 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
       </note>
-      <direction placement="below">
-        <direction-type>
-          <wedge number="1" spread="0" type="stop" />
-        </direction-type>
-        <staff>1</staff>
-      </direction>
       <note id="tab-note-207">
         <pitch>
           <step>E</step>

@@ -4362,6 +4362,13 @@
     </measure>
     <!--========================= Measure 15 =========================-->
     <measure implicit="no" number="15">
+      <direction placement="above">
+        <direction-type>
+          <words font-style="italic">Dim.</words>
+        </direction-type>
+        <offset>10080</offset>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-138">
         <pitch>
           <step>G</step>
@@ -4480,12 +4487,6 @@
         <stem>down</stem>
         <staff>1</staff>
       </note>
-      <direction placement="below">
-        <direction-type>
-          <wedge number="3" spread="15" type="diminuendo" />
-        </direction-type>
-        <staff>1</staff>
-      </direction>
       <note id="tab-note-147">
         <pitch>
           <step>F</step>
@@ -4497,12 +4498,6 @@
         <stem>down</stem>
         <staff>1</staff>
       </note>
-      <direction placement="below">
-        <direction-type>
-          <wedge number="3" spread="0" type="stop" />
-        </direction-type>
-        <staff>1</staff>
-      </direction>
       <backup>
         <duration>20160</duration>
       </backup>

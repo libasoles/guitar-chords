@@ -585,6 +585,13 @@
     </measure>
     <!--========================= Measure 3 ==========================-->
     <measure implicit="no" number="3">
+      <direction placement="above">
+        <direction-type>
+          <words font-style="italic">Cres.</words>
+        </direction-type>
+        <offset>10080</offset>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-16">
         <pitch>
           <step>F</step>
@@ -597,12 +604,6 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
-      <direction placement="below">
-        <direction-type>
-          <wedge number="1" spread="15" type="diminuendo" />
-        </direction-type>
-        <staff>1</staff>
-      </direction>
       <note id="tab-note-17">
         <pitch>
           <step>D</step>
@@ -627,12 +628,6 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
-      <direction placement="below">
-        <direction-type>
-          <wedge number="1" spread="0" type="stop" />
-        </direction-type>
-        <staff>1</staff>
-      </direction>
       <note id="tab-note-19">
         <pitch>
           <step>D</step>
@@ -4305,6 +4300,13 @@
     </measure>
     <!--========================= Measure 20 =========================-->
     <measure implicit="no" number="20">
+      <direction placement="above">
+        <direction-type>
+          <words font-style="italic">Cres.</words>
+        </direction-type>
+        <offset>10080</offset>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-133">
         <pitch>
           <step>F</step>
@@ -4317,12 +4319,6 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
-      <direction placement="below">
-        <direction-type>
-          <wedge number="2" spread="15" type="diminuendo" />
-        </direction-type>
-        <staff>1</staff>
-      </direction>
       <note id="tab-note-134">
         <pitch>
           <step>D</step>
@@ -4347,12 +4343,6 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
-      <direction placement="below">
-        <direction-type>
-          <wedge number="2" spread="0" type="stop" />
-        </direction-type>
-        <staff>1</staff>
-      </direction>
       <note id="tab-note-136">
         <pitch>
           <step>D</step>

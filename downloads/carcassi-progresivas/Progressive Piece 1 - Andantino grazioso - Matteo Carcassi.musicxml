@@ -2541,6 +2541,13 @@
     </measure>
     <!--========================= Measure 10 =========================-->
     <measure implicit="no" number="10">
+      <direction placement="above">
+        <direction-type>
+          <words font-style="italic">Cres.</words>
+        </direction-type>
+        <offset>17640</offset>
+        <staff>1</staff>
+      </direction>
       <direction placement="below">
         <direction-type>
           <wedge number="6" spread="15" type="diminuendo" />
@@ -2646,12 +2653,6 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
       </note>
-      <direction placement="below">
-        <direction-type>
-          <wedge number="1" spread="15" type="diminuendo" />
-        </direction-type>
-        <staff>1</staff>
-      </direction>
       <note id="tab-note-89">
         <pitch>
           <step>G</step>
@@ -2665,12 +2666,6 @@
         <beam number="1">end</beam>
         <beam number="2">end</beam>
       </note>
-      <direction placement="below">
-        <direction-type>
-          <wedge number="1" spread="0" type="stop" />
-        </direction-type>
-        <staff>1</staff>
-      </direction>
       <backup>
         <duration>20160</duration>
       </backup>
@@ -3164,7 +3159,7 @@
       </note>
       <direction placement="below">
         <direction-type>
-          <wedge number="2" spread="15" type="diminuendo" />
+          <wedge number="1" spread="15" type="diminuendo" />
         </direction-type>
         <staff>1</staff>
       </direction>
@@ -3183,7 +3178,7 @@
       </note>
       <direction placement="below">
         <direction-type>
-          <wedge number="2" spread="0" type="stop" />
+          <wedge number="1" spread="0" type="stop" />
         </direction-type>
         <staff>1</staff>
       </direction>
@@ -3686,7 +3681,7 @@
       </direction>
       <direction placement="below">
         <direction-type>
-          <wedge number="3" spread="15" type="diminuendo" />
+          <wedge number="2" spread="15" type="diminuendo" />
         </direction-type>
         <staff>1</staff>
       </direction>
@@ -3744,7 +3739,7 @@
       </note>
       <direction placement="below">
         <direction-type>
-          <wedge number="3" spread="0" type="stop" />
+          <wedge number="2" spread="0" type="stop" />
         </direction-type>
         <staff>1</staff>
       </direction>

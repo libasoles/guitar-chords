@@ -815,9 +815,9 @@
     </measure>
     <!--========================= Measure 6 ==========================-->
     <measure implicit="no" number="6">
-      <direction placement="below">
+      <direction placement="above">
         <direction-type>
-          <wedge number="1" spread="15" type="diminuendo" />
+          <words font-style="italic">Cres.</words>
         </direction-type>
         <staff>1</staff>
       </direction>
@@ -833,12 +833,6 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
       </note>
-      <direction placement="below">
-        <direction-type>
-          <wedge number="1" spread="0" type="stop" />
-        </direction-type>
-        <staff>1</staff>
-      </direction>
       <note id="tab-note-27">
         <pitch>
           <step>E</step>
@@ -1268,7 +1262,7 @@
     <measure implicit="no" number="10">
       <direction placement="below">
         <direction-type>
-          <wedge number="2" spread="0" type="crescendo" />
+          <wedge number="1" spread="0" type="crescendo" />
         </direction-type>
         <staff>1</staff>
       </direction>
@@ -1285,7 +1279,7 @@
       </note>
       <direction placement="below">
         <direction-type>
-          <wedge number="2" spread="15" type="stop" />
+          <wedge number="1" spread="15" type="stop" />
         </direction-type>
         <staff>1</staff>
       </direction>
@@ -1880,7 +1874,7 @@
     <measure implicit="no" number="14">
       <direction placement="below">
         <direction-type>
-          <wedge number="3" spread="0" type="crescendo" />
+          <wedge number="2" spread="0" type="crescendo" />
         </direction-type>
         <staff>1</staff>
       </direction>
@@ -1897,7 +1891,7 @@
       </note>
       <direction placement="below">
         <direction-type>
-          <wedge number="3" spread="15" type="stop" />
+          <wedge number="2" spread="15" type="stop" />
         </direction-type>
         <staff>1</staff>
       </direction>
@@ -3066,9 +3060,9 @@
     </measure>
     <!--========================= Measure 22 =========================-->
     <measure implicit="no" number="22">
-      <direction placement="below">
+      <direction placement="above">
         <direction-type>
-          <wedge number="4" spread="15" type="diminuendo" />
+          <words font-style="italic">Cres.</words>
         </direction-type>
         <staff>1</staff>
       </direction>
@@ -3084,12 +3078,6 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
       </note>
-      <direction placement="below">
-        <direction-type>
-          <wedge number="4" spread="0" type="stop" />
-        </direction-type>
-        <staff>1</staff>
-      </direction>
       <note id="tab-note-101">
         <pitch>
           <step>F</step>
@@ -3904,7 +3892,7 @@
     <measure implicit="no" number="29">
       <direction placement="below">
         <direction-type>
-          <wedge number="5" spread="15" type="diminuendo" />
+          <wedge number="3" spread="15" type="diminuendo" />
         </direction-type>
         <staff>1</staff>
       </direction>
@@ -3922,7 +3910,7 @@
       </note>
       <direction placement="below">
         <direction-type>
-          <wedge number="5" spread="0" type="stop" />
+          <wedge number="3" spread="0" type="stop" />
         </direction-type>
         <staff>1</staff>
       </direction>
@@ -4955,7 +4943,7 @@
     <measure implicit="no" number="37">
       <direction placement="below">
         <direction-type>
-          <wedge number="6" spread="15" type="diminuendo" />
+          <wedge number="4" spread="15" type="diminuendo" />
         </direction-type>
         <staff>1</staff>
       </direction>
@@ -5097,7 +5085,7 @@
       </note>
       <direction placement="below">
         <direction-type>
-          <wedge number="6" spread="0" type="stop" />
+          <wedge number="4" spread="0" type="stop" />
         </direction-type>
         <staff>1</staff>
       </direction>

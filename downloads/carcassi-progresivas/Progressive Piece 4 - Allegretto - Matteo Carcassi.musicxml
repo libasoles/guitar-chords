@@ -6047,6 +6047,12 @@
     </measure>
     <!--========================= Measure 24 =========================-->
     <measure implicit="no" number="24">
+      <direction placement="above">
+        <direction-type>
+          <words font-style="italic">Cres.</words>
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-195">
         <pitch>
           <step>G</step>
