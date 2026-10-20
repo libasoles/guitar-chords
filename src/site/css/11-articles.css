@@ -613,3 +613,9 @@ body:has(.modal-full:popover-open) {
 .arpeggio-no-results[hidden] {
   display: none;
 }
+
+/* Arpeggio tabs and search results always span the full width, even with few notes. */
+.arpeggio-group .article-tab,
+.arpeggio-results .article-tab {
+  width: 100%;
+}
