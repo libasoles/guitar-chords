@@ -75,11 +75,13 @@ def beams_for(events, bounds):
     return states
 
 
-def measure_xml(number, fifths, time, data, first, implicit):
+def measure_xml(number, fifths, time, data, first, implicit, key_change=False):
     acc = Accidentals(fifths)
     length = data['length']
     full = time[0] * 16 // time[1]
     attrs = ''
+    if key_change:
+        attrs = f"<attributes><key><fifths>{fifths}</fifths></key></attributes>"
     if first:
         attrs = (f"<attributes><divisions>{DIVISIONS}</divisions><key><fifths>{fifths}</fifths></key>"
                  f"<time><beats>{time[0]}</beats><beat-type>{time[1]}</beat-type></time>"
@@ -108,7 +110,7 @@ def measure_xml(number, fifths, time, data, first, implicit):
     if data.get('dc'):
         words = '<direction placement="above"><direction-type><words font-weight="bold">D.C. al Fine</words></direction-type></direction>'
     implicit_attr = ' implicit="yes"' if implicit else ''
-    return f'<measure number="{number}"{implicit_attr}>{attrs}{left}{words}{v1}{v2}{right}</measure>'
+    return f'<measure number="{number}"{implicit_attr}>{attrs}{left}{v1}{v2}{words}{right}</measure>'
 
 
 def convert(number):
@@ -117,8 +119,8 @@ def convert(number):
     full = time[0] * 16 // time[1]
     measures = []
     for m in meta['measures']:
-        data = convert_measure(m, meta['fifths'], full)
-        data.update(repeat_start=m['repeat_start'], repeat_end=m['repeat_end'], fine=m.get('fine'), dc=m.get('dc'))
+        data = convert_measure(m, m['fifths'], full)
+        data.update(fifths=m['fifths'], repeat_start=m['repeat_start'], repeat_end=m['repeat_end'], fine=m.get('fine'), dc=m.get('dc'))
         measures.append(data)
     measures[-1]['final'] = True
     return meta, measures
@@ -130,6 +132,7 @@ def write(number, title, path):
     full = time[0] * 16 // time[1]
     body = ''
     index = 0
+    previous = measures[0]['fifths']
     for i, data in enumerate(measures):
         pickup = i == 0 and data['length'] < full
         if pickup:
@@ -138,7 +141,9 @@ def write(number, title, path):
             index += 1
             number_attr = index
         # el ultimo compas, si completa la anacrusa, tambien es corto; se deja sin relleno
-        body += measure_xml(number_attr, fifths, time, data, i == 0, pickup)
+        current = data['fifths']
+        body += measure_xml(number_attr, current, time, data, i == 0, pickup, key_change=i > 0 and current != previous)
+        previous = current
     xml = ('<?xml version="1.0" encoding="UTF-8"?>'
            f'<score-partwise version="3.1"><work><work-title>{escape(title)}</work-title></work>'
            '<identification><creator type="composer">Matteo Carcassi</creator></identification>'

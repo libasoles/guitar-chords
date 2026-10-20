@@ -3521,12 +3521,6 @@
     </measure>
     <!--========================= Measure 25 =========================-->
     <measure implicit="no" number="25">
-      <direction placement="above">
-        <direction-type>
-          <words font-weight="bold" justify="right">Fine</words>
-        </direction-type>
-        <staff>1</staff>
-      </direction>
       <note id="tab-note-115">
         <pitch>
           <step>C</step>
@@ -3562,6 +3556,12 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <words font-weight="bold" justify="right">Fine</words>
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <backup>
         <duration>10080</duration>
       </backup>
@@ -5777,6 +5777,7 @@
         <direction-type>
           <words font-weight="bold" justify="right">D.C. al Fine</words>
         </direction-type>
+        <offset>15120</offset>
         <staff>1</staff>
       </direction>
       <note id="tab-note-187">
@@ -5790,8 +5791,15 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>5040</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <staff>1</staff>
+      </note>
       <backup>
-        <duration>10080</duration>
+        <duration>15120</duration>
       </backup>
       <note id="tab-note-188">
         <pitch>
@@ -5804,8 +5812,15 @@
         <stem>down</stem>
         <staff>1</staff>
       </note>
+      <note>
+        <rest />
+        <duration>5040</duration>
+        <voice>2</voice>
+        <type>eighth</type>
+        <staff>1</staff>
+      </note>
       <backup>
-        <duration>10080</duration>
+        <duration>15120</duration>
       </backup>
       <note>
         <pitch>
@@ -5823,8 +5838,15 @@
           </technical>
         </notations>
       </note>
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>5040</duration>
+        <voice>1</voice>
+        <type>eighth</type>
+        <staff>2</staff>
+      </note>
       <backup>
-        <duration>10080</duration>
+        <duration>15120</duration>
       </backup>
       <note>
         <pitch>
@@ -5841,6 +5863,13 @@
             <string>4</string><fret>2</fret>
           </technical>
         </notations>
+      </note>
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>5040</duration>
+        <voice>2</voice>
+        <type>eighth</type>
+        <staff>2</staff>
       </note>
       <barline location="right">
         <bar-style>light-heavy</bar-style>

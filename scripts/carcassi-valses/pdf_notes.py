@@ -82,6 +82,9 @@ def read(path):
                 meta['fifths'] = system['key']
             if system['time'] and not meta['time']:
                 meta['time'] = system['time']
+            for m in system['measures']:
+                m['fifths'] = system['key'] if system['key'] is not None else meta['fifths']
+            meta['fifths'] = system['key'] if system['key'] is not None and not meta['measures'] else meta['fifths']
             meta['measures'].extend(system['measures'])
             if index < len(tabs):
                 meta['tab'].append((tabs[index], [g for g in glyph if False]))
@@ -91,14 +94,15 @@ def read(path):
 def read_system(lines, glyph, stems, bars, thick, beams):
     top, bottom = lines[0], lines[-1]
     space = (bottom - top) / 4
-    lo, hi = top - 6 * space, bottom + 6 * space
+    lo, hi = top - 10 * space, bottom + 10 * space
     inside = [g for g in glyph if lo <= g[2] <= hi]
-    clef = [g for g in inside if g[0] in (0xE050, 0xE052)]
+    on_staff = [g for g in inside if top - space <= g[2] <= bottom + space]
+    clef = [g for g in on_staff if g[0] in (0xE050, 0xE052)]
     clef_x = clef[0][1] if clef else min(g[1] for g in inside)
-    times = [g for g in inside if 0xE080 <= g[0] <= 0xE089]
+    times = [g for g in on_staff if 0xE080 <= g[0] <= 0xE089]
     first_note = min((g[1] for g in inside if g[0] in HEAD or g[0] in RESTS), default=1e9)
     time_x = min((t[1] for t in times), default=1e9)
-    key_accs = [g for g in inside if g[0] in ACCIDENTAL and clef_x < g[1] < min(first_note, time_x)]
+    key_accs = [g for g in on_staff if g[0] in ACCIDENTAL and clef_x < g[1] < min(first_note, time_x)]
     key = None
     if clef:
         n = len(key_accs)
@@ -129,20 +133,24 @@ def read_system(lines, glyph, stems, bars, thick, beams):
 def measure(a, b, inside, stems, beams, top, bottom, space):
     half, hw = space / 2, space * 1.18
     mine = lambda g: a < g[1] < b  # noqa: E731
-    sys_stems = [s for s in stems if s.y1 >= top - 8 * space and s.y0 <= bottom + 8 * space and a - 1 < s.x0 < b + 1]
+    sys_stems = [s for s in stems if s.y1 >= top - 12 * space and s.y0 <= bottom + 12 * space and a - 1 < s.x0 < b + 1]
     sys_beams = [p for p in beams if a - 2 < min(q[0] for q in p) and max(q[0] for q in p) < b + 2
-                 and top - 8 * space <= min(q[1] for q in p) and max(q[1] for q in p) <= bottom + 8 * space]
+                 and top - 12 * space <= min(q[1] for q in p) and max(q[1] for q in p) <= bottom + 12 * space]
     accs = [g for g in inside if g[0] in ACCIDENTAL and mine(g)]
     dots = [g for g in inside if g[0] == DOT and mine(g)]
     flags = [g for g in inside if g[0] in FLAGS and mine(g)]
     items = []
     for code, x, y in (g for g in inside if g[0] in HEAD and mine(g)):
         pos = round((bottom - y) / half)
-        stem = None
+        taken = {id(o['stem']) for o in items if o['stem'] is not None and o['pos'] == pos and abs(o['x'] - x) < 2}
+        stem, best = None, 1e9
         for s in sys_stems:
-            if (abs(s.x0 - (x + hw - 0.45)) < 1.2 or abs(s.x0 - (x + 0.45)) < 1.2) and s.y0 - 1.8 <= y <= s.y1 + 1.8:
-                stem = s
-                break
+            if id(s) in taken or not (s.y0 - 1.8 <= y <= s.y1 + 1.8):
+                continue
+            # plica a la derecha (hacia arriba) o a la izquierda (hacia abajo) de la cabeza
+            distance = min(abs(s.x0 - (x + hw - 0.45)), abs(s.x0 - (x + 0.45)))
+            if distance < 1.2 and distance < best:
+                stem, best = s, distance
         cand = [g for g in accs if abs(g[2] - y) < 0.3 and 0 < x - g[1] < 14]
         acc = ACCIDENTAL[max(cand, key=lambda g: g[1])[0]] if cand else None
         dot = any(0 < d[1] - x < 14 and abs(d[2] - y) < half + 0.3 for d in dots)
