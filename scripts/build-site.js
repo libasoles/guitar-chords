@@ -1273,7 +1273,8 @@ function renderArpeggiosArticle(strings, locale) {
     h1: "artArpeggiosH1",
     lead: "artArpeggiosLead",
   }, articleArpeggios.renderBody(locale, strings), back, articleArpeggios.searchControl(strings))
-    .split("%%CARCASSI_HREF%%").join(pagePath(ARTICLE_CARCASSI_SLUG, locale));
+    .split("%%CARCASSI_HREF%%").join(pagePath(ARTICLE_CARCASSI_SLUG, locale))
+    .split("%%DIM_HREF%%").join(v7PageHref(locale, DIM_SLUG));
 }
 
 function renderPreludesArticle(strings, locale, santisteban = false) {

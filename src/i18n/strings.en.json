@@ -488,7 +488,7 @@
   "artArpeggiosMajorSeventh": "maj7",
   "artArpeggiosDiminished": "dim",
   "artArpeggiosDim7Title": "Diminished seventh (dim7)",
-  "artArpeggiosDim7Note": "A dim7 chord is symmetrical: its four notes are a minor third apart, so each position serves four chords with different names and the right name depends on the harmonic context. That is why they are grouped by notes rather than by key, and each position is named by its bass.",
+  "artArpeggiosDim7Note": "A <a href=\"%%DIM_HREF%%\">dim7 chord</a> is symmetrical: its four notes are a <span class=\"term-hl\">minor third</span> apart, so each position serves four chords with different names and the right name depends on the harmonic context. In this tab we name each position by its bass.",
   "artBackToIndex": "← Articles",
   "artFormFull": "Full form",
   "artFormDecomposed": "Decomposed form",
