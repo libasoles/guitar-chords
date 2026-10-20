@@ -16,32 +16,61 @@ const MEASURES = { 1: 8, 2: 8, 3: 7, 4: 8, 5: 8, 6: 16, 7: 8, 8: 11, 9: 8, 10: 1
 /* Cadenas del PDF de origen: nombre del archivo, productor del original, editor, licencia de la edicion. */
 const SOURCE_TRACES = [/CarcassiMethod/i, /Ghostscript/i, /Santisteban/i, /Mutopia/i, /LilyPond/i, /Preludes in Progressive/i];
 
-test('Mi mayor, compás 3: tres acordes si–re natural–mi en corcheas sobre el bajo mi', () => {
+for (const [number, pitches, low] of [[3, ['B4', 'D5', 'E5'], 'E3'], [11, ['G#4', 'D5', 'E5'], 'B3']]) {
+  test('Mi mayor, compás ' + number + ': tres acordes de corchea sobre bajo de blanca', () => {
+    for (const file of [
+      '../scripts/carcassi-preludios/corrected/prelude-09.musicxml',
+      '../downloads/carcassi-preludios/Prelude 9 in E Major - Matteo Carcassi.musicxml',
+    ]) {
+      const xml = fs.readFileSync(path.join(__dirname, file), 'utf8');
+      const bar = Array.from(xml.matchAll(/<measure\b[^>]*>([\s\S]*?)<\/measure>/g))[number - 1][1];
+      const attacks = [];
+      const bass = [];
+      for (const [, note] of bar.matchAll(/<note\b[^>]*>([\s\S]*?)<\/note>/g)) {
+        if (!/<pitch>/.test(note) || /<staff>2<\/staff>/.test(note)) continue;
+        const pitch = note.match(/<step>(.*?)<\/step>/)[1]
+          + (/<alter>1<\/alter>/.test(note) ? '#' : '') + note.match(/<octave>(.*?)<\/octave>/)[1];
+        const type = note.match(/<type>(.*?)<\/type>/)[1];
+        assert.equal(type, /<voice>2<\/voice>/.test(note) ? 'half' : 'eighth', file);
+        if (/<voice>2<\/voice>/.test(note)) {
+          bass.push([pitch, type]);
+        } else if (/<chord\s*\//.test(note)) {
+          attacks.at(-1).push(pitch);
+        } else {
+          attacks.push([pitch]);
+        }
+      }
+      assert.deepEqual(attacks, [pitches, pitches, pitches], file);
+      assert.deepEqual(bass, [[low, 'half']], file);
+      assert.match(bar, /<accidental>natural<\/accidental>/, file);
+    }
+  });
+}
+
+test('Mi mayor: los primeros quince compases tienen tres plaqués de corchea y bajo de blanca', () => {
   for (const file of [
     '../scripts/carcassi-preludios/corrected/prelude-09.musicxml',
     '../downloads/carcassi-preludios/Prelude 9 in E Major - Matteo Carcassi.musicxml',
   ]) {
     const xml = fs.readFileSync(path.join(__dirname, file), 'utf8');
-    const bar = xml.match(/<measure\b[^>]*number="3"[^>]*>([\s\S]*?)<\/measure>/)[1];
-    const attacks = [];
-    const bass = [];
-    for (const [, note] of bar.matchAll(/<note\b[^>]*>([\s\S]*?)<\/note>/g)) {
-      if (!/<pitch>/.test(note) || /<staff>2<\/staff>/.test(note)) continue;
-      const pitch = note.match(/<step>(.*?)<\/step>/)[1]
-        + (/<alter>1<\/alter>/.test(note) ? '#' : '') + note.match(/<octave>(.*?)<\/octave>/)[1];
-      const type = note.match(/<type>(.*?)<\/type>/)[1];
-      assert.equal(type, /<voice>2<\/voice>/.test(note) ? 'half' : 'eighth', file);
-      if (/<voice>2<\/voice>/.test(note)) {
-        bass.push([pitch, type]);
-      } else if (/<chord\s*\//.test(note)) {
-        attacks.at(-1).push(pitch);
-      } else {
-        attacks.push([pitch]);
+    const bars = Array.from(xml.matchAll(/<measure\b[^>]*>([\s\S]*?)<\/measure>/g));
+    for (let i = 0; i < 15; i++) {
+      const notes = Array.from(bars[i][1].matchAll(/<note\b[^>]*>([\s\S]*?)<\/note>/g), (m) => m[1])
+        .filter((note) => /<pitch>/.test(note) && !/<staff>2<\/staff>/.test(note));
+      const upper = notes.filter((note) => /<voice>1<\/voice>/.test(note));
+      const lower = notes.filter((note) => /<voice>2<\/voice>/.test(note));
+      const label = file + ', compás ' + (i + 1);
+      assert.equal(upper.length, 9, label + ': tres acordes de tres notas');
+      assert.equal(upper.filter((note) => !/<chord\s*\//.test(note)).length, 3, label + ': tres Ataques');
+      for (const note of upper) assert.match(note, /<type>eighth<\/type>/, label);
+      assert.equal(lower.length, 1, label);
+      assert.match(lower[0], /<type>half<\/type>/, label);
+      for (const note of upper.filter((note) => !/<chord\s*\//.test(note))) {
+        assert.match(note, /<stem>up<\/stem>/, label);
+        assert.match(note, /<beam number="1">/, label);
+        assert.doesNotMatch(note, /<beam number="2">/, label);
       }
     }
-    assert.deepEqual(attacks, [['B4', 'D5', 'E5'], ['B4', 'D5', 'E5'], ['B4', 'D5', 'E5']], file);
-    assert.deepEqual(bass, [['E3', 'half']], file);
-    assert.match(bar, /<accidental>natural<\/accidental>/, file);
   }
 });
 

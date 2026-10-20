@@ -52,6 +52,31 @@ título y se eliminan productor, fechas y bloque `encoding`. El motor propone la
 digitación de la TAB con afinación estándar; `avoid_repeated_strings` evita saltos
 innecesarios a la misma cuerda. El visor y la descarga usan la misma digitación.
 
+## Criterio de revisión de plaqués
+
+La colección Carcassi se transcribe manualmente: regenerar sus artefactos con
+Music21 y Verovio no ejecuta homr ni valida la lectura del impreso. El conversor
+de subidas usa `backend/ocr/run.py`: homr primero para escaneos y Audiveris
+primero para PDF vectorial, con un segundo intento si la lectura es dudosa.
+
+Al cotejar un compás, identificar primero las plicas y las cabezas que conectan
+con cada una. En intervalos de segunda, las cabezas pueden quedar a ambos lados
+de una plica: el desplazamiento horizontal no crea otro Ataque. Leer después
+la duración por las barras o corchetes (una: corchea; dos: semicorchea),
+distinguiéndolos de las líneas del pentagrama y las manchas. Separar las voces
+sostenidas de estos Ataques; una blanca de bajo puede sonar bajo tres corcheas.
+La suma de duraciones y la plausibilidad armónica son controles secundarios,
+no evidencia suficiente para decidir agrupación ni ritmo.
+
+Caso de referencia: en Mi mayor, los compases 3 y 11 tienen tres plicas de
+acordes bajo una sola barra, sobre un bajo de blanca. El c. 3 repite
+si4–re5 natural–mi5 y el c. 11 sol♯4–re5 natural–mi5. Las cabezas re–mi
+desplazadas no son notas sucesivas. Al detectar este error, revisar todos los
+pasajes del mismo patrón en la pieza, no solo el compás señalado. Los primeros
+quince compases de este preludio repiten el patrón de bajo de blanca y tres
+acordes de corchea; el cierre es distinto. Las pruebas del MusicXML protegen
+esta transcripción, pero no certifican el OCR. Investigación pendiente: #43.
+
 ## Herramientas anteriores de OCR
 
 `extract.py crop N` y `ocr N`, `detect_notes.py`, `bass_strips.py` y los informes
