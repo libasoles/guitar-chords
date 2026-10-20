@@ -2049,13 +2049,12 @@
       <note id="tab-note-69">
         <pitch>
           <step>D</step>
-          <alter>0</alter>
+          <alter>1</alter>
           <octave>4</octave>
         </pitch>
         <duration>20160</duration>
         <voice>2</voice>
         <type>half</type>
-        <accidental>natural</accidental>
         <stem>down</stem>
         <staff>1</staff>
       </note>
@@ -2224,17 +2223,19 @@
       </backup>
       <note>
         <pitch>
-          <step>D</step>
+          <step>E</step>
+          <alter>-1</alter>
           <octave>3</octave>
         </pitch>
         <duration>20160</duration>
         <voice>2</voice>
         <type>half</type>
+        <accidental>flat</accidental>
         <stem>none</stem>
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>0</fret>
+            <string>4</string><fret>1</fret>
           </technical>
         </notations>
       </note>

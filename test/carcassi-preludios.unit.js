@@ -16,6 +16,34 @@ const MEASURES = { 1: 8, 2: 8, 3: 7, 4: 8, 5: 8, 6: 16, 7: 8, 8: 11, 9: 8, 10: 1
 /* Cadenas del PDF de origen: nombre del archivo, productor del original, editor, licencia de la edicion. */
 const SOURCE_TRACES = [/CarcassiMethod/i, /Ghostscript/i, /Santisteban/i, /Mutopia/i, /LilyPond/i, /Preludes in Progressive/i];
 
+test('Mi mayor, compás 7: el dedo 1 no cancela el re sostenido de la armadura', () => {
+  for (const file of [
+    '../scripts/carcassi-preludios/corrected/prelude-09.musicxml',
+    '../downloads/carcassi-preludios/Prelude 9 in E Major - Matteo Carcassi.musicxml',
+  ]) {
+    const xml = fs.readFileSync(path.join(__dirname, file), 'utf8');
+    const bar = Array.from(xml.matchAll(/<measure\b[^>]*>([\s\S]*?)<\/measure>/g))[6][1];
+    const basses = Array.from(bar.matchAll(/<note\b[^>]*>([\s\S]*?)<\/note>/g), (m) => m[1])
+      .filter((note) => /<pitch>/.test(note) && /<voice>2<\/voice>/.test(note));
+    assert.ok(basses.length > 0, file);
+    for (const note of basses) {
+      assert.match(note, /<type>half<\/type>/, file);
+      assert.doesNotMatch(note, /<accidental>natural<\/accidental>/, file);
+      if (/<staff>2<\/staff>/.test(note)) {
+        // TAB pitches are reconstructed from MIDI and may use the enharmonic Eb3.
+        const step = note.match(/<step>(.*?)<\/step>/)[1];
+        const alter = Number((note.match(/<alter>(.*?)<\/alter>/) || [])[1] || 0);
+        const octave = Number(note.match(/<octave>(.*?)<\/octave>/)[1]);
+        assert.equal((octave + 1) * 12 + { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[step] + alter, 51, file);
+      } else {
+        assert.match(note, /<step>D<\/step>/, file);
+        assert.match(note, /<alter>1<\/alter>/, file);
+        assert.match(note, /<octave>4<\/octave>/, file);
+      }
+    }
+  }
+});
+
 for (const [number, pitches, low] of [[3, ['B4', 'D5', 'E5'], 'E3'], [11, ['G#4', 'D5', 'E5'], 'B3']]) {
   test('Mi mayor, compás ' + number + ': tres acordes de corchea sobre bajo de blanca', () => {
     for (const file of [

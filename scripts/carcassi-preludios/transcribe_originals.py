@@ -120,7 +120,8 @@ def originals():
         # Bar 3: D natural shares each eighth-note chord's stem with B and E.
         chords('E3', 'B4+D5+E5'),
         chords('A3', 'A4+C#5+E5'), chords('A#3', 'G4+C#5+E5'), chords('B3', 'G#4+B4+E5'),
-        chords('D4', 'A4+B4+F#5'), chords('E4', 'G4+B4+G5'),
+        # Bar 7: the printed 1 is fingering, not a natural; D stays sharp from the key.
+        chords('D#4', 'A4+B4+F#5'), chords('E4', 'G4+B4+G5'),
         chords('D4', 'G4+B4+F5'), chords('C4', 'G4+C5+E5'),
         # Bar 11: displaced D–E heads share three stems and one eighth-note beam, as in bar 3.
         chords('B3', 'G#4+D5+E5'),

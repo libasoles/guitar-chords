@@ -68,6 +68,11 @@ sostenidas de estos Ataques; una blanca de bajo puede sonar bajo tres corcheas.
 La suma de duraciones y la plausibilidad armónica son controles secundarios,
 no evidencia suficiente para decidir agrupación ni ritmo.
 
+Distinguir también los números de digitación de las alteraciones: en el c. 7
+de Mi mayor, el «1» junto al bajo no es un becuadro. El bajo conserva el re♯ de
+la armadura. Una discrepancia del OCR exige cotejar el signo con el original:
+homr leyó ese bajo como re bemol al contrastar la imagen aportada por el usuario.
+
 Caso de referencia: en Mi mayor, los compases 3 y 11 tienen tres plicas de
 acordes bajo una sola barra, sobre un bajo de blanca. El c. 3 repite
 si4–re5 natural–mi5 y el c. 11 sol♯4–re5 natural–mi5. Las cabezas re–mi
