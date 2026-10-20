@@ -185,7 +185,7 @@ class Converter:
                 elif MARKERS.get(label):
                     out += words_dir(MARKERS[label], right=True)
             elif el.tag == 'Jump':
-                out += words_dir(rich_text(el) or 'D.C.', right=True)
+                out += words_dir(self.texts.get(rich_text(el), rich_text(el)) or 'D.C.', right=True)
         return out
 
     def plan(self, voices):
