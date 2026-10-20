@@ -7,6 +7,7 @@ MusicXML lleva solo alturas y duraciones, y la TAB la propone el motor (ver buil
 (clave de sol), como en los preludios. Un tiempo = una semicorchea.
 """
 import os
+import re
 import sys
 from pathlib import Path
 from xml.sax.saxutils import escape
@@ -48,9 +49,11 @@ def convert_measure(m, fifths, full, scale=1):
     for g in groups:
         # una cabeza con dos plicas suena una vez: la voz mas corta no la repite
         shorter = [h for h in g['shared'] if any(o is not g and o['dur'] > g['dur'] and any(h is x for x in o['heads']) for o in groups)]
-        pitch = '+'.join(names[id(h)] for h in reversed(g['heads']) if not any(h is x for x in shorter))  # de grave a agudo
+        kept = [h for h in reversed(g['heads']) if not any(h is x for x in shorter)]  # de grave a agudo
+        pitch = '+'.join(names[id(h)] for h in kept)
+        ties = {names[id(h)]: (bool(h.get('tie_prev')), bool(h.get('tie_next'))) for h in kept if h.get('tie_prev') or h.get('tie_next')}
         items.append({'x': g['x'], 'dur': round(g['dur'] * scale), 'pitch': pitch, 'dir': g['dir'] if len(directions) == 2 else 'up',
-                      'grace': g['grace'], 'grace_type': g['grace_type'], 'beams': g['beams']})
+                      'grace': g['grace'], 'grace_type': g['grace_type'], 'beams': g['beams'], 'ties': ties})
     graces = [i for i in items if i['grace']]
     items = [i for i in items if not i['grace']]
     for r in m['rests']:
@@ -99,7 +102,7 @@ def convert_measure(m, fifths, full, scale=1):
     voices = []
     for name in ('up', 'down'):
         for lane in lanes[name]:
-            voices.append({'stem': name, 'events': [(i['onset'], i['dur'], i['pitch'], None, i.get('graces', [])) for i in lane]})
+            voices.append({'stem': name, 'events': [(i['onset'], i['dur'], i['pitch'], None, i.get('graces', []), i.get('ties', {})) for i in lane]})
     out = {'voices': voices}
     out['length'] = max([e[0] + e[1] for v in voices for e in v['events']] + [0])
     return out
@@ -130,6 +133,27 @@ def beams_for(events, bounds, scale=1):
                     state = 'begin' if i == 0 else 'end' if i == len(group) - 1 else 'continue'
                     states[e[0]] = {n: state for n in bars}
     return states
+
+
+def add_ties(xml, ties):
+    """Marca de ligadura (<tie> y <tied>) en cada nota del evento cuya altura va ligada."""
+    if not ties:
+        return xml
+    out = []
+    for note in re.findall(r'<note>.*?</note>', xml):
+        step = re.search(r'<step>(.)</step>', note)
+        if step:
+            alter = int(re.search(r'<alter>(-?\d)</alter>', note).group(1)) if '<alter>' in note else 0
+            name = f"{step.group(1)}{'#' if alter == 1 else 'b' if alter == -1 else ''}{re.search(r'<octave>(\d)</octave>', note).group(1)}"
+            if name in ties:
+                stop, start = ties[name]
+                marks = ('<tie type="stop"/>' if stop else '') + ('<tie type="start"/>' if start else '')
+                tied = ('<tied type="stop"/>' if stop else '') + ('<tied type="start"/>' if start else '')
+                note = note.replace('</duration>', '</duration>' + marks, 1)
+                note = (note.replace('<notations>', '<notations>' + tied, 1) if '<notations>' in note
+                        else note.replace('</note>', f'<notations>{tied}</notations></note>'))
+        out.append(note)
+    return ''.join(out)
 
 
 def grace_xml(grace, index, count, voice, stem, acc):
@@ -169,7 +193,7 @@ def measure_xml(number, fifths, time, data, first, implicit, key_change=False):
     order = sorted((e[0], v, e) for v, voice in enumerate(voices) for e in voice['events'])
     for _, v, event in order:
         graces = ''.join(grace_xml(g, i, len(event[4]), v + 1, voices[v]['stem'], acc) for i, g in enumerate(event[4]))
-        rendered[(v, event[0])] = graces + note_xml(event[:4], v + 1, voices[v]['stem'], acc, beams_for(voices[v]['events'], bounds, scale).get(event[0]))
+        rendered[(v, event[0])] = graces + add_ties(note_xml(event[:4], v + 1, voices[v]['stem'], acc, beams_for(voices[v]['events'], bounds, scale).get(event[0])), event[5])
     body = ''
     for v, voice in enumerate(voices):
         if v:

@@ -28,6 +28,9 @@ extract.PAGES_DIR = os.path.join(extract.PREVIEW_DIR, 'full')
 extract.PER_ROW = PER_ROW
 extract.TITLES = {n: f'Waltz {n} in {key}' for n, key in KEYS.items()}
 extract.PREVIEW_MEASURES = {}
+# Grabado mas pequeno sobre una pagina virtual mas grande (el PDF sigue siendo A4) para que el ultimo sistema no pase a una
+# segunda pagina.
+extract.PDF_OVERRIDES = {36: {'scale': 40, 'pageWidth': 2363, 'pageHeight': 3341}}
 
 _source = extract.build
 

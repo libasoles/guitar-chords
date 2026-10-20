@@ -75,8 +75,10 @@ def read(path):
         thick = [d['rect'] for d in drawings if d['type'] == 's' and (d['width'] or 0) > 2 and d['rect'].width < 0.01]
         beams = [[(i[1].x, i[1].y) for i in d['items']] + [(d['items'][-1][2].x, d['items'][-1][2].y)] for d in drawings
                  if d['type'] == 'f' and d['fill'] == (0.0, 0.0, 0.0) and len(d['items']) == 4]
+        curves = [d['rect'] for d in drawings if d['fill'] == (0.0, 0.0, 0.0) and any(i[0] == 'c' for i in d['items'])]
         for index, lines in enumerate(notation):
             system = read_system(lines, glyph, stems, bars, thick, beams)
+            mark_ties(system, curves, lines)
             mark_texts(system, page.get_text('words'), lines)
             if system['key'] is not None and not meta['measures']:
                 meta['fifths'] = system['key']
@@ -267,3 +269,28 @@ def mark_texts(system, words, lines):
         cx = (w[0] + w[2]) / 2
         best = min(system['measures'], key=lambda m: min(abs(cx - m['left']), abs(cx - m['right']), 0 if m['left'] <= cx <= m['right'] else 1e9))
         best['fine' if text == 'Fine' else 'dc'] = True
+
+
+def mark_ties(system, curves, lines):
+    """Una ligadura de prolongacion es una curva corta entre dos cabezas de la misma altura: marca
+    `tie_next` en la primera y `tie_prev` en la segunda. Las curvas largas son ligaduras de expresion."""
+    top, bottom = lines[0], lines[-1]
+    space = (bottom - top) / 4
+    hw = space * 1.18
+    heads = [h for m in system['measures'] for h in m['items']]
+    for r in curves:
+        if r.width > 60 * space or r.y0 < top - 10 * space or r.y1 > bottom + 10 * space:
+            continue
+        best = None
+        for left in heads:
+            if not (left['x'] - 1 <= r.x0 <= left['x'] + 2.2 * hw) or abs(left['y'] - (r.y0 + r.y1) / 2) > 2.5 * space:
+                continue
+            for right in heads:
+                if right['pos'] != left['pos'] or right['x'] <= left['x'] + hw or not (right['x'] - 1.2 * hw <= r.x1 <= right['x'] + 1.5 * hw):
+                    continue
+                gap = abs(right['x'] - left['x'] - r.width)
+                if best is None or gap < best[0]:
+                    best = (gap, left, right)
+        if best:
+            best[1]['tie_next'] = True
+            best[2]['tie_prev'] = True
