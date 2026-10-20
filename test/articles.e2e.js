@@ -125,12 +125,12 @@ const PDFS = [
       await page.waitForSelector('ascii-tabs .ascii-tabs-tab');
       assert.equal(await page.locator('h1').textContent(), locale === 'es' ? 'Tablaturas para arpegios' : 'Tabs for arpeggios');
       assert.equal(await page.locator('.lead a').getAttribute('href'), pagePath('articulo-carcassi', locale));
-      assert.equal(await page.locator('ascii-tabs[readonly]').count(), 28);
+      assert.equal(await page.locator('ascii-tabs[readonly]').count(), 35);
       const titles = await page.locator('figcaption').allTextContents();
       assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Do menor', 'Do 7'] : ['C major', 'C minor', 'C 7']);
       const groups = await page.locator('ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
       groups.flat().forEach((form) => assert.equal(form.filter((f) => f !== null).length, 4));
-      assert.deepEqual(groups[10][1], [0, 3, 1, null, 2, null]);
+      assert.deepEqual(groups[12][1], [0, 3, 1, null, 2, null]);
       assert.equal(await page.locator('.tab-chords').count(), groups.length);
       const weights = await page.locator('.ascii-tabs-has').evaluateAll((cells) => cells.map((cell) => ({
         string: Number(cell.dataset.s),
@@ -139,10 +139,10 @@ const PDFS = [
       weights.forEach(({ string, weight }) => assert.equal(weight, string >= 3 ? '700' : '400'));
       if (locale === 'es') assert.match(await page.locator('.lead a').textContent(), /^descomposición/);
       // The names are buttons above the tab, outside the white sheet, without underline.
-      assert.deepEqual(await page.locator('.tab-chords').nth(6).locator('.arpeggio-chord').allTextContents(), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
+      assert.deepEqual(await page.locator('.tab-chords').nth(7).locator('.arpeggio-chord').allTextContents(), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
       assert.equal(await page.locator('ascii-tabs .arpeggio-chord').count(), 0);
       assert.equal(await page.locator('.arpeggio-chord').first().evaluate((el) => getComputedStyle(el).textDecorationLine), 'none');
-      assert.deepEqual(groups[6], [
+      assert.deepEqual(groups[7], [
         [2, 1, 2, 0, null, null], [2, 1, 2, 4, null, null],
         [2, 1, 2, null, 0, null], [2, 1, 2, null, 3, null],
       ]);
@@ -185,11 +185,11 @@ const PDFS = [
       assert.ok(await qualityTabs.nth(1).evaluate((el) => el === document.activeElement));
       assert.deepEqual(await firstGroup.locator('[role="tabpanel"]:visible .arpeggio-chord').allTextContents(), ['Cm', 'Cm/Eb', 'Cm/G']);
       await page.keyboard.press('End');
-      assert.equal(await qualityTabs.nth(3).getAttribute('aria-selected'), 'true');
+      assert.equal(await qualityTabs.nth(4).getAttribute('aria-selected'), 'true');
       await page.keyboard.press('ArrowRight');
       assert.equal(await qualityTabs.first().getAttribute('aria-selected'), 'true');
       await page.keyboard.press('ArrowLeft');
-      assert.equal(await qualityTabs.nth(3).getAttribute('aria-selected'), 'true');
+      assert.equal(await qualityTabs.nth(4).getAttribute('aria-selected'), 'true');
       await page.keyboard.press('Home');
       assert.equal(await qualityTabs.first().getAttribute('aria-selected'), 'true');
       // Every annotation opens its own exact four-string fingering, including inversions.

@@ -152,6 +152,10 @@
   width: 4ch;
   text-align: center;
 }
+/* Long names overflow their column; the empty spacers must not swallow the clicks. */
+.tab-chords span:empty {
+  pointer-events: none;
+}
 /* Read-only <ascii-tabs>: the editor's white sheet, no tools. */
 .article-tab {
   --ascii-tabs-font: var(--mono);
