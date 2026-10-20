@@ -1,0 +1,24 @@
+# Valses del Op. 59 de Carcassi
+
+Página `/articulos/valses-de-carcassi`: los valses de la Tercera parte del *Método completo para guitarra*, Op. 59
+(numeración del libro, ver `resources/Libro Carcassi - Metodo.pdf`, pdf 87+). Carcassi murió en 1853: la obra es de
+dominio público.
+
+## Fuente
+
+Los PDF de `resources/carcassi-op59-youtube/` (carpeta no versionada, de solo lectura) vienen de las descripciones de la
+lista de reproducción «Carcassi Op. 59» del canal Guitar Notes en YouTube: exportaciones de MuseScore 4 con la fuente
+Leland. Son vectoriales, así que las notas se leen de la geometría del PDF sin OCR (`pdf_notes.py`) y se cotejan con el
+libro. El libro escaneado de Ditson 1853 (Internet Archive) es la referencia impresa.
+IMSLP bloquea la descarga por script; Mutopia solo tiene los preludios del Op. 59.
+
+## Reproducir
+
+```sh
+.venv-carcassi/bin/python scripts/carcassi-valses/transcribe_valses.py 2   # corrected/waltz-02.musicxml
+.venv-carcassi/bin/python scripts/carcassi-valses/build.py 2               # PDF, MusicXML y SVG con TAB
+```
+
+Requiere `pymupdf` además de lo que pide `carcassi-preludios/README.md`. El PDF y el MusicXML publicados salen del
+motor (`backend/engine/tabify.py`); la TAB es una propuesta del motor con la misma digitación que los preludios.
+Un tiempo = una semicorchea. Los compases de anacrusa y de cierre suman juntos un compás completo.

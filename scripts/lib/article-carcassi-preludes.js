@@ -11,12 +11,14 @@ const { modal, CLOSE_ICON } = require('./modal');
 
 const ROOT = path.join(__dirname, '..', '..');
 function createEdition(edition) {
-  const folder = edition === 'santisteban' ? 'santisteban-preludios' : 'carcassi-preludios';
+  const waltzes = edition === 'valses';
+  const folder = waltzes ? 'carcassi-valses' : edition === 'santisteban' ? 'santisteban-preludios' : 'carcassi-preludios';
   const DOWNLOADS_DIR = path.join(ROOT, 'downloads', folder);
   const PREVIEW_DIR = path.join(ROOT, 'src', 'site', 'articles', folder);
   const ASSETS_URL = '/assets/articles/' + folder + '/';
   const FULL_DIR = path.join(PREVIEW_DIR, 'full');
-  const SCORE_PREFIX = edition === 'santisteban' ? 'santisteban-prelude-' : 'prelude-';
+  const SCORE_PREFIX = waltzes ? 'waltz-' : edition === 'santisteban' ? 'santisteban-prelude-' : 'prelude-';
+  const PIECE = waltzes ? 'Waltz' : 'Prelude';
 
   const KEYS = {
     es: { C: 'Do', D: 'Re', E: 'Mi', F: 'Fa', G: 'Sol', A: 'La', B: 'Si', Major: 'mayor', Minor: 'menor' },
@@ -26,7 +28,7 @@ function createEdition(edition) {
   function publishedPreludes() {
     if (!fs.existsSync(DOWNLOADS_DIR)) return [];
     return fs.readdirSync(DOWNLOADS_DIR)
-      .map((file) => file.match(/^(Prelude (\d+) in ([A-G][#b]?) (Major|Minor) - Matteo Carcassi(?: - Santisteban)?)\.pdf$/))
+      .map((file) => file.match(new RegExp('^(' + PIECE + ' (\\d+) in ([A-G][#b]?) (Major|Minor) - Matteo Carcassi(?: - Santisteban)?)\\.pdf$')))
       .filter(Boolean)
       .map((m) => ({ number: Number(m[2]), base: m[1], tonic: m[3], mode: m[4], pdf: m[0] }))
       .filter((p) => fs.existsSync(path.join(DOWNLOADS_DIR, p.base + '.musicxml')) &&
@@ -101,7 +103,7 @@ function createEdition(edition) {
     'stroke-linejoin="round" aria-hidden="true"><path d="m19 6-5.2-3.9a.5.5 0 0 0-.8.4V18"/><circle cx="9" cy="18" r="4"/></svg>';
 
   function preludeName(prelude, locale) {
-    return (locale === 'es' ? 'Preludio ' : 'Prelude ') + prelude.number + (locale === 'es' ? ' en ' : ' in ') + keyName(prelude, locale);
+    return (locale === 'es' ? (waltzes ? 'Vals ' : 'Preludio ') : PIECE + ' ') + prelude.number + (locale === 'es' ? ' en ' : ' in ') + keyName(prelude, locale);
   }
 
   function card(prelude, locale, strings, sharedGlyphs, all) {
@@ -190,4 +192,4 @@ function createEdition(edition) {
   return { publishedPreludes, renderBody, pdfFiles, pageSvgFiles, cardImage, keyName, DOWNLOADS_DIR, PREVIEW_DIR, SCORE_PREFIX };
 }
 
-module.exports = { ...createEdition('carcassi'), santisteban: createEdition('santisteban') };
+module.exports = { ...createEdition('carcassi'), santisteban: createEdition('santisteban'), waltzes: createEdition('valses') };

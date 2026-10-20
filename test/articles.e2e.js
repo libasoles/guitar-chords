@@ -34,7 +34,7 @@ const PDFS = [
 
       // Index: one card per article, linking to it.
       await page.goto(base + index);
-      assert.equal(await page.locator('.article-card').count(), 4);
+      assert.equal(await page.locator('.article-card').count(), 5);
       assert.equal(await page.locator('.article-card').first().getAttribute('href'), article);
       assert.equal(await page.locator('.article-card').nth(1).getAttribute('href'), pagePath('articulo-preludios-carcassi', locale));
       assert.match(await page.locator('.article-card p').first().textContent(), /Carcassi/);
