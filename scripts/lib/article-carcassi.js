@@ -97,26 +97,26 @@ function tabChars(forms) {
    reemplaza las herramientas por defecto) ni pista de edicion. */
 function asciiTab(forms, locale, annotations) {
   return '<ascii-tabs class="article-tab" readonly theme="light" labels="notes" spacing="3" lang="' + locale + '"' +
-    (annotations ? ' data-annotations="' + escapeAttr(JSON.stringify([annotations])) + '"' : '') +
+    (annotations ? ' variant="flat" data-annotations="' + escapeAttr(JSON.stringify([annotations])) + '"' : '') +
     ' data-value=\'' + JSON.stringify([formsColumns(forms)]) + '\'><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>';
 }
 
 /* Nombres de los acordes, uno sobre la columna de su forma (la misma
    cuadricula de 4 caracteres que la TAB, con la columna vacia entre acordes). */
-function chordNames(names, interactive) {
+function chordNames(names) {
   const cells = [];
   names.forEach(function (name, i) {
     if (i > 0) cells.push('<span></span>');
     cells.push('<span>' + name + '</span>');
   });
-  return '<div class="tab-chords"' + (interactive ? '' : ' aria-hidden="true"') + '>' + cells.join('') + '</div>';
+  return '<div class="tab-chords" aria-hidden="true">' + cells.join('') + '</div>';
 }
 
 /* Titulo (y nombres de acorde) por fuera de la hoja blanca de la TAB. El
    tamano de letra se comparte para que los nombres queden sobre sus columnas. */
-function tabFigure(caption, forms, locale, names, annotations, interactive) {
+function tabFigure(caption, forms, locale, names, annotations) {
   return '<figure class="form tab-figure" style="--chars:' + tabChars(forms) + '"><figcaption>' + caption + '</figcaption>' +
-    (names && !annotations ? chordNames(names, interactive) : '') + asciiTab(forms, locale, annotations) + '</figure>';
+    (names && !annotations ? chordNames(names) : '') + asciiTab(forms, locale, annotations) + '</figure>';
 }
 
 function formFigure(caption, form, locale) {

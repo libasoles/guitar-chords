@@ -152,10 +152,6 @@
   width: 4ch;
   text-align: center;
 }
-/* Long names overflow their column; the empty spacers must not swallow the clicks. */
-.tab-chords span:empty {
-  pointer-events: none;
-}
 /* Read-only <ascii-tabs>: the editor's white sheet, no tools. */
 .article-tab {
   --ascii-tabs-font: var(--mono);
@@ -423,7 +419,37 @@ body:has(.modal-full:popover-open) {
   font-weight: 500;
 }
 
-/* Chord names sit above the tab, outside the sheet; each opens a popover with the chord card. */
+/* Flat tabs with annotations: the paper is drawn behind the strings only, so the
+   chord names above stay on the page. Each name opens a popover with the chord card. */
+.article-tab[variant="flat"] {
+  box-sizing: border-box;
+  padding-inline: 21px;
+}
+.article-tab[variant="flat"] .ascii-tabs-staff {
+  position: relative;
+  isolation: isolate;
+  padding-bottom: 21px;
+}
+.article-tab[variant="flat"] .ascii-tabs-staff::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: auto -21px 0;
+  height: calc(9em + 42px);
+  background: var(--ascii-tabs-sheet);
+  border: 1px solid var(--ascii-tabs-line);
+  border-radius: 8px;
+}
+.article-tab[variant="flat"] .ascii-tabs-annotations {
+  margin-bottom: 21px;
+}
+/* Centre each name on its fret: the library anchors it at the fret's left edge,
+   and the fret is a .6em-wide digit of the tab's font (.375em at the name's size). */
+.article-tab[variant="flat"] .ascii-tabs-annotation {
+  transform: translateX(calc(-50% + .375em));
+  white-space: nowrap;
+  font-size: .8em;
+}
 .arpeggio-chord {
   padding: 0;
   border: 0;

@@ -208,7 +208,8 @@ function renderBody(locale, strings) {
     const buttons = names.map(function (name, i) {
       const id = 'arpeggio-chord-' + group + '-' + i;
       popovers.push(chordPopover(id, name, forms[i], strings));
-      return '<button type="button" class="arpeggio-chord" popovertarget="' + id + '" aria-label="' + strings.artArpeggiosShowFingering + ' ' + name + '">' + name + '</button>';
+      // Forms sit on every other Column: a blank Column separates the chords.
+      return { column: 2 * i, text: name, html: '<button type="button" class="arpeggio-chord" popovertarget="' + id + '" aria-label="' + strings.artArpeggiosShowFingering + ' ' + name + '">' + name + '</button>' };
     });
     const styledForms = forms.map(function (form) {
       return form.map(function (fret, string) {
@@ -216,7 +217,7 @@ function renderBody(locale, strings) {
       });
     });
     if (!roots.has(en)) roots.set(en, { title: locale === 'es' ? es : en, variants: [] });
-    roots.get(en).variants.push({ title: strings['artArpeggios' + quality], figure: tabFigure(title, styledForms, locale, buttons, null, true) });
+    roots.get(en).variants.push({ title: strings['artArpeggios' + quality], figure: tabFigure(title, styledForms, locale, null, buttons) });
   });
   const tabs = Array.from(roots, function ([root, { title, variants }]) {
     const id = 'arpeggio-' + root;

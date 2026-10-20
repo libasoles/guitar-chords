@@ -131,16 +131,21 @@ const PDFS = [
       const groups = await page.locator('ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
       groups.flat().forEach((form) => assert.equal(form.filter((f) => f !== null).length, 4));
       assert.deepEqual(groups[12][1], [0, 3, 1, null, 2, null]);
-      assert.equal(await page.locator('.tab-chords').count(), groups.length);
+      assert.equal(await page.locator('ascii-tabs[variant="flat"]').count(), groups.length);
       const weights = await page.locator('.ascii-tabs-has').evaluateAll((cells) => cells.map((cell) => ({
         string: Number(cell.dataset.s),
         weight: getComputedStyle(cell.querySelector('.ascii-tabs-fret')).fontWeight,
       })));
       weights.forEach(({ string, weight }) => assert.equal(weight, string >= 3 ? '700' : '400'));
       if (locale === 'es') assert.match(await page.locator('.lead a').textContent(), /^descomposición/);
-      // The names are buttons above the tab, outside the white sheet, without underline.
-      assert.deepEqual(await page.locator('.tab-chords').nth(7).locator('.arpeggio-chord').allTextContents(), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
-      assert.equal(await page.locator('ascii-tabs .arpeggio-chord').count(), 0);
+      // The names are annotation buttons above the strings, without underline.
+      assert.deepEqual(await page.locator('ascii-tabs').nth(7).locator('.ascii-tabs-annotations .arpeggio-chord').allTextContents(), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
+      // The white paper starts below the names.
+      const [nameBottom, paperTop] = await page.locator('ascii-tabs').first().evaluate((el) => [
+        el.querySelector('.arpeggio-chord').getBoundingClientRect().bottom,
+        el.querySelector('.ascii-tabs-staff').getBoundingClientRect().bottom - parseFloat(getComputedStyle(el.querySelector('.ascii-tabs-staff'), '::before').height),
+      ]);
+      assert.ok(nameBottom <= paperTop + 1,'chord names sit above the paper');
       assert.equal(await page.locator('.arpeggio-chord').first().evaluate((el) => getComputedStyle(el).textDecorationLine), 'none');
       assert.deepEqual(groups[7], [
         [2, 1, 2, 0, null, null], [2, 1, 2, 4, null, null],
@@ -228,13 +233,16 @@ const PDFS = [
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
         for (const tab of await page.getByRole('tab').all()) {
           await tab.click();
-          assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
+          // A revealed panel lays its annotations out on the next frames.
+          await page.waitForFunction(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
         }
-        // Native annotations anchor at the fret, including after resizing.
+        // Native annotations are centred on the fret, including after resizing.
         await page.waitForFunction(() => Array.from(document.querySelectorAll('.ascii-tabs-annotation')).every((annotation) => {
           const staff = annotation.closest('.ascii-tabs-staff');
           const fret = staff.querySelector('.ascii-tabs-cell[data-c="' + annotation.dataset.column + '"][data-s="0"] .ascii-tabs-fret');
-          return Math.abs(annotation.getBoundingClientRect().left - fret.getBoundingClientRect().left) < 1;
+          const box = annotation.getBoundingClientRect();
+          const target = fret.getBoundingClientRect();
+          return Math.abs(box.left + box.width / 2 - (target.left + target.width / 2)) < 1;
         }));
       }
       await page.setViewportSize({ width: 375, height: 800 });
