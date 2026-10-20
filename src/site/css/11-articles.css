@@ -592,6 +592,24 @@ body:has(.modal-full:popover-open) {
   background: #fff;
   box-shadow: 0 8px 32px #0003;
 }
+.arpeggio-search-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.25rem;
+}
+.arpeggio-search-clear {
+  padding: 0.15rem 0.25rem;
+  border: 0;
+  background: none;
+  color: #8a8a8a;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.arpeggio-search-clear:hover,
+.arpeggio-search-clear:focus-visible {
+  color: #555;
+}
 .arpeggio-search-popup[hidden],
 .arpeggio-results[hidden],
 .arpeggio-group[hidden] {
