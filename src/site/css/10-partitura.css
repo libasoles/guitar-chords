@@ -215,10 +215,10 @@
   font-weight: 600;
   font-size: 0.9rem;
   padding: 0.5rem 1rem;
-  border: 1px solid var(--accent-brand);
+  border: 1px solid var(--accent);
   border-radius: 4px;
-  background: var(--accent-brand);
-  color: var(--ink);
+  background: var(--accent);
+  color: #fff;
   cursor: pointer;
   justify-self: start;
 }

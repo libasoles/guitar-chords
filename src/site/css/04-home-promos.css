@@ -16,7 +16,7 @@
   text-decoration: none;
 }
 .note-finder-promo-link:hover {
-  border-color: #2a835f;
+  border-color: var(--accent-brand);
 }
 .note-finder-promo-link:focus-visible {
   outline: 2px solid var(--accent);
