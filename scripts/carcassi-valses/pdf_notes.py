@@ -27,7 +27,7 @@ def glyphs(page):
             for span in line['spans']:
                 if 'Leland' in span['font']:
                     for ch in span['chars']:
-                        out.append((ord(ch['c']), ch['origin'][0], ch['origin'][1]))
+                        out.append((ord(ch['c']), ch['origin'][0], ch['origin'][1], span['size']))
     return out
 
 
@@ -140,7 +140,7 @@ def measure(a, b, inside, stems, beams, top, bottom, space):
     dots = [g for g in inside if g[0] == DOT and mine(g)]
     flags = [g for g in inside if g[0] in FLAGS and mine(g)]
     items = []
-    for code, x, y in (g for g in inside if g[0] in HEAD and mine(g)):
+    for code, x, y, size in (g for g in inside if g[0] in HEAD and mine(g)):
         pos = round((bottom - y) / half)
         taken = {id(o['stem']) for o in items if o['stem'] is not None and o['pos'] == pos and abs(o['x'] - x) < 2}
         stem, best = None, 1e9
@@ -154,8 +154,8 @@ def measure(a, b, inside, stems, beams, top, bottom, space):
         cand = [g for g in accs if abs(g[2] - y) < 0.3 and 0 < x - g[1] < 14]
         acc = ACCIDENTAL[max(cand, key=lambda g: g[1])[0]] if cand else None
         dot = any(0 < d[1] - x < 14 and abs(d[2] - y) < half + 0.3 for d in dots)
-        items.append({'code': code, 'x': x, 'y': y, 'pos': pos, 'stem': stem, 'acc': acc, 'dot': dot})
-    rests = [{'dur': RESTS[c], 'x': x, 'y': y} for c, x, y in inside if c in RESTS and mine((c, x, y))]
+        items.append({'code': code, 'x': x, 'y': y, 'pos': pos, 'stem': stem, 'acc': acc, 'dot': dot, 'grace': size < 17})
+    rests = [{'dur': RESTS[c], 'x': x, 'y': y} for c, x, y, _ in inside if c in RESTS and mine((c, x, y))]
     return {'items': items, 'rests': rests, 'flags': flags, 'beams': sys_beams, 'stems': sys_stems, 'space': space,
             'top': top, 'bottom': bottom, 'left': a, 'right': b, 'dots': dots}
 
@@ -204,8 +204,9 @@ def stem_groups(m):
         else:
             dur = base
         dotted = any(h['dot'] for h in heads)
-        out.append({'dir': 'up' if up else 'down', 'x': sx, 'heads': sorted(heads, key=lambda h: h['y']), 'dur': dur * (1.5 if dotted else 1),
-                    'stem': stem, 'beams': count})
+        grace = all(h['grace'] for h in heads)
+        out.append({'dir': 'up' if up else 'down', 'x': sx, 'heads': sorted(heads, key=lambda h: h['y']), 'dur': 0 if grace else dur * (1.5 if dotted else 1),
+                    'stem': stem, 'beams': count, 'grace': grace, 'grace_type': dur})
     return sorted(out, key=lambda g: g['x'])
 
 

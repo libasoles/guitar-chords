@@ -14,8 +14,8 @@ for n in sys.argv[1:]:
     for i, x in enumerate(m['measures']):
         s = P.length_of(x)
         mid = (x['top'] + x['bottom']) / 2
-        up = s['up'] + sum(r['dur'] for r in x['rests'] if r['y'] < mid)
-        dn = s['down'] + sum(r['dur'] for r in x['rests'] if r['y'] >= mid)
+        up = s['up'] + sum(full if r['dur'] == 16 else r['dur'] for r in x['rests'] if r['y'] < mid)
+        dn = s['down'] + sum(full if r['dur'] == 16 else r['dur'] for r in x['rests'] if r['y'] >= mid)
         ok = (up == full and dn in (0, full)) or (dn == full and up in (0, full)) or (up + dn == full and 0 in (up, dn))
         if up > full or dn > full:
             bad.append((i + 1, up, dn))  # una voz se pasa del compas: error de lectura

@@ -17,7 +17,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT / 'scripts' / 'carcassi-preludios'))
 
 import pdf_notes as P  # noqa: E402
-from transcribe_lib import DIVISIONS, Accidentals, fill, hidden_rest, note_xml, key_alters  # noqa: E402
+from transcribe_lib import DIVISIONS, Accidentals, fill, hidden_rest, note_xml, key_alters, parse, pitch_xml  # noqa: E402
 
 SOURCES = ROOT / 'resources' / 'carcassi-op59-youtube'
 STEPS = 'CDEFGAB'
@@ -29,7 +29,7 @@ def pitch_name(position, alter):
     return f"{step}{'#' if alter == 1 else 'b' if alter == -1 else ''}{octave}"
 
 
-def convert_measure(m, fifths, full):
+def convert_measure(m, fifths, full, scale=1):
     """-> {'up': [...], 'bass': [...], 'length'}; eventos (pos, dur, pitch, None) como en transcribe_lib."""
     key = key_alters(fifths)
     groups = P.stem_groups(m)
@@ -47,9 +47,12 @@ def convert_measure(m, fifths, full):
     items = []
     for g in groups:
         pitch = '+'.join(names[id(h)] for h in reversed(g['heads']))  # de grave a agudo
-        items.append({'x': g['x'], 'dur': int(g['dur']), 'pitch': pitch, 'dir': g['dir'] if len(directions) == 2 else 'up'})
+        items.append({'x': g['x'], 'dur': round(g['dur'] * scale), 'pitch': pitch, 'dir': g['dir'] if len(directions) == 2 else 'up',
+                      'grace': g['grace'], 'grace_type': g['grace_type'], 'beams': g['beams']})
+    graces = [i for i in items if i['grace']]
+    items = [i for i in items if not i['grace']]
     for r in m['rests']:
-        items.append({'x': r['x'], 'dur': int(r['dur']), 'pitch': 'R',
+        items.append({'x': r['x'], 'dur': full if r['dur'] == 16 else round(r['dur'] * scale), 'pitch': 'R',  # el silencio de redonda llena el compas
                       'dir': ('up' if r['y'] < mid else 'down') if len(directions) == 2 else 'up'})
     for name in ('up', 'down'):
         mine = sorted((i for i in items if i['dir'] == name), key=lambda i: i['x'])
@@ -77,10 +80,16 @@ def convert_measure(m, fifths, full):
                     break
             else:
                 lanes[name].append([i])
+    # cada nota de gracia pasa a la nota real siguiente (a su derecha) de su misma direccion de plica
+    for grace in sorted(graces, key=lambda g: g['x']):
+        target = min((i for i in items if i['dir'] == grace['dir'] and i['pitch'] != 'R' and i['x'] > grace['x']),
+                     key=lambda i: i['x'], default=None)
+        if target is not None:
+            target.setdefault('graces', []).append(grace)
     voices = []
     for name in ('up', 'down'):
         for lane in lanes[name]:
-            voices.append({'stem': name, 'events': [(i['onset'], i['dur'], i['pitch'], None) for i in lane]})
+            voices.append({'stem': name, 'events': [(i['onset'], i['dur'], i['pitch'], None, i.get('graces', [])) for i in lane]})
     out = {'voices': voices}
     out['length'] = max([e[0] + e[1] for v in voices for e in v['events']] + [0])
     return out
@@ -101,9 +110,9 @@ def interpolate(axis, x):
     return t0 + (t1 - t0) * (x - x0) / ((x1 - x0) or 1)
 
 
-def beams_for(events, bounds):
+def beams_for(events, bounds, scale=1):
     states = {}
-    for dur, bars in ((1, (1, 2)), (2, (1,))):
+    for dur, bars in ((scale, (1, 2)), (2 * scale, (1,))) + (((1, (1, 2, 3)),) if scale == 2 else ()):
         for start, end in zip(bounds, bounds[1:]):
             group = [e for e in events if e[1] == dur and e[2] != 'R' and start <= e[0] < end]
             for i, e in enumerate(group):
@@ -113,24 +122,43 @@ def beams_for(events, bounds):
     return states
 
 
+def grace_xml(grace, index, count, voice, stem, acc):
+    """Nota de gracia (sin duracion) antes de su nota real; las que van juntas comparten barra."""
+    kind = '16th' if grace['grace_type'] <= 1 else 'eighth'
+    bars = 2 if kind == '16th' else 1
+    notes = []
+    for n, pitch in enumerate(grace['pitch'].split('+')):
+        step, alter, octave = parse(pitch)
+        accidental = acc.xml(step, alter, octave)
+        accidental = f"<accidental>{accidental}</accidental>" if accidental else ''
+        state = 'begin' if index == 0 else 'end' if index == count - 1 else 'continue'
+        beam = ''.join(f'<beam number="{b}">{state}</beam>' for b in range(1, bars + 1)) if count > 1 else ''
+        chord = '<chord/>' if n else ''
+        notes.append(f"<note><grace/>{chord}{pitch_xml(step, alter, octave)}<voice>{voice}</voice><type>{kind}</type>"
+                     f"{accidental}<stem>{stem}</stem>{beam}</note>")
+    return ''.join(notes)
+
+
 def measure_xml(number, fifths, time, data, first, implicit, key_change=False):
     acc = Accidentals(fifths)
+    scale = data['scale']
     length = data['length']
-    full = time[0] * 16 // time[1]
+    full = time[0] * 16 // time[1] * scale
     attrs = ''
     if key_change:
         attrs = f"<attributes><key><fifths>{fifths}</fifths></key></attributes>"
     if first:
-        attrs = (f"<attributes><divisions>{DIVISIONS}</divisions><key><fifths>{fifths}</fifths></key>"
+        attrs = (f"<attributes><divisions>{DIVISIONS * scale}</divisions><key><fifths>{fifths}</fifths></key>"
                  f"<time><beats>{time[0]}</beats><beat-type>{time[1]}</beat-type></time>"
                  "<clef><sign>G</sign><line>2</line></clef></attributes>")
-    bounds = list(range(0, full + 1, 6 if time[1] == 8 else 4))
+    bounds = list(range(0, full + 1, (6 if time[1] == 8 else 4) * scale))
     voices = data['voices'] or [{'stem': 'up', 'events': []}]
     rendered = {}
     # las alteraciones se deciden en orden de lectura: se recorren todas las voces por posicion
     order = sorted((e[0], v, e) for v, voice in enumerate(voices) for e in voice['events'])
     for _, v, event in order:
-        rendered[(v, event[0])] = note_xml(event, v + 1, voices[v]['stem'], acc, beams_for(voices[v]['events'], bounds).get(event[0]))
+        graces = ''.join(grace_xml(g, i, len(event[4]), v + 1, voices[v]['stem'], acc) for i, g in enumerate(event[4]))
+        rendered[(v, event[0])] = graces + note_xml(event[:4], v + 1, voices[v]['stem'], acc, beams_for(voices[v]['events'], bounds, scale).get(event[0]))
     body = ''
     for v, voice in enumerate(voices):
         if v:
@@ -155,13 +183,24 @@ def convert(number):
     meta = P.read(str(SOURCES / f'op59-{number:02d}.pdf'))
     time = meta['time']
     full = time[0] * 16 // time[1]
+    # una fusa dura media semicorchea: la pieza entera pasa a doble resolucion
+    scale = 2 if any(g['dur'] != int(g['dur']) for m in meta['measures'] for g in P.stem_groups(m)) else 1
+    set_scale(scale)
     measures = []
     for m in meta['measures']:
-        data = convert_measure(m, m['fifths'], full)
-        data.update(fifths=m['fifths'], repeat_start=m['repeat_start'], repeat_end=m['repeat_end'], fine=m.get('fine'), dc=m.get('dc'))
+        data = convert_measure(m, m['fifths'], full * scale, scale)
+        data.update(scale=scale, fifths=m['fifths'], repeat_start=m['repeat_start'], repeat_end=m['repeat_end'], fine=m.get('fine'), dc=m.get('dc'))
         measures.append(data)
     measures[-1]['final'] = True
     return meta, measures
+
+
+def set_scale(scale):
+    import transcribe_lib
+    if scale == 2:
+        transcribe_lib.TYPES = {1: '32nd', 2: '16th', 3: '16th', 4: 'eighth', 6: 'eighth', 8: 'quarter', 12: 'quarter',
+                                16: 'half', 24: 'half', 32: 'whole'}
+        transcribe_lib.DOTTED = {3, 6, 12, 24}
 
 
 def write(number, title, path):
@@ -172,7 +211,7 @@ def write(number, title, path):
     index = 0
     previous = measures[0]['fifths']
     for i, data in enumerate(measures):
-        pickup = i == 0 and data['length'] < full
+        pickup = i == 0 and data['length'] < full * data['scale']
         if pickup:
             number_attr = 0
         else:
