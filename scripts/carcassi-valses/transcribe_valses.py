@@ -44,23 +44,61 @@ def convert_measure(m, fifths, full):
             state[index] = head['acc']
         names[id(head)] = pitch_name(head['pos'], state.get(index, key.get(step, 0)))
     directions = {g['dir'] for g in groups}
-    voices = {'up': [], 'down': []}
+    items = []
     for g in groups:
-        voice = g['dir'] if len(directions) == 2 else 'up'
         pitch = '+'.join(names[id(h)] for h in reversed(g['heads']))  # de grave a agudo
-        voices[voice].append((g['x'], g['dur'], pitch))
+        items.append({'x': g['x'], 'dur': int(g['dur']), 'pitch': pitch, 'dir': g['dir'] if len(directions) == 2 else 'up'})
     for r in m['rests']:
-        voice = ('up' if r['y'] < mid else 'down') if len(directions) == 2 else 'up'
-        voices[voice].append((r['x'], r['dur'], 'R'))
-    out = {}
-    for name, items in (('up', voices['up']), ('bass', voices['down'])):
-        pos, events = 0, []
-        for _, dur, pitch in sorted(items):
-            events.append((pos, int(dur), pitch, None))
-            pos += int(dur)
-        out[name] = events
-    out['length'] = max([e[0] + e[1] for e in out['up'] + out['bass']] + [0])
+        items.append({'x': r['x'], 'dur': int(r['dur']), 'pitch': 'R',
+                      'dir': ('up' if r['y'] < mid else 'down') if len(directions) == 2 else 'up'})
+    for name in ('up', 'down'):
+        mine = sorted((i for i in items if i['dir'] == name), key=lambda i: i['x'])
+        pos = 0
+        for i in mine:
+            i['onset'] = pos
+            pos += i['dur']
+    totals = {name: sum(i['dur'] for i in items if i['dir'] == name) for name in ('up', 'down')}
+    over = [name for name in ('up', 'down') if totals[name] > full]
+    if over:
+        # dos voces con la misma direccion de plica: los inicios salen de la posicion horizontal, tomando como
+        # eje del tiempo la direccion que llena el compas exactamente
+        ref = next((name for name in ('up', 'down') if totals[name] == full), None)
+        if ref:
+            axis = sorted((i['x'], i['onset']) for i in items if i['dir'] == ref)
+            for i in items:
+                if i['dir'] != ref:
+                    i['onset'] = max(0, min(full - 1, round(interpolate(axis, i['x']))))
+    lanes = {'up': [], 'down': []}
+    for name in ('up', 'down'):
+        for i in sorted((i for i in items if i['dir'] == name), key=lambda i: (i['onset'], i['x'])):
+            for lane in lanes[name]:
+                if lane[-1]['onset'] + lane[-1]['dur'] <= i['onset']:
+                    lane.append(i)
+                    break
+            else:
+                lanes[name].append([i])
+    voices = []
+    for name in ('up', 'down'):
+        for lane in lanes[name]:
+            voices.append({'stem': name, 'events': [(i['onset'], i['dur'], i['pitch'], None) for i in lane]})
+    out = {'voices': voices}
+    out['length'] = max([e[0] + e[1] for v in voices for e in v['events']] + [0])
     return out
+
+
+def interpolate(axis, x):
+    """Tiempo (en semicorcheas) de la posicion horizontal `x`, interpolando entre los ataques conocidos."""
+    if len(axis) == 1:
+        return axis[0][1]
+    if x <= axis[0][0]:
+        (x0, t0), (x1, t1) = axis[0], axis[1]
+    elif x >= axis[-1][0]:
+        (x0, t0), (x1, t1) = axis[-2], axis[-1]
+    else:
+        for (x0, t0), (x1, t1) in zip(axis, axis[1:]):
+            if x0 <= x <= x1:
+                break
+    return t0 + (t1 - t0) * (x - x0) / ((x1 - x0) or 1)
 
 
 def beams_for(events, bounds):
@@ -87,17 +125,17 @@ def measure_xml(number, fifths, time, data, first, implicit, key_change=False):
                  f"<time><beats>{time[0]}</beats><beat-type>{time[1]}</beat-type></time>"
                  "<clef><sign>G</sign><line>2</line></clef></attributes>")
     bounds = list(range(0, full + 1, 6 if time[1] == 8 else 4))
-    both = bool(data['up']) and bool(data['bass'])
-    rendered, order = {}, sorted([(e[0], 0, e) for e in data['up']] + [(e[0], 1, e) for e in data['bass']])
-    up_beams, bass_beams = beams_for(data['up'], bounds), beams_for(data['bass'], bounds)
-    for _, voice_index, event in order:
-        voice, stem = (1, 'up') if voice_index == 0 else (2, 'down')
-        rendered[(voice, event[0])] = note_xml(event, voice, stem, acc, (up_beams if voice == 1 else bass_beams).get(event[0]))
-    v1 = ''.join(hidden_rest(i, 1) if k == 'gap' else rendered[(1, i[0])] for k, i in fill(data['up'], 1, length))
-    v2 = ''
-    if data['bass']:
-        v2 = (f"<backup><duration>{length}</duration></backup>" +
-              ''.join(hidden_rest(i, 2) if k == 'gap' else rendered[(2, i[0])] for k, i in fill(data['bass'], 2, length)))
+    voices = data['voices'] or [{'stem': 'up', 'events': []}]
+    rendered = {}
+    # las alteraciones se deciden en orden de lectura: se recorren todas las voces por posicion
+    order = sorted((e[0], v, e) for v, voice in enumerate(voices) for e in voice['events'])
+    for _, v, event in order:
+        rendered[(v, event[0])] = note_xml(event, v + 1, voices[v]['stem'], acc, beams_for(voices[v]['events'], bounds).get(event[0]))
+    body = ''
+    for v, voice in enumerate(voices):
+        if v:
+            body += f"<backup><duration>{length}</duration></backup>"
+        body += ''.join(hidden_rest(i, v + 1) if k == 'gap' else rendered[(v, i[0])] for k, i in fill(voice['events'], v + 1, length))
     left = '<barline location="left"><bar-style>heavy-light</bar-style><repeat direction="forward"/></barline>' if data.get('repeat_start') else ''
     right = ''
     if data.get('repeat_end'):
@@ -110,7 +148,7 @@ def measure_xml(number, fifths, time, data, first, implicit, key_change=False):
     if data.get('dc'):
         words = '<direction placement="above"><direction-type><words font-weight="bold">D.C. al Fine</words></direction-type></direction>'
     implicit_attr = ' implicit="yes"' if implicit else ''
-    return f'<measure number="{number}"{implicit_attr}>{attrs}{left}{v1}{v2}{words}{right}</measure>'
+    return f'<measure number="{number}"{implicit_attr}>{attrs}{left}{body}{words}{right}</measure>'
 
 
 def convert(number):

@@ -180,9 +180,21 @@ def stem_groups(m):
         sx = stem.x0
         count = 0
         for poly in m['beams']:
-            xs = [p[0] for p in poly]
-            yc = [p[1] for p in poly]
-            if min(xs) - 1.0 <= sx <= max(xs) + 1.0 and abs((min(yc) + max(yc)) / 2 - far) < 14 and min(yc) >= min(stem.y0, stem.y1) - 9:
+            xs = [q[0] for q in poly[:4]]
+            if not (min(xs) - 1.0 <= sx <= max(xs) + 1.0):
+                continue
+            # la barra es un paralelogramo: borde superior de (x0, ya) a (x1, yb), grosor constante
+            left = min(poly[:4], key=lambda q: q[0])
+            right = max(poly[:4], key=lambda q: q[0])
+            tops = sorted(poly[:4], key=lambda q: q[1])
+            span = right[0] - left[0] or 1.0
+            ys_left = sorted(q[1] for q in poly[:4] if abs(q[0] - left[0]) < 0.1)
+            ys_right = sorted(q[1] for q in poly[:4] if abs(q[0] - right[0]) < 0.1)
+            t = (sx - left[0]) / span
+            t = min(1.0, max(0.0, t))
+            top = ys_left[0] + (ys_right[0] - ys_left[0]) * t
+            bottom = ys_left[-1] + (ys_right[-1] - ys_left[-1]) * t
+            if abs((top + bottom) / 2 - far) < 14:
                 count += 1
         flag = [f for f in m['flags'] if abs(f[1] - sx) < 2.5 and abs(f[2] - far) < 8]
         if count:
