@@ -166,6 +166,7 @@ const PDFS = [
         ['G', 'Minor', ['Gm', 'Gm/Bb', 'Gm/D'], [7, 10, 2], [7, 10, 2]],
         ['A', 'Seventh', ['A7', 'A7/C#', 'A7/E', 'A7/G'], [9, 1, 4, 7], [9, 1, 4, 7]],
         ['B', 'Minor', ['Bm', 'Bm/D', 'Bm/F#'], [11, 2, 6], [11, 2, 6]],
+        ['B', 'Seventh', ['B7', 'B7/D#', 'B7/F#', 'B7/F#'], [11, 3, 6, 9], [11, 3, 6, 6]],
       ]) {
         const label = require('../src/i18n/strings.' + locale + '.json')['artArpeggios' + quality];
         await page.locator('#arpeggio-' + root + '-root').locator('..').getByRole('tab', { name: label, exact: true }).click();
@@ -239,7 +240,7 @@ const PDFS = [
         // Native annotations are centred on the fret, including after resizing.
         await page.waitForFunction(() => Array.from(document.querySelectorAll('.ascii-tabs-annotation')).every((annotation) => {
           const staff = annotation.closest('.ascii-tabs-staff');
-          const fret = staff.querySelector('.ascii-tabs-cell[data-c="' + annotation.dataset.column + '"][data-s="0"] .ascii-tabs-fret');
+          const fret = staff.querySelector('.ascii-tabs-cell[data-c="' + annotation.dataset.column + '"] .ascii-tabs-fret');
           const box = annotation.getBoundingClientRect();
           const target = fret.getBoundingClientRect();
           return Math.abs(box.left + box.width / 2 - (target.left + target.width / 2)) < 1;

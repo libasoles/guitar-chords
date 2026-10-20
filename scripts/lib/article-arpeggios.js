@@ -5,7 +5,7 @@ const { chordCard, CHORD_CARD_LOADER } = require('./chord-forms');
 const { tabFigure, TAB_LOADER } = require('./article-carcassi');
 const { modal } = require('./modal');
 
-// Each position sounds three treble strings and one bass. String 1 first.
+// Each position sounds four strings, including one bass. String 1 first.
 const GROUPS = [
   ['Do', 'C', 'Major', ['C', 'C/E', 'C/G'], [
     [0, 1, 0, null, 3, null], [0, 1, 0, 2, null, null], [0, 1, 0, null, null, 3],
@@ -109,8 +109,9 @@ const GROUPS = [
   ['Si', 'B', 'Minor', ['Bm', 'Bm/D', 'Bm/F#'], [
     [2, 3, 4, null, 2, null], [2, 3, 4, 0, null, null], [2, 3, 4, null, null, 2],
   ]],
-  ['Si', 'B', 'Seventh', ['B7', 'B7/D#', 'B7/F#'], [
+  ['Si', 'B', 'Seventh', ['B7', 'B7/D#', 'B7/F#', 'B7/F#'], [
     [2, 4, 2, null, 2, null], [2, 0, 2, 1, null, null], [2, 4, 2, null, null, 2],
+    [null, 4, 2, 4, null, 2],
   ]],
   ['Si', 'B', 'MinorSeventh', ['Bm7', 'Bm7/D', 'Bm7/F#', 'Bm7/A'], [
     [2, 3, 2, null, 2, null],
@@ -178,6 +179,8 @@ const FINGERINGS = {
   B: '143-1-', 'B/D#': '2431--', 'B/F#': '134--1',
   Bm: '124-1-', 'Bm/D': '1240--', 'Bm/F#': '124--1',
   B7: '141-1-', 'B7/D#': '4031--', 'B7/F#': '141--1',
+  // Alternate voicing of B7/F#: no root, with the fifth doubled.
+  'x 4 2 4 x 2': '-413-1',
   Bm7: '131-1-', 'Bm7/D': '1020--', 'Bm7/F#': '131--1', 'Bm7/A': '131-0-',
   Cmaj7: '000-3-', 'Cmaj7/E': '314--0', 'Cmaj7/G': '014--3', 'Cmaj7/B': '010-2-',
   Dmaj7: '1110--', 'Dmaj7/F#': '324--1', 'Dmaj7/A': '124-0-', 'Dmaj7/C#': '121-4-',
@@ -189,8 +192,9 @@ const FINGERINGS = {
 };
 
 function chordPopover(id, name, form, strings) {
+  const fingering = FINGERINGS[form.map((fret) => fret === null ? 'x' : fret).join(' ')] || FINGERINGS[name];
   const fingers = form.map(function (fret, string) {
-    return [string + 1, fret === null ? 'x' : fret === 0 ? 'o' : fret, fret > 0 ? Number(FINGERINGS[name][string]) || undefined : undefined];
+    return [string + 1, fret === null ? 'x' : fret === 0 ? 'o' : fret, fret > 0 ? Number(fingering[string]) || undefined : undefined];
   });
   const label = strings.artChordDiagramLabel + ' ' + name;
   return modal({
