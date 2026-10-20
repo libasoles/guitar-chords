@@ -1,6 +1,6 @@
 'use strict';
 /* fingerprint.js — Versiona por contenido los assets estaticos de dist/site.
-   Renombra assets/**.{js,css,svg} a <nombre>.<hash10>.<ext> y reescribe todas
+   Renombra assets/**.{js,css,svg} y assets/icons/*.png a <nombre>.<hash10>.<ext> y reescribe todas
    las referencias (HTML, JS, CSS, manifests y sw.js). Un deploy que cambia un
    archivo cambia su URL, asi que las URLs fingerprinted son inmutables y se
    pueden servir con cache de larga vida. */
@@ -9,11 +9,11 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const HASHED_EXT = new Set(['.js', '.css', '.svg']);
+const HASHED_EXT = new Set(['.js', '.css', '.svg', '.png']);
 const TEXT_EXT = new Set(['.html', '.js', '.css', '.webmanifest', '.svg', '.xml', '.json']);
 const HASH_LEN = 10;
 // Nombre ya fingerprinted: name.<10 hex>.ext
-const HASHED_NAME_RE = new RegExp('\\.[0-9a-f]{' + HASH_LEN + '}\\.(js|css|svg)$');
+const HASHED_NAME_RE = new RegExp('\\.[0-9a-f]{' + HASH_LEN + '}\\.(js|css|svg|png)$');
 
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
@@ -59,11 +59,14 @@ function rewriteTextFiles(files, renames) {
    relPath nuevo) relativo a siteDir, con separador '/'. */
 function fingerprintAssets(siteDir) {
   const assetsDir = path.join(siteDir, 'assets');
+  const iconsDir = path.join(assetsDir, 'icons') + path.sep;
   const result = new Map();
 
   function pass(filter) {
     const targets = walk(assetsDir).filter((f) =>
-      HASHED_EXT.has(path.extname(f)) && !HASHED_NAME_RE.test(f) && filter(f));
+      HASHED_EXT.has(path.extname(f)) && !HASHED_NAME_RE.test(f) && filter(f) &&
+      // Only the PWA icons: og images keep stable URLs for social crawlers.
+      (path.extname(f) !== '.png' || f.startsWith(iconsDir)));
     const renames = new Map();
 
     // A target can only be named after every target it references. Processing

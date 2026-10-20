@@ -41,10 +41,12 @@ test('renombra js/css con hash de contenido y reescribe HTML, JS y sw.js', () =>
   assert.ok(read(dir, map.get('assets/app.js')).includes(path.basename(map.get('assets/vendor/lib.js'))));
 });
 
-test('no versiona assets que no son js/css/svg', () => {
-  const dir = makeSite(base());
-  fingerprintAssets(dir);
-  assert.ok(fs.existsSync(path.join(dir, 'assets/icons/icon.png')));
+test('versiona los PNG de assets/icons pero no otras imagenes', () => {
+  const dir = makeSite({ ...base(), 'assets/og.png': 'og' });
+  const map = fingerprintAssets(dir);
+  assert.match(map.get('assets/icons/icon.png'), /^assets\/icons\/icon\.[0-9a-f]{10}\.png$/);
+  assert.ok(!fs.existsSync(path.join(dir, 'assets/icons/icon.png')));
+  assert.ok(fs.existsSync(path.join(dir, 'assets/og.png')));
 });
 
 test('el hash cambia solo cuando cambia el contenido (propagando a quien lo referencia)', () => {
