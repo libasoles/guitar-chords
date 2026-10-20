@@ -19,7 +19,8 @@ for (const locale of ['es', 'en']) {
       const section = html.split('<section').find((part) => part.includes('id="arpeggio-' + root + '-root"'))?.split('</section>')[0];
       assert.ok(section, root + ' group exists');
       assert.ok(section.includes('>' + strings['artArpeggios' + quality] + '</button>'), root + ' ' + quality + ' tab exists');
-      for (const name of names) assert.ok(section.includes('>' + name + '</button>'), name + ' position exists');
+      // The names are ascii-tabs annotations, serialised in the data-annotations attribute.
+      for (const name of names) assert.ok(section.includes('&quot;text&quot;:&quot;' + name + '&quot;'), name + ' position exists');
     }
   });
 }
