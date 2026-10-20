@@ -41,7 +41,7 @@ const PRELUDE_CHORDS = ['Am', 'G7', 'C', 'E7'];
 const C_MAJOR_FORMS = {
   C: [[0, 1, 0, null, 3, null], [0, 1, 0, 2, null, null]],
   Dm: [[1, 3, 2, 0, null, null], [1, 3, 2, 3, null, null]],
-  G7: [[1, 0, 0, null, null, 3], [1, 3, 0, null, 2, null]],
+  G7: [[1, 0, 0, null, null, 3], [1, 0, 0, null, 2, null]],
 };
 
 function escapeAttr(text) {

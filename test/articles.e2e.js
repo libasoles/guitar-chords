@@ -75,6 +75,28 @@ const PDFS = [
       const boxes = await page.locator('.example-card').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().right));
       boxes.forEach((right) => assert.ok(right <= 375, 'tarjeta fuera del viewport'));
 
+      // The shared C-major example must agree with the original edition's G7/B.
+      if (locale === 'es') {
+        const forms = await page.locator('.bass-forms ascii-tabs').last().evaluate((el) => el.value[0].filter((c) => c.some((f) => f !== null)));
+        const sounding = forms[1].flatMap((f, i) => f === null ? [] : [[64, 59, 55, 50, 45, 40][i] + f]).sort((a, b) => a - b);
+        const xml = fs.readFileSync(path.join(__dirname, '../scripts/carcassi-preludios/corrected/prelude-01.musicxml'), 'utf8');
+        const measure = [...xml.matchAll(/<measure\b[^>]*>([\s\S]*?)<\/measure>/g)][3][1];
+        const pitches = new Set();
+        let offset = 0;
+        for (const [, tag, content] of measure.matchAll(/<(note|backup)\b[^>]*>([\s\S]*?)<\/\1>/g)) {
+          const duration = Number(content.match(/<duration>(\d+)<\/duration>/)[1]);
+          if (tag === 'backup') { offset -= duration; continue; }
+          const step = content.match(/<step>([A-G])<\/step>/);
+          if (step && offset >= 8) {
+            const octave = Number(content.match(/<octave>(\d)<\/octave>/)[1]);
+            const alter = Number((content.match(/<alter>(-?\d+)<\/alter>/) || [null, 0])[1]);
+            pitches.add(12 * octave + { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[step[1]] + alter);
+          }
+          offset += duration;
+        }
+        assert.deepEqual(sounding, [...pitches].sort((a, b) => a - b));
+      }
+
       // Only analytics, ascii-tabs and the site's own chord card scripts: the scores are static SVG.
       const scripts = await page.locator('script[src]').evaluateAll((els) => els.map((el) => el.src));
       assert.ok(scripts.every((src) => src.includes('googletagmanager') || /vendor\/(ascii-tabs|svguitar)|\/assets\/chord-(diagram|card)/.test(src)), scripts.join(','));
