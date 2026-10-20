@@ -16,7 +16,7 @@ const MEASURES = { 1: 8, 2: 8, 3: 7, 4: 8, 5: 8, 6: 16, 7: 8, 8: 11, 9: 8, 10: 1
 /* Cadenas del PDF de origen: nombre del archivo, productor del original, editor, licencia de la edicion. */
 const SOURCE_TRACES = [/CarcassiMethod/i, /Ghostscript/i, /Santisteban/i, /Mutopia/i, /LilyPond/i, /Preludes in Progressive/i];
 
-test('Mi mayor, compás 3: alterna si–mi con re natural sobre el bajo mi', () => {
+test('Mi mayor, compás 3: tres acordes si–re natural–mi en corcheas sobre el bajo mi', () => {
   for (const file of [
     '../scripts/carcassi-preludios/corrected/prelude-09.musicxml',
     '../downloads/carcassi-preludios/Prelude 9 in E Major - Matteo Carcassi.musicxml',
@@ -30,16 +30,16 @@ test('Mi mayor, compás 3: alterna si–mi con re natural sobre el bajo mi', () 
       const pitch = note.match(/<step>(.*?)<\/step>/)[1]
         + (/<alter>1<\/alter>/.test(note) ? '#' : '') + note.match(/<octave>(.*?)<\/octave>/)[1];
       const type = note.match(/<type>(.*?)<\/type>/)[1];
+      assert.equal(type, /<voice>2<\/voice>/.test(note) ? 'half' : 'eighth', file);
       if (/<voice>2<\/voice>/.test(note)) {
         bass.push([pitch, type]);
       } else if (/<chord\s*\//.test(note)) {
         attacks.at(-1).push(pitch);
       } else {
-        assert.equal(type, '16th', file);
         attacks.push([pitch]);
       }
     }
-    assert.deepEqual(attacks, [['B4', 'E5'], ['D5'], ['B4', 'E5'], ['D5'], ['B4', 'E5'], ['D5']], file);
+    assert.deepEqual(attacks, [['B4', 'D5', 'E5'], ['B4', 'D5', 'E5'], ['B4', 'D5', 'E5']], file);
     assert.deepEqual(bass, [['E3', 'half']], file);
     assert.match(bar, /<accidental>natural<\/accidental>/, file);
   }
