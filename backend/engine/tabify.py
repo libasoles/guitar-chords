@@ -746,6 +746,44 @@ def add_string_names(svg, names):
     return svg[:system.end()] + f'<g class="stringNames">{texts}</g>' + svg[system.end():]
 
 
+def inject_endings(xml, part):
+    """First/second-time brackets (`RepeatBracket`) of `part` as MusicXML `<ending>`.
+
+    music21 drops them when two staves share a part, but Verovio needs them to draw the brackets."""
+    def edit(number, update):
+        pattern = re.compile(r'(<measure\b[^>]*\bnumber="%s"[^>]*>)(.*?)(</measure>)' % number, re.S)
+        return pattern.sub(lambda m: m.group(1) + update(m.group(2)) + m.group(3), xml, count=1)
+
+    def add(body, location, element):
+        barline = re.compile(r'(<barline location="%s">)(.*?)(</barline>)' % location, re.S)
+        if barline.search(body):
+            def put(m):
+                inner = m.group(2)
+                i = inner.find("<repeat")
+                inner = inner[:i] + element + inner[i:] if i >= 0 else inner + element
+                return m.group(1) + inner + m.group(3)
+            return barline.sub(put, body, count=1)
+        bar = '<barline location="%s">%s</barline>' % (location, element)
+        if location == "right":
+            return body + bar
+        i = body.find("<note")
+        return body[:i] + bar + body[i:]
+
+    for bracket in part.recurse().getElementsByClass(m21.spanner.RepeatBracket):
+        spanned = [m for m in bracket.getSpannedElements() if isinstance(m, m21.stream.Measure)]
+        if not spanned:
+            continue
+        label = str(bracket.number).replace(",", ", ")
+        first, last = spanned[0].number, spanned[-1].number
+        xml = edit(first, lambda body: add(body, "left", '<ending number="%s" type="start"/>' % label))
+
+        def close(body):
+            kind = "stop" if re.search(r'<repeat direction="backward"', body) else "discontinue"
+            return add(body, "right", '<ending number="%s" type="%s"/>' % (label, kind))
+        xml = edit(last, close)
+    return xml
+
+
 def build_output(score, part, measures, tuning, title, out_base, header=None):
     """Writes <out_base>.musicxml and <out_base>.pdf; returns their paths.
 
@@ -763,7 +801,7 @@ def build_output(score, part, measures, tuning, title, out_base, header=None):
     out.metadata.title = title if found is None else found
     if subtitles:
         out.metadata.composer = " · ".join(subtitles)
-    xml = add_staff_tuning(fix_technical(to_musicxml(out)), tuning)
+    xml = inject_endings(add_staff_tuning(fix_technical(to_musicxml(out)), tuning), part)
     xml = add_credits(clean_labels(xml), out.metadata.title, subtitles)
     xml_path = out_base + ".musicxml"
     with open(xml_path, "w", encoding="utf-8") as f:

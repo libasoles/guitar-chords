@@ -84,6 +84,7 @@ class Converter:
 
     def convert(self):
         measures = [m for m in self.staff.findall('Measure')]
+        self.plan_voltas(measures)
         out = []
         for index, measure in enumerate(measures):
             out.append(self.measure(index, measure, measures))
@@ -130,37 +131,35 @@ class Converter:
             body += self.voice(voice, number_, length, stem, full - length if index == 0 and implicit else Fraction(0))
         return head + attributes + left + body + right + '</measure>'
 
+    def plan_voltas(self, measures):
+        """{indice del primer compas: (numeros de la casilla, indice del ultimo compas)} de los Volta de MuseScore."""
+        self.voltas = {}
+        for i, measure in enumerate(measures):
+            for spanner in measure.iter('Spanner'):
+                volta = spanner.find('Volta') if spanner.get('type') == 'Volta' else None
+                if volta is not None:
+                    span = spanner.find('next/location/measures')
+                    count = int(span.text) if span is not None else 1
+                    self.voltas[i] = ((volta.findtext('endings') or '1').replace(' ', ''), i + count - 1)
+
     def barlines(self, measure, measures, index):
+        """(barra izquierda, barra derecha) con repeticiones y casillas de primera/segunda vez."""
         left, right = '', ''
+        if index in self.voltas:
+            left += '<ending number="%s" type="start"/>' % self.voltas[index][0].replace(',', ', ')
         if measure.find('startRepeat') is not None:
             left += '<repeat direction="forward"/>'
-        ending_start = ending_stop = None
-        for spanner in measure.iter('Spanner'):
-            if spanner.get('type') != 'Volta':
-                continue
-            volta = spanner.find('Volta')
-            if volta is not None:
-                ending_start = (volta.findtext('endings') or '1').replace(' ', '')
-                span = spanner.find('next/location/measures')
-                self.volta_remaining = (ending_start, int(span.text) if span is not None else 1)
-        if getattr(self, 'volta_open', None) is None and ending_start:
-            left = '<ending number="%s" type="start"/>' % ending_start.replace(',', ', ') + left
-            self.volta_open = ending_start
-            self.volta_left = self.volta_remaining[1]
-        right_repeat = measure.find('endRepeat') is not None
-        end_style = None
+        repeat_back = measure.find('endRepeat') is not None
+        for first, (numbers, last) in self.voltas.items():
+            if last == index:
+                right += '<ending number="%s" type="%s"/>' % (numbers.replace(',', ', '), 'stop' if repeat_back else 'discontinue')
+        style = None
         for bar in measure.iter('BarLine'):
-            end_style = BARLINES.get(bar.findtext('subtype'))
-        if getattr(self, 'volta_open', None) is not None:
-            self.volta_left -= 1
-            if self.volta_left <= 0:
-                kind = 'discontinue' if right_repeat is False and end_style is None else 'stop'
-                right += '<ending number="%s" type="%s"/>' % (self.volta_open.replace(',', ', '), 'stop' if right_repeat else 'discontinue')
-                self.volta_open = None
-        if right_repeat:
+            style = BARLINES.get(bar.findtext('subtype'))
+        if style and not repeat_back:
+            right = '<bar-style>%s</bar-style>' % style + right
+        if repeat_back:
             right += '<repeat direction="backward"/>'
-        if end_style and not right_repeat:
-            right = '<bar-style>%s</bar-style>' % end_style + right
         return (('<barline location="left">%s</barline>' % left) if left else '',
                 ('<barline location="right">%s</barline>' % right) if right else '')
 
