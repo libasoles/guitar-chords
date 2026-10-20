@@ -109,8 +109,8 @@ const GROUPS = [
   ['Si', 'B', 'Minor', ['Bm', 'Bm/D', 'Bm/F#'], [
     [2, 3, 4, null, 2, null], [2, 3, 4, 0, null, null], [2, 3, 4, null, null, 2],
   ]],
-  ['Si', 'B', 'Seventh', ['B7', 'B7/D#', 'B7/F#', 'B7/F#'], [
-    [2, 4, 2, null, 2, null], [2, 0, 2, 1, null, null], [2, 4, 2, null, null, 2],
+  ['Si', 'B', 'Seventh', ['B7', 'B7', 'B7/D#', 'B7/F#', 'B7/F#'], [
+    [2, 4, 2, null, 2, null], [null, 4, 2, 4, 2, null], [2, 0, 2, 1, null, null], [2, 4, 2, null, null, 2],
     [null, 4, 2, 4, null, 2],
   ]],
   ['Si', 'B', 'MinorSeventh', ['Bm7', 'Bm7/D', 'Bm7/F#', 'Bm7/A'], [
@@ -179,6 +179,8 @@ const FINGERINGS = {
   B: '143-1-', 'B/D#': '2431--', 'B/F#': '134--1',
   Bm: '124-1-', 'Bm/D': '1240--', 'Bm/F#': '124--1',
   B7: '141-1-', 'B7/D#': '4031--', 'B7/F#': '141--1',
+  // Alternate voicing of B7 with the fifth above the root.
+  'x 4 2 4 2 x': '-4131-',
   // Alternate voicing of B7/F#: no root, with the fifth doubled.
   'x 4 2 4 x 2': '-413-1',
   Bm7: '131-1-', 'Bm7/D': '1020--', 'Bm7/F#': '131--1', 'Bm7/A': '131-0-',
