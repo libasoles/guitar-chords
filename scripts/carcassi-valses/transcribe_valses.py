@@ -53,7 +53,8 @@ def convert_measure(m, fifths, full, scale=1):
         pitch = '+'.join(names[id(h)] for h in kept)
         ties = {names[id(h)]: (bool(h.get('tie_prev')), bool(h.get('tie_next'))) for h in kept if h.get('tie_prev') or h.get('tie_next')}
         items.append({'x': g['x'], 'dur': round(g['dur'] * scale), 'pitch': pitch, 'dir': g['dir'] if len(directions) == 2 else 'up',
-                      'grace': g['grace'], 'grace_type': g['grace_type'], 'beams': g['beams'], 'ties': ties})
+                      'grace': g['grace'], 'grace_type': g['grace_type'], 'beams': g['beams'], 'ties': ties,
+                      'fingers': {names[id(h)]: h['finger'] for h in kept if h.get('finger')}})
     graces = [i for i in items if i['grace']]
     items = [i for i in items if not i['grace']]
     for r in m['rests']:
@@ -100,10 +101,14 @@ def convert_measure(m, fifths, full, scale=1):
         if target is not None:
             target.setdefault('graces', []).append(grace)
     voices = []
+    fingers = {}  # (voz, inicio) -> {altura: dedo de la mano izquierda}
     for name in ('up', 'down'):
         for lane in lanes[name]:
+            for i in lane:
+                if i.get('fingers'):
+                    fingers[(len(voices), i['onset'])] = i['fingers']
             voices.append({'stem': name, 'events': [(i['onset'], i['dur'], i['pitch'], None, i.get('graces', []), i.get('ties', {})) for i in lane]})
-    out = {'voices': voices}
+    out = {'voices': voices, 'fingers': fingers}
     out['length'] = max([e[0] + e[1] for v in voices for e in v['events']] + [0])
     return out
 

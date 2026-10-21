@@ -87,3 +87,13 @@ for (const piece of pieces) {
     assert.doesNotMatch(xml, /<encoding>|<software>|<rights>|<source>|<encoding-date>/);
   });
 }
+
+/* Dedos de la mano izquierda de la edicion de origen: la leccion 79 abre con 1 2 2 1 y el MusicXML los conserva
+   (el motor los toma como pista de la TAB y los deja en la notacion). */
+test('leccion 79: la notacion conserva los dedos de la edicion', { skip: !pieces.some((p) => p.number === 79) }, () => {
+  const piece = pieces.find((p) => p.number === 79);
+  const xml = fs.readFileSync(path.join(DOWNLOADS_DIR, piece.base + '.musicxml'), 'utf8');
+  const fingers = [...xml.matchAll(/<fingering[^>]*>\s*(\d)\s*<\/fingering>/g)].map((m) => m[1]);
+  assert.deepEqual(fingers.slice(0, 4), ['1', '2', '2', '1']);
+  assert.equal(fingers.length, 27);
+});

@@ -115,6 +115,9 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
           <tuplet bracket="yes" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -701,6 +704,9 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">2</fingering>
+          </technical>
           <tuplet bracket="yes" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -1296,6 +1302,9 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
           <tuplet bracket="yes" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -1324,6 +1333,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">2</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-28">
         <pitch>
@@ -2469,6 +2483,9 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
           <tuplet bracket="yes" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -2498,6 +2515,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">3</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-52">
         <pitch>
@@ -3054,6 +3076,9 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">2</fingering>
+          </technical>
           <tuplet bracket="yes" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -3589,6 +3614,9 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">3</fingering>
+          </technical>
           <tuplet bracket="yes" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -3618,6 +3646,9 @@
         <staff>1</staff>
         <beam number="1">end</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">1</fingering>
+          </technical>
           <tuplet number="1" type="stop" />
         </notations>
       </note>
@@ -3638,6 +3669,9 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">2</fingering>
+          </technical>
           <tuplet bracket="yes" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -3712,6 +3746,9 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">1</fingering>
+          </technical>
           <tuplet bracket="yes" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -3762,6 +3799,9 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">2</fingering>
+          </technical>
           <tuplet bracket="yes" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>

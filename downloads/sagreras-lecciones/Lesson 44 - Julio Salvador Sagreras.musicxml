@@ -1271,6 +1271,9 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
           <tuplet bracket="yes" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -1455,6 +1458,11 @@
         <type>half</type>
         <stem>down</stem>
         <staff>1</staff>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">2</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-35">
         <pitch>

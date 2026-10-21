@@ -109,10 +109,13 @@ def take_bass(m, full):
         return None
     key = V.key_alters(m['fifths'])
     names = []
+    m['bass_fingers'] = {}
     for g in whole:
         for h in sorted(g['heads'], key=lambda h: -h['y']):  # de grave a agudo
             step = V.STEPS[(2 + h['pos']) % 7]
             names.append(V.pitch_name(h['pos'], h['acc'] if h['acc'] is not None else key.get(step, 0)))
+            if h.get('finger'):
+                m['bass_fingers'][names[-1]] = h['finger']
     m['items'] = [h for h in m['items'] if not any(h is x for g in whole for x in g['heads'])]
     return '+'.join(names)
 
@@ -132,7 +135,10 @@ def lesson_measures(lesson):
             m['rests'] = [r for r in m['rests'] if r['dur'] != 16]  # silencio de compas completo bajo otra voz
         data = V.convert_measure(m, m['fifths'], full * SCALE, SCALE)
         simplify(data)
+        data['fingers'] = {(v, o): {enharmonic(n): d for n, d in names.items()} for (v, o), names in data['fingers'].items()}
         if bass:
+            if m.get('bass_fingers'):
+                data['fingers'][(len(data['voices']), 0)] = {enharmonic(n): d for n, d in m['bass_fingers'].items()}
             data['voices'].append({'stem': 'down', 'events': [(0, full * SCALE, bass, None, [], {})]})
         data.update(fifths=m['fifths'], repeat_start=m['repeat_start'], repeat_end=m['repeat_end'], fine=m.get('fine'),
                     dc=m.get('dc'), single=m.get('single_voice', False))
@@ -239,6 +245,11 @@ def measure_xml(number, time, data, first, implicit, key_change, prev_fifths):
     for _, v, event in order:
         stem = stem_for(event[2]) if data['single'] else voices[v]['stem']
         graces = ''.join(V.grace_xml(g, i, len(event[4]), v + 1, stem, acc) for i, g in enumerate(event[4]))
+        fingers = data['fingers'].get((v, event[0]), {})
+        if '+' in event[2]:  # acorde: «altura:dedo» por nota
+            event = (*event[:2], '+'.join(f'{p}:{fingers[p]}' if p in fingers else p for p in event[2].split('+')), *event[3:])
+        else:
+            event = (*event[:3], fingers.get(event[2]), *event[4:])
         xml = T.note_xml(event[:4], v + 1, stem, acc, beams_for(voices[v]['events'], bounds).get(event[0]))
         rendered[(v, event[0])] = graces + V.add_ties(xml, event[5])
     body = ''

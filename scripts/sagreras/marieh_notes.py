@@ -45,6 +45,39 @@ def italic_threes(page):
     return out
 
 
+def finger_marks(page):
+    """Dedos de la mano izquierda: cifras 0-4 de 8 pt (las de la TAB impresa son de 9 pt): (x, y) del centro y cifra."""
+    out = []
+    for block in page.get_text('rawdict')['blocks']:
+        for line in block.get('lines', []):
+            for span in line['spans']:
+                if span['font'] == 'FreeSerif' and abs(span['size'] - 8) < 0.1:
+                    for ch in span['chars']:
+                        if ch['c'] in '01234':
+                            b = ch['bbox']
+                            out.append(((b[0] + b[2]) / 2, (b[1] + b[3]) / 2, ch['c']))
+    return out
+
+
+def attach_fingers(system, marks, lines):
+    """Cada cifra pasa a la cabeza mas cercana (`finger` de la cabeza); una cabeza toma una sola cifra. En un acorde la
+    cifra puede ir al lado de la cabeza. -> las cifras que no encontraron cabeza (para avisar)."""
+    top, bottom = lines[0], lines[-1]
+    space = (bottom - top) / 4
+    mine = [m for m in marks if top - 9 * space <= m[1] <= bottom + 5 * space and system['measures']
+            and min(ms['left'] for ms in system['measures']) <= m[0] <= max(ms['right'] for ms in system['measures'])]
+    heads = [h for m in system['measures'] for h in m['items'] if not h['grace']]
+    pairs = sorted(((((h['x'] + 0.6 * space - x) / space) ** 2 + ((h['y'] - y) / space) ** 2, i, j)
+                    for i, (x, y, _) in enumerate(mine) for j, h in enumerate(heads) if abs(h['x'] + 0.6 * space - x) <= 3 * space))
+    used_mark, used_head = set(), set()
+    for _, i, j in pairs:
+        if i not in used_mark and j not in used_head:
+            used_mark.add(i)
+            used_head.add(j)
+            heads[j]['finger'] = mine[i][2]
+    return [mine[i] for i in range(len(mine)) if i not in used_mark]
+
+
 def stroke_widths(drawings):
     """Grosores de MuseScore 2: plica ~0,75 y barra de compas ~0,95; otros trazos verticales finos (0,5) no son plicas."""
     base = P.stroke_widths(drawings)
@@ -101,6 +134,7 @@ def read_pdf(path=SOURCE):
                  if d['type'] == 'f' and d['fill'] == (0.0, 0.0, 0.0) and len(d['items']) == 4]
         curves = [d['rect'] for d in drawings if d['fill'] == (0.0, 0.0, 0.0) and any(i[0] == 'c' for i in d['items'])]
         threes = italic_threes(page)
+        fingers = finger_marks(page)
         for index, lines in enumerate(notation):
             for y, number in labels:
                 if y < lines[0]:
@@ -112,6 +146,9 @@ def read_pdf(path=SOURCE):
             clip = lambda rs: [pymupdf.Rect(r.x0, r.y0, r.x1, lines[-1]) if abs(r.y0 - lines[0]) < 0.6 and r.y1 > lines[-1] + 3 * space else r for r in rs]  # noqa: E731
             system = P.read_system(lines, glyph, stems, clip(bars), clip(thick), beams)
             P.mark_ties(system, curves, lines)
+            lost = attach_fingers(system, fingers, lines)
+            if lost:
+                print(f'  leccion {current}: cifras de dedo sin nota: {[(round(x), round(y), c) for x, y, c in lost]}', file=sys.stderr)
             P.mark_texts(system, words, lines)
             space = (lines[-1] - lines[0]) / 4
             for m in system['measures']:
