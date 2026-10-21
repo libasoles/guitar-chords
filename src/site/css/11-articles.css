@@ -480,7 +480,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     width: calc(100% - 2rem);
-    max-width: 102rem;
+    max-width: 114rem;
     display: flex;
     justify-content: space-between;
     pointer-events: none;

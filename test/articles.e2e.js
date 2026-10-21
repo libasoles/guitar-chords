@@ -556,8 +556,8 @@ const PDFS = [
           const before = await measure();
           assert.ok(before.left >= 0 && before.right <= width, slug + ': buttons inside viewport');
           assert.ok(Math.abs(before.y - 400) <= 1, slug + ': vertically centered');
-          assert.ok(before.gapLeft >= 0 && before.gapLeft <= 100, slug + ': left distance capped');
-          assert.ok(before.gapRight >= 0 && before.gapRight <= 100, slug + ': right distance capped');
+          assert.ok(before.gapLeft >= 0 && before.gapLeft <= 200, slug + ': left distance capped');
+          assert.ok(before.gapRight >= 0 && before.gapRight <= 200, slug + ': right distance capped');
           assert.ok(before.overflow <= 0, slug + ': no horizontal overflow');
           await modal.evaluate((el) => { el.scrollTop = 250; });
           assert.equal((await measure()).y, before.y, slug + ': navigation stays fixed while scrolling');
