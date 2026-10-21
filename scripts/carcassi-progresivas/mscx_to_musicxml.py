@@ -135,8 +135,9 @@ def rich_text(element):
 
 class Converter:
     def __init__(self, root, title, words=(), tempo=None, ignore_marks=False, texts=None, no_fermata=False,
-                 composer='Matteo Carcassi', drop_texts=(), halve=False):
+                 composer='Matteo Carcassi', drop_texts=(), halve=False, hand_marks=False):
         self.halve = halve
+        self.hand_marks = hand_marks  # dedos de la izquierda (0-4) y letras p i m a de la derecha de cada nota
         self.composer = composer
         self.drop_texts = [re.compile(p) for p in drop_texts]  # textos de posicion/ceja que el libro no imprime como texto
         self.no_fermata = no_fermata  # el libro no corona ese acorde
@@ -469,11 +470,27 @@ class Converter:
                             notations += '<slur type="stop" number="1"/>'
                 if (fermata or el.find('Fermata') is not None) and not self.no_fermata:
                     notations += '<fermata type="upright"/>'
+            if not grace:
+                notations += self.hand_marks_xml(note)
             if notations:
                 parts.append('<notations>%s</notations>' % notations)
             parts.append('</note>')
             out += ''.join(parts)
         return out
+
+    def hand_marks_xml(self, note):
+        """<technical> con un <fingering> por cada dedo de la izquierda (0-4) y letra de la derecha (p i m a) visibles de la
+        nota; los numeros de cuerda (circulos) no son dedos y se descartan."""
+        if not self.hand_marks:
+            return ''
+        marks = []
+        for finger in note.findall('Fingering'):
+            text = (finger.findtext('text') or '').strip()
+            if finger.findtext('visible') == '0' or (finger.findtext('style') or '').startswith('String Number'):
+                continue
+            if re.fullmatch(r'[0-4]|[pima]', text):
+                marks.append('<fingering>%s</fingering>' % text)
+        return '<technical>%s</technical>' % ''.join(marks) if marks else ''
 
 
 def length_of(measure, halve):

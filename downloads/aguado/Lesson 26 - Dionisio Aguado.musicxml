@@ -56,6 +56,9 @@
         <beam number="2">begin</beam>
         <notations>
           <slur number="1" type="start" />
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
         </notations>
       </note>
       <note id="tab-note-1">
@@ -128,6 +131,11 @@
         <staff>1</staff>
         <beam number="1">end</beam>
         <beam number="2">end</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">2</fingering>
+          </technical>
+        </notations>
       </note>
       <backup>
         <duration>15120</duration>
@@ -246,6 +254,11 @@
         <dot />
         <stem>up</stem>
         <staff>1</staff>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">3</fingering>
+          </technical>
+        </notations>
       </note>
       <backup>
         <duration>15120</duration>
@@ -330,6 +343,9 @@
         <beam number="2">begin</beam>
         <notations>
           <slur number="3" type="start" />
+          <technical>
+            <fingering alternate="no" substitution="no">2</fingering>
+          </technical>
         </notations>
       </note>
       <note id="tab-note-9">
@@ -346,6 +362,9 @@
         <beam number="2">continue</beam>
         <notations>
           <slur number="3" type="stop" />
+          <technical>
+            <fingering alternate="no" substitution="no">1</fingering>
+          </technical>
         </notations>
       </note>
       <note id="tab-note-10">
@@ -392,6 +411,11 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">2</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-13">
         <pitch>
@@ -405,6 +429,11 @@
         <staff>1</staff>
         <beam number="1">end</beam>
         <beam number="2">end</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">3</fingering>
+          </technical>
+        </notations>
       </note>
       <backup>
         <duration>15120</duration>
@@ -674,6 +703,11 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-19">
         <pitch>
@@ -909,6 +943,11 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-25">
         <pitch>
@@ -948,6 +987,11 @@
         <type>quarter</type>
         <stem>down</stem>
         <staff>1</staff>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">3</fingering>
+          </technical>
+        </notations>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
@@ -1134,6 +1178,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">1</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-31">
         <pitch>
@@ -1538,6 +1587,11 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">1</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-44">
         <pitch>
@@ -1694,6 +1748,11 @@
         <stem>down</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">1</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-47">
         <pitch>
@@ -1786,6 +1845,9 @@
         <beam number="2">begin</beam>
         <notations>
           <slur number="1" type="start" />
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
         </notations>
       </note>
       <note id="tab-note-49">
@@ -1801,6 +1863,9 @@
         <beam number="2">continue</beam>
         <notations>
           <slur number="1" type="stop" />
+          <technical>
+            <fingering alternate="no" substitution="no">2</fingering>
+          </technical>
         </notations>
       </note>
       <note id="tab-note-50">
@@ -1847,6 +1912,11 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">1</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-53">
         <pitch>
@@ -1961,7 +2031,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>10</fret>
+            <string>1</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -2001,6 +2071,11 @@
         <stem>down</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">1</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-56">
         <pitch>
@@ -2056,7 +2131,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>5</string><fret>7</fret>
+            <string>4</string><fret>2</fret>
           </technical>
         </notations>
       </note>
@@ -2259,7 +2334,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>6</fret>
+            <string>3</string><fret>1</fret>
           </technical>
         </notations>
       </note>
@@ -2276,7 +2351,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>5</string><fret>5</fret>
+            <string>4</string><fret>0</fret>
           </technical>
         </notations>
       </note>
@@ -2378,6 +2453,11 @@
         <dot />
         <stem>down</stem>
         <staff>1</staff>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">1</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-67">
         <chord />
@@ -2570,6 +2650,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">2</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-70">
         <chord />
@@ -2582,6 +2667,11 @@
         <type>eighth</type>
         <stem>up</stem>
         <staff>1</staff>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">1</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-71">
         <pitch>
@@ -3402,7 +3492,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>10</fret>
+            <string>1</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -3497,7 +3587,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>5</string><fret>7</fret>
+            <string>4</string><fret>2</fret>
           </technical>
         </notations>
       </note>
@@ -3533,6 +3623,11 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">3</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-98">
         <pitch>
@@ -3561,6 +3656,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">1</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-100">
         <pitch>
@@ -3589,6 +3689,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">1</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-102">
         <pitch>
@@ -3636,7 +3741,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>6</fret>
+            <string>3</string><fret>1</fret>
           </technical>
         </notations>
       </note>
@@ -3872,6 +3977,11 @@
         <type>quarter</type>
         <stem>up</stem>
         <staff>1</staff>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">3</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-109">
         <pitch>
@@ -4037,6 +4147,11 @@
         <type>quarter</type>
         <stem>up</stem>
         <staff>1</staff>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">1</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-114">
         <chord />

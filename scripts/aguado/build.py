@@ -20,8 +20,12 @@ sys.path.insert(0, os.path.join(ROOT, 'backend', 'engine'))
 
 import extract  # noqa: E402  (rutinas de grabado compartidas con los preludios)
 import mscx_to_musicxml  # noqa: E402
+import pdf_footer  # noqa: E402
 
 AUTHOR = 'Dionisio Aguado'
+# Credito a la transcripcion de origen, en un pie gris a la izquierda de cada pagina del PDF (como en Sagreras).
+FOOTER_LINES = [[('Con modificaciones a partir de', None)],
+                [('Luigi Borgognoni (TabGuitar)', 'https://www.tabguitar.it/autori/aguado-metodi-e-studi/')]]
 SOURCES = os.path.join(HERE, 'sources')
 OUT_DIR = os.path.join(ROOT, 'downloads', 'aguado')
 PREVIEW_DIR = os.path.join(ROOT, 'src', 'site', 'articles', 'aguado')
@@ -85,7 +89,7 @@ def convert(number, mscz=None):
     xml = mscx_to_musicxml.Converter(mscx_to_musicxml.read_mscx(mscz), title_of(number), composer=AUTHOR,
                                      words=[tuple(w) for w in piece.get('words', [])], tempo=piece.get('tempo'),
                                      ignore_marks=piece.get('ignore_marks', False), texts=piece.get('texts'),
-                                     drop_texts=DROP_TEXTS, halve=piece.get('halve', False)).convert()
+                                     drop_texts=DROP_TEXTS, halve=piece.get('halve', False), hand_marks=True).convert()
     with open(target, 'w', encoding='utf-8') as f:
         f.write(xml)
     print('fuente:', target)
@@ -136,6 +140,7 @@ def build(number):
         with open(base + '.musicxml', 'w', encoding='utf-8') as f:
             f.write(xml)
         writer = PdfWriter(clone_from=PdfReader(os.path.join(exported, 'score.pdf')))
+        pdf_footer.stamp_footer(writer, FOOTER_LINES)
         writer.add_metadata({'/Title': title_of(number), '/Author': AUTHOR})
         for key in ('/Producer', '/Creator', '/CreationDate', '/ModDate'):
             writer._info.get_object().pop(NameObject(key), None)

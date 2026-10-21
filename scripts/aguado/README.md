@@ -29,6 +29,10 @@ RESOURCES_DIR=/ruta/al/checkout/resources .venv-carcassi/bin/python scripts/agua
   (`upgrade_musescore3`): primera voz sin `<voice>`, tresillos y ligaduras con `id`, armadura en `<accidental>`.
   Las ligaduras sin final en el archivo (lección 33) se descartan.
 - Lección 29: el archivo escribe 3/4 con valores duplicados; el libro tiene 3/8. `"halve": true` lo devuelve a 3/8.
+- Se conservan los dedos de la izquierda (0-4) y las letras p i m a de la derecha de cada nota (`hand_marks=True` en el
+  conversor, como `<fingering>`); el motor toma los dedos como pista de la TAB y no cambia las letras. Los números de
+  cuerda con círculo no se copian. Cada PDF lleva al pie el crédito a TabGuitar (`pdf_footer.py`, igual que Sagreras con
+  Marieh); la web ya lo cita en la introducción.
 - Se descartan las marcas de ceja, barré y posición (`DROP_TEXTS`). Se añaden o corrigen los textos que el libro imprime
   (`Andante.`, `Wals.`, `Fin.`, `Cantabile.`) en `pieces.json`.
 - El libro abrevia compases con el signo de repetición de compás; el archivo los escribe completos y así se publican.

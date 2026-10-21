@@ -15,6 +15,8 @@ const MEASURES = { 1: 19, 2: 16, 3: 16, 4: 24, 5: 24, 6: 24, 7: 16, 8: 16, 9: 24
 
 /* Cadenas de los archivos de origen: programa, editor y textos por defecto de MuseScore. */
 const SOURCE_TRACES = [/MuseScore/i, /TabGuitar/i, /tabguitar\.it/i, /\.mscz/i, /Boije/i, /Borgognoni/i];
+// El PDF si lleva el credito a TabGuitar (pie con enlace); lo demas de la fuente no.
+const PDF_TRACES = SOURCE_TRACES.filter((trace) => !/TabGuitar|tabguitar|Borgognoni/i.test(trace.source));
 
 function assertWellFormed(xml) {
   const stack = [];
@@ -73,10 +75,13 @@ for (const piece of pieces) {
     const xml = fs.readFileSync(path.join(DOWNLOADS_DIR, piece.base + '.musicxml'), 'utf8');
     assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
     const text = pdf.toString('latin1');
-    for (const trace of SOURCE_TRACES) {
-      assert.doesNotMatch(text, trace, 'PDF: ' + trace);
-      assert.doesNotMatch(xml, trace, 'MusicXML: ' + trace);
-    }
+    for (const trace of PDF_TRACES) assert.doesNotMatch(text, trace, 'PDF: ' + trace);
+    for (const trace of SOURCE_TRACES) assert.doesNotMatch(xml, trace, 'MusicXML: ' + trace);
+    assert.match(text, /\(Con modificaciones a partir de\)/);
+    assert.match(text, /\(Luigi Borgognoni \\\(TabGuitar\\\)\)/);
+    const uris = [...text.matchAll(/\/URI\s*\(((?:\\.|[^\\)])*)\)/g)]
+      .map((m) => m[1].replace(/\\(\d{3})/g, (_, octal) => String.fromCharCode(parseInt(octal, 8))));
+    assert.ok(uris.includes('https://www.tabguitar.it/autori/aguado-metodi-e-studi/'), 'enlace a la transcripcion de origen');
     const info = text.match(/\/Title\s*\(((?:\\.|[^\\)])*)\)/);
     assert.ok(info, 'el PDF declara /Title');
     // El PDF escapa algunos caracteres (p. ej. : como \072).

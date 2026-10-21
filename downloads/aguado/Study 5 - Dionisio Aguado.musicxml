@@ -1267,6 +1267,9 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">3</fingering>
+          </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -1296,6 +1299,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-35">
         <pitch>
@@ -1336,6 +1344,9 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">3</fingering>
+          </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -3409,6 +3420,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-89">
         <pitch>
@@ -4333,6 +4349,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-110">
         <pitch>
@@ -5046,6 +5067,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-122">
         <pitch>
@@ -10676,6 +10702,9 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">2</fingering>
+          </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -11389,6 +11418,9 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">1</fingering>
+          </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -11669,6 +11701,9 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -12369,6 +12404,9 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
           <tuplet number="1" type="stop" />
         </notations>
       </note>
@@ -12557,6 +12595,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">3</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-307">
         <pitch>
@@ -16464,6 +16507,9 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">3</fingering>
+          </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -16493,6 +16539,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-402">
         <pitch>
@@ -16533,6 +16584,9 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">2</fingering>
+          </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -16562,6 +16616,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">1</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-405">
         <pitch>
@@ -17450,6 +17509,9 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">2</fingering>
+          </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -17519,6 +17581,9 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">3</fingering>
+          </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -18606,6 +18671,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-456">
         <pitch>
@@ -19530,6 +19600,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-477">
         <pitch>
@@ -19570,6 +19645,9 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">1</fingering>
+          </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -19600,6 +19678,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">2</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-480">
         <pitch>
@@ -19619,6 +19702,9 @@
         <beam number="1">end</beam>
         <beam number="2">end</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">4</fingering>
+          </technical>
           <tuplet number="1" type="stop" />
         </notations>
       </note>
@@ -21230,6 +21316,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">3</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-513">
         <pitch>
@@ -22287,6 +22378,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">3</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-540">
         <pitch>
