@@ -42,6 +42,7 @@ const articlePreludes = require("./lib/article-carcassi-preludes");
 const articleProgressive = require("./lib/article-carcassi-progressive");
 const articleAguado = require("./lib/article-aguado");
 const articleSagreras = require("./lib/article-sagreras");
+const { renderArticleLinks } = require("./lib/article-link");
 const {
   pagePath,
   pageFile,
@@ -1204,9 +1205,9 @@ function renderArticlePage(strings, locale, slug, keys, bodyHtml, backHtml, head
     .split("%%PAGE_LEAD%%")
     .join(strings[keys.lead])
     .split("%%ARTICLE_BACK%%")
-    .join(backHtml)
+    .join(renderArticleLinks(backHtml))
     .split("%%ARTICLE_BODY%%")
-    .join(bodyHtml + (bodyHtml.indexOf("modal-full") === -1 ? "" : MODAL_HASH_SCRIPT));
+    .join(renderArticleLinks(bodyHtml) + (bodyHtml.indexOf("modal-full") === -1 ? "" : MODAL_HASH_SCRIPT));
   return withGuideJsonLd(html, strings, locale, slug, keys.title, keys.meta);
 }
 
@@ -1331,8 +1332,7 @@ function renderPreludesArticle(strings, locale, santisteban = false) {
   const prefix = santisteban ? "artSantisteban" : "artPreludes";
   const other = santisteban ? ARTICLE_PRELUDES_SLUG : ARTICLE_SANTISTEBAN_SLUG;
   const otherLabel = santisteban ? strings.artPreludesOriginalLink : strings.artPreludesSantistebanLink;
-  const linkIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-link-2 preview-icon" aria-hidden="true"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>';
-  const crossLink = '<p class="article-back"><a href="' + pagePath(other, locale) + '">' + linkIcon + escapeHtml(otherLabel) + '</a></p>';
+  const crossLink = '<p class="article-back"><a href="' + pagePath(other, locale) + '">' + escapeHtml(otherLabel) + '</a></p>';
   const back =
     '<p class="article-back"><a href="' +
     pagePath(ARTICLES_SLUG, locale) +

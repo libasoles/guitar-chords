@@ -6,11 +6,13 @@
   font-size: 0.9rem;
 }
 
-.article-back a {
+.article-back a,
+.article-link,
+.article-link:visited {
   color: var(--blue-france);
 }
 
-.article-back .preview-icon {
+.article-link .preview-icon {
   margin-right: 0.35em;
   vertical-align: middle;
 }
