@@ -14,8 +14,6 @@ const sagreras = require('../scripts/lib/article-sagreras');
 
 const DIST = path.join(__dirname, '..', 'dist/site');
 const BASE_URL = 'https://acordesdeguitarra.com.ar';
-// TEMP: descarga de partituras deshabilitada en articulos (bloque TEMP en 11-articles.css). Poner en true al revertirla.
-const DOWNLOADS_ENABLED = false;
 const PDFS = [
   'Allegretto in C - Matteo Carcassi · (1792—1853).pdf',
   'Prelude A Minor, Op.59 - Matteo Carcassi.pdf',
@@ -108,8 +106,7 @@ const PDFS = [
 
       // Each card downloads its score PDF.
       const cards = page.locator('.example-card');
-      if (!DOWNLOADS_ENABLED) assert.equal(await page.locator('.example-download').first().isVisible(), false);
-      for (let i = 0; DOWNLOADS_ENABLED && i < pdfs.length; i++) {
+      for (let i = 0; i < pdfs.length; i++) {
         const [download] = await Promise.all([page.waitForEvent('download'), cards.nth(i).click()]);
         assert.equal(download.suggestedFilename(), pdfs[i]);
         const saved = path.join(tmp, 'download-' + i + '.pdf');
@@ -327,7 +324,7 @@ const PDFS = [
         // On a phone the card does not open the preview: its title downloads the PDF directly.
         assert.equal(await cards.first().locator('.prelude-open').isVisible(), false);
         assert.equal(decodeURIComponent(await cards.first().locator('.prelude-pdf-link').getAttribute('href')).split('/').pop(), published[0].pdf);
-        if (DOWNLOADS_ENABLED) {
+        {
           const tab = await context.newPage();
           await tab.setViewportSize({ width: 375, height: 800 });
           await tab.goto(base + url);
@@ -390,7 +387,7 @@ const PDFS = [
         await page.setViewportSize({ width: 375, height: 800 });
         // The footer link downloads the prelude PDF with the expected name.
         // A fresh tab per download: Chromium stops honouring downloads after ~10 in one tab.
-        for (let i = 0; DOWNLOADS_ENABLED && i < published.length; i++) {
+        for (let i = 0; i < published.length; i++) {
           const tab = await context.newPage();
           await tab.goto(base + url);
           const [download] = await Promise.all([tab.waitForEvent('download'), tab.locator('.prelude-card > .example-download').nth(i).click()]);
@@ -436,15 +433,11 @@ const PDFS = [
         await page.setViewportSize({ width: 375, height: 800 });
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
         assert.ok(overflow <= 0, 'scroll horizontal de ' + overflow + 'px en ' + url);
-        if (DOWNLOADS_ENABLED) {
-          const tab = await context.newPage();
-          await tab.goto(base + url);
-          const [download] = await Promise.all([tab.waitForEvent('download'), tab.locator('.prelude-card > .example-download').first().click()]);
-          assert.equal(download.suggestedFilename(), published[0].pdf);
-          await tab.close();
-        } else {
-          assert.equal(await page.locator('.prelude-card > .example-download').first().isVisible(), false);
-        }
+        const tab = await context.newPage();
+        await tab.goto(base + url);
+        const [download] = await Promise.all([tab.waitForEvent('download'), tab.locator('.prelude-card > .example-download').first().click()]);
+        assert.equal(download.suggestedFilename(), published[0].pdf);
+        await tab.close();
       }
     }
 
@@ -520,15 +513,11 @@ const PDFS = [
         await page.setViewportSize({ width: 375, height: 800 });
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
         assert.ok(overflow <= 0, 'scroll horizontal de ' + overflow + 'px en ' + url);
-        if (DOWNLOADS_ENABLED) {
-          const tab = await context.newPage();
-          await tab.goto(base + url);
-          const [download] = await Promise.all([tab.waitForEvent('download'), tab.locator('.prelude-card > .example-download').first().click()]);
-          assert.equal(download.suggestedFilename(), published[0].pdf);
-          await tab.close();
-        } else {
-          assert.equal(await page.locator('.prelude-card > .example-download').first().isVisible(), false);
-        }
+        const tab = await context.newPage();
+        await tab.goto(base + url);
+        const [download] = await Promise.all([tab.waitForEvent('download'), tab.locator('.prelude-card > .example-download').first().click()]);
+        assert.equal(download.suggestedFilename(), published[0].pdf);
+        await tab.close();
       }
     }
 
@@ -543,6 +532,15 @@ const PDFS = [
         await page.locator('.prelude-card').first().click();
         const modal = page.locator('.modal-full:popover-open');
         const steps = modal.locator('.modal-step');
+        assert.equal(await modal.locator('.modal-download').isVisible(), true);
+        const downloadTab = await context.newPage();
+        await downloadTab.setViewportSize({ width: 1280, height: 800 });
+        await downloadTab.goto(base + pagePath(slug, locale));
+        await downloadTab.locator('.prelude-card').first().click();
+        const downloadLink = downloadTab.locator('.modal-full:popover-open .modal-download');
+        const [download] = await Promise.all([downloadTab.waitForEvent('download'), downloadLink.click()]);
+        assert.equal(download.suggestedFilename(), decodeURIComponent(await downloadLink.getAttribute('href')).split('/').pop());
+        await downloadTab.close();
         assert.equal(await steps.first().isDisabled(), true);
         for (const width of [800, 1280, 2560]) {
           await page.setViewportSize({ width, height: 800 });
