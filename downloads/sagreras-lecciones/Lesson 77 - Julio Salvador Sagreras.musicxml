@@ -60,6 +60,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">i</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-1">
         <pitch>
@@ -72,6 +77,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">end</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">m</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-2">
         <pitch>
@@ -84,6 +94,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">i</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-3">
         <pitch>
@@ -108,6 +123,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">end</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">m</fingering>
+          </technical>
+        </notations>
       </note>
       <backup>
         <duration>30240</duration>
@@ -255,6 +275,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">i</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-7">
         <pitch>
@@ -267,6 +292,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">end</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">m</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-8">
         <pitch>
@@ -279,6 +309,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">i</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-9">
         <pitch>
@@ -303,6 +338,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">end</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">m</fingering>
+          </technical>
+        </notations>
       </note>
       <backup>
         <duration>30240</duration>

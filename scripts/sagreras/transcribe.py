@@ -114,8 +114,8 @@ def take_bass(m, full):
         for h in sorted(g['heads'], key=lambda h: -h['y']):  # de grave a agudo
             step = V.STEPS[(2 + h['pos']) % 7]
             names.append(V.pitch_name(h['pos'], h['acc'] if h['acc'] is not None else key.get(step, 0)))
-            if h.get('finger'):
-                m['bass_fingers'][names[-1]] = h['finger']
+            if h.get('finger') or h.get('pluck'):
+                m['bass_fingers'][names[-1]] = '|'.join(x for x in (h.get('finger'), h.get('pluck')) if x)
     m['items'] = [h for h in m['items'] if not any(h is x for g in whole for x in g['heads'])]
     return '+'.join(names)
 

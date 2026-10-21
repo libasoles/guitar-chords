@@ -97,3 +97,11 @@ test('leccion 79: la notacion conserva los dedos de la edicion', { skip: !pieces
   assert.deepEqual(fingers.slice(0, 4), ['1', '2', '2', '1']);
   assert.equal(fingers.length, 27);
 });
+
+/* Letras de la mano derecha de la edicion: la leccion 1 las alterna i m i m. */
+test('leccion 1: la notacion conserva las letras de la mano derecha', { skip: !pieces.some((p) => p.number === 1) }, () => {
+  const piece = pieces.find((p) => p.number === 1);
+  const xml = fs.readFileSync(path.join(DOWNLOADS_DIR, piece.base + '.musicxml'), 'utf8');
+  const letters = [...xml.matchAll(/<fingering[^>]*>\s*([pima])\s*<\/fingering>/g)].map((m) => m[1]);
+  assert.deepEqual(letters, ['i', 'm', 'i', 'm', 'i', 'm', 'i', 'm']);
+});

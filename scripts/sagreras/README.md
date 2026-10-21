@@ -22,8 +22,10 @@ Leland). El original queda en `resources/sagreras/primeras-lecciones/fuentes/` (
 La TAB publicada es la digitación sugerida por el motor, no la de Marieh. Los dedos de la mano izquierda (cifras 0-4 de
 8 pt, las de la TAB impresa son de 9 pt) sí se leen: `marieh_notes.attach_fingers` pasa cada cifra a la cabeza más cercana,
 `transcribe.py` las escribe como `<fingering>` y el motor las toma como pista (descarta las digitaciones que no se pueden
-tocar con esos dedos); `transcribe.py` avisa por stderr de cualquier cifra que no encuentre nota. No se publican los PDF
-de la edición, las letras p i m a de la mano derecha ni los textos.
+tocar con esos dedos); `transcribe.py` avisa por stderr de cualquier cifra que no encuentre nota. Las letras p i m a de la
+mano derecha (texto de 8 pt de un solo carácter) se leen igual y van como un segundo `<fingering>` de la misma nota
+(`transcribe_lib.note_xml` admite varios separados por `|`); el motor las ignora al digitar. No se publican los PDF de la
+edición ni sus textos.
 
 ## Reproducir
 

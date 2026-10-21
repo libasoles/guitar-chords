@@ -45,23 +45,24 @@ def italic_threes(page):
     return out
 
 
-def finger_marks(page):
-    """Dedos de la mano izquierda: cifras 0-4 de 8 pt (las de la TAB impresa son de 9 pt): (x, y) del centro y cifra."""
+def finger_marks(page, chars='01234'):
+    """Indicaciones de dedo de 8 pt: cifras 0-4 de la mano izquierda (las de la TAB impresa son de 9 pt) o, con
+    `chars='pima'`, letras de la mano derecha (texto de un solo caracter). -> (x, y) del centro y caracter."""
     out = []
     for block in page.get_text('rawdict')['blocks']:
         for line in block.get('lines', []):
             for span in line['spans']:
-                if span['font'] == 'FreeSerif' and abs(span['size'] - 8) < 0.1:
+                if span['font'] == 'FreeSerif' and abs(span['size'] - 8) < 0.1 and (chars.isdigit() or len(span['chars']) == 1):
                     for ch in span['chars']:
-                        if ch['c'] in '01234':
+                        if ch['c'] in chars:
                             b = ch['bbox']
                             out.append(((b[0] + b[2]) / 2, (b[1] + b[3]) / 2, ch['c']))
     return out
 
 
-def attach_fingers(system, marks, lines):
-    """Cada cifra pasa a la cabeza mas cercana (`finger` de la cabeza); una cabeza toma una sola cifra. En un acorde la
-    cifra puede ir al lado de la cabeza. -> las cifras que no encontraron cabeza (para avisar)."""
+def attach_fingers(system, marks, lines, key='finger'):
+    """Cada indicacion pasa a la cabeza mas cercana (campo `key` de la cabeza: `finger` o `pluck`); una cabeza toma una
+    sola. En un acorde la cifra puede ir al lado de la cabeza. -> las indicaciones que no encontraron cabeza (para avisar)."""
     top, bottom = lines[0], lines[-1]
     space = (bottom - top) / 4
     mine = [m for m in marks if top - 9 * space <= m[1] <= bottom + 5 * space and system['measures']
@@ -74,7 +75,7 @@ def attach_fingers(system, marks, lines):
         if i not in used_mark and j not in used_head:
             used_mark.add(i)
             used_head.add(j)
-            heads[j]['finger'] = mine[i][2]
+            heads[j][key] = mine[i][2]
     return [mine[i] for i in range(len(mine)) if i not in used_mark]
 
 
@@ -135,6 +136,7 @@ def read_pdf(path=SOURCE):
         curves = [d['rect'] for d in drawings if d['fill'] == (0.0, 0.0, 0.0) and any(i[0] == 'c' for i in d['items'])]
         threes = italic_threes(page)
         fingers = finger_marks(page)
+        plucks = finger_marks(page, 'pima')
         for index, lines in enumerate(notation):
             for y, number in labels:
                 if y < lines[0]:
@@ -146,9 +148,10 @@ def read_pdf(path=SOURCE):
             clip = lambda rs: [pymupdf.Rect(r.x0, r.y0, r.x1, lines[-1]) if abs(r.y0 - lines[0]) < 0.6 and r.y1 > lines[-1] + 3 * space else r for r in rs]  # noqa: E731
             system = P.read_system(lines, glyph, stems, clip(bars), clip(thick), beams)
             P.mark_ties(system, curves, lines)
-            lost = attach_fingers(system, fingers, lines)
-            if lost:
-                print(f'  leccion {current}: cifras de dedo sin nota: {[(round(x), round(y), c) for x, y, c in lost]}', file=sys.stderr)
+            for marks, key in ((fingers, 'finger'), (plucks, 'pluck')):
+                lost = attach_fingers(system, marks, lines, key)
+                if lost:
+                    print(f'  leccion {current}: {key} sin nota: {[(round(x), round(y), c) for x, y, c in lost]}', file=sys.stderr)
             P.mark_texts(system, words, lines)
             space = (lines[-1] - lines[0]) / 4
             for m in system['measures']:
