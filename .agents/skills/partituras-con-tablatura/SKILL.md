@@ -5,6 +5,8 @@ description: Build a site page of public-domain guitar scores with notation and 
 
 Una **colección** es una página del sitio (`/articulos/...`) con una tarjeta por pieza: vista previa con TAB, modal con
 la partitura completa y descarga en PDF. Ya existen preludios de Carcassi (dos ediciones) y valses del Op. 59.
+Si el pedido es solo descargar un libro o separar sus partituras en `resources/`, entrega esos recursos y su índice;
+la conversión musical y la publicación de una colección corresponden a pedidos que las incluyan.
 
 ## 1. Fuentes y originales
 
@@ -12,7 +14,9 @@ la partitura completa y descarga en PDF. Ya existen preludios de Carcassi (dos e
 - **Guarda siempre copia del original en `resources/<colección>/`** (no se versiona) y escribe ahí un `README.md` con
   la procedencia y las diferencias con el libro. Es la base de toda revisión posterior.
 - Si otro agente trabaja sobre una carpeta de `resources/`, trátala como solo lectura.
-- IMSLP bloquea la descarga por script; Internet Archive sí se puede bajar.
+- Para descargar un método, buscar formatos editables o separar sus partituras en PDF, lee
+  [Descarga y recorte de métodos](references/descarga-y-recorte.md): incluye fuentes verificadas con Sagreras y Aguado,
+  descargas directas de IMSLP y revisión de cortes sobre escaneos.
 - Compara lo extraído con el libro impreso: orden, compás, armadura, repeticiones, Fine, D.C.
 - Obra y edición: dominio público no cubre la digitación ni la tipografía modernas.
 
