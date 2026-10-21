@@ -348,6 +348,19 @@
   max-width: 90rem;
   margin: 0 auto;
 }
+/* In the modal the star is drawn over the first page, on the title's line and flush with the staff's left edge.
+   Verovio pages are 945 units wide with the staff starting at x=72 and the title centered at y≈42 (scripts/sagreras/build.py),
+   so the position scales with the page width (cqw). */
+.modal-pages {
+  position: relative;
+  container-type: inline-size;
+}
+.modal-pages > .editor-favorite {
+  position: absolute;
+  left: 7.62cqw;
+  top: calc(4.43cqw - 0.55rem);
+  z-index: 1;
+}
 .modal-page {
   display: block;
   width: 100%;

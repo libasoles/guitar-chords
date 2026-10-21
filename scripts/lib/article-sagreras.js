@@ -50,7 +50,7 @@ function card(piece, locale, strings, sharedGlyphs, pieces) {
       '<a class="prelude-pdf-link" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' + name + '</a></h2>' +
     inlineScore(svg, strings.artPreludesAltPrefix + ' ' + name, sharedGlyphs) +
     download +
-    modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', closeContent: CLOSE_ICON, content: fullScore(piece, name, href, strings, pieces, locale) }) +
+    modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', closeContent: CLOSE_ICON, locale, strings, content: fullScore(piece, name, href, strings, pieces, locale) }) +
     '</article>';
 }
 
@@ -83,7 +83,7 @@ function fullScore(piece, name, href, strings, pieces, locale) {
       '" loading="lazy" decoding="async" alt="' + escapeAttr(name + (all.length > 1 ? ' (' + (i + 1) + '/' + all.length + ')' : '')) + '">';
   });
   const index = pieces.indexOf(piece);
-  return '<div class="modal-pages">' + pages.join('') + '</div>' +
+  return '<div class="modal-pages">' + favoriteStar('sagreras', piece.number, strings.artEditorFavorite) + pages.join('') + '</div>' +
     '<div class="modal-footer"><div class="modal-keys">' +
     stepButton(pieces[index - 1], CHEVRON_LEFT, strings.artSagrerasPrev, locale) +
     stepButton(pieces[index + 1], CHEVRON_RIGHT, strings.artSagrerasNext, locale) + '</div><a class="modal-download" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' +
