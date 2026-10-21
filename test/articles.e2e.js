@@ -372,6 +372,18 @@ const PDFS = [
           assert.equal(await page.locator('.modal-full:popover-open').count(), 0);
           if (k === 0) await cards.first().click();
         }
+        // The open modal is mirrored in the URL hash: opening sets it, closing clears it, and a reload or a shared link reopens it.
+        await cards.first().click();
+        const openId = await page.locator('.modal-full:popover-open').getAttribute('id');
+        await page.waitForFunction((id) => location.hash === '#' + id, openId);
+        await page.reload();
+        assert.equal(await page.locator('.modal-full:popover-open').getAttribute('id'), openId);
+        await page.locator('.modal-full:popover-open .modal-close').click();
+        await page.waitForFunction(() => location.hash === '');
+        await page.goto('about:blank');
+        await page.goto(base + url + '#' + openId);
+        assert.equal(await page.locator('.modal-full:popover-open').getAttribute('id'), openId);
+        await page.locator('.modal-full:popover-open .modal-close').click();
         await page.setViewportSize({ width: 375, height: 800 });
         // The footer link downloads the prelude PDF with the expected name.
         // A fresh tab per download: Chromium stops honouring downloads after ~10 in one tab.

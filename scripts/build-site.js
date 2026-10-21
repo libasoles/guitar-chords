@@ -1162,6 +1162,21 @@ function renderPrivacyPage(template, strings, locale) {
   );
 }
 
+// The score modal (popover.modal-full) is mirrored in the URL hash (#<modal id>), so a reload or a shared link
+// reopens it. Only on desktop: on mobile the cards download the PDF instead of opening the modal.
+const MODAL_HASH_SCRIPT =
+  "<script>(function(){" +
+  'var modals=document.querySelectorAll(".modal-full");' +
+  'var desktop=window.matchMedia("(min-width: 48.01rem)");' +
+  "function sync(id){try{history.replaceState(null,''," +
+  "id?'#'+id:location.pathname+location.search);}catch(e){}}" +
+  "modals.forEach(function(m){m.addEventListener('toggle',function(e){" +
+  "if(e.newState==='open')sync(m.id);else if(location.hash==='#'+m.id)sync('');});});" +
+  "var target=location.hash&&document.getElementById(location.hash.slice(1));" +
+  "if(target&&target.classList.contains('modal-full')&&desktop.matches){" +
+  "try{target.showPopover();}catch(e){}}" +
+  "})();</script>";
+
 // Render a page of the articles section. These pages live one level deeper
 // (/articulos/x, /en/articles/x), so they load assets from the domain root.
 function renderArticlePage(strings, locale, slug, keys, bodyHtml, backHtml, headingActions = "") {
@@ -1185,7 +1200,7 @@ function renderArticlePage(strings, locale, slug, keys, bodyHtml, backHtml, head
     .split("%%ARTICLE_BACK%%")
     .join(backHtml)
     .split("%%ARTICLE_BODY%%")
-    .join(bodyHtml);
+    .join(bodyHtml + (bodyHtml.indexOf("modal-full") === -1 ? "" : MODAL_HASH_SCRIPT));
   return withGuideJsonLd(html, strings, locale, slug, keys.title, keys.meta);
 }
 
