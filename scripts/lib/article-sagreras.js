@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const { modal, CLOSE_ICON } = require('./modal');
 const { escapeAttr, inlineScore, glyphDefs, DOWNLOAD_ICON } = require('./score-svg');
+const { favoriteStar } = require('./editor-favorites');
 
 const ROOT = path.join(__dirname, '..', '..');
 const FOLDER = 'sagreras-lecciones';
@@ -44,7 +45,7 @@ function card(piece, locale, strings, sharedGlyphs, pieces) {
   /* El titulo es el boton que abre la partitura completa en un modal; su ::after cubre toda la tarjeta.
      El enlace de descarga del pie queda por encima. */
   return '<article class="example-card prelude-card">' +
-    '<h2 class="prelude-card-title"><button type="button" class="prelude-open" popovertarget="' + id + '" aria-haspopup="dialog" ' +
+    '<h2 class="prelude-card-title">' + favoriteStar('sagreras', piece.number, strings.artEditorFavorite) + '<button type="button" class="prelude-open" popovertarget="' + id + '" aria-haspopup="dialog" ' +
       'aria-label="' + escapeAttr(strings.artPreludesView + ' ' + name) + '">' + name + '</button>' +
       '<a class="prelude-pdf-link" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' + name + '</a></h2>' +
     inlineScore(svg, strings.artPreludesAltPrefix + ' ' + name, sharedGlyphs) +

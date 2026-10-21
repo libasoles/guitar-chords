@@ -33,3 +33,7 @@ Every new page registers its slug in Spanish and English in `scripts/lib/slugs.j
 ## Icons
 
 Every icon must be a [Lucide](https://lucide.dev) icon whenever one exists (inline its SVG paths). Only draw a custom icon when Lucide has no equivalent.
+
+## Editor's favorites
+
+The user marks some scores as "favoritas del editor" (their own picks) and will ask for more in later sessions. A favorite shows a black star (Lucide `star`, filled) left of the title in its card, with no visible text. To mark one, add its number to the collection's list in `scripts/lib/editor-favorites.js`; if that collection's card builder does not yet call `favoriteStar(...)` in the `prelude-card-title` h2 (only Sagreras does), add it. Mark every new one the same way; do not invent another style.
