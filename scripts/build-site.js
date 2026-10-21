@@ -42,6 +42,7 @@ const articleCarcassi = require("./lib/article-carcassi");
 const articlePreludes = require("./lib/article-carcassi-preludes");
 const articleProgressive = require("./lib/article-carcassi-progressive");
 const articleAguado = require("./lib/article-aguado");
+const articleSagreras = require("./lib/article-sagreras");
 const {
   pagePath,
   pageFile,
@@ -397,6 +398,7 @@ const ARTICLE_SANTISTEBAN_SLUG = "articulo-preludios-santisteban";
 const ARTICLE_WALTZES_SLUG = "articulo-valses-carcassi";
 const ARTICLE_PROGRESSIVE_SLUG = "articulo-piezas-progresivas-carcassi";
 const ARTICLE_AGUADO_SLUG = "articulo-partituras-aguado";
+const ARTICLE_SAGRERAS_SLUG = "articulo-lecciones-sagreras";
 // YouTube video the exercise was taken from, embedded below the tabs.
 const SIXTHS_VIDEO_ID = "NNwTR8Q8JN4";
 const SIXTHS_TABS = [
@@ -1234,7 +1236,8 @@ function renderArticlesIndex(strings, locale) {
     articleCard(ARTICLE_SANTISTEBAN_SLUG, locale, articlePreludes.santisteban.cardImage().url, [684, 204], strings.artSantistebanH1, strings.artSantistebanCardSummary) +
     articleCard(ARTICLE_WALTZES_SLUG, locale, articlePreludes.waltzes.cardImage().url, [684, 204], strings.artWaltzesH1, strings.artWaltzesCardSummary) +
     articleCard(ARTICLE_PROGRESSIVE_SLUG, locale, articleProgressive.cardImage().url, articleProgressive.cardImage().size, strings.artProgressiveH1, strings.artProgressiveCardSummary) +
-    articleCard(ARTICLE_AGUADO_SLUG, locale, articleAguado.cardImage().url, articleAguado.cardImage().size, strings.artAguadoH1, strings.artAguadoCardSummary);
+    articleCard(ARTICLE_AGUADO_SLUG, locale, articleAguado.cardImage().url, articleAguado.cardImage().size, strings.artAguadoH1, strings.artAguadoCardSummary) +
+    articleCard(ARTICLE_SAGRERAS_SLUG, locale, articleSagreras.cardImage().url, articleSagreras.cardImage().size, strings.artSagrerasH1, strings.artSagrerasCardSummary);
   return renderArticlePage(
     strings,
     locale,
@@ -1374,6 +1377,28 @@ function renderAguadoArticle(strings, locale) {
   );
 }
 
+function renderSagrerasArticle(strings, locale) {
+  const back =
+    '<p class="article-back"><a href="' +
+    pagePath(ARTICLES_SLUG, locale) +
+    '">' +
+    escapeHtml(strings.artBackToIndex) +
+    "</a></p>";
+  return renderArticlePage(
+    strings,
+    locale,
+    ARTICLE_SAGRERAS_SLUG,
+    {
+      title: "artSagrerasPageTitle",
+      meta: "artSagrerasMetaDescription",
+      h1: "artSagrerasH1",
+      lead: "artSagrerasLead",
+    },
+    articleSagreras.renderBody(locale, strings),
+    back,
+  );
+}
+
 function writeArticlePages(strings, locale) {
   [
     [ARTICLES_SLUG, renderArticlesIndex],
@@ -1383,6 +1408,7 @@ function writeArticlePages(strings, locale) {
     [ARTICLE_WALTZES_SLUG, renderWaltzesArticle],
     [ARTICLE_PROGRESSIVE_SLUG, renderProgressiveArticle],
     [ARTICLE_AGUADO_SLUG, renderAguadoArticle],
+    [ARTICLE_SAGRERAS_SLUG, renderSagrerasArticle],
     [ARTICLE_ARPEGGIOS_SLUG, renderArpeggiosArticle],
   ].forEach(function (entry) {
     const outFile = path.join(DIST_SITE, pageFile(entry[0], locale));
@@ -1777,7 +1803,7 @@ copyFile(
   path.join(articlePdfDist, articleCarcassi.cardImage().name),
 );
 // Independent score downloads and modal pages for each edition.
-[articlePreludes, articlePreludes.santisteban, articlePreludes.waltzes, articleProgressive, articleAguado].forEach(function (edition) {
+[articlePreludes, articlePreludes.santisteban, articlePreludes.waltzes, articleProgressive, articleAguado, articleSagreras].forEach(function (edition) {
   const folder = path.basename(edition.PREVIEW_DIR);
   const target = path.join(ASSETS_DIST, "articles", folder);
   ensureDir(path.join(target, "full"));
@@ -2186,6 +2212,7 @@ function siteMenu(strings, locale) {
     [ARTICLE_WALTZES_SLUG, strings.artWaltzesH1],
     [ARTICLE_PROGRESSIVE_SLUG, strings.artProgressiveH1],
     [ARTICLE_AGUADO_SLUG, strings.artAguadoH1],
+    [ARTICLE_SAGRERAS_SLUG, strings.artSagrerasH1],
     [ARTICLE_ARPEGGIOS_SLUG, strings.artArpeggiosH1],
   ];
   return (
@@ -2360,7 +2387,7 @@ addSlugPages(
 addSlugPages([DIM_SLUG, NOTE_FINDER_SLUG, SIXTHS_SLUG]);
 addSlugPages([TAB_EDITOR_SLUG], ["0.7", "0.6"]);
 addSlugPages([PRIVACY_SLUG], ["0.3", "0.3"]);
-addSlugPages([ARTICLES_SLUG, ARTICLE_CARCASSI_SLUG, ARTICLE_PRELUDES_SLUG, ARTICLE_SANTISTEBAN_SLUG, ARTICLE_WALTZES_SLUG, ARTICLE_PROGRESSIVE_SLUG, ARTICLE_AGUADO_SLUG, ARTICLE_ARPEGGIOS_SLUG]);
+addSlugPages([ARTICLES_SLUG, ARTICLE_CARCASSI_SLUG, ARTICLE_PRELUDES_SLUG, ARTICLE_SANTISTEBAN_SLUG, ARTICLE_WALTZES_SLUG, ARTICLE_PROGRESSIVE_SLUG, ARTICLE_AGUADO_SLUG, ARTICLE_SAGRERAS_SLUG, ARTICLE_ARPEGGIOS_SLUG]);
 if (PARTITURA_ENABLED) addSlugPages([PARTITURA_SLUG], ["0.7", "0.6"]);
 addSlugPages(
   ALL_PICKING_PAGES.map(function (page) {

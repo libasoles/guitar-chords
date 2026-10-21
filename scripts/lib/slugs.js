@@ -25,6 +25,7 @@ const SLUGS = {
   'articulo-valses-carcassi': { es: 'articulos/valses-de-carcassi', en: 'articles/carcassi-waltzes', isNew: true },
   'articulo-piezas-progresivas-carcassi': { es: 'articulos/piezas-progresivas-de-carcassi', en: 'articles/carcassi-progressive-pieces', isNew: true },
   'articulo-partituras-aguado': { es: 'articulos/partituras-de-aguado', en: 'articles/aguado-sheet-music', isNew: true },
+  'articulo-lecciones-sagreras': { es: 'articulos/primeras-lecciones-de-sagreras', en: 'articles/sagreras-first-lessons', isNew: true },
 };
 
 function slugFor(key, locale) {

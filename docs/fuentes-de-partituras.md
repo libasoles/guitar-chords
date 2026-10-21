@@ -14,6 +14,7 @@ use como original va copiado en `resources/` (carpeta no versionada) para poder 
 | Lista «Carcassi Op. 59» del canal Guitar Notes (YouTube) | PDF con TAB, exportados de MuseScore 4, de los Nos. 1–36. El segundo link de cada descripción es el MuseScore | PDF sí; MuseScore no se bajó | Vectoriales: las notas se leen sin OCR (ver la skill `partituras-con-tablatura`). Están en `resources/carcassi-op59-youtube/` |
 | [This Is Classical Guitar](https://www.thisisclassicalguitar.com/matteo-carcassi-free-sheet-music-pdf/) | PDF con digitación y video | Sí | Ediciones con copyright del sitio (Bradford Werner): no redistribuir |
 | [Classical Guitar Library](https://www.cglib.org/composers/) | PDF, licencia CC BY-SA 4.0 | Sí | Carcassi: Op. 5, Op. 60 y otros, sin el Op. 59 |
+| [IMSLP · Sagreras, libro 1](https://imslp.org/wiki/Las_lecciones_de_guitarra_(Sagreras,_Julio_Salvador)) | Transcripción de Marieh (2020, CC BY-NC 4.0, IMSLP610099): PDF vectorial de MuseScore 2/3 con TAB, lecciones 1–86 | Sí: `https://s9.imslp.org/files/imglnks/usimg/1/19/IMSLP610099-PMLP417963-Sagreras_First_Lessons_for_Guitar_Book1.pdf` | Se leen las notas sin OCR (`scripts/sagreras/`) y se cotejan con la TAB impresa. Originales en `resources/sagreras/` |
 
 ## Por probar
 

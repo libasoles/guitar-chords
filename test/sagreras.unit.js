@@ -1,0 +1,89 @@
+/* Artefactos publicados de las Primeras lecciones de Sagreras (downloads/sagreras-lecciones).
+   Run: node --test test/sagreras.unit.js
+   Contrato: cada leccion publicada tiene PDF y MusicXML con el mismo nombre base, el MusicXML es legible, con
+   notacion y TAB y los compases de la edicion de origen. Independencia: ningun archivo conserva rastros del PDF
+   de Marieh ni del programa que lo creo y el PDF lleva los metadatos fijados. */
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('fs');
+const path = require('path');
+const catalog = require('../scripts/lib/article-sagreras');
+
+/* Compases de cada leccion, contados sobre la partitura de la edicion de origen (scripts/sagreras/measures.json). */
+const MEASURES = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'scripts', 'sagreras', 'measures.json'), 'utf8'));
+
+/* Cadenas de los archivos de origen: programa, transcriptor y marcas de la edicion. */
+const SOURCE_TRACES = [/MuseScore/i, /Marieh/i, /Copyleft/i, /\.mscz/i, /IMSLP/i];
+
+function assertWellFormed(xml) {
+  const stack = [];
+  const tags = xml.replace(/<!--[\s\S]*?-->/g, '').replace(/<\?[\s\S]*?\?>/g, '').replace(/<!DOCTYPE[^>]*>/g, '');
+  for (const m of tags.matchAll(/<(\/?)([A-Za-z][\w:.-]*)((?:"[^"]*"|'[^']*'|[^>"'])*?)(\/?)>/g)) {
+    if (m[4]) continue;
+    if (m[1]) assert.equal(stack.pop(), m[2], 'etiqueta sin cerrar: ' + m[2]);
+    else stack.push(m[2]);
+  }
+  assert.deepEqual(stack, [], 'etiquetas sin cerrar');
+}
+
+/* Compases de la parte y pentagramas que declara (notacion + TAB comparten parte). */
+function scoreShape(xml) {
+  const part = xml.match(/<part id="[^"]*">([\s\S]*?)<\/part>/)[1];
+  return { parts: (xml.match(/<part id=/g) || []).length, measures: (part.match(/<measure\b/g) || []).length,
+    staves: Number((part.match(/<staves>(\d+)<\/staves>/) || [])[1]) };
+}
+
+const pieces = catalog.publishedPieces();
+const { DOWNLOADS_DIR, PREVIEW_DIR, SCORE_PREFIX, AUTHOR } = catalog;
+
+test('hay al menos una leccion publicada y salen en orden numerico', () => {
+  assert.ok(pieces.length > 0);
+  assert.deepEqual(pieces.map((p) => p.number), pieces.map((p) => p.number).sort((a, b) => a - b));
+});
+
+for (const piece of pieces) {
+  test('leccion ' + piece.number + ': PDF y MusicXML con el mismo nombre', () => {
+    assert.ok(fs.existsSync(path.join(DOWNLOADS_DIR, piece.base + '.pdf')));
+    assert.ok(fs.existsSync(path.join(DOWNLOADS_DIR, piece.base + '.musicxml')));
+  });
+
+  test('leccion ' + piece.number + ': MusicXML legible, con notacion y TAB y los compases del libro', () => {
+    const xml = fs.readFileSync(path.join(DOWNLOADS_DIR, piece.base + '.musicxml'), 'utf8');
+    assertWellFormed(xml);
+    const shape = scoreShape(xml);
+    assert.equal(shape.staves, 2, 'notacion + pentagrama TAB');
+    assert.equal(shape.measures, MEASURES[piece.number], 'compases de la edicion');
+  });
+
+  test('leccion ' + piece.number + ': vista previa de un sistema con partitura y TAB', () => {
+    const svg = fs.readFileSync(path.join(PREVIEW_DIR, SCORE_PREFIX + String(piece.number).padStart(2, '0') + '.svg'), 'utf8');
+    assertWellFormed(svg);
+    assert.equal((svg.match(/ class="system"/g) || []).length, 1);
+    const measures = (svg.match(/ class="measure"/g) || []).length;
+    assert.ok(measures > 0);
+    assert.equal((svg.match(/ class="staff"/g) || []).length, measures * 2);
+    assert.match(svg, / class="tabGrp"/);
+  });
+
+  test('leccion ' + piece.number + ': independiente de los archivos de origen', () => {
+    const pdf = fs.readFileSync(path.join(DOWNLOADS_DIR, piece.base + '.pdf'));
+    const xml = fs.readFileSync(path.join(DOWNLOADS_DIR, piece.base + '.musicxml'), 'utf8');
+    assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
+    const text = pdf.toString('latin1');
+    for (const trace of SOURCE_TRACES) {
+      assert.doesNotMatch(text, trace, 'PDF: ' + trace);
+      assert.doesNotMatch(xml, trace, 'MusicXML: ' + trace);
+    }
+    const title = 'Lesson ' + piece.number;
+    const info = text.match(/\/Title\s*\(((?:\\.|[^\\)])*)\)/);
+    assert.ok(info, 'el PDF declara /Title');
+    // El PDF escapa algunos caracteres (p. ej. : como \072).
+    assert.equal(info[1].replace(/\\(\d{3})/g, (_, octal) => String.fromCharCode(parseInt(octal, 8))).replace(/\\([()\\])/g, '$1'), title);
+    assert.ok(xml.includes('<work-title>' + title + '</work-title>'));
+    assert.match(text, new RegExp('/Author\\s*\\(' + AUTHOR + '\\)'));
+    assert.doesNotMatch(text, /\/Producer|\/Creator|\/CreationDate|\/ModDate/);
+    assert.doesNotMatch(text, /<x:xmpmeta|\/Metadata/);
+    assert.doesNotMatch(xml, /<encoding>|<software>|<rights>|<source>|<encoding-date>/);
+  });
+}
