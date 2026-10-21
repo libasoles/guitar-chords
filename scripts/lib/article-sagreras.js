@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const { modal, CLOSE_ICON } = require('./modal');
 const { escapeAttr, inlineScore, glyphDefs, DOWNLOAD_ICON } = require('./score-svg');
-const { favoriteStar } = require('./editor-favorites');
+const { editorMarks } = require('./editor-marks');
 
 const ROOT = path.join(__dirname, '..', '..');
 const FOLDER = 'sagreras-lecciones';
@@ -45,7 +45,7 @@ function card(piece, locale, strings, sharedGlyphs, pieces) {
   /* El titulo es el boton que abre la partitura completa en un modal; su ::after cubre toda la tarjeta.
      El enlace de descarga del pie queda por encima. */
   return '<article class="example-card prelude-card">' +
-    '<h2 class="prelude-card-title">' + favoriteStar('sagreras', piece.number, strings.artEditorFavorite) + '<button type="button" class="prelude-open" popovertarget="' + id + '" aria-haspopup="dialog" ' +
+    '<h2 class="prelude-card-title">' + editorMarks('sagreras', piece.number, strings) + '<button type="button" class="prelude-open" popovertarget="' + id + '" aria-haspopup="dialog" ' +
       'aria-label="' + escapeAttr(strings.artPreludesView + ' ' + name) + '">' + name + '</button>' +
       '<a class="prelude-pdf-link" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' + name + '</a></h2>' +
     inlineScore(svg, strings.artPreludesAltPrefix + ' ' + name, sharedGlyphs) +
@@ -83,7 +83,7 @@ function fullScore(piece, name, href, strings, pieces, locale) {
       '" loading="lazy" decoding="async" alt="' + escapeAttr(name + (all.length > 1 ? ' (' + (i + 1) + '/' + all.length + ')' : '')) + '">';
   });
   const index = pieces.indexOf(piece);
-  return '<div class="modal-pages">' + favoriteStar('sagreras', piece.number, strings.artEditorFavorite) + pages.join('') + '</div>' +
+  return '<div class="modal-pages">' + editorMarks('sagreras', piece.number, strings) + pages.join('') + '</div>' +
     '<div class="modal-footer"><div class="modal-keys">' +
     stepButton(pieces[index - 1], CHEVRON_LEFT, strings.artSagrerasPrev, locale) +
     stepButton(pieces[index + 1], CHEVRON_RIGHT, strings.artSagrerasNext, locale) + '</div><a class="modal-download" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' +

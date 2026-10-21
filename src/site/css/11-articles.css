@@ -210,18 +210,19 @@
   border: 0;
   font-size: 1.1rem;
 }
-/* Editor's favorites carry a black star before the title (scripts/lib/editor-favorites.js). */
-.prelude-card .prelude-card-title:has(.editor-favorite) {
+/* Editor marks (favorite star, insightful square-star) go in black before the title (scripts/lib/editor-marks.js). */
+.prelude-card .prelude-card-title:has(.editor-marks) {
   display: flex;
   align-items: center;
   gap: 0.4rem;
 }
-.editor-favorite {
+.editor-marks {
   display: inline-flex;
+  gap: 0.3rem;
   flex: none;
   color: #000;
 }
-.editor-favorite svg {
+.editor-mark svg {
   width: 1.1rem;
   height: 1.1rem;
 }
@@ -355,7 +356,7 @@
   position: relative;
   container-type: inline-size;
 }
-.modal-pages > .editor-favorite {
+.modal-pages > .editor-marks {
   position: absolute;
   left: 7.62cqw;
   top: calc(4.43cqw - 0.55rem);
