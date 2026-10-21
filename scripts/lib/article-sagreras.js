@@ -35,7 +35,7 @@ function pieceName(piece, locale) {
   return (locale === 'es' ? 'Lección ' : 'Lesson ') + piece.number;
 }
 
-function card(piece, locale, strings, sharedGlyphs) {
+function card(piece, locale, strings, sharedGlyphs, pieces) {
   const name = pieceName(piece, locale);
   const svg = fs.readFileSync(path.join(PREVIEW_DIR, SCORE_PREFIX + String(piece.number).padStart(2, '0') + '.svg'), 'utf8');
   const id = 'sagreras-score-' + piece.number;
@@ -49,7 +49,7 @@ function card(piece, locale, strings, sharedGlyphs) {
       '<a class="prelude-pdf-link" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' + name + '</a></h2>' +
     inlineScore(svg, strings.artPreludesAltPrefix + ' ' + name, sharedGlyphs) +
     download +
-    modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', closeContent: CLOSE_ICON, content: fullScore(piece, name, href, strings) }) +
+    modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', closeContent: CLOSE_ICON, content: fullScore(piece, name, href, strings, pieces, locale) }) +
     '</article>';
 }
 
@@ -63,22 +63,37 @@ function pageFiles(piece) {
     : [];
 }
 
-function fullScore(piece, name, href, strings) {
+const CHEVRON_LEFT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>';
+const CHEVRON_RIGHT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
+
+/* Las lecciones son progresivas: los chevrons del pie pasan a la anterior / siguiente, y quedan deshabilitados en los extremos. */
+function stepButton(target, icon, label, locale) {
+  const attrs = target
+    ? 'popovertarget="sagreras-score-' + target.number + '" popovertargetaction="show" aria-label="' + escapeAttr(label + ': ' + pieceName(target, locale)) + '"'
+    : 'disabled aria-label="' + escapeAttr(label) + '"';
+  return '<button type="button" class="modal-step" ' + attrs + '>' + icon + '</button>';
+}
+
+function fullScore(piece, name, href, strings, pieces, locale) {
   const pages = pageFiles(piece).map((file, i, all) => {
     const head = fs.readFileSync(path.join(FULL_DIR, file), 'utf8').slice(0, 300);
     const [, width, height] = head.match(/<svg width="(\d+)(?:\.\d+)?px" height="(\d+)(?:\.\d+)?px"/);
     return '<img class="modal-page" src="' + ASSETS_URL + 'full/' + file + '" width="' + width + '" height="' + height +
       '" loading="lazy" decoding="async" alt="' + escapeAttr(name + (all.length > 1 ? ' (' + (i + 1) + '/' + all.length + ')' : '')) + '">';
   });
+  const index = pieces.indexOf(piece);
   return '<div class="modal-pages">' + pages.join('') + '</div>' +
-    '<div class="modal-footer"><div class="modal-keys"></div><a class="modal-download" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' +
+    '<div class="modal-footer"><div class="modal-keys">' +
+    stepButton(pieces[index - 1], CHEVRON_LEFT, strings.artSagrerasPrev, locale) +
+    stepButton(pieces[index + 1], CHEVRON_RIGHT, strings.artSagrerasNext, locale) + '</div><a class="modal-download" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' +
     DOWNLOAD_ICON + '<span>' + strings.artPreludesDownload + '</span></a></div>';
 }
 
 function renderBody(locale, strings) {
   const prose = fs.readFileSync(path.join(PREVIEW_DIR, 'body.' + locale + '.html'), 'utf8');
   const sharedGlyphs = new Map();
-  const cards = publishedPieces().map((p) => card(p, locale, strings, sharedGlyphs)).join('');
+  const pieces = publishedPieces();
+  const cards = pieces.map((p) => card(p, locale, strings, sharedGlyphs, pieces)).join('');
   const grid = glyphDefs(sharedGlyphs) + '<div class="prelude-grid">' + cards + '</div>';
   return prose.split('%%LESSONS%%').join(grid);
 }

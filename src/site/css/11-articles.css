@@ -384,6 +384,29 @@
   color: #767676;
   font-weight: 400;
 }
+.modal-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border: 1px solid var(--brand-blue);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--brand-blue);
+  cursor: pointer;
+}
+.modal-step:hover:not(:disabled) {
+  background: #0000000a;
+}
+.modal-step:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.modal-step svg {
+  display: block;
+  width: 1.2rem;
+  height: 1.2rem;
+}
 .modal-download {
   display: inline-flex;
   align-items: center;

@@ -495,7 +495,20 @@ const PDFS = [
         assert.ok(await first.evaluate((img) => img.naturalWidth > 0));
         assert.match(await first.getAttribute('src'), new RegExp('/full/lesson-' + String(published[0].number).padStart(2, '0') + '-p1(?:\\.[a-f0-9]+)?\\.svg$'));
         assert.equal(decodeURIComponent(await modal.locator('.modal-footer .modal-download').getAttribute('href')).split('/').pop(), published[0].pdf);
-        await modal.locator('.modal-close').click();
+        // Lessons are progressive: the footer has previous/next chevrons, disabled at either end.
+        const steps = modal.locator('.modal-footer .modal-step');
+        assert.equal(await steps.count(), 2);
+        assert.equal(await steps.nth(0).isDisabled(), true);
+        assert.equal(await steps.nth(1).isDisabled(), published.length < 2);
+        if (published.length > 1) {
+          await steps.nth(1).click();
+          const second = page.locator('.modal-full:popover-open');
+          assert.equal(await second.count(), 1);
+          assert.equal(await second.getAttribute('id'), 'sagreras-score-' + published[1].number);
+          assert.equal(await second.locator('.modal-step').nth(0).isDisabled(), false);
+          assert.equal(await second.locator('.modal-step').nth(1).isDisabled(), published.length < 3);
+        }
+        await page.locator('.modal-full:popover-open .modal-close').click();
         assert.equal(await page.locator('.modal-full:popover-open').count(), 0);
         await page.setViewportSize({ width: 375, height: 800 });
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
