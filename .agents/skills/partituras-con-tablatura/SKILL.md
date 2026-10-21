@@ -67,6 +67,12 @@ El `.mscx` es XML limpio. El conversor (`mscx_to_musicxml.py`, solo biblioteca e
 - `Rest` con `durationType` = `measure` es un compás completo; los silencios de relleno de una voz se ocultan.
 - MuseScore usa a veces `D.S. al Fine` donde el libro dice `D.C.`, «Mineur» donde dice «Minor.», `GALOP` por «Gallop»:
   la corrección va en `pieces.json` (`texts`, `words`, `tempo`, `segno`, `ignore_marks`, `no_fermata`), no a mano en la fuente.
+- **MuseScore 3 (TabGuitar, Aguado)**: la primera voz cuelga del compás sin `<voice>`, la armadura va en `<accidental>`,
+  y los esquemas antiguos usan `<Tuplet id>` + `<Tuplet>id</Tuplet>` en cada acorde y `<Slur type=start|stop id>`;
+  `upgrade_musescore3` los normaliza (y descarta ligaduras sin final). Una transcripción puede cambiar la métrica
+  (lección 29: 3/4 con valores duplicados frente al 3/8 del libro: `"halve": true`) o numerarse distinto del libro
+  (el Estudio 2 de TabGuitar no es el del libro): comprobar cada pieza con el facsímil antes de publicarla.
+  Catálogo con nombre propio por pieza: `scripts/aguado/` + `scripts/lib/article-aguado.js`.
 - **Comparar con el libro** sigue siendo obligatorio: el archivo del autor puede traer errores (se encontró un compás
   distinto entre dos transcripciones independientes, y la del libro decidió).
 
