@@ -1170,6 +1170,9 @@ const MODAL_HASH_SCRIPT =
   'var desktop=window.matchMedia("(min-width: 48.01rem)");' +
   "function sync(id){try{history.replaceState(null,''," +
   "id?'#'+id:location.pathname+location.search);}catch(e){}}" +
+  // The prev/next chevrons live inside the open modal: close it so the target replaces it instead of nesting.
+  "document.querySelectorAll('.modal-step[popovertarget]').forEach(function(b){b.addEventListener('click',function(){" +
+  "var m=b.closest('.modal-full');if(m)m.hidePopover();});});" +
   "modals.forEach(function(m){m.addEventListener('toggle',function(e){" +
   "if(e.newState==='open')sync(m.id);else if(location.hash==='#'+m.id)sync('');});});" +
   "var target=location.hash&&document.getElementById(location.hash.slice(1));" +
