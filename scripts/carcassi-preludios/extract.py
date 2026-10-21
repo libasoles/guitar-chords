@@ -281,6 +281,15 @@ def build(number):
         with open(os.path.join(prepared, tabify.SUGGESTION_NAME), encoding="utf-8") as f:
             suggestion = json.load(f)
         tabs = avoid_repeated_strings(suggestion["tabs"], tabify.open_midis(tabify.STANDARD_TUNING))
+        if EDITION == "valses" and number == 5:
+            # Keep the melodic run on string 1: 5-4-5-3-0. These are the fourth
+            # and eighth measures counting the pickup (MusicXML numbers 3 and 7).
+            for measure in (3, 7):
+                for column in tabs[measure]:
+                    for string, fret, first_string_fret in ((1, 9, 4), (1, 8, 3), (2, 9, 0)):
+                        if column[string] == fret:
+                            column[string] = None
+                            column[0] = first_string_fret
         if EDITION == "carcassi" and number == 9:
             # Requested TAB voicing: play the B bass on the sixth string in m. 15,
             # and play G# on the third string in the closing chord (m. 16).
