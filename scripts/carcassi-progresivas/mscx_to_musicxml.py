@@ -18,6 +18,7 @@ from fractions import Fraction
 from xml.sax.saxutils import escape
 
 DIVISIONS = 480  # por negra: alcanza para fusas y tresillos de semicorcheas
+HALVED = {'whole': 'half', 'half': 'quarter', 'quarter': 'eighth', 'eighth': '16th', '16th': '32nd', '32nd': '64th'}
 TYPE_QUARTERS = {'whole': Fraction(4), 'half': Fraction(2), 'quarter': Fraction(1), 'eighth': Fraction(1, 2),
                  '16th': Fraction(1, 4), '32nd': Fraction(1, 8), '64th': Fraction(1, 16)}
 STEPS = 'FCGDAEB'  # linea de quintas desde fa
@@ -34,8 +35,69 @@ def read_mscx(path):
     if path.endswith('.mscz'):
         with zipfile.ZipFile(path) as z:
             name = next(n for n in z.namelist() if n.endswith('.mscx'))
-            return ET.fromstring(z.read(name))
-    return ET.parse(path).getroot()
+            return upgrade_musescore3(ET.fromstring(z.read(name)))
+    return upgrade_musescore3(ET.parse(path).getroot())
+
+
+MEASURE_LEVEL = {'voice', 'startRepeat', 'endRepeat', 'BarLine', 'Marker', 'Jump', 'LayoutBreak', 'irregular', 'noOffset',
+                 'stretch', 'vspacer'}
+
+
+def upgrade_musescore3(root):
+    """Lleva un archivo de MuseScore 3 (o 2) al esquema que lee el conversor, el de MuseScore 4:
+    - la primera voz cuelga directamente del compas (solo las demas van en <voice>): se envuelve en un <voice>;
+    - los tresillos antiguos llevan la definicion <Tuplet id> y en cada acorde <Tuplet>id</Tuplet>, sin endTuplet;
+    - las ligaduras de expresion antiguas son <Slur type="start|stop" id> dentro del acorde, y las de union
+      <Tie id> en la nota de salida y <endSpanner id> en la de llegada."""
+    staff = root.find('Score').find('Staff')
+    stops = {mark.get('id') for mark in staff.iter('Slur') if mark.get('type') == 'stop'}
+    ends = {mark.get('id') for mark in staff.iter('endSpanner')}
+    for measure in staff.findall('Measure'):
+        if any(child.tag in ('Chord', 'Rest') for child in measure):
+            first = ET.Element('voice')
+            for child in list(measure):
+                if child.tag not in MEASURE_LEVEL:
+                    measure.remove(child)
+                    first.append(child)
+            measure.insert(0, first)
+        for voice in measure.findall('voice'):
+            if voice.find('endTuplet') is None:  # esquema antiguo: se cierra al primer elemento sin <Tuplet>id</Tuplet>
+                in_tuplet = False
+                for child in list(voice):
+                    ref = child.find('Tuplet') if child.tag in ('Chord', 'Rest') else None
+                    if ref is not None:
+                        child.remove(ref)
+                        in_tuplet = True
+                    elif in_tuplet and child.tag in ('Chord', 'Rest', 'Tuplet'):
+                        voice.insert(list(voice).index(child), ET.Element('endTuplet'))
+                        in_tuplet = False
+                if in_tuplet:
+                    voice.append(ET.Element('endTuplet'))
+            for chord in voice.findall('Chord'):
+                for mark in chord.findall('Slur'):
+                    if mark.get('type') in ('start', 'stop'):
+                        chord.remove(mark)
+                        if mark.get('type') == 'start' and mark.get('id') not in stops:
+                            continue  # ligadura sin final en el archivo: se descarta
+                        spanner = ET.SubElement(chord, 'Spanner', type='Slur')
+                        if mark.get('type') == 'start':
+                            ET.SubElement(spanner, 'Slur')
+                            ET.SubElement(spanner, 'next')
+                        else:
+                            ET.SubElement(spanner, 'prev')
+                for note in chord.findall('Note'):
+                    for mark in note.findall('Tie'):
+                        if mark.get('id') is not None:
+                            note.remove(mark)
+                            if mark.get('id') not in ends:
+                                continue
+                            spanner = ET.SubElement(note, 'Spanner', type='Tie')
+                            ET.SubElement(spanner, 'next')
+                    for mark in note.findall('endSpanner'):
+                        note.remove(mark)
+                        spanner = ET.SubElement(note, 'Spanner', type='Tie')
+                        ET.SubElement(spanner, 'prev')
+    return root
 
 
 def spelling(tpc, midi):
@@ -52,10 +114,12 @@ def fraction(text):
     return Fraction(int(n), int(d or 1))
 
 
-def duration_of(chord_like, measure_len, tuplet):
+def duration_of(chord_like, measure_len, tuplet, halve=False):
     kind = chord_like.findtext('durationType')
     if kind == 'measure':
         return measure_len, 'whole'
+    if halve:  # el archivo escribe el doble de lo que dice el libro: cada figura baja un escalon
+        kind = HALVED[kind]
     quarters = TYPE_QUARTERS[kind]
     dots = int(chord_like.findtext('dots') or 0)
     quarters = quarters * (2 - Fraction(1, 2 ** dots))
@@ -70,7 +134,11 @@ def rich_text(element):
 
 
 class Converter:
-    def __init__(self, root, title, words=(), tempo=None, ignore_marks=False, texts=None, no_fermata=False):
+    def __init__(self, root, title, words=(), tempo=None, ignore_marks=False, texts=None, no_fermata=False,
+                 composer='Matteo Carcassi', drop_texts=(), halve=False):
+        self.halve = halve
+        self.composer = composer
+        self.drop_texts = [re.compile(p) for p in drop_texts]  # textos de posicion/ceja que el libro no imprime como texto
         self.no_fermata = no_fermata  # el libro no corona ese acorde
         self.texts = texts or {}  # {texto del MuseScore: texto del libro}
         self.ignore_marks = ignore_marks  # descarta Fine/D.C. del MuseScore cuando el libro marca otra cosa
@@ -108,7 +176,7 @@ class Converter:
             self.index = index
             out.append(self.measure(index, measure, measures))
         header = ('<?xml version="1.0" encoding="UTF-8"?>\n<score-partwise version="3.1"><work><work-title>' +
-                  escape(self.title) + '</work-title></work><identification><creator type="composer">Matteo Carcassi'
+                  escape(self.title) + '</work-title></work><identification><creator type="composer">' + escape(self.composer) +
                   '</creator></identification><part-list><score-part id="P1"><part-name>Guitar</part-name></score-part>'
                   '</part-list><part id="P1">')
         return header + ''.join(out) + '</part></score-partwise>\n'
@@ -119,11 +187,11 @@ class Converter:
         attributes = ''
         for voice in voices:
             for sig in voice.findall('TimeSig'):
-                self.time = (int(sig.findtext('sigN')), int(sig.findtext('sigD')))
+                self.time = (int(sig.findtext('sigN')), int(sig.findtext('sigD')) * (2 if self.halve else 1))
             for key in voice.findall('KeySig'):
-                self.fifths = int(key.findtext('concertKey') or 0)
+                self.fifths = int(key.findtext('concertKey') or key.findtext('accidental') or 0)  # MuseScore 3: accidental
         full = Fraction(self.time[0] * 4, self.time[1])
-        length = fraction(measure.get('len')) * 4 if measure.get('len') else full  # len va en fracciones de redonda
+        length = fraction(measure.get('len')) * 4 / (2 if self.halve else 1) if measure.get('len') else full  # len va en fracciones de redonda
         if index == 0 or attributes_changed(voices):
             symbol = ' symbol="common"' if self.time == (4, 4) else ''
             attributes = ('<attributes><divisions>%d</divisions><key><fifths>%d</fifths></key><time%s><beats>%d</beats>'
@@ -133,7 +201,7 @@ class Converter:
                 self.clef_written = True
             attributes += '</attributes>'
         implicit = length < full
-        pickup = measures[0].get('len') is not None and fraction(measures[0].get('len')) * 4 < full
+        pickup = measures[0].get('len') is not None and length_of(measures[0], self.halve) < full
         number = index if pickup else index + 1
         head = '<measure number="%d"%s>' % (number, ' implicit="yes"' if implicit else '')
         left, right = self.barlines(measure, measures, index)
@@ -190,6 +258,8 @@ class Converter:
         for el in elements:
             if el.tag in ('StaffText', 'Expression'):
                 text = self.texts.get(rich_text(el), rich_text(el))
+                if any(p.fullmatch(text) for p in self.drop_texts):
+                    text = ''
                 if self.tempo and index == 0 and el.tag == 'StaffText' and text:
                     text, self.tempo = self.tempo, None
                 if text:
@@ -261,7 +331,7 @@ class Converter:
             elif tag == 'Fermata':
                 fermata = not self.no_fermata
             elif tag == 'Rest':
-                dur, kind = duration_of(el, length, tuplet)
+                dur, kind = duration_of(el, length, tuplet, self.halve)
                 events.append({'level': 0, 'pos': offset + total})
                 total += dur
                 measure_rest = el.findtext('durationType') == 'measure'
@@ -272,7 +342,7 @@ class Converter:
                     tuplet['first'] = False
             elif tag == 'Chord':
                 grace = el.find('acciaccatura') is not None or el.find('appoggiatura') is not None
-                dur, kind = duration_of(el, length, tuplet)
+                dur, kind = duration_of(el, length, tuplet, self.halve)
                 out += ''.join(pending); pending = []
                 if not grace:
                     level = BEAM_LEVEL.get(kind, 0)
@@ -404,6 +474,10 @@ class Converter:
             parts.append('</note>')
             out += ''.join(parts)
         return out
+
+
+def length_of(measure, halve):
+    return fraction(measure.get('len')) * 4 / (2 if halve else 1)
 
 
 def attributes_changed(voices):

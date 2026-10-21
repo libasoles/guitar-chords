@@ -24,6 +24,7 @@ const SLUGS = {
   'articulo-preludios-carcassi': { es: 'articulos/preludios-de-carcassi', en: 'articles/carcassi-preludes', isNew: true },
   'articulo-valses-carcassi': { es: 'articulos/valses-de-carcassi', en: 'articles/carcassi-waltzes', isNew: true },
   'articulo-piezas-progresivas-carcassi': { es: 'articulos/piezas-progresivas-de-carcassi', en: 'articles/carcassi-progressive-pieces', isNew: true },
+  'articulo-partituras-aguado': { es: 'articulos/partituras-de-aguado', en: 'articles/aguado-sheet-music', isNew: true },
 };
 
 function slugFor(key, locale) {
