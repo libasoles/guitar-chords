@@ -128,6 +128,19 @@ body {
   border-radius: 6px;
   font-size: 0.95rem;
 }
+@media (min-width: 761px) {
+  .site-menu-panel {
+    width: min(46rem, calc(100vw - 3rem));
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 0.5rem;
+  }
+  .site-menu-wide {
+    grid-column: 1 / -1;
+    border-top: 1px solid rgba(26, 26, 26, 0.12);
+    margin-top: 0.4rem;
+  }
+}
 .site-menu-panel a {
   display: block;
   padding: 0.45rem 1.1rem;

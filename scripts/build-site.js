@@ -2168,11 +2168,11 @@ function siteMenu(strings, locale) {
     '<nav class="site-menu-panel" aria-label="' +
     escapeHtml(strings.menuButtonLabel) +
     '">' +
-    '<p class="site-menu-heading">' +
+    '<div class="site-menu-col"><p class="site-menu-heading">' +
     escapeHtml(strings.menuResources) +
     "</p>" +
     items.join("") +
-    '<p class="site-menu-heading">' +
+    '</div><div class="site-menu-col"><p class="site-menu-heading">' +
     escapeHtml(strings.menuArticles) +
     "</p>" +
     articles
@@ -2180,7 +2180,7 @@ function siteMenu(strings, locale) {
         return link(pagePath(a[0], locale), a[1]);
       })
       .join("") +
-    '<p class="site-menu-heading">' +
+    '</div><div class="site-menu-wide"><p class="site-menu-heading">' +
     escapeHtml(strings.menuExtensions) +
     "</p>" +
     '<a class="site-menu-ext" href="' +
@@ -2189,7 +2189,7 @@ function siteMenu(strings, locale) {
     escapeHtml(strings.menuChordFinder) +
     "</strong><small>" +
     escapeHtml(strings.extensionDescription) +
-    '</small></span><img src="/assets/guitar-player-cubist-left-head.svg" alt="" width="48" height="48"></a></nav></details>' +
+    '</small></span><img src="/assets/guitar-player-cubist-left-head.svg" alt="" width="48" height="48"></a></div></nav></details>' +
     SITE_MENU_SCRIPT
   );
 }
