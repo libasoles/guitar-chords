@@ -25,7 +25,8 @@ function editorMarks(collection, number, strings) {
   const marks = Object.keys(MARKS).filter((mark) => ((PIECES[collection] || {})[mark] || []).includes(number));
   return marks.length
     ? '<span class="editor-marks">' + marks.map((mark) =>
-      '<span class="editor-mark" role="img" aria-label="' + strings[MARKS[mark].labelKey].replace(/"/g, '&quot;') + '">' + MARKS[mark].icon + '</span>').join('') + '</span>'
+      '<span class="editor-mark tooltip" role="img" tabindex="0" aria-label="' + strings[MARKS[mark].labelKey].replace(/"/g, '&quot;') + '" ' +
+      'data-tooltip="' + strings[MARKS[mark].labelKey].replace(/"/g, '&quot;') + '">' + MARKS[mark].icon + '</span>').join('') + '</span>'
     : '';
 }
 
