@@ -19,6 +19,14 @@ sys.path.insert(0, os.path.join(ROOT, 'backend', 'engine'))
 import extract  # noqa: E402  (rutinas de grabado compartidas con los preludios)
 
 AUTHOR = 'Julio Salvador Sagreras'
+# Atribucion que exige la licencia de la edicion de origen (CC BY-NC 4.0): pie gris en sans, a la izquierda de cada pagina.
+FOOTER_LINES = [[('Con modificaciones a partir de', None)],
+                [('Marieh (2020)', 'https://imslp.org/wiki/Las_lecciones_de_guitarra_(Sagreras,_Julio_Salvador)'), (' \u00b7 ', None),
+                 ('CC BY-NC 4.0', 'https://creativecommons.org/licenses/by-nc/4.0/')]]
+FOOTER_SIZE = 7
+FOOTER_GRAY = 0.45  # se ve al imprimir sin competir con la partitura
+FOOTER_LEFT = 54  # margen izquierdo de los sistemas
+FOOTER_BASELINE = 36  # linea de abajo; la de arriba va una interlinea mas arriba
 SOURCES = os.path.join(HERE, 'sources')
 OUT_DIR = os.path.join(ROOT, 'downloads', 'sagreras-lecciones')
 PREVIEW_DIR = os.path.join(ROOT, 'src', 'site', 'articles', 'sagreras-lecciones')
@@ -54,6 +62,57 @@ def title_of(number):
 
 def file_base(number):
     return f'Lesson {number:02d} - {AUTHOR}'
+
+
+def text_width(text):
+    try:
+        from pypdf._codecs.core_font_metrics import CORE_FONT_METRICS
+        widths = CORE_FONT_METRICS['Helvetica'].character_widths
+        return sum(widths.get(c, 500) for c in text) * FOOTER_SIZE / 1000
+    except (ImportError, KeyError):
+        return len(text) * 0.5 * FOOTER_SIZE
+
+
+def stamp_footer(writer):
+    """Pie de atribucion en Helvetica (fuente estandar, sin incrustar) con enlaces en cada pagina."""
+    from pypdf.generic import (ArrayObject, DecodedStreamObject, DictionaryObject, FloatObject, NameObject,
+                               NumberObject, TextStringObject)
+    font = writer._add_object(DictionaryObject({
+        NameObject('/Type'): NameObject('/Font'), NameObject('/Subtype'): NameObject('/Type1'),
+        NameObject('/BaseFont'): NameObject('/Helvetica'), NameObject('/Encoding'): NameObject('/WinAnsiEncoding')}))
+    leading = FOOTER_SIZE * 1.3
+    ops, links = [f'{FOOTER_GRAY} g', 'BT', f'/FtAttr {FOOTER_SIZE} Tf'], []
+    for row, line in enumerate(FOOTER_LINES):
+        y = FOOTER_BASELINE + (len(FOOTER_LINES) - 1 - row) * leading
+        x = FOOTER_LEFT
+        for text, uri in line:
+            escaped = text.replace('\\', '\\\\').replace('(', '\\(').replace(')', '\\)')
+            ops.append(f'1 0 0 1 {x:.2f} {y:.2f} Tm ({escaped}) Tj')
+            width = text_width(text)
+            if uri:
+                links.append((x, y - 2, x + width, y + FOOTER_SIZE, uri))
+            x += width
+    ops.append('ET')
+    content = '\n'.join(ops).encode('latin-1')
+    for page in writer.pages:
+        stream = DecodedStreamObject()
+        stream.set_data(b'q\n' + content + b'\nQ')
+        page_contents = page.get_contents()
+        data = page_contents.get_data() if page_contents is not None else b''
+        before = DecodedStreamObject()
+        before.set_data(b'q\n' + data + b'\nQ')  # lo que deje abierto la pagina no afecta al pie
+        page[NameObject('/Contents')] = ArrayObject([writer._add_object(before), writer._add_object(stream)])
+        resources = page['/Resources']
+        fonts = resources.setdefault(NameObject('/Font'), DictionaryObject())
+        fonts[NameObject('/FtAttr')] = font
+        annots = page.setdefault(NameObject('/Annots'), ArrayObject())
+        for x0, y0, x1, y1, uri in links:
+            annots.append(writer._add_object(DictionaryObject({
+                NameObject('/Type'): NameObject('/Annot'), NameObject('/Subtype'): NameObject('/Link'),
+                NameObject('/Rect'): ArrayObject([FloatObject(v) for v in (x0, y0, x1, y1)]),
+                NameObject('/Border'): ArrayObject([NumberObject(0), NumberObject(0), NumberObject(0)]),
+                NameObject('/A'): DictionaryObject({
+                    NameObject('/S'): NameObject('/URI'), NameObject('/URI'): TextStringObject(uri)})})))
 
 
 def build(number):
@@ -101,6 +160,7 @@ def build(number):
         with open(base + '.musicxml', 'w', encoding='utf-8') as f:
             f.write(xml)
         writer = PdfWriter(clone_from=PdfReader(os.path.join(exported, 'score.pdf')))
+        stamp_footer(writer)
         writer.add_metadata({'/Title': title_of(number), '/Author': AUTHOR})
         for key in ('/Producer', '/Creator', '/CreationDate', '/ModDate'):
             writer._info.get_object().pop(NameObject(key), None)
