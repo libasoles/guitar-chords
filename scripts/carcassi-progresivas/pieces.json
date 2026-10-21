@@ -32,7 +32,7 @@
   "31": {"form": "Larghetto", "es": "Larghetto", "segno": true},
   "32": {"form": "March", "es": "Marcha"},
   "33": {"form": "Rondo", "es": "Rondó"},
-  "34": {"form": "Waltz", "es": "Vals"},
+  "34": {"form": "Waltz", "es": "Vals", "segno": true},
   "35": {"form": "Rondo", "es": "Rondó"},
-  "36": {"form": "Waltz", "es": "Vals"}
+  "36": {"form": "Waltz", "es": "Vals", "segno": true}
 }
