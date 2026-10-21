@@ -24,6 +24,7 @@ Elige por el tipo de original:
 |---|---|
 | PDF vectorial de MuseScore (fuente Leland) | Leer la geometría con PyMuPDF, sin OCR: `scripts/carcassi-valses/pdf_notes.py` |
 | Escaneo antiguo | Transcripción manual en Python (`scripts/carcassi-preludios/transcribe_*.py`). El OCR (homr, Audiveris) confunde dedos con notas |
+| Archivo MuseScore `.mscz` (zip con un `.mscx`) | `scripts/carcassi-progresivas/mscx_to_musicxml.py`: lee las notas exactas, sin OCR. **Preferirlo al PDF** si el autor publica el archivo (en YouTube suele ir un segundo enlace de Drive en la descripción) |
 | Archivo LilyPond, MusicXML o GPX | Convertir directamente |
 
 ### Lo aprendido con PDF de MuseScore
@@ -43,6 +44,28 @@ Elige por el tipo de original:
   voz se pasa del total es un error de lectura. Los cortos suelen ser anacrusa y cierre.
 - Siempre **cotejar a ojo** el PDF generado contra el original, página por página, y buscar compases que no cuadren.
 
+### Lo aprendido con archivos MuseScore (`.mscx`)
+
+El `.mscx` es XML limpio. El conversor (`mscx_to_musicxml.py`, solo biblioteca estándar) lee el **primer** pentagrama
+(el segundo es la TAB de MuseScore, que se ignora: la calcula el motor) y descarta digitaciones, trazos de posición
+(I, II, V…), saltos de página y estilo. Trampas encontradas:
+
+- Descarga de Drive sin API: `https://drive.usercontent.google.com/download?id=<ID>&export=download&confirm=t`
+  (a veces devuelve un error 500 en HTML: reintentar y comprobar que empieza por `PK`/`%PDF`).
+- Las alturas suenan **escritas** para clave de sol 8vb; la ortografía sale del `tpc` (14 = do, +1 por quinta), no del
+  MIDI (si no, do♯ y re♭ se confunden).
+- `Marker` (Fine, segno) y `Jump` (D.C./D.S.) **cuelgan del compás**, no de la voz; `Fermata` va antes del acorde que
+  corona; `Tuplet`…`endTuplet` envuelven los acordes; las ligaduras de unión y de expresión son `Spanner` con `next`/`prev`.
+- Las **casillas** (1.ª/2.ª vez) son `Volta` con `endings` y número de compases; music21 las pierde al unir dos
+  pentagramas en una parte, así que `tabify.inject_endings` las reinyecta como `<ending>`.
+- Los reguladores `HairPin` de subtipo 2 y 3 son «cresc.»/«dim.» **con línea de texto**, no cuñas: imprimirlos como texto
+  (`Cres.`/`Dim.`). Inicio y final pueden estar en voces distintas: emparejar por posición (conversor en dos pasadas).
+- `Rest` con `durationType` = `measure` es un compás completo; los silencios de relleno de una voz se ocultan.
+- MuseScore usa a veces `D.S. al Fine` donde el libro dice `D.C.`, «Mineur» donde dice «Minor.», `GALOP` por «Gallop»:
+  la corrección va en `pieces.json` (`texts`, `words`, `tempo`, `segno`, `ignore_marks`, `no_fermata`), no a mano en la fuente.
+- **Comparar con el libro** sigue siendo obligatorio: el archivo del autor puede traer errores (se encontró un compás
+  distinto entre dos transcripciones independientes, y la del libro decidió).
+
 ## 3. Generar el MusicXML y el PDF con TAB
 
 - El MusicXML lleva solo alturas y duraciones; la TAB la propone el motor (`backend/engine/tabify.py`, afinación estándar o
@@ -52,7 +75,16 @@ Elige por el tipo de original:
   `src/site/articles/<colección>/<prefijo>-NN.svg` y páginas en `full/`.
 - El nombre del PDF debe ser `<Pieza> N in <Tonalidad> (Major|Minor) - Matteo Carcassi.pdf`: la página lo descubre por ese nombre.
 - Un PDF de una sola página: si se derrama un compás a una segunda, usar `PDF_OVERRIDES` (escala menor, página virtual mayor).
-- Las marcas «Fine» y «D.C.» salen del MusicXML como `<words>` al final del compás.
+  `scripts/carcassi-progresivas/build.py` lo prueba solo (`SCALES`): sube la página virtual y baja la escala de Verovio
+  (entera) hasta que el PDF ocupa menos páginas. Cambiar solo `scale` no mueve nada: hay que cambiar también el tamaño
+  de página en proporción (`pageWidth`/`pageHeight` × 45/escala).
+- Las marcas «Fine» y «D.C.» salen del MusicXML como `<words>` al final del compás. Para que el motor las conserve en
+  una colección curada hay que poner `tabify.KEEP_TEXT = True` (por defecto se borran porque en una subida son ruido del OCR).
+- Las colecciones con **nombre propio por pieza** (no «N in tonalidad») no usan `article-carcassi-preludes.js`: ver
+  `scripts/lib/article-carcassi-progressive.js` (`Progressive Piece N - <forma> - Matteo Carcassi.pdf`, formas en
+  `scripts/carcassi-progresivas/pieces.json`) y `scripts/lib/score-svg.js` con los helpers de SVG compartidos.
+- La fuente curada es `sources/NN.musicxml` (se puede editar a mano); `build.py convert N archivo.mscz` la regenera, y
+  `build.py N` la pasa por el motor.
 - Un compás con notas descartadas hace fallar el build (`Notas descartadas`): revisar la lectura de ese compás.
 - Afinaciones especiales (scordatura) no las soporta el motor: dejar la pieza fuera y avisar.
 
@@ -63,13 +95,20 @@ Elige por el tipo de original:
 - Edición nueva en `scripts/lib/article-carcassi-preludes.js` (`createEdition`).
 - `scripts/build-site.js`: constante del slug, render, tarjeta en el índice de artículos, copia de assets, menú, sitemap.
 - Textos en `src/i18n/strings.es.json` y `strings.en.json`; cuerpo en `src/site/articles/<colección>/body.{es,en}.html`
-  con el marcador `%%PRELUDES%%`.
+  con el marcador `%%PRELUDES%%` (o `%%PIECES%%` en la colección de piezas progresivas).
+- Un módulo nuevo debe aportar su propio test (`test/carcassi-progresivas.unit.js`: compases del libro por pieza en
+  `MEASURES`) y un bloque en `test/articles.e2e.js`; el número de tarjetas del índice sube con cada colección.
+- `.gitignore` excluye `resources/` y `__pycache__`: no usar `git add -f` sobre un directorio entero de scripts (se coló
+  el bytecode una vez).
 - El índice de artículos solo lleva tarjetas (sin enlace de texto aparte). El e2e `test/articles.e2e.js` cuenta las tarjetas.
 
 ## 5. Entregar pieza a pieza
 
 1. Extraer, comprobar sumas, generar, **mirar el PDF** y compararlo con el original.
 2. `node scripts/build-site.js`, `node test/articles.e2e.js` y `npm run test:unit`.
-3. Commit y push de **cada pieza** por separado, con su TAB. Si el push se rechaza, `git pull --rebase`.
+3. Commit y push de **cada pieza** por separado, con su TAB. Si el push se rechaza, `git pull --rebase` (otra sesión puede
+   estar publicando otra colección en paralelo y tocando `build-site.js`, `slugs.js` y `strings.*.json`: los conflictos
+   se resuelven conservando ambas entradas).
+   Un arreglo del conversor o del motor obliga a **reconstruir todas las piezas ya publicadas** y a revisarlas.
 4. Cada push cancela la ejecución de CI anterior y el despliegue solo corre al terminar CI: con varios pushes seguidos
    nada se despliega hasta que una ejecución no se interrumpa. Avísalo si alguien «no ve» la página.
