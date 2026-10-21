@@ -198,7 +198,8 @@ class Converter:
                 label = (el.findtext('label') or '').lower()
                 if label == 'segno':
                     out += '<direction placement="above"><direction-type><segno/></direction-type></direction>'
-                elif label == 'coda':
+                elif label in ('coda', 'codab'):  # «To Coda» y la coda misma; las dos llevan el signo de coda
+                    out += words_dir('To Coda' if label == 'coda' else 'CODA.', right=label == 'coda')
                     out += '<direction placement="above"><direction-type><coda/></direction-type></direction>'
                 elif MARKERS.get(label):
                     out += words_dir(MARKERS[label], right=True)
