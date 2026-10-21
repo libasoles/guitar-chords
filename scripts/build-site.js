@@ -23,6 +23,7 @@ const { drawIcon } = require("./lib/icon-png");
 const { fingerprintAssets } = require("./lib/fingerprint");
 const { minifyAssets } = require("./lib/minify-assets");
 const { readSiteCss, readPartituraCss } = require("./lib/site-css");
+const { normalizeScoreDirections } = require("./lib/score-svg");
 const {
   resolveLastmods,
   loadManifest,
@@ -94,7 +95,11 @@ function ensureDir(dir) {
 }
 
 function copyFile(src, dst) {
-  fs.copyFileSync(src, dst);
+  if (path.extname(src) === ".svg") {
+    fs.writeFileSync(dst, normalizeScoreDirections(fs.readFileSync(src, "utf8")));
+  } else {
+    fs.copyFileSync(src, dst);
+  }
   say(path.relative(ROOT, src) + " → " + path.relative(ROOT, dst));
 }
 
