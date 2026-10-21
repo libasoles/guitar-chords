@@ -15,6 +15,8 @@ const MEASURES = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'scripts'
 
 /* Cadenas de los archivos de origen: programa, transcriptor y marcas de la edicion. */
 const SOURCE_TRACES = [/MuseScore/i, /Marieh/i, /Copyleft/i, /\.mscz/i, /IMSLP/i];
+// El PDF si lleva la atribucion que exige CC BY-NC 4.0 (pie con enlaces); lo demas de la edicion no.
+const PDF_TRACES = SOURCE_TRACES.filter((trace) => !/Marieh|IMSLP/.test(trace.source));
 
 function assertWellFormed(xml) {
   const stack = [];
@@ -71,10 +73,15 @@ for (const piece of pieces) {
     const xml = fs.readFileSync(path.join(DOWNLOADS_DIR, piece.base + '.musicxml'), 'utf8');
     assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
     const text = pdf.toString('latin1');
-    for (const trace of SOURCE_TRACES) {
-      assert.doesNotMatch(text, trace, 'PDF: ' + trace);
-      assert.doesNotMatch(xml, trace, 'MusicXML: ' + trace);
-    }
+    for (const trace of PDF_TRACES) assert.doesNotMatch(text, trace, 'PDF: ' + trace);
+    for (const trace of SOURCE_TRACES) assert.doesNotMatch(xml, trace, 'MusicXML: ' + trace);
+    assert.match(text, /\(Con modificaciones a partir de\)/);
+    assert.match(text, /\(Marieh \\\(2020\\\)\)/);
+    assert.match(text, /\(CC BY-NC 4\.0\)/);
+    const uris = [...text.matchAll(/\/URI\s*\(((?:\\.|[^\\)])*)\)/g)]
+      .map((m) => m[1].replace(/\\(\d{3})/g, (_, octal) => String.fromCharCode(parseInt(octal, 8))));
+    assert.ok(uris.includes('https://creativecommons.org/licenses/by-nc/4.0/'), 'enlace a la licencia');
+    assert.ok(uris.some((uri) => uri.startsWith('https://imslp.org/')), 'enlace a la edicion de origen');
     const title = 'Lesson ' + piece.number;
     const info = text.match(/\/Title\s*\(((?:\\.|[^\\)])*)\)/);
     assert.ok(info, 'el PDF declara /Title');
