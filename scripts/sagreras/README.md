@@ -25,6 +25,17 @@ La TAB publicada es la digitación sugerida por el motor, no la de Marieh. Los d
 tocar con esos dedos); `transcribe.py` avisa por stderr de cualquier cifra que no encuentre nota. No se publican los PDF
 de la edición, las letras p i m a de la mano derecha ni los textos.
 
+## Control de la digitación contra el libro
+
+`compare_positions.py` compara las casillas (cuerda y traste) que propone el motor con las de la TAB impresa de la edición.
+Lo aprendido: el libro mantiene los acordes en posición baja y con cuerdas al aire (A-do♯-sol = 5-2-0, no 5-6-5), y el costo
+del motor solo medía la apertura de la mano. `tabify.local_cost` suma ahora 0,25 por traste pisado (53 → 18 casillas
+distintas de 3070; las que quedan son las lecciones 60, 73, 79 y 37, y la 33 no tiene TAB impresa). **Tras tocar el costo
+del motor o añadir una lección, corre `compare_positions.py`: el total no debe subir.** Otras trampas ya corregidas: un
+♯ de la primera nota no es una armadura (`pdf_notes.key_signature` exige las alturas canónicas), y en compases con varias
+voces de plica abajo los inicios se ajustan a la cuadrícula de duraciones (si no, un acorde queda entre dos pulsos).
+Los corchetes de tresillo se dibujan sobre el pentagrama (debajo chocan con la redonda del bajo) y no se copian a la TAB.
+
 ## Reproducir
 
 ```sh

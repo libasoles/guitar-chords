@@ -93,6 +93,25 @@ def read(path):
     return meta
 
 
+# Altura (en espacios bajo la linea superior, clave de sol) de cada alteracion de la armadura, en orden.
+SHARP_ORDER = [0, 1.5, -0.5, 1, 2.5, 0.5, 2]
+FLAT_ORDER = [2, 0.5, 2.5, 1, 3, 1.5, 3.5]
+
+
+def key_signature(accs, top, space):
+    """Las alteraciones iniciales que forman una armadura: cada una en su altura canonica. Una alteracion de la
+    primera nota (un do# antes del acorde) queda fuera aunque se imprima entre la clave y la cabeza."""
+    if not accs:
+        return []
+    order = SHARP_ORDER if accs[0][0] == 0xE262 else FLAT_ORDER
+    out = []
+    for g, y in zip(accs, order):
+        if g[0] != accs[0][0] or abs((g[2] - top) / space - y) > 0.3:
+            break
+        out.append(g)
+    return out
+
+
 def read_system(lines, glyph, stems, bars, thick, beams):
     top, bottom = lines[0], lines[-1]
     space = (bottom - top) / 4
@@ -107,6 +126,7 @@ def read_system(lines, glyph, stems, bars, thick, beams):
     key_accs = [g for g in on_staff if g[0] in ACCIDENTAL and clef_x < g[1] < min(first_note, time_x)]
     key = None
     if clef:
+        key_accs = key_signature(sorted(key_accs, key=lambda g: g[1]), top, space)
         n = len(key_accs)
         key = n if not n or key_accs[0][0] == 0xE262 else -n
     time = None

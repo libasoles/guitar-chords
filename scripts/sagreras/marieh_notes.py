@@ -3,7 +3,7 @@
 Reutiliza la lectura de geometria de carcassi-valses/pdf_notes.py. Diferencias con los PDF de MuseScore 4: el
 pentagrama es un solo trazo de 5 (o 6) lineas, y varias lecciones comparten pagina; cada sistema se asigna a la
 leccion cuya etiqueta «No.N» aparece antes que el (por pagina y altura). Los numeros de la TAB impresa dan un
-control independiente de las alturas (`tab_notes`).
+control independiente de las alturas (`tab_cells`).
 """
 import re
 import sys
@@ -153,7 +153,7 @@ def read_pdf(path=SOURCE):
             space = (lines[-1] - lines[0]) / 4
             for m in system['measures']:
                 m['tuplets'] = [(x, y) for x, y in threes if m['left'] <= x <= m['right'] and lines[0] - 9 * space <= y <= lines[-1] + 7 * space]
-            lesson = lessons.setdefault(current, {'fifths': None, 'time': None, 'measures': [], 'tab': []})
+            lesson = lessons.setdefault(current, {'fifths': None, 'time': None, 'measures': [], 'tab': [], 'cells': []})
             if system['key'] is not None and lesson['fifths'] is None:
                 lesson['fifths'] = system['key']
             symbol = [g for g in glyph if g[0] in (0xE08A, 0xE08B) and lines[0] - 1 <= g[2] <= lines[-1] + 6 * (lines[-1] - lines[0]) / 4]
@@ -165,12 +165,14 @@ def read_pdf(path=SOURCE):
                 m['fifths'] = system['key'] if system['key'] is not None else lesson['fifths']
             lesson['measures'].extend(system['measures'])
             if index < len(tabs):
-                lesson['tab'].extend(tab_notes(tabs[index], words, system['measures']))
+                cells = tab_cells(tabs[index], words, system['measures'])
+                lesson['cells'].extend(cells)
+                lesson['tab'].extend((x, OPEN_MIDI[string] + fret) for x, string, fret in cells)
     return lessons
 
 
-def tab_notes(lines, words, measures):
-    """Alturas MIDI segun los numeros de la TAB impresa que caen en este sistema (para cotejar)."""
+def tab_cells(lines, words, measures):
+    """Casillas (x, cuerda, traste) de los numeros de la TAB impresa que caen en este sistema; cuerda 0 = la 1."""
     top, bottom = lines[0], lines[-1]
     gap = (bottom - top) / 5
     left = min(m['left'] for m in measures) - 2 if measures else 0
@@ -180,6 +182,5 @@ def tab_notes(lines, words, measures):
             continue
         cy, cx = (w[1] + w[3]) / 2, (w[0] + w[2]) / 2
         if top - gap / 2 <= cy <= bottom + gap / 2 and cx > left:
-            string = round((cy - top) / gap)  # 0 = cuerda 1
-            out.append((cx, OPEN_MIDI[string] + int(w[4])))
+            out.append((cx, round((cy - top) / gap), int(w[4])))
     return out
