@@ -243,5 +243,24 @@ class AnnotationTests(unittest.TestCase):
         self.assertTrue(combos)
 
 
+class HeldFretsTests(unittest.TestCase):
+    def test_no_candidate_needs_a_fifth_fret_when_another_exists(self):
+        from unittest import mock
+        chords = ([68, 66, 64, 63, 61], [71, 68, 66, 63, 59], [67, 63, 60, 56, 52], [70, 66, 63, 59, 56, 52])
+        for midis in chords:
+            with mock.patch.object(tabify, "MAX_HELD_FRETS", 99):
+                raw = tabify.candidates(midis, OPENS)
+            kept = tabify.candidates(midis, OPENS)
+            frets = lambda combo: len({f for _, f in combo if f > 0})
+            if any(frets(c) <= 4 for c in raw):
+                self.assertTrue(kept and all(frets(c) <= 4 for c in kept), midis)
+            else:
+                self.assertEqual(kept, raw)  # nothing better: never drop the note
+
+    def test_the_filter_only_removes_never_adds(self):
+        raw_midis = [64, 59, 55]
+        self.assertTrue(tabify.candidates(raw_midis, OPENS))
+
+
 if __name__ == "__main__":
     unittest.main()

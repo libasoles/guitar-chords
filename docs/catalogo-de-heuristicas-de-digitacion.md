@@ -23,6 +23,7 @@ con la imagen antes de citar páginas. Arpegios y plaqués tienen su propio docu
 | F4 | Extensión: un dedo puede estirarse un traste más allá de su posición. | Carcassi (posiciones) | **Implementada solo con anotaciones**: `fingering.EXTENSION = 1` en `fingers_possible`. Sin dedos escritos no se aplica. |
 | F5 | Posición = traste que pisa el dedo 1 (dedo 1 en el traste 1 = posición I); el dedo `d` en el traste `f` implica la posición `f − (d−1)`. | Carcassi, «The Positions» | **Implementada con anotaciones**: `fingering.fingers_possible`. |
 | F6 | Cejilla: el dedo 1 pisa dos o más cuerdas en un mismo traste (pequeña, 2–3 cuerdas; grande, las 6). Aguado: *ceja*. | Carcassi, «The Barrer»; Aguado §138, §149 | **Parcial**: `fingers_possible` admite el mismo dedo 1 en el mismo traste; no hay costo propio de cejilla ni la genera el motor. |
+| F8 | Un dedo por traste: un acorde que obliga a sostener a la vez más de cuatro trastes distintos (la cejilla cuenta como uno) no se puede tocar. | Física (cuatro dedos) | **Implementada**: `tabify.MAX_HELD_FRETS = 4` en `tabify.candidates`; si ninguna combinación cumple, se conserva la nota (nunca se descarta). Comprobado que no cambia la TAB de ninguna de las 148 fuentes de las colecciones. |
 | F7 | Mano derecha: pulgar en los bajos (cuerdas 6–4), índice, medio y anular en las tres agudas. | Carcassi, «Manner of Touching the Strings» | **No implementada.** Hoy el motor ignora la mano derecha (`note_hints` descarta `p i m a`). |
 
 ## 2. Costos de la literatura (modelo de camino mínimo)
@@ -66,7 +67,7 @@ Un MusicXML con `<fingering>`, `<string>` o `<fret>` limita dónde puede ir una 
 | N5 | Las posiciones implícitas (`traste − (dedo−1)`) no difieren en más de una extensión. | **Implementada** (`EXTENSION = 1`). |
 | N6 | Si la anotación contradice la altura o no deja ninguna combinación, **gana la altura** y la anotación se ignora para esa columna. | **Implementada**: una nota nunca se pierde por una anotación mal leída. |
 | N7 | Continuidad de la posición entre columnas anotadas. | **No implementada.** |
-| N8 | Cuatro trastes distintos con solo tres dedos, salvo cejilla. | **No implementada.** |
+| N8 | Más trastes distintos que dedos, salvo cejilla. | **Implementada**: con dedos anotados la cubre N3 (cinco trastes obligan a repetir dedo); sin anotaciones, F8. |
 | N9 | Mismo dedo en dos notas simultáneas sostenidas (Al Kasimi 2007, piano). | **No implementada.** |
 | N10 | Marcas de posición escritas («II», «C. V») como centro de la mano. | **No implementada.** |
 | N11 | Dedos de la mano derecha (`p i m a`) para fijar las cuerdas de un arpegio. | **No implementada** (ver F7). |
@@ -85,7 +86,7 @@ Se aplican solo a los compases que `fingering.detect_arpeggios` marca (o a todos
 | A3 | **Economía de dedos**: dentro de un compás cada altura conserva una casilla, solo si no rompe A1. | Carcassi, Aguado, Heijink y Meulenbroek (segmentos ya reclutados) | **Implementada**: `_one_cell_per_pitch`, con `economy=True`. |
 | A4 | Un compás que mezcla cuerdas al aire con notas de los trastes 6 a 11 se digita como **forma de acorde en posición** (como una cejilla), sin cuerdas al aire; el traste 12 se excluye porque son armónicos. | Pesos propios, observados en los preludios | **Implementada**: `open_reach = 6` en `avoid_repeated_strings`. |
 | A5 | Las notas sueltas de un arpegio solo usan trastes hasta el 9. | Pesos propios | **Implementada**: `max_fret = 9` en `avoid_repeated_strings`. |
-| A6 | Un arpegio usa **conjuntos de cuerdas contiguas** (pulgar en 6–4; índice, medio y anular en 3–2–1). | Carcassi, arpegios p-i-m-a | **No implementada** (sin costo por salto de cuerda). |
+| A6 | Un arpegio usa **conjuntos de cuerdas contiguas** (pulgar en 6–4; índice, medio y anular en 3–2–1). | Carcassi, arpegios p-i-m-a | **Probada y descartada por ahora**: un costo de 1,0 por cuerda saltada solo bajó los saltos de 577 a 575 en los 16 preludios y subió el movimiento de mano de 1141 a 1159 (preludio 2: 69 a 87). Muchos saltos son intencionales (el pulgar salta entre bajos), así que «contigua» no es la métrica. Pendiente hasta modelar la mano derecha (F7). |
 | A7 | **Melodía en cuerdas agudas, bajos en graves.** | Carcassi, «Manner of Touching the Strings» | **No implementada.** |
 | A8 | No cambiar de posición dentro de un compás de arpegio. | Heijink y Meulenbroek (el reposicionamiento pesa más en la dificultad) | **Parcial**: lo cubre el costo de movimiento de la mano (C2), sin refuerzo propio. |
 
@@ -96,6 +97,8 @@ saltos. Una melodía por grados conjuntos o una escala no se marca, porque en el
 normal.
 
 ## 6. Lo que falta, por orden de utilidad probable
+
+Las pendientes tienen su ticket en GitHub («Heurísticas de digitación pendientes»).
 
 1. `lift_cost`: costo por levantar un dedo cuya nota aún suena (M2, M3, M4). Requiere llevar la duración de cada nota al
    estado del Viterbi.

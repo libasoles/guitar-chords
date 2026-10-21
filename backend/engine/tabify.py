@@ -42,6 +42,7 @@ STANDARD_TUNING = "E2,A2,D3,G3,B3,E4"  # string 6 -> string 1
 DROP_D_TUNING = "D2,A2,D3,G3,B3,E4"
 MAX_FRET = 19
 MAX_SPAN = 4  # frets the hand covers without stretching
+MAX_HELD_FRETS = 4  # distinct frets pressed at once: one per finger
 CANDIDATES_PER_COLUMN = 40
 GUITAR_LOWEST = 38  # D2, the 6th string in Drop D
 # Share of notes below the written guitar range that marks a score as already in sound.
@@ -304,6 +305,9 @@ def candidates(midis, opens, hints=None):
         strings = [s for s, _ in combo]
         if len(set(strings)) == len(strings):
             out.append(combo)
+    # One finger per fret (a barre counts as one): a chord that needs a fifth fret held at once cannot be played.
+    # Kept as a fallback when nothing else fits, so a note is never dropped for it.
+    out = [combo for combo in out if len({f for _, f in combo if f > 0}) <= MAX_HELD_FRETS] or out
     fingers = [hints.get(m, {}).get("finger") for m in midis]
     if any(d for d in fingers):
         playable = [combo for combo in out if fingering.fingers_possible(combo, fingers)]
