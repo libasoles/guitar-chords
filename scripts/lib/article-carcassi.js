@@ -10,6 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const { fullForm, chordObject, chordCard, CHORD_CARD_LOADER } = require('./chord-forms');
 const { PREVIEW_DIR } = require('./article-carcassi-preludes');
+const { normalizeScoreDirections } = require('./score-svg');
 
 const ARTICLE_DIR = path.join(__dirname, '..', '..', 'src', 'site', 'articles', 'carcassi');
 const ASSETS_URL = '/assets/articles/carcassi/';
@@ -51,7 +52,7 @@ function escapeAttr(text) {
 /* El SVG de Verovio sin saltos entre etiquetas y sin tamano fijo: se escala al
    ancho de la tarjeta con su viewBox. */
 function inlineScore(svg, alt) {
-  return svg
+  return normalizeScoreDirections(svg)
     .trim()
     .replace(/>\s+</g, '><')
     .replace(/^<svg\b([^>]*)>/, function (_, attrs) {
