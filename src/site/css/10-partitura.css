@@ -504,8 +504,8 @@ html.part-modal-open body { overflow: hidden; }
   height: 72px;
   background: url("guitar-player-cubist-left-head.svg") center / contain
     no-repeat;
-  pointer-events: none;
 }
+.part-modal-logo:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 .part-modal-close svg { width: 2rem; height: 2rem; }
 .part-modal-close:hover { background: #0000000f; }
 .part-modal-close:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }

@@ -181,8 +181,10 @@
       '<path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>';
     close.addEventListener('click', leaveModal);
     resultEl.appendChild(close);
-    var logo = el('span', 'part-modal-logo');
-    logo.setAttribute('aria-hidden', 'true');
+    var brand = document.querySelector('.site-header .brand');
+    var logo = el('a', 'part-modal-logo');
+    logo.href = brand.href;
+    logo.setAttribute('aria-label', brand.textContent.trim());
     resultEl.appendChild(logo);
     modalKeydown = function (event) {
       if (event.key === 'Escape' && !event.defaultPrevented) leaveModal();
