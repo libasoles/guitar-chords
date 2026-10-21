@@ -496,6 +496,8 @@ html.part-modal-open body { overflow: hidden; }
   cursor: pointer;
 }
 .part-modal-logo {
+  border-bottom: none;
+  text-decoration: none;
   position: fixed;
   top: 0.4rem;
   left: max(1rem, 2vw);
