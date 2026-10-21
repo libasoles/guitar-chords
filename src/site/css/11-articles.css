@@ -753,3 +753,15 @@ body:has(.modal-full:popover-open) {
 .arpeggio-results .article-tab {
   width: 100%;
 }
+
+/* TEMP: descarga de partituras deshabilitada en articulos. Para revertir, borrar este bloque
+   (o `git revert` del commit "Deshabilita temporalmente la descarga de partituras en articulos"). */
+.example-download,
+.modal-download,
+.prelude-pdf-link::after {
+  display: none;
+}
+.example-card {
+  pointer-events: none;
+  cursor: default;
+}
