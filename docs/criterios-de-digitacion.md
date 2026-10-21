@@ -1,5 +1,8 @@
 # Criterios de digitación: dónde tocar cada nota
 
+> Este documento es referencia de la investigación. El catálogo con el estado de cada heurística en el código es
+> `docs/catalogo-de-heuristicas-de-digitacion.md`; **la verdad está en `backend/engine/` (`tabify.py`, `fingering.py`) y sus pruebas.**
+
 Investigación para la issue #42 (heurísticas de arpegio / melodía / acorde en `tabify`). «Casilla» = celda (cuerda, traste) del mango. Cada afirmación lleva su fuente; lo que no pude comprobar en la fuente primaria está marcado **[no verificado]**. Cómo se leyó cada fuente, al final, en «Fuentes».
 
 ## 1. Restricciones físicas
