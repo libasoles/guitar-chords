@@ -66,7 +66,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -118,7 +118,7 @@
           <technical>
             <fingering alternate="no" substitution="no">4</fingering>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -192,7 +192,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -241,7 +241,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -345,7 +345,7 @@
           <technical>
             <string>3</string><fret>2</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -398,7 +398,7 @@
           <technical>
             <string>1</string><fret>3</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -481,7 +481,7 @@
           <technical>
             <string>3</string><fret>2</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -534,7 +534,7 @@
           <technical>
             <string>1</string><fret>3</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -653,7 +653,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -707,7 +707,7 @@
           <technical>
             <fingering alternate="no" substitution="no">2</fingering>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -781,7 +781,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -832,7 +832,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -936,7 +936,7 @@
           <technical>
             <string>3</string><fret>0</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -993,7 +993,7 @@
           <technical>
             <string>1</string><fret>2</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -1076,7 +1076,7 @@
           <technical>
             <string>3</string><fret>0</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -1133,7 +1133,7 @@
           <technical>
             <string>1</string><fret>2</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -1252,7 +1252,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -1305,7 +1305,7 @@
           <technical>
             <fingering alternate="no" substitution="no">4</fingering>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -1384,7 +1384,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -1434,7 +1434,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -1538,7 +1538,7 @@
           <technical>
             <string>3</string><fret>2</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -1593,7 +1593,7 @@
           <technical>
             <string>1</string><fret>5</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -1676,7 +1676,7 @@
           <technical>
             <string>3</string><fret>2</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -1731,7 +1731,7 @@
           <technical>
             <string>1</string><fret>5</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -1850,7 +1850,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -1899,7 +1899,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -1973,7 +1973,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2022,7 +2022,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2126,7 +2126,7 @@
           <technical>
             <string>3</string><fret>2</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2179,7 +2179,7 @@
           <technical>
             <string>1</string><fret>3</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2262,7 +2262,7 @@
           <technical>
             <string>3</string><fret>2</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2315,7 +2315,7 @@
           <technical>
             <string>1</string><fret>3</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2434,7 +2434,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2486,7 +2486,7 @@
           <technical>
             <fingering alternate="no" substitution="no">4</fingering>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2565,7 +2565,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2614,7 +2614,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2718,7 +2718,7 @@
           <technical>
             <string>3</string><fret>2</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2771,7 +2771,7 @@
           <technical>
             <string>1</string><fret>3</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2854,7 +2854,7 @@
           <technical>
             <string>3</string><fret>2</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2907,7 +2907,7 @@
           <technical>
             <string>1</string><fret>3</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -3026,7 +3026,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -3079,7 +3079,7 @@
           <technical>
             <fingering alternate="no" substitution="no">2</fingering>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -3152,7 +3152,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -3202,7 +3202,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -3305,7 +3305,7 @@
           <technical>
             <string>3</string><fret>0</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -3360,7 +3360,7 @@
           <technical>
             <string>1</string><fret>2</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -3441,7 +3441,7 @@
           <technical>
             <string>3</string><fret>0</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -3496,7 +3496,7 @@
           <technical>
             <string>1</string><fret>2</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -3617,7 +3617,7 @@
           <technical>
             <fingering alternate="no" substitution="no">3</fingering>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -3672,7 +3672,7 @@
           <technical>
             <fingering alternate="no" substitution="no">2</fingering>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -3749,7 +3749,7 @@
           <technical>
             <fingering alternate="no" substitution="no">1</fingering>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -3802,7 +3802,7 @@
           <technical>
             <fingering alternate="no" substitution="no">2</fingering>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -3907,7 +3907,7 @@
           <technical>
             <string>4</string><fret>4</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -3960,7 +3960,7 @@
           <technical>
             <string>2</string><fret>3</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -4043,7 +4043,7 @@
           <technical>
             <string>4</string><fret>2</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -4098,7 +4098,7 @@
           <technical>
             <string>2</string><fret>2</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -4215,7 +4215,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -4265,7 +4265,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -4394,7 +4394,7 @@
           <technical>
             <string>3</string><fret>2</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -4449,7 +4449,7 @@
           <technical>
             <string>2</string><fret>3</fret>
           </technical>
-          <tuplet bracket="yes" number="1" type="start">
+          <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
               <tuplet-type>eighth</tuplet-type>

@@ -223,17 +223,17 @@ def name_of_published(number):
 
 SANS = "Helvetica, Arial, DejaVu Sans, sans-serif"
 STAFF = re.compile(r'<g id="[^"]*" class="staff">')
-TUPLET_NUM = re.compile(r'<g id="[^"]*" class="tupletNum">.*?</g>', re.S)
+TUPLET_MARKS = re.compile(r'<g id="[^"]*" class="tuplet(?:Num|Bracket)">.*?</g>', re.S)
 
 
 def drop_tab_tuplets(svg):
-    """The tab staff copies the notation's tuplets; the numbers belong only above the notation (the 2nd staff of
-    every measure is the tab)."""
+    """The tab staff copies the notation's tuplets; the numbers and brackets belong only to the notation (the 2nd
+    staff of every measure is the tab)."""
     starts = [m.start() for m in STAFF.finditer(svg)] + [len(svg)]
     out, last = [], 0
     for i, (a, b) in enumerate(zip(starts, starts[1:])):
         out.append(svg[last:a])
-        out.append(TUPLET_NUM.sub("", svg[a:b]) if i % 2 == 1 else svg[a:b])
+        out.append(TUPLET_MARKS.sub("", svg[a:b]) if i % 2 == 1 else svg[a:b])
         last = b
     return "".join(out) + svg[last:]
 

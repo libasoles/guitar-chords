@@ -6,6 +6,7 @@ Las notas se leen de la geometria del PDF (ver pdf_notes.py); no se copia nada d
 MusicXML lleva solo alturas y duraciones, y la TAB la propone el motor (ver build.py). Alturas escritas
 (clave de sol), como en los preludios. Un tiempo = una semicorchea.
 """
+import math
 import os
 import re
 import sys
@@ -81,9 +82,12 @@ def convert_measure(m, fifths, full, scale=1):
         ref = next((name for name in ('up', 'down') if totals[name] == full), None)
         if ref:
             axis = sorted((i['x'], i['onset']) for i in items if i['dir'] == ref)
+            # los ataques caen en la cuadricula de las duraciones de la voz (si no, un acorde sale entre dos pulsos)
+            grid = math.gcd(*[i['dur'] for i in items if i['dir'] != ref and i['dur'] > 0] or [1])
             for i in items:
                 if i['dir'] != ref:
-                    i['onset'] = max(0, min(full - 1, round(interpolate(axis, i['x']))))
+                    onset = round(interpolate(axis, i['x']) / grid) * grid
+                    i['onset'] = max(0, min(full - grid, onset))
     items = [i for i in items if i['pitch']]
     lanes = {'up': [], 'down': []}
     for name in ('up', 'down'):

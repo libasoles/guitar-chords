@@ -219,7 +219,7 @@ def tuplet_marks(xml, role):
     xml = xml.replace(marks, MODIFICATION + marks, 1)
     if not role:
         return xml
-    tag = f'<tuplet type="{role}"/>'
+    tag = f'<tuplet type="{role}" placement="above"/>'  # debajo chocaria con la redonda del bajo
     if '<notations>' in xml:
         return xml.replace('<notations>', '<notations>' + tag, 1)
     return xml.replace('</note>', f'<notations>{tag}</notations></note>', 1)

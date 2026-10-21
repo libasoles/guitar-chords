@@ -322,6 +322,10 @@ def local_cost(combo):
     span = max(fretted) - min(fretted)
     cost = span + 10 * max(0, span - MAX_SPAN)
     cost += 0.3 * min(fretted) + 0.5 * max(0, max(fretted) - 12)
+    # Every pressed fret counts, so an open string in the chord beats a compact shape higher up the neck (A-C#-G
+    # as 5-2-0, not 5-6-5): the books keep chords in low position. Measured against Sagreras' printed tab
+    # (scripts/sagreras/compare_positions.py): 53 -> 18 differing cells of 3070, none worse.
+    cost += 0.25 * sum(fretted)
     return cost
 
 
