@@ -27,6 +27,11 @@ mano derecha (texto de 8 pt de un solo carácter) se leen igual y van como un se
 (`transcribe_lib.note_xml` admite varios separados por `|`); el motor las ignora al digitar. No se publican los PDF de la
 edición ni sus textos.
 
+Atribución: la licencia (CC BY-NC 4.0) exige acreditar a Marieh e indicar los cambios en cada copia, así que `build.py`
+(`stamp_footer`) pone en cada página del PDF, abajo a la izquierda, en Helvetica gris: «Con modificaciones a partir de» /
+«Marieh (2020) · CC BY-NC 4.0», con enlaces a la edición en IMSLP y a la licencia. El detalle de los cambios está en la
+página del artículo.
+
 ## Control de la digitación contra el libro
 
 `compare_positions.py` compara las casillas (cuerda y traste) que propone el motor con las de la TAB impresa de la edición.
