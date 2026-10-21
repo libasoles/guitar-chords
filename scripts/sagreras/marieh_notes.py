@@ -107,7 +107,10 @@ def read_pdf(path=SOURCE):
                     current = number
             if current is None or not 1 <= current <= 86:
                 continue
-            system = P.read_system(lines, glyph, stems, bars, thick, beams)
+            space = (lines[-1] - lines[0]) / 4
+            # una barra que cruza notacion y TAB cuenta como barra de este pentagrama
+            clip = lambda rs: [pymupdf.Rect(r.x0, r.y0, r.x1, lines[-1]) if abs(r.y0 - lines[0]) < 0.6 and r.y1 > lines[-1] + 3 * space else r for r in rs]  # noqa: E731
+            system = P.read_system(lines, glyph, stems, clip(bars), clip(thick), beams)
             P.mark_ties(system, curves, lines)
             P.mark_texts(system, words, lines)
             space = (lines[-1] - lines[0]) / 4

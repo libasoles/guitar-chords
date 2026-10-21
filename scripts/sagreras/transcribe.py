@@ -81,6 +81,25 @@ def fixed_groups(m):
 P.stem_groups = fixed_groups
 
 
+ENHARMONIC = {'E#': ('F', 0), 'B#': ('C', 1), 'Fb': ('E', 0), 'Cb': ('B', -1)}
+
+
+def enharmonic(pitch):
+    """Mi# -> fa, si# -> do, fa♭ -> mi, do♭ -> si: el motor no digita esas grafias."""
+    out = []
+    for p in pitch.split('+'):
+        if p[:2] in ENHARMONIC:
+            step, shift = ENHARMONIC[p[:2]]
+            p = f'{step}{int(p[2:]) + shift}'
+        out.append(p)
+    return '+'.join(out)
+
+
+def simplify(data):
+    for voice in data['voices']:
+        voice['events'] = [(o, d, enharmonic(p), f, g, {enharmonic(k): v for k, v in t.items()}) for o, d, p, f, g, t in voice['events']]
+
+
 def take_bass(m, full):
     """Tres voces: la redonda sin plica (bajo) pasa a una tercera voz; el resto se lee como siempre."""
     groups = _original_groups(m)
@@ -112,6 +131,7 @@ def lesson_measures(lesson):
         if m['rests'] and any(r['dur'] == 16 for r in m['rests']) and m['items']:
             m['rests'] = [r for r in m['rests'] if r['dur'] != 16]  # silencio de compas completo bajo otra voz
         data = V.convert_measure(m, m['fifths'], full * SCALE, SCALE)
+        simplify(data)
         if bass:
             data['voices'].append({'stem': 'down', 'events': [(0, full * SCALE, bass, None, [], {})]})
         data.update(fifths=m['fifths'], repeat_start=m['repeat_start'], repeat_end=m['repeat_end'], fine=m.get('fine'),
@@ -281,6 +301,8 @@ def to_xml(number, lesson, measures):
 
 # Lecciones cuya TAB impresa viene vacia: no hay control contra la TAB, se revisan a ojo contra el pentagrama.
 NO_PRINTED_TAB = {33}
+# Lecciones que pasan el control pero el motor no puede digitar (notas descartadas): quedan fuera hasta resolverlo.
+ENGINE_FAILS = {71}
 
 
 def record_measures(n, count):
@@ -303,10 +325,14 @@ def run(numbers, write):
         missing, extra = ([], []) if n in NO_PRINTED_TAB and not lesson['tab'] else compare_tab(lesson, measures)
         full = lesson['time'][0] * 16 // lesson['time'][1] * SCALE
         odd = [i + 1 for i, d in enumerate(measures) if d['length'] != full]
+        if odd and set(odd) <= {1, len(measures)} and measures[0]['length'] + measures[-1]['length'] == full:
+            odd = []  # anacrusa y compas final complementarios
+        if odd == [1] and measures[0]['length'] < full:
+            odd = []  # anacrusa sin compas complementario al final
         status = 'OK ' if not missing and not extra and not odd else 'REVISAR'
         print(f"{n:2d} {status} {lesson['time']} fifths={lesson['fifths']} compases={len(measures)} "
               f"cortos/largos={odd} notacion-de-mas={missing} tab-de-mas={extra}")
-        if write and status == 'OK ':
+        if write and status == 'OK ' and n not in ENGINE_FAILS:
             SOURCES.mkdir(exist_ok=True)
             (SOURCES / f'{n:02d}.musicxml').write_text(to_xml(n, lesson, measures), encoding='utf-8')
             record_measures(n, len(measures))
