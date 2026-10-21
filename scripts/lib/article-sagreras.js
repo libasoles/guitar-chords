@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const { modal, CLOSE_ICON } = require('./modal');
 const { pagePath } = require('./slugs');
+const { scoreNavigation } = require('./score-navigation');
 const { escapeAttr, inlineScore, glyphDefs, DOWNLOAD_ICON } = require('./score-svg');
 const { editorMarks } = require('./editor-marks');
 
@@ -65,17 +66,6 @@ function pageFiles(piece) {
     : [];
 }
 
-const CHEVRON_LEFT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>';
-const CHEVRON_RIGHT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
-
-/* Las lecciones son progresivas: los chevrons del pie pasan a la anterior / siguiente, y quedan deshabilitados en los extremos. */
-function stepButton(target, icon, label, locale) {
-  const attrs = target
-    ? 'popovertarget="sagreras-score-' + target.number + '" popovertargetaction="show" aria-label="' + escapeAttr(label + ': ' + pieceName(target, locale)) + '"'
-    : 'disabled aria-label="' + escapeAttr(label) + '"';
-  return '<button type="button" class="modal-step" ' + attrs + '>' + icon + '</button>';
-}
-
 function fullScore(piece, name, href, strings, pieces, locale) {
   const pages = pageFiles(piece).map((file, i, all) => {
     const head = fs.readFileSync(path.join(FULL_DIR, file), 'utf8').slice(0, 300);
@@ -83,11 +73,9 @@ function fullScore(piece, name, href, strings, pieces, locale) {
     return '<img class="modal-page" src="' + ASSETS_URL + 'full/' + file + '" width="' + width + '" height="' + height +
       '" loading="lazy" decoding="async" alt="' + escapeAttr(name + (all.length > 1 ? ' (' + (i + 1) + '/' + all.length + ')' : '')) + '">';
   });
-  const index = pieces.indexOf(piece);
   return '<div class="modal-pages">' + editorMarks('sagreras', piece.number, strings) + pages.join('') + '</div>' +
     '<div class="modal-footer"><div class="modal-keys">' +
-    stepButton(pieces[index - 1], CHEVRON_LEFT, strings.artSagrerasPrev, locale) +
-    stepButton(pieces[index + 1], CHEVRON_RIGHT, strings.artSagrerasNext, locale) + '</div><a class="modal-download" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' +
+    scoreNavigation(pieces, piece, 'sagreras-score-', pieceName, locale, { mobile: true }) + '</div><a class="modal-download" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' +
     DOWNLOAD_ICON + '<span>' + strings.artPreludesDownload + '</span></a></div>';
 }
 

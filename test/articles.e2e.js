@@ -532,6 +532,57 @@ const PDFS = [
       }
     }
 
+    // All author collections share lateral desktop navigation, including sparse publication lists.
+    for (const slug of ['articulo-preludios-carcassi', 'articulo-preludios-santisteban',
+      'articulo-valses-carcassi', 'articulo-piezas-progresivas-carcassi',
+      'articulo-partituras-aguado', 'articulo-lecciones-sagreras']) {
+      for (const locale of ['es', 'en']) {
+        await page.setViewportSize({ width: 1280, height: 800 });
+        await page.goto(base + pagePath(slug, locale));
+        const ids = await page.locator('.prelude-card .modal-full').evaluateAll((els) => els.map((el) => el.id));
+        await page.locator('.prelude-card').first().click();
+        const modal = page.locator('.modal-full:popover-open');
+        const steps = modal.locator('.modal-step');
+        assert.equal(await steps.first().isDisabled(), true);
+        for (const width of [800, 1280, 2560]) {
+          await page.setViewportSize({ width, height: 800 });
+          const measure = () => modal.evaluate((el) => {
+            const [left, right] = [...el.querySelectorAll('.modal-step')].map((b) => b.getBoundingClientRect());
+            const score = el.querySelector('.modal-pages').getBoundingClientRect();
+            return { left: left.x, right: right.right, y: left.y + left.height / 2,
+              gapLeft: score.left - left.right, gapRight: right.left - score.right,
+              overflow: el.scrollWidth - el.clientWidth };
+          });
+          const before = await measure();
+          assert.ok(before.left >= 0 && before.right <= width, slug + ': buttons inside viewport');
+          assert.ok(Math.abs(before.y - 400) <= 1, slug + ': vertically centered');
+          assert.ok(before.gapLeft >= 0 && before.gapLeft <= 100, slug + ': left distance capped');
+          assert.ok(before.gapRight >= 0 && before.gapRight <= 100, slug + ': right distance capped');
+          assert.ok(before.overflow <= 0, slug + ': no horizontal overflow');
+          await modal.evaluate((el) => { el.scrollTop = 250; });
+          assert.equal((await measure()).y, before.y, slug + ': navigation stays fixed while scrolling');
+          await modal.evaluate((el) => { el.scrollTop = 0; });
+        }
+        await page.setViewportSize({ width: 1280, height: 800 });
+        if (ids.length > 1) {
+          await steps.last().click();
+          assert.equal(await modal.count(), 1);
+          assert.equal(await modal.getAttribute('id'), ids[1]);
+          await page.waitForFunction((id) => location.hash === '#' + id, ids[1]);
+          await steps.first().click();
+          assert.equal(await modal.getAttribute('id'), ids[0]);
+          await modal.locator('.modal-close').click();
+          await page.locator('.prelude-card').last().click();
+          assert.equal(await steps.last().isDisabled(), true);
+        }
+        await modal.locator('.modal-close').click();
+        await page.setViewportSize({ width: 375, height: 800 });
+        await page.evaluate((id) => document.getElementById(id).showPopover(), ids[0]);
+        assert.equal(await steps.first().isVisible(), slug === 'articulo-lecciones-sagreras');
+        await page.keyboard.press('Escape');
+      }
+    }
+
     // The home pages link to the section only from the hamburger menu.
     for (const file of ['index.html', 'en.html']) {
       const html = fs.readFileSync(path.join(DIST, file), 'utf8');

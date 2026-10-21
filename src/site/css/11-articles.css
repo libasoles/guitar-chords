@@ -338,7 +338,7 @@
   max-height: none;
   margin: 0;
   box-sizing: border-box;
-  padding: 5.5rem max(1.5rem, 3vw) 0;
+  padding: 5.5rem var(--modal-gutter, max(1.5rem, 3vw)) 0;
   border: 0;
   background: var(--paper);
   color: var(--ink);
@@ -424,8 +424,8 @@
   z-index: 2;
   display: flex;
   justify-content: flex-end;
-  margin: auto calc(-1 * max(1.5rem, 3vw)) 0;
-  padding: 0.8rem max(1.5rem, 3vw);
+  margin: auto calc(-1 * var(--modal-gutter, max(1.5rem, 3vw))) 0;
+  padding: 0.8rem var(--modal-gutter, max(1.5rem, 3vw));
   background: var(--paper);
   border-top: 1px solid var(--rule);
 }
@@ -460,6 +460,35 @@
 .modal-key-label {
   color: #767676;
   font-weight: 400;
+}
+/* Desktop navigation stays beside the score while scrolling. Its maximum width
+   limits the distance from the 90rem score on ultrawide screens. */
+.modal-navigation {
+  display: none;
+}
+.modal-navigation-mobile {
+  display: flex;
+  gap: 0.6rem;
+}
+@media (min-width: 48.01rem) {
+  .modal-full:has(.modal-navigation) {
+    --modal-gutter: max(4.5rem, 3vw);
+  }
+  .modal-navigation {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% - 2rem);
+    max-width: 102rem;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+  .modal-navigation .modal-step {
+    pointer-events: auto;
+    background: var(--paper);
+  }
 }
 .modal-step {
   width: 2.8rem;

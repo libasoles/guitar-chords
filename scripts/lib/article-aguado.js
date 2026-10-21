@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const { modal, CLOSE_ICON } = require('./modal');
 const { pagePath } = require('./slugs');
+const { scoreNavigation } = require('./score-navigation');
 const { escapeAttr, inlineScore, glyphDefs, DOWNLOAD_ICON } = require('./score-svg');
 
 const ROOT = path.join(__dirname, '..', '..');
@@ -51,7 +52,7 @@ function publishedPieces() {
     .sort((a, b) => a.number - b.number);
 }
 
-function card(piece, locale, strings, sharedGlyphs) {
+function card(piece, locale, strings, sharedGlyphs, pieces) {
   const name = pieceName(piece, locale);
   const svg = fs.readFileSync(path.join(PREVIEW_DIR, previewFile(piece.number)), 'utf8');
   const id = 'aguado-score-' + piece.number;
@@ -65,7 +66,7 @@ function card(piece, locale, strings, sharedGlyphs) {
       '<a class="prelude-pdf-link" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' + name + '</a></h2>' +
     inlineScore(svg, strings.artPreludesAltPrefix + ' ' + name, sharedGlyphs) +
     download +
-    modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', closeContent: CLOSE_ICON, locale, strings, logoHref: pagePath('articulos', locale), content: fullScore(piece, name, href, strings) }) +
+    modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', closeContent: CLOSE_ICON, locale, strings, logoHref: pagePath('articulos', locale), content: fullScore(piece, name, href, strings, pieces, locale) }) +
     '</article>';
 }
 
@@ -79,7 +80,7 @@ function pageFiles(piece) {
     : [];
 }
 
-function fullScore(piece, name, href, strings) {
+function fullScore(piece, name, href, strings, pieces, locale) {
   const pages = pageFiles(piece).map((file, i, all) => {
     const head = fs.readFileSync(path.join(FULL_DIR, file), 'utf8').slice(0, 300);
     const [, width, height] = head.match(/<svg width="(\d+)(?:\.\d+)?px" height="(\d+)(?:\.\d+)?px"/);
@@ -87,14 +88,15 @@ function fullScore(piece, name, href, strings) {
       '" loading="lazy" decoding="async" alt="' + escapeAttr(name + (all.length > 1 ? ' (' + (i + 1) + '/' + all.length + ')' : '')) + '">';
   });
   return '<div class="modal-pages">' + pages.join('') + '</div>' +
-    '<div class="modal-footer"><div class="modal-keys"></div><a class="modal-download" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' +
+    '<div class="modal-footer">' + scoreNavigation(pieces, piece, 'aguado-score-', pieceName, locale) + '<div class="modal-keys"></div><a class="modal-download" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' +
     DOWNLOAD_ICON + '<span>' + strings.artPreludesDownload + '</span></a></div>';
 }
 
 function renderBody(locale, strings) {
   const prose = fs.readFileSync(path.join(PREVIEW_DIR, 'body.' + locale + '.html'), 'utf8');
   const sharedGlyphs = new Map();
-  const cards = publishedPieces().map((p) => card(p, locale, strings, sharedGlyphs)).join('');
+  const pieces = publishedPieces();
+  const cards = pieces.map((p) => card(p, locale, strings, sharedGlyphs, pieces)).join('');
   const grid = glyphDefs(sharedGlyphs) + '<div class="prelude-grid">' + cards + '</div>';
   return prose.split('%%PIECES%%').join(grid);
 }

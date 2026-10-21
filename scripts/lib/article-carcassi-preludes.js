@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const { modal, CLOSE_ICON } = require('./modal');
 const { pagePath } = require('./slugs');
+const { scoreNavigation } = require('./score-navigation');
 const { escapeAttr, inlineScore, glyphDefs, DOWNLOAD_ICON } = require('./score-svg');
 
 const ROOT = path.join(__dirname, '..', '..');
@@ -116,7 +117,7 @@ function createEdition(edition) {
       keyButton(relative, relative && relative.mode === 'Minor' ? strings.artPreludesRelativeMinor : strings.artPreludesRelativeMajor) +
       keyButton(dominantOf(prelude, all), strings.artPreludesDominant) + '</div>';
     return '<div class="modal-pages">' + pages.join('') + '</div>' +
-      '<div class="modal-footer">' + keyButtons + '<a class="modal-download" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' +
+      '<div class="modal-footer">' + scoreNavigation(all, prelude, 'prelude-score-', preludeName, locale) + keyButtons + '<a class="modal-download" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' +
       DOWNLOAD_ICON + '<span>' + strings.artPreludesDownload + '</span></a></div>';
   }
 
