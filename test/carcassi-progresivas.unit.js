@@ -11,7 +11,7 @@ const path = require('path');
 const catalog = require('../scripts/lib/article-carcassi-progressive');
 
 /* Compases de cada pieza, contados sobre la partitura del libro; las anacrusas de cada seccion cuentan como compas. */
-const MEASURES = { 1: 18, 2: 44, 3: 27, 4: 27, 5: 35, 6: 35, 7: 24, 8: 27, 9: 18, 10: 40, 11: 26, 12: 27, 13: 27, 14: 16, 15: 27, 16: 22, 17: 38, 18: 18, 19: 39, 20: 34, 21: 65, 22: 30, 23: 66, 24: 27, 25: 28 };
+const MEASURES = { 1: 18, 2: 44, 3: 27, 4: 27, 5: 35, 6: 35, 7: 24, 8: 27, 9: 18, 10: 40, 11: 26, 12: 27, 13: 27, 14: 16, 15: 27, 16: 22, 17: 38, 18: 18, 19: 39, 20: 34, 21: 65, 22: 30, 23: 66, 24: 27, 25: 28, 26: 27, 27: 27, 28: 27, 29: 44 };
 
 /* Cadenas de los archivos de origen: programa, canal y textos por defecto de MuseScore. */
 const SOURCE_TRACES = [/MuseScore/i, /Guitar Notes/i, /guitar-notes/i, /\.mscz/i, /작곡가/, /이름 없는/, /Carcassi Op\.59/];

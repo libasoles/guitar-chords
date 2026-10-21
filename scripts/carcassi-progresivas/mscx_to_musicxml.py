@@ -70,7 +70,8 @@ def rich_text(element):
 
 
 class Converter:
-    def __init__(self, root, title, words=(), tempo=None, ignore_marks=False, texts=None):
+    def __init__(self, root, title, words=(), tempo=None, ignore_marks=False, texts=None, no_fermata=False):
+        self.no_fermata = no_fermata  # el libro no corona ese acorde
         self.texts = texts or {}  # {texto del MuseScore: texto del libro}
         self.ignore_marks = ignore_marks  # descarta Fine/D.C. del MuseScore cuando el libro marca otra cosa
         self.extra_words = list(words)  # [(numero de compas, texto)] que el libro imprime y el MuseScore no trae
@@ -257,7 +258,7 @@ class Converter:
                 elif el.find('prev') is not None and id(el) not in self.text_ends:
                     pending.append('<direction><direction-type><wedge type="stop"/></direction-type></direction>')
             elif tag == 'Fermata':
-                fermata = True
+                fermata = not self.no_fermata
             elif tag == 'Rest':
                 dur, kind = duration_of(el, length, tuplet)
                 events.append({'level': 0, 'pos': offset + total})
@@ -395,7 +396,7 @@ class Converter:
                             notations += '<slur type="start" number="1"/>'
                         elif spanner.find('prev') is not None:
                             notations += '<slur type="stop" number="1"/>'
-                if fermata or el.find('Fermata') is not None:
+                if (fermata or el.find('Fermata') is not None) and not self.no_fermata:
                     notations += '<fermata type="upright"/>'
             if notations:
                 parts.append('<notations>%s</notations>' % notations)
