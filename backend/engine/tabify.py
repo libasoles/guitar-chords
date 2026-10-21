@@ -31,6 +31,8 @@ from xml.sax.saxutils import escape
 import music21 as m21
 import verovio
 
+import fingering
+
 verovio.enableLog(False)
 # The wrapper only finds its fonts by itself on the main thread; the web app
 # renders from request threads.
@@ -219,6 +221,7 @@ def build_columns(part, shifts=None):
     key = 0
     for measure, shift in zip(source, shifts):
         by_offset = {}
+        hints = {}
         for general in measure.recurse().notes:
             if general.duration.isGrace:
                 continue
@@ -231,14 +234,40 @@ def build_columns(part, shifts=None):
                 note.editorial.tabBass = (note.stemDirection if note.stemDirection in ("up", "down")
                                           else general.stemDirection) == "down"
                 key += 1
+                hints[midi_key(note, shift)] = merge_hints(hints.get(midi_key(note, shift)), note_hints(note))
                 tie = note.tie or general.tie
                 if tie is not None and tie.type in ("stop", "continue"):
                     continue
                 by_offset.setdefault(offset, []).append((note, note.pitch.midi + shift))
         columns = [{"offset": o, "notes": by_offset[o]} for o in sorted(by_offset)]
+        for column in columns:
+            column["hints"] = {m: hints[m] for _, m in column["notes"] if hints.get(m)}
         measures.append({"number": measure.number, "measure": measure, "columns": columns})
     # Reported shift: the one most measures use.
     return measures, max(set(shifts), key=shifts.count, default=0)
+
+
+def midi_key(note, shift):
+    return note.pitch.midi + shift
+
+
+def note_hints(note):
+    """What the score says about how to play `note`: left-hand finger (0-4), string (0 = highest) and fret, from
+    MusicXML <fingering>, <string> and <fret>. Right-hand letters (p i m a) and anything else are ignored."""
+    hint = {}
+    for articulation in note.articulations:
+        if isinstance(articulation, m21.articulations.StringIndication) and articulation.number:
+            hint["string"] = int(articulation.number) - 1
+        elif isinstance(articulation, m21.articulations.FretIndication) and articulation.number is not None:
+            hint["fret"] = int(articulation.number)
+        elif isinstance(articulation, m21.articulations.Fingering) and str(articulation.fingerNumber).isdigit():
+            if 0 <= int(articulation.fingerNumber) <= 4:
+                hint["finger"] = int(articulation.fingerNumber)
+    return hint
+
+
+def merge_hints(old, new):
+    return {**(old or {}), **new} if new else old
 
 
 def guess_tuning(measures):
@@ -263,14 +292,22 @@ def dropped_notes(measures):
 
 # --- String/fret assignment ------------------------------------------------
 
-def candidates(midis, opens):
-    """Every way to put the (distinct) pitches on distinct strings."""
-    options = [[(s, m - o) for s, o in enumerate(opens) if 0 <= m - o <= MAX_FRET] for m in midis]
+def candidates(midis, opens, hints=None):
+    """Every way to put the (distinct) pitches on distinct strings. `hints` ({midi: {string, fret, finger}}, from
+    the score's annotations) narrow the cells of a note and rule out finger combinations nobody can hold; if the
+    annotations leave nothing playable they are ignored for this column."""
+    hints = hints or {}
+    options = [[(s, f) for s, f in fingering.allowed_cells(m, opens, hints.get(m, {}), MAX_FRET)] if hints.get(m)
+               else [(s, m - o) for s, o in enumerate(opens) if 0 <= m - o <= MAX_FRET] for m in midis]
     out = []
     for combo in itertools.product(*options):
         strings = [s for s, _ in combo]
         if len(set(strings)) == len(strings):
             out.append(combo)
+    fingers = [hints.get(m, {}).get("finger") for m in midis]
+    if any(d for d in fingers):
+        playable = [combo for combo in out if fingering.fingers_possible(combo, fingers)]
+        out = playable or out
     return out
 
 
@@ -289,26 +326,30 @@ def hand(combo):
     return min(fretted) if fretted else None
 
 
-def playable_subset(midis, opens):
+def playable_subset(midis, opens, hints=None):
     """Drops pitches until the rest fit on the strings: out-of-range ones first,
     then inner voices (keep bass and melody)."""
     midis = [m for m in midis if any(0 <= m - o <= MAX_FRET for o in opens)]
-    while midis and not candidates(midis, opens):
+    while midis and not candidates(midis, opens, hints):
         midis.pop(len(midis) // 2)
     return midis
 
 
-def assign_frets(measures, tuning=STANDARD_TUNING):
+def assign_frets(measures, tuning=STANDARD_TUNING, arpeggio=False):
     """Fills `cells` (ascii-tabs Column) and `fingering` {id(note): (string, fret)}
-    on every Column, via Viterbi over the whole piece."""
+    on every Column, via Viterbi over the whole piece.
+
+    `arpeggio` applies the string rules of `fingering` (no two different notes in a row on one string, a repeated
+    note keeps its string, one cell per pitch in a measure): False never, True to every measure, "auto" to the
+    measures `fingering.detect_arpeggios` reads as arpeggios. Each measure's `arpeggio` flag records the outcome."""
     opens = open_midis(tuning)
     flat = [col for m in measures for col in m["columns"]]
     layers = []
     for col in flat:
         midis = sorted({m for _, m in col["notes"]}, reverse=True)
-        midis = playable_subset(midis, opens)
+        midis = playable_subset(midis, opens, col.get("hints"))
         col["midis"] = midis
-        combos = candidates(midis, opens) or [()]
+        combos = candidates(midis, opens, col.get("hints")) or [()]
         combos.sort(key=local_cost)
         layers.append([(c, local_cost(c)) for c in combos[:CANDIDATES_PER_COLUMN]])
 
@@ -332,6 +373,27 @@ def assign_frets(measures, tuning=STANDARD_TUNING):
         for i in range(len(layers) - 1, -1, -1):
             set_column(flat[i], layers[i][k][0], opens)
             k = best[i][k][1]
+    apply_arpeggio_rules(measures, opens, arpeggio)
+
+
+def apply_arpeggio_rules(measures, opens, arpeggio):
+    """Re-chooses the single notes of arpeggio measures (see `assign_frets`)."""
+    if arpeggio == "auto":
+        flags = fingering.detect_arpeggios([[(c["offset"], c["midis"]) for c in m["columns"]] for m in measures])
+    else:
+        flags = [bool(arpeggio)] * len(measures)
+    for m, flag in zip(measures, flags):
+        m["arpeggio"] = flag
+    active = [i for i, flag in enumerate(flags) if flag]
+    if not active:
+        return
+    tabs = [[list(c["cells"]) for c in m["columns"]] for m in measures]
+    fingering.avoid_repeated_strings(tabs, opens, measures=active, economy=True)
+    for m, tab in zip(measures, tabs):
+        for col, cells in zip(m["columns"], tab):
+            if cells != col["cells"]:
+                col["cells"] = cells
+                col["fingering"] = fingering_from_cells(col, cells, opens)
 
 
 def set_column(col, combo, opens):
@@ -873,18 +935,20 @@ def _suggestion(measures, tuning, shifts, title, subtitles):
                       "midis": [midi for _, midi in c["notes"]]} for c in m["columns"]]
                     for m in measures],
         "dropped": [{"measure": n, "pitch": p} for n, p in dropped_notes(measures)],
+        "arpeggio_measures": [m["number"] for m in measures if m.get("arpeggio")],
         # One ascii-tabs Tab (Column[]) per measure: the Digitación sugerida.
         "tabs": [[c["cells"] for c in m["columns"]] for m in measures],
         "preview_columns": [preview_columns(m) for m in measures],
     }
 
 
-def prepare(input_path, kind, tuning, out_dir, per_row=4):
+def prepare(input_path, kind, tuning, out_dir, per_row=4, arpeggio="auto"):
     """Input score -> normalized MusicXML + suggested fingering + preview.
 
     `input_path` is one MusicXML/MXL file or a list of them (OCR movements).
     `kind` is 'musicxml' or 'pdf-ocr-output' (the MusicXML Audiveris wrote);
     both are read the same way. `tuning` is 'auto', 'standard' or 'dropd'.
+    `arpeggio` is 'auto' (detect arpeggio measures), True or False: see `assign_frets`.
     Writes normalized.musicxml, suggestion.json, preview.json and
     preview-NN.svg into out_dir and returns a dict describing them.
     """
@@ -909,7 +973,7 @@ def prepare(input_path, kind, tuning, out_dir, per_row=4):
     if not any(m["columns"] for m in measures):
         raise NoNotesError("No se reconocieron notas en la partitura.")
     resolved = TUNINGS.get(tuning) or guess_tuning(measures)
-    assign_frets(measures, resolved)
+    assign_frets(measures, resolved, arpeggio)
     suggestion = _suggestion(measures, resolved, shifts, title, subtitles)
     suggestion_path = os.path.join(out_dir, SUGGESTION_NAME)
     _write_json(suggestion_path, suggestion)

@@ -15,6 +15,8 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT =os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(ROOT, "backend", "engine"))
+import fingering  # noqa: E402
 DEFAULT_SOURCE = os.path.join(ROOT, "resources", "CarcassiMethodPreludes-a4.pdf")
 WORK = os.path.join(ROOT, ".work", "carcassi-preludios")
 DPI = 400
@@ -246,94 +248,9 @@ def patch_engine(tabify):
         original(svg).replace('font-family="Times, serif"', f'font-family="{SANS}"', 1))
 
 
-def _hand(option):
-    fretted = [f for _, f in option if f > 0]
-    return min(fretted) if fretted else None
-
-
-def _solve(layers, opens):
-    """Viterbi over layers [(options, original)]: the cheapest option per layer. Costs: leaving the engine's
-    choice, high frets, hand movement (the hand keeps its position over open strings) and, biggest, two
-    consecutive single notes on one string. The exception is a repeated note (same pitch twice in a row):
-    it stays on its string and changing string costs instead."""
-    def own(option, original):
-        h = _hand(option)
-        return (0 if option == original else 0.5) + (0.4 * max(0, h - 4) if h else 0)
-
-    def single(option):
-        return option[0] if len(option) == 1 else None
-
-    states = [[(o, _hand(o)) for o in layers[0][0]]]
-    cost = [[own(o, layers[0][1]) for o, _ in states[0]]]
-    back = [[None] * len(states[0])]
-    for i in range(1, len(layers)):
-        options, original = layers[i]
-        row, costs, backs = [], [], []
-        for option in options:
-            h = _hand(option)
-            best = None
-            for j, (prev, ph) in enumerate(states[i - 1]):
-                c = cost[i - 1][j] + own(option, original)
-                if h is not None and ph is not None:
-                    c += 0.6 * abs(h - ph)
-                now, was = single(option), single(prev)
-                if now and was:
-                    same_pitch = opens[now[0]] + now[1] == opens[was[0]] + was[1]
-                    if same_pitch and now[0] != was[0]:
-                        c += 3
-                    elif not same_pitch and now[0] == was[0]:
-                        c += 8
-                if best is None or c < best[0]:
-                    best = (c, j)
-            row.append((option, h if h is not None else states[i - 1][best[1]][1]))
-            costs.append(best[0])
-            backs.append(best[1])
-        states.append(row)
-        cost.append(costs)
-        back.append(backs)
-    k = min(range(len(cost[-1])), key=lambda j: cost[-1][j])
-    chosen = [None] * len(layers)
-    for i in range(len(layers) - 1, -1, -1):
-        chosen[i] = states[i][k][0]
-        k = back[i][k]
-    return chosen
-
-
-def avoid_repeated_strings(tabs, opens, max_fret=9, open_reach=6):
-    """Arpeggio rules for the TAB of a prelude:
-    1. No two consecutive different notes on the same string (0-3, 3-0 or 0-3-0 on the B string); a repeated
-       note stays on its string.
-    2. A measure that mixes open strings with notes from fret `open_reach` to 11 (a stretch away from the open
-       chord) is fingered as a full chord shape in position, like a barre, with no open strings.
-    Single-note columns are re-chosen over the whole piece (see `_solve`); chords keep their cells.
-    `tabs`: one list of columns per measure, cells string 1 first; `opens`: open-string MIDI, string 1 first."""
-    flat = [col for measure in tabs for col in measure]
-    owner = [m for m, measure in enumerate(tabs) for _ in measure]
-    layers = []
-    for col in flat:
-        cells = tuple((s, f) for s, f in enumerate(col) if f is not None)
-        if len(cells) != 1:
-            layers.append(([cells], cells))
-            continue
-        pitch = opens[cells[0][0]] + cells[0][1]
-        options = [((s, pitch - o),) for s, o in enumerate(opens) if 0 <= pitch - o <= max_fret]
-        layers.append((options or [cells], cells))
-
-    chosen = _solve(layers, opens)
-    frets = {}
-    for m, option in zip(owner, chosen):
-        frets.setdefault(m, []).extend(f for _, f in option)
-    stretched = {m for m, fs in frets.items() if 0 in fs and any(open_reach <= f < 12 for f in fs)}  # fret 12 is a harmonic
-    if stretched:
-        layers = [([o for o in options if m not in stretched or len(o) != 1 or o[0][1] > 0] or options, original)
-                  for m, (options, original) in zip(owner, layers)]
-        chosen = _solve(layers, opens)
-    for col, option in zip(flat, chosen):
-        for s in range(len(col)):
-            col[s] = None
-        for s, f in option:
-            col[s] = f
-    return tabs
+# The arpeggio rules live in the engine (backend/engine/fingering.py); the collections that predate the engine's
+# own arpeggio detection apply them to every measure of the piece, without the finger-economy rule.
+avoid_repeated_strings = fingering.avoid_repeated_strings
 
 
 def build(number):
@@ -357,7 +274,7 @@ def build(number):
     with tempfile.TemporaryDirectory() as tmp:
         patch_engine(tabify)
         prepared = os.path.join(tmp, "prepared")
-        result = tabify.prepare(source, "musicxml", "standard", prepared, per_row=PER_ROW.get(number, 4))
+        result = tabify.prepare(source, "musicxml", "standard", prepared, per_row=PER_ROW.get(number, 4), arpeggio=False)
         if result["dropped"]:
             raise RuntimeError(f"Notas descartadas en {EDITION} {number}: {result['dropped']}")
         exported = os.path.join(tmp, "export")

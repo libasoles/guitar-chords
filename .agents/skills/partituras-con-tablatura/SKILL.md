@@ -96,6 +96,13 @@ El `.mscx` es XML limpio. El conversor (`mscx_to_musicxml.py`, solo biblioteca e
 - La fuente curada es `sources/NN.musicxml` (se puede editar a mano); `build.py convert N archivo.mscz` la regenera, y
   `build.py N` la pasa por el motor.
 - Un compás con notas descartadas hace fallar el build (`Notas descartadas`): revisar la lectura de ese compás.
+- **Digitación de arpegios**: `backend/engine/fingering.py` detecta los compases de arpegio y aplica las reglas de cuerdas
+  (`tabify.prepare(..., arpeggio="auto")`). Los `build.py` de Sagreras, Aguado y las progresivas lo activan por pieza con
+  el conjunto `ARPEGGIO`; si lo activas, la TAB cambia: reconstruye la pieza y compárala con el original. Criterios y
+  fuentes en `docs/criterios-de-digitacion.md`; si el MusicXML de la fuente trae dedos, cuerdas o trastes, el motor los usa.
+- **Acordes con cabezas desplazadas** (segundas con plica compartida): al leer un escaneo con `detect_notes.py`, las
+  cabezas con la misma plica son un acorde y los compases marcados `(REVISAR)` se leen a ojo
+  (`docs/heuristicas-plaques.md`). Estas reglas funcionan sin OCR, que es lo normal en las páginas de autores.
 - Afinaciones especiales (scordatura) no las soporta el motor: dejar la pieza fuera y avisar.
 
 ## 4. Registrar la página

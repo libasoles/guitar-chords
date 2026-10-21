@@ -21,7 +21,7 @@ TARGET = os.path.join(ROOT, "src", "site", "partitura-example.json")
 
 def main():
     with tempfile.TemporaryDirectory() as out:
-        tabify.prepare(SOURCE, "musicxml", "standard", out, per_row=4)
+        tabify.prepare(SOURCE, "musicxml", "standard", out, per_row=4, arpeggio=False)
         with open(os.path.join(out, tabify.SUGGESTION_NAME), encoding="utf-8") as f:
             suggestion = json.load(f)
         with open(os.path.join(out, tabify.PREVIEW_NAME), encoding="utf-8") as f:

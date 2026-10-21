@@ -13,12 +13,18 @@ No tiene sesiones: todo estado vive en artefactos en S3.
 ## Operaciones puras (`engine/tabify.py`)
 
 ```python
-prepare(input_path | [paths], kind, tuning, out_dir, per_row=4) -> dict
+prepare(input_path | [paths], kind, tuning, out_dir, per_row=4, arpeggio="auto") -> dict
 export(musicxml_path, suggestion_path, tabs, tuning, out_dir) -> dict
 ```
 
 `kind`: `musicxml` | `pdf-ocr-output`. `tuning` en prepare: `auto` | `standard` | `dropd`;
 en export: `standard` | `dropd` | `None`/`auto` (conserva la de la sugerencia).
+`arpeggio`: `"auto"` (detecta los compases de arpegio y les aplica las reglas de `engine/fingering.py`: sin dos
+notas distintas seguidas en una cuerda, nota repetida en su cuerda, una casilla por altura en el compás) | `True`
+(todos los compases) | `False` (solo el Viterbi). Los compases detectados salen en `suggestion.json` como
+`arpeggio_measures`. Además, un MusicXML con `<fingering>` (dedo izquierdo 0-4), `<string>` o `<fret>` en las notas
+limita las casillas de esa nota y descarta las combinaciones de dedos imposibles de sostener. Criterios y fuentes:
+`docs/criterios-de-digitacion.md`.
 
 **prepare** escribe en `out_dir`:
 

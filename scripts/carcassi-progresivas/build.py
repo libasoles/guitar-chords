@@ -32,7 +32,8 @@ with open(os.path.join(HERE, 'pieces.json'), encoding='utf-8') as f:
 # Compases por sistema de la vista previa (por defecto 4) y ajustes de pagina del PDF para las piezas largas.
 PER_ROW = {}
 PDF_OVERRIDES = {}
-# Piezas de arpegios a las que se aplican las reglas de cuerdas de los preludios (ver extract.avoid_repeated_strings).
+# Piezas a las que se aplican las reglas de arpegio del motor (backend/engine/fingering.py): el motor detecta los
+# compases de arpegio de cada una, y los demas quedan como los digita el Viterbi. Vacio: ninguna.
 ARPEGGIO = set()
 # Pagina virtual mas grande con escala menor (el PDF sigue midiendo lo mismo, como en los preludios
 # largos): el grabado se achica y caben mas compases por sistema y mas sistemas por pagina. Se prueba de menos a mas
@@ -87,14 +88,12 @@ def build(number):
     with tempfile.TemporaryDirectory() as tmp:
         extract.patch_engine(tabify)
         prepared = os.path.join(tmp, 'prepared')
-        result = tabify.prepare(source, 'musicxml', 'standard', prepared, per_row=PER_ROW.get(number, 4))
+        result = tabify.prepare(source, 'musicxml', 'standard', prepared, per_row=PER_ROW.get(number, 4), arpeggio='auto' if number in ARPEGGIO else False)
         if result['dropped']:
             raise RuntimeError(f"Notas descartadas en la pieza {number}: {result['dropped']}")
         with open(os.path.join(prepared, tabify.SUGGESTION_NAME), encoding='utf-8') as f:
             suggestion = json.load(f)
         tabs = suggestion['tabs']
-        if number in ARPEGGIO:
-            tabs = extract.avoid_repeated_strings(tabs, tabify.open_midis(tabify.STANDARD_TUNING))
         # El primer nivel (el menos compacto) con el que el PDF ocupa menos paginas.
         best = None
         for level in ([PDF_OVERRIDES[number]] if number in PDF_OVERRIDES else [zoom_options(sc) for sc in SCALES]):

@@ -2,9 +2,11 @@
 
     python scripts/carcassi-preludios/detect_notes.py N
 
-Imprime, por sistema y por compás, las cabezas de izquierda a derecha como letra+octava SIN alteraciones
-(la armadura y los accidentales se ponen a mano mirando la imagen). No ve cabezas huecas (blancas):
-esas, los silencios y los dedos se leen a ojo. Pensado como ayuda, no como OCR.
+Imprime, por sistema y por compás, los Ataques de izquierda a derecha como letra+octava SIN alteraciones
+(la armadura y los accidentales se ponen a mano mirando la imagen). Las cabezas que comparten plica forman un
+acorde, aunque una segunda las desplace a ambos lados; las barras dan el valor (`/8` una barra, `/16` dos).
+Lo que la imagen no resuelve se marca con `?` y el motivo (ver backend/ocr/chord_groups.py): revisar ese compás
+a ojo. No ve cabezas huecas (blancas): esas, los silencios y los dedos se leen a ojo. Pensado como ayuda, no como OCR.
 """
 import os
 import sys
@@ -14,20 +16,10 @@ from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 WORK = os.path.join(os.path.dirname(os.path.dirname(HERE)), ".work", "carcassi-preludios")
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(HERE)), "backend", "ocr"))
+import chord_groups  # noqa: E402  (agrupacion por plica, compartida con las pruebas)
+
 LETTERS = "CDEFGAB"
-
-
-def box_sum(mask, k):
-    """Suma por ventana k x k (esquina superior izquierda) con imagen integral."""
-    integral = np.pad(mask.astype(np.int32).cumsum(0).cumsum(1), ((1, 0), (1, 0)))
-    return integral[k:, k:] - integral[:-k, k:] - integral[k:, :-k] + integral[:-k, :-k]
-
-
-def opening(mask, k):
-    """Apertura con ventana cuadrada k: quita lineas, plicas y barras finas y deja las cabezas macizas."""
-    eroded = box_sum(mask, k) == k * k
-    padded = np.pad(eroded, ((k - 1, k - 1), (k - 1, k - 1)))
-    return box_sum(padded, k) > 0
 
 
 def staff_lines(mask):
@@ -55,27 +47,6 @@ def staff_lines(mask):
     return staves, spacing
 
 
-def components(mask):
-    h, w = mask.shape
-    seen = np.zeros_like(mask, dtype=bool)
-    out = []
-    for y, x in zip(*np.nonzero(mask)):
-        if seen[y, x]:
-            continue
-        stack, pixels = [(y, x)], []
-        seen[y, x] = True
-        while stack:
-            cy, cx = stack.pop()
-            pixels.append((cy, cx))
-            for ny, nx in ((cy + 1, cx), (cy - 1, cx), (cy, cx + 1), (cy, cx - 1)):
-                if 0 <= ny < h and 0 <= nx < w and mask[ny, nx] and not seen[ny, nx]:
-                    seen[ny, nx] = True
-                    stack.append((ny, nx))
-        ys, xs = zip(*pixels)
-        out.append((len(pixels), np.mean(xs), np.mean(ys), max(xs) - min(xs) + 1, max(ys) - min(ys) + 1))
-    return out
-
-
 def barlines(mask, five, spacing):
     top, bottom = int(five[0]), int(five[4])
     cols = []
@@ -100,44 +71,38 @@ def name(step):
     return LETTERS[index % 7] + str(4 + index // 7)
 
 
+def label(chord, five, spacing):
+    """`[B4 D5 E5]/8` for a chord, `E4` for a single head; `?motivo` when the image leaves it open."""
+    pitches = [name(round((five[4] - h["cy"]) / (spacing / 2))) for h in chord["heads"]]
+    text = pitches[0] if len(pitches) == 1 else "[" + " ".join(pitches) + "]"
+    if chord["beams"]:
+        text += {1: "/8", 2: "/16", 3: "/32"}.get(chord["beams"], f"/{chord['beams']}barras")
+    if chord["issues"]:
+        text += "?" + ",".join(chord["issues"])
+    return text
+
+
 def main(number):
     path = os.path.join(WORK, f"prelude-{number:02d}.png")
     mask = np.array(Image.open(path).convert("L")) < 140
     staves, spacing = staff_lines(mask)
-    k = max(3, int(round(.62 * spacing)))
-    heads = opening(mask, k)
-    area0 = .8 * spacing * spacing
-    notes = []
-    for c in components(heads):
-        if not (.35 * area0 < c[0] < 7 * area0 and c[3] < 2.2 * spacing and c[4] < 5.5 * spacing):
-            continue
-        # cabezas apiladas (acorde de terceras) salen fundidas: la altura dice cuantas son
-        n = max(1, round((c[4] - .95 * spacing) / spacing) + 1) if c[4] > 1.4 * spacing else 1
-        for i in range(n):
-            notes.append((c[0] / n, c[1], c[2] + (i - (n - 1) / 2) * spacing, c[3], c[4] / n))
+    heads = chord_groups.find_heads(mask, spacing)
     print(f"{len(staves)} sistemas, espaciado {spacing:.1f}px")
     measure_no = 1
     for si, five in enumerate(staves):
         bars = barlines(mask, five, spacing)
         edges = [0.0] + [b for b in bars if b > 0] + [float(mask.shape[1])]
         mid = (five[0] + five[4]) / 2
-        mine = [c for c in notes if abs(c[2] - mid) < 6 * spacing]
+        mine = [h for h in heads if abs(h["cy"] - mid) < 6 * spacing]
+        chords = chord_groups.read_chords(mask, mine, int(five[0] - 4 * spacing), int(five[4] + 4 * spacing), spacing, bars)
         print(f"\nSistema {si + 1}")
         # los compases: entre barras (la primera 'barra' puede ser el inicio del pentagrama)
         spans = [(a, b) for a, b in zip(edges, edges[1:]) if b - a > 4 * spacing]
         for a, b in spans:
-            inside = sorted((c for c in mine if a < c[1] < b), key=lambda c: c[1])
-            # las cabezas con la misma x son un acorde: se imprimen como [agudo ... grave]
-            columns = []
-            for c in inside:
-                if columns and abs(c[1] - columns[-1][-1][1]) < .45 * spacing:
-                    columns[-1].append(c)
-                else:
-                    columns.append([c])
-            names = [[name(round((five[4] - c[2]) / (spacing / 2))) for c in sorted(col, key=lambda c: c[2])] for col in columns]
-            seq = " ".join(n[0] if len(n) == 1 else "[" + " ".join(n) + "]" for n in names)
+            inside = [c for c in chords if a < c["x"] < b]
             if inside:
-                print(f"  c.{measure_no}: {seq}")
+                review = " (REVISAR)" if any(c["issues"] for c in inside) else ""
+                print(f"  c.{measure_no}: " + " ".join(label(c, five, spacing) for c in inside) + review)
                 measure_no += 1
 
 
