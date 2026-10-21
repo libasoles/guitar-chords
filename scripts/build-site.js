@@ -18,8 +18,6 @@
 
 const fs = require("fs");
 const path = require("path");
-const { execSync } = require("child_process");
-const { drawIcon } = require("./lib/icon-png");
 const { fingerprintAssets } = require("./lib/fingerprint");
 const { minifyAssets } = require("./lib/minify-assets");
 const { readSiteCss, readPartituraCss } = require("./lib/site-css");
@@ -1842,45 +1840,14 @@ copyFile(
 );
 
 // ---- PWA: icons ------------------------------------------------------------
-// PNG icons for the web app manifest, generated from the site logo.
-
-console.log("==> Generating PWA icons...");
+// Use the committed logo renders on every machine, including deployment
+// runners without rsvg-convert. Regenerate with node scripts/generate-pwa-icons.js.
+console.log("==> Copying PWA icons...");
 const ICONS_DIST = path.join(ASSETS_DIST, "icons");
 ensureDir(ICONS_DIST);
-const PWA_ICON_SIZES = [192, 512];
-const maskableSvg = path.join(SRC_SITE, "icon-maskable.svg");
-const hasRsvg = (() => {
-  try {
-    execSync("rsvg-convert --version", { stdio: "ignore" });
-    return true;
-  } catch {
-    return false;
-  }
-})();
-if (!fs.existsSync(maskableSvg)) {
-  fail("src/site/icon-maskable.svg is required to generate PWA icons.");
-}
-if (!hasRsvg) {
-  say("(rsvg-convert not found — generating portable PNG fallbacks)");
-}
-PWA_ICON_SIZES.forEach(function (size) {
-  const out = path.join(ICONS_DIST, "icon-" + size + ".png");
-  if (hasRsvg) {
-    execSync(
-      "rsvg-convert -w " +
-        size +
-        " -h " +
-        size +
-        ' "' +
-        maskableSvg +
-        '" -o "' +
-        out +
-        '"',
-    );
-  } else {
-    drawIcon(size, out);
-  }
-  say("assets/icons/icon-" + size + ".png");
+[192, 512].forEach(function (size) {
+  const file = "icon-" + size + ".png";
+  copyFile(path.join(SRC_SITE, "icons", file), path.join(ICONS_DIST, file));
 });
 
 // ---- PWA: web app manifest (one per locale) --------------------------------
