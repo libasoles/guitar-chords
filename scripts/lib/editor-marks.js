@@ -23,6 +23,7 @@ const MARKS = {
 
 const PIECES = {
   'carcassi-progresivas': { favorite: [1] },
+  'carcassi-valses': { favorite: [10] },
   sagreras: { favorite: [36], insightful: [16], effort: [38] },
 };
 

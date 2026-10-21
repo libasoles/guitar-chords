@@ -10,6 +10,7 @@ const path = require('path');
 const { modal, CLOSE_ICON } = require('./modal');
 const { pagePath } = require('./slugs');
 const { scoreNavigation } = require('./score-navigation');
+const { editorMarks } = require('./editor-marks');
 const { escapeAttr, inlineScore, glyphDefs, DOWNLOAD_ICON } = require('./score-svg');
 
 const ROOT = path.join(__dirname, '..', '..');
@@ -81,7 +82,7 @@ function createEdition(edition) {
     /* El titulo es el boton que abre la partitura completa en un modal; su ::after cubre toda la tarjeta.
        El enlace de descarga del pie queda por encima. */
     return '<article class="example-card prelude-card">' +
-      '<h2 class="prelude-card-title"><button type="button" class="prelude-open" popovertarget="' + id + '" aria-haspopup="dialog" ' +
+      '<h2 class="prelude-card-title">' + editorMarks(folder, prelude.number, strings) + '<button type="button" class="prelude-open" popovertarget="' + id + '" aria-haspopup="dialog" ' +
         'aria-label="' + escapeAttr(strings.artPreludesView + ' ' + name) + '">' + name + '</button>' +
         '<a class="prelude-pdf-link" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' + name + '</a></h2>' +
       inlineScore(svg, strings.artPreludesAltPrefix + ' ' + name, sharedGlyphs) +
@@ -116,7 +117,7 @@ function createEdition(edition) {
     const keyButtons = '<div class="modal-keys">' +
       keyButton(relative, relative && relative.mode === 'Minor' ? strings.artPreludesRelativeMinor : strings.artPreludesRelativeMajor) +
       keyButton(dominantOf(prelude, all), strings.artPreludesDominant) + '</div>';
-    return '<div class="modal-pages">' + pages.join('') + '</div>' +
+    return '<div class="modal-pages">' + editorMarks(folder, prelude.number, strings) + pages.join('') + '</div>' +
       '<div class="modal-footer">' + scoreNavigation(all, prelude, 'prelude-score-', preludeName, locale) + keyButtons + '<a class="modal-download" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' +
       DOWNLOAD_ICON + '<span>' + strings.artPreludesDownload + '</span></a></div>';
   }
