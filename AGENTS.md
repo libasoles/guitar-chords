@@ -29,3 +29,7 @@ Playwright and Lighthouse are dev dependencies, so `npm ci` is the only install 
 ## New pages
 
 Every new page registers its slug in Spanish and English in `scripts/lib/slugs.js` (see `docs/adr/0003-slugs-por-idioma-y-redireccion-de-urls-viejas.md`). New pages get no redirect.
+
+## Icons
+
+Every icon must be a [Lucide](https://lucide.dev) icon whenever one exists (inline its SVG paths). Only draw a custom icon when Lucide has no equivalent.
