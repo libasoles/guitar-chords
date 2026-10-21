@@ -12,10 +12,10 @@ function escapeAttr(text) {
 const CLOSE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
   'stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
 
-/* Los modales a pantalla completa llevan siempre el logo que vuelve al inicio (como el preview de Partitura y
-   tablatura): hace falta `locale` y `strings` para su enlace y su etiqueta. */
-function modal({ id, label, closeLabel, className, content, closeContent = '×', locale, strings }) {
-  const homeHref = className === 'modal-full' ? (locale === 'en' ? '/en' : '/') : '';
+/* Los modales a pantalla completa llevan el logo: `logoHref` permite elegir su destino.
+   Por defecto vuelve al inicio del idioma; `strings` proporciona su etiqueta. */
+function modal({ id, label, closeLabel, className, content, closeContent = '×', locale, strings, logoHref = locale === 'en' ? '/en' : '/' }) {
+  const homeHref = className === 'modal-full' ? logoHref : '';
   const homeLabel = homeHref ? strings.wordmark + ' ' + strings.wordmarkSmall : '';
   return '<div id="' + id + '" class="modal ' + className + '" popover role="dialog" aria-label="' + escapeAttr(label) + '">' +
     '<button type="button" class="modal-close" popovertarget="' + id + '" popovertargetaction="hide" aria-label="' + escapeAttr(closeLabel) + '">' + closeContent + '</button>' +

@@ -8,6 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 const { modal, CLOSE_ICON } = require('./modal');
+const { pagePath } = require('./slugs');
 const { escapeAttr, inlineScore, glyphDefs, DOWNLOAD_ICON } = require('./score-svg');
 
 const ROOT = path.join(__dirname, '..', '..');
@@ -51,7 +52,7 @@ function card(piece, locale, strings, sharedGlyphs) {
       '<a class="prelude-pdf-link" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' + name + '</a></h2>' +
     inlineScore(svg, strings.artPreludesAltPrefix + ' ' + name, sharedGlyphs) +
     download +
-    modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', closeContent: CLOSE_ICON, locale, strings, content: fullScore(piece, name, href, strings) }) +
+    modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', closeContent: CLOSE_ICON, locale, strings, logoHref: pagePath('articulos', locale), content: fullScore(piece, name, href, strings) }) +
     '</article>';
 }
 
