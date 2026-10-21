@@ -84,7 +84,8 @@ function createEdition(edition) {
         '<a class="prelude-pdf-link" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' + name + '</a></h2>' +
       inlineScore(svg, strings.artPreludesAltPrefix + ' ' + name, sharedGlyphs) +
       download +
-      modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', closeContent: CLOSE_ICON, content: fullScore(prelude, name, href, strings, all, locale) }) +
+      modal({ id, label: name, closeLabel: strings.artArpeggiosClose, className: 'modal-full', closeContent: CLOSE_ICON,
+        homeHref: locale === 'en' ? '/en' : '/', homeLabel: strings.wordmark + ' ' + strings.wordmarkSmall, content: fullScore(prelude, name, href, strings, all, locale) }) +
       '</article>';
   }
 

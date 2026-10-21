@@ -293,8 +293,7 @@
 .modal-full::backdrop {
   background: var(--paper);
 }
-.modal-full::before {
-  content: "";
+.modal-full .modal-logo {
   position: fixed;
   top: 0.4rem;
   left: max(1rem, 2vw);
@@ -302,7 +301,10 @@
   width: 72px;
   height: 72px;
   background: url("guitar-player-cubist-left-head.svg") center / contain no-repeat;
-  pointer-events: none;
+}
+.modal-full .modal-logo:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }
 .modal-full .modal-close {
   position: fixed;
