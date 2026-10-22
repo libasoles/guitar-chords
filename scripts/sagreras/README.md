@@ -24,6 +24,10 @@ sin cambiar la de las lecciones anteriores. Dos glifos de puntillo multiplican l
 fusa + corchea con doble puntillo completan una negra. Se conservan las dos voces de la cabeza compartida
 (fusa arriba y negra del bajo), pero el control contra la TAB cuenta ese ataque una sola vez.
 
+En el No.58, una cabeza compartida lleva blanca con puntillo en el bajo y negra en la voz superior.
+Si leer ambas como blancas hace desbordar la voz superior, su duración inicial se deduce del resto del compás;
+ese tramo se conserva como hueco invisible al no repetir el ataque del bajo. Así la corchea siguiente no se adelanta.
+
 La TAB publicada es la digitación sugerida por el motor, no la de Marieh. Los dedos de la mano izquierda (cifras 0-4 de
 8 pt, las de la TAB impresa son de 9 pt) sí se leen: `marieh_notes.attach_fingers` pasa cada cifra a la cabeza más cercana,
 `transcribe.py` las escribe como `<fingering>` y el motor las toma como pista (descarta las digitaciones que no se pueden

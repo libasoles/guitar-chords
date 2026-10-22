@@ -45,6 +45,28 @@ class RhythmTests(unittest.TestCase):
         self.assertEqual([b.text for b in upper[0].findall('beam')],
                          ['begin', 'forward hook', 'forward hook'])
 
+    def test_shared_dotted_half_keeps_the_melodys_initial_quarter(self):
+        bass = group('down', 20, 0, 12, dotted=True)
+        upper = group('up', 26, 0, 8, dotted=True)
+        upper['heads'] = bass['heads']
+        bass['shared'] = upper['shared'] = bass['heads']
+        groups = [bass, upper, group('up', 40, 2, 2),
+                  group('up', 55, 5, 4), group('up', 80, 7, 2)]
+        measure = {'top': 10, 'bottom': 30, 'space': 5, 'items': [], 'fifths': 0,
+                   'repeat_start': False, 'repeat_end': False, 'dots': [], 'rests': []}
+        lesson = {'time': (6, 8), 'measures': [measure],
+                  'tab': [(20, 52), (40, 55), (55, 60), (80, 64)]}
+        with patch.object(T, '_original_groups', side_effect=lambda _: copy.deepcopy(groups)):
+            measures = T.lesson_measures(lesson)
+        self.assertEqual([e[:3] for e in measures[0]['voices'][0]['events']],
+                         [(12, 6, 'G4'), (18, 12, 'C5'), (30, 6, 'E5')])
+        self.assertEqual(measures[0]['voices'][1]['events'][0][:3], (0, 36, 'E4'))
+        self.assertEqual(T.compare_tab(lesson, measures), ([], []))
+        xml = ET.fromstring(T.to_xml(58, lesson, measures))
+        first = xml.find('.//note')
+        self.assertEqual(first.get('print-object'), 'no')
+        self.assertEqual(first.findtext('duration'), '12')
+
     def test_equal_duration_unisons_are_not_deduplicated(self):
         event = (0, 12, 'C4', None, [], {})
         measures = [{'voices': [{'events': [event]}, {'events': [event]}]}]

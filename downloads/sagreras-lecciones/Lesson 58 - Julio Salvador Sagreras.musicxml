@@ -75,6 +75,13 @@
     </measure>
     <!--========================= Measure 1 ==========================-->
     <measure implicit="no" number="1">
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>10080</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <staff>1</staff>
+      </note>
       <note id="tab-note-1">
         <pitch>
           <step>G</step>
@@ -108,13 +115,6 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>10080</duration>
-        <voice>1</voice>
-        <type>quarter</type>
-        <staff>1</staff>
-      </note>
       <backup>
         <duration>30240</duration>
       </backup>
@@ -133,6 +133,13 @@
       <backup>
         <duration>30240</duration>
       </backup>
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>10080</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <staff>2</staff>
+      </note>
       <note>
         <pitch>
           <step>G</step>
@@ -180,13 +187,6 @@
             <string>1</string><fret>0</fret>
           </technical>
         </notations>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>10080</duration>
-        <voice>1</voice>
-        <type>quarter</type>
-        <staff>2</staff>
       </note>
       <backup>
         <duration>30240</duration>
@@ -658,6 +658,13 @@
     </measure>
     <!--========================= Measure 5 ==========================-->
     <measure implicit="no" number="5">
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>10080</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <staff>1</staff>
+      </note>
       <note id="tab-note-20">
         <pitch>
           <step>G</step>
@@ -691,13 +698,6 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>10080</duration>
-        <voice>1</voice>
-        <type>quarter</type>
-        <staff>1</staff>
-      </note>
       <backup>
         <duration>30240</duration>
       </backup>
@@ -716,6 +716,13 @@
       <backup>
         <duration>30240</duration>
       </backup>
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>10080</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <staff>2</staff>
+      </note>
       <note>
         <pitch>
           <step>G</step>
@@ -763,13 +770,6 @@
             <string>1</string><fret>0</fret>
           </technical>
         </notations>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>10080</duration>
-        <voice>1</voice>
-        <type>quarter</type>
-        <staff>2</staff>
       </note>
       <backup>
         <duration>30240</duration>
@@ -1788,6 +1788,13 @@
     </measure>
     <!--========================= Measure 13 =========================-->
     <measure implicit="no" number="13">
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>10080</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <staff>1</staff>
+      </note>
       <note id="tab-note-56">
         <pitch>
           <step>G</step>
@@ -1821,13 +1828,6 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>10080</duration>
-        <voice>1</voice>
-        <type>quarter</type>
-        <staff>1</staff>
-      </note>
       <backup>
         <duration>30240</duration>
       </backup>
@@ -1846,6 +1846,13 @@
       <backup>
         <duration>30240</duration>
       </backup>
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>10080</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <staff>2</staff>
+      </note>
       <note>
         <pitch>
           <step>G</step>
@@ -1893,13 +1900,6 @@
             <string>1</string><fret>0</fret>
           </technical>
         </notations>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>10080</duration>
-        <voice>1</voice>
-        <type>quarter</type>
-        <staff>2</staff>
       </note>
       <backup>
         <duration>30240</duration>

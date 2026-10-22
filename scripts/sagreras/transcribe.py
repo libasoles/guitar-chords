@@ -75,6 +75,18 @@ def fixed_groups(m):
                        for d in m['dots']) for h in g['heads'])
         if dots == 2:
             g['dur'] *= 7 / 6  # de 3/2 a 7/4 de la figura base
+    # Una cabeza hueca compartida puede representar una blanca con puntillo abajo
+    # y solo una negra arriba (No.58). La cabeza no fija ambas duraciones: si la
+    # voz corta desborda el compas, su tramo inicial es lo que falta hasta llenarlo.
+    for g in groups:
+        if not g['shared'] or g['beams'] or len(g['shared']) != len(g['heads']):
+            continue
+        sustained = any(o is not g and o['dir'] != g['dir'] and o['dur'] == full
+                        and all(any(h is x for x in o['heads']) for h in g['heads'])
+                        for o in groups)
+        remaining = full - sum(o['dur'] for o in groups if o is not g and o['dir'] == g['dir'])
+        if sustained and 0 < remaining < g['dur']:
+            g['dur'] = remaining
     space = m['space']
     # tresillos: la cifra «3» marca las tres notas (o silencios) mas cercanos de su voz: sobre el pentagrama la
     # voz de plicas arriba, bajo el la de plicas abajo

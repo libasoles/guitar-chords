@@ -148,3 +148,29 @@ test('leccion 39: fusas, doble puntillo y bajo sostenido conservan sus duracione
     }
   }
 });
+
+/* La cabeza compartida del bajo no debe adelantar la corchea de la melodia. */
+test('leccion 58: blanca con puntillo y entrada posterior de la melodia', () => {
+  const files = [
+    path.join(__dirname, '..', 'scripts', 'sagreras', 'sources', '58.musicxml'),
+    path.join(DOWNLOADS_DIR, 'Lesson 58 - Julio Salvador Sagreras.musicxml'),
+  ];
+  for (const file of files) {
+    const xml = fs.readFileSync(file, 'utf8');
+    const divisions = Number(xml.match(/<divisions>(\d+)<\/divisions>/)[1]);
+    for (const number of [1, 5, 13]) {
+      const measure = xml.match(new RegExp('<measure\\b[^>]*number="' + number + '"[^>]*>([\\s\\S]*?)</measure>'))[1];
+      const notes = [...measure.matchAll(/<note\b[^>]*>[\s\S]*?<\/note>/g)].map((m) => m[0]);
+      const staff = notes.filter((n) => !/<staff>2<\/staff>/.test(n));
+      const upper = staff.filter((n) => /<voice>1<\/voice>/.test(n));
+      assert.match(upper[0], /print-object="no"/);
+      assert.match(upper[0], /<rest\s*\/>/);
+      assert.deepEqual(upper.map((n) => Number(n.match(/<duration>(\d+)<\/duration>/)[1]) / divisions), [1, 0.5, 1, 0.5]);
+      const bass = staff.filter((n) => /<voice>2<\/voice>/.test(n));
+      assert.equal(bass.length, 1);
+      assert.match(bass[0], /<type>half<\/type>/);
+      assert.match(bass[0], /<dot\s*\/>/);
+      assert.equal(Number(bass[0].match(/<duration>(\d+)<\/duration>/)[1]) / divisions, 3);
+    }
+  }
+});
