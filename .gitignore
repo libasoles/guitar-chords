@@ -17,3 +17,6 @@ resources/
 .work/
 .venv-carcassi/
 .DS_Store
+
+# Laboratorio local de ejercicios y materiales musicales
+/lab/
