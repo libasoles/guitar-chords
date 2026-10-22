@@ -75,3 +75,10 @@ Verificación: `node --test test/sagreras.unit.js`, `node scripts/build-site.js`
 Regresiones del lector sin el PDF local: `.venv-carcassi/bin/python -m unittest discover -s scripts/sagreras -p 'test_*.py'`.
 La prueba de la leccion 39 en `test/sagreras.unit.js` verifica tambien las duraciones y los dos puntillos en la fuente y
 el MusicXML publicado.
+
+## Recuperacion de pendientes
+
+La 59 pasa el lector actual sin correcciones: 8 compases y 0 diferencias de digitacion respecto de la TAB impresa.
+La 62 (8 compases, tambien 0 diferencias) quedaba fuera porque el control contaba dos veces las cabezas compartidas
+de igual duracion. `recover.py 62` valida un solo ataque por altura e inicio, conservando ambas voces en el MusicXML.
+Este cotejo curado no modifica el lector ni las fuentes de las demas lecciones.
