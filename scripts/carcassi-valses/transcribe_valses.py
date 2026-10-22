@@ -238,6 +238,16 @@ def convert(number):
         data = convert_measure(m, m['fifths'], full * scale, scale)
         data.update(scale=scale, fifths=m['fifths'], repeat_start=m['repeat_start'], repeat_end=m['repeat_end'], fine=m.get('fine'), dc=m.get('dc'))
         measures.append(data)
+    if number == 2:
+        # Compás 17 (18 contando la anacrusa), cotejado con Ditson, p. 77:
+        # la plica hacia abajo del re# no inicia otra voz; es la corchea
+        # final, después del acorde de negra. La geometría lo superpone.
+        measures[17]['voices'] = [{'stem': 'up', 'events': [
+            (0, 4, 'G3+G4+D5', None, [], {}),
+            (4, 2, 'D#5', None, [], {}),
+        ]}]
+        measures[17]['length'] = 6
+        measures[17]['fingers'] = {}
     measures[-1]['final'] = True
     return meta, measures
 

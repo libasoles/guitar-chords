@@ -22,3 +22,11 @@ IMSLP bloquea la descarga por script; Mutopia solo tiene los preludios del Op. 5
 Requiere `pymupdf` además de lo que pide `carcassi-preludios/README.md`. El PDF y el MusicXML publicados salen del
 motor (`backend/engine/tabify.py`); la TAB es una propuesta del motor con la misma digitación que los preludios.
 Un tiempo = una semicorchea. Los compases de anacrusa y de cierre suman juntos un compás completo.
+
+## Correcciones cotejadas
+
+Vals 2, compás 17 (18 contando la anacrusa): acorde sol3–sol4–re5 de negra,
+seguido de re♯5 de corchea, sin superposición. La plica descendente de la
+corchea se había interpretado como otra voz al inicio del compás, produciendo
+la posición imposible `x475x3`. Se cotejó con Ditson, página impresa 77, y
+con `op59-02.pdf`. La corrección se conserva también en `convert(2)`.
