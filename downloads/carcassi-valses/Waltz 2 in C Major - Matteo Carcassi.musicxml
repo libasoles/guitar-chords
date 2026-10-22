@@ -2365,9 +2365,6 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
-      <backup>
-        <duration>10080</duration>
-      </backup>
       <note id="tab-note-79">
         <pitch>
           <step>D</step>
@@ -2375,21 +2372,14 @@
           <octave>5</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>1</voice>
         <type>eighth</type>
         <accidental>sharp</accidental>
         <stem>down</stem>
         <staff>1</staff>
       </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>5040</duration>
-        <voice>2</voice>
-        <type>eighth</type>
-        <staff>1</staff>
-      </note>
       <backup>
-        <duration>10080</duration>
+        <duration>15120</duration>
       </backup>
       <note>
         <pitch>
@@ -2397,13 +2387,13 @@
           <octave>4</octave>
         </pitch>
         <duration>10080</duration>
-        <voice>1</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <stem>none</stem>
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>7</fret>
+            <string>2</string><fret>3</fret>
           </technical>
         </notations>
       </note>
@@ -2414,12 +2404,12 @@
           <octave>3</octave>
         </pitch>
         <duration>10080</duration>
-        <voice>1</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>5</fret>
+            <string>3</string><fret>0</fret>
           </technical>
         </notations>
       </note>
@@ -2430,7 +2420,7 @@
           <octave>2</octave>
         </pitch>
         <duration>10080</duration>
-        <voice>1</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
         <notations>
@@ -2439,9 +2429,6 @@
           </technical>
         </notations>
       </note>
-      <backup>
-        <duration>10080</duration>
-      </backup>
       <note>
         <pitch>
           <step>E</step>
@@ -2459,13 +2446,6 @@
             <string>2</string><fret>4</fret>
           </technical>
         </notations>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>5040</duration>
-        <voice>2</voice>
-        <type>eighth</type>
-        <staff>2</staff>
       </note>
     </measure>
     <!--========================= Measure 18 =========================-->

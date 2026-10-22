@@ -290,6 +290,12 @@ def build(number):
                         if column[string] == fret:
                             column[string] = None
                             column[0] = first_string_fret
+            # In m. 16, keep E on the open first string so the initial
+            # B-D-E voicing can stay in position throughout the measure.
+            for column in tabs[16]:
+                if column[2] == 9:
+                    column[2] = None
+                    column[0] = 0
         if EDITION == "carcassi" and number == 9:
             # Requested TAB voicing: play the B bass on the sixth string in m. 15,
             # and play G# on the third string in the closing chord (m. 16).
