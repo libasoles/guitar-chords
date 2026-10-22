@@ -58,6 +58,10 @@ la vista previa, las páginas del modal y el PDF; la vista previa reserva margen
 Al reconstruir varias voces con plicas en la misma dirección, la barra final fija el final del eje temporal.
 No extrapolar el espaciado anterior: el ultimo grupo suele estar más comprimido. En la 53 eso superponía
 dos semicorcheas y creaba una cuarta voz; con una sola nota de referencia (60 y 79), los acordes se adelantaban al inicio.
+En la lección 60, compases 2, 4, 10 y 12, melodía y bajo duran tres negras; la voz intermedia empieza con
+un silencio de negra y toca los dos acordes en los tiempos 2 y 3. Comparar solo las alturas de la TAB no detecta
+que esos ataques se hayan desplazado: la regresión de `test/sagreras.unit.js` verifica también sus inicios y
+duraciones en la fuente y en el MusicXML publicado.
 
 ## Reproducir
 
