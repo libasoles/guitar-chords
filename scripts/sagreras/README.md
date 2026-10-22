@@ -82,3 +82,8 @@ La 59 pasa el lector actual sin correcciones: 8 compases y 0 diferencias de digi
 La 62 (8 compases, tambien 0 diferencias) quedaba fuera porque el control contaba dos veces las cabezas compartidas
 de igual duracion. `recover.py 62` valida un solo ataque por altura e inicio, conservando ambas voces en el MusicXML.
 Este cotejo curado no modifica el lector ni las fuentes de las demas lecciones.
+
+`recover.py 54` separa las blancas mi4 del arpegio en el compas 7, usando el mismo patron ritmico del compas 3.
+Conserva el si del compas 2 en tercera cuerda, traste 4, como pide el texto de la leccion. Los 8 compases pasan el
+control de alturas y duraciones y la digitacion tiene 0 diferencias en 121 notas. Una regresion comprueba las
+blancas, los ataques de la melodia y las 12 semicorcheas del compas 7 en la fuente y en la descarga publicada.
