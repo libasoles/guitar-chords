@@ -29,7 +29,8 @@ Elige por el tipo de original:
 | PDF vectorial de MuseScore (fuente Leland) | Leer la geometría con PyMuPDF, sin OCR: `scripts/carcassi-valses/pdf_notes.py` |
 | Escaneo antiguo | Transcripción manual en Python (`scripts/carcassi-preludios/transcribe_*.py`). El OCR (homr, Audiveris) confunde dedos con notas |
 | Archivo MuseScore `.mscz` (zip con un `.mscx`) | `scripts/carcassi-progresivas/mscx_to_musicxml.py`: lee las notas exactas, sin OCR. **Preferirlo al PDF** si el autor publica el archivo (en YouTube suele ir un segundo enlace de Drive en la descripción) |
-| Archivo LilyPond, MusicXML o GPX | Convertir directamente |
+| Archivo LilyPond (`.ly`) | `scripts/sor/ly_to_musicxml.py` (sin LilyPond instalado; ver `scripts/sor/README.md`: altura escrita o sonante según la clave, comprobar con el `.mid` de Mutopia) |
+| Archivo MusicXML o GPX | Convertir directamente |
 
 ### Lo aprendido con PDF de MuseScore
 

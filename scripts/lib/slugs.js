@@ -26,6 +26,7 @@ const SLUGS = {
   'articulo-piezas-progresivas-carcassi': { es: 'articulos/piezas-progresivas-de-carcassi', en: 'articles/carcassi-progressive-pieces', isNew: true },
   'articulo-partituras-aguado': { es: 'articulos/partituras-de-aguado', en: 'articles/aguado-sheet-music', isNew: true },
   'articulo-lecciones-sagreras': { es: 'articulos/primeras-lecciones-de-sagreras', en: 'articles/sagreras-first-lessons', isNew: true },
+  'articulo-lecciones-sor': { es: 'articulos/lecciones-progresivas-de-sor', en: 'articles/sor-progressive-lessons', isNew: true },
 };
 
 function slugFor(key, locale) {
