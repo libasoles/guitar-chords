@@ -104,14 +104,13 @@
 }
 .example-download {
   display: block;
+  border-bottom: 0;
+  text-decoration: none;
   margin-top: 0.4rem;
   font-family: var(--sans);
   font-size: 0.85rem;
   color: var(--accent);
   text-align: right;
-}
-.example-card:hover .example-download {
-  text-decoration: underline;
 }
 @media (max-width: 48rem) {
   .example-download {
@@ -311,6 +310,7 @@
 /* Phones download the PDF straight from the title instead of opening the preview. */
 .prelude-pdf-link {
   display: none;
+  border-bottom: 0;
   color: inherit;
   text-decoration: none;
 }
@@ -331,12 +331,6 @@
   position: relative;
   width: fit-content;
   margin-left: auto;
-}
-.prelude-card:hover .example-download {
-  text-decoration: none;
-}
-.prelude-card .example-download:hover {
-  text-decoration: underline;
 }
 
 /* Full-screen modal (see scripts/lib/modal.js), styled like the Partitura y tablatura preview: paper background,
