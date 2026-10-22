@@ -69,3 +69,6 @@ for (const measure of [3, 7, 20, 24]) {
   });
 }
 
+test('Vals 7, compás 20: 2–1–2 en tercera cuerda y 0–1–3 en segunda', () => {
+  assert.deepEqual(melodyCells(7, 'A Major', 20), [[3, 2], [3, 1], [3, 2], [2, 0], [2, 1], [2, 3]]);
+});
