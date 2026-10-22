@@ -6,11 +6,11 @@ intérprete antes de ampliar o reordenar la progresión.
 
 ## Entregables
 
-- [PDF completo](../../output/pdf/folklore-arpegios.pdf): diez páginas A4,
+- [PDF completo](../output/pdf/folklore-arpegios.pdf): diez páginas A4,
   un ejercicio por página, pentagrama y TAB alineados.
 - [Fuente editable](coleccion.json): formas descompuestas, células, sucesiones,
   objetivos y consignas. Esta es la fuente de verdad para revisiones.
-- [MusicXML](../../output/musicxml/folklore-arpegios/): un archivo por ejercicio,
+- [MusicXML](../output/musicxml/folklore-arpegios/): un archivo por ejercicio,
   con los dos pentagramas y las posiciones de cuerda y traste explícitas.
   Se puede importar en un editor musical; para cambios persistentes hay que
   llevar la corrección también a la fuente JSON.
@@ -99,10 +99,10 @@ posiciones explícitas; su ritmo se lee en el pentagrama superior.
 
 Requiere Python 3.10+, `verovio==6.*`, `rsvg-convert` y `pdfinfo`.
 No se requieren reconocimiento óptico, conexión de red ni los originales
-de `resources/` para reconstruir la colección.
+de consulta para reconstruir la colección.
 
 ```bash
-python scores/folklore-arpegios/build.py
+python lab/folklore-arpegios/build.py
 ```
 
 La opción `--output /ruta/de/salida` permite una reconstrucción de revisión
@@ -123,7 +123,7 @@ mantienen fuera de git.
 
 ## Materiales y criterio musical
 
-La base armónica es `resources/lab folklore/folklore-argentino-acordes.md`;
+La base armónica es `lab/folklore-argentino-acordes.md`;
 la procedencia concreta se guarda en `fuente` dentro de cada ejercicio.
 Se excluyen los temas marcados como ajenos al folklore argentino en ese
 corpus. Los apuntes rítmicos y de dos voces de la misma carpeta orientan
@@ -143,8 +143,8 @@ ejercicio 8: corchea con puntillo + semicorchea, dos corcheas y cuatro
 semicorcheas sobre un bajo de blanca. En Am reproduce sus posiciones de
 cuerda y traste. Se conserva la agrupación gráfica por negras de esa
 variación, dentro del 6/8 de la colección, en contraste con los compases
-de base. La imagen original es material local de sesión; no hace falta
-para regenerar el ejercicio.
+de base. La imagen original se conserva en `lab/fuentes/celula-aportada.png`; no
+hace falta para regenerar el ejercicio.
 
 La milonga del ejercicio 3 utiliza la célula corchea con puntillo,
 semicorchea y dos corcheas. El ejercicio 4 conserva el gesto inicial y
@@ -157,7 +157,7 @@ ejemplos. Para el chamamé, el estudio primario de Troitiño y Polemann,
 documenta el bajo en tres negras y la armonización por terceras y sextas.
 Su aplicación a una sola guitarra en estos ejercicios es una adaptación.
 
-El análisis delegado de Fleury examinó `resources/partituras/fleury/vol2.pdf`
+El análisis delegado de Fleury examinó `lab/fuentes/fleury-vol2.pdf`
 visualmente. Las páginas siguientes son **páginas PDF, contadas desde 1**;
 los compases son conteos locales por sistema, no números impresos:
 

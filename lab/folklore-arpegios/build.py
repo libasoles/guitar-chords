@@ -18,7 +18,7 @@ from xml.sax.saxutils import escape
 import verovio
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[1]
+LAB = HERE.parent
 OPEN = [64, 59, 55, 50, 45, 40]
 PITCHES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 KINDS = {1: ("16th", False), 2: ("eighth", False), 3: ("eighth", True),
@@ -386,5 +386,5 @@ def build(output):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=ROOT / "output")
+    parser.add_argument("--output", type=Path, default=LAB / "output")
     build(parser.parse_args().output.resolve())
