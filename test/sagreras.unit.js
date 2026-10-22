@@ -174,3 +174,27 @@ test('leccion 58: blanca con puntillo y entrada posterior de la melodia', () => 
     }
   }
 });
+
+/* En los primeros seis compases del No.53 los cuatro pulsos repiten silencio + tres semicorcheas.
+   El espaciado mas estrecho del ultimo grupo no debe desplazar una nota a otra voz. */
+test('leccion 53: el ultimo grupo conserva sus tres semicorcheas en la misma voz', () => {
+  const piece = pieces.find((p) => p.number === 53);
+  assert.ok(piece);
+  for (const file of [path.join(__dirname, '..', 'scripts', 'sagreras', 'sources', '53.musicxml'),
+    path.join(DOWNLOADS_DIR, piece.base + '.musicxml')]) {
+    const xml = fs.readFileSync(file, 'utf8');
+    const measures = [...xml.matchAll(/<measure\b[^>]*>([\s\S]*?)<\/measure>/g)].map((m) => m[1]);
+    for (const measure of measures.slice(0, 6)) {
+      const notes = [...measure.matchAll(/<note\b[^>]*>([\s\S]*?)<\/note>/g)].map((m) => m[1])
+        .filter((n) => /<voice>2<\/voice>/.test(n) && !/<staff>2<\/staff>/.test(n));
+      assert.equal(notes.length, 16);
+      assert.ok(notes.every((n) => /<type>16th<\/type>/.test(n)));
+      const pitches = notes.map((n) => (n.match(/<pitch>([\s\S]*?)<\/pitch>/) || [null, 'rest'])[1].replace(/\s+/g, ''));
+      const durations = notes.map((n) => Number(n.match(/<duration>(\d+)<\/duration>/)[1]));
+      assert.ok(durations.every((d) => d === durations[0]));
+      for (let group = 1; group < 4; group++) {
+        assert.deepEqual(pitches.slice(group * 4, group * 4 + 4), pitches.slice(0, 4));
+      }
+    }
+  }
+});

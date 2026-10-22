@@ -55,6 +55,10 @@ Su altura se calcula por grupo, dejando espacio sobre las notas agudas y sus pli
 no a una altura fija de la última línea. La lección 55 aplica esta corrección en `engraving.clear_triplets` al generar
 la vista previa, las páginas del modal y el PDF; la vista previa reserva margen superior para las cifras elevadas.
 
+Al reconstruir varias voces con plicas en la misma dirección, la barra final fija el final del eje temporal.
+No extrapolar el espaciado anterior: el ultimo grupo suele estar más comprimido. En la 53 eso superponía
+dos semicorcheas y creaba una cuarta voz; con una sola nota de referencia (60 y 79), los acordes se adelantaban al inicio.
+
 ## Reproducir
 
 ```sh
