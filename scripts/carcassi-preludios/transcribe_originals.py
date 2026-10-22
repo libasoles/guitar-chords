@@ -98,9 +98,10 @@ def originals():
     def repeated_peak(low, a, b, c):
         return flow([low, a, b, c, c, c, c, c, low, a, b, c], [(0, 8, low), (8, 4, low)])
     scores[6] = [repeated_peak(*x.split()) for x in [
-        'B3 F#4 B4 D5', 'B3 G4 B4 E5', 'B3 E4 G#4 B4', 'B3 F#4 B4 D5',
+        # Bars 3 and 11: E–A#–C# above B; the printed sharp belongs to A.
+        'B3 F#4 B4 D5', 'B3 G4 B4 E5', 'B3 E4 A#4 C#5', 'B3 F#4 B4 D5',
         'G3 D4 G4 B4', 'E3 G4 C5 E5', 'F#3 F#4 A#4 C#5', 'B3 F#4 B4 D5',
-        'B3 F#4 A#4 C#5', 'B3 F#4 B4 D5', 'B3 E4 G#4 B4',
+        'B3 F#4 A#4 C#5', 'B3 F#4 B4 D5', 'B3 E4 A#4 C#5',
     ]] + [ending('B3', 'D4+F#4+B4', 8, 4)]
     scores[7] = legacy(7)
     scores[7][4] = repeat('A3 A4 C#5 A4 C#5 A4', 'A3 A4 C#5 A4 G5 A4')
