@@ -61,7 +61,9 @@ No se cotejó con el impreso: Mutopia parte de escaneos.
 
 ## Pendiente
 
-- Op. 35 n.º 6, 8, 12, 14, 15, 16 y 21: convierten, pero no se publican hasta confirmar que el MIDI y el PDF de Mutopia
-  coinciden (el MIDI se desfasa una negra, o varias, en estas piezas; hay que decidir por el PDF).
+- **Op. 35 n.º 12** queda fuera: Mutopia indica «Low E tuned to F» (la sexta cuerda en Fa) y el motor solo admite
+  afinación estándar y Re en la sexta (`tuning: "dropd"`). Su `.ly` está en `sources/estudios/` pero no se publica.
 - Cotejar con un escaneo del Op. 60, Op. 6 y Op. 35 de IMSLP.
 - Las otras 12 lecciones del Op. 60 no están en Mutopia.
+- En Op. 35 n.º 6, 8, 16 y 21 el MIDI de Mutopia se desfasa (`\partial` dentro de repeticiones, `Timing.measureLength`): se
+  publicaron por el PDF (mismos compases y notas) y el recuento de alturas.

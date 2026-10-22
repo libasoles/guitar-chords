@@ -16,8 +16,9 @@ const MEASURES_LECCIONES = { 1: 16, 2: 40, 3: 24, 4: 26, 5: 40, 6: 36, 7: 44, 8:
 
 /* Cadenas del archivo de origen: programa, rutas y textos de la cabecera de LilyPond. */
 const SOURCE_TRACES = [/LilyPond/i, /\.ly\b/i, /fernandosor\.free\.fr/i, /mutopiatitle/i];
-// El PDF si lleva el credito a Mutopia (pie con enlace); el MusicXML no lleva rastros.
-const PDF_TRACES = SOURCE_TRACES;
+// El PDF si lleva el credito a Mutopia (pie con enlace); el MusicXML no lleva rastros. En el PDF no se busca `.ly`: esa
+// secuencia aparece por azar entre los bytes comprimidos.
+const PDF_TRACES = SOURCE_TRACES.filter((trace) => trace.source !== '\\.ly\\b');
 
 function assertWellFormed(xml) {
   const stack = [];
@@ -37,7 +38,7 @@ function scoreShape(xml) {
     staves: Number((part.match(/<staves>(\d+)<\/staves>/) || [])[1]) };
 }
 
-const MEASURES_ESTUDIOS = { 601: 44, 602: 18, 603: 41, 604: 48, 605: 48, 606: 138, 607: 80, 608: 39, 609: 58, 610: 61, 611: 87, 612: 63, 3501: 32, 3502: 26, 3503: 25, 3504: 36, 3505: 40, 3507: 33, 3509: 48, 3510: 37, 3511: 37, 3513: 32, 3517: 33, 3518: 40, 3519: 46, 3520: 56, 3522: 48, 3523: 25, 3524: 52 };
+const MEASURES_ESTUDIOS = { 601: 44, 602: 18, 603: 41, 604: 48, 605: 48, 606: 138, 607: 80, 608: 39, 609: 58, 610: 61, 611: 87, 612: 63, 3501: 32, 3502: 26, 3503: 25, 3504: 36, 3505: 40, 3506: 25, 3507: 33, 3508: 71, 3509: 48, 3510: 37, 3511: 37, 3513: 32, 3514: 26, 3515: 27, 3516: 62, 3517: 33, 3518: 40, 3519: 46, 3520: 56, 3521: 45, 3522: 48, 3523: 25, 3524: 52 };
 
 const COLLECTIONS = [
   ['lecciones', require('../scripts/lib/article-sor'), MEASURES_LECCIONES],
