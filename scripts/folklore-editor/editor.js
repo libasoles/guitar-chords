@@ -5,6 +5,9 @@ const exercises = document.querySelector('#exercises');
 const status = document.querySelector('#status');
 const track = document.querySelector('#track');
 const TRACK_KEY = 'folklore.lab.track.v1';
+const SIGNATURE_KEY = 'folklore.lab.signature.v1';
+let trackSignature = null;
+try { trackSignature = JSON.parse(localStorage.getItem(SIGNATURE_KEY) || 'null'); } catch { /* Recover from the first chunk. */ }
 let currentSet;
 let models = [];
 let viewId = 0;
@@ -97,6 +100,51 @@ function stripTrackContext(svg) {
   });
 }
 
+// The opening staff supplies the effective signature even when a later bar
+// has no repeated clef, key signature or meter glyphs of its own.
+function captureSignature(original) {
+  const staff = original.querySelector('g.staff');
+  const symbols = [...staff.querySelectorAll('g.clef, g.keySig, g.meterSig')];
+  const boxes = symbols.map(node => node.getBBox()).filter(box => box.width > 0);
+  if (!boxes.length) return null;
+  const lines = [...staff.children].filter(node => node.localName === 'path');
+  const line = lines[0].getBBox();
+  const x = line.x - 100;
+  const width = Math.max(...boxes.map(box => box.x + box.width)) - x + 180;
+  const y = Math.min(line.y, ...boxes.map(box => box.y)) - 100;
+  const bottom = Math.max(...lines.map(node => node.getBBox().y), ...boxes.map(box => box.y + box.height)) + 100;
+  const svg = original.cloneNode(false);
+  [...original.children].filter(node => ['defs', 'style'].includes(node.localName))
+    .forEach(node => svg.append(node.cloneNode(true)));
+  const copy = staff.cloneNode(false);
+  lines.forEach(node => {
+    const path = node.cloneNode(true);
+    const lineY = node.getBBox().y;
+    path.setAttribute('d', `M${x} ${lineY} L${x + width} ${lineY}`);
+    copy.append(path);
+  });
+  symbols.forEach(node => copy.append(node.cloneNode(true)));
+  svg.append(copy);
+  svg.setAttribute('viewBox', `${x} ${y} ${width} ${bottom - y}`);
+  svg.removeAttribute('width');
+  svg.removeAttribute('height');
+  return { svg: svg.outerHTML, width: width * .05,
+    staffTop: (line.y - y) * .05, staffBottom: (bottom - line.y) * .05 };
+}
+
+function renderSignature(top) {
+  document.querySelector('.track-signature')?.remove();
+  if (!sequence.length || !trackSignature) return;
+  const label = element('div', 'track-signature');
+  label.setAttribute('role', 'img');
+  label.setAttribute('aria-label', 'Clave, armadura y compás del track');
+  label.style.width = trackSignature.width + 'px';
+  label.style.paddingTop = (28 + top - trackSignature.staffTop) + 'px';
+  label.innerHTML = trackSignature.svg;
+  scopeSvg(label.querySelector('svg'));
+  track.before(label);
+}
+
 // Each excerpt uses the original staff and notehead X coordinates. Only the
 // SVG viewport changes: no engraving or rhythmic spacing is recalculated here.
 function excerpts(model) {
@@ -105,6 +153,7 @@ function excerpts(model) {
   document.body.append(host);
   const original = host.querySelector('svg');
   stripScoreText(original);
+  const signature = captureSignature(original);
   const layoutHost = element('div');
   layoutHost.innerHTML = model.layoutSvg;
   host.append(layoutHost);
@@ -148,7 +197,7 @@ function excerpts(model) {
     });
     // Scope both glyph references and Verovio's staff-line CSS per excerpt.
     scopeSvg(svg);
-    return { bar: index + 1, notes, svg: svg.outerHTML, staffTop: -top * .05, staffBottom: bottom * .05, layout: { width: width * .05, positions },
+    return { bar: index + 1, notes, signature, svg: svg.outerHTML, staffTop: -top * .05, staffBottom: bottom * .05, layout: { width: width * .05, positions },
       number: model.number, title: model.title, meter: model.meter, set: currentSet,
       label: collection.selectedOptions[0]?.textContent || currentSet };
   });
@@ -301,11 +350,17 @@ function makeExercise(model) {
 }
 
 function saveTrack() {
-  try { localStorage.setItem(TRACK_KEY, JSON.stringify(sequence)); }
+  if (!sequence.length) trackSignature = null;
+  try {
+    localStorage.setItem(TRACK_KEY, JSON.stringify(sequence));
+    if (trackSignature) localStorage.setItem(SIGNATURE_KEY, JSON.stringify(trackSignature));
+    else localStorage.removeItem(SIGNATURE_KEY);
+  }
   catch { status.textContent = 'El track sigue disponible en esta página, pero no se pudo guardar en el navegador.'; }
 }
 
 function insertSnapshot(snapshot, beforeId) {
+  if (!sequence.length) trackSignature = structuredClone(snapshot.signature);
   const item = { id: crypto.randomUUID(), snapshot: structuredClone(snapshot) };
   const before = sequence.findIndex(entry => entry.id === beforeId);
   sequence.splice(before < 0 ? sequence.length : before, 0, item);
@@ -325,7 +380,8 @@ function moveItem(id, beforeId) {
 }
 
 function renderTrack() {
-  const top = Math.max(0, ...sequence.map(entry => entry.snapshot.staffTop));
+  const top = Math.max(trackSignature?.staffTop || 0, ...sequence.map(entry => entry.snapshot.staffTop));
+  renderSignature(top);
   const bottom = Math.max(0, ...sequence.map(entry => entry.snapshot.staffBottom));
   track.replaceChildren(...sequence.map(entry => {
     const item = element('article', 'track-item');
@@ -378,6 +434,16 @@ try {
   collection.replaceChildren(...sets.map(set => new Option(set.label, set.id)));
   if (!sets.length) throw new Error('No se encontraron colecciones en el laboratorio');
   await loadSet();
+  if (sequence.length && !trackSignature) {
+    const first = sequence[0].snapshot;
+    const sourceModels = first.set === currentSet ? models : await request(`/api/set/${first.set}`);
+    const model = sourceModels.find(model => model.number === first.number);
+    if (model && sequence[0]?.snapshot === first && !trackSignature) {
+      trackSignature = excerpts(model)[0].signature;
+      saveTrack();
+      renderTrack();
+    }
+  }
 } catch (error) {
   status.textContent = error.message;
   exercises.setAttribute('aria-busy', 'false');

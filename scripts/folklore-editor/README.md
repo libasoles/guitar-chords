@@ -22,7 +22,10 @@ que queda vacía conserva su duración como silencio oculto.
 
 Arrastrar el pentagrama de un compás al **Track** agrega una copia de su
 notas y TAB en ese momento, sin claves, armaduras, indicaciones de compás,
-barras de repetición ni otras marcas de contexto. Se pueden mezclar compases de distintos
+barras de repetición ni otras marcas de contexto dentro del chunk. La clave,
+armadura y compás del primer chunk pegado aparecen como un bloque independiente
+y no editable al inicio del track. Se mantienen al reordenar o borrar chunks,
+incluso al recargar, y se eliminan al vaciar el track. Se pueden mezclar compases de distintos
 sets, repetirlos, reordenarlos por arrastre y quitar cada copia con la X
 de Lucide en su esquina superior derecha. Enter sobre el pentagrama ofrece una alternativa al arrastre. El track queda visible al desplazarse por los
 ejercicios y admite mouse o pantalla táctil.
