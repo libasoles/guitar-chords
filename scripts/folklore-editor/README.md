@@ -10,10 +10,24 @@ Abrir http://127.0.0.1:8765. Requiere el laboratorio local en `lab/` y su
 entorno Python con Verovio 6.3. No descarga recursos ni publica el laboratorio.
 Se puede indicar otra carpeta con `--lab /ruta/al/lab` y otro puerto con `--port`.
 
-El selector carga los diez ejercicios de la primera tanda o de cualquiera de
-las seis ramas por ritmo. Hacer clic en una cifra de TAB (o enfocarla con Tab
-y pulsar Enter) permite cambiar cuerda y traste. Se conserva la cantidad de
-notas; no se agregan ataques ni se editan silencios o valores rítmicos.
+El encabezado muestra «Lab». El selector carga los diez ejercicios de la
+primera tanda o de cualquiera de las seis ramas por ritmo. Cada compás usa
+el componente `ascii-tabs` editable, con columnas alineadas a sus notas.
+Se puede escribir un traste o arrastrar una nota a otra cuerda del mismo
+ataque. Las ediciones no agregan ni quitan notas o ataques; una operación
+que cambie esa estructura se revierte con un mensaje junto al compás.
+No se editan silencios ni valores rítmicos.
+
+Arrastrar el pentagrama de un compás al **Track** agrega una copia de su
+partitura y TAB en ese momento. Se pueden mezclar compases de distintos
+sets, repetirlos, reordenarlos por arrastre o con los botones de dirección,
+y quitar copias. «Agregar al track» y Enter sobre el pentagrama ofrecen
+una alternativa al arrastre. El track queda visible al desplazarse por los
+ejercicios y admite mouse o pantalla táctil.
+
+La secuencia y sus copias se guardan en el navegador (`folklore.lab.track.v1`).
+La TAB del track es de lectura; las ediciones se hacen en los ejercicios.
+Una modificación posterior del ejercicio no altera las copias existentes.
 
 Las ediciones se guardan automáticamente en `lab/editor/ediciones.json`,
 por set, ejercicio y nota. Persisten al cambiar de set y reiniciar el servidor.

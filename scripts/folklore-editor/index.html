@@ -1,10 +1,25 @@
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Editor · Folklore argentino</title><link rel="stylesheet" href="/editor.css"><script src="/editor.js" defer></script></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Lab</title>
+  <link rel="stylesheet" href="/editor.css">
+  <script src="/editor.js" type="module"></script>
+</head>
 <body>
-<header><div class="eyebrow">LABORATORIO / GUITARRA</div><h1>Folklore argentino</h1><p>Editá la tablatura. La partitura acompaña cada cambio de altura, con el ritmo y las posiciones horizontales fijos.</p>
-<div class="toolbar"><label for="collection">Set de ejercicios<select id="collection" disabled><option>Cargando…</option></select></label><span id="status" role="status" aria-live="polite">Preparando el laboratorio…</span></div></header>
-<main id="exercises" aria-busy="true"></main>
-<dialog id="note-dialog"><form id="note-form"><div class="eyebrow">EDITAR NOTA</div><h2 id="note-title">Cuerda y traste</h2><p id="note-context"></p><div class="fields"><label>Cuerda<select id="string"><option value="1">1 · Mi agudo</option><option value="2">2 · Si</option><option value="3">3 · Sol</option><option value="4">4 · Re</option><option value="5">5 · La</option><option value="6">6 · Mi grave</option></select></label><label>Traste<input id="fret" type="number" min="0" max="19" step="1" required></label></div><p class="hint">La duración y el lugar en el compás se conservan.</p><p id="note-error" role="alert"></p><div class="actions"><button type="button" id="cancel">Cancelar</button><button class="primary" type="submit">Guardar nota</button></div></form></dialog>
-<footer>Afinación estándar · Cambios guardados en lab/editor/ediciones.json · Los originales se conservan.</footer>
-</body></html>
+  <header><h1>Lab</h1></header>
+  <main>
+    <section class="track-panel" aria-labelledby="track-heading">
+      <div class="track-heading"><h2 id="track-heading">Track</h2><span id="track-count">0 compases</span></div>
+      <p class="hint">Arrastrá compases de los ejercicios hasta acá. Podés mezclar sets y ordenar la secuencia.</p>
+      <div id="track" role="list" aria-label="Track de compases"></div>
+    </section>
+    <div class="toolbar">
+      <label for="collection">Set de ejercicios<select id="collection" disabled><option>Cargando…</option></select></label>
+      <span id="status" role="status" aria-live="polite">Preparando el laboratorio…</span>
+    </div>
+    <section id="exercises" aria-label="Ejercicios" aria-busy="true"></section>
+  </main>
+</body>
+</html>

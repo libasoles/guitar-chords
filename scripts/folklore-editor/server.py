@@ -179,21 +179,40 @@ class Library:
     def edit(self, data):
         self.load(data['set'])
         exercise = self.exercises[str(data['exercise'])]
-        key, string, fret = data['key'], data['string'], data['fret']
-        exercise.check_position(key, string, fret)
-        before = dict(exercise.notes[key])
+        # Batch a whole measure atomically: moving a note between strings may
+        # update several cells, but its attack, voice and duration stay fixed.
+        changes = data.get('changes', [data])
+        if not isinstance(changes, list) or not changes or len(changes) > len(exercise.notes):
+            raise ValueError('Edición inválida')
+        keys = set()
+        for change in changes:
+            key = change['key']
+            exercise.check_position(key, change['string'], change['fret'])
+            if key in keys:
+                raise ValueError('Nota repetida')
+            keys.add(key)
+        before = copy.deepcopy(exercise.notes)
         old_saved = copy.deepcopy(self.saved)
         try:
-            exercise.notes[key].update(string=string, fret=fret)
+            for change in changes:
+                exercise.notes[change['key']].update(string=change['string'], fret=change['fret'])
+            occupied = set()
+            for note in exercise.notes.values():
+                cell = (note['bar'], note['at'], note['string'])
+                if cell in occupied:
+                    raise ValueError('Dos notas del mismo ataque no pueden ocupar la misma cuerda')
+                occupied.add(cell)
             exercise.refresh()
-            self.saved.setdefault(self.current, {}).setdefault(str(data['exercise']), {})[key] = [string, fret]
+            saved = self.saved.setdefault(self.current, {}).setdefault(str(data['exercise']), {})
+            for change in changes:
+                saved[change['key']] = [change['string'], change['fret']]
             self.save_path.parent.mkdir(parents=True, exist_ok=True)
             with tempfile.NamedTemporaryFile('w', dir=self.save_path.parent, delete=False) as file:
                 json.dump(self.saved, file, ensure_ascii=False, indent=2)
                 temp = Path(file.name)
             temp.replace(self.save_path)
         except Exception:
-            exercise.notes[key] = before
+            exercise.notes = before
             self.saved = old_saved
             exercise.refresh()
             raise
@@ -226,6 +245,8 @@ def handler(library):
                     _, _, _, collection, number = path.split('/')
                     library.load(collection)
                     return self.reply(library.exercises[number].musicxml(), 'application/vnd.recordare.musicxml+xml')
+                if path == '/ascii-tabs.js':
+                    return self.reply((HERE.parents[1] / 'vendor/ascii-tabs.js').read_text(), 'text/javascript; charset=utf-8')
                 files = {'/': 'index.html', '/editor.js': 'editor.js', '/editor.css': 'editor.css'}
                 if path in files:
                     mime = {'/': 'text/html', '/editor.js': 'text/javascript', '/editor.css': 'text/css'}[path]
@@ -240,7 +261,7 @@ def handler(library):
                 return self.reply(dict(error='Origen no permitido'), status=403)
             try:
                 length = int(self.headers.get('Content-Length', '0'))
-                if urlparse(self.path).path != '/api/edit' or not 0 < length < 4096:
+                if urlparse(self.path).path != '/api/edit' or not 0 < length < 32768:
                     raise ValueError('Petición inválida')
                 self.reply(library.edit(json.loads(self.rfile.read(length))))
             except (ValueError, KeyError, TypeError) as error:

@@ -74,6 +74,30 @@ class EditorTests(unittest.TestCase):
         self.assertEqual(exercise.toolkit.getElementAttr('a' + key).get('accid', ''), '')
         self.assertEqual(positions, anchors(exercise.svg))
 
+    def test_batch_string_moves_are_atomic_and_keep_note_identities(self):
+        self.library.load('arpegios')
+        exercise = self.library.exercises['3']
+        by_attack = {}
+        for note in exercise.notes.values():
+            by_attack.setdefault((note['bar'], note['at']), []).append(note)
+        pair = next(notes[:2] for notes in by_attack.values() if len(notes) >= 2)
+        before = copy.deepcopy(exercise.notes)
+        before_rhythm = rhythm(exercise.musicxml())
+        before_positions = anchors(exercise.svg)
+        changes = [dict(key=pair[0]['key'], string=pair[1]['string'], fret=pair[0]['fret']),
+                   dict(key=pair[1]['key'], string=pair[0]['string'], fret=pair[1]['fret'])]
+        self.library.edit(dict(set='arpegios', exercise=3, changes=changes))
+        self.assertEqual(anchors(exercise.svg), before_positions)
+        self.assertEqual(rhythm(exercise.musicxml()), before_rhythm)
+        self.assertEqual(exercise.notes[pair[0]['key']]['string'], before[pair[1]['key']]['string'])
+        committed = copy.deepcopy(exercise.notes)
+        saved = self.library.save_path.read_bytes()
+        changes[0]['string'] = changes[1]['string']
+        with self.assertRaises(ValueError):
+            self.library.edit(dict(set='arpegios', exercise=3, changes=changes))
+        self.assertEqual(exercise.notes, committed)
+        self.assertEqual(self.library.save_path.read_bytes(), saved)
+
     def test_all_sets_and_edits_preserve_rhythm_and_horizontal_positions(self):
         for collection, _, _ in SETS:
             with self.subTest(collection=collection):
