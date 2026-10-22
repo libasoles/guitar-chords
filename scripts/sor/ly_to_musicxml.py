@@ -878,6 +878,8 @@ class Writer:
                 elif kind == 'volta_stop':
                     right += '<ending number="%d" type="discontinue"/>' % item['n']
                 elif kind == 'bar':
+                    if item['style'] in (':|.', ':|') and '<repeat' not in right:  # repeticion suelta, sin la de inicio
+                        right += '<repeat direction="backward"/>'
                     style = {'|.': 'light-heavy', '||': 'light-light'}.get(item['style'])
                     if style and not any('<repeat' in r for r in right):
                         right = '<bar-style>%s</bar-style>' % style + right
