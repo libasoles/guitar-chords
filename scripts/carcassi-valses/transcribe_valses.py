@@ -82,6 +82,9 @@ def convert_measure(m, fifths, full, scale=1):
         ref = next((name for name in ('up', 'down') if totals[name] == full), None)
         if ref:
             axis = sorted((i['x'], i['onset']) for i in items if i['dir'] == ref)
+            # El ultimo grupo suele estar mas comprimido: la barra final fija el fin del compas.
+            # Extrapolar el espaciado anterior puede superponer dos semicorcheas y crear otra voz.
+            axis.append((m['right'], full))
             # los ataques caen en la cuadricula de las duraciones de la voz (si no, un acorde sale entre dos pulsos)
             grid = math.gcd(*[i['dur'] for i in items if i['dir'] != ref and i['dur'] > 0] or [1])
             for i in items:

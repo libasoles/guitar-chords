@@ -47,6 +47,9 @@ del motor o añadir una lección, corre `compare_positions.py`: el total no debe
 ♯ de la primera nota no es una armadura (`pdf_notes.key_signature` exige las alturas canónicas), y en compases con varias
 voces de plica abajo los inicios se ajustan a la cuadrícula de duraciones (si no, un acorde queda entre dos pulsos).
 Los corchetes de tresillo se dibujan sobre el pentagrama (debajo chocan con la redonda del bajo) y no se copian a la TAB.
+Al reconstruir varias voces con plicas en la misma dirección, la barra final fija el final del eje temporal.
+No extrapolar el espaciado anterior: el ultimo grupo suele estar más comprimido. En la 53 eso superponía
+dos semicorcheas y creaba una cuarta voz; con una sola nota de referencia (60 y 79), los acordes se adelantaban al inicio.
 
 ## Reproducir
 
