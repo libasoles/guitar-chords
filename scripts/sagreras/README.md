@@ -19,6 +19,11 @@ Leland). El original queda en `resources/sagreras/primeras-lecciones/fuentes/` (
    `downloads/sagreras-lecciones/`, la vista previa en `src/site/articles/sagreras-lecciones/lesson-NN.svg` y las páginas del
    modal en `full/`. `measures.json` guarda los compases por lección (lo lee `test/sagreras.unit.js`).
 
+Las fusas necesitan 24 divisiones por negra: `lesson_measures` selecciona esa rejilla al detectar tres barras,
+sin cambiar la de las lecciones anteriores. Dos glifos de puntillo multiplican la figura por 7/4; en el No.39,
+fusa + corchea con doble puntillo completan una negra. Se conservan las dos voces de la cabeza compartida
+(fusa arriba y negra del bajo), pero el control contra la TAB cuenta ese ataque una sola vez.
+
 La TAB publicada es la digitación sugerida por el motor, no la de Marieh. Los dedos de la mano izquierda (cifras 0-4 de
 8 pt, las de la TAB impresa son de 9 pt) sí se leen: `marieh_notes.attach_fingers` pasa cada cifra a la cabeza más cercana,
 `transcribe.py` las escribe como `<fingering>` y el motor las toma como pista (descarta las digitaciones que no se pueden
@@ -51,3 +56,7 @@ Los corchetes de tresillo se dibujan sobre el pentagrama (debajo chocan con la r
 ```
 
 Verificación: `node --test test/sagreras.unit.js`, `node scripts/build-site.js` y `node test/articles.e2e.js`.
+
+Regresiones del lector sin el PDF local: `.venv-carcassi/bin/python -m unittest discover -s scripts/sagreras -p 'test_*.py'`.
+La prueba de la leccion 39 en `test/sagreras.unit.js` verifica tambien las duraciones y los dos puntillos en la fuente y
+el MusicXML publicado.
