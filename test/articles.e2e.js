@@ -276,7 +276,8 @@ const PDFS = [
       assert.equal(await page.locator('.chord-popover:popover-open').count(), 0);
       for (const width of [320, 375, 1280]) {
         await page.setViewportSize({ width, height: 800 });
-        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
+        // Resizing reflows over the next frames, so wait instead of sampling once.
+        await page.waitForFunction(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
         for (const tab of await page.getByRole('tab').all()) {
           await tab.click();
           // A revealed panel lays its annotations out on the next frames.
