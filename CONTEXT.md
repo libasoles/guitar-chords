@@ -1,6 +1,6 @@
 # Acordes de guitarra
 
-Sitio estático de herramientas para guitarristas (acordes, notas, tablaturas) más la herramienta Partitura y tablatura, que convierte una partitura en notación con tablatura. Este glosario fija el vocabulario de esa herramienta; código, docs y tickets deben usar estos términos.
+Sitio estático de herramientas para guitarristas (acordes, notas, tablaturas), la herramienta Partitura y tablatura, que convierte una partitura en notación con tablatura, y colecciones de ejercicios. Este glosario fija el vocabulario del proyecto; código, docs y tickets deben usar estos términos.
 
 ## Language
 
@@ -51,6 +51,16 @@ _Avoid_: Forma reducida, digitación parcial
 **Descomposición**:
 Tomar algunas notas de un acorde en vez de su Forma completa para generar un arpegio, plaqué o contrapunto.
 _Avoid_: Simplificación
+
+### Colecciones de estudio
+
+**Célula de estudio**:
+Un patrón breve de duraciones y relaciones entre bajo y agudos que puede recorrer una sucesión de acordes. Su repetición concentra la práctica en una dificultad principal.
+_Avoid_: Género (una célula no define por sí sola un género), sucesión (esta indica el recorrido armónico)
+
+**Cierre escrito**:
+La conclusión musical explícita de un ejercicio, después de su sección repetible. Resuelve la sucesión y permite terminar sin volver al comienzo del patrón.
+_Avoid_: Repetición, vuelta
 
 ## Relationships
 
