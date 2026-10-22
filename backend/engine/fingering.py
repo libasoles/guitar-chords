@@ -182,6 +182,8 @@ def avoid_repeated_strings(tabs, opens, max_fret=9, open_reach=6, measures=None,
 # A left-hand finger (1-4), a string or a fret written on a note narrows where it can be played. The position
 # is the fret under finger 1 (Carcassi, "The Positions"), so finger `d` on fret `f` implies `f - (d - 1)`.
 
+FINGERED_NOT_OPEN = False   # a written finger 1-4 means a pressed fret, never an open string. Off by default: Sagreras'
+                            # arpeggio studies carry digits on notes the printed tab plays open (lessons 49, 55)
 EXTENSION = 1   # frets the hand may stretch beyond its position before a finger combination is impossible
 
 
@@ -192,7 +194,8 @@ def allowed_cells(midi, opens, hint, max_fret):
     narrowed = [(s, f) for s, f in cells
                 if (hint.get("string") is None or s == hint["string"])
                 and (hint.get("fret") is None or f == hint["fret"])
-                and (hint.get("finger") != 0 or f == 0)]
+                and (hint.get("finger") != 0 or f == 0)
+                and not (FINGERED_NOT_OPEN and hint.get("finger") and f == 0)]
     return narrowed or cells
 
 

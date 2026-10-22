@@ -1,6 +1,7 @@
 """Arpeggio rules (issue #42). Expectations are musical: what a guitarist would not play, not what the code returns."""
 
 import unittest
+from unittest import mock
 
 import fingering
 import tabify
@@ -237,6 +238,14 @@ class AnnotationTests(unittest.TestCase):
         self.assertTrue(fingering.fingers_possible([(1, 5), (2, 8)], [1, 4]))
         # finger 1 on fret 5 and finger 2 on fret 9: positions 5 and 8, an impossible stretch
         self.assertFalse(fingering.fingers_possible([(1, 5), (2, 9)], [1, 2]))
+
+    def test_a_fingered_note_is_never_an_open_string(self):
+        # B3 with finger 3 (Sor, Op. 60 n.º 3, m. 6: a-1 b-3 on one string): fret 4 of the third string, not the open second
+        with mock.patch.object(fingering, "FINGERED_NOT_OPEN", True):
+            self.assertEqual([(2, 4)], fingering.allowed_cells(59, OPENS, {"finger": 3}, 12)[:1])
+            self.assertNotIn((1, 0), fingering.allowed_cells(59, OPENS, {"finger": 3}, 12))
+        self.assertIn((1, 0), fingering.allowed_cells(59, OPENS, {"finger": 3}, 12))
+        self.assertIn((1, 0), fingering.allowed_cells(59, OPENS, {}, 12))
 
     def test_hints_never_remove_a_note(self):
         combos = tabify.candidates([64], OPENS, {64: {"finger": 4, "string": 5}})
