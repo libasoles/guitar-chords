@@ -47,6 +47,9 @@ del motor o añadir una lección, corre `compare_positions.py`: el total no debe
 ♯ de la primera nota no es una armadura (`pdf_notes.key_signature` exige las alturas canónicas), y en compases con varias
 voces de plica abajo los inicios se ajustan a la cuadrícula de duraciones (si no, un acorde queda entre dos pulsos).
 Los corchetes de tresillo se dibujan sobre el pentagrama (debajo chocan con la redonda del bajo) y no se copian a la TAB.
+Su altura se calcula por grupo, dejando espacio sobre las notas agudas y sus plicas de todas las voces simultáneas,
+no a una altura fija de la última línea. La lección 55 aplica esta corrección en `engraving.clear_triplets` al generar
+la vista previa, las páginas del modal y el PDF; la vista previa reserva margen superior para las cifras elevadas.
 
 ## Reproducir
 
