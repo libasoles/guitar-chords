@@ -21,7 +21,8 @@ No se crean columnas ni se cambian valores rítmicos. En MusicXML, una voz
 que queda vacía conserva su duración como silencio oculto.
 
 Arrastrar el pentagrama de un compás al **Track** agrega una copia de su
-partitura y TAB en ese momento. Se pueden mezclar compases de distintos
+notas y TAB en ese momento, sin claves, armaduras, indicaciones de compás,
+barras de repetición ni otras marcas de contexto. Se pueden mezclar compases de distintos
 sets, repetirlos, reordenarlos por arrastre y quitar cada copia con la X
 de Lucide en su esquina superior derecha. Enter sobre el pentagrama ofrece una alternativa al arrastre. El track queda visible al desplazarse por los
 ejercicios y admite mouse o pantalla táctil.

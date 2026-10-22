@@ -86,6 +86,17 @@ function stripScoreText(svg) {
   svg.querySelectorAll('text, foreignObject, g.dir, g.dynam, g.tempo, g.harm, g.verse, g.syl, g.mNum, g.reh, g.fing').forEach(node => node.remove());
 }
 
+// Keep the staff and the glyphs that describe notes and their rhythm.
+// Apply on display as well, so previously saved chunks use the same format.
+function stripTrackContext(svg) {
+  const noteGroups = new Set(['staff', 'layer', 'beam', 'chord', 'note',
+    'notehead', 'stem', 'flag', 'dots', 'accid', 'ledgerLines',
+    'tuplet', 'tupletNum', 'tupletBracket']);
+  svg.querySelectorAll('g.measure g').forEach(group => {
+    if (![...group.classList].some(name => noteGroups.has(name))) group.remove();
+  });
+}
+
 // Each excerpt uses the original staff and notehead X coordinates. Only the
 // SVG viewport changes: no engraving or rhythmic spacing is recalculated here.
 function excerpts(model) {
@@ -212,6 +223,7 @@ function makeMeasure(snapshot, editable) {
   const notation = element('div', 'measure-notation');
   notation.innerHTML = snapshot.svg;
   stripScoreText(notation.querySelector('svg'));
+  if (!editable) stripTrackContext(notation.querySelector('svg'));
   scopeSvg(notation.querySelector('svg'));
   notation.draggable = false;
   notation.tabIndex = 0;

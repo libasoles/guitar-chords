@@ -72,6 +72,16 @@ const { playwrightExecutablePath } = require('../lib/chrome-path');
     const track = page.locator('#track');
     await measure.locator('.measure-notation').dragTo(track, { sourcePosition: { x: 20, y: 20 } });
     assert.equal(await track.locator('.track-item').count(), 1);
+    const context = 'g.clef, g.keySig, g.meterSig, g.barLine, g.fermata, g.rest';
+    assert.ok(await measure.locator(context).count() > 0, 'source keeps score context');
+    assert.equal(await track.locator(context).count(), 0, 'track contains only note notation');
+    assert.equal(await track.locator('g.notehead').count(), await measure.locator('g.notehead').count());
+    const trackDelta = await track.locator('.measure-view').evaluate(node => {
+      const head = node.querySelector('[data-id="n0-agudo-0-0"] .notehead').getBoundingClientRect();
+      const fret = node.querySelector('.ascii-tabs-cell[data-c="1"][data-s="2"] .ascii-tabs-fret').getBoundingClientRect();
+      return Math.abs(head.x + head.width / 2 - fret.x - fret.width / 2);
+    });
+    assert.ok(trackDelta < 2, `Track TAB alignment: ${trackDelta}px`);
     assert.equal(await first.locator('.measure-view').count(), 8);
     assert.equal(await track.locator('ascii-tabs').evaluate(tabs => tabs.readonly), true);
     assert.equal(await track.locator('ascii-tabs').evaluate(tabs => tabs.value[0][1][2]), 12);
@@ -125,9 +135,17 @@ const { playwrightExecutablePath } = require('../lib/chrome-path');
     assert.equal(await track.locator('.track-item').count(), 3);
     assert.equal(await track.locator('.track-source, .measure-label, text').count(), 0);
     assert.equal(await page.locator('#status').innerText(), '');
+    // Older snapshots may still contain context glyphs in storage.
+    await page.evaluate(() => {
+      const key = 'folklore.lab.track.v1';
+      const saved = JSON.parse(localStorage.getItem(key));
+      saved[0].snapshot.svg = saved[0].snapshot.svg.replace('</svg>', '<g class="measure"><g class="keySig"><path d="M0 0h10"/></g></g></svg>');
+      localStorage.setItem(key, JSON.stringify(saved));
+    });
     await page.reload();
     await page.waitForFunction(() => !document.querySelector('#collection').disabled);
     assert.equal(await track.locator('.track-item').count(), 3);
+    assert.equal(await track.locator(context).count(), 0, 'persisted chunks also omit context');
     assert.equal(await page.locator('.exercise').first().locator('ascii-tabs').first().evaluate(tabs => tabs.value[0][1][3]), 2);
     assert.equal(await page.locator('.exercise').first().locator('ascii-tabs').first().evaluate(tabs => tabs.value[0][1][0]), 7);
     await track.locator('.track-item').nth(1).locator('.measure-notation').dragTo(track.locator('.track-item').first());
