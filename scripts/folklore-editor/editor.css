@@ -16,8 +16,10 @@ button { cursor: pointer; }
 button:focus-visible, select:focus-visible, .measure-notation:focus-visible { outline: 2px solid #4b8060; outline-offset: 2px; }
 #status { font-size: 13px; color: #a53524; }
 #status:empty { display: none; }
-.track-panel { position: sticky; top: 0; z-index: 5; background: var(--paper); margin-bottom: 24px; }
-#track { min-height: 100px; display: flex; overflow-x: auto; padding: 4px 0; border-bottom: 1px solid #d9dfd5; }
+.track-panel { display: flex; border-bottom: 1px solid #d9dfd5; position: sticky; top: 0; z-index: 5; background: var(--paper); margin-bottom: 24px; }
+#track { flex: 1; min-width: 0; min-height: 100px; display: flex; overflow-x: auto; padding: 4px 0; }
+.track-signature { flex: none; padding-top: 28px; margin-top: 4px; user-select: none; pointer-events: none; }
+.track-signature svg { display: block; width: 100%; }
 #track.drag-over { background: #edf4eb; border-color: #376c48; }
 .exercise { margin-bottom: 32px; }
 .measure-scroll { overflow-x: auto; }
