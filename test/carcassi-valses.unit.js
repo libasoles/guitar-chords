@@ -37,3 +37,15 @@ test('Vals 2, compás 17: el re sostenido sigue al acorde de sol', () => {
     }
   }
 });
+
+test('Vals 5, compás 16: mi en primera cuerda al aire mantiene la posición', () => {
+  const xml = fs.readFileSync(path.join(__dirname, '../downloads/carcassi-valses/Waltz 5 in D Major - Matteo Carcassi.musicxml'), 'utf8');
+  const bar = xml.match(/<measure\b[^>]*number="16"[^>]*>([\s\S]*?)<\/measure>/)[1];
+  const notes = [...bar.matchAll(/<note\b[^>]*>([\s\S]*?)<\/note>/g)]
+    .map((m) => m[1]).filter((n) => /<staff>2<\/staff>/.test(n) && /<pitch>/.test(n));
+  const melody = notes.filter((n) => /<voice>1<\/voice>/.test(n) && !/<chord\s*\//.test(n));
+  assert.deepEqual(melody.map((n) => [
+    Number(n.match(/<string>(.*?)<\/string>/)[1]),
+    Number(n.match(/<fret>(.*?)<\/fret>/)[1]),
+  ]), [[1, 0], [1, 2], [1, 0], [2, 3], [3, 4]]);
+});
