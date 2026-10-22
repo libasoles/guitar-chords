@@ -112,3 +112,39 @@ test('leccion 1: la notacion conserva las letras de la mano derecha', { skip: !p
   const letters = [...xml.matchAll(/<fingering[^>]*>\s*([pima])\s*<\/fingering>/g)].map((m) => m[1]);
   assert.deepEqual(letters, ['i', 'm', 'i', 'm', 'i', 'm', 'i', 'm']);
 });
+
+/* El No.39 combina fusa + corchea con doble puntillo sobre un bajo de negra.
+   Comprobar las duraciones reales, ademas de los simbolos: redondear la fusa desplaza toda la voz. */
+test('leccion 39: fusas, doble puntillo y bajo sostenido conservan sus duraciones', () => {
+  const piece = pieces.find((p) => p.number === 39);
+  assert.ok(piece, 'la leccion 39 debe estar publicada');
+  const files = [
+    path.join(__dirname, '..', 'scripts', 'sagreras', 'sources', '39.musicxml'),
+    path.join(DOWNLOADS_DIR, piece.base + '.musicxml'),
+  ];
+  for (const file of files) {
+    const xml = fs.readFileSync(file, 'utf8');
+    const divisions = Number(xml.match(/<divisions>(\d+)<\/divisions>/)[1]);
+    const measures = [...xml.matchAll(/<measure\b[^>]*>([\s\S]*?)<\/measure>/g)].map((m) => m[1]);
+    assert.equal(measures.length, 3);
+    for (const [index, measure] of measures.entries()) {
+      const notes = [...measure.matchAll(/<note\b[^>]*>([\s\S]*?)<\/note>/g)].map((m) => m[1]);
+      const staff = notes.filter((n) => !/<staff>2<\/staff>/.test(n));
+      const upper = staff.filter((n) => /<voice>1<\/voice>/.test(n));
+      const expected = index < 2 ? [1 / 8, 7 / 8, 1 / 8, 7 / 8, 1 / 8, 7 / 8, 1 / 8, 7 / 8] : [1 / 8, 7 / 8, 1, 2];
+      assert.deepEqual(upper.map((n) => Number(n.match(/<duration>(\d+)<\/duration>/)[1]) / divisions), expected);
+      for (const [i, note] of upper.entries()) {
+        if (index === 2 && i >= 2) {
+          assert.match(note, /<rest\s*\/>/);
+          continue;
+        }
+        assert.match(note, i % 2 === 0 ? /<type>32nd<\/type>/ : /<type>eighth<\/type>/);
+        assert.equal((note.match(/<dot\s*\/>/g) || []).length, i % 2 === 0 ? 0 : 2);
+        assert.doesNotMatch(note, /<time-modification>/, 'la fusa no es un tresillo');
+      }
+      const bass = staff.filter((n) => /<voice>2<\/voice>/.test(n) && /<pitch>/.test(n));
+      assert.equal(bass.length, index < 2 ? 4 : 1);
+      assert.ok(bass.every((n) => Number(n.match(/<duration>(\d+)<\/duration>/)[1]) === divisions));
+    }
+  }
+});

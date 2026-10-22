@@ -5,7 +5,7 @@
 
 Las notas se leen de la geometria del PDF (marieh_notes.py + carcassi-valses/pdf_notes.py); no se copia nada del PDF
 a la salida: el MusicXML lleva solo alturas y duraciones, y la TAB la propone el motor (ver build.py). Alturas escritas
-(clave de sol), 12 divisiones por negra (admite tresillos). Los numeros de la TAB impresa dan un control independiente:
+(clave de sol), 12 divisiones por negra o 24 si hay fusas (admite tresillos). Los numeros de la TAB impresa dan un control independiente:
 las alturas leidas de la notacion deben coincidir con las del pentagrama de tablatura.
 """
 import json
@@ -28,14 +28,30 @@ import transcribe_valses as V  # noqa: E402
 
 SOURCES = HERE / 'sources'
 SCALE = 3  # unidades por semicorchea; la negra son 12
-T.TYPES = {1: '32nd', 2: '16th', 3: '16th', 4: 'eighth', 6: 'eighth', 8: 'quarter', 9: 'eighth', 12: 'quarter', 18: 'quarter',
+BASE_TYPES = {1: '32nd', 2: '16th', 3: '16th', 4: 'eighth', 6: 'eighth', 8: 'quarter', 9: 'eighth', 12: 'quarter', 18: 'quarter',
            24: 'half', 36: 'half', 48: 'whole'}
-T.DOTTED = {9, 18, 36}
+BASE_DOTTED = {9, 18, 36}
 TRIPLET = {2, 4, 8}  # semicorchea, corchea y negra de tresillo (en unidades)
 STEPS = 'CDEFGAB'
 
 _state = {'full': 16}
 _original_groups = P.stem_groups
+
+
+def configure_rhythm(scale):
+    """Conservar la rejilla habitual; fusas y doble puntillo necesitan 24 divisiones por negra."""
+    global SCALE, TRIPLET
+    SCALE = scale
+    factor = scale // 3
+    T.TYPES = {d * factor: kind for d, kind in BASE_TYPES.items()}
+    T.DOTTED = {d * factor for d in BASE_DOTTED}
+    if scale == 6:
+        T.TYPES.update({3: '32nd', 21: 'eighth'})
+        T.DOTTED.add(21)
+    TRIPLET = {d * factor for d in (2, 4, 8)}
+
+
+configure_rhythm(3)
 
 
 def read_lessons():
@@ -50,6 +66,15 @@ def fixed_groups(m):
     """`stem_groups` con las reglas propias de esta edicion: tresillos, redonda sin plica y voz unica."""
     groups = _original_groups(m)
     full = _state['full']
+    # El lector compartido solo aplica un puntillo. Contar los glifos propios de esta edicion para
+    # recuperar el segundo sin modificar las reglas de las otras colecciones.
+    for g in groups:
+        if not any(h['dot'] for h in g['heads']):
+            continue
+        dots = max(sum(0 < d[1] - h['x'] < 14 and abs(d[2] - h['y']) < m['space'] / 2 + 0.3
+                       for d in m['dots']) for h in g['heads'])
+        if dots == 2:
+            g['dur'] *= 7 / 6  # de 3/2 a 7/4 de la figura base
     space = m['space']
     # tresillos: la cifra «3» marca las tres notas (o silencios) mas cercanos de su voz: sobre el pentagrama la
     # voz de plicas arriba, bajo el la de plicas abajo
@@ -121,6 +146,9 @@ def take_bass(m, full):
 
 
 def lesson_measures(lesson):
+    # No redondear las medias semicorcheas: una fusa ocupa tres unidades con escala 6.
+    groups = [g for m in lesson['measures'] for g in _original_groups(m)]
+    configure_rhythm(6 if any(g['beams'] >= 3 for g in groups) else 3)
     time = lesson['time']
     full = time[0] * 16 // time[1]
     _state['full'] = full
@@ -157,11 +185,17 @@ def compare_tab(lesson, measures):
     read = Counter()
     tied = Counter()
     for data in measures:
+        attacks = {}
         for voice in data['voices']:
-            for _, _, pitch, _, _, ties in voice['events']:
+            for onset, duration, pitch, _, _, ties in voice['events']:
                 for p in pitch.split('+'):
                     if p == 'R':
                         continue
+                    # Dos cabezas coincidentes en voces distintas son un solo ataque (bajo sostenido
+                    # con negra y fusa en la voz superior); la TAB impresa lo cuenta una sola vez.
+                    if (onset, p) in attacks and attacks[(onset, p)] != duration:
+                        continue
+                    attacks[(onset, p)] = duration
                     read[written_midi(p)] += 1
                     if ties.get(p, (False, False))[0]:
                         tied[written_midi(p)] += 1
@@ -172,7 +206,7 @@ def compare_tab(lesson, measures):
 
 
 def beam_bounds(time, full):
-    unit = 18 if time[1] == 8 else 12 if time[1] == 4 else 24
+    unit = (6 if time[1] == 8 else 4 if time[1] == 4 else 8) * SCALE
     return list(range(0, full + 1, unit))
 
 
@@ -188,20 +222,27 @@ def stem_for(pitch):
 
 def beams_for(events, bounds):
     states = {}
+    factor = SCALE // 3
     for dur, bars in ((2, (1, 2)), (3, (1, 2)), (4, (1,)), (6, (1,))):
         for start, end in zip(bounds, bounds[1:]):
-            group = [e for e in events if e[1] == dur and e[2] != 'R' and start <= e[0] < end]
+            group = [e for e in events if e[1] == dur * factor and e[2] != 'R' and start <= e[0] < end]
             for i, e in enumerate(group):
                 if len(group) > 1:
                     state = 'begin' if i == 0 else 'end' if i == len(group) - 1 else 'continue'
                     states.setdefault(e[0], {}).update({n: state for n in bars})
-    # corcheas y semicorcheas seguidas: la barra 1 es comun
+    # Fusa + corchea de doble puntillo: una barra comun y dos ganchos hacia la corchea.
+    if SCALE == 6:
+        for first, second in zip(events, events[1:]):
+            if first[1] == 3 and second[1] == 21 and first[0] + 3 == second[0] and first[2] != 'R' and second[2] != 'R':
+                states[first[0]] = {1: 'begin', 2: 'forward hook', 3: 'forward hook'}
+                states[second[0]] = {1: 'end'}
     return states
 
 
 def rests_xml(length, voice):
     out = ''
-    for size in (48, 24, 12, 8, 6, 4, 3, 2, 1):
+    sizes = (96, 48, 24, 16, 12, 8, 6, 4, 3, 2) if SCALE == 6 else (48, 24, 12, 8, 6, 4, 3, 2, 1)
+    for size in sizes:
         while length >= size:
             out += T.hidden_rest(size, voice)
             length -= size
@@ -251,6 +292,8 @@ def measure_xml(number, time, data, first, implicit, key_change, prev_fifths):
         else:
             event = (*event[:3], fingers.get(event[2]), *event[4:])
         xml = T.note_xml(event[:4], v + 1, stem, acc, beams_for(voices[v]['events'], bounds).get(event[0]))
+        if SCALE == 6 and event[1] == 21:
+            xml = xml.replace('<dot/>', '<dot/><dot/>')
         rendered[(v, event[0])] = graces + V.add_ties(xml, event[5])
     body = ''
     for v, voice in enumerate(voices):
