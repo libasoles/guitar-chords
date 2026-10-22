@@ -707,37 +707,8 @@ async function fillForm(page, name) {
         await page.locator('#partNotation').uncheck();
         const plain = await page.locator('.part-measure-tab .ascii-tabs-fret').first().evaluate(n => getComputedStyle(n).fontWeight);
         assert.ok(Number(plain) < 600, 'frets are not bold by default: ' + plain);
-        await page.locator('#partBoldBass').check();
-        const weights = await page.evaluate(() => {
-          const m = document.querySelectorAll('.part-measure-tab')[1];
-          const col = m.querySelector('.ascii-tabs-has[data-c="1"][data-s="5"] .ascii-tabs-fret');
-          const top = m.querySelector('.ascii-tabs-has[data-c="1"][data-s="0"] .ascii-tabs-fret');
-          return [getComputedStyle(col).fontWeight, getComputedStyle(top).fontWeight];
-        });
-        assert.ok(Number(weights[0]) >= 600 && Number(weights[1]) < 600, 'bass bold only: ' + weights);
-        // A Column with no downward stems has no bass: nothing is bold there.
-        const upStem = await page.evaluate(() => {
-          const m = document.querySelectorAll('.part-measure-tab')[1];
-          const cell = m.querySelector('.ascii-tabs-has[data-c="0"][data-s="1"] .ascii-tabs-fret');
-          return getComputedStyle(cell).fontWeight;
-        });
-        assert.ok(Number(upStem) < 600, 'up-stem Column not bold: ' + upStem);
-        await page.locator('#partBoldBass').uncheck();
-
-        // First use: the bass tip, then the B-key tip. Expiring alone does not
-        // remember them; closing each one does.
-        const tipTitle = () => page.locator('.part-tip .part-tip-title').allTextContents();
+        assert.equal(await page.locator('#partBoldBass').count(), 0, 'no bass highlight option');
         const strings = await page.evaluate(() => window.PARTITURA_CONFIG.strings);
-        assert.deepEqual(await tipTitle(), [strings.partTipBassTitle], 'bass tip shown first');
-        assert.equal(await page.locator('.part-tip svg.part-tip-graphic').count(), 1);
-        assert.equal(await page.evaluate(() => localStorage.getItem('partitura.tip.bass')), null);
-        await page.locator('.part-tip-close').click();
-        assert.equal(await page.evaluate(() => localStorage.getItem('partitura.tip.bass')), '1');
-        assert.deepEqual(await tipTitle(), [strings.partTipBoldTitle], 'bold tip follows immediately');
-        assert.equal(await page.locator('.part-tip .tab-demo--bold').count(), 1);
-        await page.locator('.part-tip-close').click();
-        assert.equal(await page.evaluate(() => localStorage.getItem('partitura.tip.bold')), '1');
-        assert.equal(await page.locator('.part-tip').count(), 0);
 
         // Confirm and export: the Digitación confirmada goes to POST /export.
         assert.equal(await page.locator('#partTitle').inputValue(), 'Camino de las Tropas');
