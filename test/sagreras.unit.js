@@ -10,6 +10,43 @@ const fs = require('fs');
 const path = require('path');
 const catalog = require('../scripts/lib/article-sagreras');
 
+test('leccion 60: el acompanamiento entra en los tiempos 2 y 3, separado de las blancas con puntillo', () => {
+  const root = path.join(__dirname, '..');
+  const files = [path.join(root, 'scripts/sagreras/sources/60.musicxml'),
+    path.join(root, 'downloads/sagreras-lecciones/Lesson 60 - Julio Salvador Sagreras.musicxml')];
+  const patterns = { 2: ['D5', 'B3', ['F4', 'G4']], 4: ['E5', 'C4', ['G4', 'C5']],
+    10: ['G5', 'E4', ['G4', 'C5']], 12: ['E5', 'C4', ['G4', 'C5']] };
+  for (const file of files) {
+    const xml = fs.readFileSync(file, 'utf8');
+    const divisions = Number(xml.match(/<divisions>(\d+)<\/divisions>/)[1]);
+    for (const [number, [melody, bass, chord]] of Object.entries(patterns)) {
+      const measure = xml.match(new RegExp(`<measure\\b[^>]*number="${number}"[^>]*>([\\s\\S]*?)<\\/measure>`))[1];
+      let cursor = 0;
+      let previous = 0;
+      const notes = [];
+      const rests = [];
+      for (const token of measure.matchAll(/<(note|backup|forward)\b[^>]*>([\s\S]*?)<\/\1>/g)) {
+        const body = token[2];
+        const duration = Number(body.match(/<duration>(\d+)<\/duration>/)[1]) / divisions;
+        if (token[1] === 'backup') { cursor -= duration; continue; }
+        if (token[1] === 'forward') { cursor += duration; continue; }
+        const isChord = /<chord\s*\//.test(body);
+        const onset = isChord ? previous : cursor;
+        if (!isChord) { previous = cursor; cursor += duration; }
+        if (/<staff>2<\/staff>/.test(body)) continue;
+        const pitch = body.match(/<step>([A-G])<\/step>[\s\S]*?<octave>(\d)<\/octave>/);
+        if (pitch) notes.push([onset, duration, pitch[1] + pitch[2]]);
+        else if (!/print-object="no"/.test(token[0])) rests.push([onset, duration]);
+      }
+      const expected = [[0, 3, melody], [0, 3, bass],
+        ...[1, 2].flatMap((beat) => chord.map((pitch) => [beat, 1, pitch]))];
+      const sort = (a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b));
+      assert.deepEqual(notes.sort(sort), expected.sort(sort), `${file}: compas ${number}`);
+      assert.deepEqual(rests, [[0, 1]], `${file}: silencio inicial del acompanamiento en ${number}`);
+    }
+  }
+});
+
 /* Compases de cada leccion, contados sobre la partitura de la edicion de origen (scripts/sagreras/measures.json). */
 const MEASURES = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'scripts', 'sagreras', 'measures.json'), 'utf8'));
 
