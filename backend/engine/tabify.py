@@ -49,6 +49,10 @@ GUITAR_LOWEST = 38  # D2, the 6th string in Drop D
 # One misread note (OMR noise) must not flip a whole piece an octave.
 IN_SOUND_SHARE = 0.05
 KEEP_TEXT = False  # keep <words> directions; off for uploads, where they are OCR noise
+# Two voices sounding the same pitch at the same instant (a melody note over the bass note it shares) are one note on
+# the guitar: only the first gets a string and fret, as engravers merge their heads. Off by default: uploads keep
+# every note; curated collections whose source marks such unisons (Sor, from LilyPond) turn it on.
+MERGE_UNISONS = False
 
 PREVIEW_OPTIONS = {
     "pageWidth": 2100, "pageHeight": 60000, "scale": 40, "adjustPageHeight": True,
@@ -239,7 +243,10 @@ def build_columns(part, shifts=None):
                 tie = note.tie or general.tie
                 if tie is not None and tie.type in ("stop", "continue"):
                     continue
-                by_offset.setdefault(offset, []).append((note, note.pitch.midi + shift))
+                column = by_offset.setdefault(offset, [])
+                if MERGE_UNISONS and any(m == note.pitch.midi + shift for _, m in column):
+                    continue
+                column.append((note, note.pitch.midi + shift))
         columns = [{"offset": o, "notes": by_offset[o]} for o in sorted(by_offset)]
         for column in columns:
             column["hints"] = {m: hints[m] for _, m in column["notes"] if hints.get(m)}

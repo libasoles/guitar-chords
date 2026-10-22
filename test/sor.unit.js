@@ -12,7 +12,7 @@ const path = require('path');
 const catalog = require('../scripts/lib/article-sor');
 
 /* Compases de cada pieza, contados sobre la fuente curada (la partitura del libro; la anacrusa cuenta como compas). */
-const MEASURES = { 1: 16, 3: 24, 4: 26, 8: 16 };
+const MEASURES = { 1: 16, 2: 40, 3: 24, 4: 26, 5: 40, 6: 36, 7: 44, 8: 16, 9: 16, 10: 17, 11: 32, 12: 27, 13: 24 };
 
 /* Cadenas del archivo de origen: programa, rutas y textos de la cabecera de LilyPond. */
 const SOURCE_TRACES = [/LilyPond/i, /\.ly\b/i, /fernandosor\.free\.fr/i, /mutopiatitle/i];

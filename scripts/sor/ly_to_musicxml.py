@@ -205,7 +205,7 @@ class Parser:
         for name in names:
             music = self.variables[name]
             voices.extend(music['voices'] if isinstance(music, dict) else [music])
-        return voices
+        return expand_nested(voices)
 
     # -- musica ----------------------------------------------------------------------------------
     def music(self):
@@ -220,6 +220,13 @@ class Parser:
                 return self.repeat_block()
             if text == '\\notes':
                 self.take()
+                return self.music()
+            if text in ('\\context', '\\new'):
+                self.take()
+                self.take()  # Voice, Staff...
+                if self.peek()[1] == '=':
+                    self.take()
+                    self.take()
                 return self.music()
             if text[1:] in self.variables:
                 self.take()
@@ -274,6 +281,7 @@ class Parser:
     def simultaneous(self):
         """`<< { a } \\\\ { b } >>` o `<< \\a \\\\ \\b >>`: una voz por rama."""
         branches, current = [], []
+        start = self.ref  # en modo relativo cada rama parte de la altura anterior al <<
         while True:
             kind, text = self.peek()
             if kind == 'simclose':
@@ -283,11 +291,14 @@ class Parser:
                 self.take()
                 branches.append(current)
                 current = []
+                self.ref = start
                 continue
             if kind == 'command' and text[1:] in IGNORED | {'oneVoice'}:
                 self.take()
                 continue
             current.append(self.music())
+            if self.peek()[0] not in ('simclose', 'voicesep'):
+                self.ref = start
         branches.append(current)
         voices = []
         for branch in branches:
@@ -386,10 +397,18 @@ class Parser:
             items.extend(self.flat(self.relative_block()))
         elif name == 'repeat':
             items.extend(self.flat(self.repeat_block()))
-        elif name == 'context' or name == 'new':
-            raise LyError('\\context dentro de la musica')
         elif name in self.variables:
             items.extend(self.flat(self.variables[name]))
+        elif name in ('acciaccatura', 'appoggiatura', 'grace'):
+            first = len(items)
+            if self.peek()[1] == '{':
+                self.take()
+                items.extend(self.sequence('}'))
+            else:
+                self.element(items)
+            for event in items[first:]:
+                if event['kind'] == 'chord':
+                    event.update(grace=True, slash=name == 'acciaccatura', grace_dur=event['dur'], dur=Fraction(0))
         elif name == 'rest':
             pass
         elif name in IGNORED:
@@ -488,6 +507,55 @@ class Parser:
 
 
 # -- MusicXML --------------------------------------------------------------------------------------------
+def expand_nested(voices):
+    """Las voces simultaneas que se abren a mitad de una voz (`<< { a } \\\\ { b } >>` entre otras notas) pasan a ser
+    voces propias: la primera rama sigue en su sitio y las demas empiezan en ese instante, con silencios de relleno
+    delante y detras hasta el final de la pieza."""
+    result, extras = [], []
+    for voice in voices:
+        out, t = [], Fraction(0)
+        for item in voice:
+            if item['kind'] == 'par':
+                branches = [expand_nested([branch])[0] for branch in item['voices']]
+                length = Writer.timeline(branches[0])[3]
+                out.extend(branches[0])
+                for branch in branches[1:]:
+                    extras.append((t, branch))
+                t += length
+                continue
+            out.append(item)
+            if item['kind'] in ('chord', 'rest', 'space'):
+                t += item['dur']
+        result.append(out)
+    total = max(Writer.timeline(v)[3] for v in result + [b for _, b in extras])
+    for start, branch in extras:
+        filler = [space(start)] if start else []
+        rest = total - start - Writer.timeline(branch)[3]
+        result.append(filler + branch + ([space(rest)] if rest else []))
+    return result
+
+
+def split_spaces(events, bounds):
+    """Parte en cada barra de compas los silencios invisibles que la cruzan."""
+    out = []
+    for e in events:
+        if e['kind'] != 'space':
+            out.append(e)
+            continue
+        at, end = e['at'], e['at'] + e['dur']
+        for bound in bounds:
+            if at < bound < end:
+                out.append({**e, 'at': at, 'dur': bound - at})
+                at = bound
+        out.append({**e, 'at': at, 'dur': end - at})
+    return out
+
+
+def space(dur):
+    return {'kind': 'space', 'dur': dur, 'pitches': [], 'tie': False, 'slur_start': 0, 'slur_stop': 0, 'words': [],
+            'segno': False}
+
+
 class Writer:
     def __init__(self, voices, title, composer, words=None, tempo=None, score_controls=(), octave_shift=0):
         self.title, self.composer = title, composer
@@ -521,6 +589,14 @@ class Writer:
         timelines = [self.timeline(v) for v in self.voices]
         events0, controls0, bars0, end0 = timelines[0]
         controls = self.score_controls + [c for _, ctl, _, _ in timelines for c in ctl]
+        # Cada voz lleva las mismas marcas de repeticion y de casilla: se cuentan una vez.
+        seen, unique = set(), []
+        for t, item in controls:
+            key = (t, tuple(sorted((k, str(v)) for k, v in item.items())))
+            if key not in seen:
+                seen.add(key)
+                unique.append((t, item))
+        controls = unique
         time = (4, 4)
         fifths = 0
         for _, item in sorted(controls, key=lambda c: c[0]):
@@ -534,6 +610,8 @@ class Writer:
         bounds = self.measure_bounds(timelines, controls, full, end)
         starts = [Fraction(0)] + bounds[:-1]
         measures = list(zip(starts, bounds))
+        for events, _, _, _ in timelines:  # un silencio de relleno puede abarcar varios compases
+            events[:] = split_spaces(events, bounds)
         problems = []
         for index, (a, b) in enumerate(measures):
             if a == b:
@@ -545,7 +623,6 @@ class Writer:
         if problems:
             raise LyError('; '.join(problems[:8]))
         key_state = self.key_table(fifths)
-        stems = len(self.voices) > 1
         out = []
         pickup = measures[0][1] - measures[0][0] < full
         counter, previous = 0 if pickup else 1, None
@@ -596,11 +673,15 @@ class Writer:
                 for text in self.words:
                     body += words_dir(text)
             state = dict(key_state)
-            for k, (events, _, _, _) in enumerate(timelines):
-                if k:
+            # Una voz con solo silencios de relleno en este compas no se escribe; las plicas van arriba y abajo
+            # solo donde suenan dos voces.
+            active = [k for k, (events, _, _, _) in enumerate(timelines)
+                      if k == 0 or any(e['kind'] != 'space' for e in events if a <= e['at'] < b)]
+            for turn, k in enumerate(active):
+                if turn:
                     body += '<backup><duration>%d</duration></backup>' % int(length * DIVISIONS)
-                stem = ('up' if k == 0 else 'down') if stems else None
-                body += self.voice_xml(events, a, b, k + 1, stem, state, time, full if not implicit else length)
+                stem = ('up' if turn == 0 else 'down') if len(active) > 1 else None
+                body += self.voice_xml(timelines[k][0], a, b, k + 1, stem, state, time, full if not implicit else length)
             barline_left = '<barline location="left">%s</barline>' % left if left else ''
             barline_right = '<barline location="right">%s</barline>' % right if right else ''
             out.append('<measure number="%d"%s>%s%s%s%s</measure>' %
@@ -617,7 +698,10 @@ class Writer:
         """Finales de compas: las comprobaciones de compas del archivo o, si no las trae, la metrica (con \\partial)."""
         bars = set(b for _, _, bs, _ in timelines for b in bs)
         if bars:
-            return sorted(bars | {end})
+            # El inicio y el fin de una repeticion o de una casilla caen siempre en una barra de compas, la trajera o no
+            # el archivo (las casillas 1.a y 2.a no suelen llevar `|` entre ellas).
+            edges = {t for t, c in controls if c['kind'] in ('repeat_start', 'repeat_end', 'volta', 'volta_stop') and 0 < t < end}
+            return sorted(bars | edges | {end})
         # `\partial d` en el instante t: el compas que empieza ahi dura d (un anacrusa al inicio o un compas corto al
         # final de una repeticion); el resto dura lo que marca la metrica.
         partials = {}
@@ -649,8 +733,13 @@ class Writer:
                 beam_events.append({'level': 0, 'pos': cursor - a})
             if e['at'] + e['dur'] > b:
                 raise LyError('una nota cruza la barra de compas en %s (voz %d)' % (e['at'], number))
+            if e.get('grace'):
+                out += self.chord_xml(e, number, stem, state, -1)
+                continue
             level = BEAM_LEVEL.get(self.type_of(e['dur']), 0) if e['kind'] == 'chord' else 0
             beam_events.append({'level': level, 'pos': e['at'] - a})
+            if e.get('segno'):
+                out += '<direction placement="above"><direction-type><segno/></direction-type></direction>'
             if e['kind'] == 'chord':
                 out += self.chord_xml(e, number, stem, state, len(beam_events) - 1)
             else:
@@ -678,19 +767,24 @@ class Writer:
 
     def chord_xml(self, e, number, stem, state, index):
         out = ''
-        kind = self.type_of(e['dur'])
+        grace = e.get('grace')
+        kind = self.type_of(e['grace_dur'] if grace else e['dur'])
         for i, p in enumerate(e['pitches']):
             parts = ['<note>']
+            if grace:
+                parts.append('<grace slash="yes"/>' if e.get('slash') else '<grace/>')
             if i:
                 parts.append('<chord/>')
             parts.append('<pitch><step>%s</step>%s<octave>%d</octave></pitch>' %
                          (p['step'].upper(), '<alter>%d</alter>' % p['alter'] if p['alter'] else '', p['octave'] + self.octave_shift))
-            parts.append('<duration>%d</duration>' % int(e['dur'] * DIVISIONS))
+            if not grace:
+                parts.append('<duration>%d</duration>' % int(e['dur'] * DIVISIONS))
             if e.get('tied_from'):
                 parts.append('<tie type="stop"/>')
             if e['tie']:
                 parts.append('<tie type="start"/>')
-            parts.append('<voice>%d</voice><type>%s</type>%s' % (number, kind, '<dot/>' * dots_of(e['dur'], kind, None)))
+            parts.append('<voice>%d</voice><type>%s</type>%s' % (
+                number, kind, '' if grace else '<dot/>' * dots_of(e['dur'], kind, None)))
             slot = (p['step'], p['octave'])
             expected = state.get(p['step'], 0) if slot not in state else state[slot]
             shown = ''
@@ -701,7 +795,7 @@ class Writer:
                 parts.append('<accidental>%s</accidental>' % shown)
             if stem:
                 parts.append('<stem>%s</stem>' % stem)
-            if i == 0:
+            if i == 0 and not grace:
                 parts.append('@B%d@' % index)
             notations = ''
             if e.get('tied_from'):
@@ -754,14 +848,23 @@ class Writer:
 
 
 def mark_ties(voices):
-    """Una nota que sigue a otra con `~` recibe el cierre de la ligadura (tied_from)."""
+    """Una nota que sigue a otra con `~` recibe el cierre de la ligadura (tied_from). LilyPond ignora una ligadura entre
+    alturas distintas (Mutopia tiene una en la leccion 11, `d, ~ d'`); aqui tambien: se quita de las dos notas."""
     for voice in voices:
         previous = None
         for item in voice:
             if item['kind'] not in ('chord', 'rest', 'space'):
                 continue
-            item['tied_from'] = bool(previous and previous['tie'] and previous['kind'] == 'chord')
+            wanted = bool(previous and previous['tie'] and previous['kind'] == 'chord')
+            if wanted and pitch_set(previous) != pitch_set(item):
+                previous['tie'] = False
+                wanted = False
+            item['tied_from'] = wanted
             previous = item
+
+
+def pitch_set(event):
+    return {(p['step'], p['alter'], p['octave']) for p in event['pitches']}
 
 
 def convert(path, title, composer, words=None):

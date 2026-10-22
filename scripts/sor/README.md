@@ -31,15 +31,31 @@ el conversor la resta. Con `\clef "treble_8"` el archivo ya da la que suena. Se 
 
 ## Cómo se comprobó cada pieza
 
-1. Altura y posición de cada nota contra el `.mid` de Mutopia (music21, con las ligaduras fundidas): lecciones 1, 3, 4 y 8, cero
-   diferencias.
-2. Vista del PDF generado junto al PDF de Mutopia: notas, repeticiones, compases cortos y dedos.
+1. Altura y posición de cada nota contra el `.mid` de Mutopia (music21, con las ligaduras fundidas y comparando
+   conjuntos de (instante, altura)): lecciones 1–6, 8, 10, 11 y 13, cero diferencias. Tres diferencias que no son del
+   archivo: la 9 re-ataca un mi4 mientras suena otro igual (arpegio sobre una nota larga; LilyPond lo funde en el MIDI),
+   y la 12 y la 6 tienen una semicorchea con puntillo seguida de fusa que el MIDI cuantiza a tresillo. music21 además
+   parte las notas largas del MIDI en cada barra contada desde 0, sin descontar la anacrusa: esas notas se descartan
+   al comparar. En la 7 el MIDI no sirve a partir de la `\acciaccatura` (da tiempo al adorno).
+2. Vista del PDF generado junto al PDF de Mutopia, pieza por pieza: notas, repeticiones, casillas, compases cortos,
+   segno y dedos.
 
 No se cotejó con el impreso del Op. 60: Mutopia parte de escaneos de `fernandosor.free.fr`.
 
+## Lo que hubo que resolver
+
+- **La misma altura en dos voces a la vez** (lecciones 5, 9, 10, 11, 12, 13): LilyPond funde las cabezas; el motor las
+  tocaba dos veces en la TAB. `tabify.MERGE_UNISONS = True` (solo aquí) deja una sola nota por columna.
+- **Casillas 1.ª y 2.ª** (12): el archivo no trae `|` entre ellas; cada inicio y fin de repetición o casilla es una
+  barra de compás. Las marcas de repetición salen una vez aunque las lleve cada voz.
+- **Compases cortos con `\partial` a mitad de pieza** (4, 6, 7, 11, 12): la anacrusa de la repeticion siguiente completa
+  el compás corto y no cuenta como compás nuevo.
+- **Voces que se abren a mitad de una voz** (2): pasan a voz propia, con silencios invisibles; las plicas arriba y abajo
+  solo van donde suenan dos voces.
+- **`\acciaccatura`** (7) como nota de adorno sin duración; **`\segno`** como dirección.
+- **Ligadura entre alturas distintas** (`d, ~ d'` en la 11): se ignora, como hace LilyPond (su PDF imprime las dos notas).
+
 ## Pendiente
 
-- 5, 6, 9, 10, 11, 12, 13: el MIDI difiere por notas iguales a la vez en dos voces (LilyPond las funde en una cabeza;
-  aquí quedan duplicadas, lo que rompe la TAB) y por repeticiones con anacrusa. Hay que fundirlas antes de publicar.
-- 2 (`\context Voice` dentro de la música) y 7 (`\acciaccatura`): sin soporte en el conversor.
 - Cotejar con un escaneo del Op. 60 de IMSLP.
+- Las otras 12 lecciones del Op. 60 no están en Mutopia.

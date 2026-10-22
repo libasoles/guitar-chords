@@ -269,6 +269,28 @@ class ScoreImportTests(unittest.TestCase):
         self.assertEqual([n.quarterLength for n in restored.recurse().notes], [6, 4])
         self.assertEqual(len(restored.parts[0].getElementsByClass('Measure')), 2)
 
+    def test_merge_unisons_gives_one_column_note_for_the_same_pitch_in_two_voices(self):
+        m21 = tabify.m21
+
+        def columns(merge):
+            part = m21.stream.Part()
+            measure = m21.stream.Measure(number=1)
+            for voice_id, length in (('1', 0.5), ('2', 3)):
+                voice = m21.stream.Voice(id=voice_id)
+                voice.append(m21.note.Note('A3', quarterLength=length))
+                measure.insert(0, voice)
+            part.append(measure)
+            tabify.MERGE_UNISONS = merge
+            try:
+                return tabify.build_columns(part)[0][0]['columns']
+            finally:
+                tabify.MERGE_UNISONS = False
+
+        self.assertEqual([len(c['notes']) for c in columns(False)], [2])
+        merged = columns(True)
+        self.assertEqual([len(c['notes']) for c in merged], [1])
+        self.assertEqual(merged[0]['notes'][0][0].quarterLength, 0.5)  # la primera voz conserva su nota
+
     def test_preview_anchors_and_bass_survive_export(self):
         m21 = tabify.m21
         part = m21.stream.Part()

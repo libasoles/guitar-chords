@@ -1,6 +1,15 @@
 {
   "1": {"n": "1", "form": "C Major", "es": "Do mayor", "source": "sor_op60-01.ly", "editor": "Fabrice De Volder", "license": "2.5"},
+  "2": {"n": "2", "form": "C Major", "es": "Do mayor", "source": "sor_op60-02.ly", "editor": "Fabrice De Volder", "license": "2.5"},
   "3": {"n": "3", "form": "C Major", "es": "Do mayor", "source": "sor_op60-03.ly", "editor": "Fabrice De Volder", "license": "3.0"},
   "4": {"n": "4", "form": "E-flat Major", "es": "Mi bemol mayor", "source": "sor_op60-04.ly", "editor": "Fabrice De Volder", "license": "2.5"},
-  "8": {"n": "8", "form": "C Major", "es": "Do mayor", "source": "sor_op60-08.ly", "editor": "Hajo Dezelski", "license": "3.0"}
+  "5": {"n": "5", "form": "A Major", "es": "La mayor", "source": "sor_op60-05.ly", "editor": "Fabrice De Volder", "license": "3.0"},
+  "6": {"n": "6", "form": "C Major", "es": "Do mayor", "source": "sor_op60-06.ly", "editor": "Hajo Dezelski", "license": "3.0"},
+  "7": {"n": "7", "form": "C Major", "es": "Do mayor", "source": "sor_op60-07.ly", "editor": "Hajo Dezelski", "license": "3.0"},
+  "8": {"n": "8", "form": "C Major", "es": "Do mayor", "source": "sor_op60-08.ly", "editor": "Hajo Dezelski", "license": "3.0"},
+  "9": {"n": "9", "form": "C Major", "es": "Do mayor", "source": "sor_op60-09.ly", "editor": "Hajo Dezelski", "license": "3.0"},
+  "10": {"n": "10", "form": "C Major", "es": "Do mayor", "source": "sor_op60-10.ly", "editor": "Hajo Dezelski", "license": "3.0"},
+  "11": {"n": "11", "form": "G Major", "es": "Sol mayor", "source": "sor_op60-11.ly", "editor": "Hajo Dezelski", "license": "3.0"},
+  "12": {"n": "12", "form": "G Major", "es": "Sol mayor", "source": "sor_op60-12.ly", "editor": "Hajo Dezelski", "license": "3.0"},
+  "13": {"n": "13", "form": "C Major", "es": "Do mayor", "source": "sor_op60-13.ly", "editor": "Hajo Dezelski", "license": "3.0"}
 }

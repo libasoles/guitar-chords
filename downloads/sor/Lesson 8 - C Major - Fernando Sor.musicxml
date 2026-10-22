@@ -586,15 +586,6 @@
       <backup>
         <duration>40320</duration>
       </backup>
-      <note print-object="no" print-spacing="yes">
-        <rest measure="yes" />
-        <duration>40320</duration>
-        <voice>2</voice>
-        <staff>1</staff>
-      </note>
-      <backup>
-        <duration>40320</duration>
-      </backup>
       <note id="tab-note-15">
         <pitch>
           <step>G</step>
@@ -659,15 +650,6 @@
             <string>2</string><fret>3</fret>
           </technical>
         </notations>
-      </note>
-      <backup>
-        <duration>40320</duration>
-      </backup>
-      <note print-object="no" print-spacing="yes">
-        <rest measure="yes" />
-        <duration>40320</duration>
-        <voice>2</voice>
-        <staff>2</staff>
       </note>
       <backup>
         <duration>40320</duration>
@@ -2622,15 +2604,6 @@
       <backup>
         <duration>40320</duration>
       </backup>
-      <note print-object="no" print-spacing="yes">
-        <rest measure="yes" />
-        <duration>40320</duration>
-        <voice>2</voice>
-        <staff>1</staff>
-      </note>
-      <backup>
-        <duration>40320</duration>
-      </backup>
       <note id="tab-note-68">
         <pitch>
           <step>G</step>
@@ -2742,15 +2715,6 @@
       <backup>
         <duration>40320</duration>
       </backup>
-      <note print-object="no" print-spacing="yes">
-        <rest measure="yes" />
-        <duration>40320</duration>
-        <voice>2</voice>
-        <staff>2</staff>
-      </note>
-      <backup>
-        <duration>40320</duration>
-      </backup>
       <note>
         <pitch>
           <step>G</step>
@@ -2837,15 +2801,6 @@
         <voice>1</voice>
         <type>quarter</type>
         <stem>up</stem>
-        <staff>1</staff>
-      </note>
-      <backup>
-        <duration>40320</duration>
-      </backup>
-      <note print-object="no" print-spacing="yes">
-        <rest measure="yes" />
-        <duration>40320</duration>
-        <voice>2</voice>
         <staff>1</staff>
       </note>
       <backup>
@@ -2942,15 +2897,6 @@
             <string>2</string><fret>0</fret>
           </technical>
         </notations>
-      </note>
-      <backup>
-        <duration>40320</duration>
-      </backup>
-      <note print-object="no" print-spacing="yes">
-        <rest measure="yes" />
-        <duration>40320</duration>
-        <voice>2</voice>
-        <staff>2</staff>
       </note>
       <backup>
         <duration>40320</duration>
@@ -3052,15 +2998,6 @@
         <duration>10080</duration>
         <voice>1</voice>
         <type>quarter</type>
-        <staff>1</staff>
-      </note>
-      <backup>
-        <duration>40320</duration>
-      </backup>
-      <note print-object="no" print-spacing="yes">
-        <rest measure="yes" />
-        <duration>40320</duration>
-        <voice>2</voice>
         <staff>1</staff>
       </note>
       <backup>
@@ -3173,15 +3110,6 @@
         <duration>10080</duration>
         <voice>1</voice>
         <type>quarter</type>
-        <staff>2</staff>
-      </note>
-      <backup>
-        <duration>40320</duration>
-      </backup>
-      <note print-object="no" print-spacing="yes">
-        <rest measure="yes" />
-        <duration>40320</duration>
-        <voice>2</voice>
         <staff>2</staff>
       </note>
       <backup>

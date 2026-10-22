@@ -70,6 +70,41 @@ class StructureTests(unittest.TestCase):
         self.assertEqual(voices, ['1', '2'])
         self.assertEqual([s.text for s in root.iter('stem')], ['up', 'down', 'down'])
 
+    def test_tie_between_different_pitches_is_ignored(self):
+        # Mutopia tiene `d, ~ d'` en la leccion 11: LilyPond no liga alturas distintas y el MusicXML tampoco debe.
+        root = convert("\\relative c' { d4 ~ d' c2 }")
+        self.assertEqual(list(root.iter('tie')), [])
+        root = convert("\\relative c' { d4 ~ d c2 }")
+        self.assertEqual([t.get('type') for t in root.iter('tie')], ['start', 'stop'])
+
+    def test_voice_that_opens_in_the_middle_becomes_its_own_voice(self):
+        root = convert("\\relative c' { c1 | << { d1 } \\context Voice = \"x\" { b,2 g } >> }")
+        measures = root.findall('.//measure')
+        self.assertEqual([sorted({n.findtext('voice') for n in m.iter('note')}) for m in measures], [['1'], ['1', '2']])
+        # La voz 2 no escribe nada en el primer compas y solo hay plicas donde suenan dos voces.
+        self.assertEqual([len(m.findall('.//stem')) for m in measures], [0, 3])
+
+    def test_acciaccatura_takes_no_time(self):
+        root = convert("\\relative c' { \\acciaccatura d8 c2 d4 }", '\\time 3/4 \\key c \\major \\clef violin')
+        notes = list(root.iter('note'))
+        self.assertIsNotNone(notes[0].find('grace'))
+        self.assertIsNone(notes[0].find('duration'))
+        self.assertEqual(notes[0].findtext('type'), 'eighth')
+        self.assertEqual(len(root.findall('.//measure')), 1)
+
+    def test_alternative_endings_are_separate_measures_with_their_own_barlines(self):
+        body = "\\relative c' { \\repeat volta 2 { c4 d e f | } \\alternative { { g4 g g g | } { a1 | } } }"
+        measures = convert(body).findall('.//measure')
+        self.assertEqual(len(measures), 3)
+        endings = [(e.get('number'), e.get('type')) for m in measures for e in m.iter('ending')]
+        self.assertEqual(endings, [('1', 'start'), ('1', 'stop'), ('2', 'start'), ('2', 'discontinue')])
+        self.assertEqual([r.get('direction') for r in measures[1].iter('repeat')], ['backward'])
+
+    def test_segno_is_a_direction_before_its_note(self):
+        root = convert("\\relative c' { c4\\segno d e f }")
+        first = root.find('.//measure')[1] if root.find('.//measure')[0].tag == 'attributes' else root.find('.//measure')[0]
+        self.assertIsNotNone(first.find('direction-type/segno'))
+
     def test_note_crossing_another_voices_barline_is_rejected(self):
         with self.assertRaises(L.LyError):
             convert("<< \\relative c'' { c1 | c1 } \\\\ \\relative c { c2 | c2 c2 } >>")
