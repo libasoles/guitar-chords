@@ -1205,7 +1205,7 @@ function renderArticlePage(strings, locale, slug, keys, bodyHtml, backHtml, head
     .split("%%PAGE_LEAD%%")
     .join(strings[keys.lead])
     .split("%%ARTICLE_BACK%%")
-    .join(renderArticleLinks(backHtml))
+    .join(backHtml)
     .split("%%ARTICLE_BODY%%")
     .join(renderArticleLinks(bodyHtml) + (bodyHtml.indexOf("modal-full") === -1 ? "" : MODAL_HASH_SCRIPT));
   return withGuideJsonLd(html, strings, locale, slug, keys.title, keys.meta);
