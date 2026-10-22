@@ -47,6 +47,7 @@
         <direction-type>
           <words font-weight="bold">Andante.</words>
         </direction-type>
+        <offset>10080</offset>
         <staff>1</staff>
       </direction>
       <note print-object="no" print-spacing="yes">

@@ -853,7 +853,7 @@ class Writer:
                          '<beat-type>%d</beat-type></time><clef><sign>G</sign><line>2</line>'
                          '<clef-octave-change>-1</clef-octave-change></clef></attributes>' %
                          (DIVISIONS, initial_fifths, ' symbol="common"' if initial_time == (4, 4) else '', *initial_time))
-            body = ''
+            body, lead = '', ''  # `lead`: textos y segno del compas, ante la primera nota visible de la primera voz
             left, right = '', ''
             for t, item in sorted(controls, key=lambda c: c[0]):
                 if not (a <= t < b or (t == b and index == len(measures) - 1)):
@@ -864,9 +864,9 @@ class Writer:
                 elif kind == 'volta' and t == a:
                     left = '<ending number="%d" type="start"/>' % item['n'] + left
                 elif kind == 'words':
-                    body += words_dir(item['text'], right=item['text'].rstrip('.').lower() in ('fin', 'fine', 'd.c', 'd.s'))
+                    lead += words_dir(item['text'], right=item['text'].rstrip('.').lower() in ('fin', 'fine', 'd.c', 'd.s'))
                 elif kind == 'segno':
-                    body += '<direction placement="above"><direction-type><segno/></direction-type></direction>'
+                    lead += '<direction placement="above"><direction-type><segno/></direction-type></direction>'
             for t, item in sorted(controls, key=lambda c: c[0]):
                 kind = item['kind']
                 if t != b:
@@ -883,7 +883,7 @@ class Writer:
                         right = '<bar-style>%s</bar-style>' % style + right
             if index == 0:
                 for text in self.words:
-                    body += words_dir(text)
+                    lead += words_dir(text)
             state = dict(key_state)
             # Una voz con solo silencios de relleno en este compas no se escribe; las plicas van arriba y abajo
             # solo donde suenan dos voces.
@@ -893,7 +893,8 @@ class Writer:
                 if turn:
                     body += '<backup><duration>%d</duration></backup>' % int(length * DIVISIONS)
                 stem = ('up' if turn == 0 else 'down') if len(active) > 1 else None
-                body += self.voice_xml(timelines[k][0], a, b, k + 1, stem, state, time, full if not implicit else length)
+                body += self.voice_xml(timelines[k][0], a, b, k + 1, stem, state, time, full if not implicit else length,
+                                       lead if turn == 0 else '')
             barline_left = '<barline location="left">%s</barline>' % left if left else ''
             barline_right = '<barline location="right">%s</barline>' % right if right else ''
             out.append('<measure number="%d"%s>%s%s%s%s</measure>' %
@@ -937,7 +938,7 @@ class Writer:
             table[step] = 1 if fifths > 0 else -1
         return table
 
-    def voice_xml(self, events, a, b, number, stem, state, time, length):
+    def voice_xml(self, events, a, b, number, stem, state, time, length, lead=''):
         inside = [e for e in events if a <= e['at'] < b]
         out, cursor = '', a
         beam_events = []
@@ -948,6 +949,8 @@ class Writer:
                 beam_events.append({'level': 0, 'pos': cursor - a})
             if e['at'] + e['dur'] > b:
                 raise LyError('una nota cruza la barra de compas en %s (voz %d)' % (e['at'], number))
+            if lead and e['kind'] != 'space':
+                out, lead = out + lead, ''
             shown = (e.get('stem') or stem) if stem else None
             if e.get('grace'):
                 out += self.chord_xml(e, number, shown, state, -1)
@@ -964,7 +967,7 @@ class Writer:
         if cursor < b:
             out += self.rest_xml(b - cursor, number, True)
             beam_events.append({'level': 0, 'pos': cursor - a})
-        return self.apply_beams(out, beam_events, group)
+        return self.apply_beams(out + lead, beam_events, group)
 
     @staticmethod
     def type_of(dur):
