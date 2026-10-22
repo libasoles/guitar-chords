@@ -360,6 +360,8 @@ def assign_frets(measures, tuning=STANDARD_TUNING, arpeggio=False):
     opens = open_midis(tuning)
     flat = [col for m in measures for col in m["columns"]]
     layers = []
+    for measure in measures:
+        fingering.mark_fretted({m: h for col in measure["columns"] for m, h in col.get("hints", {}).items()}, opens, MAX_FRET)
     for col in flat:
         midis = sorted({m for _, m in col["notes"]}, reverse=True)
         midis = playable_subset(midis, opens, col.get("hints"))
