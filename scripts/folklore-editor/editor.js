@@ -5,7 +5,6 @@ const exercises = document.querySelector('#exercises');
 const status = document.querySelector('#status');
 const track = document.querySelector('#track');
 const TRACK_KEY = 'folklore.lab.track.v1';
-const ns = 'http://www.w3.org/2000/svg';
 let currentSet;
 let models = [];
 let viewId = 0;
@@ -81,6 +80,12 @@ function scopeSvg(svg) {
   }
 }
 
+// Strip annotations before measuring so text does not reserve vertical space.
+// Also apply this to persisted track snapshots created by earlier versions.
+function stripScoreText(svg) {
+  svg.querySelectorAll('text, foreignObject, g.dir, g.dynam, g.tempo, g.harm, g.verse, g.syl, g.mNum, g.reh, g.fing').forEach(node => node.remove());
+}
+
 // Each excerpt uses the original staff and notehead X coordinates. Only the
 // SVG viewport changes: no engraving or rhythmic spacing is recalculated here.
 function excerpts(model) {
@@ -88,6 +93,7 @@ function excerpts(model) {
   host.innerHTML = model.svg;
   document.body.append(host);
   const original = host.querySelector('svg');
+  stripScoreText(original);
   const layoutHost = element('div');
   layoutHost.innerHTML = model.layoutSvg;
   host.append(layoutHost);
@@ -141,7 +147,6 @@ function excerpts(model) {
 
 function syncSaving() {
   collection.disabled = pending > 0;
-  exercises.querySelectorAll('.measure-label button').forEach(button => { button.disabled = pending > 0; });
 }
 
 function clearDrop() {
@@ -204,16 +209,9 @@ function makeMeasure(snapshot, editable) {
   const measure = element('div', 'measure-view');
   measure.dataset.bar = snapshot.bar;
   measure.style.width = snapshot.layout.width + 'px';
-  const label = element('div', 'measure-label');
-  label.append(element('span', '', `Compás ${snapshot.bar}`));
-  if (editable) {
-    const add = element('button', '', 'Agregar al track');
-    add.type = 'button';
-    add.addEventListener('click', () => insertSnapshot(measure.snapshot));
-    label.append(add);
-  }
   const notation = element('div', 'measure-notation');
   notation.innerHTML = snapshot.svg;
+  stripScoreText(notation.querySelector('svg'));
   scopeSvg(notation.querySelector('svg'));
   notation.draggable = false;
   notation.tabIndex = 0;
@@ -232,14 +230,13 @@ function makeMeasure(snapshot, editable) {
   tabs.readonly = !editable;
   tabs.setDocument({ value: [columns(snapshot.notes).map(attack => attack.value)], columnLayout: [snapshot.layout] });
   measure.snapshot = snapshot;
-  measure.append(label, notation, tabs);
+  measure.append(notation, tabs);
   if (editable) {
     let timer;
     tabs.addEventListener('change', () => {
       if (timer !== null && timer !== undefined) { clearTimeout(timer); pending--; }
       pending++;
       syncSaving();
-      status.textContent = 'Guardando…';
       const value = tabs.value[0];
       timer = setTimeout(() => {
         saving = saving.then(() => saveMeasure(measure, value)).finally(() => {
@@ -271,7 +268,6 @@ async function saveMeasure(measure, value) {
       target.querySelector('.measure-notation').innerHTML = excerpt.svg;
     });
     models = models.map(model => model.number === updated.number ? updated : model);
-    status.textContent = 'Guardado · Ritmo y posiciones conservados';
   } catch (error) {
     tabs.value = [columns(snapshot.notes).map(attack => attack.value)];
     measure.append(element('p', 'measure-error', error.message));
@@ -279,24 +275,17 @@ async function saveMeasure(measure, value) {
   }
 }
 
-function makeCard(model) {
-  const card = element('article', 'exercise');
-  card.dataset.number = model.number;
-  const head = element('div', 'card-header');
-  const text = element('div');
-  text.append(element('div', 'eyebrow', `EJERCICIO ${String(model.number).padStart(2, '0')} / 10 · ${model.meter}`),
-    element('h2', '', model.title), element('p', '', model.objective));
-  const download = element('a', 'download', 'Descargar MusicXML');
-  download.href = `/api/musicxml/${currentSet}/${model.number}`;
-  download.download = `${currentSet}-${String(model.number).padStart(2, '0')}-editado.musicxml`;
-  head.append(text, download);
+function makeExercise(model) {
+  const exercise = element('article', 'exercise');
+  exercise.dataset.number = model.number;
+  exercise.setAttribute('aria-label', `Ejercicio ${model.number}: ${model.title}`);
   const scroll = element('div', 'measure-scroll');
   excerpts(model).forEach((snapshot, index) => {
     if (index % 4 === 0) scroll.append(element('div', 'measure-row'));
     scroll.lastElementChild.append(makeMeasure(snapshot, true));
   });
-  card.append(head, scroll);
-  return card;
+  exercise.append(scroll);
+  return exercise;
 }
 
 function saveTrack() {
@@ -310,7 +299,6 @@ function insertSnapshot(snapshot, beforeId) {
   sequence.splice(before < 0 ? sequence.length : before, 0, item);
   saveTrack();
   renderTrack();
-  status.textContent = `Compás ${snapshot.bar} agregado al track`;
 }
 
 function moveItem(id, beforeId) {
@@ -331,7 +319,6 @@ function renderTrack() {
     const item = element('article', 'track-item');
     item.dataset.id = entry.id;
     item.setAttribute('role', 'listitem');
-    item.append(element('span', 'track-source', `${entry.snapshot.label} · Ej. ${entry.snapshot.number} · ${entry.snapshot.meter}`));
     const measure = makeMeasure(entry.snapshot, false);
     const notation = measure.querySelector('.measure-notation');
     notation.style.paddingTop = (top - entry.snapshot.staffTop) + 'px';
@@ -350,7 +337,6 @@ function renderTrack() {
     item.append(remove);
     return item;
   }));
-  document.querySelector('#track-count').textContent = `${sequence.length} ${sequence.length === 1 ? 'compás' : 'compases'}`;
 }
 
 
@@ -358,13 +344,12 @@ async function loadSet() {
   const nextSet = collection.value;
   collection.disabled = true;
   exercises.setAttribute('aria-busy', 'true');
-  status.textContent = 'Cargando los 10 ejercicios…';
+  status.textContent = '';
   try {
     const nextModels = await request(`/api/set/${nextSet}`);
     currentSet = nextSet;
     models = nextModels;
-    exercises.replaceChildren(...models.map(makeCard));
-    status.textContent = 'Editá la TAB o arrastrá un compás al track';
+    exercises.replaceChildren(...models.map(makeExercise));
   } catch (error) {
     if (currentSet) collection.value = currentSet;
     status.textContent = error.message;

@@ -23,8 +23,7 @@ que queda vacía conserva su duración como silencio oculto.
 Arrastrar el pentagrama de un compás al **Track** agrega una copia de su
 partitura y TAB en ese momento. Se pueden mezclar compases de distintos
 sets, repetirlos, reordenarlos por arrastre y quitar cada copia con la X
-de Lucide en su esquina superior derecha. «Agregar al track» y Enter sobre el pentagrama ofrecen
-una alternativa al arrastre. El track queda visible al desplazarse por los
+de Lucide en su esquina superior derecha. Enter sobre el pentagrama ofrece una alternativa al arrastre. El track queda visible al desplazarse por los
 ejercicios y admite mouse o pantalla táctil.
 
 La secuencia y sus copias se guardan en el navegador (`folklore.lab.track.v1`).
@@ -35,8 +34,7 @@ Las ediciones se guardan automáticamente en `lab/editor/ediciones.json`,
 por set, ejercicio y nota. Persisten al cambiar de set y reiniciar el servidor.
 Los JSON compositivos y los PDF originales se conservan. El generador de los
 cuadernos todavía lee esas fuentes originales: para llevar una revisión al
-cuaderno, hay que incorporarla a su fuente. La página permite descargar el
-MusicXML editado de cada ejercicio para seguir trabajando fuera del editor.
+cuaderno, hay que incorporarla a su fuente. Las ediciones se guardan sin mostrar confirmaciones en pantalla.
 
 El diseño horizontal se calcula una sola vez, reservando seis posiciones por
 ataque. Las posiciones vacías permanecen ocultas; al agregar una nota se

@@ -8,17 +8,15 @@
   <script src="/editor.js" type="module"></script>
 </head>
 <body>
-  <header><h1>Lab</h1></header>
+  <header>
+    <h1>Lab</h1>
+    <select id="collection" aria-label="Set de ejercicios" disabled><option>Cargando…</option></select>
+  </header>
   <main>
-    <section class="track-panel" aria-labelledby="track-heading">
-      <div class="track-heading"><h2 id="track-heading">Track</h2><span id="track-count">0 compases</span></div>
-      <p class="hint">Arrastrá compases de los ejercicios hasta acá. Podés mezclar sets y ordenar la secuencia.</p>
+    <section class="track-panel" aria-label="Track de compases">
       <div id="track" role="list" aria-label="Track de compases"></div>
     </section>
-    <div class="toolbar">
-      <label for="collection">Set de ejercicios<select id="collection" disabled><option>Cargando…</option></select></label>
-      <span id="status" role="status" aria-live="polite">Preparando el laboratorio…</span>
-    </div>
+    <p id="status" role="status" aria-live="polite"></p>
     <section id="exercises" aria-label="Ejercicios" aria-busy="true"></section>
   </main>
 </body>
