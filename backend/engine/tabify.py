@@ -752,7 +752,9 @@ def draw_tab_clef(svg):
     def staff(match):
         body = match.group(0)
         ys = sorted({float(y) for _, y, _, y2 in re.findall(
-            r'<path d="M([\d.]+) ([\d.]+) L([\d.]+) ([\d.]+)"', body) if y == y2})
+            r'<path d="M([\d.]+) ([\d.]+) L([\d.]+) ([\d.]+)"', body) if y == y2})[-6:]
+        # Only the six strings: a first/second-ending bracket falling in this body (a system that starts inside
+        # an ending) is a horizontal line too and would stretch the letters.
         if len(ys) < 4:
             return body
         gap = (ys[-1] - ys[0]) / (len(ys) - 1)
