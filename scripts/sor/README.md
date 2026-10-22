@@ -57,6 +57,10 @@ No se cotejó con el impreso: Mutopia parte de escaneos.
 
 - Op. 35 n.º 13, compás 27: el archivo escribe `g,16` en la voz interna mientras el bajo toca `gis,2`; la figura es un
   sol♯ (y el sol natural más el sol♯ no se pueden tocar a la vez). Se corrige con `patches` a `gis,16`.
+- Op. 60 n.º 5, compás 3, segundo bajo: se cambia sol por mi grave en ambas voces, siguiendo la edición de
+  [Stefan Nesyba en IMSLP](https://s9.imslp.org/files/imglnks/usimg/7/71/IMSLP606871-PMLP93616-Etude_a-Moll_op._60_Nr._5.mscz.pdf),
+  que coincide con la versión con TAB cotejada. El LilyPond de Mutopia y su facsímil escriben sol; se conserva
+  el archivo original y se aplica la corrección editorial con `patches`.
 - Op. 60 n.º 5 empieza en la menor y pasa a La mayor en el compás 17: título «A Minor and A Major».
 
 ## Pendiente

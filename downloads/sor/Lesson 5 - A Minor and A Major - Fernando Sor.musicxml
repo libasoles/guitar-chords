@@ -528,7 +528,7 @@
       </note>
       <note id="tab-note-17">
         <pitch>
-          <step>G</step>
+          <step>E</step>
           <octave>2</octave>
         </pitch>
         <duration>5040</duration>
@@ -584,7 +584,7 @@
       </note>
       <note id="tab-note-21">
         <pitch>
-          <step>G</step>
+          <step>E</step>
           <octave>2</octave>
         </pitch>
         <duration>15120</duration>
@@ -649,7 +649,7 @@
       </note>
       <note>
         <pitch>
-          <step>G</step>
+          <step>E</step>
           <octave>2</octave>
         </pitch>
         <duration>5040</duration>
@@ -659,7 +659,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>6</string><fret>3</fret>
+            <string>6</string><fret>0</fret>
           </technical>
         </notations>
       </note>
