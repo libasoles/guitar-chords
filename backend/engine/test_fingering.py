@@ -239,13 +239,19 @@ class AnnotationTests(unittest.TestCase):
         # finger 1 on fret 5 and finger 2 on fret 9: positions 5 and 8, an impossible stretch
         self.assertFalse(fingering.fingers_possible([(1, 5), (2, 9)], [1, 2]))
 
-    def test_a_fingered_note_is_never_an_open_string(self):
-        # B3 with finger 3 (Sor, Op. 60 n.º 3, m. 6: a-1 b-3 on one string): fret 4 of the third string, not the open second
-        with mock.patch.object(fingering, "FINGERED_NOT_OPEN", True):
-            self.assertEqual([(2, 4)], fingering.allowed_cells(59, OPENS, {"finger": 3}, 12)[:1])
-            self.assertNotIn((1, 0), fingering.allowed_cells(59, OPENS, {"finger": 3}, 12))
-        self.assertIn((1, 0), fingering.allowed_cells(59, OPENS, {"finger": 3}, 12))
-        self.assertIn((1, 0), fingering.allowed_cells(59, OPENS, {}, 12))
+    def test_a_finger_confirmed_by_its_neighbours_is_not_an_open_string(self):
+        # Sor, Op. 60 n.º 3, m. 6: e-1 f#-3 a-1 b-3. The b with finger 3 is fret 4 of the G string, in the a's position
+        hints = {52: {"finger": 1}, 54: {"finger": 3}, 57: {"finger": 1}, 59: {"finger": 3}}
+        fingering.mark_fretted(hints, OPENS, 12)
+        self.assertTrue(hints[59].get("fretted"))
+        self.assertEqual((2, 4), fingering.allowed_cells(59, OPENS, hints[59], 12)[0])
+        self.assertNotIn((1, 0), fingering.allowed_cells(59, OPENS, hints[59], 12))
+
+    def test_a_lone_finger_may_sit_on_an_open_string(self):
+        # Sagreras 49: one digit on a G the book plays open
+        hints = {55: {"finger": 1}}
+        fingering.mark_fretted(hints, OPENS, 12)
+        self.assertIn((2, 0), fingering.allowed_cells(55, OPENS, hints[55], 12))
 
     def test_hints_never_remove_a_note(self):
         combos = tabify.candidates([64], OPENS, {64: {"finger": 4, "string": 5}})

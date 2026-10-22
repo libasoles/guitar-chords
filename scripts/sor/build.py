@@ -118,7 +118,6 @@ def build(number):
         raise SystemExit(f'falta la fuente: {source}')
     base_options = dict(tabify.PDF_OPTIONS)
     tabify.KEEP_TEXT = True  # tempo, Fine y D.C. se imprimen
-    tabify.fingering.FINGERED_NOT_OPEN = True  # los dedos de Sor mandan: una nota con dedo 1-4 no es una cuerda al aire
     tabify.MERGE_UNISONS = True  # la misma altura en dos voces a la vez es una sola nota en la TAB
     with tempfile.TemporaryDirectory() as tmp:
         extract.patch_engine(tabify)

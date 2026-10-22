@@ -182,8 +182,6 @@ def avoid_repeated_strings(tabs, opens, max_fret=9, open_reach=6, measures=None,
 # A left-hand finger (1-4), a string or a fret written on a note narrows where it can be played. The position
 # is the fret under finger 1 (Carcassi, "The Positions"), so finger `d` on fret `f` implies `f - (d - 1)`.
 
-FINGERED_NOT_OPEN = False   # a written finger 1-4 means a pressed fret, never an open string. Off by default: Sagreras'
-                            # arpeggio studies carry digits on notes the printed tab plays open (lessons 49, 55)
 EXTENSION = 1   # frets the hand may stretch beyond its position before a finger combination is impossible
 
 
@@ -195,7 +193,7 @@ def allowed_cells(midi, opens, hint, max_fret):
                 if (hint.get("string") is None or s == hint["string"])
                 and (hint.get("fret") is None or f == hint["fret"])
                 and (hint.get("finger") != 0 or f == 0)
-                and not (FINGERED_NOT_OPEN and hint.get("finger") and f == 0)]
+                and not (hint.get("fretted") and f == 0)]
     return narrowed or cells
 
 
@@ -214,3 +212,23 @@ def fingers_possible(combo, fingers):
                 return False
     positions = [f - (d - 1) for f, d in held]
     return not positions or max(positions) - min(positions) <= EXTENSION
+
+
+def mark_fretted(hints, opens, max_fret):
+    """Flags (`hint["fretted"]`) the fingered notes of one measure that must be pressed, not played open.
+
+    A finger written on a note that could also be an open string is ambiguous: Sagreras' arpeggio studies put digits on
+    notes the printed tab plays open, while Sor's `a-1 b-3` only works if the b is fret 4 of the a's string. What tells
+    them apart is the neighbours: the note is pressed when another fingered pitch of the measure has a pressed cell
+    whose lowest position (see above) is within a stretch of its own. A lone digit proves nothing and is left alone.
+    `hints` is {midi: {finger, ...}} for the measure; the dicts are updated in place."""
+    def position(midi, hint):
+        """The lowest position where the written finger can hold the note: books keep to the low positions."""
+        found = [f - (hint["finger"] - 1) for s, f in allowed_cells(midi, opens, hint, max_fret) if f > 0]
+        return min(found) if found else None
+
+    where = {m: position(m, h) for m, h in hints.items() if h.get("finger")}
+    for midi, here in where.items():
+        if here is not None and any(abs(here - there) <= EXTENSION for other, there in where.items()
+                                    if other != midi and there is not None):
+            hints[midi]["fretted"] = True
