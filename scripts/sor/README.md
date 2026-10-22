@@ -63,11 +63,30 @@ No se cotejó con el impreso: Mutopia parte de escaneos.
   el archivo original y se aplica la corrección editorial con `patches`.
 - Op. 60 n.º 5 empieza en la menor y pasa a La mayor en el compás 17: título «A Minor and A Major».
 
+## Lecciones del Op. 60 transcritas de IMSLP (14 en adelante)
+
+Mutopia solo publica 13 de las 25; el resto no existe como LilyPond, MusicXML ni MIDI en ninguna fuente libre. Se
+transcriben a mano de los escaneos de dominio público de
+[IMSLP](https://imslp.org/wiki/Introduction_%C3%A0_l%27%C3%A9tude_de_la_guitare,_Op.60_(Sor,_Fernando)) (la descarga
+tiene captcha: se bajan a mano a `resources/sor/imslp/`, no versionado):
+
+- Gitarrefreund, Múnich 1915-17 (la misma edición de la que parten las lecciones 6 a 13 de Mutopia): `Sor_-_Op.60_No.13-16.pdf`,
+  `No.17-19`, `No.20-21`, `No.22`, `No.23`, `No.24`. Es la fuente principal.
+- Edición de París (`Sor_op.60.pdf`, una lección por página, la única con la 25): se usa para resolver lo que el escaneo
+  de Gitarrefreund deja dudoso (alteraciones, puntillos, ligaduras).
+
+Se escribe `sources/sor_op60-NN.ly` a mano con `\fixed c` (alturas que suenan: la escrita menos una octava), una voz de
+`\score` por voz de la partitura (`upper`, `inner`, `bass`; `s` para el hueco que el grabado no dibuja) y `\repeat volta`
+con `\alternative` en cada voz. Sin digitación. El conversor exige que cada compás sume lo que marca la métrica en
+cada voz, lo que atrapa los errores de duración, pero no los de altura: esos se buscan comparando el PDF generado con
+el escaneo compás a compás. En `pieces.json` llevan `"license": "public-domain"` y `credit`/`credit_url`, que
+sustituyen al crédito a Mutopia del pie.
+
 ## Pendiente
 
 - **Op. 35 n.º 12** queda fuera: Mutopia indica «Low E tuned to F» (la sexta cuerda en Fa) y el motor solo admite
   afinación estándar y Re en la sexta (`tuning: "dropd"`). Su `.ly` está en `sources/estudios/` pero no se publica.
 - Cotejar con un escaneo del Op. 60, Op. 6 y Op. 35 de IMSLP.
-- Las otras 12 lecciones del Op. 60 no están en Mutopia.
+- Las lecciones 15 a 25 del Op. 60 no están en Mutopia: se transcriben de IMSLP (ver abajo).
 - En Op. 35 n.º 6, 8, 16 y 21 el MIDI de Mutopia se desfasa (`\partial` dentro de repeticiones, `Timing.measureLength`): se
   publicaron por el PDF (mismos compases y notas) y el recuento de alturas.

@@ -12,7 +12,7 @@ const fs = require('fs');
 const path = require('path');
 
 /* Compases de cada pieza (clave: numero de la leccion, u opus * 100 + numero en los estudios), contados sobre la fuente curada (la partitura del libro; la anacrusa cuenta como compas). */
-const MEASURES_LECCIONES = { 1: 16, 2: 40, 3: 24, 4: 26, 5: 40, 6: 36, 7: 44, 8: 16, 9: 16, 10: 17, 11: 32, 12: 27, 13: 24 };
+const MEASURES_LECCIONES = { 1: 16, 2: 40, 3: 24, 4: 26, 5: 40, 6: 36, 7: 44, 8: 16, 9: 16, 10: 17, 11: 32, 12: 27, 13: 24, 14: 25, 15: 24 };
 
 /* Cadenas del archivo de origen: programa, rutas y textos de la cabecera de LilyPond. */
 const SOURCE_TRACES = [/LilyPond/i, /\.ly\b/i, /fernandosor\.free\.fr/i, /mutopiatitle/i];
@@ -87,11 +87,13 @@ function suite(collection, catalog, MEASURES) {
       const text = pdf.toString('latin1');
       for (const trace of PDF_TRACES) assert.doesNotMatch(text, trace, 'PDF: ' + trace);
       for (const trace of SOURCE_TRACES) assert.doesNotMatch(xml, trace, 'MusicXML: ' + trace);
-      assert.match(text, /\(Con modificaciones a partir de la edicion de [^)]+ en Mutopia\)/);
+      const transcribed = /\(Transcripcion a partir de la edicion de [^)]+ en IMSLP\)/.test(text);
+      if (!transcribed) assert.match(text, /\(Con modificaciones a partir de la edicion de [^)]+ en Mutopia\)/);
       assert.match(text, /\((?:CC BY-SA \d\.\d|Dominio publico)\)/);
       const uris = [...text.matchAll(/\/URI\s*\(((?:\\.|[^\\)])*)\)/g)]
         .map((m) => m[1].replace(/\\(\d{3})/g, (_, octal) => String.fromCharCode(parseInt(octal, 8))));
-      assert.ok(uris.includes('https://www.mutopiaproject.org/cgibin/make-table.cgi?Composer=SorF'), 'enlace a la edicion de origen');
+      if (transcribed) assert.ok(uris.some((uri) => /^https:\/\/imslp\.org\/wiki\//.test(uri)), 'enlace a la edicion de origen');
+      else assert.ok(uris.includes('https://www.mutopiaproject.org/cgibin/make-table.cgi?Composer=SorF'), 'enlace a la edicion de origen');
       if (!/Dominio publico/.test(text)) assert.ok(uris.some((uri) => /^https:\/\/creativecommons\.org\/licenses\/by-sa\/\d\.\d\/$/.test(uri)), 'enlace a la licencia');
       const info = text.match(/\/Title\s*\(((?:\\.|[^\\)])*)\)/);
       assert.ok(info, 'el PDF declara /Title');

@@ -32,6 +32,8 @@ def footer_lines(number):
     """Credito a la edicion LilyPond de origen (Mutopia) y su licencia, en un pie gris a la izquierda de cada pagina."""
     piece = PIECES[number]
     credit = [('Con modificaciones a partir de la edicion de ' + piece['editor'] + ' en Mutopia', MUTOPIA)]
+    if 'credit' in piece:  # transcrita a mano de un escaneo de dominio publico (IMSLP)
+        credit = [(piece['credit'], piece['credit_url'])]
     if piece['license'] == 'public-domain':
         return [credit, [('Dominio publico', None)]]
     return [credit, [('CC BY-SA ' + piece['license'], 'https://creativecommons.org/licenses/by-sa/%s/' % piece['license'])]]

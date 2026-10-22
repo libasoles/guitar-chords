@@ -58,6 +58,13 @@ class StructureTests(unittest.TestCase):
         directions = [r.get('direction') for r in root.iter('repeat')]
         self.assertEqual(directions, ['forward', 'backward'])
 
+    def test_bar_end_repeat_alone_is_a_backward_repeat_without_a_forward_one(self):
+        root = convert("\\relative c' { c4 d e f | \\bar \":|.\" g1 | a1 }")
+        self.assertEqual([r.get('direction') for r in root.iter('repeat')], ['backward'])
+        measures = root.findall('.//measure')
+        self.assertIsNotNone(measures[0].find('barline[@location="right"]/repeat'))
+        self.assertIsNone(measures[1].find('barline'))
+
     def test_ties_and_slurs(self):
         root = convert("\\relative c' { c2 ~ c4 ( d e1 ) }")
         notes = list(root.iter('note'))

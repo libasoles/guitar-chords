@@ -11,5 +11,7 @@
   "10": {"n": "10", "form": "C Major", "es": "Do mayor", "source": "sor_op60-10.ly", "editor": "Hajo Dezelski", "license": "3.0"},
   "11": {"n": "11", "form": "G Major", "es": "Sol mayor", "source": "sor_op60-11.ly", "editor": "Hajo Dezelski", "license": "3.0"},
   "12": {"n": "12", "form": "G Major", "es": "Sol mayor", "source": "sor_op60-12.ly", "editor": "Hajo Dezelski", "license": "3.0"},
-  "13": {"n": "13", "form": "C Major", "es": "Do mayor", "source": "sor_op60-13.ly", "editor": "Hajo Dezelski", "license": "3.0"}
+  "13": {"n": "13", "form": "C Major", "es": "Do mayor", "source": "sor_op60-13.ly", "editor": "Hajo Dezelski", "license": "3.0"},
+  "14": {"n": "14", "form": "E Minor", "es": "Mi menor", "source": "sor_op60-14.ly", "editor": "Gitarrefreund", "license": "public-domain", "credit": "Transcripcion a partir de la edicion de Gitarrefreund, Munich 1915-17, en IMSLP", "credit_url": "https://imslp.org/wiki/Introduction_%C3%A0_l%27%C3%A9tude_de_la_guitare,_Op.60_(Sor,_Fernando)"},
+  "15": {"n": "15", "form": "E Major", "es": "Mi mayor", "source": "sor_op60-15.ly", "editor": "Gitarrefreund", "license": "public-domain", "credit": "Transcripcion a partir de la edicion de Gitarrefreund, Munich 1915-17, en IMSLP", "credit_url": "https://imslp.org/wiki/Introduction_%C3%A0_l%27%C3%A9tude_de_la_guitare,_Op.60_(Sor,_Fernando)"}
 }
