@@ -46,3 +46,16 @@ test('Sagreras 54: las blancas del compas 7 no alargan el arpegio ni retrasan la
       [0.25, 0.5, 0.75, 1.25, 1.5, 1.75, 2.25, 2.5, 2.75, 3.25, 3.5, 3.75]);
   }
 });
+
+test('Sagreras 56: conserva el cierre del primer sistema y la polifonia del segundo', () => {
+  for (const xml of scores(56)) {
+    assert.equal((xml.match(/<measure\b/g) || []).length, 16);
+    assert.deepEqual(notes(xml, 8), [[0, 3, 'G4'], [0, 3, 'G3']]);
+    const tenth = notes(xml, 10);
+    assert.deepEqual(tenth.filter((e) => e[2] === 'E5' || e[2] === 'E4'),
+      [[0, 3, 'E5'], [0, 3, 'E4']]);
+    for (const pitch of ['G4', 'C5']) {
+      assert.deepEqual(tenth.filter((e) => e[2] === pitch), [[1, 1, pitch], [2, 1, pitch]]);
+    }
+  }
+});

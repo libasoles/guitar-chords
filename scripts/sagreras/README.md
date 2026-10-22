@@ -87,3 +87,7 @@ Este cotejo curado no modifica el lector ni las fuentes de las demas lecciones.
 Conserva el si del compas 2 en tercera cuerda, traste 4, como pide el texto de la leccion. Los 8 compases pasan el
 control de alturas y duraciones y la digitacion tiene 0 diferencias en 121 notas. Una regresion comprueba las
 blancas, los ataques de la melodia y las 12 semicorcheas del compas 7 en la fuente y en la descarga publicada.
+
+`recover.py 56` transcribe los 16 compases de la pagina PDF 29: el lector solo devolvia 15 porque omitia el cierre
+del primer sistema (sol4 y sol3 de blanca con puntillo). Tambien separa las tres voces del compas 10. Control de
+alturas y duraciones correcto, 0 diferencias de digitacion en 65 notas; regresiones en fuente y descarga.

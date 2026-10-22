@@ -13,6 +13,67 @@ import xml.etree.ElementTree as ET
 import transcribe as T
 
 
+def voice(stem, events):
+    return {'stem': stem, 'events': [(o, d, p, None, [], {}) for o, d, p in events]}
+
+
+def sequential(*pairs):
+    onset = 0
+    events = []
+    for duration, pitch in pairs:
+        events.append((onset, duration, pitch))
+        onset += duration
+    return events
+
+
+def lesson56():
+    """16 compases cotejados en pagina PDF 29, dos sistemas de ocho.
+
+    El lector omitía el compas 8 junto a la doble barra y desplazaba los
+    siguientes. Los bajos compartidos mantienen sus dos plicas.
+    """
+    line = sequential
+    short = lambda a, b, c, d: line((6, a), (6, b), (12, c), (12, d))
+    pulse = lambda p: line((12, 'R'), (12, p), (12, 'R'))
+    held = lambda p: [(0, 36, p)]
+    pairs = [
+        [short('G4', 'E4', 'C4', 'E4'), pulse('C4')],
+        [short('G4', 'F4', 'B3', 'F4'), pulse('B3')],
+        [short('B4', 'G4', 'F4', 'G4'), pulse('F4')],
+        [line((12, 'E5'), (24, 'G4+C5')), held('E4')],
+        [short('G4', 'E4', 'C4', 'E4'), pulse('C4')],
+        [short('B4', 'G4', 'D4', 'G4'), pulse('D4')],
+        [short('C5', 'A4', 'D4', 'A4'), pulse('D4')],
+        [held('G4'), held('G3')],
+        [short('F5', 'G4', 'B4', 'G5'), held('D4')],
+        [held('E5'), [(12, 12, 'G4+C5'), (24, 12, 'G4+C5')], held('E4')],
+        [short('D5', 'G4', 'D5', 'E5'), held('F4')],
+        [line((12, 'C5'), (12, 'G4'), (12, 'E4')), line((24, 'E4'), (12, 'E4'))],
+        [short('C4', 'E4', 'G4', 'C5'), held('C4')],
+        [short('A3', 'F4', 'A4', 'C5'), held('A3')],
+        [short('G3', 'G4', 'E5', 'D5'), line((24, 'G3'), (12, 'B3'))],
+        [line((24, 'C5'), (12, 'R')), [(0, 24, 'C4')]],
+    ]
+    measures = []
+    for parts in pairs:
+        measures.append({'length': 36, 'voices': [voice('up' if i == 0 else 'down', e)
+                                                for i, e in enumerate(parts)],
+                         'fingers': {}, 'fifths': 0, 'single': False})
+    # Indicaciones del pentagrama, no cifras tomadas de la TAB.
+    fingers = {
+        1: {(0, 0): {'G4': 'm'}, (0, 6): {'E4': 'i'}, (1, 12): {'C4': 'p'}},
+        2: {(0, 6): {'F4': '3'}, (0, 12): {'B3': '2'}},
+        4: {(0, 0): {'E5': 'a'}},
+        11: {(0, 0): {'D5': '4'}, (1, 0): {'F4': '3'}},
+        15: {(0, 12): {'E5': 'a'}, (0, 24): {'D5': '4|m'}, (1, 24): {'B3': '2'}},
+        16: {(0, 0): {'C5': 'i'}},
+    }
+    for number, marks in fingers.items():
+        measures[number - 1]['fingers'] = marks
+    measures[-1]['final'] = True
+    return measures
+
+
 def validate(lesson, measures):
     full = lesson['time'][0] * 16 // lesson['time'][1] * T.SCALE
     read = Counter()
@@ -31,10 +92,12 @@ def validate(lesson, measures):
 
 
 def recover(number, lessons):
-    if number not in {54, 62}:
+    if number not in {54, 56, 62}:
         raise ValueError(f'Leccion sin cotejo curado: {number}')
     lesson = lessons[number]
     measures = T.lesson_measures(lesson)
+    if number == 56:
+        measures = lesson56()
     if number == 54:
         # Compas 7: el mi4 de blanca tiene plica propia hacia abajo;
         # no forma parte de la cadena de semicorcheas de la voz intermedia.
@@ -58,6 +121,11 @@ def recover(number, lessons):
                     technical = ET.SubElement(notations, 'technical')
                 ET.SubElement(technical, 'string').text = '3'
                 ET.SubElement(technical, 'fret').text = '4'
+        xml = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(root, encoding='unicode') + '\n'
+    if number == 56:
+        root = ET.fromstring(xml)
+        bar = ET.SubElement(root.find('./part/measure[@number="8"]'), 'barline', location='right')
+        ET.SubElement(bar, 'bar-style').text = 'light-light'
         xml = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(root, encoding='unicode') + '\n'
     (T.SOURCES / f'{number:02d}.musicxml').write_text(xml, encoding='utf-8')
     T.record_measures(number, len(measures))
