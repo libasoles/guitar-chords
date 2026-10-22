@@ -75,3 +75,28 @@ Verificación: `node --test test/sagreras.unit.js`, `node scripts/build-site.js`
 Regresiones del lector sin el PDF local: `.venv-carcassi/bin/python -m unittest discover -s scripts/sagreras -p 'test_*.py'`.
 La prueba de la leccion 39 en `test/sagreras.unit.js` verifica tambien las duraciones y los dos puntillos en la fuente y
 el MusicXML publicado.
+
+## Recuperacion de pendientes
+
+La 59 pasa el lector actual sin correcciones: 8 compases y 0 diferencias de digitacion respecto de la TAB impresa.
+La 62 (8 compases, tambien 0 diferencias) quedaba fuera porque el control contaba dos veces las cabezas compartidas
+de igual duracion. `recover.py 62` valida un solo ataque por altura e inicio, conservando ambas voces en el MusicXML.
+Este cotejo curado no modifica el lector ni las fuentes de las demas lecciones.
+
+`recover.py 54` separa las blancas mi4 del arpegio en el compas 7, usando el mismo patron ritmico del compas 3.
+Conserva el si del compas 2 en tercera cuerda, traste 4, como pide el texto de la leccion. Los 8 compases pasan el
+control de alturas y duraciones y la digitacion tiene 0 diferencias en 121 notas. Una regresion comprueba las
+blancas, los ataques de la melodia y las 12 semicorcheas del compas 7 en la fuente y en la descarga publicada.
+
+`recover.py 56` transcribe los 16 compases de la pagina PDF 29: el lector solo devolvia 15 porque omitia el cierre
+del primer sistema (sol4 y sol3 de blanca con puntillo). Tambien separa las tres voces del compas 10. Control de
+alturas y duraciones correcto, 0 diferencias de digitacion en 65 notas; regresiones en fuente y descarga.
+
+`recover.py 57` separa las tres voces de los compases 2, 4 y 10: las blancas de la melodia y del bajo arrancan en
+el primer tiempo, mientras la voz intermedia entra en el segundo. No se concatenan sus duraciones. Conserva los
+16 compases y la doble barra de seccion del compas 8. La regresion comprueba todas las alturas, inicios y duraciones
+de esos tres compases en la fuente y en la descarga.
+El do5 del cierre de la primera seccion se conserva en segunda cuerda, traste 1: 0 diferencias de digitacion en 67 notas.
+
+Para reproducir estas cuatro fuentes usar `recover.py N` y despues `build.py N`; `transcribe.py N` sigue siendo el
+lector automatico sin este cotejo manual. La 59 se reproduce con `transcribe.py 59` y `build.py 59`.
