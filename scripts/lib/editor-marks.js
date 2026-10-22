@@ -22,6 +22,7 @@ const MARKS = {
 };
 
 const PIECES = {
+  'carcassi-preludios': { favorite: [2, 4] },
   'carcassi-progresivas': { favorite: [1] },
   'carcassi-valses': { favorite: [10] },
   'santisteban-preludios': { favorite: [2, 3, 4] },
