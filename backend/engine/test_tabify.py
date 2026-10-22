@@ -133,6 +133,14 @@ class ScoreImportTests(unittest.TestCase):
         self.assertNotIn('E06D', out)
         self.assertEqual(out.count('fill="#000000"'), 3)
 
+    def test_tab_clef_ignores_an_ending_bracket_in_the_staff(self):
+        lines = ''.join(f'<path d="M0 {y} L900 {y}" />' for y in range(100, 700, 100))
+        bracket = '<path d="M0 -3000 L900 -3000" />'
+        svg = ('<g class="staff">' + bracket + lines + '<g id="b" class="clef">\n'
+               '<use xlink:href="#E06D-x" transform="translate(50, 400) scale(0.7, 0.7)" /></g></g>')
+        out = tabify.draw_tab_clef(svg)
+        self.assertEqual(out.count('font-size="120px"'), 3)
+
     def test_tab_staves_lose_meter_and_page_loses_brace(self):
         svg = ('<g class="staff"><g class="meterSig"><use /></g></g>'
                '<g class="staff"><g class="meterSig"><use /></g></g>'
