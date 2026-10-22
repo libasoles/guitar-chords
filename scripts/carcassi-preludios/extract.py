@@ -248,8 +248,8 @@ def patch_engine(tabify):
         original(svg).replace('font-family="Times, serif"', f'font-family="{SANS}"', 1))
 
 
-# The arpeggio rules live in the engine (backend/engine/fingering.py); the collections that predate the engine's
-# own arpeggio detection apply them to every measure of the piece, without the finger-economy rule.
+# The preludes retain their reviewed legacy arpeggio treatment. Mixed collections
+# such as the waltzes use the engine's passage detection before choosing strings.
 avoid_repeated_strings = fingering.avoid_repeated_strings
 
 
@@ -274,28 +274,17 @@ def build(number):
     with tempfile.TemporaryDirectory() as tmp:
         patch_engine(tabify)
         prepared = os.path.join(tmp, "prepared")
-        result = tabify.prepare(source, "musicxml", "standard", prepared, per_row=PER_ROW.get(number, 4), arpeggio=False)
+        contextual = EDITION == "valses"
+        result = tabify.prepare(source, "musicxml", "standard", prepared, per_row=PER_ROW.get(number, 4),
+                                arpeggio="auto" if contextual else False)
         if result["dropped"]:
             raise RuntimeError(f"Notas descartadas en {EDITION} {number}: {result['dropped']}")
         exported = os.path.join(tmp, "export")
         with open(os.path.join(prepared, tabify.SUGGESTION_NAME), encoding="utf-8") as f:
             suggestion = json.load(f)
-        tabs = avoid_repeated_strings(suggestion["tabs"], tabify.open_midis(tabify.STANDARD_TUNING))
-        if EDITION == "valses" and number == 5:
-            # Keep the melodic run on string 1: 5-4-5-3-0. These are the fourth
-            # and eighth measures counting the pickup (MusicXML numbers 3 and 7).
-            for measure in (3, 7):
-                for column in tabs[measure]:
-                    for string, fret, first_string_fret in ((1, 9, 4), (1, 8, 3), (2, 9, 0)):
-                        if column[string] == fret:
-                            column[string] = None
-                            column[0] = first_string_fret
-            # In m. 16, keep E on the open first string so the initial
-            # B-D-E voicing can stay in position throughout the measure.
-            for column in tabs[16]:
-                if column[2] == 9:
-                    column[2] = None
-                    column[0] = 0
+        tabs = suggestion["tabs"]
+        if not contextual:
+            tabs = avoid_repeated_strings(tabs, tabify.open_midis(tabify.STANDARD_TUNING))
         if EDITION == "carcassi" and number == 9:
             # Requested TAB voicing: play the B bass on the sixth string in m. 15,
             # and play G# on the third string in the closing chord (m. 16).

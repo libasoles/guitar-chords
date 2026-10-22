@@ -44,8 +44,28 @@ test('Vals 5, compás 16: mi en primera cuerda al aire mantiene la posición', (
   const notes = [...bar.matchAll(/<note\b[^>]*>([\s\S]*?)<\/note>/g)]
     .map((m) => m[1]).filter((n) => /<staff>2<\/staff>/.test(n) && /<pitch>/.test(n));
   const melody = notes.filter((n) => /<voice>1<\/voice>/.test(n) && !/<chord\s*\//.test(n));
-  assert.deepEqual(melody.map((n) => [
+  assert.deepEqual(melody.slice(0, 3).map((n) => [
     Number(n.match(/<string>(.*?)<\/string>/)[1]),
     Number(n.match(/<fret>(.*?)<\/fret>/)[1]),
-  ]), [[1, 0], [1, 2], [1, 0], [2, 3], [3, 4]]);
+  ]), [[1, 0], [1, 2], [1, 0]]);
 });
+
+function melodyCells(number, key, measure) {
+  const xml = fs.readFileSync(path.join(__dirname, `../downloads/carcassi-valses/Waltz ${number} in ${key} - Matteo Carcassi.musicxml`), 'utf8');
+  const bar = xml.match(new RegExp(`<measure\\b[^>]*number="${measure}"[^>]*>([\\s\\S]*?)<\\/measure>`))[1];
+  const attacks = [];
+  for (const [, note] of bar.matchAll(/<note\b[^>]*>([\s\S]*?)<\/note>/g)) {
+    if (!/<staff>2<\/staff>/.test(note) || !/<voice>1<\/voice>/.test(note) || !/<pitch>/.test(note)) continue;
+    const cell = [Number(note.match(/<string>(.*?)<\/string>/)[1]), Number(note.match(/<fret>(.*?)<\/fret>/)[1])];
+    if (/<chord\s*\//.test(note)) attacks.at(-1).push(cell);
+    else attacks.push([cell]);
+  }
+  return attacks.map((cells) => cells.sort((a, b) => a[0] - b[0])[0]);
+}
+
+for (const measure of [3, 7, 20, 24]) {
+  test(`Vals 5, compás ${measure}: la melodía 5–4–5–3–0 sigue en primera cuerda`, () => {
+    assert.deepEqual(melodyCells(5, 'D Major', measure), [[1, 5], [1, 4], [1, 5], [1, 3], [1, 0]]);
+  });
+}
+

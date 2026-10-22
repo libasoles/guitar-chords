@@ -157,6 +157,46 @@ pruebas en `backend/engine/test_fingering.py`.
 - **Preludios publicados**: no se reconstruyeron; sus compases ya salen del script con las reglas aplicadas a todos.
   Activar `ARPEGGIO` en Sagreras, Aguado o las progresivas cambia su TAB y obliga a reconstruir y revisar esas piezas.
 
+### 8.1 Contexto melódico en los valses de Carcassi
+
+El tratamiento antiguo de `extract.py` aplicaba `avoid_repeated_strings` a todos
+los compases. No estaba interpretando mal una marca de dedo: penalizaba con 8
+cada par de notas distintas consecutivas en la misma cuerda, incluso en escalas
+y bordaduras melódicas. Así convertía `5–4–5–3–0` de primera cuerda en saltos a
+segunda (9 y 8) y tercera (9). La regla de «forma de cejilla» podía reforzarlo:
+si el resultado mezclaba trastes 6–11 con cuerdas al aire, eliminaba estas últimas.
+
+Los valses usan ahora `tabify.prepare(..., arpeggio="auto")` y conservan su
+Digitación sugerida sin volver a aplicar el posproceso general. El detector
+existente distingue por compás los patrones de saltos recurrentes y pulso
+regular de las melodías por grados conjuntos. En un pasaje melódico, repetir
+cuerda permite ligar una escala y no debe recibir el costo de resonancia del
+arpegio. Las cuerdas al aire siguen siendo candidatas y no obligan a desplazar
+la mano. Esto conserva las preferencias de posición baja y desplazamiento del
+Viterbi; no prescribe siempre la primera cuerda ni asigna dedos izquierdos.
+
+El contexto decide qué sonido debe continuar: las notas sucesivas de una misma
+melodía pueden reemplazarse en la misma cuerda; un arpegio busca conservar la
+resonancia de las otras notas del acorde. Un bajo sostenido no convierte por sí
+solo la melodía superior en arpegio. Las bordaduras (`la–sol♯–la`) y los tramos
+cromáticos o por grados conjuntos son casos de regresión para no extender las
+reglas de resonancia a una línea melódica. Los números de traste de la TAB
+(`9`, `8`) no son dedos izquierdos escritos en la fuente: aquí el error estaba
+en la selección posterior de equísonos, no en leer `1`/`2`/`3`/`4` de la fuente.
+
+Casos de regresión (numeración MusicXML): vals 5, compases 3, 7, 20 y 24,
+`5–4–5–3–0` en primera; compás 16, `0–2–0` en primera tras el acorde inicial;
+vals 7, compás 20, `2–1–2` en tercera seguido de `0–1–3` en segunda (si–do–re).
+El traste 2 final cambiaría la altura a do♯. Se cotejó este cierre con Ditson,
+página impresa 80, y `op59-07.pdf`, página 2.
+
+La detección sigue siendo una heurística por compás, no un análisis completo de
+voces, ligados o duración de notas sostenidas. No se cambiaron sus umbrales ni
+los pesos globales. Los preludios conservan su tratamiento revisado; migrarlos
+requiere su propia comparación musical. Pruebas: `test/carcassi-valses.unit.js`
+para los archivos publicados y `backend/engine/test_fingering.py` para la
+clasificación y las reglas compartidas.
+
 ## 9. Resumen
 
 Reglas clave: span ≤ 4 con extensión limitada; mano quieta en el compás; arpegios en cuerdas contiguas con pulgar en los graves; no repetir cuerda entre notas distintas; mantener dedos y cejilla mientras suenan; marcas de la partitura (dedo, cuerda, traste) como restricciones duras.

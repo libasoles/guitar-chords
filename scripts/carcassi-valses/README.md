@@ -20,7 +20,10 @@ IMSLP bloquea la descarga por script; Mutopia solo tiene los preludios del Op. 5
 ```
 
 Requiere `pymupdf` además de lo que pide `carcassi-preludios/README.md`. El PDF y el MusicXML publicados salen del
-motor (`backend/engine/tabify.py`); la TAB es una propuesta del motor con la misma digitación que los preludios.
+motor (`backend/engine/tabify.py`); la TAB es una propuesta del motor con detección de arpegios por compás
+(`arpeggio="auto"`). Las melodías por grados conjuntos conservan las cuerdas
+que elige el Viterbi; no se les aplica la penalización de repetir cuerda de los
+arpegios. Ver `docs/criterios-de-digitacion.md`, §8.1.
 Un tiempo = una semicorchea. Los compases de anacrusa y de cierre suman juntos un compás completo.
 
 ## Correcciones cotejadas

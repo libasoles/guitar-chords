@@ -165,6 +165,27 @@ class EngineIntegrationTests(unittest.TestCase):
         self.assertFalse(auto[0]["arpeggio"])
         self.assertEqual([c["cells"] for c in auto[0]["columns"]], [c["cells"] for c in off[0]["columns"]])
 
+    def test_chromatic_turn_over_an_open_bass_keeps_the_first_string(self):
+        # Vals 5: A4-G#4-A4-G4-E4 over A2. These are successive melody
+        # notes, so fretting the next one should stop the previous one.
+        part = self.part([[69, 68, 69, 67, 64]])
+        measure = part.measure(1)
+        measure.insert(0, tabify.m21.note.Note(45 + 12, quarterLength=2.5))
+        measures, _ = tabify.build_columns(part)
+        tabify.assign_frets(measures, arpeggio="auto")
+        self.assertFalse(measures[0]["arpeggio"])
+        self.assertEqual([c["cells"][0] for c in measures[0]["columns"]], [5, 4, 5, 3, 0])
+        self.assertEqual(measures[0]["columns"][0]["cells"][4], 0)
+
+    def test_neighbor_note_and_scale_stay_in_low_position(self):
+        # Vals 7 in A minor: A3-G#3-A3-B3-C4-D4. The E-string
+        # melody conventions of major-key arpeggios do not apply here.
+        measures = self.run_engine([[57, 56, 57, 59, 60, 62]], "auto")
+        self.assertFalse(measures[0]["arpeggio"])
+        self.assertEqual([next((s, f) for s, f in enumerate(c["cells"]) if f is not None)
+                          for c in measures[0]["columns"]],
+                         [(2, 2), (2, 1), (2, 2), (1, 0), (1, 1), (1, 3)])
+
     def test_fingering_follows_the_new_cells(self):
         measures = self.run_engine([[59, 64, 67, 64, 59, 64, 67, 64]], "auto")
         for col in measures[0]["columns"]:
