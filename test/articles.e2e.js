@@ -12,6 +12,7 @@ const progressive = require('../scripts/lib/article-carcassi-progressive');
 const aguado = require('../scripts/lib/article-aguado');
 const sagreras = require('../scripts/lib/article-sagreras');
 const sor = require('../scripts/lib/article-sor');
+const sorEstudios = require('../scripts/lib/article-sor-estudios');
 
 const DIST = path.join(__dirname, '..', 'dist/site');
 const BASE_URL = 'https://acordesdeguitarra.com.ar';
@@ -38,7 +39,7 @@ const PDFS = [
 
       // Index: one card per article, linking to it.
       await page.goto(base + index);
-      assert.equal(await page.locator('.article-card').count(), 9);
+      assert.equal(await page.locator('.article-card').count(), 10);
       assert.equal(await page.locator('.article-card').first().getAttribute('href'), article);
       assert.equal(await page.locator('.article-card').nth(1).getAttribute('href'), pagePath('articulo-preludios-carcassi', locale));
       assert.match(await page.locator('.article-card p').first().textContent(), /Carcassi/);
@@ -603,10 +604,90 @@ const PDFS = [
       }
     }
 
+    // Sor's studies: one card per published piece, in catalog order, with a score modal and a PDF download.
+    {
+      const published = sorEstudios.publishedPieces();
+      for (const locale of ['es', 'en']) {
+        const url = pagePath('articulo-estudios-sor', locale);
+        await page.setViewportSize({ width: 1280, height: 800 });
+        await page.goto(base + url);
+        const cards = page.locator('.prelude-card');
+        assert.equal(await cards.count(), published.length);
+        const hrefs = await page.locator('.prelude-card > .example-download').evaluateAll((els) => els.map((el) => decodeURIComponent(el.getAttribute('href'))));
+        assert.deepEqual(hrefs.map((href) => href.split('/').pop()), published.map((p) => p.pdf));
+        const titles = await cards.locator('.prelude-open').allTextContents();
+        assert.deepEqual(titles, published.map((p) => sorEstudios.pieceName(p, locale)));
+        assert.equal(await cards.locator('svg.score-svg').count(), published.length);
+        assert.equal(await page.locator('.article-back a[href="' + pagePath('articulos', locale) + '"]').count(), 1);
+        await cards.first().click();
+        const modal = page.locator('.modal-full:popover-open');
+        assert.equal(await modal.count(), 1);
+        const first = modal.locator('img.modal-page').first();
+        await first.evaluate((img) => img.decode());
+        assert.ok(await first.evaluate((img) => img.naturalWidth > 0));
+        assert.match(await first.getAttribute('src'), /\/full\/sor-est-601-p1(?:\.[a-f0-9]+)?\.svg$/);
+        assert.equal(decodeURIComponent(await modal.locator('.modal-footer .modal-download').getAttribute('href')).split('/').pop(), published[0].pdf);
+        await modal.locator('.modal-close').click();
+        assert.equal(await page.locator('.modal-full:popover-open').count(), 0);
+        await page.setViewportSize({ width: 375, height: 800 });
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+        assert.ok(overflow <= 0, 'scroll horizontal de ' + overflow + 'px en ' + url);
+      }
+    }
+
+    // Sagreras lessons: one card per published lesson, in numeric order, with a score modal and a PDF download.
+    {
+      const published = sagreras.publishedPieces();
+      for (const locale of ['es', 'en']) {
+        const url = pagePath('articulo-lecciones-sagreras', locale);
+        await page.setViewportSize({ width: 1280, height: 800 });
+        await page.goto(base + url);
+        const cards = page.locator('.prelude-card');
+        assert.equal(await cards.count(), published.length);
+        const hrefs = await page.locator('.prelude-card > .example-download').evaluateAll((els) => els.map((el) => decodeURIComponent(el.getAttribute('href'))));
+        assert.deepEqual(hrefs.map((href) => href.split('/').pop()), published.map((p) => p.pdf));
+        const titles = await cards.locator('.prelude-open').allTextContents();
+        titles.forEach((title, i) => assert.match(title, new RegExp('^' + (locale === 'es' ? 'Lecci\u00f3n ' : 'Lesson ') + published[i].number + '$')));
+        assert.equal(await cards.locator('svg.score-svg').count(), published.length);
+        assert.equal(await page.locator('.article-back a[href="' + pagePath('articulos', locale) + '"]').count(), 1);
+        await cards.first().click();
+        const modal = page.locator('.modal-full:popover-open');
+        assert.equal(await modal.count(), 1);
+        const first = modal.locator('img.modal-page').first();
+        await first.evaluate((img) => img.decode());
+        assert.ok(await first.evaluate((img) => img.naturalWidth > 0));
+        assert.match(await first.getAttribute('src'), new RegExp('/full/lesson-' + String(published[0].number).padStart(2, '0') + '-p1(?:\\.[a-f0-9]+)?\\.svg$'));
+        assert.equal(decodeURIComponent(await modal.locator('.modal-footer .modal-download').getAttribute('href')).split('/').pop(), published[0].pdf);
+        // Lessons are progressive: the footer has previous/next chevrons, disabled at either end.
+        const steps = modal.locator('.modal-footer .modal-step');
+        assert.equal(await steps.count(), 2);
+        assert.equal(await steps.nth(0).isDisabled(), true);
+        assert.equal(await steps.nth(1).isDisabled(), published.length < 2);
+        if (published.length > 1) {
+          await steps.nth(1).click();
+          const second = page.locator('.modal-full:popover-open');
+          assert.equal(await second.count(), 1);
+          assert.equal(await second.getAttribute('id'), 'sagreras-score-' + published[1].number);
+          assert.equal(await second.locator('.modal-step').nth(0).isDisabled(), false);
+          assert.equal(await second.locator('.modal-step').nth(1).isDisabled(), published.length < 3);
+        }
+        await page.locator('.modal-full:popover-open .modal-close').click();
+        assert.equal(await page.locator('.modal-full:popover-open').count(), 0);
+        await page.setViewportSize({ width: 375, height: 800 });
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+        assert.ok(overflow <= 0, 'scroll horizontal de ' + overflow + 'px en ' + url);
+        const tab = await context.newPage();
+        await tab.goto(base + url);
+        const [download] = await Promise.all([tab.waitForEvent('download'), tab.locator('.prelude-card > .example-download').first().click()]);
+        assert.equal(download.suggestedFilename(), published[0].pdf);
+        await tab.close();
+      }
+    }
+
     // All author collections share lateral desktop navigation, including sparse publication lists.
     for (const slug of ['articulo-preludios-carcassi', 'articulo-preludios-santisteban',
       'articulo-valses-carcassi', 'articulo-piezas-progresivas-carcassi',
-      'articulo-partituras-aguado', 'articulo-lecciones-sagreras', 'articulo-lecciones-sor']) {
+      'articulo-partituras-aguado', 'articulo-lecciones-sagreras', 'articulo-lecciones-sor', 'articulo-estudios-sor']) {
       for (const locale of ['es', 'en']) {
         await page.setViewportSize({ width: 1280, height: 800 });
         await page.goto(base + pagePath(slug, locale));

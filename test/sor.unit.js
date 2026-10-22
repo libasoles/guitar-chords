@@ -1,4 +1,5 @@
-/* Artefactos publicados de las Lecciones progresivas de Sor (downloads/sor).
+/* Artefactos publicados de las colecciones de Sor: lecciones del Op. 60 (downloads/sor) y estudios de los
+   Op. 6 y Op. 35 (downloads/sor-estudios).
    Run: node --test test/sor.unit.js
    Contrato: cada pieza publicada tiene PDF y MusicXML con el mismo nombre base, el MusicXML es legible, con
    notacion y TAB y los compases de la fuente curada, y la pieza lleva el nombre de pieces.json. Independencia:
@@ -9,10 +10,9 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const catalog = require('../scripts/lib/article-sor');
 
-/* Compases de cada pieza, contados sobre la fuente curada (la partitura del libro; la anacrusa cuenta como compas). */
-const MEASURES = { 1: 16, 2: 40, 3: 24, 4: 26, 5: 40, 6: 36, 7: 44, 8: 16, 9: 16, 10: 17, 11: 32, 12: 27, 13: 24 };
+/* Compases de cada pieza (clave: numero de la leccion, u opus * 100 + numero en los estudios), contados sobre la fuente curada (la partitura del libro; la anacrusa cuenta como compas). */
+const MEASURES_LECCIONES = { 1: 16, 2: 40, 3: 24, 4: 26, 5: 40, 6: 36, 7: 44, 8: 16, 9: 16, 10: 17, 11: 32, 12: 27, 13: 24 };
 
 /* Cadenas del archivo de origen: programa, rutas y textos de la cabecera de LilyPond. */
 const SOURCE_TRACES = [/LilyPond/i, /\.ly\b/i, /fernandosor\.free\.fr/i, /mutopiatitle/i];
@@ -37,61 +37,72 @@ function scoreShape(xml) {
     staves: Number((part.match(/<staves>(\d+)<\/staves>/) || [])[1]) };
 }
 
-const pieces = catalog.publishedPieces();
-const { DOWNLOADS_DIR, PREVIEW_DIR, SCORE_PREFIX, AUTHOR } = catalog;
+const MEASURES_ESTUDIOS = { 601: 44, 602: 18, 603: 41, 604: 48, 605: 48, 606: 138, 607: 80, 608: 39, 609: 58, 610: 61, 611: 87, 612: 63, 3501: 32, 3502: 26, 3503: 25, 3504: 36, 3505: 40, 3507: 33, 3509: 48, 3510: 37, 3511: 37, 3513: 32, 3517: 33, 3518: 40, 3519: 46, 3520: 56, 3522: 48, 3523: 25, 3524: 52 };
 
-test('hay al menos una pieza publicada y salen en orden numerico', () => {
-  assert.ok(pieces.length > 0);
-  assert.deepEqual(pieces.map((p) => p.number), pieces.map((p) => p.number).sort((a, b) => a - b));
-});
+const COLLECTIONS = [
+  ['lecciones', require('../scripts/lib/article-sor'), MEASURES_LECCIONES],
+  ['estudios', require('../scripts/lib/article-sor-estudios'), MEASURES_ESTUDIOS],
+];
 
-for (const piece of pieces) {
-  const label = catalog.pieceName(piece, 'en');
+function suite(collection, catalog, MEASURES) {
+  const pieces = catalog.publishedPieces();
+  const { DOWNLOADS_DIR, PREVIEW_DIR, SCORE_PREFIX, AUTHOR } = catalog;
 
-  test(label + ': PDF y MusicXML con el nombre de pieces.json', () => {
-    assert.ok(fs.existsSync(path.join(DOWNLOADS_DIR, piece.base + '.pdf')));
-    assert.ok(fs.existsSync(path.join(DOWNLOADS_DIR, piece.base + '.musicxml')));
+  test(collection + ': hay al menos una pieza publicada y salen en orden numerico', () => {
+    assert.ok(pieces.length > 0);
+    assert.deepEqual(pieces.map((p) => p.number), pieces.map((p) => p.number).sort((a, b) => a - b));
   });
 
-  test(label + ': MusicXML legible, con notacion y TAB y los compases de la fuente', () => {
-    const xml = fs.readFileSync(path.join(DOWNLOADS_DIR, piece.base + '.musicxml'), 'utf8');
-    assertWellFormed(xml);
-    const shape = scoreShape(xml);
-    assert.equal(shape.staves, 2, 'notacion + pentagrama TAB');
-    assert.equal(shape.measures, MEASURES[piece.number], 'compases de la fuente');
-  });
+  for (const piece of pieces) {
+    const label = catalog.pieceName(piece, 'en');
 
-  test(label + ': vista previa de un sistema con partitura y TAB', () => {
-    const svg = fs.readFileSync(path.join(PREVIEW_DIR, SCORE_PREFIX + String(piece.number).padStart(2, '0') + '.svg'), 'utf8');
-    assertWellFormed(svg);
-    assert.equal((svg.match(/ class="system"/g) || []).length, 1);
-    const measures = (svg.match(/ class="measure"/g) || []).length;
-    assert.ok(measures > 0);
-    assert.equal((svg.match(/ class="staff"/g) || []).length, measures * 2);
-    assert.match(svg, / class="tabGrp"/);
-  });
+    test(label + ': PDF y MusicXML con el nombre de pieces.json', () => {
+      assert.ok(fs.existsSync(path.join(DOWNLOADS_DIR, piece.base + '.pdf')));
+      assert.ok(fs.existsSync(path.join(DOWNLOADS_DIR, piece.base + '.musicxml')));
+    });
 
-  test(label + ': independiente de los archivos de origen', () => {
-    const pdf = fs.readFileSync(path.join(DOWNLOADS_DIR, piece.base + '.pdf'));
-    const xml = fs.readFileSync(path.join(DOWNLOADS_DIR, piece.base + '.musicxml'), 'utf8');
-    assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
-    const text = pdf.toString('latin1');
-    for (const trace of PDF_TRACES) assert.doesNotMatch(text, trace, 'PDF: ' + trace);
-    for (const trace of SOURCE_TRACES) assert.doesNotMatch(xml, trace, 'MusicXML: ' + trace);
-    assert.match(text, /\(Con modificaciones a partir de la edicion de [^)]+ en Mutopia\)/);
-    assert.match(text, /\(CC BY-SA [23]\.[05]\)/);
-    const uris = [...text.matchAll(/\/URI\s*\(((?:\\.|[^\\)])*)\)/g)]
-      .map((m) => m[1].replace(/\\(\d{3})/g, (_, octal) => String.fromCharCode(parseInt(octal, 8))));
-    assert.ok(uris.includes('https://www.mutopiaproject.org/cgibin/make-table.cgi?Composer=SorF'), 'enlace a la edicion de origen');
-    assert.ok(uris.some((uri) => /^https:\/\/creativecommons\.org\/licenses\/by-sa\/[23]\.[05]\/$/.test(uri)), 'enlace a la licencia');
-    const info = text.match(/\/Title\s*\(((?:\\.|[^\\)])*)\)/);
-    assert.ok(info, 'el PDF declara /Title');
-    // El PDF escapa algunos caracteres (p. ej. : como \072).
-    assert.equal(info[1].replace(/\\(\d{3})/g, (_, octal) => String.fromCharCode(parseInt(octal, 8))).replace(/\\([()\\])/g, '$1'), label);
-    assert.ok(xml.includes('<work-title>' + label + '</work-title>'));
-    assert.match(text, new RegExp('/Author\\s*\\(' + AUTHOR + '\\)'));
-    assert.doesNotMatch(text, /\/Producer|\/Creator|\/CreationDate|\/ModDate/);
-    assert.doesNotMatch(text, /<x:xmpmeta|\/Metadata/);
-    assert.doesNotMatch(xml, /<encoding>|<software>|<rights>|<source>|<encoding-date>/);
-  });
+    test(label + ': MusicXML legible, con notacion y TAB y los compases de la fuente', () => {
+      const xml = fs.readFileSync(path.join(DOWNLOADS_DIR, piece.base + '.musicxml'), 'utf8');
+      assertWellFormed(xml);
+      const shape = scoreShape(xml);
+      assert.equal(shape.staves, 2, 'notacion + pentagrama TAB');
+      assert.equal(shape.measures, MEASURES[piece.number], 'compases de la fuente');
+    });
+
+    test(label + ': vista previa de un sistema con partitura y TAB', () => {
+      const svg = fs.readFileSync(path.join(PREVIEW_DIR, SCORE_PREFIX + String(piece.number).padStart(2, '0') + '.svg'), 'utf8');
+      assertWellFormed(svg);
+      assert.equal((svg.match(/ class="system"/g) || []).length, 1);
+      const measures = (svg.match(/ class="measure"/g) || []).length;
+      assert.ok(measures > 0);
+      assert.equal((svg.match(/ class="staff"/g) || []).length, measures * 2);
+      assert.match(svg, / class="tabGrp"/);
+    });
+
+    test(label + ': independiente de los archivos de origen', () => {
+      const pdf = fs.readFileSync(path.join(DOWNLOADS_DIR, piece.base + '.pdf'));
+      const xml = fs.readFileSync(path.join(DOWNLOADS_DIR, piece.base + '.musicxml'), 'utf8');
+      assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
+      const text = pdf.toString('latin1');
+      for (const trace of PDF_TRACES) assert.doesNotMatch(text, trace, 'PDF: ' + trace);
+      for (const trace of SOURCE_TRACES) assert.doesNotMatch(xml, trace, 'MusicXML: ' + trace);
+      assert.match(text, /\(Con modificaciones a partir de la edicion de [^)]+ en Mutopia\)/);
+      assert.match(text, /\((?:CC BY-SA \d\.\d|Dominio publico)\)/);
+      const uris = [...text.matchAll(/\/URI\s*\(((?:\\.|[^\\)])*)\)/g)]
+        .map((m) => m[1].replace(/\\(\d{3})/g, (_, octal) => String.fromCharCode(parseInt(octal, 8))));
+      assert.ok(uris.includes('https://www.mutopiaproject.org/cgibin/make-table.cgi?Composer=SorF'), 'enlace a la edicion de origen');
+      if (!/Dominio publico/.test(text)) assert.ok(uris.some((uri) => /^https:\/\/creativecommons\.org\/licenses\/by-sa\/\d\.\d\/$/.test(uri)), 'enlace a la licencia');
+      const info = text.match(/\/Title\s*\(((?:\\.|[^\\)])*)\)/);
+      assert.ok(info, 'el PDF declara /Title');
+      // El PDF escapa algunos caracteres (p. ej. : como \072).
+      assert.equal(info[1].replace(/\\(\d{3})/g, (_, octal) => String.fromCharCode(parseInt(octal, 8))).replace(/\\([()\\])/g, '$1'), label);
+      assert.ok(xml.includes('<work-title>' + label + '</work-title>'));
+      assert.match(text, new RegExp('/Author\\s*\\(' + AUTHOR + '\\)'));
+      assert.doesNotMatch(text, /\/Producer|\/Creator|\/CreationDate|\/ModDate/);
+      assert.doesNotMatch(text, /<x:xmpmeta|\/Metadata/);
+      assert.doesNotMatch(xml, /<encoding>|<software>|<rights>|<source>|<encoding-date>/);
+    });
+  }
 }
+
+for (const [collection, catalog, measures] of COLLECTIONS) suite(collection, catalog, measures);

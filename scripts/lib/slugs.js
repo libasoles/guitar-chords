@@ -27,6 +27,7 @@ const SLUGS = {
   'articulo-partituras-aguado': { es: 'articulos/partituras-de-aguado', en: 'articles/aguado-sheet-music', isNew: true },
   'articulo-lecciones-sagreras': { es: 'articulos/primeras-lecciones-de-sagreras', en: 'articles/sagreras-first-lessons', isNew: true },
   'articulo-lecciones-sor': { es: 'articulos/lecciones-progresivas-de-sor', en: 'articles/sor-progressive-lessons', isNew: true },
+  'articulo-estudios-sor': { es: 'articulos/estudios-de-sor', en: 'articles/sor-studies', isNew: true },
 };
 
 function slugFor(key, locale) {
