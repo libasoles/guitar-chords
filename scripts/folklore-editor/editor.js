@@ -1,4 +1,5 @@
 import '/ascii-tabs.js';
+import { playSnapshots } from '/guitar-sound.js';
 
 const collection = document.querySelector('#collection');
 const exercises = document.querySelector('#exercises');
@@ -379,7 +380,40 @@ function moveItem(id, beforeId) {
   renderTrack();
 }
 
+const play = document.querySelector('#play');
+const ICONS = {
+  play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+  stop: '<rect width="14" height="14" x="5" y="5" rx="1"/>',
+};
+let playback;
+
+function setPlayIcon(name, label) {
+  play.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+  play.setAttribute('aria-label', label);
+  play.title = label;
+}
+
+function highlight(index) {
+  track.querySelectorAll('.track-item').forEach((item, position) => {
+    item.classList.toggle('playing', position === index);
+    if (position === index) item.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  });
+}
+
+play.addEventListener('click', () => {
+  if (playback) return playback.stop();
+  playback = playSnapshots(sequence.map(entry => entry.snapshot), highlight);
+  setPlayIcon('stop', 'Detener');
+  playback.finished.then(() => {
+    playback = null;
+    setPlayIcon('play', 'Reproducir track');
+  });
+});
+
 function renderTrack() {
+  playback?.stop();
+  play.disabled = !sequence.length;
+  if (!playback) setPlayIcon('play', 'Reproducir track');
   const top = Math.max(trackSignature?.staffTop || 0, ...sequence.map(entry => entry.snapshot.staffTop));
   renderSignature(top);
   const bottom = Math.max(0, ...sequence.map(entry => entry.snapshot.staffBottom));

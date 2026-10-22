@@ -30,6 +30,13 @@ sets, repetirlos, reordenarlos por arrastre y quitar cada copia con la X
 de Lucide en su esquina superior derecha. Enter sobre el pentagrama ofrece una alternativa al arrastre. El track queda visible al desplazarse por los
 ejercicios y admite mouse o pantalla táctil.
 
+El track ocupa todo el ancho de la pantalla. El botón de play (icono Lucide) a
+su izquierda reproduce el track con un sonido de guitarra sintetizado en el
+navegador (Karplus-Strong con Web Audio, sin descargar muestras, en
+`guitar-sound.js`): cada nota suena en su cuerda y traste, una cuerda se corta
+al pulsarla de nuevo, y el compás en curso se resalta. Vuelve a pulsarlo para
+detener; editar el track también detiene la reproducción.
+
 La secuencia y sus copias se guardan en el navegador (`folklore.lab.track.v1`).
 La TAB del track es de lectura; las ediciones se hacen en los ejercicios.
 Una modificación posterior del ejercicio no altera las copias existentes.

@@ -474,9 +474,11 @@ def handler(library):
                     return self.reply(library.exercises[number].musicxml(), 'application/vnd.recordare.musicxml+xml')
                 if path == '/ascii-tabs.js':
                     return self.reply((HERE.parents[1] / 'vendor/ascii-tabs.js').read_text(), 'text/javascript; charset=utf-8')
-                files = {'/': 'index.html', '/editor.js': 'editor.js', '/editor.css': 'editor.css'}
+                files = {'/': 'index.html', '/editor.js': 'editor.js', '/editor.css': 'editor.css',
+                         '/guitar-sound.js': 'guitar-sound.js'}
                 if path in files:
-                    mime = {'/': 'text/html', '/editor.js': 'text/javascript', '/editor.css': 'text/css'}[path]
+                    mime = {'/': 'text/html', '/editor.js': 'text/javascript', '/editor.css': 'text/css',
+                            '/guitar-sound.js': 'text/javascript'}[path]
                     return self.reply((HERE / files[path]).read_text(), mime + '; charset=utf-8')
                 self.reply(dict(error='No encontrado'), status=404)
             except (ValueError, KeyError) as error:
