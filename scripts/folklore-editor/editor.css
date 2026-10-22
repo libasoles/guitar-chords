@@ -1,7 +1,8 @@
 :root {
+  --paper: #fdfaf5;
   font-family: system-ui, -apple-system, sans-serif;
   color: #252c29;
-  background: white;
+  background: var(--paper);
   font-synthesis: none;
 }
 * { box-sizing: border-box; }
@@ -9,19 +10,19 @@ body { margin: 0; }
 header, main { max-width: 1240px; margin: auto; padding: 24px 32px; }
 header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 24px; padding-bottom: 0; }
 h1 { font: 400 38px Georgia, serif; margin: 0; }
-select, button { font: inherit; color: inherit; background: white; }
+select, button { font: inherit; color: inherit; background: var(--paper); }
 select { min-width: 0; max-width: 70%; padding: 6px 8px; border: 1px solid #d9dfd5; border-radius: 4px; }
 button { cursor: pointer; }
 button:focus-visible, select:focus-visible, .measure-notation:focus-visible { outline: 2px solid #4b8060; outline-offset: 2px; }
 #status { font-size: 13px; color: #a53524; }
 #status:empty { display: none; }
-.track-panel { position: sticky; top: 0; z-index: 5; background: white; margin-bottom: 24px; }
+.track-panel { position: sticky; top: 0; z-index: 5; background: var(--paper); margin-bottom: 24px; }
 #track { min-height: 100px; display: flex; overflow-x: auto; padding: 4px 0; border-bottom: 1px solid #d9dfd5; }
 #track.drag-over { background: #edf4eb; border-color: #376c48; }
 .exercise { margin-bottom: 32px; }
 .measure-scroll { overflow-x: auto; }
 .measure-row { display: flex; min-width: 900px; align-items: end; margin-bottom: 16px; }
-.measure-view { flex: none; min-width: 0; background: white; }
+.measure-view { flex: none; min-width: 0; background: var(--paper); }
 .measure-notation { cursor: grab; touch-action: none; user-select: none; }
 .measure-notation:active { cursor: grabbing; }
 .measure-notation > svg { display: block; width: 100%; overflow: hidden; pointer-events: none; user-select: none; }
@@ -36,7 +37,7 @@ button:focus-visible, select:focus-visible, .measure-notation:focus-visible { ou
 .measure-view ascii-tabs .ascii-tabs-fret { font-weight: 400; }
 .measure-view ascii-tabs .ascii-tabs-tools { display: none; }
 .measure-view ascii-tabs .ascii-tabs-tab { overflow-x: clip; }
-.measure-view ascii-tabs .ascii-tabs-area .ascii-tabs-fret { background: #fff; }
+.measure-view ascii-tabs .ascii-tabs-area .ascii-tabs-fret { background: var(--paper); }
 .measure-view ascii-tabs .ascii-tabs-cur .ascii-tabs-fret { background: var(--ascii-tabs-focus); }
 .measure-view ascii-tabs.ascii-tabs-editing .ascii-tabs-cur .ascii-tabs-fret::after {
   content: ''; position: absolute; left: 100%; top: .25em; bottom: .25em; width: 1px;
