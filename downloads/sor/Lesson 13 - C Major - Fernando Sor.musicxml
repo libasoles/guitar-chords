@@ -902,7 +902,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
       </note>
@@ -914,7 +914,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
         <beam number="1">end</beam>
       </note>
@@ -1168,7 +1168,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
       </note>
@@ -1180,7 +1180,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
         <beam number="1">end</beam>
         <notations>
@@ -1197,7 +1197,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
       </note>
@@ -1209,7 +1209,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
         <beam number="1">end</beam>
         <notations>
@@ -2081,7 +2081,7 @@
         <duration>10080</duration>
         <voice>2</voice>
         <type>quarter</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <note id="tab-note-65">
@@ -2092,7 +2092,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <backup>
@@ -2280,7 +2280,7 @@
         <duration>10080</duration>
         <voice>2</voice>
         <type>quarter</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <note id="tab-note-71">
@@ -2291,7 +2291,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <backup>
@@ -2479,7 +2479,7 @@
         <duration>10080</duration>
         <voice>2</voice>
         <type>quarter</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <note id="tab-note-77">
@@ -2490,7 +2490,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <backup>
@@ -2678,7 +2678,7 @@
         <duration>10080</duration>
         <voice>2</voice>
         <type>quarter</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <note id="tab-note-83">
@@ -2689,7 +2689,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <backup>
@@ -2887,7 +2887,7 @@
         <duration>10080</duration>
         <voice>2</voice>
         <type>quarter</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <note id="tab-note-89">
@@ -2898,7 +2898,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <backup>
@@ -3094,7 +3094,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <note id="tab-note-95">
@@ -3107,7 +3107,7 @@
         <voice>2</voice>
         <type>quarter</type>
         <accidental>sharp</accidental>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <backup>
@@ -3319,7 +3319,7 @@
         <voice>2</voice>
         <type>quarter</type>
         <dot />
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <note id="tab-note-102">
@@ -3330,7 +3330,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <backup>
@@ -3519,7 +3519,7 @@
         <duration>10080</duration>
         <voice>2</voice>
         <type>quarter</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <note>
@@ -3537,7 +3537,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <backup>
@@ -4907,7 +4907,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
       </note>
@@ -4919,7 +4919,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
         <beam number="1">end</beam>
       </note>
@@ -4933,7 +4933,7 @@
         <voice>2</voice>
         <type>quarter</type>
         <accidental>flat</accidental>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <backup>
@@ -5189,7 +5189,7 @@
         <voice>2</voice>
         <type>quarter</type>
         <dot />
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <note print-object="no" print-spacing="yes">
@@ -5399,7 +5399,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
       </note>
@@ -5411,7 +5411,7 @@
         <duration>5040</duration>
         <voice>2</voice>
         <type>eighth</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
         <beam number="1">end</beam>
       </note>
@@ -5423,7 +5423,7 @@
         <duration>10080</duration>
         <voice>2</voice>
         <type>quarter</type>
-        <stem>down</stem>
+        <stem>up</stem>
         <staff>1</staff>
       </note>
       <backup>

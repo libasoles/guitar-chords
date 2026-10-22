@@ -1,61 +1,67 @@
-# Lecciones progresivas de Sor (Op. 60)
+# Partituras de Sor
 
-Página: `/articulos/lecciones-progresivas-de-sor`. `pieces.json` es el catálogo: la clave es el número de la lección en
-el Op. 60 (*Introduction à l'étude de la guitare*, 25 lecciones), `form`/`es` la tonalidad, `editor` y `license` los de
-la edición de Mutopia de la que parte.
+Dos páginas, las dos desde los archivos LilyPond de [Mutopia](https://www.mutopiaproject.org/cgibin/make-table.cgi?Composer=SorF)
+(CC BY-SA 2.5, 3.0 o 4.0 según la pieza; el Op. 35 n.º 14 es de dominio público):
 
-## De dónde salen las notas
+| Colección | Página | Catálogo | Fuentes | Salida |
+|---|---|---|---|---|
+| `lecciones` | `/articulos/lecciones-progresivas-de-sor` (Op. 60, 13 de las 25) | `pieces.json` | `sources/sor_op60-NN.ly` | `downloads/sor/`, `src/site/articles/sor/` |
+| `estudios` | `/articulos/estudios-de-sor` (Op. 6 y Op. 35) | `estudios.json` | `sources/estudios/*.ly` | `downloads/sor-estudios/`, `src/site/articles/sor-estudios/` |
 
-Archivos LilyPond de [Mutopia](https://www.mutopiaproject.org/cgibin/make-table.cgi?Composer=SorF) (carpeta `O60`),
-licencia CC BY-SA 2.5 o 3.0 según la pieza, copiados tal cual en `sources/sor_op60-NN.ly`. Mutopia publica 13 de las 25
-(la 2 y la 7 no se leen todavía: voces anidadas y `\acciaccatura`). Las copias originales, con su `.mid` y su `.rdf`,
-están en `resources/sor/mutopia/` (no versionado). El libro de 1830 (*Méthode pour la guitare*) está en
-`resources/sor/metodo-1830/`: son escaneos difusos y casi todo son ejemplos cortos, no piezas.
-
-LilyPond no está instalado y no exporta MusicXML, así que `ly_to_musicxml.py` lee el `.ly` directamente (modo
-`\relative`, repeticiones, `\partial`, voces simultáneas, digitación, ligaduras). Exige que cada compás sume lo que
-marca la métrica, voz por voz, como hace LilyPond con las comprobaciones de compás.
+La clave del catálogo es el número de la lección; en los estudios, opus × 100 + número (601 = Op. 6 n.º 1, 3524 = Op. 35
+n.º 24). `form`/`es` son la tonalidad, `editor` y `license` los de la edición de Mutopia; `tuning: "dropd"` pone la sexta
+cuerda en Re (Op. 6 n.º 7 y 9); `patches` son correcciones de erratas del `.ly` (ver abajo).
 
 ```sh
-.venv-carcassi/bin/python scripts/sor/build.py convert 1   # sources/sor_op60-01.ly -> sources/01.musicxml
-.venv-carcassi/bin/python scripts/sor/build.py 1           # -> downloads/sor/ + vistas del sitio
+.venv-carcassi/bin/python scripts/sor/build.py [estudios] convert 3501   # el .ly -> sources/.../3501.musicxml
+.venv-carcassi/bin/python scripts/sor/build.py [estudios] 3501           # -> downloads/ + vistas del sitio
 .venv-carcassi/bin/python -m unittest discover -s scripts/sor -p 'test_*.py'
 node --test test/sor.unit.js
 ```
 
-## Altura
+Los originales (con su `.mid` y `.rdf`) están en `resources/sor/mutopia/` (no versionado). El libro de 1830
+(*Méthode pour la guitare*, `resources/sor/metodo-1830/`) son escaneos difusos y casi todo son ejemplos cortos: no sirve.
 
-Con `\clef violin` el archivo da la altura **escrita** de la guitarra: el motor espera la que suena (una octava menos), y
-el conversor la resta. Con `\clef "treble_8"` el archivo ya da la que suena. Se comprobó contra el MIDI de Mutopia
-(el MIDI de las piezas con `\transposition` va una octava más grave: no sirve para comparar octavas).
+## El conversor
+
+LilyPond no está instalado y no exporta MusicXML, así que `ly_to_musicxml.py` lee el `.ly` directamente: modo
+`\relative` y `\fixed`, repeticiones (`volta`, `unfold`, `\alternative`), `\partial` a mitad de pieza, voces simultáneas y
+anidadas, tresillos, notas de adorno, ligaduras por altura, números de dedo, `\key`/`\time` que cambian, nombres alemanes
+(`\include "deutsch.ly"`) y funciones de música definidas en el archivo. Exige que cada compás sume lo que marca la métrica,
+voz por voz, como hace LilyPond con las comprobaciones de compás.
+
+Reglas de LilyPond que se comprobaron contra el MIDI y no son las que dice el manual a primera vista:
+
+- En modo relativo, **cada rama de `<< >>` parte de donde acabó la anterior** (no de la altura previa al `<<`).
+- `\repeat unfold N { ... }` resuelve las alturas relativas **una vez** y copia el bloque: las copias son idénticas.
+- Una ligadura entre alturas distintas se ignora (`d, ~ d'` en Op. 60 n.º 11).
+- Con `\clef violin` el archivo da la altura **escrita**; el motor espera la que suena (una octava menos). Con
+  `\clef "treble_8"` (también si va dentro de `global`) ya da la que suena.
+- Dos voces con la misma altura a la vez son una sola nota en la TAB: `tabify.MERGE_UNISONS = True` (solo aquí).
+
+Si se cambia el conversor hay que **reconstruir y revisar** todas las piezas: `test_ly_to_musicxml.py` comprueba que cada
+`NN.musicxml` versionado es lo que genera el conversor actual.
 
 ## Cómo se comprobó cada pieza
 
-1. Altura y posición de cada nota contra el `.mid` de Mutopia (music21, con las ligaduras fundidas y comparando
-   conjuntos de (instante, altura)): lecciones 1–6, 8, 10, 11 y 13, cero diferencias. Tres diferencias que no son del
-   archivo: la 9 re-ataca un mi4 mientras suena otro igual (arpegio sobre una nota larga; LilyPond lo funde en el MIDI),
-   y la 12 y la 6 tienen una semicorchea con puntillo seguida de fusa que el MIDI cuantiza a tresillo. music21 además
-   parte las notas largas del MIDI en cada barra contada desde 0, sin descontar la anacrusa: esas notas se descartan
-   al comparar. En la 7 el MIDI no sirve a partir de la `\acciaccatura` (da tiempo al adorno).
-2. Vista del PDF generado junto al PDF de Mutopia, pieza por pieza: notas, repeticiones, casillas, compases cortos,
-   segno y dedos.
+1. Altura y posición de cada nota contra el `.mid` de Mutopia (music21, ligaduras fundidas, conjuntos de (instante,
+   altura)). Hay diferencias que no son del archivo: music21 parte las notas largas del MIDI en cada barra contada desde 0 y
+   no une una nota con el acorde que la contiene; LilyPond da tiempo real a las notas de adorno y el MIDI cuantiza las
+   semicorcheas con puntillo y los tresillos de semicorcheas. Con `\partial` dentro de una repetición el MIDI se desplaza
+   una negra: ahí decide el PDF de Mutopia.
+2. Vista del PDF generado junto al PDF de Mutopia.
 
-No se cotejó con el impreso del Op. 60: Mutopia parte de escaneos de `fernandosor.free.fr`.
+No se cotejó con el impreso: Mutopia parte de escaneos.
 
-## Lo que hubo que resolver
+## Diferencias con la edición de Mutopia
 
-- **La misma altura en dos voces a la vez** (lecciones 5, 9, 10, 11, 12, 13): LilyPond funde las cabezas; el motor las
-  tocaba dos veces en la TAB. `tabify.MERGE_UNISONS = True` (solo aquí) deja una sola nota por columna.
-- **Casillas 1.ª y 2.ª** (12): el archivo no trae `|` entre ellas; cada inicio y fin de repetición o casilla es una
-  barra de compás. Las marcas de repetición salen una vez aunque las lleve cada voz.
-- **Compases cortos con `\partial` a mitad de pieza** (4, 6, 7, 11, 12): la anacrusa de la repeticion siguiente completa
-  el compás corto y no cuenta como compás nuevo.
-- **Voces que se abren a mitad de una voz** (2): pasan a voz propia, con silencios invisibles; las plicas arriba y abajo
-  solo van donde suenan dos voces.
-- **`\acciaccatura`** (7) como nota de adorno sin duración; **`\segno`** como dirección.
-- **Ligadura entre alturas distintas** (`d, ~ d'` en la 11): se ignora, como hace LilyPond (su PDF imprime las dos notas).
+- Op. 35 n.º 13, compás 27: el archivo escribe `g,16` en la voz interna mientras el bajo toca `gis,2`; la figura es un
+  sol♯ (y el sol natural más el sol♯ no se pueden tocar a la vez). Se corrige con `patches` a `gis,16`.
+- Op. 60 n.º 5 empieza en la menor y pasa a La mayor en el compás 17: título «A Minor and A Major».
 
 ## Pendiente
 
-- Cotejar con un escaneo del Op. 60 de IMSLP.
+- Op. 35 n.º 6, 8, 12, 14, 15, 16 y 21: convierten, pero no se publican hasta confirmar que el MIDI y el PDF de Mutopia
+  coinciden (el MIDI se desfasa una negra, o varias, en estas piezas; hay que decidir por el PDF).
+- Cotejar con un escaneo del Op. 60, Op. 6 y Op. 35 de IMSLP.
 - Las otras 12 lecciones del Op. 60 no están en Mutopia.

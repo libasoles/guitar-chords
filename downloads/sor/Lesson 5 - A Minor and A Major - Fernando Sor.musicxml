@@ -2,9 +2,9 @@
 <!DOCTYPE score-partwise  PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
 <score-partwise version="4.0">
   <work>
-    <work-title>Lesson 5: A Major</work-title>
+    <work-title>Lesson 5: A Minor and A Major</work-title>
   </work>
-  <movement-title>Lesson 5: A Major</movement-title>
+  <movement-title>Lesson 5: A Minor and A Major</movement-title>
   <identification>
     <creator type="composer">Fernando Sor</creator>
   </identification>
@@ -14,7 +14,7 @@
       <tenths>40</tenths>
     </scaling>
   </defaults>
-  <credit page="1"><credit-words default-x="1050" default-y="1150" justify="center" valign="top">Lesson 5: A Major</credit-words></credit><credit page="1"><credit-words default-x="1900" default-y="1090" justify="right" valign="top">Fernando Sor</credit-words></credit><credit page="1"><credit-words default-x="1050" default-y="1030" justify="center" valign="top"> </credit-words></credit><part-list>
+  <credit page="1"><credit-words default-x="1050" default-y="1150" justify="center" valign="top">Lesson 5: A Minor and A Major</credit-words></credit><credit page="1"><credit-words default-x="1900" default-y="1090" justify="right" valign="top">Fernando Sor</credit-words></credit><credit page="1"><credit-words default-x="1050" default-y="1030" justify="center" valign="top"> </credit-words></credit><part-list>
     <score-part id="P1">
       <part-name print-object="no"></part-name>
     </score-part>
@@ -26,7 +26,7 @@
       <attributes>
         <divisions>10080</divisions>
         <key>
-          <fifths>3</fifths>
+          <fifths>0</fifths>
         </key>
         <time>
           <beats>6</beats>
@@ -93,13 +93,11 @@
       <note id="tab-note-3">
         <pitch>
           <step>C</step>
-          <alter>0</alter>
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
-        <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
@@ -311,13 +309,11 @@
       <note id="tab-note-10">
         <pitch>
           <step>F</step>
-          <alter>0</alter>
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
-        <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
@@ -508,6 +504,7 @@
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
+        <accidental>sharp</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">continue</beam>
@@ -532,13 +529,11 @@
       <note id="tab-note-17">
         <pitch>
           <step>G</step>
-          <alter>0</alter>
           <octave>2</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
-        <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
@@ -737,13 +732,11 @@
       <note id="tab-note-23">
         <pitch>
           <step>C</step>
-          <alter>0</alter>
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
-        <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">continue</beam>
@@ -983,13 +976,11 @@
       <note id="tab-note-32">
         <pitch>
           <step>C</step>
-          <alter>0</alter>
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
-        <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
@@ -1198,13 +1189,11 @@
       <note id="tab-note-39">
         <pitch>
           <step>F</step>
-          <alter>0</alter>
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
-        <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
@@ -1395,6 +1384,7 @@
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
+        <accidental>sharp</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">continue</beam>
@@ -1453,13 +1443,11 @@
       <note id="tab-note-48">
         <pitch>
           <step>C</step>
-          <alter>0</alter>
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
-        <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">end</beam>
@@ -1617,6 +1605,7 @@
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
+        <accidental>sharp</accidental>
         <staff>1</staff>
         <beam number="1">continue</beam>
       </note>
@@ -1756,6 +1745,7 @@
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
+        <accidental>sharp</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">continue</beam>
@@ -1956,13 +1946,11 @@
       <note id="tab-note-61">
         <pitch>
           <step>C</step>
-          <alter>0</alter>
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
-        <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
@@ -2193,6 +2181,7 @@
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
+        <accidental>sharp</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">continue</beam>
@@ -2398,13 +2387,11 @@
       <note id="tab-note-76">
         <pitch>
           <step>C</step>
-          <alter>0</alter>
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
-        <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">continue</beam>
@@ -2613,13 +2600,11 @@
       <note id="tab-note-83">
         <pitch>
           <step>F</step>
-          <alter>0</alter>
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
-        <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">continue</beam>
@@ -2644,13 +2629,11 @@
       <note id="tab-note-85">
         <pitch>
           <step>G</step>
-          <alter>0</alter>
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
-        <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
@@ -2830,13 +2813,11 @@
       <note id="tab-note-90">
         <pitch>
           <step>C</step>
-          <alter>0</alter>
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
-        <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
@@ -2868,13 +2849,11 @@
       <note id="tab-note-93">
         <pitch>
           <step>F</step>
-          <alter>0</alter>
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
-        <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
@@ -3123,6 +3102,7 @@
         <duration>5040</duration>
         <voice>1</voice>
         <type>eighth</type>
+        <accidental>sharp</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">continue</beam>
@@ -3488,6 +3468,11 @@
     </measure>
     <!--========================= Measure 17 =========================-->
     <measure implicit="no" number="17">
+      <attributes>
+        <key>
+          <fifths>3</fifths>
+        </key>
+      </attributes>
       <direction placement="above">
         <direction-type>
           <words font-weight="bold" justify="right">Fin.</words>

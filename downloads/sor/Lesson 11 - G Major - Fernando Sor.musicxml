@@ -2303,6 +2303,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
+          <slur number="3" type="start" />
           <technical>
             <fingering alternate="no" substitution="no">2</fingering>
           </technical>
@@ -2320,7 +2321,7 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <notations>
-          <slur number="2" type="stop" />
+          <slur number="3" type="stop" />
           <technical>
             <fingering alternate="no" substitution="no">3</fingering>
           </technical>
@@ -2352,6 +2353,9 @@
         <dot />
         <stem>down</stem>
         <staff>1</staff>
+        <notations>
+          <slur number="2" type="stop" />
+        </notations>
       </note>
       <backup>
         <duration>30240</duration>

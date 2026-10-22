@@ -114,5 +114,99 @@ class StructureTests(unittest.TestCase):
             convert("\\relative c' { c4 \\nonsense d }")
 
 
+def convert_file(text, patches=()):
+    with tempfile.TemporaryDirectory() as tmp:
+        path = os.path.join(tmp, 'p.ly')
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(text)
+        return ET.fromstring(L.convert(path, 'x', 'y', patches=patches).split('?>', 1)[1])
+
+
+class ModernSyntaxTests(unittest.TestCase):
+    def test_fixed_uses_the_octave_of_its_reference(self):
+        root = convert("\\fixed c' { c4 d, e'' f }", '\\time 4/4 \\clef "treble_8"')
+        self.assertEqual([(s, o) for s, o, _ in pitches(root)], [('C', 4), ('D', 3), ('E', 6), ('F', 4)])
+
+    def test_tuplet_scales_durations_and_marks_the_group(self):
+        root = convert("\\relative c' { \\tuplet 3/2 { c8 d e } f4 g2 }")
+        notes = list(root.iter('note'))
+        self.assertEqual([n.findtext('duration') for n in notes[:4]], ['160', '160', '160', '480'])
+        self.assertEqual([n.findtext('time-modification/actual-notes') for n in notes[:4]], ['3', '3', '3', None])
+        self.assertEqual([t.get('type') for t in root.iter('tuplet')], ['start', 'stop'])
+
+    def test_unfold_repeats_the_block_with_the_same_pitches(self):
+        # En modo relativo LilyPond resuelve el bloque una vez: las copias no suben de octava.
+        root = convert("\\relative c' { \\repeat unfold 3 { e2 e' } }", '\\time 2/4 \\key c \\major \\clef violin')
+        self.assertEqual([o for _, o, _ in pitches(root)], [3, 4, 3, 4, 3, 4])
+
+    def test_branches_of_simultaneous_music_chain_their_relative_pitch(self):
+        root = convert("\\relative c' { << { c1 } \\\\ { g'1 } >> }")
+        self.assertEqual([(s, o) for s, o, _ in pitches(root)], [('C', 3), ('G', 3)])
+
+    def test_q_repeats_the_previous_chord(self):
+        root = convert("\\relative c' { <c e>4 q q q }")
+        self.assertEqual(len(pitches(root)), 8)
+
+    def test_key_change_writes_new_attributes_and_accidentals_follow_it(self):
+        root = convert("\\relative c' { c1 | \\key g \\major fis1 }")
+        measures = root.findall('.//measure')
+        self.assertEqual(measures[1].findtext('attributes/key/fifths'), '1')
+        self.assertIsNone(measures[1].find('.//accidental'))  # fa sostenido ya esta en la armadura
+
+    def test_clef_inside_a_variable_decides_the_octave(self):
+        text = ('\\version "2.18.0"\nglobal = { \\time 4/4 \\clef "treble_8" }\n'
+                "music = \\relative c' { \\global c1 }\n\\score { << \\music >> }\n")
+        self.assertEqual(pitches(convert_file(text))[0][:2], ('C', 4))
+
+    def test_german_note_names_with_the_include(self):
+        text = ('\\version "2.16.0"\n\\include "deutsch.ly"\n'
+                "music = \\relative c'' { h4 b a as }\n\\score { << \\music >> }\n")
+        root = convert_file(text)
+        self.assertEqual([(s, a) for s, _, a in pitches(root)], [('B', 0), ('B', -1), ('A', 0), ('A', -1)])
+
+    def test_patch_must_match_exactly_once(self):
+        text = "\\version \"2.18.0\"\nmusic = \\relative c' { c1 }\n\\score { << \\music >> }\n"
+        self.assertEqual(pitches(convert_file(text, patches=[("c1", "d1")]))[0][0], 'D')
+        with self.assertRaises(L.LyError):
+            convert_file(text, patches=[("zzz", "d1")])
+
+    def test_tie_applies_only_to_marked_chord_notes(self):
+        root = convert("\\relative c' { <c~ e>2 <c f> }")
+        starts = [n.findtext('pitch/step') for n in root.iter('note')
+                  if n.find('tie') is not None and n.find('tie').get('type') == 'start']
+        self.assertEqual(starts, ['C'])
+
+    def test_music_function_returns_its_music_arguments_in_order(self):
+        text = ('\\version "2.18.2"\n'
+                'pair = #(define-music-function (parser location dim a b) (number-pair? ly:music? ly:music?) #{ #a #b #})\n'
+                "music = \\relative c' { \\pair #'(1 . 2) c4 d e2 }\n\\score { << \\music >> }\n")
+        self.assertEqual([s for s, _, _ in pitches(convert_file(text))], ['C', 'D', 'E'])
+
+
+class PublishedSourcesAreFresh(unittest.TestCase):
+    """Cada `NN.musicxml` versionado es lo que genera el conversor actual desde su `.ly`: si se cambia el conversor,
+    hay que reconstruir (`build.py [coleccion] convert N` y `build.py [coleccion] N`) y volver a revisar las piezas."""
+
+    def test_sources_match_the_converter(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('sor_build', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'build.py'))
+        build = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(build)
+        checked = 0
+        for collection in build.COLLECTIONS:
+            build.use(collection)
+            for number, piece in build.PIECES.items():
+                lilypond = os.path.join(build.SOURCES, piece['source'])
+                committed = os.path.join(build.SOURCES, f'{number:02d}.musicxml')
+                if not (os.path.exists(lilypond) and os.path.exists(committed)):
+                    continue
+                expected = L.convert(lilypond, build.title_of(number), build.AUTHOR, words=piece.get('words'),
+                                     patches=piece.get('patches', ()))
+                with open(committed, encoding='utf-8') as f:
+                    self.assertEqual(f.read(), expected, '%s %s: reconstruir con build.py' % (collection, number))
+                checked += 1
+        self.assertGreater(checked, 0)
+
+
 if __name__ == '__main__':
     unittest.main()

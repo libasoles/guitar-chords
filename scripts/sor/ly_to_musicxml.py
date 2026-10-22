@@ -26,7 +26,9 @@ SHARP_ORDER = 'fcgdaeb'
 FLAT_ORDER = 'beadgcf'
 TYPES = {1: 'whole', 2: 'half', 4: 'quarter', 8: 'eighth', 16: '16th', 32: '32nd', 64: '64th'}
 # Ordenes de LilyPond sin argumentos que no cambian las notas.
-IGNORED = {'break', 'noBreak', 'pageBreak', 'stemUp', 'stemDown', 'stemNeutral', 'tieUp', 'tieDown', 'tieNeutral',
+IGNORED = {'once', 'temporary', 'noBeam', 'hideNotes', 'unHideNotes', 'numericTimeSignature', 'mergeDifferentlyHeadedOn',
+           'mergeDifferentlyDottedOn', 'mergeDifferentlyHeadedOff', 'mergeDifferentlyDottedOff', 'shiftOnn', 'shiftOnnn',
+           'hideTuplets', 'unset', 'sustainOn', 'sustainOff', 'break', 'noBreak', 'pageBreak', 'stemUp', 'stemDown', 'stemNeutral', 'tieUp', 'tieDown', 'tieNeutral',
            'slurUp', 'slurDown', 'slurNeutral', 'oneVoice', 'voiceOne', 'voiceTwo', 'voiceThree', 'voiceFour',
            'autoBeamOff', 'autoBeamOn', 'sustainDown', 'sustainUp', 'fermata', 'trill', 'staccato', 'tenuto', 'accent',
            'stopStaff', 'startStaff', 'shiftOn', 'shiftOff', 'notes', 'p', 'f', 'mf', 'mp', 'pp', 'ff', 'sf', 'fp', 'cresc',
@@ -35,18 +37,22 @@ IGNORED = {'break', 'noBreak', 'pageBreak', 'stemUp', 'stemDown', 'stemNeutral',
 TOKEN = re.compile(r'''
     (?P<string>"(?:[^"\\]|\\.)*")
   | (?P<voicesep>\\\\)
-  | (?P<command>\\[A-Za-z]+)
+  | (?P<dyn>\\[!<>()])
+  | (?P<command>\\[A-Za-z]+(?:_[A-Za-z]+)*)
   | (?P<chordopen><(?!<))
   | (?P<simopen><<)
   | (?P<simclose>>>)
   | (?P<chordclose>>)
+  | (?P<stringnum>\\\d)
   | (?P<finger>[-^_]\d)
   | (?P<script>[-^_][.>^_!+-])
   | (?P<num>\d+\.*(?:\*\d+(?:/\d+)?)?(?:/\d+)?)
-  | (?P<dotted>[A-Za-z]+(?:\.[A-Za-z]+)+)
-  | (?P<word>[A-Za-z]+[',]*[!?]*)
-  | (?P<scheme>\#\#?(?:'?\((?:[^()]|\((?:[^()])*\))*\)|[^\s{}()<>]+))
+  | (?P<dotted>[A-Za-z]+(?:[.-][A-Za-z]+)+)
+  | (?P<word>[A-Za-z]+(?:_[A-Za-z]+)*[',]*[!?]*)
+  | (?P<scheme>\#\#?(?:'?\((?:[^()]|\((?:[^()])*\))*\)|"(?:[^"\\]|\\.)*"|[^\s{}()<>]+))
+  | (?P<dir>[-^_])
   | (?P<punct>[{}|~()\[\]=])
+  | (?P<other>\S)
 ''', re.X)
 
 
@@ -101,7 +107,15 @@ def tokenize(text):
     return tokens
 
 
+NESTED_START = 'chain'  # en modo relativo cada rama de << >> parte de donde acabo la anterior (se comprobo con el MIDI)
+GERMAN = False  # `\\include "deutsch.ly"`: h es si natural y b es si bemol
+
+
 def pitch_of(word):
+    if GERMAN and word[:1] in 'bh':
+        marks = re.search(r"[',!?]*$", word).group()
+        stem = word[:len(word) - len(marks)]
+        word = ('bes' if stem == 'b' else 'b' + stem[1:] if stem[0] == 'h' else stem) + marks
     match = re.fullmatch(r"([a-g])((?:is|es|s)*)([',]*)([!?]*)", word)
     if not match:
         return None
@@ -120,10 +134,20 @@ def duration_of(text, previous):
     return base
 
 
+FUNCTION = re.compile(r'(\w+)\s*=\s*#\(define-music-function\s*\([^)]*\)\s*\(([^)]*)\)\s*#\{.*?#\}\)', re.S)
+
+
 class Parser:
     def __init__(self, text):
+        global GERMAN
+        GERMAN = '\\include "deutsch.ly"' in text
         text = strip_comments(text)
-        text = drop_blocks(text, ['header', 'layout', 'midi', 'paper', 'markup'])
+        # Una funcion de musica (`altpair = #(define-music-function ...)`) solo ordena sus argumentos y fija plicas y
+        # barras: se registra su lista de tipos y su resultado es la musica de los argumentos, en orden.
+        self.functions = {m.group(1): m.group(2).split() for m in FUNCTION.finditer(text)}
+        text = FUNCTION.sub('', text)
+        text = text.replace('\\include "deutsch.ly"', '')
+        text = drop_blocks(text, ['header', 'layout', 'midi', 'paper'])
         self.tokens = tokenize(text)
         self.pos = 0
         self.variables = {}
@@ -132,6 +156,10 @@ class Parser:
         self.relative = False
         self.score_controls = []
         self.clef = 'treble'
+        self.last_chord = None  # para `q`
+        self.stray = []  # controles sueltos dentro de un contexto (`\\GuitarStaff = \\context Staff << \\time ... >>`)
+        self.fixed = None  # octava base de `\fixed`
+        self.stem = None  # 'up', 'down' o None (automatica) segun \voiceOne, \stemDown...
 
     # -- lectura de tokens -----------------------------------------------------------------------
     def peek(self, offset=0):
@@ -168,8 +196,12 @@ class Parser:
             elif kind == 'word' and self.peek(1)[1] == '=':
                 name = self.take()[1]
                 self.take()
+                self.stem = None
                 self.variables[name] = self.music()
-            elif kind == 'command' and text in ('\\include', '\\book'):
+            elif kind == 'command' and text == '\\include':
+                self.take()
+                self.take()
+            elif kind == 'command' and text == '\\book':
                 raise LyError('no soportado: ' + text)
             else:
                 self.take()
@@ -190,12 +222,12 @@ class Parser:
         """Voces de la particion: las variables que cita \\score, en orden. `<< a \\\\ b >>` aporta una voz por rama."""
         self.expect('{')
         names, depth = [], 1
-        self.score_controls = []
+        self.score_controls = [c for c in self.stray if c['kind'] in ('time', 'key', 'partial')]
         while depth:
             kind, text = self.take()
             if kind == 'punct':
                 depth += (text == '{') - (text == '}')
-            elif text in ('\\time', '\\key', '\\partial'):
+            elif text in ('\\time', '\\key', '\\partial', '\\tempo'):
                 self.command(text, self.score_controls)
             elif text == '\\clef':
                 self.clef = self.take()[1].strip('"')
@@ -204,7 +236,11 @@ class Parser:
         voices = []
         for name in names:
             music = self.variables[name]
-            voices.extend(music['voices'] if isinstance(music, dict) else [music])
+            for voice in (music['voices'] if isinstance(music, dict) else [music]):
+                if any(item['kind'] in ('chord', 'rest', 'space', 'par') for item in voice):
+                    voices.append(voice)
+                else:  # `global = { \time 4/4 \key d \major }`
+                    self.score_controls.extend(item for item in voice if item['kind'] in ('time', 'key', 'partial'))
         return expand_nested(voices)
 
     # -- musica ----------------------------------------------------------------------------------
@@ -215,12 +251,23 @@ class Parser:
             if text == '\\relative':
                 self.take()
                 return self.relative_block()
+            if text == '\\fixed':
+                self.take()
+                return self.fixed_block()
             if text == '\\repeat':
                 self.take()
                 return self.repeat_block()
             if text == '\\notes':
                 self.take()
                 return self.music()
+            if text == '\\markup':
+                self.take()
+                self.skip_markup(taken=True)
+                return []
+            if text[1:] in ('stemUp', 'stemDown', 'stemNeutral', 'voiceOne', 'voiceTwo', 'voiceThree', 'voiceFour', 'oneVoice'):
+                items = []
+                self.command(self.take()[1], items)
+                return items
             if text in ('\\context', '\\new'):
                 self.take()
                 self.take()  # Voice, Staff...
@@ -239,22 +286,39 @@ class Parser:
             return self.simultaneous()
         raise LyError('expresion musical inesperada: %r' % (text,))
 
-    def relative_block(self):
+    def fixed_block(self):
+        """`\\fixed c' { ... }`: alturas absolutas; sin marcas, la octava de la referencia."""
         kind, text = self.take()
         start = pitch_of(text) if kind == 'word' else None
         if start is None:
+            raise LyError('\\fixed sin altura')
+        saved = (self.relative, self.fixed)
+        self.relative, self.fixed = False, 3 + start[2]
+        result = self.music()
+        self.relative, self.fixed = saved
+        return result
+
+    def relative_block(self):
+        if self.peek()[1] == '{':  # `\relative { ... }` equivale a `\relative c'`
+            start = (0, 0, 1)
+        else:
+            kind, text = self.take()
+            start = pitch_of(text) if kind == 'word' else None
+        if start is None:
             raise LyError('\\relative sin altura')
-        saved = (self.relative, self.ref)
-        self.relative = True
+        saved = (self.relative, self.ref, self.fixed)
+        self.relative, self.fixed = True, None
         self.ref = (start[0], 3 + start[2])
         result = self.music()
-        self.relative, self.ref = saved
+        self.relative, self.ref, self.fixed = saved
         return result
 
     def repeat_block(self):
         kind, style = self.take()
+        if style == 'unfold':
+            return self.unfold_block()
         if style != 'volta':
-            raise LyError('solo se admite \\repeat volta')
+            raise LyError('solo se admite \\repeat volta o unfold')
         times = int(self.take()[1])
         body = self.music()
         alternatives = None
@@ -278,6 +342,18 @@ class Parser:
                 out.append({'kind': 'volta_stop', 'n': number})
         return out
 
+    def unfold_block(self):
+        """`\\repeat unfold N { ... }`: LilyPond resuelve las alturas relativas del bloque una sola vez y luego lo copia
+        N veces, asi que las copias son identicas."""
+        times = int(self.take()[1])
+        music = self.music()
+        if isinstance(music, dict):
+            raise LyError('\\repeat unfold sobre voces simultaneas')
+        out = []
+        for _ in range(times):
+            out.extend(copy_items(music))
+        return out
+
     def simultaneous(self):
         """`<< { a } \\\\ { b } >>` o `<< \\a \\\\ \\b >>`: una voz por rama."""
         branches, current = [], []
@@ -291,13 +367,18 @@ class Parser:
                 self.take()
                 branches.append(current)
                 current = []
-                self.ref = start
+                if NESTED_START == 'same':
+                    self.ref = start
                 continue
             if kind == 'command' and text[1:] in IGNORED | {'oneVoice'}:
                 self.take()
                 continue
+            if kind == 'command' and text[1:] in ('set', 'override', 'revert', 'transposition', 'clef', 'time', 'key',
+                                                  'tempo', 'omit', 'hide', 'bar', 'barNumberCheck'):
+                self.command(self.take()[1], self.stray)
+                continue
             current.append(self.music())
-            if self.peek()[0] not in ('simclose', 'voicesep'):
+            if self.peek()[0] not in ('simclose', 'voicesep') and NESTED_START == 'same':
                 self.ref = start
         branches.append(current)
         voices = []
@@ -344,11 +425,11 @@ class Parser:
             self.note(items)
         elif kind == 'word':
             self.pos -= 1
-            if text in ('r', 's', 'R') or pitch_of(text):
+            if text in ('r', 's', 'R', 'q') or pitch_of(text):
                 self.note(items)
             else:
                 raise LyError('palabra inesperada %r' % text)
-        elif kind in ('finger', 'script', 'num', 'scheme', 'string', 'voicesep'):
+        elif kind in ('finger', 'script', 'num', 'scheme', 'string', 'voicesep', 'dyn', 'stringnum', 'dir'):
             pass
         else:
             raise LyError('elemento inesperado %r' % text)
@@ -370,27 +451,50 @@ class Parser:
             tonic = self.take()[1]
             mode = self.take()[1]
             table = KEY_MINOR if mode == '\\minor' else KEY_MAJOR
-            items.append({'kind': 'key', 'fifths': table[tonic]})
+            items.append({'kind': 'key', 'fifths': table[tonic], 'tonic': tonic, 'mode': 'minor' if mode == '\\minor' else 'major'})
         elif name == 'clef':
-            self.take()
+            self.clef = self.take()[1].strip('"')
         elif name == 'bar':
             items.append({'kind': 'bar', 'style': self.take()[1].strip('"')})
         elif name == 'mark':
-            kind, value = self.take()
-            items.append({'kind': 'words', 'text': value.strip('"')})
+            if self.peek()[0] == 'string':
+                items.append({'kind': 'words', 'text': self.take()[1].strip('"')})
+            elif self.peek()[1] == '\\markup':
+                self.skip_markup()
+            else:
+                self.take()
+        elif name == 'markup':
+            self.skip_markup(taken=True)
+        elif name == 'barNumberCheck':
+            self.take()
         elif name == 'segno':
             items.append({'kind': 'segno'})
         elif name == 'tempo':
-            while self.peek()[0] in ('num', 'string') or self.peek()[1] == '=':
-                self.take()
-        elif name in ('override', 'revert'):
+            while self.peek()[0] in ('num', 'string', 'scheme') or self.peek()[1] == '=':
+                kind, value = self.take()
+                if kind == 'string':
+                    items.append({'kind': 'words', 'text': value.strip('"'), 'tempo': True})
+        elif name == 'override':
             while self.take()[1] != '=':
                 pass
             self.take()
+        elif name == 'revert':
+            while self.peek()[0] in ('dotted', 'scheme') or (self.peek()[0] == 'word' and self.peek()[1][0].isupper()):
+                self.take()
+        elif name in ('omit', 'hide', 'remove'):
+            self.take()
+        elif name in ('tupletSpan', 'tupletNumberFormatFunction'):
+            self.take()
+        elif name in ('tuplet', 'times'):
+            self.tuplet_block(name, items)
         elif name == 'set':
             self.take()
             self.expect('=')
             self.take()
+        elif name in ('stemUp', 'voiceOne', 'voiceThree', 'stemDown', 'voiceTwo', 'voiceFour', 'stemNeutral', 'oneVoice'):
+            self.stem = 'up' if name in ('stemUp', 'voiceOne', 'voiceThree') else \
+                'down' if name in ('stemDown', 'voiceTwo', 'voiceFour') else None
+            items.append({'kind': 'stem', 'value': self.stem})
         elif name == 'transposition':
             self.take()
         elif name == 'relative':
@@ -398,8 +502,20 @@ class Parser:
         elif name == 'repeat':
             items.extend(self.flat(self.repeat_block()))
         elif name in self.variables:
-            items.extend(self.flat(self.variables[name]))
-        elif name in ('acciaccatura', 'appoggiatura', 'grace'):
+            body = self.flat(self.variables[name])
+            items.extend(body)
+            for item in body:
+                if item['kind'] == 'stem':
+                    self.stem = item['value']
+        elif name in self.functions:
+            for kind_name in self.functions[name]:
+                if kind_name != 'ly:music?':
+                    self.take()
+                elif self.peek()[1] in ('{', '<<') or self.peek()[0] == 'simopen':
+                    items.extend(self.flat(self.music()))
+                else:  # `\\altpair #'(1 . 2) e8 d` : cada argumento es la siguiente nota
+                    self.element(items)
+        elif name in ('acciaccatura', 'appoggiatura', 'grace', 'slashedGrace'):
             first = len(items)
             if self.peek()[1] == '{':
                 self.take()
@@ -408,13 +524,40 @@ class Parser:
                 self.element(items)
             for event in items[first:]:
                 if event['kind'] == 'chord':
-                    event.update(grace=True, slash=name == 'acciaccatura', grace_dur=event['dur'], dur=Fraction(0))
+                    event.update(grace=True, slash=name in ('acciaccatura', 'slashedGrace'), grace_dur=event['dur'], dur=Fraction(0))
         elif name == 'rest':
             pass
         elif name in IGNORED:
             pass
         else:
             raise LyError('orden desconocida: ' + text)
+
+    def skip_markup(self, taken=False):
+        """`\\markup { ... }` o `\\markup "texto"`: texto de caratula o de dinamica, sin notas."""
+        if not taken:
+            self.take()
+        if self.peek()[1] == '{':
+            self.skip_group()
+        else:
+            self.take()
+
+    def tuplet_block(self, name, items):
+        """`\\tuplet 3/2 { ... }` (tres en el tiempo de dos) y `\\times 2/3 { ... }`: cada duracion se escala."""
+        a, b = (int(x) for x in self.take()[1].split('/'))
+        actual, normal = (a, b) if name == 'tuplet' else (b, a)
+        if self.peek()[1] != '{':
+            raise LyError('\\%s sin llaves' % name)
+        self.take()
+        inside = self.sequence('}')
+        timed = [e for e in inside if e['kind'] in ('chord', 'rest', 'space') and not e.get('grace')]
+        for e in timed:
+            e['nominal'] = e['dur']
+            e['dur'] = e['dur'] * normal / actual
+            e['tuplet'] = (actual, normal)
+        if timed:
+            timed[0]['tuplet_start'] = True
+            timed[-1]['tuplet_stop'] = True
+        items.extend(inside)
 
     def take_duration_expression(self, items, kind):
         text = self.take()[1]
@@ -424,7 +567,7 @@ class Parser:
     def absolute(self, step, alter, marks):
         """Octava (MusicXML) de una altura: relativa a la nota anterior o absoluta."""
         if not self.relative:
-            return 3 + marks
+            return (3 if self.fixed is None else self.fixed) + marks
         ref_step, ref_octave = self.ref
         octave = ref_octave
         if step - ref_step > 3:
@@ -436,6 +579,7 @@ class Parser:
     def note(self, items):
         kind, text = self.take()
         pitches = []
+        inner_slur = [0, 0]
         if kind == 'chordopen':
             first = None
             while self.peek()[0] != 'chordclose':
@@ -449,11 +593,25 @@ class Parser:
                     self.ref = (step, octave)
                     first = first or (step, octave)
                 pitches.append({'step': STEPS[step], 'alter': alter, 'octave': octave, 'fingers': self.fingers(), 'force': False})
+                while self.peek()[0] in ('stringnum', 'dir', 'script', 'finger', 'dyn') or self.peek()[1] in ('\\rest', '~', '(', ')', '[', ']'):
+                    if self.peek()[0] == 'finger':
+                        pitches[-1]['fingers'].append(self.peek()[1][1])
+                    if self.peek()[1] == '~':
+                        pitches[-1]['tie_wanted'] = True
+                    if self.peek()[1] == '(':
+                        inner_slur[0] += 1
+                    if self.peek()[1] == ')':
+                        inner_slur[1] += 1
+                    self.take()
             self.take()
             if self.relative and first:
                 self.ref = first
         elif text in ('r', 's', 'R'):
             pass
+        elif text == 'q':
+            if self.last_chord is None:
+                raise LyError('`q` sin acorde anterior')
+            pitches = [{**p, 'fingers': [], 'tie_wanted': False} for p in self.last_chord]
         else:
             step, alter, marks = pitch_of(text)
             octave = self.absolute(step, alter, marks)
@@ -463,15 +621,27 @@ class Parser:
         if self.peek()[0] == 'num':
             self.last_duration = duration_of(self.take()[1], None)
         event = {'kind': 'chord' if pitches else ('space' if text == 's' else 'rest'), 'dur': self.last_duration,
-                 'pitches': pitches, 'tie': False, 'slur_start': 0, 'slur_stop': 0, 'words': [], 'segno': False}
+                 'pitches': pitches, 'tie': False, 'slur_start': 0, 'slur_stop': 0, 'words': [], 'segno': False,
+                 'stem': self.stem}
         while True:
             kind, nxt = self.peek()
             if kind == 'finger':
                 self.take()
                 if pitches and nxt[1] in '0123456789':
                     pitches[-1]['fingers'].append(nxt[1])
-            elif kind == 'script':
+            elif kind in ('script', 'stringnum'):
                 self.take()
+            elif kind == 'dir':  # `_"Fine."`, `^\\markup { ... }`, `-\\tenuto`
+                self.take()
+                after = self.peek()
+                if after[0] == 'string':
+                    self.take()
+                    items.append({'kind': 'words', 'text': after[1].strip('"')})
+                elif after[1] == '\\markup':
+                    self.take()
+                    self.skip_markup(taken=True)
+                elif after[0] == 'command':
+                    self.take()
             elif kind == 'punct' and nxt == '~':
                 self.take()
                 event['tie'] = True
@@ -494,8 +664,16 @@ class Parser:
             elif kind == 'command' and nxt == '\\segno':
                 self.take()
                 event['segno'] = True
+            elif kind in ('dyn',):
+                self.take()
             else:
                 break
+        event['slur_start'] += inner_slur[0]
+        event['slur_stop'] += inner_slur[1]
+        for p in pitches:  # `<a b>~` liga todas las alturas; `<a~ b>` solo las marcadas
+            p['tie_wanted'] = p.get('tie_wanted', False) or event['tie']
+        if pitches:
+            self.last_chord = pitches
         items.append(event)
 
     def fingers(self):
@@ -507,32 +685,57 @@ class Parser:
 
 
 # -- MusicXML --------------------------------------------------------------------------------------------
+def copy_items(items):
+    return [{**item, 'pitches': [{**p, 'fingers': list(p['fingers'])} for p in item['pitches']]} if 'pitches' in item
+            else dict(item) for item in items]
+
+
 def expand_nested(voices):
     """Las voces simultaneas que se abren a mitad de una voz (`<< { a } \\\\ { b } >>` entre otras notas) pasan a ser
-    voces propias: la primera rama sigue en su sitio y las demas empiezan en ese instante, con silencios de relleno
-    delante y detras hasta el final de la pieza."""
-    result, extras = [], []
-    for voice in voices:
+    voces propias: la primera rama sigue en su sitio y la rama k de cada << >> va a la voz extra k, con silencios de
+    relleno entre un tramo y el siguiente y hasta el final de la pieza."""
+    result, extras = [], {}  # extras[(voz de origen, rama k)]: lista de (inicio, items)
+    for index, voice in enumerate(voices):
         out, t = [], Fraction(0)
         for item in voice:
             if item['kind'] == 'par':
                 branches = [expand_nested([branch])[0] for branch in item['voices']]
-                length = Writer.timeline(branches[0])[3]
+                lengths = [Writer.timeline(b)[3] for b in branches]
+                length = max(lengths)  # un << >> dura lo que la rama mas larga
                 out.extend(branches[0])
-                for branch in branches[1:]:
-                    extras.append((t, branch))
+                if lengths[0] < length:
+                    out.append(space(length - lengths[0]))
+                for k, branch in enumerate(branches[1:]):
+                    extras.setdefault((index, k), []).append((t, branch))
                 t += length
                 continue
             out.append(item)
             if item['kind'] in ('chord', 'rest', 'space'):
                 t += item['dur']
         result.append(out)
-    total = max(Writer.timeline(v)[3] for v in result + [b for _, b in extras])
-    for start, branch in extras:
-        filler = [space(start)] if start else []
-        rest = total - start - Writer.timeline(branch)[3]
-        result.append(filler + branch + ([space(rest)] if rest else []))
+    total = max([Writer.timeline(v)[3] for v in result] +
+                [start + Writer.timeline(b)[3] for segments in extras.values() for start, b in segments])
+    for key in sorted(extras):
+        voice, now = [], Fraction(0)
+        for start, branch in extras[key]:
+            if start > now:
+                voice.append(space(start - now))
+            voice.extend(branch)
+            now = start + Writer.timeline(branch)[3]
+        result.append(voice)
+    # LilyPond admite voces mas cortas que las demas: se rellenan con silencios invisibles hasta el final.
+    for voice in result:
+        rest = total - Writer.timeline(voice)[3]
+        if rest > 0:
+            voice.append(space(rest))
     return result
+
+
+def tuplet_of(e):
+    """{'actual', 'normal'} del tresillo (o similar) al que pertenece el evento, o None."""
+    if e and e.get('tuplet'):
+        return {'actual': e['tuplet'][0], 'normal': e['tuplet'][1]}
+    return None
 
 
 def split_spaces(events, bounds):
@@ -597,17 +800,17 @@ class Writer:
                 seen.add(key)
                 unique.append((t, item))
         controls = unique
-        time = (4, 4)
-        fifths = 0
-        for _, item in sorted(controls, key=lambda c: c[0]):
-            if item['kind'] == 'time':
+        time, fifths = (4, 4), 0
+        for t, item in sorted(controls, key=lambda c: c[0]):
+            if t == 0 and item['kind'] == 'time':
                 time = item['time']
-            if item['kind'] == 'key':
+            if t == 0 and item['kind'] == 'key':
                 fifths = item['fifths']
         full = Fraction(time[0] * 4, time[1])
         # Compases: de la comprobacion de compas a la siguiente; el ultimo compas termina donde acaba la voz.
         end = max(tl[3] for tl in timelines)
         bounds = self.measure_bounds(timelines, controls, full, end)
+        initial_time, initial_fifths = time, fifths
         starts = [Fraction(0)] + bounds[:-1]
         measures = list(zip(starts, bounds))
         for events, _, _, _ in timelines:  # un silencio de relleno puede abarcar varios compases
@@ -622,11 +825,20 @@ class Writer:
                     problems.append('compas %d voz %d: suma %s de %s negras' % (index, k + 1, total, b - a))
         if problems:
             raise LyError('; '.join(problems[:8]))
-        key_state = self.key_table(fifths)
         out = []
         pickup = measures[0][1] - measures[0][0] < full
         counter, previous = 0 if pickup else 1, None
         for index, (a, b) in enumerate(measures):
+            changed = ''
+            for t, item in sorted(controls, key=lambda c: c[0]):
+                if index and t == a and item['kind'] == 'key' and item['fifths'] != fifths:
+                    fifths = item['fifths']
+                    changed += '<key><fifths>%d</fifths></key>' % fifths
+                if index and t == a and item['kind'] == 'time' and item['time'] != time:
+                    time = item['time']
+                    full = Fraction(time[0] * 4, time[1])
+                    changed += '<time><beats>%d</beats><beat-type>%d</beat-type></time>' % time
+            key_state = self.key_table(fifths)
             length = b - a
             implicit = length < full
             # Una anacrusa a mitad de pieza completa el compas corto que cierra la repeticion anterior: no cuenta.
@@ -635,12 +847,12 @@ class Writer:
                 counter += 1
             number = counter
             previous = length
-            attrs = ''
+            attrs = '<attributes>%s</attributes>' % changed if changed else ''
             if index == 0:
                 attrs = ('<attributes><divisions>%d</divisions><key><fifths>%d</fifths></key><time%s><beats>%d</beats>'
                          '<beat-type>%d</beat-type></time><clef><sign>G</sign><line>2</line>'
                          '<clef-octave-change>-1</clef-octave-change></clef></attributes>' %
-                         (DIVISIONS, fifths, ' symbol="common"' if time == (4, 4) else '', *time))
+                         (DIVISIONS, initial_fifths, ' symbol="common"' if initial_time == (4, 4) else '', *initial_time))
             body = ''
             left, right = '', ''
             for t, item in sorted(controls, key=lambda c: c[0]):
@@ -704,12 +916,15 @@ class Writer:
             return sorted(bars | edges | {end})
         # `\partial d` en el instante t: el compas que empieza ahi dura d (un anacrusa al inicio o un compas corto al
         # final de una repeticion); el resto dura lo que marca la metrica.
-        partials = {}
+        partials, times = {}, {}
         for t, c in controls:
             if c['kind'] == 'partial':
                 partials[t] = c['dur']
+            if c['kind'] == 'time':
+                times[t] = Fraction(c['time'][0] * 4, c['time'][1])
         bounds, t = [], Fraction(0)
         while t < end:
+            full = times.get(t, full)
             t += partials.get(t, full)
             bounds.append(min(t, end))
         return bounds
@@ -733,17 +948,18 @@ class Writer:
                 beam_events.append({'level': 0, 'pos': cursor - a})
             if e['at'] + e['dur'] > b:
                 raise LyError('una nota cruza la barra de compas en %s (voz %d)' % (e['at'], number))
+            shown = (e.get('stem') or stem) if stem else None
             if e.get('grace'):
-                out += self.chord_xml(e, number, stem, state, -1)
+                out += self.chord_xml(e, number, shown, state, -1)
                 continue
-            level = BEAM_LEVEL.get(self.type_of(e['dur']), 0) if e['kind'] == 'chord' else 0
+            level = BEAM_LEVEL.get(self.type_of(e.get('nominal', e['dur'])), 0) if e['kind'] == 'chord' else 0
             beam_events.append({'level': level, 'pos': e['at'] - a})
             if e.get('segno'):
                 out += '<direction placement="above"><direction-type><segno/></direction-type></direction>'
             if e['kind'] == 'chord':
-                out += self.chord_xml(e, number, stem, state, len(beam_events) - 1)
+                out += self.chord_xml(e, number, shown, state, len(beam_events) - 1)
             else:
-                out += self.rest_xml(e['dur'], number, e['kind'] == 'space')
+                out += self.rest_xml(e['dur'], number, e['kind'] == 'space', e)
             cursor = e['at'] + e['dur']
         if cursor < b:
             out += self.rest_xml(b - cursor, number, True)
@@ -759,16 +975,24 @@ class Writer:
                     return kind
         return nearest_type(dur)
 
-    def rest_xml(self, dur, number, hidden):
-        kind = self.type_of(dur)
-        return ('<note%s><rest/><duration>%d</duration><voice>%d</voice><type>%s</type>%s</note>' %
+    def rest_xml(self, dur, number, hidden, e=None):
+        tuplet = tuplet_of(e)
+        kind = self.type_of(e['nominal'] if tuplet else dur)
+        notations = ''
+        if tuplet and e.get('tuplet_start'):
+            notations += '<tuplet type="start" bracket="no"/>'
+        if tuplet and e.get('tuplet_stop'):
+            notations += '<tuplet type="stop"/>'
+        return ('<note%s><rest/><duration>%d</duration><voice>%d</voice><type>%s</type>%s%s%s</note>' %
                 (' print-object="no"' if hidden else '', int(dur * DIVISIONS), number, kind,
-                 '<dot/>' * dots_of(dur, kind, None)))
+                 '<dot/>' * dots_of(dur, kind, tuplet), time_mod(tuplet) if tuplet else '',
+                 '<notations>%s</notations>' % notations if notations else ''))
 
     def chord_xml(self, e, number, stem, state, index):
         out = ''
         grace = e.get('grace')
-        kind = self.type_of(e['grace_dur'] if grace else e['dur'])
+        tuplet = tuplet_of(e)
+        kind = self.type_of(e['grace_dur'] if grace else e['nominal'] if tuplet else e['dur'])
         for i, p in enumerate(e['pitches']):
             parts = ['<note>']
             if grace:
@@ -779,12 +1003,14 @@ class Writer:
                          (p['step'].upper(), '<alter>%d</alter>' % p['alter'] if p['alter'] else '', p['octave'] + self.octave_shift))
             if not grace:
                 parts.append('<duration>%d</duration>' % int(e['dur'] * DIVISIONS))
-            if e.get('tied_from'):
+            if p.get('tied_from'):
                 parts.append('<tie type="stop"/>')
-            if e['tie']:
+            if p.get('tie'):
                 parts.append('<tie type="start"/>')
             parts.append('<voice>%d</voice><type>%s</type>%s' % (
-                number, kind, '' if grace else '<dot/>' * dots_of(e['dur'], kind, None)))
+                number, kind, '' if grace else '<dot/>' * dots_of(e['dur'], kind, tuplet)))
+            if tuplet:
+                parts.append(time_mod(tuplet))
             slot = (p['step'], p['octave'])
             expected = state.get(p['step'], 0) if slot not in state else state[slot]
             shown = ''
@@ -798,13 +1024,17 @@ class Writer:
             if i == 0 and not grace:
                 parts.append('@B%d@' % index)
             notations = ''
-            if e.get('tied_from'):
+            if p.get('tied_from'):
                 notations += '<tied type="stop"/>'
-            if e['tie']:
+            if p.get('tie'):
                 notations += '<tied type="start"/>'
             if i == 0:
-                notations += '<slur type="stop" number="1"/>' * e['slur_stop']
-                notations += '<slur type="start" number="1"/>' * e['slur_start']
+                if tuplet and e.get('tuplet_start'):
+                    notations += '<tuplet type="start" bracket="no"/>'
+                if tuplet and e.get('tuplet_stop'):
+                    notations += '<tuplet type="stop"/>'
+                notations += '<slur type="stop" number="%d"/>' % number * e['slur_stop']
+                notations += '<slur type="start" number="%d"/>' % number * e['slur_start']
                 if e.get('fermata'):
                     notations += '<fermata type="upright"/>'
             if p['fingers']:
@@ -848,28 +1078,37 @@ class Writer:
 
 
 def mark_ties(voices):
-    """Una nota que sigue a otra con `~` recibe el cierre de la ligadura (tied_from). LilyPond ignora una ligadura entre
-    alturas distintas (Mutopia tiene una en la leccion 11, `d, ~ d'`); aqui tambien: se quita de las dos notas."""
+    """Cada altura de una nota con `~` se liga a la misma altura de la nota siguiente de la voz (tied_from). LilyPond
+    ignora la ligadura entre alturas distintas (Mutopia tiene una en la leccion 11, `d, ~ d'`); aqui tambien."""
     for voice in voices:
         previous = None
         for item in voice:
             if item['kind'] not in ('chord', 'rest', 'space'):
                 continue
-            wanted = bool(previous and previous['tie'] and previous['kind'] == 'chord')
-            if wanted and pitch_set(previous) != pitch_set(item):
-                previous['tie'] = False
-                wanted = False
-            item['tied_from'] = wanted
+            for p in item['pitches']:
+                p['tied_from'] = p['tie'] = False
+            if previous and previous['kind'] == 'chord' and item['kind'] == 'chord':
+                for p in previous['pitches']:
+                    match = next((q for q in item['pitches'] if pitch_key(q) == pitch_key(p)), None)
+                    if match and p.get('tie_wanted'):
+                        p['tie'] = match['tied_from'] = True
             previous = item
 
 
-def pitch_set(event):
-    return {(p['step'], p['alter'], p['octave']) for p in event['pitches']}
+def pitch_key(p):
+    return (p['step'], p['alter'], p['octave'])
 
 
-def convert(path, title, composer, words=None):
+def convert(path, title, composer, words=None, patches=()):
+    """`patches`: pares [texto, reemplazo] sobre el `.ly` (erratas de la edicion de Mutopia). Cada texto debe aparecer
+    una sola vez: si el archivo cambia, la correccion falla en vez de aplicarse donde no toca."""
     with open(path, encoding='utf-8') as f:
-        parser = Parser(f.read())
+        text = f.read()
+    for old, new in patches:
+        if text.count(old) != 1:
+            raise LyError('la correccion %r aparece %d veces en %s' % (old, text.count(old), os.path.basename(path)))
+        text = text.replace(old, new)
+    parser = Parser(text)
     voices = parser.parse_file()
     mark_ties(voices)
     # Con clave de sol normal el archivo da la altura escrita de la guitarra (suena una octava mas grave); con

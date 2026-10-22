@@ -1,7 +1,11 @@
-"""Lecciones progresivas de Sor (Op. 60): del LilyPond de Mutopia a MusicXML, PDF y vistas del sitio.
+"""Partituras de Sor (lecciones del Op. 60, estudios de los Op. 6 y Op. 35): del LilyPond de Mutopia a MusicXML, PDF y
+vistas del sitio.
 
-    python scripts/sor/build.py N [N ...]    # sources/NN.musicxml -> downloads/ + vistas
-    python scripts/sor/build.py convert N    # sources/sor_op60-NN.ly -> sources/NN.musicxml
+    python scripts/sor/build.py [coleccion] N [N ...]    # sources/NN.musicxml -> downloads/ + vistas
+    python scripts/sor/build.py [coleccion] convert N    # el .ly de sources/ -> sources/NN.musicxml
+
+La coleccion es `lecciones` (por defecto; N = numero de la leccion) o `estudios` (N = opus * 100 + numero: 601 es el
+Op. 6 n.º 1, 3524 el Op. 35 n.º 24).
 
 Usa el motor y las rutinas de grabado de los preludios de Carcassi (scripts/carcassi-preludios/extract.py).
 """
@@ -27,15 +31,35 @@ MUTOPIA = 'https://www.mutopiaproject.org/cgibin/make-table.cgi?Composer=SorF'
 def footer_lines(number):
     """Credito a la edicion LilyPond de origen (Mutopia) y su licencia, en un pie gris a la izquierda de cada pagina."""
     piece = PIECES[number]
-    return [[('Con modificaciones a partir de la edicion de ' + piece['editor'] + ' en Mutopia', MUTOPIA)],
-            [('CC BY-SA ' + piece['license'], 'https://creativecommons.org/licenses/by-sa/%s/' % piece['license'])]]
-SOURCES = os.path.join(HERE, 'sources')
-OUT_DIR = os.path.join(ROOT, 'downloads', 'sor')
-PREVIEW_DIR = os.path.join(ROOT, 'src', 'site', 'articles', 'sor')
-PREFIX = 'sor-'
+    credit = [('Con modificaciones a partir de la edicion de ' + piece['editor'] + ' en Mutopia', MUTOPIA)]
+    if piece['license'] == 'public-domain':
+        return [credit, [('Dominio publico', None)]]
+    return [credit, [('CC BY-SA ' + piece['license'], 'https://creativecommons.org/licenses/by-sa/%s/' % piece['license'])]]
 
-with open(os.path.join(HERE, 'pieces.json'), encoding='utf-8') as f:
-    PIECES = {int(k): v for k, v in json.load(f).items()}
+
+COLLECTIONS = {
+    'lecciones': {'catalog': 'pieces.json', 'sources': 'sources', 'out': 'sor', 'prefix': 'sor-'},
+    'estudios': {'catalog': 'estudios.json', 'sources': os.path.join('sources', 'estudios'), 'out': 'sor-estudios',
+                 'prefix': 'sor-est-'},
+}
+COLLECTION = 'lecciones'
+SOURCES = OUT_DIR = PREVIEW_DIR = PREFIX = PIECES = None
+
+
+def use(name):
+    """Elige la coleccion con la que trabajan las demas funciones."""
+    global COLLECTION, SOURCES, OUT_DIR, PREVIEW_DIR, PREFIX, PIECES
+    config = COLLECTIONS[name]
+    COLLECTION = name
+    SOURCES = os.path.join(HERE, config['sources'])
+    OUT_DIR = os.path.join(ROOT, 'downloads', config['out'])
+    PREVIEW_DIR = os.path.join(ROOT, 'src', 'site', 'articles', config['out'])
+    PREFIX = config['prefix']
+    with open(os.path.join(HERE, config['catalog']), encoding='utf-8') as f:
+        PIECES = {int(k): v for k, v in json.load(f).items()}
+
+
+use('lecciones')
 
 PER_ROW = {}
 ARPEGGIO = set()
@@ -48,7 +72,7 @@ def zoom_options(scale):
 
 
 def select():
-    extract.EDITION = 'sor'
+    extract.EDITION = os.path.basename(OUT_DIR)
     extract.OUT_DIR = OUT_DIR
     extract.PREVIEW_DIR = PREVIEW_DIR
     extract.PAGES_DIR = os.path.join(PREVIEW_DIR, 'full')
@@ -57,8 +81,11 @@ def select():
 
 
 def name_of(number):
-    """(en, es) del titulo: «Lesson 1 in C Major» / «Lección 1 en Do mayor»."""
+    """(en, es) del titulo: «Lesson 4: E-flat Major» / «Lección 4: Mi bemol mayor» o «Op. 35 No. 4: G Major»."""
     piece = PIECES[number]
+    if COLLECTION == 'estudios':
+        return (f"Op. {piece['opus']} No. {piece['n']}: {piece['form']}",
+                f"Op. {piece['opus']} n.º {piece['n']}: {piece['es']}")
     return f"Lesson {piece['n']}: {piece['form']}", f"Lección {piece['n']}: {piece['es']}"
 
 
@@ -73,7 +100,7 @@ def file_base(number):
 def convert(number):
     piece = PIECES[number]
     source = os.path.join(SOURCES, piece['source'])
-    xml = ly_to_musicxml.convert(source, title_of(number), AUTHOR, words=piece.get('words'))
+    xml = ly_to_musicxml.convert(source, title_of(number), AUTHOR, words=piece.get('words'), patches=piece.get('patches', ()))
     target = os.path.join(SOURCES, f'{number:02d}.musicxml')
     with open(target, 'w', encoding='utf-8') as f:
         f.write(xml)
@@ -95,7 +122,7 @@ def build(number):
     with tempfile.TemporaryDirectory() as tmp:
         extract.patch_engine(tabify)
         prepared = os.path.join(tmp, 'prepared')
-        result = tabify.prepare(source, 'musicxml', 'standard', prepared, per_row=PER_ROW.get(number, 4), arpeggio='auto' if number in ARPEGGIO else False)
+        result = tabify.prepare(source, 'musicxml', PIECES[number].get('tuning', 'standard'), prepared, per_row=PER_ROW.get(number, 4), arpeggio='auto' if number in ARPEGGIO else False)
         if result['dropped']:
             raise RuntimeError(f"Notas descartadas en la pieza {number}: {result['dropped']}")
         with open(os.path.join(prepared, tabify.SUGGESTION_NAME), encoding='utf-8') as f:
@@ -107,7 +134,7 @@ def build(number):
             tabify.PDF_OPTIONS = {**base_options, **level}
             exported = os.path.join(tmp, f"export-{level['scale']}")
             tabify.export(os.path.join(prepared, tabify.NORMALIZED_NAME), os.path.join(prepared, tabify.SUGGESTION_NAME),
-                          tabs, 'standard', exported, title=title_of(number), subtitle=AUTHOR)
+                          tabs, PIECES[number].get('tuning', 'standard'), exported, title=title_of(number), subtitle=AUTHOR)
             pages = len(PdfReader(os.path.join(exported, 'score.pdf')).pages)
             if best is None or pages < best[0]:
                 best = (pages, level, exported)
@@ -137,6 +164,8 @@ def build(number):
 
 if __name__ == '__main__':
     args = sys.argv[1:]
+    if args and args[0] in COLLECTIONS:
+        use(args.pop(0))
     if args and args[0] == 'convert':
         convert(int(args[1]))
     else:
