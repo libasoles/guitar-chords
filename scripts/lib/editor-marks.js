@@ -22,6 +22,7 @@ const MARKS = {
 };
 
 const PIECES = {
+  sor: { effort: [1] },
   'carcassi-preludios': { favorite: [2, 4] },
   'carcassi-progresivas': { favorite: [1] },
   'carcassi-valses': { favorite: [10] },
