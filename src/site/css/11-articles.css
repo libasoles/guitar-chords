@@ -113,6 +113,11 @@
 .example-card:hover .example-download {
   text-decoration: underline;
 }
+@media (max-width: 48rem) {
+  .example-download {
+    font-size: 0.75rem;
+  }
+}
 
 /* Chord comparison: each chord stacks its diagram, full form and decomposed form. */
 .chord-grid {
