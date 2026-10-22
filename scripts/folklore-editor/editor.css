@@ -55,7 +55,7 @@ button:disabled { opacity: .4; cursor: default; }
 .measure-notation:active { cursor: grabbing; }
 .measure-notation > svg { display: block; width: 100%; overflow: hidden; pointer-events: none; user-select: none; }
 .measure-view ascii-tabs {
-  --ascii-tabs-font-size: 13px;
+  --ascii-tabs-font-size: 19px;
   --ascii-tabs-accent: #276140;
   --ascii-tabs-focus: #e0efdf;
   --ascii-tabs-line: #d5dfd2;
@@ -71,11 +71,14 @@ button:disabled { opacity: .4; cursor: default; }
   content: ''; position: absolute; left: 100%; top: .25em; bottom: .25em; width: 1px;
   background: var(--ascii-tabs-accent); animation: ascii-tabs-blink 1s steps(1) infinite;
 }
-.track-item { flex: none; width: max-content; border: 1px solid #d9e2d6; border-radius: 6px; overflow: hidden; }
+.track-item { position: relative; flex: none; width: max-content; border: 1px solid #d9e2d6; border-radius: 6px; overflow: hidden; }
 .track-item .measure-view { border: 0; }
-.track-source { display: block; font-size: 10px; color: #58665b; padding: 7px 8px 0; }
-.track-actions { display: flex; justify-content: end; gap: 4px; padding: 4px; }
-.track-actions button { padding: 4px 8px; font-size: 12px; }
+.track-source { display: block; font-size: 10px; color: #58665b; padding: 9px 38px 0 8px; }
+.track-remove { position: absolute; top: 4px; right: 4px; width: 28px; height: 28px; display: grid; place-items: center; padding: 4px; border: 0; background: transparent; }
+.track-remove:hover { background: #eaf0e8; }
+.measure-view ascii-tabs .ascii-tabs-line,
+.measure-view ascii-tabs .ascii-tabs-cell,
+.measure-view ascii-tabs .ascii-tabs-area { height: 1.25em; line-height: 1.25em; }
 .track-item.drop-before { border-left: 4px solid #376c48; }
 .measure-error { font-size: 12px; color: #a53524; margin: 6px 8px; }
 .svg-measurement { position: absolute; visibility: hidden; width: 1100px; height: 0; overflow: hidden; pointer-events: none; }

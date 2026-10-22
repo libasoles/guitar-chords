@@ -14,14 +14,16 @@ El encabezado muestra «Lab». El selector carga los diez ejercicios de la
 primera tanda o de cualquiera de las seis ramas por ritmo. Cada compás usa
 el componente `ascii-tabs` editable, con columnas alineadas a sus notas.
 Se puede escribir un traste o arrastrar una nota a otra cuerda del mismo
-ataque. Las ediciones no agregan ni quitan notas o ataques; una operación
-que cambie esa estructura se revierte con un mensaje junto al compás.
-No se editan silencios ni valores rítmicos.
+ataque, y agregar o borrar notas en cualquiera de sus seis cuerdas. Las
+columnas permanecen en su sitio aunque se vacíen. Las notas nuevas heredan
+la duración y la voz del agudo de ese ataque, o del bajo si no hay agudo.
+No se crean columnas ni se cambian valores rítmicos. En MusicXML, una voz
+que queda vacía conserva su duración como silencio oculto.
 
 Arrastrar el pentagrama de un compás al **Track** agrega una copia de su
 partitura y TAB en ese momento. Se pueden mezclar compases de distintos
-sets, repetirlos, reordenarlos por arrastre o con los botones de dirección,
-y quitar copias. «Agregar al track» y Enter sobre el pentagrama ofrecen
+sets, repetirlos, reordenarlos por arrastre y quitar cada copia con la X
+de Lucide en su esquina superior derecha. «Agregar al track» y Enter sobre el pentagrama ofrecen
 una alternativa al arrastre. El track queda visible al desplazarse por los
 ejercicios y admite mouse o pantalla táctil.
 
@@ -36,11 +38,15 @@ cuadernos todavía lee esas fuentes originales: para llevar una revisión al
 cuaderno, hay que incorporarla a su fuente. La página permite descargar el
 MusicXML editado de cada ejercicio para seguir trabajando fuera del editor.
 
-El diseño horizontal se calcula una sola vez desde cada original. Al editar,
+El diseño horizontal se calcula una sola vez, reservando seis posiciones por
+ataque. Las posiciones vacías permanecen ocultas; al agregar una nota se
+activa una de ellas dentro del mismo acorde. Al editar,
 Verovio actualiza las alturas con `redoPagePitchPosLayout()`, sin ejecutar
 `redoLayout()` ni volver a importar la partitura. Así se conservan las abscisas
 de notas, barras y ataques, incluso tras recargar las ediciones. Las plicas y
-líneas adicionales acompañan la nueva altura. Los cambios extremos pueden
+líneas adicionales acompañan la nueva altura. Los puntillos, las líneas
+adicionales y los calderones se actualizan según las notas activas para
+evitar marcas residuales de posiciones vacías. Los cambios extremos pueden
 producir colisiones: el editor mantiene la posición pedida en lugar de
 redistribuir el compás. No comprueba comodidad de la mano ni armonía.
 

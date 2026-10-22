@@ -4,6 +4,7 @@ import argparse
 import copy
 import importlib.util
 import json
+import re
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 import tempfile
@@ -14,6 +15,7 @@ import verovio
 
 HERE = Path(__file__).resolve().parent
 MEI = 'http://www.music-encoding.org/ns/mei'
+SVG = 'http://www.w3.org/2000/svg'
 ET.register_namespace('', MEI)
 XML_ID = '{http://www.w3.org/XML/1998/namespace}id'
 SETS = [('arpegios', 'Primera tanda', 'folklore-arpegios/coleccion.json')] + [
@@ -47,6 +49,24 @@ class Exercise:
                                                        at=event['at'], duration=event['duration'],
                                                        string=string, fret=fret)
         self.xml = root
+        self.groups = {}
+        for note in self.notes.values():
+            note['active'] = True
+            group = note['key'].rsplit('-', 1)[0]
+            note['group'] = group
+            self.groups.setdefault(group, []).append(note['key'])
+        self.attacks = {}
+        for note in list(self.notes.values()):
+            self.attacks.setdefault((note['bar'], note['at']), []).append(note['key'])
+        # Reserve six positions per attack, including the original notes. New
+        # notes join the upper voice when present and inherit its duration.
+        for (bar, at), keys in self.attacks.items():
+            anchor = self.notes[keys[0]]
+            for index in range(6 - len(keys)):
+                key = f'{bar - 1}-extra-{at}-{index}'
+                self.notes[key] = dict(anchor, key=key, active=False)
+                self.groups[anchor['group']].append(key)
+
         self.toolkit = verovio.toolkit()
         self.toolkit.setOptions(dict(pageWidth=2100, pageHeight=12000, scale=50,
             adjustPageHeight=True, breaks='encoded', header='none', footer='none',
@@ -61,6 +81,39 @@ class Exercise:
                     parent.remove(child)
                 elif parent.tag == f'{{{MEI}}}staffDef' and parent.get('n') == '2' and child.tag == f'{{{MEI}}}meterSig':
                     parent.remove(child)
+        parents = {child: parent for parent in mei.iter() for child in parent}
+        elements = {node.get(XML_ID): node for node in mei.iter() if node.get(XML_ID)}
+        for prefix in ('n', 't'):
+            for group, keys in self.groups.items():
+                original = elements[prefix + keys[0]]
+                parent = parents[original]
+                if parent.tag not in {f'{{{MEI}}}chord', f'{{{MEI}}}tabGrp'}:
+                    chord = ET.Element(f'{{{MEI}}}chord', {XML_ID: prefix + 'group-' + group})
+                    for attr in ('dur', 'dur.ppq', 'dots', 'stem.dir'):
+                        if attr in original.attrib:
+                            chord.set(attr, original.attrib.pop(attr))
+                    parent.insert(list(parent).index(original), chord)
+                    parent.remove(original)
+                    chord.append(original)
+                else:
+                    chord = parent
+                    chord_id = chord.get(XML_ID)
+                    if chord_id:
+                        for node in mei.iter():
+                            for attr, value in list(node.attrib.items()):
+                                if value == '#' + chord_id:
+                                    node.set(attr, '#' + prefix + 'group-' + group)
+                    chord.set(XML_ID, prefix + 'group-' + group)
+                for index, key in enumerate(keys):
+                    if prefix + key not in elements:
+                        note = ET.SubElement(chord, f'{{{MEI}}}note', dict(original.attrib))
+                        note.set(XML_ID, prefix + key)
+                        note.set('visible', 'false')
+                        if prefix == 'n':
+                            # Separate placeholders during the one horizontal layout
+                            # so hidden unisons cannot displace heads or stems.
+                            note.set('pname', ('c', 'e', 'g', 'b', 'd', 'f')[index])
+                            note.set('oct', str(7 + index // 4))
         # Reserve an accidental node even when none is printed, so later pitch
         # edits never need to reload or horizontally lay out the document.
         for note in mei.iter(f'{{{MEI}}}note'):
@@ -73,13 +126,22 @@ class Exercise:
                 for attr in ('accid', 'accid.ges'):
                     if attr in note.attrib:
                         acc.set(attr, note.attrib.pop(attr))
+        self.fermatas = {node.get(XML_ID): node.get('startid', '').lstrip('#')
+                         for node in mei.iter(f'{{{MEI}}}fermata')}
         if not self.toolkit.loadData(ET.tostring(mei, encoding='unicode')):
             raise ValueError('No se pudo preparar la partitura')
         self.attributes = {node.get(XML_ID): dict(node.attrib) for node in mei.iter() if node.get(XML_ID)}
         self.svg = self.toolkit.renderToSVG(1)  # Establish the immutable horizontal layout.
+        self.refresh()
+        self.layout_svg = self.svg
         for key, position in edits.items():
-            self.check_position(key, *position)
-            self.notes[key].update(string=position[0], fret=position[1])
+            if key not in self.notes:
+                raise ValueError('Nota desconocida en las ediciones guardadas')
+            if position is None:
+                self.notes[key]['active'] = False
+            else:
+                self.check_position(key, *position)
+                self.notes[key].update(string=position[0], fret=position[1], active=True)
         if edits:
             self.refresh()
 
@@ -95,8 +157,18 @@ class Exercise:
         # See Verovio Toolkit::RedoPagePitchPosLayout / Page::LayOutPitchPos.
         self.actions = []
         accidentals = {}
+        representatives = {group: next((self.notes[key] for key in keys if self.notes[key]['active']), None)
+                           for group, keys in self.groups.items()}
         fifths = self.exercise['quintas']
         for key, note in sorted(self.notes.items(), key=lambda item: (item[1]['bar'], item[1]['at'])):
+            for prefix in ('n', 't'):
+                self.set_attribute(prefix + key, 'visible', 'true' if note['active'] else 'false')
+            if not note['active']:
+                reference = representatives[note['group']]
+                midi = OPEN[reference['string'] - 1] + reference['fret'] if reference else 60
+                self.set_attribute('n' + key, 'pname', PITCHES[midi % 12])
+                self.set_attribute('n' + key, 'oct', midi // 12 - 1)
+                continue
             midi = OPEN[note['string'] - 1] + note['fret']
             pname, sharp, octave = PITCHES[midi % 12], int(midi % 12 in SHARPS), midi // 12 - 1
             # MEI retains sounding octaves; the guitar clef supplies the display octave.
@@ -109,10 +181,119 @@ class Exercise:
             accidentals[context] = sharp
             for attr, value in [('tab.course', note['string']), ('tab.fret', note['fret'])]:
                 self.set_attribute('t' + key, attr, value)
+        for group, keys in self.groups.items():
+            visible = any(self.notes[key]['active'] for key in keys)
+            for prefix in ('n',):
+                self.set_attribute(prefix + 'group-' + group, 'visible', 'true' if visible else 'false')
         if self.actions and not self.toolkit.edit(dict(action='chain', param=self.actions)):
             raise ValueError('No se pudo actualizar la nota')
         self.toolkit.redoPagePitchPosLayout()
-        self.svg = self.toolkit.renderToSVG(1)
+        self.svg = self.render_svg()
+
+    def render_svg(self):
+        """Refresh cached notation marks from active tones without horizontal layout."""
+        root = ET.fromstring(self.toolkit.renderToSVG(1))
+        nodes = {node.get("data-id"): node for node in root.iter() if node.get("data-id")}
+        parents = {child: parent for parent in root.iter() for child in parent}
+        tag = lambda name: f"{{{SVG}}}{name}"
+        for group, keys in self.groups.items():
+            chord = nodes["ngroup-" + group]
+            dots = chord.find(f'./{tag("g")}[@class="dots"]')
+            if dots is None or not len(dots):
+                continue
+            template = dict(dots[0].attrib)
+            dots.clear()
+            dots.set("class", "dots")
+            staff = parents[chord]
+            while staff.get("class") != "staff":
+                staff = parents[staff]
+            lines = [child for child in staff if child.tag == tag("path")]
+            line_y = [float(re.search(r"M[-\d.]+[ ,]+([-\d.]+)", line.get("d")).group(1)) for line in lines[:2]]
+            step = line_y[1] - line_y[0]
+            pitches = set()
+            for key in keys:
+                if self.notes[key]["active"]:
+                    head = nodes["n" + key].find(f'./{tag("g")}[@class="notehead"]/{tag("use")}')
+                    pitches.add(float(re.search(r"translate\([-\d.]+[ ,]+([-\d.]+)", head.get("transform")).group(1)))
+            used = set()
+            for y in sorted(pitches):
+                on_line = abs((y - line_y[0]) / step - round((y - line_y[0]) / step)) < .001
+                position = y - step / 2 if on_line else y
+                if position in used:
+                    position += step
+                used.add(position)
+                ET.SubElement(dots, tag("ellipse"), dict(template, cy=str(position)))
+        for ident, anchor in self.fermatas.items():
+            fermata = nodes.get(ident)
+            if fermata is None:
+                continue
+            group = anchor[len('ngroup-'):] if anchor.startswith('ngroup-') else self.notes.get(anchor[1:], {}).get('group')
+            keys = self.groups.get(group, [])
+            active = [key for key in keys if self.notes[key]['active']]
+            if not active:
+                fermata.set('visibility', 'hidden')
+                continue
+            chord = nodes['ngroup-' + group]
+            staff = parents[chord]
+            while staff.get('class') != 'staff':
+                staff = parents[staff]
+            line = next(child for child in staff if child.tag == tag('path'))
+            top = float(re.search(r'M[-\d.]+[ ,]+([-\d.]+)', line.get('d')).group(1))
+            heights = [top]
+            for key in active:
+                head = nodes['n' + key].find(f'./{tag("g")}[@class="notehead"]/{tag("use")}')
+                heights.append(float(re.search(r'translate\([-\d.]+[ ,]+([-\d.]+)', head.get('transform')).group(1)))
+            for stem in chord.findall(f'./{tag("g")}[@class="stem"]/{tag("path")}'):
+                heights.extend(float(y) for y in re.findall(r'[ML][-\d.]+[ ,]+([-\d.]+)', stem.get('d')))
+            y = min(heights) - 300
+            for glyph in fermata.iter(tag('use')):
+                glyph.set('transform', re.sub(r'translate\(([-\d.]+)[ ,]+[-\d.]+\)',
+                    lambda match: f'translate({match.group(1)}, {y:g})', glyph.get('transform')))
+        # Verovio also caches ledger segments in pitch-only layout. Rebuild
+        # them from active heads so removed/moved notes leave no stray lines.
+        for staff in root.iter(tag('g')):
+            if staff.get('class') != 'staff':
+                continue
+            heads = []
+            for node in staff.iter(tag('g')):
+                key = node.get('data-id', '')
+                if key.startswith('n') and key[1:] in self.notes and self.notes[key[1:]]['active']:
+                    head = node.find(f'./{tag("g")}[@class="notehead"]/{tag("use")}')
+                    x, y = map(float, re.search(r'translate\(([-\d.]+)[ ,]+([-\d.]+)', head.get('transform')).groups())
+                    heads.append((x, y))
+            if not heads and not any(node.get('data-id', '').startswith('n') for node in staff.iter()):
+                continue
+            for ledger in list(staff.iter(tag('g'))):
+                if 'ledgerLines' in ledger.get('class', '').split():
+                    parents[ledger].remove(ledger)
+            lines = [child for child in staff if child.tag == tag('path')]
+            if len(lines) < 5:
+                continue
+            ys = [float(re.search(r'M[-\d.]+[ ,]+([-\d.]+)', line.get('d')).group(1)) for line in lines[:5]]
+            step = ys[1] - ys[0]
+            segments = {}
+            for x, y in heads:
+                for edge, direction in ((ys[0], -1), (ys[-1], 1)):
+                    line = edge + direction * step
+                    while direction * (y - line) >= -.01:
+                        segments.setdefault(line, []).append((x - .3 * step, x + 1.5 * step))
+                        line += direction * step
+            for y, spans in segments.items():
+                merged = []
+                for left, right in sorted(spans):
+                    if merged and left <= merged[-1][1]:
+                        merged[-1][1] = max(merged[-1][1], right)
+                    else:
+                        merged.append([left, right])
+                ledger = ET.SubElement(staff, tag('g'), {'class': 'ledgerLines above' if y < ys[0] else 'ledgerLines below'})
+                for left, right in merged:
+                    ET.SubElement(ledger, tag('path'), {'d': f'M{left:g} {y:g} L{right:g} {y:g}', 'stroke-width': str(round(.12 * step))})
+        ET.register_namespace("", SVG)
+        ET.register_namespace("xlink", "http://www.w3.org/1999/xlink")
+        try:
+            return ET.tostring(root, encoding="unicode")
+        finally:
+            ET.register_namespace("", MEI)
 
     def check_position(self, key, string, fret):
         if key not in self.notes or type(string) is not int or type(fret) is not int or not 1 <= string <= 6 or not 0 <= fret <= 19:
@@ -121,10 +302,48 @@ class Exercise:
     def payload(self):
         return dict(number=self.exercise['numero'], title=self.exercise['titulo'],
                     objective=self.exercise['objetivo'], meter=self.exercise['compas'],
-                    notes=list(self.notes.values()), svg=self.svg)
+                    notes=list(self.notes.values()), svg=self.svg, layoutSvg=self.layout_svg)
 
     def musicxml(self):
         root = copy.deepcopy(self.xml)
+        # Rebuild each original rhythmic event as a chord, or a hidden rest
+        # when its last note was removed. Backups and onset positions stay put.
+        for measure in root.findall('./part/measure'):
+            for prefix in ('n', 't'):
+                for group, keys in self.groups.items():
+                    originals = [node for node in measure.findall('note')
+                                 if node.get('id', '')[1:].rsplit('-', 1)[0] == group
+                                 and node.get('id', '').startswith(prefix)]
+                    if not originals:
+                        continue
+                    index = list(measure).index(originals[0])
+                    template = copy.deepcopy(originals[0])
+                    for node in originals:
+                        measure.remove(node)
+                    active = [self.notes[key] for key in keys if self.notes[key]['active']]
+                    for offset, note in enumerate(active or [None]):
+                        node = copy.deepcopy(template)
+                        for chord in node.findall('chord'):
+                            node.remove(chord)
+                        if note:
+                            node.set('id', prefix + note['key'])
+                            if offset:
+                                node.insert(0, ET.Element('chord'))
+                                for tag in ('beam', 'notations'):
+                                    for child in node.findall(tag):
+                                        node.remove(child)
+                                if prefix == 't':
+                                    technical = ET.SubElement(ET.SubElement(node, 'notations'), 'technical')
+                                    ET.SubElement(technical, 'string')
+                                    ET.SubElement(technical, 'fret')
+                        else:
+                            node.attrib.pop('id', None)
+                            node.set('print-object', 'no')
+                            for tag in ('pitch', 'accidental', 'stem', 'beam', 'notations'):
+                                for child in node.findall(tag):
+                                    node.remove(child)
+                            node.insert(0, ET.Element('rest'))
+                        measure.insert(index + offset, node)
         for node in root.findall('.//note'):
             key = node.get('id', '')[1:]
             if key not in self.notes:
@@ -187,7 +406,10 @@ class Library:
         keys = set()
         for change in changes:
             key = change['key']
-            exercise.check_position(key, change['string'], change['fret'])
+            if key not in exercise.notes or type(change.get('active', True)) is not bool:
+                raise ValueError('Nota inválida')
+            if change.get('active', True):
+                exercise.check_position(key, change['string'], change['fret'])
             if key in keys:
                 raise ValueError('Nota repetida')
             keys.add(key)
@@ -195,9 +417,14 @@ class Library:
         old_saved = copy.deepcopy(self.saved)
         try:
             for change in changes:
-                exercise.notes[change['key']].update(string=change['string'], fret=change['fret'])
+                note = exercise.notes[change['key']]
+                note['active'] = change.get('active', True)
+                if note['active']:
+                    note.update(string=change['string'], fret=change['fret'])
             occupied = set()
             for note in exercise.notes.values():
+                if not note['active']:
+                    continue
                 cell = (note['bar'], note['at'], note['string'])
                 if cell in occupied:
                     raise ValueError('Dos notas del mismo ataque no pueden ocupar la misma cuerda')
@@ -205,7 +432,7 @@ class Library:
             exercise.refresh()
             saved = self.saved.setdefault(self.current, {}).setdefault(str(data['exercise']), {})
             for change in changes:
-                saved[change['key']] = [change['string'], change['fret']]
+                saved[change['key']] = [change['string'], change['fret']] if change.get('active', True) else None
             self.save_path.parent.mkdir(parents=True, exist_ok=True)
             with tempfile.NamedTemporaryFile('w', dir=self.save_path.parent, delete=False) as file:
                 json.dump(self.saved, file, ensure_ascii=False, indent=2)

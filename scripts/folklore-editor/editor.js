@@ -34,7 +34,7 @@ async function request(path, options) {
 function columns(notes) {
   return [...new Set(notes.map(note => note.at))].sort((a, b) => a - b).map(at => {
     const value = Array(6).fill(null);
-    notes.filter(note => note.at === at).forEach(note => { value[note.string - 1] = note.fret; });
+    notes.filter(note => note.at === at && note.active !== false).forEach(note => { value[note.string - 1] = note.fret; });
     return { at, value };
   });
 }
@@ -45,21 +45,26 @@ function plain(value) {
 
 function changesFor(notes, value) {
   const attacks = columns(notes);
-  if (value.length !== attacks.length) throw new Error('Conservá los ataques del compás.');
+  if (value.length !== attacks.length) throw new Error('Conservá las columnas del compás.');
   const changes = [];
   attacks.forEach((attack, index) => {
-    const original = notes.filter(note => note.at === attack.at);
-    const cells = value[index].map((fret, string) => ({ fret: plain(fret), string: string + 1 }))
+    const slots = notes.filter(note => note.at === attack.at);
+    const remaining = value[index].map((fret, string) => ({ fret: plain(fret), string: string + 1 }))
       .filter(cell => cell.fret !== null);
-    if (cells.length !== original.length) throw new Error('Podés cambiar trastes o mover notas entre cuerdas, conservando la cantidad de notas de cada ataque.');
-    const remaining = [...cells];
-    const moved = [];
-    original.forEach(note => {
+    const assigned = new Set();
+    // Keep identities for notes that remain on their string, then reuse the
+    // other positions for moves/additions. Empty positions remain available.
+    slots.filter(note => note.active !== false).forEach(note => {
       const matching = remaining.findIndex(cell => cell.string === note.string);
-      if (matching >= 0) changes.push({ key: note.key, ...remaining.splice(matching, 1)[0] });
-      else moved.push(note);
+      if (matching < 0) return;
+      changes.push({ key: note.key, active: true, ...remaining.splice(matching, 1)[0] });
+      assigned.add(note.key);
     });
-    moved.forEach((note, i) => changes.push({ key: note.key, ...remaining[i] }));
+    slots.filter(note => !assigned.has(note.key)).forEach(note => {
+      changes.push(remaining.length
+        ? { key: note.key, active: true, ...remaining.shift() }
+        : { key: note.key, active: false });
+    });
   });
   return changes;
 }
@@ -83,12 +88,17 @@ function excerpts(model) {
   host.innerHTML = model.svg;
   document.body.append(host);
   const original = host.querySelector('svg');
+  const layoutHost = element('div');
+  layoutHost.innerHTML = model.layoutSvg;
+  host.append(layoutHost);
+  const layoutMeasures = [...layoutHost.querySelectorAll('g.measure')];
   const measures = [...original.querySelectorAll('g.measure')];
   const ranges = measures.map(measure => {
     const staff = measure.querySelector('g.staff');
     const line = staff.querySelector('path').getBBox();
-    const box = staff.getBBox();
-    return { top: box.y - line.y, bottom: box.y + box.height - line.y };
+    const boxes = [staff.getBBox(), ...[...measure.querySelectorAll('g.fermata:not([visibility="hidden"])')].map(mark => mark.getBBox())];
+    return { top: Math.min(...boxes.map(box => box.y)) - line.y,
+      bottom: Math.max(...boxes.map(box => box.y + box.height)) - line.y };
   });
   const top = Math.min(...ranges.map(range => range.top)) - 260;
   const bottom = Math.max(...ranges.map(range => range.bottom)) + 260;
@@ -116,7 +126,7 @@ function excerpts(model) {
     const notes = model.notes.filter(note => note.bar === index + 1);
     const positions = columns(notes).map(attack => {
       const note = notes.find(item => item.at === attack.at);
-      const head = copy.querySelector(`[data-id="n${note.key}"] .notehead`).getBBox();
+      const head = layoutMeasures[index].querySelector(`[data-id="n${note.key}"] .notehead`).getBBox();
       return (head.x + head.width / 2 - x) * .05;
     });
     // Scope both glyph references and Verovio's staff-line CSS per excerpt.
@@ -317,7 +327,7 @@ function moveItem(id, beforeId) {
 function renderTrack() {
   const top = Math.max(0, ...sequence.map(entry => entry.snapshot.staffTop));
   const bottom = Math.max(0, ...sequence.map(entry => entry.snapshot.staffBottom));
-  track.replaceChildren(...sequence.map((entry, index) => {
+  track.replaceChildren(...sequence.map(entry => {
     const item = element('article', 'track-item');
     item.dataset.id = entry.id;
     item.setAttribute('role', 'listitem');
@@ -327,22 +337,17 @@ function renderTrack() {
     notation.style.paddingTop = (top - entry.snapshot.staffTop) + 'px';
     notation.style.paddingBottom = (bottom - entry.snapshot.staffBottom) + 'px';
     item.append(measure);
-    const actions = element('div', 'track-actions');
-    [['←', 'Mover a la izquierda', index === 0, () => moveItem(entry.id, sequence[index - 1].id)],
-      ['→', 'Mover a la derecha', index === sequence.length - 1, () => moveItem(entry.id, sequence[index + 2]?.id)],
-      ['Quitar', 'Quitar compás', false, () => { sequence = sequence.filter(value => value.id !== entry.id); saveTrack(); renderTrack(); }]]
-      .forEach(([text, title, disabled, action]) => {
-        const button = element('button');
-        if (text === '←' || text === '→') {
-          button.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${text === '←' ? 'm15 18-6-6 6-6' : 'm9 18 6-6-6-6'}"/></svg>`;
-        } else button.textContent = text;
-        button.type = 'button';
-        button.setAttribute('aria-label', title);
-        button.disabled = disabled;
-        button.addEventListener('click', action);
-        actions.append(button);
-      });
-    item.append(actions);
+    const remove = element('button', 'track-remove');
+    remove.type = 'button';
+    remove.setAttribute('aria-label', 'Quitar compás');
+    remove.title = 'Quitar compás';
+    remove.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+    remove.addEventListener('click', () => {
+      sequence = sequence.filter(value => value.id !== entry.id);
+      saveTrack();
+      renderTrack();
+    });
+    item.append(remove);
     return item;
   }));
   document.querySelector('#track-count').textContent = `${sequence.length} ${sequence.length === 1 ? 'compás' : 'compases'}`;

@@ -74,6 +74,77 @@ class EditorTests(unittest.TestCase):
         self.assertEqual(exercise.toolkit.getElementAttr('a' + key).get('accid', ''), '')
         self.assertEqual(positions, anchors(exercise.svg))
 
+    def test_empty_positions_do_not_add_dots_or_ledger_lines(self):
+        collection = json.loads((self.lab / 'folklore-arpegios/coleccion.json').read_text())
+        exercise = Exercise(self.library.generator, collection, collection['ejercicios'][0], {})
+        root = ET.fromstring(exercise.svg)
+        dots = root.findall('.//s:g[@data-id="ngroup-0-bajo-0"]/s:g[@class="dots"]/s:ellipse', SVG)
+        self.assertEqual(len(dots), 1, 'a dotted half remains a single dot')
+        chord = root.find('.//s:g[@data-id="ngroup-0-bajo-0"]', SVG)
+        heads = chord.findall('.//s:g[@class="notehead"]/s:use', SVG)
+        xs = [re.search(r'translate\(([-\d.]+)', head.get('transform')).group(1) for head in heads]
+        self.assertEqual(len(set(xs)), 1, 'added notes share the attack X coordinate')
+        final = root.findall('.//s:g[@class="measure"]', SVG)[-1]
+        line_y = float(re.search(r'M[-\d.]+[ ,]+([-\d.]+)', final.find('./s:g[@class="staff"]/s:path', SVG).get('d')).group(1))
+        fermata = final.find('.//s:g[@class="fermata"]/s:use', SVG)
+        fermata_y = float(re.search(r'translate\([-\d.]+[ ,]+([-\d.]+)', fermata.get('transform')).group(1))
+        self.assertTrue(-1500 < fermata_y - line_y < 0, 'the closing fermata stays near the actual staff')
+        for note in exercise.notes.values():
+            if note['bar'] == 1 and note['at'] == 0:
+                note['active'] = False
+        exercise.refresh()
+        root = ET.fromstring(exercise.svg)
+        self.assertEqual(len(root.findall('.//s:g[@data-id="ngroup-0-bajo-0"]/s:g[@class="dots"]/s:ellipse', SVG)), 0)
+        staff = root.find('.//s:g[@class="staff"]', SVG)
+        self.assertEqual(len(staff.findall('.//s:g[@class="ledgerLines below"]/s:path', SVG)), 0)
+
+    def test_add_remove_and_reload_notes_without_moving_existing_notes(self):
+        self.library.load('arpegios')
+        exercise = self.library.exercises['1']
+        original = copy.deepcopy(exercise.notes)
+        before = anchors(exercise.svg)
+        key = next(key for key, note in exercise.notes.items() if not note['active'])
+        slot = exercise.notes[key]
+        anchor = next(note for note in original.values() if note['active'] and note['group'] == slot['group'])
+        self.library.edit(dict(set='arpegios', exercise=1,
+                               changes=[dict(key=key, string=1, fret=0)]))
+        after = anchors(exercise.svg)
+        self.assertEqual({key: after[key] for key in before}, before)
+        self.assertIn('n' + key, after)
+        xml = ET.fromstring(exercise.musicxml())
+        for prefix in ('n', 't'):
+            added = xml.find(f'.//note[@id="{prefix}{key}"]')
+            self.assertEqual(added.findtext('duration'), str(anchor['duration']))
+            self.assertIsNotNone(added.find('chord'))
+            self.assertEqual(added.findtext('pitch/step'), 'E')
+        # Every pre-existing note retains its rhythmic fields, pitch and position.
+        for note_key, note in original.items():
+            if note['active']:
+                self.assertEqual(exercise.notes[note_key], note)
+        reloaded = Library(self.lab)
+        reloaded.load('arpegios')
+        self.assertTrue(reloaded.exercises['1'].notes[key]['active'])
+        self.library.edit(dict(set='arpegios', exercise=1, changes=[dict(key=key, active=False)]))
+        hidden = exercise.toolkit.getElementAttr('n' + key)
+        reference = exercise.toolkit.getElementAttr('n' + anchor['key'])
+        self.assertEqual((hidden['pname'], hidden['oct']), (reference['pname'], reference['oct']))
+        # Removing every note of this column keeps its duration as a hidden rest.
+        changes = [dict(key=note_key, active=False) for note_key, note in exercise.notes.items()
+                   if note['bar'] == slot['bar'] and note['at'] == slot['at']]
+        self.library.edit(dict(set='arpegios', exercise=1, changes=changes))
+        for change in changes:
+            self.assertFalse(exercise.notes[change['key']]['active'])
+        root = ET.fromstring(exercise.musicxml())
+        rests = root.findall('./part/measure[@number="1"]/note[@print-object="no"]')
+        self.assertTrue(any(node.find('rest') is not None and node.findtext('duration') == str(anchor['duration']) for node in rests))
+        reloaded = Library(self.lab)
+        reloaded.load('arpegios')
+        self.assertFalse(reloaded.exercises['1'].notes[key]['active'])
+        # Restore so the other tests keep using the unmodified source fixture.
+        self.library.edit(dict(set='arpegios', exercise=1, changes=[
+            dict(key=k, active=n['active'], string=n['string'], fret=n['fret'])
+            for k, n in original.items()]))
+
     def test_batch_string_moves_are_atomic_and_keep_note_identities(self):
         self.library.load('arpegios')
         exercise = self.library.exercises['3']
