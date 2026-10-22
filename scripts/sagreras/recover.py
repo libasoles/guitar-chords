@@ -74,6 +74,27 @@ def lesson56():
     return measures
 
 
+def correct57(measures):
+    # Pagina PDF 29: la voz intermedia se solapa con las notas largas
+    # de arriba y abajo. El espaciado no representa duraciones sucesivas.
+    replacements = {
+        2: [[(0, 24, 'E5'), (24, 12, 'D5')],
+            sequential((12, 'R'), (12, 'G4'), (12, 'R')), [(0, 36, 'F4')]],
+        4: [[(0, 24, 'F5'), (24, 12, 'E5')],
+            sequential((12, 'R'), (12, 'G4'), (12, 'R')), [(0, 24, 'D4'), (24, 12, 'C4')]],
+        10: [[(0, 36, 'G5')],
+             sequential((12, 'R'), (12, 'G4+C5'), (12, 'G4+C5')), [(0, 36, 'E4')]],
+    }
+    for number, parts in replacements.items():
+        data = measures[number - 1]
+        data['length'] = 36
+        data['voices'] = [voice('up' if i == 0 else 'down', e) for i, e in enumerate(parts)]
+        data['voices'][1]['stem'] = 'up' if number in {2, 4} else 'down'
+        data['fingers'] = {(0, 0): {2: {'E5': 'a'}, 4: {'F5': 'a'}, 10: {'G5': 'a'}}[number]}
+        if number == 4:
+            data['fingers'][(0, 24)] = {'E5': 'm'}
+
+
 def validate(lesson, measures):
     full = lesson['time'][0] * 16 // lesson['time'][1] * T.SCALE
     read = Counter()
@@ -92,12 +113,14 @@ def validate(lesson, measures):
 
 
 def recover(number, lessons):
-    if number not in {54, 56, 62}:
+    if number not in {54, 56, 57, 62}:
         raise ValueError(f'Leccion sin cotejo curado: {number}')
     lesson = lessons[number]
     measures = T.lesson_measures(lesson)
     if number == 56:
         measures = lesson56()
+    if number == 57:
+        correct57(measures)
     if number == 54:
         # Compas 7: el mi4 de blanca tiene plica propia hacia abajo;
         # no forma parte de la cadena de semicorcheas de la voz intermedia.
@@ -122,10 +145,23 @@ def recover(number, lessons):
                 ET.SubElement(technical, 'string').text = '3'
                 ET.SubElement(technical, 'fret').text = '4'
         xml = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(root, encoding='unicode') + '\n'
-    if number == 56:
+    if number in {56, 57}:
         root = ET.fromstring(xml)
         bar = ET.SubElement(root.find('./part/measure[@number="8"]'), 'barline', location='right')
         ET.SubElement(bar, 'bar-style').text = 'light-light'
+        if number == 57:
+            # El cierre de la primera seccion sigue en primera posicion:
+            # do5 en segunda cuerda, no el traste 5 de la tercera.
+            for note in root.findall('./part/measure[@number="8"]/note'):
+                if note.findtext('pitch/step') == 'C' and note.findtext('pitch/octave') == '5':
+                    notations = note.find('notations')
+                    if notations is None:
+                        notations = ET.SubElement(note, 'notations')
+                    technical = notations.find('technical')
+                    if technical is None:
+                        technical = ET.SubElement(notations, 'technical')
+                    ET.SubElement(technical, 'string').text = '2'
+                    ET.SubElement(technical, 'fret').text = '1'
         xml = '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(root, encoding='unicode') + '\n'
     (T.SOURCES / f'{number:02d}.musicxml').write_text(xml, encoding='utf-8')
     T.record_measures(number, len(measures))

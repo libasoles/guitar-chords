@@ -59,3 +59,18 @@ test('Sagreras 56: conserva el cierre del primer sistema y la polifonia del segu
     }
   }
 });
+
+test('Sagreras 57: las notas sostenidas no desplazan los ataques de la voz intermedia', () => {
+  const expected = {
+    2: [[0, 2, 'E5'], [2, 1, 'D5'], [1, 1, 'G4'], [0, 3, 'F4']],
+    4: [[0, 2, 'F5'], [2, 1, 'E5'], [1, 1, 'G4'], [0, 2, 'D4'], [2, 1, 'C4']],
+    10: [[0, 3, 'G5'], [1, 1, 'G4'], [1, 1, 'C5'], [2, 1, 'G4'], [2, 1, 'C5'], [0, 3, 'E4']],
+  };
+  const sorted = (events) => [...events].sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+  for (const xml of scores(57)) {
+    assert.equal((xml.match(/<measure\b/g) || []).length, 16);
+    for (const [number, events] of Object.entries(expected)) {
+      assert.deepEqual(sorted(notes(xml, number)), sorted(events), `compas ${number}`);
+    }
+  }
+});

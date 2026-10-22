@@ -91,3 +91,12 @@ blancas, los ataques de la melodia y las 12 semicorcheas del compas 7 en la fuen
 `recover.py 56` transcribe los 16 compases de la pagina PDF 29: el lector solo devolvia 15 porque omitia el cierre
 del primer sistema (sol4 y sol3 de blanca con puntillo). Tambien separa las tres voces del compas 10. Control de
 alturas y duraciones correcto, 0 diferencias de digitacion en 65 notas; regresiones en fuente y descarga.
+
+`recover.py 57` separa las tres voces de los compases 2, 4 y 10: las blancas de la melodia y del bajo arrancan en
+el primer tiempo, mientras la voz intermedia entra en el segundo. No se concatenan sus duraciones. Conserva los
+16 compases y la doble barra de seccion del compas 8. La regresion comprueba todas las alturas, inicios y duraciones
+de esos tres compases en la fuente y en la descarga.
+El do5 del cierre de la primera seccion se conserva en segunda cuerda, traste 1: 0 diferencias de digitacion en 67 notas.
+
+Para reproducir estas cuatro fuentes usar `recover.py N` y despues `build.py N`; `transcribe.py N` sigue siendo el
+lector automatico sin este cotejo manual. La 59 se reproduce con `transcribe.py 59` y `build.py 59`.
