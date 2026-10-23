@@ -3107,13 +3107,6 @@
     </measure>
     <!--========================= Measure 15 =========================-->
     <measure implicit="no" number="15">
-      <note>
-        <rest />
-        <duration>10080</duration>
-        <voice>1</voice>
-        <type>quarter</type>
-        <staff>1</staff>
-      </note>
       <note id="tab-note-103">
         <pitch>
           <step>B</step>
@@ -3156,13 +3149,6 @@
         <voice>1</voice>
         <type>quarter</type>
         <stem>up</stem>
-        <staff>1</staff>
-      </note>
-      <note>
-        <rest />
-        <duration>10080</duration>
-        <voice>1</voice>
-        <type>quarter</type>
         <staff>1</staff>
       </note>
       <note id="tab-note-106">
@@ -3209,22 +3195,32 @@
         <staff>1</staff>
       </note>
       <backup>
-        <duration>40320</duration>
+        <duration>20160</duration>
       </backup>
-      <note print-object="no" print-spacing="yes">
+      <note>
         <rest />
         <duration>10080</duration>
         <voice>2</voice>
         <type>quarter</type>
-        <staff>2</staff>
+        <staff>1</staff>
       </note>
+      <note>
+        <rest />
+        <duration>10080</duration>
+        <voice>2</voice>
+        <type>quarter</type>
+        <staff>1</staff>
+      </note>
+      <backup>
+        <duration>20160</duration>
+      </backup>
       <note>
         <pitch>
           <step>G</step>
           <octave>4</octave>
         </pitch>
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>1</voice>
         <type>quarter</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3242,7 +3238,7 @@
           <octave>4</octave>
         </pitch>
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>1</voice>
         <type>quarter</type>
         <accidental>sharp</accidental>
         <staff>2</staff>
@@ -3260,7 +3256,7 @@
           <octave>3</octave>
         </pitch>
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>1</voice>
         <type>quarter</type>
         <accidental>flat</accidental>
         <staff>2</staff>
@@ -3270,13 +3266,6 @@
           </technical>
         </notations>
       </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>10080</duration>
-        <voice>2</voice>
-        <type>quarter</type>
-        <staff>2</staff>
-      </note>
       <note>
         <pitch>
           <step>F</step>
@@ -3284,7 +3273,7 @@
           <octave>4</octave>
         </pitch>
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>1</voice>
         <type>quarter</type>
         <accidental>sharp</accidental>
         <stem>none</stem>
@@ -3302,7 +3291,7 @@
           <octave>4</octave>
         </pitch>
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>1</voice>
         <type>quarter</type>
         <staff>2</staff>
         <notations>
@@ -3318,7 +3307,7 @@
           <octave>3</octave>
         </pitch>
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>1</voice>
         <type>quarter</type>
         <staff>2</staff>
         <notations>
@@ -3326,6 +3315,23 @@
             <string>3</string><fret>2</fret>
           </technical>
         </notations>
+      </note>
+      <backup>
+        <duration>20160</duration>
+      </backup>
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>10080</duration>
+        <voice>2</voice>
+        <type>quarter</type>
+        <staff>2</staff>
+      </note>
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>10080</duration>
+        <voice>2</voice>
+        <type>quarter</type>
+        <staff>2</staff>
       </note>
     </measure>
     <!--========================= Measure 16 =========================-->

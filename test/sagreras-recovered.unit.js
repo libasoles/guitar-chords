@@ -71,6 +71,22 @@ test('Sagreras 67: los seis compases con silencio central conservan el bajo y tr
   }
 });
 
+test('Sagreras 68: la voz de silencios no alarga el compas 15 ni duplica ataques del bajo', () => {
+  for (const xml of scores(68)) {
+    const events = notes(xml, 15, true);
+    assert.equal(new Set(events.map((e) => e.voice)).size, 2);
+    assert.equal(Math.max(...events.map((e) => e.onset + e.duration)), 2);
+    assert.deepEqual(events.filter((e) => e.pitch === 'R').map((e) => [e.onset, e.duration]), [[0, 1], [1, 1]]);
+    assert.deepEqual(notes(xml, 15), [[0, 1, 'Bb4'], [0, 1, 'C#5'], [0, 1, 'G5'],
+      [1, 1, 'A4'], [1, 1, 'C5'], [1, 1, 'F#5']]);
+    for (const number of [2, 3, 10, 11]) {
+      const bass = notes(xml, number).filter((e) => e[2] === 'G3');
+      assert.ok(bass.length > 0);
+      assert.ok(bass.every((e) => e[0] === 1.5 && e[1] === 0.5));
+    }
+  }
+});
+
 test('Sagreras 56: conserva el cierre del primer sistema y la polifonia del segundo', () => {
   for (const xml of scores(56)) {
     assert.equal((xml.match(/<measure\b/g) || []).length, 16);

@@ -119,3 +119,7 @@ La 67 conserva tres voces de cuatro tiempos: el bajo es una redonda, la melodia 
 negra y el arpegio con silencio de semicorchea. Un silencio centrado no va siempre arriba: se asigna segun
 la duracion que falta en cada voz, usando duraciones de tresillo cuando corresponde. Los compases 1, 6, 7,
 9, 12 y 14 tienen regresiones en la fuente y la descarga. Control correcto y 0 diferencias en 234 casillas.
+
+En la 68, la voz grave del compas 15 contiene dos silencios de negra: no se concatenan con los acordes
+superiores. En 2, 3, 10 y 11, el sol grave compartido tiene dos plicas de igual duracion y una sola cifra
+en la TAB impresa; el cotejo admite ese ataque unico sin borrar las voces. 0 diferencias en 97 casillas.

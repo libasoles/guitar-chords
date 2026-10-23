@@ -32,7 +32,7 @@ const PIECES = {
   'carcassi-progresivas': { favorite: [1] },
   'carcassi-valses': { favorite: [10] },
   'santisteban-preludios': { favorite: [2, 3, 4] },
-  sagreras: { favorite: [36, 40, 42, 59, 62, 75], insightful: [16, 61], effort: [38, 43], pending: [66, 68, 69, 70, 71, 72, 74, 76, 78, 81, 82, 83, 84, 85, 86] },
+  sagreras: { favorite: [36, 40, 42, 59, 62, 75], insightful: [16, 61], effort: [38, 43], pending: [66, 69, 70, 71, 72, 74, 76, 78, 81, 82, 83, 84, 85, 86] },
 };
 
 /* Iconos de las marcas de la pieza dentro de un <span class="editor-marks">; vacio si no tiene ninguna. */
