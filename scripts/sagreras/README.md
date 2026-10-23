@@ -134,3 +134,11 @@ La 71 conserva la anacrusa de corchea y las cuatro blancas con puntillo del nove
 con la misma x son de alturas distintas, no doble puntillo; el del bajo se busca con el espacio del
 pentagrama. El silencio de blanca con linea adicional del cierre conserva el sol grave en el tercer
 tiempo. El motor procesa los 17 compases sin descartar notas: 0 diferencias en 102 casillas.
+
+La 72 conserva los 24 compases de las dos paginas del original. En 2, 6, 15, 18, 22 y 23, los silencios
+centrales son del acompanamiento: permiten separar las notas tenidas de la cadena de corcheas. Las
+regresiones comprueban los inicios y duraciones de las tres voces; 0 diferencias en 242 casillas.
+
+Estas seis fuentes se reproducen con `transcribe.py 67 68 69 70 71 72` y `build.py N`. El cotejo acepta
+una o dos cifras para un unisono y la omision de cifras ligadas, pero conserva todas las voces y ligaduras
+en el MusicXML. `test/sagreras-recovered.unit.js` verifica tambien que ningun compas publicado desborde.

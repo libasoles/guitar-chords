@@ -135,6 +135,41 @@ test('Sagreras 71: anacrusa de corchea y noveno compas con cuatro blancas de un 
   }
 });
 
+test('Sagreras 72: melodia, bajo y corcheas intermedias se superponen en seis compases', () => {
+  for (const xml of scores(72)) {
+    assert.equal((xml.match(/<measure\b/g) || []).length, 24);
+    for (const number of [2, 6, 15, 18, 22, 23]) {
+      const events = notes(xml, number, true);
+      assert.equal(new Set(events.map((e) => e.voice)).size, 3, `compas ${number}`);
+      assert.equal(Math.max(...events.map((e) => e.onset + e.duration)), 4, `compas ${number}`);
+      const middle = events.filter((e) => e.voice === '3');
+      assert.deepEqual(middle.map((e) => [e.onset, e.duration]), Array.from({ length: 8 }, (_, i) => [i / 2, 0.5]));
+      assert.deepEqual(middle.filter((e) => e.pitch === 'R').map((e) => e.onset), number === 15 ? [0, 1, 2, 3] : [0, 2]);
+      const melody = events.filter((e) => e.voice === '1');
+      const bass = events.filter((e) => e.voice === '2');
+      const onsets = number === 15 ? [0, 1, 2, 3] : [0, 2];
+      for (const voice of [melody, bass]) {
+        assert.deepEqual(voice.map((e) => [e.onset, e.duration]), onsets.map((o) => [o, number === 15 ? 1 : 2]));
+      }
+      assert.deepEqual(bass.map((e) => e.pitch), number === 15 ? ['C4', 'D4', 'E4', 'D4'] : ['D4', number === 23 ? 'B3' : 'E4']);
+    }
+  }
+});
+
+test('Sagreras 67–72: ninguna voz publicada desborda el compas', () => {
+  for (const number of [67, 68, 69, 70, 71, 72]) {
+    const beats = number === 67 || number === 72 ? 4 : number === 71 ? 3 : 2;
+    for (const xml of scores(number)) {
+      const numbers = [...xml.matchAll(/<measure\b[^>]*number="(\d+)"/g)].map((m) => m[1]);
+      for (const [i, measure] of numbers.entries()) {
+        const events = notes(xml, measure, true);
+        const length = Math.max(...events.map((e) => e.onset + e.duration));
+        assert.equal(length, number === 71 && i === 0 ? 0.5 : beats, `leccion ${number}, compas ${measure}`);
+      }
+    }
+  }
+});
+
 test('Sagreras 56: conserva el cierre del primer sistema y la polifonia del segundo', () => {
   for (const xml of scores(56)) {
     assert.equal((xml.match(/<measure\b/g) || []).length, 16);
