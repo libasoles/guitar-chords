@@ -13,6 +13,10 @@ Sessions that entered a worktree cannot run git against the main checkout (the h
 
 This repo does not require draft PRs for routine agent work — merge directly to `main` once the change is verified (tests/build pass, or manual verification done). Only stop to ask the user first if the change is risky, destructive, or ambiguous in scope.
 
+## Lab
+
+Everything for the lab (its editor, server, tests, scores and notes) lives under `lab/`, including `lab/folklore-editor/`. `lab/` is local and git-ignored: never version it and never put lab code in `scripts/`, `src/` or elsewhere in the tracked tree. A worktree does not contain `lab/`, so edit it in the main checkout; there is nothing to commit, merge or push for it. Shared tooling the lab needs (e.g. `scripts/lib/chrome-path.js`) stays in the repo and the lab reaches it by relative path.
+
 ## Browser tooling (offline)
 
 Playwright and Lighthouse are dev dependencies, so `npm ci` is the only install step. Don't download browsers or install tools from the web.
