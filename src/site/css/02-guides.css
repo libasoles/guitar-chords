@@ -400,20 +400,29 @@
 
 .dim-grid {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1.6rem 1.2rem;
+  flex-direction: column;
+  gap: 1.6rem;
   margin: 1rem 0 2.4rem;
 }
-.dim-grid .v7-card {
+.dim-row {
+  display: grid;
+  grid-template-columns: repeat(4, 130px);
+  gap: 1.2rem;
+}
+.dim-row .v7-card {
   width: 130px;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .dim-grid {
-    gap: 1.2rem 0.8rem;
+    gap: 1.2rem;
   }
-  .dim-grid .v7-card {
-    width: 92px;
+  .dim-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+  .dim-row .v7-card {
+    width: auto;
   }
 }
 

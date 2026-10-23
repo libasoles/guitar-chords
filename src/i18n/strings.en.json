@@ -212,7 +212,7 @@
   "dimMetaDescription": "The 12 diminished chords (dim7) on guitar, with the movable fingering on the 6th, 5th and 4th string. Ready-to-play diagrams for any position on the neck.",
   "dimH1": "Diminished chords",
   "dimLead": "The diminished seventh chord (dim7) is symmetric: moving it three frets repeats the same notes, in a different order.",
-  "dimLeadForms": "It has three shapes, depending on which string carries the lowest root: the 6th, 5th, or 4th string.",
+  "dimLeadForms": "It has three shapes, depending on which string carries the lowest root: the 6th, 5th, or 4th string. The chord is named after its lowest note. In each section the chords are grouped in rows: those in the same row share the same notes (they are three frets apart), and the leftmost one uses the lowest fret.",
   "dimSection6Title": "Root on the 6th string",
   "dimSection6Lead": "The lowest shape: the root sounds on the 6th string (low E), with the 5th and 1st strings muted.",
   "dimSection5Title": "Root on the 5th string",
