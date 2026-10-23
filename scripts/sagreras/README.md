@@ -244,4 +244,24 @@ Las fuentes y descargas anteriores aun concatenaban el bajo y el acompanamiento.
 Se regeneraron con `transcribe.py 85` y `build.py 85`, sin cambiar el lector
 ni el motor, y se retiro la marca pendiente. La regresion comprueba las tres
 voces, sus alturas, inicios y duraciones en 3 y 11 y la longitud de los 16
-compases, tanto en la fuente como en la descarga publicada.
+compases, tanto en la fuente como en la descarga publicada. La digitacion
+conserva las mismas 3 diferencias en 124 casillas frente a la TAB impresa.
+
+
+## Leccion 86 recuperada
+
+La misma regla del silencio central recupera las tres voces del compas 6:
+cuatro negras si5–do♯6–re6–si5, dos blancas re4 y cuatro grupos de silencio
+de semicorchea + re5–fa♯5–re5. Se cotejaron los ocho compases de 4/4 con
+la pagina PDF 55, incluido el la5 ligado del cierre. La fuente y la descarga
+anteriores todavia concatenaban bajo y arpegio. Se regeneraron con
+`transcribe.py 86` y `build.py 86`, sin modificar el lector ni el motor, y
+se retiro la marca pendiente. La regresion verifica alturas, entradas y
+duraciones de las tres voces del 6, la ligadura final y que ninguno de los
+ocho compases desborde en la fuente ni en la descarga. La digitacion sugerida
+tiene 24 diferencias en 133 casillas frente a la TAB impresa (antes 23):
+al corregir la simultaneidad del re6 con el bajo, el re5 deja de coincidir
+con la melodia y el motor lo propone en segunda cuerda, traste 3. Las alturas
+coinciden; no se modifico el costo ni las reglas de digitacion del motor.
+
+Tras estas recuperaciones quedan pendientes 76, 78, 81 y 84.

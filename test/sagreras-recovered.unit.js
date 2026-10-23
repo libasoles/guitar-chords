@@ -298,3 +298,24 @@ test('Sagreras 85: melodia, bajos y corcheas conservan tres voces en 3 y 11', ()
     }
   }
 });
+
+test('Sagreras 86: cuatro negras, dos blancas y semicorcheas independientes en el compas 6', () => {
+  for (const xml of scores(86)) {
+    assert.equal((xml.match(/<measure\b/g) || []).length, 8);
+    const events = notes(xml, 6, true);
+    assert.equal(new Set(events.map((e) => e.voice)).size, 3);
+    assert.deepEqual(events.filter((e) => e.voice === '1').map((e) => [e.onset, e.duration, e.pitch]),
+      ['B5', 'C#6', 'D6', 'B5'].map((p, i) => [i, 1, p]));
+    assert.deepEqual(events.filter((e) => e.voice === '2').map((e) => [e.onset, e.duration, e.pitch]),
+      [[0, 2, 'D4'], [2, 2, 'D4']]);
+    assert.deepEqual(events.filter((e) => e.voice === '3').map((e) => [e.onset, e.duration, e.pitch]),
+      Array.from({ length: 16 }, (_, i) => [i / 4, 0.25, ['R', 'D5', 'F#5', 'D5'][i % 4]]));
+    for (let number = 1; number <= 8; number++) {
+      const all = notes(xml, number, true);
+      assert.equal(Math.max(...all.map((e) => e.onset + e.duration)), 4, `compas ${number}`);
+    }
+    const ending = notes(xml, 8, true).filter((e) => e.pitch === 'A5');
+    assert.deepEqual(ending.map((e) => [e.onset, e.duration, e.start, e.stop]),
+      [[0, 2, true, false], [2, 1, false, true]]);
+  }
+});
