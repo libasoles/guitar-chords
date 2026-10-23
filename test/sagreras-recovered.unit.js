@@ -156,8 +156,36 @@ test('Sagreras 72: melodia, bajo y corcheas intermedias se superponen en seis co
   }
 });
 
-test('Sagreras 67–72: ninguna voz publicada desborda el compas', () => {
-  for (const number of [67, 68, 69, 70, 71, 72]) {
+test('Sagreras 74: el silencio intermedio no retrasa las blancas del compas 12', () => {
+  for (const xml of scores(74)) {
+    assert.equal((xml.match(/<measure\b/g) || []).length, 16);
+    const events = notes(xml, 12, true);
+    assert.equal(new Set(events.map((e) => e.voice)).size, 3);
+    for (const pitch of ['A5', 'A3']) {
+      assert.deepEqual(events.filter((e) => e.pitch === pitch).map((e) => [e.onset, e.duration]), [[0, 2]]);
+    }
+    const middle = events.filter((e) => e.voice === '3');
+    assert.deepEqual(middle.map((e) => [e.onset, e.duration, e.pitch]),
+      [[0, 0.5, 'R'], [0.5, 0.5, 'C5'], [0.5, 0.5, 'E5'], [1, 1, 'C5'], [1, 1, 'E5']]);
+  }
+});
+
+test('Sagreras 74: las tres alturas de cada acorde conservan sus ligaduras', () => {
+  const chords = { 3: ['G#4', 'B4', 'F5'], 13: ['A4', 'D5', 'F5'], 14: ['A4', 'C5', 'E5'] };
+  for (const xml of scores(74)) {
+    for (const [number, pitches] of Object.entries(chords)) {
+      const events = notes(xml, number, true);
+      for (const pitch of pitches) {
+        const pair = events.filter((e) => e.pitch === pitch && [0.5, 1].includes(e.onset));
+        assert.deepEqual(pair.map((e) => [e.onset, e.duration, e.start, e.stop]),
+          [[0.5, 0.5, true, false], [1, 0.5, false, true]], `compas ${number}: ${pitch}`);
+      }
+    }
+  }
+});
+
+test('Sagreras recuperadas: ninguna voz publicada desborda el compas', () => {
+  for (const number of [67, 68, 69, 70, 71, 72, 74]) {
     const beats = number === 67 || number === 72 ? 4 : number === 71 ? 3 : 2;
     for (const xml of scores(number)) {
       const numbers = [...xml.matchAll(/<measure\b[^>]*number="(\d+)"/g)].map((m) => m[1]);

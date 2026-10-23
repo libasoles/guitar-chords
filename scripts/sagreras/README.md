@@ -142,3 +142,41 @@ regresiones comprueban los inicios y duraciones de las tres voces; 0 diferencias
 Estas seis fuentes se reproducen con `transcribe.py 67 68 69 70 71 72` y `build.py N`. El cotejo acepta
 una o dos cifras para un unisono y la omision de cifras ligadas, pero conserva todas las voces y ligaduras
 en el MusicXML. `test/sagreras-recovered.unit.js` verifica tambien que ningun compas publicado desborde.
+
+## Revision de pendientes (2026-10-23)
+
+Se volvieron a leer las diez lecciones con marca pendiente despues de las reglas de 67–72, cotejando las
+paginas PDF 36, 45–47 y 50–55 de Marieh. **Solo la 74 pasa ahora el control completo del lector**:
+16 compases de 2/4, sin diferencias de alturas. En el compas 12, la melodia la5 y el bajo la3 son blancas
+simultaneas; el silencio de corchea pertenece a la tercera voz, que toca do5–mi5 a partir de la segunda
+corchea. Las reglas nuevas tambien recuperan las tres ligaduras paralelas en cada acorde de 3, 13 y 14.
+Se regeneraron fuente, descarga y vistas, y se retiro su marca pendiente. Las regresiones comprueban
+estos ataques y ligaduras en la fuente y la descarga, ademas de la duracion de los 16 compases.
+La digitacion sugerida conserva 4 diferencias en 116 casillas frente a la TAB impresa: los dos acordes
+do5–mi5 del compas 12 se digitan en posicion baja, mientras la edicion usa quinta posicion; las alturas coinciden.
+
+Las otras nueve **siguen pendientes**. Este es el resultado del lector actual, no una validacion de las
+fuentes antiguas publicadas. No se regeneraron esas fuentes: completar el compas de la voz mas larga o
+coincidir en el total de alturas no garantiza que todas las voces esten bien.
+
+| Leccion | Pagina PDF | Resultado y siguiente caso por resolver |
+| --- | --- | --- |
+| 66 | 36 | 16 compases correctos en longitud, pero el fa5 del compas 10 debe ser fa♯5. La nueva armadura comienza en el 9; recuperar la doble barra no resolvio esa altura. |
+| 76 | 46 | 8 compases sin desbordes; falta el re del armonico natural de la cuarta cuerda, traste 12, en el cierre. La indicacion `Hr.12` y la cabeza de armonico necesitan lectura propia. |
+| 78 | 47 | 16 compases sin desbordes; sobra un mi5 en el cotejo global. Revisar las prolongaciones entre 7–8 y 11–12: las curvas cruzan barras y un salto de sistema. |
+| 81 | 50 | El compas 8 llega a 3,5 negras en vez de 2 y lee do5 en lugar de do♯5; hay que separar el acorde sostenido del acompanamiento. Tambien falta el armonico re del cierre (16). |
+| 82 | 51 | Alturas correctas, pero 3, 4, 11 y 12 duran 3 negras en lugar de 2: el silencio central se concatena con la melodia y el bajo con el acorde intermedio. Necesita separar esas tres voces. |
+| 83 | 52 | El lector recupera 16 compases (la fuente publicada tiene 15), pero lee sol5 en vez de sol♯5 en el 9. La nueva armadura de tres sostenidos debe regir desde ese compas, no desde el 11. |
+| 84 | 53 | Los compases 8 y 9 desbordan (38 y 67 divisiones, en vez de 36). Ademas, en otros compases aparecen cuatro voces espurias y valores mezclados de corchea normal y de tresillo: hay que revisar la asignacion de los tresillos a notas y silencios antes de regenerar. |
+| 85 | 54 | Alturas correctas, pero 3 y 11 duran 5,5 negras en lugar de 3: el bajo y las corcheas intermedias siguen concatenados. El resto del cotejo de alturas no valida sus inicios ni duraciones. |
+| 86 | 55 | Alturas correctas, pero el 6 dura 7 negras en lugar de 4. Separar las cuatro negras de la melodia, las dos blancas del bajo y el arpegio de semicorcheas con sus silencios. |
+
+Repetir el control sin escribir fuentes:
+
+```sh
+.venv-carcassi/bin/python scripts/sagreras/transcribe.py check 66 74 76 78 81 82 83 84 85 86
+```
+
+Los casos de 82, 85 y 86 son cercanos a las separaciones de voces ya recuperadas, pero las reglas actuales
+todavia no los resuelven automaticamente. Los cambios de armadura de 66/83, las prolongaciones de 78,
+los armonicos de 76/81 y los tresillos de 84 requieren sus propios cotejos y regresiones.
