@@ -112,3 +112,10 @@ El do5 del cierre de la primera seccion se conserva en segunda cuerda, traste 1:
 
 Para reproducir estas cuatro fuentes usar `recover.py N` y despues `build.py N`; `transcribe.py N` sigue siendo el
 lector automatico sin este cotejo manual. La 59 se reproduce con `transcribe.py 59` y `build.py 59`.
+
+## Polifonia recuperada (67–72)
+
+La 67 conserva tres voces de cuatro tiempos: el bajo es una redonda, la melodia empieza con silencio de
+negra y el arpegio con silencio de semicorchea. Un silencio centrado no va siempre arriba: se asigna segun
+la duracion que falta en cada voz, usando duraciones de tresillo cuando corresponde. Los compases 1, 6, 7,
+9, 12 y 14 tienen regresiones en la fuente y la descarga. Control correcto y 0 diferencias en 234 casillas.

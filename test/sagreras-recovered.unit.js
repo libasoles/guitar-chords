@@ -11,7 +11,7 @@ function scores(number) {
 }
 
 // Posiciones en negras, independientemente de las divisiones y voces del exportador.
-function notes(xml, number) {
+function notes(xml, number, details = false) {
   const divisions = Number(xml.match(/<divisions>(\d+)<\/divisions>/)[1]);
   const measure = xml.match(new RegExp(`<measure\\b[^>]*number="${number}"[^>]*>([\\s\\S]*?)<\\/measure>`))[1];
   let cursor = 0;
@@ -29,7 +29,12 @@ function notes(xml, number) {
     const step = body.match(/<step>([A-G])<\/step>/)?.[1];
     const octave = body.match(/<octave>(\d)<\/octave>/)?.[1];
     const alter = Number(body.match(/<alter>(-?\d+)<\/alter>/)?.[1] || 0);
-    if (step) result.push([onset, duration, step + (alter === 1 ? '#' : alter === -1 ? 'b' : '') + octave]);
+    const pitch = step ? step + (alter === 1 ? '#' : alter === -1 ? 'b' : '') + octave : 'R';
+    if (details) result.push({ onset, duration, pitch, voice: body.match(/<voice>(\d+)<\/voice>/)?.[1],
+      type: body.match(/<type>([^<]+)<\/type>/)?.[1], dots: (body.match(/<dot\s*\//g) || []).length,
+      hidden: /print-object="no"/.test(token[0]), start: /<tie\b[^>]*type="start"/.test(body),
+      stop: /<tie\b[^>]*type="stop"/.test(body) });
+    else if (step) result.push([onset, duration, pitch]);
   }
   return result;
 }
@@ -44,6 +49,25 @@ test('Sagreras 54: las blancas del compas 7 no alargan el arpegio ni retrasan la
     assert.ok(arpeggio.every((e) => e[1] === 0.25));
     assert.deepEqual(arpeggio.map((e) => e[0]).sort((a, b) => a - b),
       [0.25, 0.5, 0.75, 1.25, 1.5, 1.75, 2.25, 2.5, 2.75, 3.25, 3.5, 3.75]);
+  }
+});
+
+test('Sagreras 67: los seis compases con silencio central conservan el bajo y tres voces de cuatro tiempos', () => {
+  const basses = { 1: 'C4', 6: 'D4', 7: 'D4', 9: 'C4', 12: 'C4', 14: 'D4' };
+  for (const xml of scores(67)) {
+    for (const [number, pitch] of Object.entries(basses)) {
+      const events = notes(xml, number, true);
+      assert.equal(new Set(events.map((e) => e.voice)).size, 3, `compas ${number}`);
+      assert.equal(Math.max(...events.map((e) => e.onset + e.duration)), 4, `compas ${number}`);
+      const bass = events.filter((e) => e.pitch === pitch);
+      assert.deepEqual(bass.map((e) => [e.onset, e.duration, e.type]), [[0, 4, 'whole']], `bajo ${number}`);
+      const upper = events.filter((e) => e.voice === '1');
+      assert.deepEqual(upper.map((e) => [e.onset, e.duration]), [0, 1, 2, 3].map((o) => [o, 1]));
+      assert.equal(upper[0].pitch, 'R');
+      const middle = events.filter((e) => e.voice === '2');
+      assert.deepEqual(middle.map((e) => [e.onset, e.duration]), Array.from({ length: 16 }, (_, i) => [i / 4, 0.25]));
+      assert.deepEqual(middle.filter((e) => e.pitch === 'R').map((e) => e.onset), [0, 1, 2, 3]);
+    }
   }
 });
 
