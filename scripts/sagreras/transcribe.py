@@ -48,6 +48,9 @@ def configure_rhythm(scale):
     if scale == 6:
         T.TYPES.update({3: '32nd', 21: 'eighth'})
         T.DOTTED.add(21)
+    elif scale == 3:  # negra y blanca con doble puntillo
+        T.TYPES.update({21: 'quarter', 42: 'half'})
+        T.DOTTED.update({21, 42})
     TRIPLET = {d * factor for d in (2, 4, 8)}
 
 
@@ -310,7 +313,7 @@ def measure_xml(number, time, data, first, implicit, key_change, prev_fifths):
         else:
             event = (*event[:3], fingers.get(event[2]), *event[4:])
         xml = T.note_xml(event[:4], v + 1, stem, acc, beams_for(voices[v]['events'], bounds).get(event[0]))
-        if SCALE == 6 and event[1] == 21:
+        if event[1] == 21 or (SCALE == 3 and event[1] == 42):
             xml = xml.replace('<dot/>', '<dot/><dot/>')
         rendered[(v, event[0])] = graces + V.add_ties(xml, event[5])
     body = ''
