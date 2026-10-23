@@ -225,3 +225,21 @@ test('Sagreras 57: las notas sostenidas no desplazan los ataques de la voz inter
     }
   }
 });
+
+
+test('Sagreras 66: la armadura de sol mayor rige desde el compas 9', () => {
+  for (const xml of scores(66)) {
+    assert.equal((xml.match(/<measure\b/g) || []).length, 16);
+    const keys = [...xml.matchAll(/<measure\b[^>]*number="(\d+)"[^>]*>([\s\S]*?)<\/measure>/g)]
+      .flatMap((m) => [...m[2].matchAll(/<key\b[^>]*>[\s\S]*?<fifths>(-?\d+)<\/fifths>[\s\S]*?<\/key>/g)]
+        .map((key) => [Number(m[1]), Number(key[1])]));
+    // El exportador tambien incluye la armadura del pentagrama TAB.
+    assert.deepEqual([...new Map(keys).entries()], [[1, 0], [9, 1]]);
+    assert.ok(notes(xml, 10).some((e) => e[2] === 'F#5'));
+    assert.ok(!notes(xml, 10).some((e) => e[2] === 'F5'));
+    for (let number = 1; number <= 16; number++) {
+      const events = notes(xml, number, true);
+      assert.equal(Math.max(...events.map((e) => e.onset + e.duration)), 3, `compas ${number}`);
+    }
+  }
+});

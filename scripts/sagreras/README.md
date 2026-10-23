@@ -155,7 +155,7 @@ estos ataques y ligaduras en la fuente y la descarga, ademas de la duracion de l
 La digitacion sugerida conserva 4 diferencias en 116 casillas frente a la TAB impresa: los dos acordes
 do5–mi5 del compas 12 se digitan en posicion baja, mientras la edicion usa quinta posicion; las alturas coinciden.
 
-Las otras nueve **siguen pendientes**. Este es el resultado del lector actual, no una validacion de las
+Las otras nueve **seguian pendientes en esta revision** (la 66 se recupero despues; ver abajo). Este es el resultado del lector actual, no una validacion de las
 fuentes antiguas publicadas. No se regeneraron esas fuentes: completar el compas de la voz mas larga o
 coincidir en el total de alturas no garantiza que todas las voces esten bien.
 
@@ -180,3 +180,21 @@ Repetir el control sin escribir fuentes:
 Los casos de 82, 85 y 86 son cercanos a las separaciones de voces ya recuperadas, pero las reglas actuales
 todavia no los resuelven automaticamente. Los cambios de armadura de 66/83, las prolongaciones de 78,
 los armonicos de 76/81 y los tresillos de 84 requieren sus propios cotejos y regresiones.
+
+
+## Cambios de armadura recuperados
+
+La 66 pasa de do mayor a sol mayor tras la doble barra del compas 8, dentro del
+segundo sistema. El lector de Marieh reconoce ahora las alteraciones anteriores
+al primer ataque tras una doble barra, en el orden y las alturas canonicas de
+una armadura, y mantiene esa armadura en los compases siguientes del sistema.
+Las alteraciones de nota tras una barra simple siguen siendo locales. No cambia
+la lectura de las demas lecciones salvo la 83, que presenta el mismo caso.
+
+La 66 conserva sus 16 compases de 3/4, Fine en el 8 y D.C. al Fine en el 16.
+El fa5 del compas 10 se lee como fa♯5. El control contra las alturas de la TAB
+impresa pasa sin diferencias. Se regeneraron fuente, descarga y vistas y se retiro
+la marca pendiente. Las regresiones comprueban la armadura desde el 9, el fa♯5 y
+la longitud de todos los compases en la fuente y la descarga.
+
+Reproducir: `transcribe.py 66` y `build.py 66`.

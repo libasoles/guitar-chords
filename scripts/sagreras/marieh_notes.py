@@ -159,6 +159,31 @@ def bar_strokes(drawings):
             and 0.78 < (d['width'] or 0) < 2 and d['rect'].width < 0.01]
 
 
+def assign_measure_keys(system, glyphs, inherited):
+    """Armadura por compas, incluidos los cambios tras una doble barra.
+
+    read_system reconoce la del inicio de sistema. En Marieh tambien hay
+    cambios de seccion dentro del sistema (66/83): las alteraciones preceden
+    a la primera nota y siguen el orden y las alturas canonicas de la armadura.
+    Una alteracion tras barra simple sigue siendo una alteracion de nota.
+    """
+    current = system['key'] if system['key'] is not None else inherited
+    previous = None
+    for measure in system['measures']:
+        if previous is not None and previous['right_bar_style'] == 'light-light':
+            first = min([h['x'] for h in measure['items']]
+                        + [r['x'] for r in measure['rests']], default=measure['right'])
+            accs = sorted((g for g in glyphs if g[0] in (0xE260, 0xE262)
+                           and measure['left'] < g[1] < first
+                           and measure['top'] - measure['space'] <= g[2] <= measure['bottom'] + measure['space']),
+                          key=lambda g: g[1])
+            signature = P.key_signature(accs, measure['top'], measure['space'])
+            if signature:
+                current = len(signature) * (1 if signature[0][0] == 0xE262 else -1)
+        measure['fifths'] = current
+        previous = measure
+
+
 def read_pdf(path=SOURCE):
     """-> {leccion: {'fifths', 'time', 'measures', 'tab'}} para las lecciones 1-86."""
     doc = pymupdf.open(str(path))
@@ -209,8 +234,8 @@ def read_pdf(path=SOURCE):
                 system['time'] = (4, 4) if symbol[0][0] == 0xE08A else (2, 2)
             if system['time'] and not lesson['time']:
                 lesson['time'] = system['time']
-            for m in system['measures']:
-                m['fifths'] = system['key'] if system['key'] is not None else lesson['fifths']
+            inherited = lesson['measures'][-1]['fifths'] if lesson['measures'] else lesson['fifths']
+            assign_measure_keys(system, glyph, inherited)
             lesson['measures'].extend(system['measures'])
             if index < len(tabs):
                 cells = tab_cells(tabs[index], words, system['measures'])

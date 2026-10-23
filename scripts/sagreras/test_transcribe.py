@@ -41,6 +41,38 @@ class RhythmTests(unittest.TestCase):
         self.assertIsNone(xml.find('./part/measure[@number="3"]/barline'),
                           'no convertir una barra simple explicita en final')
 
+    def test_mid_system_key_change_applies_from_section_and_is_exported(self):
+        rect = T.M.pymupdf.Rect
+        lines = [10, 15, 20, 25, 30]
+        # Armadura inicial de re mayor; la de la mayor empieza tras la doble
+        # barra. El sol5 del segundo compas no lleva alteracion junto a la nota.
+        glyphs = [(0xE050, 0, 25, 20), (0xE262, 15, 10, 20),
+                  (0xE262, 20, 17.5, 20), (0xE4E3, 35, 15, 20),
+                  (0xE262, 62, 10, 20), (0xE262, 67, 17.5, 20),
+                  (0xE262, 72, 7.5, 20), (0xE0A4, 90, 7.5, 20),
+                  (0xE4E3, 140, 15, 20)]
+        system = T.P.read_system(lines, glyphs, [],
+                                 [rect(x, 10, x, 30) for x in (55, 57.3, 120, 165)], [], [])
+        T.M.assign_measure_keys(system, glyphs, 0)
+        self.assertEqual([m['fifths'] for m in system['measures']], [2, 3, 3])
+        lesson = {'time': (4, 4), 'measures': system['measures']}
+        measures = T.lesson_measures(lesson)
+        pitches = [e[2] for v in measures[1]['voices'] for e in v['events']]
+        self.assertIn('G#5', pitches)
+        xml = ET.fromstring(T.to_xml(83, lesson, measures))
+        self.assertEqual(xml.findtext('./part/measure[@number="2"]/attributes/key/fifths'), '3')
+        self.assertIsNone(xml.find('./part/measure[@number="3"]/attributes/key'))
+
+    def test_single_bar_accidental_is_not_a_key_change(self):
+        rect = T.M.pymupdf.Rect
+        glyphs = [(0xE050, 0, 25, 20), (0xE4E3, 30, 15, 20),
+                  (0xE262, 60, 10, 20), (0xE0A4, 70, 10, 20)]
+        system = T.P.read_system([10, 15, 20, 25, 30], glyphs, [],
+                                 [rect(x, 10, x, 30) for x in (50, 100)], [], [])
+        T.M.assign_measure_keys(system, glyphs, 0)
+        self.assertEqual([m['fifths'] for m in system['measures']], [0, 0])
+        self.assertEqual(system['measures'][1]['items'][0]['acc'], 1)
+
     def test_final_and_repeat_bars_keep_their_styles(self):
         rect = T.M.pymupdf.Rect
         glyphs = [(0xE050, 0, 25, 20), (0xE4E3, 30, 15, 20)]
