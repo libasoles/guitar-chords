@@ -279,3 +279,22 @@ test('Sagreras 82: los compases 3, 4, 11 y 12 conservan tres voces de dos tiempo
     }
   }
 });
+
+test('Sagreras 85: melodia, bajos y corcheas conservan tres voces en 3 y 11', () => {
+  for (const xml of scores(85)) {
+    assert.equal((xml.match(/<measure\b/g) || []).length, 16);
+    for (const number of [3, 11]) {
+      const events = notes(xml, number, true);
+      assert.equal(new Set(events.map((e) => e.voice)).size, 3);
+      assert.deepEqual(events.filter((e) => e.voice === '1').map((e) => [e.onset, e.duration, e.pitch]),
+        [[0, 1.5, 'F5'], [1.5, 1.5, 'A5']]);
+      assert.deepEqual(events.filter((e) => e.voice === '2').map((e) => [e.onset, e.duration, e.pitch]),
+        [[0, 1.5, 'D4'], [1.5, 1.5, 'F4']]);
+      assert.deepEqual(events.filter((e) => e.voice === '3').map((e) => [e.onset, e.duration, e.pitch]),
+        ['R', 'G4', 'B4', 'R', 'G4', 'B4'].map((p, i) => [i / 2, 0.5, p]));
+    }
+    for (let number = 1; number <= 16; number++) {
+      assert.equal(Math.max(...notes(xml, number, true).map((e) => e.onset + e.duration)), 3, `compas ${number}`);
+    }
+  }
+});

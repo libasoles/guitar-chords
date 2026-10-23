@@ -435,7 +435,7 @@ NO_PRINTED_TAB = {33}
 ENGINE_FAILS = set()
 # Lecciones publicadas aunque no pasen el control: llevan la marca «Revision pendiente» (scripts/lib/editor-marks.js)
 # hasta que se curen a mano contra la edicion.
-PENDING_REVIEW = {76, 78, 81, 82, 84, 85, 86}
+PENDING_REVIEW = {76, 78, 81, 82, 84, 86}
 
 
 def record_measures(n, count):

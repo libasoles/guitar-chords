@@ -232,3 +232,16 @@ Reproducir: `transcribe.py 82` y `build.py 82`.
 El mismo cambio permite pasar el control preliminar de alturas y longitud a
 85 y 86; siguen pendientes hasta cotejar sus voces, inicios y duraciones con
 el original. La 84 sigue fallando en el compas 8 y requiere revisar los tresillos.
+
+
+## Leccion 85 recuperada
+
+La regla de silencios centrales desplazados incorporada para la 82 tambien
+separa correctamente las tres voces de los compases 3 y 11 de la 85. Se cotejaron
+los 16 compases de 6/8 con la pagina PDF 54: melodia y bajo entran juntos,
+y la voz intermedia alterna silencio de corchea con dos corcheas en cada pulso.
+Las fuentes y descargas anteriores aun concatenaban el bajo y el acompanamiento.
+Se regeneraron con `transcribe.py 85` y `build.py 85`, sin cambiar el lector
+ni el motor, y se retiro la marca pendiente. La regresion comprueba las tres
+voces, sus alturas, inicios y duraciones en 3 y 11 y la longitud de los 16
+compases, tanto en la fuente como en la descarga publicada.
