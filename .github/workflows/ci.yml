@@ -61,6 +61,9 @@ jobs:
 
       - name: Build site
         run: npm run build:site
+        env:
+          PARTITURA_API_URL: ${{ vars.PARTITURA_API_URL }}
+          TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
 
       - name: Build extensions
         run: npm run build:ext
@@ -108,9 +111,13 @@ jobs:
       - name: Vendor (svguitar)
         run: npm run vendor
 
+      # Same configuration as the deploy build, so the suites test what ships.
       - name: Build site
         if: matrix.build == 'site'
         run: npm run build:site
+        env:
+          PARTITURA_API_URL: ${{ vars.PARTITURA_API_URL }}
+          TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
 
       - name: Build extensions
         if: matrix.build == 'ext'

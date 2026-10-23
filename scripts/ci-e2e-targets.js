@@ -45,7 +45,7 @@ const SUITES = {
     ],
   },
   partitura: {
-    build: false,
+    build: 'site',
     paths: [
       /^src\/site\/partitura/,
       /^scripts\/(og-partitura\.js|partitura-example\/)/,
