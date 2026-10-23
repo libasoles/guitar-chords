@@ -155,7 +155,7 @@ estos ataques y ligaduras en la fuente y la descarga, ademas de la duracion de l
 La digitacion sugerida conserva 4 diferencias en 116 casillas frente a la TAB impresa: los dos acordes
 do5–mi5 del compas 12 se digitan en posicion baja, mientras la edicion usa quinta posicion; las alturas coinciden.
 
-Las otras nueve **seguian pendientes en esta revision** (la 66 se recupero despues; ver abajo). Este es el resultado del lector actual, no una validacion de las
+Las otras nueve **seguian pendientes en esta revision** (66 y 83 se recuperaron despues; ver abajo). Este es el resultado del lector actual, no una validacion de las
 fuentes antiguas publicadas. No se regeneraron esas fuentes: completar el compas de la voz mas larga o
 coincidir en el total de alturas no garantiza que todas las voces esten bien.
 
@@ -197,4 +197,15 @@ impresa pasa sin diferencias. Se regeneraron fuente, descarga y vistas y se reti
 la marca pendiente. Las regresiones comprueban la armadura desde el 9, el fa♯5 y
 la longitud de todos los compases en la fuente y la descarga.
 
-Reproducir: `transcribe.py 66` y `build.py 66`.
+La 83 pasa de re mayor a la mayor tambien desde el compas 9, tras la doble
+barra del 8. El sol5 del 9 se lee como sol♯5. La regeneracion recupera ademas el
+compas 8 que faltaba en la fuente antigua: son 16 compases de 3/4, con Fine en
+el 8 y D.C. al Fine en el 16. Alturas sin diferencias y digitacion sugerida con
+8 diferencias en 142 casillas respecto de la TAB impresa: el motor elige si4
+en segunda cuerda al aire donde la edicion usa tercera cuerda, traste 4. Fuente, descarga y vistas
+regeneradas; retirada la marca pendiente. Las regresiones cubren armadura, sol♯5
+y longitud de los 16 compases en fuente y descarga. La 66 tambien tiene 0 diferencias
+de digitacion en 101 casillas.
+
+Reproducir: `transcribe.py 66 83` y `build.py 66 83`.
+Solo quedan pendientes 76, 78, 81, 82, 84, 85 y 86.

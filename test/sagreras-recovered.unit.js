@@ -243,3 +243,20 @@ test('Sagreras 66: la armadura de sol mayor rige desde el compas 9', () => {
     }
   }
 });
+
+test('Sagreras 83: la armadura de la mayor rige desde el compas 9', () => {
+  for (const xml of scores(83)) {
+    assert.equal((xml.match(/<measure\b/g) || []).length, 16);
+    const keys = [...xml.matchAll(/<measure\b[^>]*number="(\d+)"[^>]*>([\s\S]*?)<\/measure>/g)]
+      .flatMap((m) => [...m[2].matchAll(/<key\b[^>]*>[\s\S]*?<fifths>(-?\d+)<\/fifths>[\s\S]*?<\/key>/g)]
+        .map((key) => [Number(m[1]), Number(key[1])]));
+    // El exportador tambien incluye la armadura del pentagrama TAB.
+    assert.deepEqual([...new Map(keys).entries()], [[1, 2], [9, 3]]);
+    assert.ok(notes(xml, 9).some((e) => e[2] === 'G#5'));
+    assert.ok(!notes(xml, 9).some((e) => e[2] === 'G5'));
+    for (let number = 1; number <= 16; number++) {
+      const events = notes(xml, number, true);
+      assert.equal(Math.max(...events.map((e) => e.onset + e.duration)), 3, `compas ${number}`);
+    }
+  }
+});
