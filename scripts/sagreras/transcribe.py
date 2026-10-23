@@ -368,7 +368,10 @@ def to_xml(number, lesson, measures):
 # Lecciones cuya TAB impresa viene vacia: no hay control contra la TAB, se revisan a ojo contra el pentagrama.
 NO_PRINTED_TAB = {33}
 # Lecciones que pasan el control pero el motor no puede digitar (notas descartadas): quedan fuera hasta resolverlo.
-ENGINE_FAILS = {71}
+ENGINE_FAILS = set()
+# Lecciones publicadas aunque no pasen el control: llevan la marca «Revision pendiente» (scripts/lib/editor-marks.js)
+# hasta que se curen a mano contra la edicion.
+PENDING_REVIEW = {64, 65, 66, 67, 68, 69, 70, 71, 72, 74, 76, 78, 81, 82, 83, 84, 85, 86}
 
 
 def record_measures(n, count):
@@ -398,7 +401,7 @@ def run(numbers, write):
         status = 'OK ' if not missing and not extra and not odd else 'REVISAR'
         print(f"{n:2d} {status} {lesson['time']} fifths={lesson['fifths']} compases={len(measures)} "
               f"cortos/largos={odd} notacion-de-mas={missing} tab-de-mas={extra}")
-        if write and status == 'OK ' and n not in ENGINE_FAILS:
+        if write and (n in PENDING_REVIEW or (status == 'OK ' and n not in ENGINE_FAILS)):
             SOURCES.mkdir(exist_ok=True)
             (SOURCES / f'{n:02d}.musicxml').write_text(to_xml(n, lesson, measures), encoding='utf-8')
             record_measures(n, len(measures))
