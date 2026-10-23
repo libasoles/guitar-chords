@@ -9,10 +9,87 @@ on:
     branches: [main]
 
 jobs:
+  # Picks the e2e suites a PR needs from its changed files (see
+  # scripts/ci-e2e-targets.js). Pushes to main always run every suite.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.targets.outputs.matrix }}
+      any: ${{ steps.targets.outputs.any }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Select e2e suites
+        id: targets
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            git diff --name-only "origin/$BASE_REF...HEAD" | node scripts/ci-e2e-targets.js > matrix.json
+          else
+            node scripts/ci-e2e-targets.js --all < /dev/null > matrix.json
+          fi
+          cat matrix.json
+          echo "matrix=$(cat matrix.json)" >> "$GITHUB_OUTPUT"
+          echo "any=$(node -p "require('./matrix.json').include.length > 0")" >> "$GITHUB_OUTPUT"
+
   test-and-build:
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-checks
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Vendor (svguitar)
+        run: npm run vendor
+
+      - name: Build site
+        run: npm run build:site
+
+      - name: Build extensions
+        run: npm run build:ext
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Upload Guitar Chords artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: guitar-chords-extension
+          path: dist/extensions/chords.zip
+
+      - name: Upload Guitar Tabs artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: guitar-tabs-extension
+          path: dist/extensions/tabs.zip
+
+  e2e:
+    needs: changes
+    if: needs.changes.outputs.any == 'true'
+    name: e2e (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.changes.outputs.matrix) }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-e2e-${{ matrix.name }}
       cancel-in-progress: true
 
     steps:
@@ -32,31 +109,33 @@ jobs:
         run: npm run vendor
 
       - name: Build site
+        if: matrix.build == 'site'
         run: npm run build:site
 
       - name: Build extensions
+        if: matrix.build == 'ext'
         run: npm run build:ext
 
-      - name: Unit tests
-        run: npm run test:unit
-
       - name: E2E tests
-        run: npm run test:e2e
+        run: node test/${{ matrix.name }}.e2e.js
 
-      - name: Upload Guitar Chords artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: guitar-chords-extension
-          path: dist/extensions/chords.zip
-
-      - name: Upload Guitar Tabs artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: guitar-tabs-extension
-          path: dist/extensions/tabs.zip
+  # One stable check for branch protection: skipped e2e suites count as
+  # passed; failed or cancelled jobs do not.
+  ci-ok:
+    needs: [test-and-build, e2e]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          for r in $RESULTS; do
+            case "$r" in success|skipped) ;; *) echo "A required job ended as $r"; exit 1 ;; esac
+          done
 
   deploy:
-    needs: test-and-build
+    needs: [test-and-build, e2e]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     concurrency:
