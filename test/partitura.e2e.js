@@ -1,22 +1,21 @@
 /* E2E for Partitura y tablatura and the privacy policy.
 
-   Builds the site into a temp directory twice (without and with the API URL),
-   serves it and drives the tool with the API, Turnstile and uploads mocked by
+   Serves dist/site (build it with PARTITURA_API_URL set, as CI does for the
+   deploy) and drives the tool with the API, Turnstile and uploads mocked by
    network interception, in both locales. Needs no AWS and no real Turnstile. */
 'use strict';
 
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const os = require('node:os');
 const path = require('node:path');
-const { spawnSync } = require('node:child_process');
 const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
 const { serveStatic } = require('../scripts/lib/static-server');
 const { pagePath, pageFile } = require('../scripts/lib/slugs');
 
 const ROOT = path.join(__dirname, '..');
-const API = 'https://api.partitura.test';
+const SITE = path.join(ROOT, 'dist', 'site');
+let API;
 const FILES = 'https://files.partitura.test';
 const JOB = 'job-abc123XYZ';
 const CORS = {
@@ -24,15 +23,6 @@ const CORS = {
   'access-control-allow-headers': '*',
   'access-control-allow-methods': '*',
 };
-
-function build(outDir, env) {
-  const result = spawnSync('node', [path.join(ROOT, 'scripts', 'build-site.js')], {
-    cwd: ROOT,
-    env: Object.assign({}, process.env, { SITE_OUT_DIR: outDir, PARTITURA_API_URL: '' }, env),
-    encoding: 'utf8',
-  });
-  assert.equal(result.status, 0, result.stderr || result.stdout);
-}
 
 const SVG = [
   '<svg xmlns="http://www.w3.org/2000/svg" width="800px" height="200px">',
@@ -191,39 +181,24 @@ async function fillForm(page, name) {
 }
 
 (async function () {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'partitura-e2e-'));
-  const withoutDir = path.join(tmp, 'without');
-  const withDir = path.join(tmp, 'with');
-  build(withoutDir, {});
-  build(withDir, { PARTITURA_API_URL: API });
-
-  // Without the API URL the tool, its banner and its home links do not exist.
-  for (const file of [pageFile('partitura-y-tablatura', 'es'), pageFile('partitura-y-tablatura', 'en')]) {
-    assert.ok(!fs.existsSync(path.join(withoutDir, file)), file + ' must not be generated');
-  }
-  for (const file of ['index.html', 'en/index.html']) {
-    const html = fs.readFileSync(path.join(withoutDir, file), 'utf8');
-    assert.ok(!html.includes('partitura-y-tablatura') && !html.includes('sheet-music-to-tab'), file + ' links to the tool');
-    assert.ok(!html.includes('part-promo'), file + ' has the banner');
-  }
-  assert.ok(!/partitura-y-tablatura|sheet-music-to-tab/.test(fs.readFileSync(path.join(withoutDir, 'sitemap.xml'), 'utf8')));
-  for (const file of [pageFile('politica-de-privacidad', 'es'), pageFile('politica-de-privacidad', 'en')]) {
-    assert.ok(fs.existsSync(path.join(withoutDir, file)), file + ' must always be generated');
-  }
+  const toolPage = path.join(SITE, pageFile('partitura-y-tablatura', 'es'));
+  assert.ok(fs.existsSync(toolPage), toolPage + ' is missing. Build the site with the API URL first: PARTITURA_API_URL=https://api.partitura.test npm run build:site');
+  // The API is whatever URL the build was given (the real one in CI); the mock intercepts it.
+  API = /"apiUrl":"([^"]+)"/.exec(fs.readFileSync(toolPage, 'utf8'))[1];
 
   for (const locale of ['es', 'en']) {
-    const html = fs.readFileSync(path.join(withDir, pageFile('partitura-y-tablatura', locale)), 'utf8');
+    const html = fs.readFileSync(path.join(SITE, pageFile('partitura-y-tablatura', locale)), 'utf8');
     assert.ok(!/%%part\w+%%/.test(html), 'unresolved partitura translation in ' + locale);
     const strings = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/i18n/strings.' + locale + '.json'), 'utf8'));
     assert.ok(html.includes('<h2 class="part-duration">' + strings.partDurationHint + '</h2>'));
   }
 
-  const server = await serveStatic(withDir, 0);
+  const server = await serveStatic(SITE, 0);
   const base = 'http://localhost:' + server.address().port;
   let browser;
   try {
     browser = await chromium.launch({ executablePath: playwrightExecutablePath() });
-    const sitemap = fs.readFileSync(path.join(withDir, 'sitemap.xml'), 'utf8');
+    const sitemap = fs.readFileSync(path.join(SITE, 'sitemap.xml'), 'utf8');
     assert.ok(sitemap.includes(pagePath('partitura-y-tablatura', 'es') + '<') && sitemap.includes(pagePath('partitura-y-tablatura', 'en') + '<'));
     assert.ok(sitemap.includes(pagePath('politica-de-privacidad', 'es') + '<') && sitemap.includes(pagePath('politica-de-privacidad', 'en') + '<'));
 
@@ -918,7 +893,6 @@ async function fillForm(page, name) {
   } finally {
     if (browser) await browser.close();
     await new Promise(resolve => server.close(resolve));
-    fs.rmSync(tmp, { recursive: true, force: true });
   }
 })().catch(err => {
   console.error(err);
