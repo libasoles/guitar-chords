@@ -265,6 +265,15 @@ class RhythmTests(unittest.TestCase):
         self.assertEqual([e[:3] for e in result['voices'][0]['events']],
                          [(0, 4, 'R'), (4, 4, 'C5'), (8, 4, 'C5')])
 
+    def test_half_rest_with_ledger_line_keeps_its_duration(self):
+        from types import SimpleNamespace
+        raw = {'blocks': [{'lines': [{'spans': [{'font': 'MScore', 'size': 20,
+                'chars': [{'c': chr(0xE4F5), 'origin': (20, 40)}]}]}]}]}
+        page = SimpleNamespace(get_text=lambda _: raw)
+        glyphs = T.M.mscore_glyphs(page)
+        measure = T.P.measure(0, 60, glyphs, [], [], 10, 30, 5)
+        self.assertEqual(measure['rests'], [{'dur': 8, 'x': 20, 'y': 40}])
+
     def test_switching_back_preserves_the_triplet_grid(self):
         T.configure_rhythm(6)
         T.configure_rhythm(3)

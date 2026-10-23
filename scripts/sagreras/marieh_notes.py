@@ -27,7 +27,10 @@ def mscore_glyphs(page):
             for span in line['spans']:
                 if span['font'] == 'MScore':
                     for ch in span['chars']:
-                        out.append((ord(ch['c']), ch['origin'][0], ch['origin'][1], span['size']))
+                        # Silencio de blanca con linea adicional (cierre del No.71).
+                        # Su variante grafica tiene la misma duracion que E4E4.
+                        code = {0xE4F5: 0xE4E4}.get(ord(ch['c']), ord(ch['c']))
+                        out.append((code, ch['origin'][0], ch['origin'][1], span['size']))
     return out
 
 

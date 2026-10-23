@@ -129,3 +129,8 @@ su anchura. Los compases 7, 10 y 14 conservan todas sus ligaduras; 0 diferencias
 
 La 70 recupera el cierre del compas 8 junto a la doble barra (16 compases), las tres ligaduras de los
 compases 7 y 15 y el ataque compartido del 5. Ambos cierres incluyen el mi grave. 0 diferencias en 120 casillas.
+
+La 71 conserva la anacrusa de corchea y las cuatro blancas con puntillo del noveno compas. Puntillos
+con la misma x son de alturas distintas, no doble puntillo; el del bajo se busca con el espacio del
+pentagrama. El silencio de blanca con linea adicional del cierre conserva el sol grave en el tercer
+tiempo. El motor procesa los 17 compases sin descartar notas: 0 diferencias en 102 casillas.

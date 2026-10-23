@@ -121,6 +121,20 @@ test('Sagreras 70: conserva los 16 compases y ambos cierres completos', () => {
   }
 });
 
+test('Sagreras 71: anacrusa de corchea y noveno compas con cuatro blancas de un solo puntillo', () => {
+  for (const xml of scores(71)) {
+    assert.equal((xml.match(/<measure\b/g) || []).length, 17);
+    const pickupNumber = /<measure\b[^>]*number="0"/.test(xml) ? 0 : 1;
+    assert.deepEqual(notes(xml, pickupNumber), [[0, 0.5, 'D4']]);
+    const ninth = notes(xml, pickupNumber + 8, true);
+    assert.deepEqual(ninth.map((e) => [e.onset, e.duration, e.pitch, e.type, e.dots]),
+      [[0, 3, 'A4', 'half', 1], [0, 3, 'B4', 'half', 1],
+        [0, 3, 'F#5', 'half', 1], [0, 3, 'B3', 'half', 1]]);
+    const last = notes(xml, pickupNumber + 16);
+    assert.ok(last.some((e) => e[0] === 2 && e[1] === 1 && e[2] === 'G3'));
+  }
+});
+
 test('Sagreras 56: conserva el cierre del primer sistema y la polifonia del segundo', () => {
   for (const xml of scores(56)) {
     assert.equal((xml.match(/<measure\b/g) || []).length, 16);
