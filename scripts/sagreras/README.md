@@ -82,6 +82,9 @@ duraciones en la fuente y en el MusicXML publicado.
 Verificación: `node --test test/sagreras.unit.js`, `node scripts/build-site.js` y `node test/articles.e2e.js`.
 
 Regresiones del lector sin el PDF local: `.venv-carcassi/bin/python -m unittest discover -s scripts/sagreras -p 'test_*.py'`.
+El lector distingue las barras simples de 0,95 pt y las dobles de dos trazos de 0,8 pt; conserva el tipo
+de cierre (doble, final o repeticion) al escribir MusicXML. En la 66, omitir esos trazos fusionaba los compases
+8 y 9: ahora se conservan los 16 compases, con doble barra tras el 8 y Fine antes de ella.
 La prueba de la leccion 39 en `test/sagreras.unit.js` verifica tambien las duraciones y los dos puntillos en la fuente y
 el MusicXML publicado.
 

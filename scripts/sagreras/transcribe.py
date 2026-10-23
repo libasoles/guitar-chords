@@ -230,7 +230,7 @@ def lesson_measures(lesson):
                 data['fingers'][(len(data['voices']), 0)] = {enharmonic(n): d for n, d in m['bass_fingers'].items()}
             data['voices'].append({'stem': 'down', 'events': [(0, full * SCALE, bass, None, [], {})]})
         data.update(fifths=m['fifths'], repeat_start=m['repeat_start'], repeat_end=m['repeat_end'], fine=m.get('fine'),
-                    dc=m.get('dc'), single=m.get('single_voice', False))
+                    dc=m.get('dc'), single=m.get('single_voice', False), right_bar_style=m.get('right_bar_style'))
         out.append(data)
     out[-1]['final'] = True
     return out
@@ -392,7 +392,9 @@ def measure_xml(number, time, data, first, implicit, key_change, prev_fifths):
     right = ''
     if data.get('repeat_end'):
         right = '<barline location="right"><bar-style>light-heavy</bar-style><repeat direction="backward"/></barline>'
-    elif data.get('final'):
+    elif data.get('right_bar_style') not in (None, 'regular'):
+        right = f'<barline location="right"><bar-style>{data["right_bar_style"]}</bar-style></barline>'
+    elif data.get('final') and not data.get('right_bar_style'):
         right = '<barline location="right"><bar-style>light-heavy</bar-style></barline>'
     words = ''
     if data.get('fine'):

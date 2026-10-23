@@ -146,6 +146,16 @@ def mark_ties(system, drawings, lines):
             left['tie_next'] = right['tie_prev'] = True
 
 
+def bar_strokes(drawings):
+    """Barras finas de MuseScore 2: 0,95 pt simples y 0,8 pt dobles.
+
+    Las plicas son de 0,75 pt. read_system exige ademas que cada trazo
+    cubra el pentagrama completo antes de usarlo como limite de compas.
+    """
+    return [d['rect'] for d in drawings if d['type'] == 's'
+            and 0.78 < (d['width'] or 0) < 2 and d['rect'].width < 0.01]
+
+
 def read_pdf(path=SOURCE):
     """-> {leccion: {'fifths', 'time', 'measures', 'tab'}} para las lecciones 1-86."""
     doc = pymupdf.open(str(path))
@@ -162,10 +172,7 @@ def read_pdf(path=SOURCE):
         labels = sorted((w[1], int(m[1])) for w in words if (m := re.fullmatch(r'No\.(\d+)', w[4])))
         glyph = mscore_glyphs(page)
         stems = [d['rect'] for d in drawings if d['type'] == 's' and abs((d['width'] or 0) - widths['stem']) < 0.02 and d['rect'].width < 0.01]
-        # Las dobles barras finas de MuseScore 3 miden 0.8 pt, frente a 0.95
-        # de las simples. read_system exige que crucen todo el pentagrama.
-        bars = [d['rect'] for d in drawings if d['type'] == 's' and d['rect'].width < 0.01
-                and (abs((d['width'] or 0) - (widths['bar'] or 0)) < 0.02 or abs((d['width'] or 0) - 0.8) < 0.02)]
+        bars = bar_strokes(drawings)
         thick = [d['rect'] for d in drawings if d['type'] == 's' and (d['width'] or 0) > 2 and d['rect'].width < 0.01]
         beams = [[(i[1].x, i[1].y) for i in d['items']] + [(d['items'][-1][2].x, d['items'][-1][2].y)] for d in drawings
                  if d['type'] == 'f' and d['fill'] == (0.0, 0.0, 0.0) and len(d['items']) == 4]

@@ -146,6 +146,14 @@ def read_system(lines, glyph, stems, bars, thick, beams):
         m = measure(a, b, inside, stems, beams, top, bottom, space)
         m['repeat_start'] = any(a - 3 <= d[1] <= a + 14 for d in repeat_dots) and any(abs(a - t) < 8 for t in thick_x)
         m['repeat_end'] = any(b - 14 <= d[1] <= b + 3 for d in repeat_dots) and any(abs(b - t) < 12 for t in thick_x)
+        # Los trazos proximos forman una sola frontera, pero su numero y
+        # grosor siguen distinguiendo barra simple, doble y final.
+        thin = [x for x in inside_bars if b <= x <= b + 8]
+        heavy = [x for x in thick_x if b <= x <= b + 8]
+        m['right_bar_style'] = ('light-heavy' if thin and heavy and thin[0] < heavy[0]
+                                else 'heavy-light' if thin and heavy
+                                else 'heavy' if heavy
+                                else 'light-light' if len(thin) > 1 else 'regular')
         m['end_x'] = b
         if m['items'] or m['rests'] or b - a > 25:
             measures.append(m)  # un tramo vacio y estrecho es la barra de repeticion junto a la armadura
