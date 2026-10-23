@@ -29,8 +29,8 @@ import transcribe_valses as V  # noqa: E402
 SOURCES = HERE / 'sources'
 SCALE = 3  # unidades por semicorchea; la negra son 12
 BASE_TYPES = {1: '32nd', 2: '16th', 3: '16th', 4: 'eighth', 6: 'eighth', 8: 'quarter', 9: 'eighth', 12: 'quarter', 18: 'quarter',
-           24: 'half', 36: 'half', 48: 'whole'}
-BASE_DOTTED = {9, 18, 36}
+           24: 'half', 36: 'half', 48: 'whole', 72: 'whole'}
+BASE_DOTTED = {9, 18, 36, 72}
 TRIPLET = {2, 4, 8}  # semicorchea, corchea y negra de tresillo (en unidades)
 STEPS = 'CDEFGAB'
 
