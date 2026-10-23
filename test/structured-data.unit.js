@@ -137,7 +137,8 @@ test('una pagina-herramienta es WebApplication con migas y FAQPage sin HTML', ()
 test('partitura-y-tablatura: vista previa con el banner de la home y FAQPage (si se genero)', (t) => {
   const file = path.join(DIST, 'partitura-y-tablatura.html');
   if (!fs.existsSync(file)) return t.skip('la pagina solo se genera con PARTITURA_API_URL');
-  ['partitura-y-tablatura.html', 'en/partitura-y-tablatura.html'].forEach((f) => {
+  const { pageFile } = require('../scripts/lib/slugs');
+  ['es', 'en'].map((locale) => pageFile('partitura-y-tablatura', locale)).forEach((f) => {
     const html = fs.readFileSync(path.join(DIST, f), 'utf8');
     const lang = html.match(/<html lang="(\w+)"/)[1];
     assert.match(html, new RegExp('property="og:image" content="[^"]+/assets/og-partitura-' + lang + '\\.png"'), f);
