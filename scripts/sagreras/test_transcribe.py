@@ -20,6 +20,46 @@ class RhythmTests(unittest.TestCase):
     def tearDown(self):
         T.configure_rhythm(3)
 
+    def test_double_bar_separates_measures_and_survives_musicxml(self):
+        # MuseScore 2: barra normal de 0,95 pt, doble barra de dos trazos de 0,8.
+        rect = T.M.pymupdf.Rect
+        drawings = [{'type': 's', 'width': width, 'rect': rect(x, 9.75, x, 30.25)}
+                    for x, width in ((50, .95), (65, .75), (80, .8), (82.3, .8), (110, .95))]
+        glyphs = [(0xE050, 0, 25, 20)] + [(0xE4E3, x, 15, 20) for x in (20, 60, 95)]
+        system = T.P.read_system([10, 15, 20, 25, 30], glyphs, [],
+                                 T.M.bar_strokes(drawings), [], [])
+        self.assertEqual(len(system['measures']), 3)
+        self.assertEqual(system['measures'][1]['right_bar_style'], 'light-light')
+        for m in system['measures']:
+            m['fifths'] = 0
+        lesson = {'time': (4, 4), 'measures': system['measures']}
+        measures = T.lesson_measures(lesson)
+        xml = ET.fromstring(T.to_xml(66, lesson, measures))
+        self.assertEqual(xml.findtext('./part/measure[@number="2"]/barline/bar-style'), 'light-light')
+        self.assertIsNone(xml.find('./part/measure[@number="2"]/barline/repeat'))
+        self.assertIsNone(xml.find('./part/measure[@number="1"]/barline'))
+        self.assertIsNone(xml.find('./part/measure[@number="3"]/barline'),
+                          'no convertir una barra simple explicita en final')
+
+    def test_final_and_repeat_bars_keep_their_styles(self):
+        rect = T.M.pymupdf.Rect
+        glyphs = [(0xE050, 0, 25, 20), (0xE4E3, 30, 15, 20)]
+        for repeat in (False, True):
+            with self.subTest(repeat=repeat):
+                dots = [(0xE044, 44, 17.5, 20)] if repeat else []
+                system = T.P.read_system([10, 15, 20, 25, 30], glyphs + dots, [],
+                                         [rect(50, 10, 50, 30)], [rect(53, 10, 53, 30)], [])
+                self.assertEqual(system['measures'][0]['right_bar_style'], 'light-heavy')
+                self.assertEqual(system['measures'][0]['repeat_end'], repeat)
+                system['measures'][0]['fifths'] = 0
+                lesson = {'time': (4, 4), 'measures': system['measures']}
+                xml = ET.fromstring(T.to_xml(1, lesson, T.lesson_measures(lesson)))
+                self.assertEqual(xml.findtext('.//barline/bar-style'), 'light-heavy')
+                mark = xml.find('.//barline/repeat')
+                self.assertEqual(mark is not None, repeat)
+                if repeat:
+                    self.assertEqual(mark.get('direction'), 'backward')
+
     def test_thirty_second_double_dotted_eighth_over_quarter_bass(self):
         # El lector geometrico ya reconoce tres barras, pero solo aplica el primer puntillo.
         groups = [group('up', 20, -2, 0.5, 3), group('up', 30, 5, 3, 1, True),

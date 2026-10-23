@@ -10,6 +10,30 @@ const fs = require('fs');
 const path = require('path');
 const catalog = require('../scripts/lib/article-sagreras');
 
+test('leccion 66: la doble barra separa los compases 8 y 9 sin fusionarlos', () => {
+  for (const file of ['scripts/sagreras/sources/66.musicxml',
+    'downloads/sagreras-lecciones/Lesson 66 - Julio Salvador Sagreras.musicxml']) {
+    const xml = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+    const measures = [...xml.matchAll(/<measure\b[^>]*>([\s\S]*?)<\/measure>/g)].map((m) => m[1]);
+    assert.equal(measures.length, 16, file);
+    assert.match(measures[7], /<barline location="right">\s*<bar-style>light-light<\/bar-style>/, file);
+    assert.doesNotMatch(measures[7], /<repeat\b/, file);
+    assert.match(measures[7], /<words[^>]*>Fine<\/words>/, file);
+    const divisions = Number(xml.match(/<divisions>(\d+)<\/divisions>/)[1]);
+    for (const measure of measures) {
+      let cursor = 0;
+      let end = 0;
+      for (const [, kind, body] of measure.matchAll(/<(note|backup|forward)\b[^>]*>([\s\S]*?)<\/\1>/g)) {
+        const duration = Number(body.match(/<duration>(\d+)<\/duration>/)[1]);
+        if (kind === 'backup') cursor -= duration;
+        else if (!/<chord\s*\//.test(body)) cursor += duration;
+        end = Math.max(end, cursor);
+      }
+      assert.equal(end / divisions, 3, `${file}: cada compas dura tres negras`);
+    }
+  }
+});
+
 test('leccion 65: tres voces independientes con sus silencios y puntillos en los 16 compases', () => {
   const root = path.join(__dirname, '..');
   const files = [path.join(root, 'scripts/sagreras/sources/65.musicxml'),
