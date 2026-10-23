@@ -74,7 +74,7 @@ def text_width(text):
         return len(text) * 0.5 * FOOTER_SIZE
 
 
-def stamp_footer(writer):
+def stamp_footer(writer, baseline=FOOTER_BASELINE):
     """Pie de atribucion en Helvetica (fuente estandar, sin incrustar) con enlaces en cada pagina."""
     from pypdf.generic import (ArrayObject, DecodedStreamObject, DictionaryObject, FloatObject, NameObject,
                                NumberObject, TextStringObject)
@@ -84,7 +84,7 @@ def stamp_footer(writer):
     leading = FOOTER_SIZE * 1.3
     ops, links = [f'{FOOTER_GRAY} g', 'BT', f'/FtAttr {FOOTER_SIZE} Tf'], []
     for row, line in enumerate(FOOTER_LINES):
-        y = FOOTER_BASELINE + (len(FOOTER_LINES) - 1 - row) * leading
+        y = baseline + (len(FOOTER_LINES) - 1 - row) * leading
         x = FOOTER_LEFT
         for text, uri in line:
             escaped = text.replace('\\', '\\\\').replace('(', '\\(').replace(')', '\\)')
@@ -164,7 +164,8 @@ def build(number):
         with open(base + '.musicxml', 'w', encoding='utf-8') as f:
             f.write(xml)
         writer = PdfWriter(clone_from=PdfReader(os.path.join(exported, 'score.pdf')))
-        stamp_footer(writer)
+        # La 65 ocupa seis sistemas: el pie queda debajo del ultimo pentagrama TAB.
+        stamp_footer(writer, baseline=12 if number == 65 else FOOTER_BASELINE)
         writer.add_metadata({'/Title': title_of(number), '/Author': AUTHOR})
         for key in ('/Producer', '/Creator', '/CreationDate', '/ModDate'):
             writer._info.get_object().pop(NameObject(key), None)

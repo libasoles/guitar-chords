@@ -121,6 +121,15 @@ def fixed_groups(m):
             for g in groups:
                 g['dir'] = 'up'  # una sola voz con plicas segun la altura
             m['single_voice'] = True
+    # Si hay varias voces con la misma direccion, convert_measure reconstruye los
+    # ataques por geometria. Comparar cabezas con silencios, no plicas: las de
+    # arriba estan a la derecha y adelantaban silencios/bajos en el No.65.
+    totals = {side: sum(g['dur'] for g in groups if g['dir'] == side)
+              + sum(r['dur'] for r in m['rests'] if ('up' if r['y'] < mid else 'down') == side)
+              for side in ('up', 'down')}
+    if any(total > full for total in totals.values()):
+        for g in groups:
+            g['x'] = min(h['x'] for h in g['heads'])
     return groups
 
 
@@ -177,6 +186,14 @@ def lesson_measures(lesson):
     for m in lesson['measures']:
         mid = (m['top'] + m['bottom']) / 2
         for r in m['rests']:
+            # Los puntillos tambien alargan los silencios de cada voz. El lector
+            # geometrico compartido solo los reconoce en cabezas de notas.
+            if not r.get('dots'):
+                dots = sum(0 < d[1] - r['x'] < 14 and abs(d[2] - r['y']) < m['space'] / 2 + 0.3
+                           for d in m['dots'])
+                if dots:
+                    r['dur'] *= 2 - 2 ** -dots
+                    r['dots'] = dots
             if abs(r['y'] - mid) < 0.3 * m['space']:
                 r['y'] = mid - m['space']  # silencio de la voz superior (queda sobre la linea central)
         bass = take_bass(m, full)
@@ -380,7 +397,7 @@ NO_PRINTED_TAB = {33}
 ENGINE_FAILS = set()
 # Lecciones publicadas aunque no pasen el control: llevan la marca «Revision pendiente» (scripts/lib/editor-marks.js)
 # hasta que se curen a mano contra la edicion.
-PENDING_REVIEW = {65, 66, 67, 68, 69, 70, 71, 72, 74, 76, 78, 81, 82, 83, 84, 85, 86}
+PENDING_REVIEW = {66, 67, 68, 69, 70, 71, 72, 74, 76, 78, 81, 82, 83, 84, 85, 86}
 
 
 def record_measures(n, count):

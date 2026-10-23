@@ -101,6 +101,55 @@ class RhythmTests(unittest.TestCase):
         notes = [e[:3] for v in measures[0]['voices'] for e in v['events'] if e[2] == 'E4']
         self.assertEqual(notes, [(12, 12, 'E4'), (24, 12, 'E4')])
 
+    def test_dotted_rest_delays_the_melody_in_three_voices(self):
+        # No.65: cada voz suma doce corcheas, incluidos sus propios silencios.
+        bass = group('down', 10, -2, 24, dotted=True)
+        bass['stem'] = None
+        groups = [bass] + [group('up', x, 5, 6, dotted=True) for x in (40, 70, 100)]
+        groups += [group('down', x, pos, 2, 1) for x, pos in
+                   ((20, 0), (30, 2), (50, 0), (60, 2), (80, 0), (90, 2), (110, 0), (120, 2))]
+        measure = {'left': 0, 'right': 130, 'top': 10, 'bottom': 30, 'space': 5,
+                   'items': [h for g in groups for h in g['heads']],
+                   'rests': [{'x': x, 'y': 30, 'dur': 2} for x in (10, 40, 70, 100)]
+                            + [{'x': 10, 'y': 10, 'dur': 4}],
+                   'dots': [(T.P.DOT, 17, 7.5, 20)], 'fifths': 0,
+                   'repeat_start': False, 'repeat_end': False}
+        def read_groups(m):
+            return [g for g in groups if any(h is item for h in g['heads'] for item in m['items'])]
+        with patch.object(T, '_original_groups', side_effect=read_groups):
+            result = T.lesson_measures({'time': (12, 8), 'measures': [measure]})[0]
+        self.assertEqual(len(result['voices']), 3)
+        upper, middle, lower = [v['events'] for v in result['voices']]
+        self.assertEqual([e[:3] for e in upper],
+                         [(0, 18, 'R'), (18, 18, 'C5'), (36, 18, 'C5'), (54, 18, 'C5')])
+        self.assertEqual([(e[0], e[1]) for e in middle], [(i * 6, 6) for i in range(12)])
+        self.assertEqual(lower[0][:3], (0, 72, 'C4'))
+
+    def test_same_direction_voices_use_heads_to_align_rests_and_notes(self):
+        # Geometria del compas 15 del No.65: las plicas arriba estan ~5.6 pt
+        # a la derecha de las cabezas; ese desplazamiento no es tiempo musical.
+        groups = [group('down', x, -5, 12, dotted=True) for x in (342.31, 398.31)]
+        for x, pos in ((376.42, 5), (432.42, 4)):
+            g = group('up', x, pos, 6, dotted=True)
+            g['heads'][0]['x'] = x - 5.56
+            groups.append(g)
+        groups += [group('down', x, pos, 2, 1) for x, pos in
+                   ((354.02, 0), (362.30, 2), (381.93, 0), (390.21, 2),
+                    (410.02, 1), (418.30, 2), (437.93, 1), (446.21, 2))]
+        rests = [{'x': x, 'y': 25, 'dur': 2} for x in (342.12, 370.21, 398.12, 426.21)]
+        rests += [{'x': x, 'y': 10, 'dur': 4} for x in (342.12, 398.12)]
+        measure = {'left': 332.6, 'right': 458.4, 'top': 10, 'bottom': 30, 'space': 5,
+                   'items': [], 'rests': rests,
+                   'dots': [(T.P.DOT, x, 7.5, 20) for x in (349.20, 405.20)],
+                   'fifths': 0, 'repeat_start': False, 'repeat_end': False}
+        with patch.object(T, '_original_groups', side_effect=lambda _: copy.deepcopy(groups)):
+            result = T.lesson_measures({'time': (12, 8), 'measures': [measure]})[0]
+        self.assertEqual(len(result['voices']), 3)
+        middle = next(v['events'] for v in result['voices'] if len(v['events']) == 12)
+        self.assertEqual([(e[0], e[1]) for e in middle], [(i * 6, 6) for i in range(12)])
+        bass = next(v['events'] for v in result['voices'] if v['events'][0][2] == 'G3')
+        self.assertEqual([e[:3] for e in bass], [(0, 36, 'G3'), (36, 36, 'G3')])
+
     def test_equal_duration_unisons_are_not_deduplicated(self):
         event = (0, 12, 'C4', None, [], {})
         measures = [{'voices': [{'events': [event]}, {'events': [event]}]}]

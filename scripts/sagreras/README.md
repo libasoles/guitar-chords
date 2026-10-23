@@ -28,6 +28,15 @@ En el No.58, una cabeza compartida lleva blanca con puntillo en el bajo y negra 
 Si leer ambas como blancas hace desbordar la voz superior, su duración inicial se deduce del resto del compás;
 ese tramo se conserva como hueco invisible al no repetir el ataque del bajo. Así la corchea siguiente no se adelanta.
 
+En el No.65 (12/8), los silencios tambien llevan puntillo: la voz aguda empieza con un silencio de negra
+con puntillo y sigue con tres negras con puntillo, mientras la voz intermedia alterna un silencio de corchea
+con dos corcheas y el bajo sostiene una redonda con puntillo. El lector aplica los puntillos a los silencios
+antes de separar las voces. En los compases 15–16, bajo y arpegio comparten direccion de plica: el eje temporal
+usa las cabezas, sin el desplazamiento horizontal de las plicas superiores. Asi conserva tres voces y sus
+silencios, sin anticipar ataques ni crear una cuarta voz. Las regresiones de `test/sagreras.unit.js` comprueban
+los 16 compases en la fuente y en el MusicXML publicado; el control de alturas o la duracion maxima del
+compas por si solos no detectan una voz corta cuando otra llena el compas.
+
 La TAB publicada es la digitación sugerida por el motor, no la de Marieh. Los dedos de la mano izquierda (cifras 0-4 de
 8 pt, las de la TAB impresa son de 9 pt) sí se leen: `marieh_notes.attach_fingers` pasa cada cifra a la cabeza más cercana,
 `transcribe.py` las escribe como `<fingering>` y el motor las toma como pista (descarta las digitaciones que no se pueden

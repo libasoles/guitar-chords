@@ -10,6 +10,57 @@ const fs = require('fs');
 const path = require('path');
 const catalog = require('../scripts/lib/article-sagreras');
 
+test('leccion 65: tres voces independientes con sus silencios y puntillos en los 16 compases', () => {
+  const root = path.join(__dirname, '..');
+  const files = [path.join(root, 'scripts/sagreras/sources/65.musicxml'),
+    path.join(root, 'downloads/sagreras-lecciones/Lesson 65 - Julio Salvador Sagreras.musicxml')];
+  for (const file of files) {
+    const xml = fs.readFileSync(file, 'utf8');
+    const divisions = Number(xml.match(/<divisions>(\d+)<\/divisions>/)[1]);
+    const measures = [...xml.matchAll(/<measure\b[^>]*number="(\d+)"[^>]*>([\s\S]*?)<\/measure>/g)];
+    assert.equal(measures.length, 16);
+    for (const [, number, measure] of measures) {
+      const context = `${file}: compas ${number}`;
+      let cursor = 0;
+      let previous = 0;
+      const voices = new Map();
+      for (const token of measure.matchAll(/<(note|backup|forward)\b[^>]*>([\s\S]*?)<\/\1>/g)) {
+        const body = token[2];
+        const duration = Number(body.match(/<duration>(\d+)<\/duration>/)[1]) / divisions;
+        if (token[1] === 'backup') { cursor -= duration; continue; }
+        if (token[1] === 'forward') { cursor += duration; continue; }
+        const isChord = /<chord\s*\//.test(body);
+        const onset = isChord ? previous : cursor;
+        if (!isChord) { previous = cursor; cursor += duration; }
+        if (/<staff>2<\/staff>/.test(body)) continue;
+        const voice = body.match(/<voice>(\d+)<\/voice>/)[1];
+        if (!voices.has(voice)) voices.set(voice, []);
+        voices.get(voice).push({ onset, duration, body, hidden: /print-object="no"/.test(token[0]) });
+      }
+      assert.equal(voices.size, 3, context);
+      const timing = (events) => events.map(({ onset, duration }) => [onset, duration]);
+      const rests = (events) => events.filter(({ body }) => /<rest\b/.test(body)).map(({ onset }) => onset);
+      const upper = voices.get('1');
+      assert.deepEqual(timing(upper), [0, 1.5, 3, 4.5].map((onset) => [onset, 1.5]), context);
+      assert.deepEqual(rests(upper), Number(number) <= 14 ? [0] : Number(number) === 15 ? [0, 3] : [0, 4.5], context);
+      for (const { body } of upper) {
+        assert.match(body, /<type>quarter<\/type>/, context);
+        assert.equal((body.match(/<dot\s*\//g) || []).length, 1, context);
+      }
+      const bass = [...voices.values()].find((events) => /<type>(whole|half)<\/type>/.test(events[0].body));
+      assert.deepEqual(timing(bass), Number(number) <= 14 ? [[0, 6]] : [[0, 3], [3, 3]], context);
+      const middle = [...voices.values()].find((events) => events !== upper && events !== bass);
+      const visible = middle.filter(({ hidden }) => !hidden);
+      const count = Number(number) <= 15 ? 12 : 7;
+      assert.deepEqual(timing(visible), Array.from({ length: count }, (_, i) => [i * 0.5, 0.5]), context);
+      assert.deepEqual(rests(visible), Number(number) <= 15 ? [0, 1.5, 3, 4.5] : [0, 1.5, 3], context);
+      for (const events of voices.values()) {
+        assert.equal(Math.max(...events.map(({ onset, duration }) => onset + duration)), 6, context);
+      }
+    }
+  }
+});
+
 test('leccion 60: el acompanamiento entra en los tiempos 2 y 3, separado de las blancas con puntillo', () => {
   const root = path.join(__dirname, '..');
   const files = [path.join(root, 'scripts/sagreras/sources/60.musicxml'),
