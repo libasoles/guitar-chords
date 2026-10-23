@@ -126,3 +126,6 @@ en la TAB impresa; el cotejo admite ese ataque unico sin borrar las voces. 0 dif
 
 En la 69, las curvas paralelas de un acorde se emparejan por la altura de sus extremos, no solo por
 su anchura. Los compases 7, 10 y 14 conservan todas sus ligaduras; 0 diferencias en 130 casillas.
+
+La 70 recupera el cierre del compas 8 junto a la doble barra (16 compases), las tres ligaduras de los
+compases 7 y 15 y el ataque compartido del 5. Ambos cierres incluyen el mi grave. 0 diferencias en 120 casillas.

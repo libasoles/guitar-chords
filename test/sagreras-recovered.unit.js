@@ -101,6 +101,26 @@ test('Sagreras 69: cada altura de los acordes ligados conserva su propia ligadur
   }
 });
 
+test('Sagreras 70: conserva los 16 compases y ambos cierres completos', () => {
+  const sorted = (events) => events.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+  for (const xml of scores(70)) {
+    assert.equal((xml.match(/<measure\b/g) || []).length, 16);
+    for (const number of [8, 16]) {
+      assert.deepEqual(sorted(notes(xml, number)), sorted([[0, 1, 'E4'], [0, 1, 'G4'],
+        [0, 1, 'B4'], [0, 1, 'E5'], [1, 1, 'E3']]), `cierre ${number}`);
+    }
+    const eighth = xml.match(/<measure\b[^>]*number="8"[^>]*>([\s\S]*?)<\/measure>/)[1];
+    assert.match(eighth, /<bar-style>light-light<\/bar-style>/);
+    for (const number of [7, 15]) {
+      const events = notes(xml, number, true);
+      for (const pitch of ['G4', 'B4', 'G5']) {
+        assert.ok(events.some((e) => e.pitch === pitch && e.onset === 0.5 && e.start));
+        assert.ok(events.some((e) => e.pitch === pitch && e.onset === 1 && e.stop));
+      }
+    }
+  }
+});
+
 test('Sagreras 56: conserva el cierre del primer sistema y la polifonia del segundo', () => {
   for (const xml of scores(56)) {
     assert.equal((xml.match(/<measure\b/g) || []).length, 16);
