@@ -113,6 +113,39 @@ class PageProxy:
         return out
 
 
+def mark_ties(system, drawings, lines):
+    """Emparejar cada curva con su altura, incluso en ligaduras paralelas de un acorde."""
+    top, bottom = lines[0], lines[-1]
+    space = (bottom - top) / 4
+    hw = space * 1.18
+    heads = [h for m in system['measures'] for h in m['items']]
+    for drawing in drawings:
+        curves = [i for i in drawing['items'] if i[0] == 'c']
+        r = drawing['rect']
+        if drawing['fill'] != (0., 0., 0.) or not curves or r.width > 60 * space:
+            continue
+        if r.y0 < top - 10 * space or r.y1 > bottom + 10 * space:
+            continue
+        start, control, _, end = curves[0][1:]
+        if abs(start.y - end.y) > space / 2:
+            continue
+        # El extremo de la curva esta a ~0.4 espacios de la cabeza; el centro
+        # de su caja queda cerca de otra nota en un acorde y no identifica la altura.
+        target_y = start.y + (0.4 * space if control.y < start.y else -0.4 * space)
+        pairs = []
+        for left in heads:
+            if not (left['x'] - 1 <= r.x0 <= left['x'] + 2.2 * hw) or abs(left['y'] - target_y) > space:
+                continue
+            for right in heads:
+                if (right['pos'] == left['pos'] and right['x'] > left['x'] + hw
+                        and right['x'] - 1.2 * hw <= r.x1 <= right['x'] + 1.5 * hw):
+                    cost = abs(right['x'] - left['x'] - r.width) + 4 * abs(left['y'] - target_y)
+                    pairs.append((cost, left, right))
+        if pairs:
+            _, left, right = min(pairs, key=lambda pair: pair[0])
+            left['tie_next'] = right['tie_prev'] = True
+
+
 def read_pdf(path=SOURCE):
     """-> {leccion: {'fifths', 'time', 'measures', 'tab'}} para las lecciones 1-86."""
     doc = pymupdf.open(str(path))
@@ -129,11 +162,13 @@ def read_pdf(path=SOURCE):
         labels = sorted((w[1], int(m[1])) for w in words if (m := re.fullmatch(r'No\.(\d+)', w[4])))
         glyph = mscore_glyphs(page)
         stems = [d['rect'] for d in drawings if d['type'] == 's' and abs((d['width'] or 0) - widths['stem']) < 0.02 and d['rect'].width < 0.01]
-        bars = [d['rect'] for d in drawings if d['type'] == 's' and abs((d['width'] or 0) - (widths['bar'] or 0)) < 0.02 and d['rect'].width < 0.01]
+        # Las dobles barras finas de MuseScore 3 miden 0.8 pt, frente a 0.95
+        # de las simples. read_system exige que crucen todo el pentagrama.
+        bars = [d['rect'] for d in drawings if d['type'] == 's' and d['rect'].width < 0.01
+                and (abs((d['width'] or 0) - (widths['bar'] or 0)) < 0.02 or abs((d['width'] or 0) - 0.8) < 0.02)]
         thick = [d['rect'] for d in drawings if d['type'] == 's' and (d['width'] or 0) > 2 and d['rect'].width < 0.01]
         beams = [[(i[1].x, i[1].y) for i in d['items']] + [(d['items'][-1][2].x, d['items'][-1][2].y)] for d in drawings
                  if d['type'] == 'f' and d['fill'] == (0.0, 0.0, 0.0) and len(d['items']) == 4]
-        curves = [d['rect'] for d in drawings if d['fill'] == (0.0, 0.0, 0.0) and any(i[0] == 'c' for i in d['items'])]
         threes = italic_threes(page)
         fingers = finger_marks(page)
         plucks = finger_marks(page, 'pima')
@@ -147,7 +182,7 @@ def read_pdf(path=SOURCE):
             # una barra que cruza notacion y TAB cuenta como barra de este pentagrama
             clip = lambda rs: [pymupdf.Rect(r.x0, r.y0, r.x1, lines[-1]) if abs(r.y0 - lines[0]) < 0.6 and r.y1 > lines[-1] + 3 * space else r for r in rs]  # noqa: E731
             system = P.read_system(lines, glyph, stems, clip(bars), clip(thick), beams)
-            P.mark_ties(system, curves, lines)
+            mark_ties(system, drawings, lines)
             for marks, key in ((fingers, 'finger'), (plucks, 'pluck')):
                 lost = attach_fingers(system, marks, lines, key)
                 if lost:
@@ -169,6 +204,9 @@ def read_pdf(path=SOURCE):
             lesson['measures'].extend(system['measures'])
             if index < len(tabs):
                 cells = tab_cells(tabs[index], words, system['measures'])
+                for m in system['measures']:
+                    m['tab'] = [(x, OPEN_MIDI[string] + fret) for x, string, fret in cells
+                                if m['left'] <= x < m['right']]
                 lesson['cells'].extend(cells)
                 lesson['tab'].extend((x, OPEN_MIDI[string] + fret) for x, string, fret in cells)
     return lessons

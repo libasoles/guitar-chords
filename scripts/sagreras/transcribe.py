@@ -12,6 +12,7 @@ import json
 import re
 import sys
 from collections import Counter
+from copy import deepcopy
 from pathlib import Path
 from xml.sax.saxutils import escape
 
@@ -78,12 +79,18 @@ def fixed_groups(m):
     # El lector compartido solo aplica un puntillo. Contar los glifos propios de esta edicion para
     # recuperar el segundo sin modificar las reglas de las otras colecciones.
     for g in groups:
-        if not any(h['dot'] for h in g['heads']):
-            continue
-        dots = max(sum(0 < d[1] - h['x'] < 14 and abs(d[2] - h['y']) < m['space'] / 2 + 0.3
-                       for d in m['dots']) for h in g['heads'])
-        if dots == 2:
-            g['dur'] *= 7 / 6  # de 3/2 a 7/4 de la figura base
+        dots = max(len({round(d[1], 1) for d in m['dots']
+                        if 0 < d[1] - h['x'] < 3 * m['space']
+                        and abs(d[2] - h['y']) < m['space'] / 2 + 0.3}) for h in g['heads'])
+        # Puntillos en la misma x pertenecen a alturas diferentes del acorde,
+        # no a una figura con doble puntillo (No.71). El bajo puede estar a
+        # mas de 14 pt de su puntillo; usar el espacio del pentagrama.
+        if dots:
+            already_dotted = any(h['dot'] for h in g['heads'])
+            longest = all(g['dur'] >= o['dur'] for o in groups if o is not g
+                          and any(h is x for h in g['heads'] for x in o['heads']))
+            if longest:
+                g['dur'] *= (2 - 2 ** -dots) / (1.5 if already_dotted else 1)
     # Una cabeza hueca compartida puede representar una blanca con puntillo abajo
     # y solo una negra arriba (No.58). La cabeza no fija ambas duraciones: si la
     # voz corta desborda el compas, su tramo inicial es lo que falta hasta llenarlo.
@@ -194,12 +201,28 @@ def lesson_measures(lesson):
                 if dots:
                     r['dur'] *= 2 - 2 ** -dots
                     r['dots'] = dots
+        # La decision usa duraciones de tresillo, pero sin consumir dos veces
+        # la conversion de los silencios: fixed_groups modifica esos objetos.
+        rhythm = deepcopy(m) if m.get('tuplets') else m
+        groups = fixed_groups(rhythm) if m.get('tuplets') else _original_groups(m)
+        centered = [r for r in rhythm['rests'] if abs(r['y'] - mid) < 0.3 * m['space']]
+        upper = sum(g['dur'] for g in groups if g['dir'] == 'up' and g['stem'] is not None)
+        upper += sum(r['dur'] for r in rhythm['rests'] if r['y'] < mid - 0.3 * m['space'])
+        # Un silencio central es ambiguo: solo va arriba si cabe en esa voz.
+        # En 67/72 la melodia ya llena el compas; en el cierre de 65 falta ese tramo.
+        center_above = upper + sum(r['dur'] for r in centered) <= full
+        for r in m['rests']:
             if abs(r['y'] - mid) < 0.3 * m['space']:
-                r['y'] = mid - m['space']  # silencio de la voz superior (queda sobre la linea central)
+                r['y'] = mid + (-m['space'] if center_above else m['space'])
         bass = take_bass(m, full)
         if m['rests'] and any(r['dur'] == 16 for r in m['rests']) and m['items']:
             m['rests'] = [r for r in m['rests'] if r['dur'] != 16]  # silencio de compas completo bajo otra voz
-        data = V.convert_measure(m, m['fifths'], full * SCALE, SCALE)
+        groups = _original_groups(m)
+        directions = {g['dir'] for g in groups}
+        rest_only = (len(directions) == 1 and sum(g['dur'] for g in groups) == full
+                     and sum(r['dur'] for r in m['rests']) == full
+                     and all(('up' if r['y'] < mid else 'down') not in directions for r in m['rests']))
+        data = V.convert_measure(m, m['fifths'], full * SCALE, SCALE, rest_voices=rest_only)
         simplify(data)
         data['fingers'] = {(v, o): {enharmonic(n): d for n, d in names.items()} for (v, o), names in data['fingers'].items()}
         if bass:
@@ -222,6 +245,8 @@ def compare_tab(lesson, measures):
     """Alturas de la notacion contra la TAB impresa (ambas como MIDI escrito). -> (faltan_en_tab, sobran_en_tab)."""
     read = Counter()
     tied = Counter()
+    unique = Counter()
+    unique_tied = Counter()
     for data in measures:
         attacks = {}
         for voice in data['voices']:
@@ -229,6 +254,10 @@ def compare_tab(lesson, measures):
                 for p in pitch.split('+'):
                     if p == 'R':
                         continue
+                    if (onset, p) not in attacks:
+                        unique[written_midi(p)] += 1
+                        if ties.get(p, (False, False))[0]:
+                            unique_tied[written_midi(p)] += 1
                     # Dos cabezas coincidentes en voces distintas son un solo ataque (bajo sostenido
                     # con negra y fusa en la voz superior); la TAB impresa lo cuenta una sola vez.
                     if (onset, p) in attacks and attacks[(onset, p)] != duration:
@@ -238,7 +267,10 @@ def compare_tab(lesson, measures):
                     if ties.get(p, (False, False))[0]:
                         tied[written_midi(p)] += 1
     tab = Counter(pitch + 12 for _, pitch in lesson['tab'])
-    options = [read, read - tied]
+    # La TAB puede imprimir una sola cifra para una cabeza con dos plicas
+    # incluso si ambas voces duran lo mismo (68 y 70), o dos cifras para un
+    # unisono en cuerdas distintas. Conservar ambas lecturas del ataque.
+    options = [read, read - tied, unique, unique - unique_tied]
     best = min(options, key=lambda r: sum(((r - tab) + (tab - r)).values()))
     return sorted((best - tab).elements()), sorted((tab - best).elements())
 

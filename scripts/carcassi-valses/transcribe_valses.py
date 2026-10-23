@@ -31,7 +31,7 @@ def pitch_name(position, alter):
     return f"{step}{'#' if alter == 1 else 'b' if alter == -1 else ''}{octave}"
 
 
-def convert_measure(m, fifths, full, scale=1):
+def convert_measure(m, fifths, full, scale=1, rest_voices=False):
     """-> {'up': [...], 'bass': [...], 'length'}; eventos (pos, dur, pitch, None) como en transcribe_lib."""
     key = key_alters(fifths)
     groups = P.stem_groups(m)
@@ -46,6 +46,8 @@ def convert_measure(m, fifths, full, scale=1):
             state[index] = head['acc']
         names[id(head)] = pitch_name(head['pos'], state.get(index, key.get(step, 0)))
     directions = {g['dir'] for g in groups}
+    if rest_voices:
+        directions.update('up' if r['y'] < mid else 'down' for r in m['rests'])
     items = []
     for g in groups:
         # una cabeza con dos plicas suena una vez: la voz mas corta no la repite

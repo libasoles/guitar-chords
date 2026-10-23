@@ -155,6 +155,76 @@ class RhythmTests(unittest.TestCase):
         measures = [{'voices': [{'events': [event]}, {'events': [event]}]}]
         self.assertEqual(T.compare_tab({'tab': [(0, 48), (0, 48)]}, measures), ([], []))
 
+    def test_shared_head_can_have_one_printed_tab_number_in_two_equal_voices(self):
+        event = (0, 6, 'G3', None, [], {})
+        measures = [{'voices': [{'events': [event]}, {'events': [event]}]}]
+        self.assertEqual(T.compare_tab({'tab': [(0, 43)]}, measures), ([], []))
+
+    def test_centered_rest_belongs_to_accompaniment_when_melody_is_full(self):
+        # No.67: negra de silencio + tres negras arriba; cuatro grupos de
+        # silencio + tres semicorcheas abajo. El bajo es una redonda.
+        bass = group('up', 10, -2, 16)
+        bass['stem'] = None
+        groups = [bass] + [group('up', x, 5, 4) for x in (50, 90, 130)]
+        groups += [group('down', x, 0, 1, 2) for x in
+                   (20, 30, 40, 60, 70, 80, 100, 110, 120, 140, 150, 160)]
+        m = {'top': 10, 'bottom': 30, 'space': 5, 'left': 0, 'right': 170,
+             'items': [h for g in groups for h in g['heads']], 'dots': [],
+             'rests': [{'x': 10, 'y': 20, 'dur': 1}, {'x': 10, 'y': 10, 'dur': 4}]
+                      + [{'x': x, 'y': 25, 'dur': 1} for x in (50, 90, 130)],
+             'fifths': 0, 'repeat_start': False, 'repeat_end': False}
+        def read_groups(measure):
+            return [g for g in groups if any(h is item for h in g['heads'] for item in measure['items'])]
+        with patch.object(T, '_original_groups', side_effect=read_groups):
+            result = T.lesson_measures({'time': (4, 4), 'measures': [m]})[0]
+        self.assertEqual(result['length'], 48)
+        upper, middle, lower = [v['events'] for v in result['voices']]
+        self.assertEqual([(e[0], e[1]) for e in upper], [(i * 12, 12) for i in range(4)])
+        self.assertEqual([(e[0], e[1]) for e in middle], [(i * 3, 3) for i in range(16)])
+        self.assertEqual(lower[0][:3], (0, 48, 'C4'))
+
+    def test_rest_only_voice_is_not_concatenated_with_chords(self):
+        groups = [group('up', x, 6, 4) for x in (10, 40)]
+        m = {'top': 10, 'bottom': 30, 'space': 5, 'items': [], 'dots': [],
+             'rests': [{'x': x, 'y': 40, 'dur': 4} for x in (10, 40)],
+             'fifths': 0, 'repeat_start': False, 'repeat_end': False}
+        with patch.object(T, '_original_groups', side_effect=lambda _: copy.deepcopy(groups)):
+            result = T.lesson_measures({'time': (2, 4), 'measures': [m]})[0]
+        self.assertEqual(result['length'], 24)
+        self.assertEqual(len(result['voices']), 2)
+        self.assertEqual([e[:3] for e in result['voices'][1]['events']], [(0, 12, 'R'), (12, 12, 'R')])
+
+    def test_vertical_chord_dots_are_not_double_dots_and_wide_bass_dot_is_kept(self):
+        upper = group('up', 20, 3, 12, dotted=True)
+        upper['heads'] += group('up', 20, 4, 12)['heads']
+        bass = group('down', 20, -3, 8)
+        m = {'top': 10, 'bottom': 30, 'space': 5,
+             'dots': [(T.P.DOT, 34.5, y, 20) for y in (20, 25, 37.5)], 'rests': []}
+        with patch.object(T, '_original_groups', return_value=[upper, bass]):
+            result = T.fixed_groups(m)
+        self.assertEqual([g['dur'] for g in result], [12, 12])
+
+    def test_parallel_chord_ties_are_matched_by_their_endpoints(self):
+        P = T.M.pymupdf
+        heads = [{'x': x, 'y': y, 'pos': pos} for x in (20, 50) for y, pos in ((20, 4), (25, 2))]
+        drawings = [{'fill': (0., 0., 0.), 'rect': P.Rect(27, y - 5, 49, y - 2),
+                     'items': [('c', P.Point(27, y - 2), P.Point(32, y - 5),
+                                P.Point(44, y - 5), P.Point(49, y - 2))]} for y in (20, 25)]
+        T.M.mark_ties({'measures': [{'items': heads}]}, drawings, [10, 15, 20, 25, 30])
+        self.assertTrue(all(h.get('tie_next') for h in heads[:2]))
+        self.assertTrue(all(h.get('tie_prev') for h in heads[2:]))
+
+    def test_centered_triplet_rest_uses_tuplet_duration_before_choosing_voice(self):
+        groups = [group('up', x, 5, 2, 1) for x in (25, 40)] + [group('down', 10, -2, 4)]
+        m = {'top': 10, 'bottom': 30, 'space': 5, 'left': 0, 'right': 55,
+             'items': [], 'dots': [], 'rests': [{'x': 10, 'y': 20, 'dur': 2}],
+             'tuplets': [(25, 0)], 'fifths': 0, 'repeat_start': False, 'repeat_end': False}
+        with patch.object(T, '_original_groups', side_effect=lambda _: copy.deepcopy(groups)):
+            result = T.lesson_measures({'time': (1, 4), 'measures': [m]})[0]
+        self.assertEqual(result['length'], 12)
+        self.assertEqual([e[:3] for e in result['voices'][0]['events']],
+                         [(0, 4, 'R'), (4, 4, 'C5'), (8, 4, 'C5')])
+
     def test_switching_back_preserves_the_triplet_grid(self):
         T.configure_rhythm(6)
         T.configure_rhythm(3)
