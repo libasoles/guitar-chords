@@ -155,7 +155,7 @@ estos ataques y ligaduras en la fuente y la descarga, ademas de la duracion de l
 La digitacion sugerida conserva 4 diferencias en 116 casillas frente a la TAB impresa: los dos acordes
 do5–mi5 del compas 12 se digitan en posicion baja, mientras la edicion usa quinta posicion; las alturas coinciden.
 
-Las otras nueve **seguian pendientes en esta revision** (66 y 83 se recuperaron despues; ver abajo). Este es el resultado del lector actual, no una validacion de las
+Las otras nueve **seguian pendientes en esta revision** (66, 82 y 83 se recuperaron despues; ver abajo). Este es el resultado del lector actual, no una validacion de las
 fuentes antiguas publicadas. No se regeneraron esas fuentes: completar el compas de la voz mas larga o
 coincidir en el total de alturas no garantiza que todas las voces esten bien.
 
@@ -208,4 +208,27 @@ y longitud de los 16 compases en fuente y descarga. La 66 tambien tiene 0 difere
 de digitacion en 101 casillas.
 
 Reproducir: `transcribe.py 66 83` y `build.py 66 83`.
-Solo quedan pendientes 76, 78, 81, 82, 84, 85 y 86.
+Quedan pendientes 76, 78, 81, 84, 85 y 86.
+
+## Silencios centrales y voces de la 82
+
+En los compases 3, 4, 11 y 12, el origen del glifo de silencio queda entre
+0,30 y 0,40 espacios por encima del centro del pentagrama. El margen anterior
+de 0,30 lo clasificaba como voz superior: al concatenarlo con la melodia,
+ambas direcciones de plica desbordaban y se perdia el eje temporal para separar
+el bajo del acorde intermedio. El margen superior de medio espacio permite asignarlo
+segun la duracion que falta en cada voz.
+
+Los cuatro compases conservan ahora el fa♯4 de blanca desde el inicio,
+el silencio de negra seguido por si4–re♯5 en el segundo tiempo y la melodia
+independiente. Los 16 compases de 2/4 pasan el cotejo de alturas y duraciones.
+Se regeneraron fuente, descarga y vistas y se retiro la marca pendiente.
+Las regresiones verifican alturas, inicios y duraciones en fuente y descarga;
+el lector tiene ademas una prueba sin PDF con ambos desplazamientos del glifo.
+
+La digitacion sugerida coincide en las 81 casillas de la TAB impresa.
+
+Reproducir: `transcribe.py 82` y `build.py 82`.
+El mismo cambio permite pasar el control preliminar de alturas y longitud a
+85 y 86; siguen pendientes hasta cotejar sus voces, inicios y duraciones con
+el original. La 84 sigue fallando en el compas 8 y requiere revisar los tresillos.

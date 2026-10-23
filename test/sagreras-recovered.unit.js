@@ -185,7 +185,7 @@ test('Sagreras 74: las tres alturas de cada acorde conservan sus ligaduras', () 
 });
 
 test('Sagreras recuperadas: ninguna voz publicada desborda el compas', () => {
-  for (const number of [67, 68, 69, 70, 71, 72, 74]) {
+  for (const number of [67, 68, 69, 70, 71, 72, 74, 82]) {
     const beats = number === 67 || number === 72 ? 4 : number === 71 ? 3 : 2;
     for (const xml of scores(number)) {
       const numbers = [...xml.matchAll(/<measure\b[^>]*number="(\d+)"/g)].map((m) => m[1]);
@@ -257,6 +257,25 @@ test('Sagreras 83: la armadura de la mayor rige desde el compas 9', () => {
     for (let number = 1; number <= 16; number++) {
       const events = notes(xml, number, true);
       assert.equal(Math.max(...events.map((e) => e.onset + e.duration)), 3, `compas ${number}`);
+    }
+  }
+});
+
+test('Sagreras 82: los compases 3, 4, 11 y 12 conservan tres voces de dos tiempos', () => {
+  for (const xml of scores(82)) {
+    for (const number of [3, 4, 11, 12]) {
+      const events = notes(xml, number, true);
+      assert.equal(new Set(events.map((e) => e.voice)).size, 3, `compas ${number}`);
+      assert.equal(Math.max(...events.map((e) => e.onset + e.duration)), 2);
+      const melody = events.filter((e) => e.voice === '1');
+      assert.deepEqual(melody.map((e) => [e.onset, e.duration, e.pitch]),
+        number === 3 || number === 11
+          ? [[0, 0.5, 'B5'], [0.5, 0.5, 'A5'], [1, 0.5, 'A5'], [1.5, 0.5, 'G#5']]
+          : [[0, 2, 'A5']]);
+      assert.deepEqual(events.filter((e) => e.pitch === 'F#4').map((e) => [e.onset, e.duration]), [[0, 2]]);
+      const middle = events.filter((e) => e.pitch === 'R' || e.pitch === 'B4' || e.pitch === 'D#5');
+      assert.deepEqual(middle.map((e) => [e.onset, e.duration, e.pitch]), [[0, 1, 'R'], [1, 1, 'B4'], [1, 1, 'D#5']]);
+      assert.equal(new Set(middle.map((e) => e.voice)).size, 1);
     }
   }
 });

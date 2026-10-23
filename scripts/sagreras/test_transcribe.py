@@ -255,6 +255,40 @@ class RhythmTests(unittest.TestCase):
         self.assertEqual([(e[0], e[1]) for e in middle], [(i * 3, 3) for i in range(16)])
         self.assertEqual(lower[0][:3], (0, 48, 'C4'))
 
+    def test_displaced_central_rest_separates_three_voices_in_82(self):
+        # No.82, 3/4/11/12: el origen del glifo esta 0,30–0,40
+        # espacios por encima del centro, aunque el silencio es intermedio.
+        for offset in (-0.30018, -0.40016):
+            with self.subTest(offset=offset):
+                groups = [group('up', x, 11 - i, 2, 1)
+                          for i, x in enumerate((10, 30, 50, 70))]
+                groups += [group('down', 10, 1, 8), group('down', 50, 4, 4)]
+                m = {'top': 10, 'bottom': 30, 'space': 5, 'left': 0, 'right': 90,
+                     'items': [], 'dots': [], 'rests': [{'x': 10, 'y': 20 + offset * 5, 'dur': 4}],
+                     'fifths': 1, 'repeat_start': False, 'repeat_end': False}
+                with patch.object(T, '_original_groups', side_effect=lambda _: copy.deepcopy(groups)):
+                    result = T.lesson_measures({'time': (2, 4), 'measures': [m]})[0]
+                self.assertEqual(result['length'], 24)
+                self.assertEqual(len(result['voices']), 3)
+                self.assertEqual([[e[:2] for e in v['events']] for v in result['voices']],
+                                 [[(0, 6), (6, 6), (12, 6), (18, 6)], [(0, 24)], [(0, 12), (12, 12)]])
+
+    def test_lower_arpeggio_rests_stay_below_central_half_rest(self):
+        # No.48, cierre: los silencios de semicorchea a medio espacio
+        # debajo del centro son del arpegio; la blanca central es superior.
+        groups = [group('down', x, -2, 8) for x in (10, 90)]
+        groups += [group('up', 50, 7, 4)]
+        groups += [group('down', x, 2, 1, 2) for x in (20, 30, 40, 60, 70, 80)]
+        m = {'top': 10, 'bottom': 30, 'space': 5, 'left': 0, 'right': 130,
+             'items': [], 'dots': [], 'rests': [{'x': x, 'y': 22.499, 'dur': 1} for x in (10, 50)]
+             + [{'x': 90, 'y': 20, 'dur': 8}, {'x': 10, 'y': 10, 'dur': 4}],
+             'fifths': 0, 'repeat_start': False, 'repeat_end': False}
+        with patch.object(T, '_original_groups', side_effect=lambda _: copy.deepcopy(groups)):
+            result = T.lesson_measures({'time': (4, 4), 'measures': [m]})[0]
+        self.assertEqual(result['length'], 48)
+        self.assertEqual([e[:3] for e in result['voices'][0]['events']],
+                         [(0, 12, 'R'), (12, 12, 'E5'), (24, 24, 'R')])
+
     def test_rest_only_voice_is_not_concatenated_with_chords(self):
         groups = [group('up', x, 6, 4) for x in (10, 40)]
         m = {'top': 10, 'bottom': 30, 'space': 5, 'items': [], 'dots': [],

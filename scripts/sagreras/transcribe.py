@@ -205,14 +205,18 @@ def lesson_measures(lesson):
         # la conversion de los silencios: fixed_groups modifica esos objetos.
         rhythm = deepcopy(m) if m.get('tuplets') else m
         groups = fixed_groups(rhythm) if m.get('tuplets') else _original_groups(m)
-        centered = [r for r in rhythm['rests'] if abs(r['y'] - mid) < 0.3 * m['space']]
+        # El origen del glifo central puede quedar hasta medio espacio arriba
+        # (No.82); no confundir ese desplazamiento con una voz superior.
+        center_top = mid - 0.5 * m['space']
+        center_bottom = mid + 0.3 * m['space']
+        centered = [r for r in rhythm['rests'] if center_top < r['y'] < center_bottom]
         upper = sum(g['dur'] for g in groups if g['dir'] == 'up' and g['stem'] is not None)
-        upper += sum(r['dur'] for r in rhythm['rests'] if r['y'] < mid - 0.3 * m['space'])
+        upper += sum(r['dur'] for r in rhythm['rests'] if r['y'] < center_top)
         # Un silencio central es ambiguo: solo va arriba si cabe en esa voz.
         # En 67/72 la melodia ya llena el compas; en el cierre de 65 falta ese tramo.
         center_above = upper + sum(r['dur'] for r in centered) <= full
         for r in m['rests']:
-            if abs(r['y'] - mid) < 0.3 * m['space']:
+            if center_top < r['y'] < center_bottom:
                 r['y'] = mid + (-m['space'] if center_above else m['space'])
         bass = take_bass(m, full)
         if m['rests'] and any(r['dur'] == 16 for r in m['rests']) and m['items']:
