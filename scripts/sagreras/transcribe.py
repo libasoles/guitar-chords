@@ -54,8 +54,14 @@ def configure_rhythm(scale):
 configure_rhythm(3)
 
 
+# Cifras de compas que el lector no reconoce (solo distingue C y la C cortada): se leen a ojo de la edicion.
+TIME_OVERRIDES = {65: (12, 8)}
+
+
 def read_lessons():
     lessons = M.read_pdf()
+    for n, time in TIME_OVERRIDES.items():
+        lessons[n]['time'] = time
     for lesson in lessons.values():
         if lesson['time'] is None:
             lesson['time'] = (4, 4)  # las primeras lecciones no llevan cifra de compas
