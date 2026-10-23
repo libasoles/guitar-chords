@@ -142,6 +142,8 @@ def build(number):
         # El primer nivel (el menos compacto) con el que el PDF ocupa menos paginas.
         best = None
         for level in ([PDF_OVERRIDES[number]] if number in PDF_OVERRIDES else [zoom_options(sc) for sc in SCALES]):
+            if number in {69, 70}:
+                level = {**level, 'pageMarginTop': 160}  # margen para el titulo con grabado compacto
             tabify.PDF_OPTIONS = {**base_options, **level}
             exported = os.path.join(tmp, f"export-{level['scale']}")
             tabify.export(os.path.join(prepared, tabify.NORMALIZED_NAME), os.path.join(prepared, tabify.SUGGESTION_NAME),

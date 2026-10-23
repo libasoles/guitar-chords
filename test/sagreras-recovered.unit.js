@@ -87,6 +87,20 @@ test('Sagreras 68: la voz de silencios no alarga el compas 15 ni duplica ataques
   }
 });
 
+test('Sagreras 69: cada altura de los acordes ligados conserva su propia ligadura', () => {
+  const pitches = { 7: ['A4', 'C5'], 10: ['A4', 'C5', 'E5'], 14: ['G4', 'C5', 'G5'] };
+  for (const xml of scores(69)) {
+    for (const [number, chord] of Object.entries(pitches)) {
+      const events = notes(xml, number, true);
+      for (const pitch of chord) {
+        const pair = events.filter((e) => e.pitch === pitch && (e.onset === 0.5 || e.onset === 1));
+        assert.deepEqual(pair.map((e) => [e.onset, e.duration, e.start, e.stop]),
+          [[0.5, 0.5, true, false], [1, 0.5, false, true]], `compas ${number}: ${pitch}`);
+      }
+    }
+  }
+});
+
 test('Sagreras 56: conserva el cierre del primer sistema y la polifonia del segundo', () => {
   for (const xml of scores(56)) {
     assert.equal((xml.match(/<measure\b/g) || []).length, 16);

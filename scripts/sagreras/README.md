@@ -123,3 +123,6 @@ la duracion que falta en cada voz, usando duraciones de tresillo cuando correspo
 En la 68, la voz grave del compas 15 contiene dos silencios de negra: no se concatenan con los acordes
 superiores. En 2, 3, 10 y 11, el sol grave compartido tiene dos plicas de igual duracion y una sola cifra
 en la TAB impresa; el cotejo admite ese ataque unico sin borrar las voces. 0 diferencias en 97 casillas.
+
+En la 69, las curvas paralelas de un acorde se emparejan por la altura de sus extremos, no solo por
+su anchura. Los compases 7, 10 y 14 conservan todas sus ligaduras; 0 diferencias en 130 casillas.
