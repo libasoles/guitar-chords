@@ -60,7 +60,7 @@ const SUITES = {
       /^src\/shared\//,
       /^scripts\/(articles|aguado|sagreras|sor|carcassi-[^/]+)\//,
       /^scripts\/(lib\/(article-|score-|editor-marks|chord-forms|structured-data|lastmod|fingerprint)|og-articles)/,
-      /^test\/articles\./,
+      /^test\/(articles|arpeggio-layout)\./,
     ],
   },
   extensions: {

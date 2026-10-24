@@ -172,7 +172,7 @@
     const config = CONFIGS[variant] || CONFIGS.finder;
     const { fingers, barres } = toWindowFrets(chord);
     new svguitar.SVGuitarChord(target)
-      .configure(config)
+      .configure(chord.stringNotes ? { ...config, tuning: chord.stringNotes.slice().reverse() } : config)
       .chord({
         fingers: fingers,
         barres: barres,

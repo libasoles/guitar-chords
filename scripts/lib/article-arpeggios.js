@@ -244,6 +244,25 @@ const FINGERINGS = {
   Ddim7: '1020--', Fdim7: '3141--', Abdim7: '123--4', Bdim7: '131-2-',
 };
 
+// Spell chord tones by thirds, then label the exact sounding string positions.
+function stringNotes(name, form) {
+  const natural = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  const letters = 'CDEFGAB';
+  const [, root, accidental, quality] = name.match(/^([A-G])([#b]?)([^/]*)/);
+  const rootPitch = natural[root] + (accidental === '#' ? 1 : accidental === 'b' ? -1 : 0);
+  const intervals = quality === 'dim7' ? [0, 3, 6, 9] : quality === 'dim' ? [0, 3, 6] :
+    quality === 'm7' ? [0, 3, 7, 10] : quality === 'm' ? [0, 3, 7] :
+    quality === 'maj7' ? [0, 4, 7, 11] : quality === '7' ? [0, 4, 7, 10] : [0, 4, 7];
+  const spellings = new Map(intervals.map(function (interval, i) {
+    const pitch = (rootPitch + interval + 12) % 12;
+    const letter = letters[(letters.indexOf(root) + 2 * i) % 7];
+    const delta = (pitch - natural[letter] + 18) % 12 - 6;
+    return [pitch, letter + (delta < 0 ? '♭'.repeat(-delta) : '♯'.repeat(delta))];
+  }));
+  const open = [4, 11, 7, 2, 9, 4];
+  return form.map((fret, string) => fret === null ? '' : spellings.get((open[string] + fret) % 12));
+}
+
 function chordPopover(id, name, form, strings) {
   const fingering = FINGERINGS[form.map((fret) => fret === null ? 'x' : fret).join(' ')] || FINGERINGS[name];
   const fingers = form.map(function (fret, string) {
@@ -251,8 +270,8 @@ function chordPopover(id, name, form, strings) {
   });
   const label = strings.artChordDiagramLabel + ' ' + name;
   return modal({
-    id, label, closeLabel: strings.artArpeggiosClose, className: 'chord-popover',
-    content: chordCard({ name, fingers, barres: [], position: 1 }, label),
+    id, label, closeLabel: strings.artArpeggiosClose, className: 'chord-popover arpeggio-popover',
+    content: chordCard({ name, fingers, barres: [], position: 1, stringNotes: stringNotes(name, form) }, label),
   });
 }
 
@@ -274,7 +293,8 @@ function renderBody(locale, strings) {
       });
     });
     if (!roots.has(en)) roots.set(en, { title: en === 'Dim7' ? strings.artArpeggiosDim7Title : locale === 'es' ? es : en, note: en === 'Dim7' ? strings.artArpeggiosDim7Note : '', variants: [] });
-    roots.get(en).variants.push({ title: qualityLabel(quality, strings), figure: tabFigure(title, styledForms, locale, null, buttons) });
+    roots.get(en).variants.push({ title: qualityLabel(quality, strings), figure: tabFigure(title, styledForms, locale, null, buttons) +
+      '<div class="arpeggio-diagrams" hidden data-chords="' + names.map((_, i) => 'arpeggio-chord-' + group + '-' + i).join(' ') + '"></div>' });
   });
   const tabs = Array.from(roots, function ([root, { title, note, variants }]) {
     const id = 'arpeggio-' + root;
@@ -283,14 +303,14 @@ function renderBody(locale, strings) {
       '<div role="tablist" aria-labelledby="' + id + '-root">' + variants.map(function (variant, i) {
         return '<button type="button" role="tab" id="' + id + '-tab-' + i + '" aria-controls="' + id + '-panel-' + i +
           '" aria-selected="' + (i === 0) + '" tabindex="' + (i === 0 ? '0' : '-1') + '">' + variant.title + '</button>';
-      }).join('') + '</div></div>' + (note ? '<p class="arpeggio-note">' + note + '</p>' : '') + variants.map(function (variant, i) {
+      }).join('') + '</div>' + viewSwitch(title, strings) + '</div>' + (note ? '<p class="arpeggio-note">' + note + '</p>' : '') + variants.map(function (variant, i) {
         return '<div role="tabpanel" id="' + id + '-panel-' + i + '" aria-labelledby="' + id + '-tab-' + i +
           '" tabindex="0"' + (i === 0 ? '' : ' hidden') + '>' + variant.figure + '</div>';
       }).join('') + '</section>';
   });
   return '<p>' + strings.artArpeggiosIntro + '</p><h2 class="arpeggio-results-title" id="arpeggio-results-title" hidden>' + strings.artArpeggiosResults +
     '</h2><p class="arpeggio-no-results" id="arpeggio-no-results" role="status" hidden>' + strings.artArpeggiosNoResults +
-    '</p><div class="sequence-forms">' + tabs.join('') + '</div>' + popovers.join('') + CHORD_CARD_LOADER + TAB_LOADER + QUALITY_TABS_LOADER +
+    '</p><div class="sequence-forms">' + tabs.join('') + '</div>' + popovers.join('') + CHORD_CARD_LOADER + TAB_LOADER + POPOVER_LOADER + QUALITY_TABS_LOADER +
     searchIndex(locale, strings) + SEARCH_LOADER;
 }
 
@@ -323,10 +343,86 @@ function searchControl(strings) {
     '<div class="arpeggio-search-footer"><button type="button" class="arpeggio-search-clear">' + strings.artArpeggiosClearNotes + '</button></div></div></div>';
 }
 
+// Lucide toggle-right and toggle-left: checked means tablature is visible.
+function viewSwitch(title, strings) {
+  const svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+  const track = '<rect width="22" height="14" x="1" y="5" rx="7"/>';
+  const on = svg + '<circle cx="16" cy="12" r="3"/>' + track + '</svg>';
+  const off = svg + '<circle cx="8" cy="12" r="3"/>' + track + '</svg>';
+  return '<button type="button" role="switch" aria-checked="true" class="arpeggio-view-switch tooltip" aria-label="' +
+    strings.artArpeggiosTabView + ': ' + title + '" data-tooltip="' + strings.artArpeggiosToggleView + '">' +
+    '<span class="arpeggio-view-tabs">' + on + '</span><span class="arpeggio-view-diagrams">' + off + '</span></button>';
+}
+
+// Keep native popover dismissal and focus behavior, positioning against the actual
+// invoker (the search can create a second button for the same chord).
+const POPOVER_LOADER = `<script>
+(function() {
+  var trigger;
+  function position(popup) {
+    if (!trigger || !trigger.isConnected) return;
+    var rect = trigger.getBoundingClientRect();
+    var box = popup.getBoundingClientRect();
+    var padding = 16;
+    var gap = 10;
+    var left = rect.left + (rect.width - box.width) / 2;
+    var top = rect.bottom + gap;
+    if (top + box.height > innerHeight - padding) top = rect.top - gap - box.height;
+    popup.style.left = Math.max(padding, Math.min(left, innerWidth - box.width - padding)) + 'px';
+    popup.style.top = Math.max(padding, Math.min(top, innerHeight - box.height - padding)) + 'px';
+  }
+  document.addEventListener('click', function(event) {
+    var button = event.target.closest('.arpeggio-chord');
+    if (button) trigger = button;
+  }, true);
+  document.querySelectorAll('.arpeggio-popover').forEach(function(popup) {
+    popup.addEventListener('toggle', function(event) {
+      if (event.newState !== 'open') return;
+      window.ChordCard.renderAll(popup);
+      position(popup);
+    });
+  });
+  function reposition() {
+    var popup = document.querySelector('.arpeggio-popover:popover-open');
+    if (popup) position(popup);
+  }
+  window.addEventListener('resize', reposition);
+  document.addEventListener('scroll', reposition, true);
+})();
+</script>`;
+
 // Each root keeps its own selection. Arrow keys follow the horizontal tab pattern.
 const QUALITY_TABS_LOADER = `<script>
 document.querySelectorAll('.arpeggio-group').forEach(function(group) {
   var tabs = Array.from(group.querySelectorAll('[role="tab"]'));
+  var viewSwitch = group.querySelector('.arpeggio-view-switch');
+  function updateView() {
+    var diagrams = viewSwitch.getAttribute('aria-checked') === 'false';
+    group.classList.toggle('is-diagrams', diagrams);
+    var container = group.classList.contains('is-filtering') ? group.querySelector('.arpeggio-results') : group.querySelector('[role="tabpanel"]:not([hidden])');
+    if (!container || group.hidden) return;
+    var row = container.querySelector('.arpeggio-diagrams');
+    if (!row) return;
+    row.hidden = !diagrams;
+    if (!diagrams || row.dataset.rendered) return;
+    row.replaceChildren();
+    (row.dataset.chords || '').split(' ').filter(Boolean).forEach(function(id) {
+      var source = document.getElementById(id).querySelector('[data-chord-card]');
+      var slot = document.createElement('div');
+      slot.setAttribute('data-chord-card', '');
+      slot.dataset.chord = source.dataset.chord;
+      slot.setAttribute('role', 'img');
+      slot.setAttribute('aria-label', source.getAttribute('aria-label'));
+      row.appendChild(slot);
+      window.ChordCard.render(slot);
+    });
+    row.dataset.rendered = '1';
+  }
+  viewSwitch.addEventListener('click', function() {
+    viewSwitch.setAttribute('aria-checked', String(viewSwitch.getAttribute('aria-checked') !== 'true'));
+    updateView();
+  });
+  group.addEventListener('arpeggioresultschange', updateView);
   function select(tab) {
     tabs.forEach(function(item) {
       var selected = item === tab;
@@ -334,6 +430,7 @@ document.querySelectorAll('.arpeggio-group').forEach(function(group) {
       item.tabIndex = selected ? 0 : -1;
       document.getElementById(item.getAttribute('aria-controls')).hidden = !selected;
     });
+    updateView();
   }
   tabs.forEach(function(tab, index) {
     tab.addEventListener('click', function() { select(tab); });
@@ -394,19 +491,36 @@ const SEARCH_LOADER = `<script>
         results.innerHTML = '<ascii-tabs class="article-tab" readonly theme="light" labels="notes" spacing="3" variant="flat" lang="' + data.locale + '"><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>';
         section.appendChild(results);
       }
-      if (!on) { if (results) results.hidden = true; return; }
+      if (!on) {
+        if (results) results.hidden = true;
+        section.dispatchEvent(new Event('arpeggioresultschange'));
+        return;
+      }
       results.hidden = false;
-      var columns = [];
+      var row = results.querySelector('.arpeggio-diagrams');
+      if (!row) {
+        row = document.createElement('div');
+        row.className = 'arpeggio-diagrams';
+        row.hidden = true;
+        results.appendChild(row);
+      }
+      row.dataset.chords = matches.map(function(chord) { return chord.popover; }).join(' ');
+      delete row.dataset.rendered;
+      var tabs = [];
       var annotations = [];
       matches.forEach(function(chord, i) {
-        if (i > 0) columns.push([null, null, null, null, null, null]);
-        annotations.push({ column: columns.length, text: chord.name, html: '<button type="button" class="arpeggio-chord" popovertarget="' + chord.popover + '" aria-label="' + data.showFingering + ' ' + chord.name + '">' + chord.name + '</button>' });
+        if (i % 6 === 0) { tabs.push([]); annotations.push([]); }
+        var columns = tabs[tabs.length - 1];
+        if (columns.length) columns.push([null, null, null, null, null, null]);
+        annotations[annotations.length - 1].push({ column: columns.length, text: chord.name, html: '<button type="button" class="arpeggio-chord" popovertarget="' + chord.popover + '" aria-label="' + data.showFingering + ' ' + chord.name + '">' + chord.name + '</button>' });
         columns.push(chord.form.map(function(fret, s) { return fret === null ? null : { fret: fret, bold: s >= 3 }; }));
       });
-      results.style.setProperty('--chars', Math.max(23, 4 * columns.length + 3));
+      section.dispatchEvent(new Event('arpeggioresultschange'));
+      // Keep a readable font; the component wraps the matches into staves.
+      results.style.setProperty('--chars', 23);
       var tab = results.querySelector('ascii-tabs');
       customElements.whenDefined('ascii-tabs').then(function() {
-        tab.setDocument({ value: [columns], annotations: [annotations] });
+        tab.setDocument({ value: tabs, annotations: annotations });
       });
     });
     document.getElementById('arpeggio-results-title').hidden = !on;

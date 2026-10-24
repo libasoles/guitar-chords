@@ -788,3 +788,100 @@ body:has(.modal-full:popover-open) {
 .arpeggio-results .article-tab {
   width: 100%;
 }
+
+/* Six string lines (9em), the annotation band (1.2em), and paper padding.
+   Keep the same space before the custom element and its script have loaded. */
+.arpeggio-group .article-tab {
+  min-height: calc(10.2em + 42px);
+}
+.arpeggio-popover {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overflow-x: clip;
+  /* Leave room for the close button inside the scrollable viewport. */
+  padding: 12px;
+}
+.arpeggio-popover .modal-close {
+  top: 0;
+  right: 0;
+}
+
+/* Each root owns a volatile representation switch, including filtered results. */
+.arpeggio-group-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+}
+.arpeggio-view-switch {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 2px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.arpeggio-view-switch span {
+  display: none;
+}
+.arpeggio-view-switch svg {
+  display: block;
+  width: 30px;
+  height: 30px;
+}
+.arpeggio-view-switch[aria-checked="true"] .arpeggio-view-tabs,
+.arpeggio-view-switch[aria-checked="false"] .arpeggio-view-diagrams {
+  display: block;
+}
+.arpeggio-view-switch[aria-checked="true"] {
+  color: var(--blue-france);
+}
+.arpeggio-view-switch:focus-visible {
+  outline: 2px solid var(--blue-france);
+  outline-offset: 3px;
+}
+.arpeggio-group.is-filtering .arpeggio-view-switch {
+  grid-column: 3;
+}
+.arpeggio-group.is-diagrams .article-tab {
+  display: none;
+}
+.arpeggio-diagrams {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.arpeggio-diagrams[hidden] {
+  display: none;
+}
+@media (max-width: 480px) {
+  .arpeggio-diagrams .finder-card {
+    width: calc((100% - 1rem) / 2);
+  }
+  .arpeggio-diagrams .diagram {
+    width: 100%;
+    max-width: 150px;
+  }
+}
+
+.arpeggio-view-switch::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+/* The long dim7 title gets its own row on mobile, leaving the tabs and
+   their switch alongside each other without overlapping their hit areas. */
+@media (max-width: 480px) {
+  .arpeggio-group:not(.is-filtering) .arpeggio-group-header:has(#arpeggio-Dim7-root) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .arpeggio-group:not(.is-filtering) #arpeggio-Dim7-root {
+    grid-column: 1 / -1;
+  }
+}

@@ -22,6 +22,7 @@ const PDFS = [
 ];
 
 (async function () {
+  await require('./arpeggio-layout.e2e')();
   const server = await serveStatic(DIST, 0);
   let browser;
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'articles-e2e-'));
