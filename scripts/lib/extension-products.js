@@ -30,11 +30,14 @@ module.exports = {
       const fs = require('fs');
       const path = require('path');
       const { renderSharedTabEditor } = require('./tab-editor');
+      const { pagePath } = require('./slugs');
       const template = fs.readFileSync(path.join(root, 'src/extensions/tabs/editor.html'), 'utf8');
       for (const locale of ['es', 'en']) {
         const strings = JSON.parse(fs.readFileSync(path.join(root, 'src/i18n/strings.' + locale + '.json'), 'utf8'));
         const editor = renderSharedTabEditor(strings, locale, { heading: 'Guitar Tabs' });
-        const html = template.replace('%%LOCALE%%', locale).replace('%%TAB_EDITOR%%', editor);
+        const html = template.replace('%%LOCALE%%', locale).replace('%%TAB_EDITOR%%', editor)
+          .replace('%%ARPEGGIOS_URL%%', 'https://acordesdeguitarra.com.ar' + pagePath('articulo-tablaturas-arpegios', locale))
+          .replace('%%ARPEGGIOS_LABEL%%', strings.artArpeggiosH1);
         fs.writeFileSync(path.join(output, 'popup.' + locale + '.html'), html);
       }
     },

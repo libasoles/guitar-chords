@@ -69,3 +69,27 @@ body {
 .tab-tutorial {
   margin-top: 2rem;
 }
+
+.panel-footer {
+  padding-top: 0.75rem;
+  text-align: left;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+}
+
+.panel-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #888;
+  text-decoration: none;
+}
+
+.panel-footer a:hover {
+  text-decoration: underline;
+}
+
+.panel-footer a:focus-visible {
+  outline: 2px solid var(--ink-soft);
+  outline-offset: 3px;
+}
