@@ -95,7 +95,7 @@ async function checkArpeggioLayout() {
       assert.equal(await viewSwitch.getAttribute('aria-checked'), 'true');
       assert.equal(await first.locator('ascii-tabs:visible').count(), 1);
       await first.getByRole('tab', { name: '7', exact: true }).click();
-      assert.equal(await first.locator('.arpeggio-block-label').textContent(), '7 sin 5ta');
+      assert.equal(await first.locator('.arpeggio-block-label').textContent(), 'Con 7ma, pero sin 5ta');
       assert.equal(await first.locator('ascii-tabs:visible').count(), 2, 'both seventh blocks show tablature');
       await viewSwitch.click();
       assert.equal(await first.locator('ascii-tabs:visible').count(), 0);
