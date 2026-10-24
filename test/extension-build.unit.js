@@ -61,7 +61,7 @@ test('both products build independently and Tabs packages its local editor resou
   const extension = path.join(output, 'tabs');
   const manifest = JSON.parse(fs.readFileSync(path.join(extension, 'manifest.json')));
   assert.equal(manifest.manifest_version, 3);
-  assert.equal(manifest.version, '0.1.0');
+  assert.equal(manifest.version, '0.1.1');
   assert.deepEqual(manifest.permissions || [], []);
   assert.equal(JSON.parse(fs.readFileSync(path.join(extension, '_locales/en/messages.json'))).appName.message, 'Guitar Tabs');
   for (const file of ['popup.html', 'popup.es.html', 'popup.en.html', 'popup.js', 'popup.css', 'tab-editor.js', 'tab-editor.css', 'vendor/ascii-tabs.js', ...Object.values(manifest.icons)]) {
