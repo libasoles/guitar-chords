@@ -62,6 +62,10 @@ No se cotejó con el impreso: Mutopia parte de escaneos.
   que coincide con la versión con TAB cotejada. El LilyPond de Mutopia y su facsímil escriben sol; se conserva
   el archivo original y se aplica la corrección editorial con `patches`.
 - Op. 60 n.º 5 empieza en la menor y pasa a La mayor en el compás 17: título «A Minor and A Major».
+- Op. 60 n.º 7, compás 6: los dos mi se tocan en la primera cuerda al aire. Mutopia indica dedo 4 en el segundo;
+  el motor interpreta esa indicación junto al do con dedo 1 como posición pisada y asigna ambos mi al traste 5 de
+  la segunda cuerda. Se sustituyen las indicaciones de ambos mi por dedo 0 con `patches`, como elección editorial
+  para mantener la primera posición y facilitar el fa del compás siguiente; las alturas no cambian.
 
 ## Lecciones del Op. 60 transcritas de IMSLP (14 en adelante)
 

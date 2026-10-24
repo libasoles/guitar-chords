@@ -5,7 +5,7 @@
   "4": {"n": "4", "form": "E-flat Major", "es": "Mi bemol mayor", "source": "sor_op60-04.ly", "editor": "Fabrice De Volder", "license": "2.5"},
   "5": {"n": "5", "form": "A Minor and A Major", "es": "La menor y La mayor", "source": "sor_op60-05.ly", "editor": "Fabrice De Volder", "license": "3.0", "patches": [["e4. g,4.", "e4. e,4."], ["e,-2 gis-1 b g, e'' d-4", "e,-2 gis-1 b e,, e'' d-4"]]},
   "6": {"n": "6", "form": "C Major", "es": "Do mayor", "source": "sor_op60-06.ly", "editor": "Hajo Dezelski", "license": "3.0"},
-  "7": {"n": "7", "form": "C Major", "es": "Do mayor", "source": "sor_op60-07.ly", "editor": "Hajo Dezelski", "license": "3.0"},
+  "7": {"n": "7", "form": "C Major", "es": "Do mayor", "source": "sor_op60-07.ly", "editor": "Hajo Dezelski", "license": "3.0", "patches": [["c8-1 [ e e-4]", "c8-1 [ e-0 e-0]"]]},
   "8": {"n": "8", "form": "C Major", "es": "Do mayor", "source": "sor_op60-08.ly", "editor": "Hajo Dezelski", "license": "3.0"},
   "9": {"n": "9", "form": "C Major", "es": "Do mayor", "source": "sor_op60-09.ly", "editor": "Hajo Dezelski", "license": "3.0"},
   "10": {"n": "10", "form": "C Major", "es": "Do mayor", "source": "sor_op60-10.ly", "editor": "Hajo Dezelski", "license": "3.0"},

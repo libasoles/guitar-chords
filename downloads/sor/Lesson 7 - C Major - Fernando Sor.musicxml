@@ -790,6 +790,11 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">0</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-24">
         <pitch>
@@ -804,7 +809,7 @@
         <beam number="1">end</beam>
         <notations>
           <technical>
-            <fingering alternate="no" substitution="no">4</fingering>
+            <fingering alternate="no" substitution="no">0</fingering>
           </technical>
         </notations>
       </note>
@@ -857,7 +862,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>5</fret>
+            <string>1</string><fret>0</fret>
           </technical>
         </notations>
       </note>
@@ -873,7 +878,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>5</fret>
+            <string>1</string><fret>0</fret>
           </technical>
         </notations>
       </note>
