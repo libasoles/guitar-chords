@@ -8,11 +8,53 @@ const PITCH = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 const OPEN = [64, 59, 55, 50, 45, 40];
 
 function pitchClass(note) {
-  return (PITCH[note[0]] + (note[1] === '#' ? 1 : note[1] === 'b' ? -1 : 0) + 12) % 12;
+  const alteration = [...note.slice(1)].reduce((sum, accidental) => sum + (accidental === '#' ? 1 : -1), 0);
+  return (PITCH[note[0]] + alteration + 12) % 12;
 }
 
 function sounding(form) {
   return form.map((fret, string) => fret === null ? null : OPEN[string] + fret).filter((pitch) => pitch !== null);
+}
+
+for (const locale of ['es', 'en']) {
+  test('accidental roots offer every chord quality in tabs, diagrams and search in ' + locale, () => {
+    const strings = require('../src/i18n/strings.' + locale + '.json');
+    const html = renderBody(locale, strings);
+    const search = JSON.parse(html.match(/id="arpeggio-search-data">([^<]+)/)[1]);
+    const qualities = {
+      Major: [0, 4, 7], Minor: [0, 3, 7], Seventh: [0, 4, 7, 10],
+      MinorSeventh: [0, 3, 7, 10], MajorSeventh: [0, 4, 7, 11], Diminished: [0, 3, 6],
+    };
+    for (const root of ['Db', 'Eb', 'F#', 'Ab', 'Bb']) {
+      const section = html.split('<section').find((part) => part.includes('id="arpeggio-' + root + '-root"')).split('</section>')[0];
+      const indexed = search.roots.find((item) => item.id === 'arpeggio-' + root).chords;
+      const annotations = [...section.matchAll(/data-annotations="([^"]+)"/g)].flatMap((match) =>
+        JSON.parse(match[1].replaceAll('&quot;', '"').replaceAll('&lt;', '<').replaceAll('&amp;', '&')).flat());
+      for (const [quality, tones] of Object.entries(qualities)) {
+        assert.ok(section.includes('>' + strings['artArpeggios' + quality] + '</button>'), root + ' ' + quality + ' tab');
+        const group = GROUPS.find(([, name, variant]) => name === root && variant === quality);
+        assert.ok(group, root + ' ' + quality + ' forms');
+        const [, , , names, forms, fingerings] = group;
+        assert.ok(forms.length >= 3, 'root position and inversions');
+        for (let i = 0; i < forms.length; i++) {
+          const form = forms[i];
+          const pitches = sounding(form);
+          assert.equal(pitches.length, 4, names[i]);
+          for (const pitch of pitches) assert.ok(tones.includes((pitch - pitchClass(root) + 12) % 12), names[i] + ' chord tones');
+          assert.equal(Math.min(...pitches) % 12, pitchClass(names[i].split('/')[1] || root), names[i] + ' bass');
+          const fretted = form.filter((fret) => fret > 0);
+          assert.ok(Math.max(...fretted) - Math.min(...fretted) <= 3, names[i] + ' fits within four frets');
+          form.forEach((fret, string) => assert.match(fingerings[i][string], fret === null ? /^-$/ : fret === 0 ? /^0$/ : /^[1-4]$/, names[i] + ' fingering'));
+          const chord = indexed.find((chord) => chord.name === names[i] && JSON.stringify(chord.form) === JSON.stringify(form));
+          assert.ok(chord, names[i] + ' indexed');
+          assert.ok(annotations.some((annotation) => annotation.text === names[i] && annotation.html.includes('popovertarget="' + chord.popover + '"')), names[i] + ' tab annotation');
+          const popup = html.split('id="' + chord.popover + '"')[1].split('</div></div>')[0];
+          const diagram = JSON.parse(popup.match(/data-chord="([^"]+)"/)[1].replaceAll('&quot;', '"'));
+          assert.deepEqual(diagram.fingers.map(([, fret]) => fret === 'x' ? null : fret === 'o' ? 0 : fret), form);
+        }
+      }
+    }
+  });
 }
 
 test('diminished positions use only the chord tones and are named by their bass', () => {

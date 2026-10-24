@@ -179,6 +179,171 @@ const GROUPS = [
   ['dim7', 'Dim7', 'Dim7D', ['Ddim7', 'Fdim7', 'Abdim7', 'Bdim7'], [
     [1, 0, 1, 0, null, null], [4, 3, 4, 3, null, null], [1, 3, 4, null, null, 4], [1, 3, 1, null, 2, null],
   ]],
+  // Forms and inversions for the five accidental roots; exact fingers per form.
+  ['Re♭', 'Db', 'Major', ['Db', 'Db/F', 'Db/Ab'], [
+    [4, 6, 6, null, 4, null],
+    [4, 6, 6, 3, null, null],
+    [4, 6, 6, null, null, 4],
+  ], ['122-1-', '2331--', '122--1']],
+  ['Re♭', 'Db', 'Minor', ['Dbm', 'Dbm/Fb', 'Dbm/Ab'], [
+    [4, 5, 6, null, 4, null],
+    [0, 2, 1, null, null, 0],
+    [4, 5, 6, null, null, 4],
+  ], ['123-1-', '021--0', '123--1']],
+  ['Re♭', 'Db', 'Seventh', ['Db7', 'Db7/F', 'Db7/Ab'], [
+    [4, 6, 4, null, 4, null],
+    [4, 2, 4, 3, null, null],
+    [4, 6, 4, null, null, 4],
+  ], ['121-1-', '3142--', '121--1']],
+  ['Re♭', 'Db', 'MinorSeventh', ['Dbm7', 'Dbm7/Fb', 'Dbm7/Ab', 'Dbm7/Cb'], [
+    [4, 5, 4, null, 4, null],
+    [4, 2, 4, 2, null, null],
+    [4, 5, 4, null, null, 4],
+    [4, 5, 4, null, 2, null],
+  ], ['121-1-', '2131--', '121--1', '232-1-']],
+  ['Re♭', 'Db', 'MajorSeventh', ['Dbmaj7', 'Dbmaj7/F', 'Dbmaj7/Ab', 'Dbmaj7/C'], [
+    [4, 6, 5, null, 4, null],
+    [4, 2, 5, 3, null, null],
+    [1, 1, 1, null, null, 4],
+    [4, 6, 6, null, 3, null],
+  ], ['132-1-', '3142--', '111--2', '233-1-']],
+  ['Re♭', 'Db', 'Diminished', ['Dbdim', 'Dbdim/Fb', 'Dbdim/Abb'], [
+    [3, 5, 6, null, 4, null],
+    [0, 2, 0, null, null, 0],
+    [3, 5, 6, 5, null, null],
+  ], ['134-2-', '010--0', '1232--']],
+  ['Mi♭', 'Eb', 'Major', ['Eb', 'Eb/G', 'Eb/Bb'], [
+    [3, 4, 3, 1, null, null],
+    [3, 4, 3, null, null, 3],
+    [3, 4, 3, null, 1, null],
+  ], ['2321--', '121--1', '232-1-']],
+  ['Mi♭', 'Eb', 'Minor', ['Ebm', 'Ebm/Gb', 'Ebm/Bb'], [
+    [2, 4, 3, 1, null, null],
+    [2, 4, 3, 4, null, null],
+    [2, 4, 3, null, 1, null],
+  ], ['2431--', '1324--', '243-1-']],
+  ['Mi♭', 'Eb', 'Seventh', ['Eb7', 'Eb7/G', 'Eb7/Bb', 'Eb7/Db'], [
+    [3, 2, 3, 1, null, null],
+    [3, 2, 3, 5, null, null],
+    [3, 2, 3, null, 1, null],
+    [3, 2, 3, null, 4, null],
+  ], ['3241--', '2134--', '324-1-', '213-4-']],
+  ['Mi♭', 'Eb', 'MinorSeventh', ['Ebm7', 'Ebm7/Gb', 'Ebm7/Bb', 'Ebm7/Db'], [
+    [2, 2, 3, 1, null, null],
+    [2, 2, 3, 4, null, null],
+    [2, 2, 3, null, 1, null],
+    [2, 2, 3, null, 4, null],
+  ], ['2231--', '1123--', '223-1-', '112-3-']],
+  ['Mi♭', 'Eb', 'MajorSeventh', ['Ebmaj7', 'Ebmaj7/G', 'Ebmaj7/Bb', 'Ebmaj7/D'], [
+    [3, 3, 3, 1, null, null],
+    [3, 3, 3, null, null, 3],
+    [3, 3, 0, null, 1, null],
+    [3, 4, 3, null, 5, null],
+  ], ['2221--', '111--1', '220-1-', '121-3-']],
+  ['Mi♭', 'Eb', 'Diminished', ['Ebdim', 'Ebdim/Gb', 'Ebdim/Bbb'], [
+    [2, 4, 2, 1, null, null],
+    [2, 4, 2, 4, null, null],
+    [2, 4, 2, null, null, 5],
+  ], ['2321--', '1213--', '121--3']],
+  ['Fa♯', 'F#', 'Major', ['F#', 'F#/A#', 'F#/C#'], [
+    [2, 2, 3, 4, null, null],
+    [2, 2, 3, null, 1, null],
+    [2, 2, 3, null, 4, null],
+  ], ['1123--', '223-1-', '112-3-']],
+  ['Fa♯', 'F#', 'Minor', ['F#m', 'F#m/A', 'F#m/C#'], [
+    [2, 2, 2, 4, null, null],
+    [2, 2, 2, null, null, 5],
+    [2, 2, 2, null, 4, null],
+  ], ['1112--', '111--2', '111-2-']],
+  ['Fa♯', 'F#', 'Seventh', ['F#7', 'F#7/A#', 'F#7/C#', 'F#7/E'], [
+    [2, 5, 3, 4, null, null],
+    [0, 2, 3, null, 1, null],
+    [2, 5, 3, null, 4, null],
+    [2, 5, 3, 2, null, null],
+  ], ['1423--', '023-1-', '142-3-', '1321--']],
+  ['Fa♯', 'F#', 'MinorSeventh', ['F#m7', 'F#m7/A', 'F#m7/C#', 'F#m7/E'], [
+    [5, 5, 6, 4, null, null],
+    [5, 5, 6, null, null, 5],
+    [5, 5, 6, null, 4, null],
+    [0, 2, 2, null, null, 0],
+  ], ['2231--', '112--1', '223-1-', '011--0']],
+  ['Fa♯', 'F#', 'MajorSeventh', ['F#maj7', 'F#maj7/A#', 'F#maj7/C#', 'F#maj7/E#'], [
+    [1, 2, 3, null, null, 2],
+    [1, 2, 3, null, 1, null],
+    [1, 2, 3, null, 4, null],
+    [2, 2, 3, null, null, 1],
+  ], ['123--2', '123-1-', '123-4-', '223--1']],
+  ['Fa♯', 'F#', 'Diminished', ['F#dim', 'F#dim/A', 'F#dim/C'], [
+    [2, 1, 2, 4, null, null],
+    [2, 1, 2, null, 0, null],
+    [2, 1, 2, null, 3, null],
+  ], ['2134--', '213-0-', '213-4-']],
+  ['La♭', 'Ab', 'Major', ['Ab', 'Ab/C', 'Ab/Eb'], [
+    [4, 1, 1, null, null, 4],
+    [4, 1, 1, null, 3, null],
+    [4, 1, 1, 1, null, null],
+  ], ['211--3', '311-2-', '2111--']],
+  ['La♭', 'Ab', 'Minor', ['Abm', 'Abm/Cb', 'Abm/Eb'], [
+    [4, 4, 4, null, null, 4],
+    [4, 4, 4, null, 2, null],
+    [4, 4, 4, 1, null, null],
+  ], ['111--1', '222-1-', '2221--']],
+  ['La♭', 'Ab', 'Seventh', ['Ab7', 'Ab7/C', 'Ab7/Eb'], [
+    [2, 1, 1, null, null, 4],
+    [2, 4, 1, null, 3, null],
+    [2, 1, 1, 1, null, null],
+  ], ['211--3', '241-3-', '2111--']],
+  ['La♭', 'Ab', 'MinorSeventh', ['Abm7', 'Abm7/Cb', 'Abm7/Eb', 'Abm7/Gb'], [
+    [2, 4, 4, null, null, 4],
+    [2, 4, 4, null, 2, null],
+    [2, 4, 4, 1, null, null],
+    [2, 4, 4, 4, null, null],
+  ], ['122--2', '122-1-', '2331--', '1222--']],
+  ['La♭', 'Ab', 'MajorSeventh', ['Abmaj7', 'Abmaj7/C', 'Abmaj7/Eb', 'Abmaj7/G'], [
+    [3, 1, 1, null, null, 4],
+    [3, 4, 1, null, 3, null],
+    [3, 1, 1, 1, null, null],
+    [4, 4, 5, null, null, 3],
+  ], ['211--3', '241-3-', '2111--', '223--1']],
+  ['La♭', 'Ab', 'Diminished', ['Abdim', 'Abdim/Cb', 'Abdim/Ebb'], [
+    [4, 3, 4, 6, null, null],
+    [4, 3, 4, null, 2, null],
+    [4, 3, 4, null, 5, null],
+  ], ['2134--', '324-1-', '213-4-']],
+  ['Si♭', 'Bb', 'Major', ['Bb', 'Bb/D', 'Bb/F'], [
+    [1, 3, 3, null, 1, null],
+    [1, 3, 3, 0, null, null],
+    [1, 3, 3, null, null, 1],
+  ], ['122-1-', '1220--', '122--1']],
+  ['Si♭', 'Bb', 'Minor', ['Bbm', 'Bbm/Db', 'Bbm/F'], [
+    [1, 2, 3, null, 1, null],
+    [1, 2, 3, null, 4, null],
+    [1, 2, 3, null, null, 1],
+  ], ['123-1-', '123-4-', '123--1']],
+  ['Si♭', 'Bb', 'Seventh', ['Bb7', 'Bb7', 'Bb7/D', 'Bb7/F', 'Bb7/Ab'], [
+    [1, 3, 1, null, 1, null],
+    [4, 3, 1, null, 1, null],
+    [1, 3, 1, 0, null, null],
+    [1, 3, 1, null, null, 1],
+    [1, 3, 1, null, null, 4],
+  ], ['121-1-', '321-1-', '1210--', '121--1', '121--3']],
+  ['Si♭', 'Bb', 'MinorSeventh', ['Bbm7', 'Bbm7/Db', 'Bbm7/F', 'Bbm7/Ab'], [
+    [1, 2, 1, null, 1, null],
+    [1, 2, 1, null, 4, null],
+    [1, 2, 1, null, null, 1],
+    [1, 2, 1, null, null, 4],
+  ], ['121-1-', '121-3-', '121--1', '121--3']],
+  ['Si♭', 'Bb', 'MajorSeventh', ['Bbmaj7', 'Bbmaj7/D', 'Bbmaj7/F', 'Bbmaj7/A'], [
+    [1, 3, 2, null, 1, null],
+    [5, 6, 3, null, 5, null],
+    [1, 3, 2, null, null, 1],
+    [1, 3, 2, null, 0, null],
+  ], ['132-1-', '241-3-', '132--1', '132-0-']],
+  ['Si♭', 'Bb', 'Diminished', ['Bbdim', 'Bbdim/Db', 'Bbdim/Fb'], [
+    [0, 2, 3, null, 1, null],
+    [6, 5, 6, null, 4, null],
+    [6, 5, 6, null, 7, null],
+  ], ['023-1-', '324-1-', '213-4-']],
 ];
 
 // Alternate upper voices on strings 2–4, with the bass on string 5 or 6.
