@@ -293,6 +293,12 @@ def build(number):
                     if column[old_string] == old_fret:
                         column[old_string] = None
                         column[new_string] = new_fret
+        if EDITION == "carcassi" and number == 13:
+            # The D bass in m. 1 is the open fourth string, not fret 5 on the fifth.
+            for column in tabs[0]:
+                if column[4] == 5 and column[3] is None:
+                    column[4] = None
+                    column[3] = 0
         tabify.export(os.path.join(prepared, tabify.NORMALIZED_NAME), os.path.join(prepared, tabify.SUGGESTION_NAME),
                       tabs,
                       "standard", exported, title=title, subtitle=subtitle)
