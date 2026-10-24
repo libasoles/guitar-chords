@@ -293,7 +293,8 @@ function renderBody(locale, strings) {
       });
     });
     if (!roots.has(en)) roots.set(en, { title: en === 'Dim7' ? strings.artArpeggiosDim7Title : locale === 'es' ? es : en, note: en === 'Dim7' ? strings.artArpeggiosDim7Note : '', variants: [] });
-    roots.get(en).variants.push({ title: qualityLabel(quality, strings), figure: tabFigure(title, styledForms, locale, null, buttons) });
+    roots.get(en).variants.push({ title: qualityLabel(quality, strings), figure: tabFigure(title, styledForms, locale, null, buttons) +
+      '<div class="arpeggio-diagrams" hidden data-chords="' + names.map((_, i) => 'arpeggio-chord-' + group + '-' + i).join(' ') + '"></div>' });
   });
   const tabs = Array.from(roots, function ([root, { title, note, variants }]) {
     const id = 'arpeggio-' + root;
@@ -302,7 +303,7 @@ function renderBody(locale, strings) {
       '<div role="tablist" aria-labelledby="' + id + '-root">' + variants.map(function (variant, i) {
         return '<button type="button" role="tab" id="' + id + '-tab-' + i + '" aria-controls="' + id + '-panel-' + i +
           '" aria-selected="' + (i === 0) + '" tabindex="' + (i === 0 ? '0' : '-1') + '">' + variant.title + '</button>';
-      }).join('') + '</div></div>' + (note ? '<p class="arpeggio-note">' + note + '</p>' : '') + variants.map(function (variant, i) {
+      }).join('') + '</div>' + viewSwitch(title, strings) + '</div>' + (note ? '<p class="arpeggio-note">' + note + '</p>' : '') + variants.map(function (variant, i) {
         return '<div role="tabpanel" id="' + id + '-panel-' + i + '" aria-labelledby="' + id + '-tab-' + i +
           '" tabindex="0"' + (i === 0 ? '' : ' hidden') + '>' + variant.figure + '</div>';
       }).join('') + '</section>';
@@ -340,6 +341,17 @@ function searchControl(strings) {
     '<div class="arpeggio-search-popup" role="dialog" aria-label="' + strings.artArpeggiosSearch + '" hidden>' +
     '<ascii-tabs class="article-tab" theme="light" labels="notes" spacing="3"><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>' +
     '<div class="arpeggio-search-footer"><button type="button" class="arpeggio-search-clear">' + strings.artArpeggiosClearNotes + '</button></div></div></div>';
+}
+
+// Lucide toggle-right and toggle-left: checked means tablature is visible.
+function viewSwitch(title, strings) {
+  const svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+  const track = '<rect width="22" height="14" x="1" y="5" rx="7"/>';
+  const on = svg + '<circle cx="16" cy="12" r="3"/>' + track + '</svg>';
+  const off = svg + '<circle cx="8" cy="12" r="3"/>' + track + '</svg>';
+  return '<button type="button" role="switch" aria-checked="true" class="arpeggio-view-switch tooltip" aria-label="' +
+    strings.artArpeggiosTabView + ': ' + title + '" data-tooltip="' + strings.artArpeggiosToggleView + '">' +
+    '<span class="arpeggio-view-tabs">' + on + '</span><span class="arpeggio-view-diagrams">' + off + '</span></button>';
 }
 
 // Keep native popover dismissal and focus behavior, positioning against the actual
@@ -383,6 +395,34 @@ const POPOVER_LOADER = `<script>
 const QUALITY_TABS_LOADER = `<script>
 document.querySelectorAll('.arpeggio-group').forEach(function(group) {
   var tabs = Array.from(group.querySelectorAll('[role="tab"]'));
+  var viewSwitch = group.querySelector('.arpeggio-view-switch');
+  function updateView() {
+    var diagrams = viewSwitch.getAttribute('aria-checked') === 'false';
+    group.classList.toggle('is-diagrams', diagrams);
+    var container = group.classList.contains('is-filtering') ? group.querySelector('.arpeggio-results') : group.querySelector('[role="tabpanel"]:not([hidden])');
+    if (!container || group.hidden) return;
+    var row = container.querySelector('.arpeggio-diagrams');
+    if (!row) return;
+    row.hidden = !diagrams;
+    if (!diagrams || row.dataset.rendered) return;
+    row.replaceChildren();
+    (row.dataset.chords || '').split(' ').filter(Boolean).forEach(function(id) {
+      var source = document.getElementById(id).querySelector('[data-chord-card]');
+      var slot = document.createElement('div');
+      slot.setAttribute('data-chord-card', '');
+      slot.dataset.chord = source.dataset.chord;
+      slot.setAttribute('role', 'img');
+      slot.setAttribute('aria-label', source.getAttribute('aria-label'));
+      row.appendChild(slot);
+      window.ChordCard.render(slot);
+    });
+    row.dataset.rendered = '1';
+  }
+  viewSwitch.addEventListener('click', function() {
+    viewSwitch.setAttribute('aria-checked', String(viewSwitch.getAttribute('aria-checked') !== 'true'));
+    updateView();
+  });
+  group.addEventListener('arpeggioresultschange', updateView);
   function select(tab) {
     tabs.forEach(function(item) {
       var selected = item === tab;
@@ -390,6 +430,7 @@ document.querySelectorAll('.arpeggio-group').forEach(function(group) {
       item.tabIndex = selected ? 0 : -1;
       document.getElementById(item.getAttribute('aria-controls')).hidden = !selected;
     });
+    updateView();
   }
   tabs.forEach(function(tab, index) {
     tab.addEventListener('click', function() { select(tab); });
@@ -450,8 +491,21 @@ const SEARCH_LOADER = `<script>
         results.innerHTML = '<ascii-tabs class="article-tab" readonly theme="light" labels="notes" spacing="3" variant="flat" lang="' + data.locale + '"><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>';
         section.appendChild(results);
       }
-      if (!on) { if (results) results.hidden = true; return; }
+      if (!on) {
+        if (results) results.hidden = true;
+        section.dispatchEvent(new Event('arpeggioresultschange'));
+        return;
+      }
       results.hidden = false;
+      var row = results.querySelector('.arpeggio-diagrams');
+      if (!row) {
+        row = document.createElement('div');
+        row.className = 'arpeggio-diagrams';
+        row.hidden = true;
+        results.appendChild(row);
+      }
+      row.dataset.chords = matches.map(function(chord) { return chord.popover; }).join(' ');
+      delete row.dataset.rendered;
       var columns = [];
       var annotations = [];
       matches.forEach(function(chord, i) {
@@ -459,6 +513,7 @@ const SEARCH_LOADER = `<script>
         annotations.push({ column: columns.length, text: chord.name, html: '<button type="button" class="arpeggio-chord" popovertarget="' + chord.popover + '" aria-label="' + data.showFingering + ' ' + chord.name + '">' + chord.name + '</button>' });
         columns.push(chord.form.map(function(fret, s) { return fret === null ? null : { fret: fret, bold: s >= 3 }; }));
       });
+      section.dispatchEvent(new Event('arpeggioresultschange'));
       results.style.setProperty('--chars', Math.max(23, 4 * columns.length + 3));
       var tab = results.querySelector('ascii-tabs');
       customElements.whenDefined('ascii-tabs').then(function() {

@@ -808,3 +808,69 @@ body:has(.modal-full:popover-open) {
   top: 0;
   right: 0;
 }
+
+/* Each root owns a volatile representation switch, including filtered results. */
+.arpeggio-group-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+}
+.arpeggio-view-switch {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 2px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.arpeggio-view-switch span {
+  display: none;
+}
+.arpeggio-view-switch svg {
+  display: block;
+  width: 30px;
+  height: 30px;
+}
+.arpeggio-view-switch[aria-checked="true"] .arpeggio-view-tabs,
+.arpeggio-view-switch[aria-checked="false"] .arpeggio-view-diagrams {
+  display: block;
+}
+.arpeggio-view-switch[aria-checked="true"] {
+  color: var(--blue-france);
+}
+.arpeggio-view-switch:focus-visible {
+  outline: 2px solid var(--blue-france);
+  outline-offset: 3px;
+}
+.arpeggio-group.is-filtering .arpeggio-view-switch {
+  grid-column: 3;
+}
+.arpeggio-group.is-diagrams .article-tab {
+  display: none;
+}
+.arpeggio-diagrams {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.arpeggio-diagrams[hidden] {
+  display: none;
+}
+@media (max-width: 480px) {
+  .arpeggio-diagrams .finder-card {
+    width: calc((100% - 1rem) / 2);
+  }
+  .arpeggio-diagrams .diagram {
+    width: 100%;
+    max-width: 150px;
+  }
+}
+
+.arpeggio-view-switch::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}

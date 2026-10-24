@@ -53,10 +53,48 @@ async function checkArpeggioLayout() {
         assert.equal(await popup.count(), 0);
         assert.ok(await button.evaluate((el) => el === document.activeElement));
       }
+      const groups = page.locator('.arpeggio-group');
+      const first = groups.first();
+      const second = groups.nth(1);
+      const viewSwitch = first.getByRole('switch');
+      assert.equal(await page.getByRole('switch', { checked: true }).count(), 8);
+      assert.equal(await first.locator('.arpeggio-diagrams:visible').count(), 0);
+      await viewSwitch.click();
+      assert.equal(await viewSwitch.getAttribute('aria-checked'), 'false');
+      assert.equal(await first.locator('ascii-tabs:visible').count(), 0);
+      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible .name').allTextContents(), ['C', 'C/E', 'C/G']);
+      assert.equal(await second.getByRole('switch').getAttribute('aria-checked'), 'true');
+      assert.equal(await second.locator('ascii-tabs:visible').count(), 1);
+      await first.getByRole('tab', { name: 'menor', exact: true }).click();
+      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible .name').allTextContents(), ['Cm', 'Cm/Eb', 'Cm/G']);
+      await viewSwitch.focus();
+      await page.keyboard.press('Space');
+      assert.equal(await viewSwitch.getAttribute('aria-checked'), 'true');
+      assert.equal(await first.locator('ascii-tabs:visible').count(), 1);
+      await viewSwitch.click();
+      // Filter by an open first string: diagrams follow the actual matches,
+      // while each other root keeps its independent representation.
+      await page.locator('.arpeggio-search-toggle').click();
+      await page.locator('.arpeggio-search ascii-tabs').evaluate((el) => {
+        el.dispatchEvent(new CustomEvent('change', { detail: { value: [[[0, null, null, null, null, null]]] } }));
+      });
+      await page.keyboard.press('Escape');
+      await page.locator('h1').click();
+      const expected = await page.evaluate(() => JSON.parse(document.getElementById('arpeggio-search-data').textContent).roots[0].chords.filter((chord) => chord.form[0] === 0).map((chord) => chord.name));
+      assert.equal(await viewSwitch.isVisible(), true);
+      assert.deepEqual(await first.locator('.arpeggio-results .arpeggio-diagrams:visible .name').allTextContents(), expected);
+      await viewSwitch.click();
+      assert.equal(await first.locator('.arpeggio-results ascii-tabs').isVisible(), true);
+      await viewSwitch.click();
+      await page.locator('.arpeggio-search-toggle').click();
+      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible .name').allTextContents(), ['Cm', 'Cm/Eb', 'Cm/G']);
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'representations fit viewport');
+      await page.reload();
+      assert.equal(await page.getByRole('switch', { checked: true }).count(), 8, 'switch state is volatile');
       assert.deepEqual(errors, []);
       await page.close();
     }
-    console.log('Arpeggio loading geometry, anchored popovers and string notes passed.');
+    console.log('Arpeggio loading, popovers, string notes and per-root representation switches passed.');
   } finally {
     await browser.close();
     server.close();
