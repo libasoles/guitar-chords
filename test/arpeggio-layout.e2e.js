@@ -85,11 +85,11 @@ async function checkArpeggioLayout() {
       await viewSwitch.click();
       assert.equal(await viewSwitch.getAttribute('aria-checked'), 'false');
       assert.equal(await first.locator('ascii-tabs:visible').count(), 0);
-      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible .name').allTextContents(), ['C', 'C/E', 'C/G', 'C', 'C/E', 'C/G']);
+      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible .name').allTextContents(), ['C', 'C', 'C/E', 'C/E', 'C/G', 'C/G']);
       assert.equal(await second.getByRole('switch').getAttribute('aria-checked'), 'true');
       assert.equal(await second.locator('ascii-tabs:visible').count(), 1);
       await first.getByRole('tab', { name: 'menor', exact: true }).click();
-      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible .name').allTextContents(), ['Cm', 'Cm/Eb', 'Cm/G', 'Cm', 'Cm/Eb', 'Cm/G']);
+      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible .name').allTextContents(), ['Cm', 'Cm', 'Cm/Eb', 'Cm/Eb', 'Cm/G', 'Cm/G']);
       await viewSwitch.focus();
       await page.keyboard.press('Space');
       assert.equal(await viewSwitch.getAttribute('aria-checked'), 'true');
@@ -100,7 +100,7 @@ async function checkArpeggioLayout() {
       await viewSwitch.click();
       assert.equal(await first.locator('ascii-tabs:visible').count(), 0);
       assert.equal(await first.locator('.arpeggio-diagrams:visible').count(), 2, 'both seventh blocks show diagrams');
-      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible').last().locator('.name').allTextContents(), ['C7', 'C7/E', 'C7/Bb']);
+      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible').last().locator('.name').allTextContents(), ['C7', 'C7/E', 'C7/E', 'C7/Bb']);
       // Every search resets all roots to tablature, including hidden roots.
       await second.getByRole('switch').click();
       await groups.last().getByRole('switch').click();

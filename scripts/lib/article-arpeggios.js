@@ -522,6 +522,44 @@ MIDDLE_STRING_POSITIONS.forEach(([root, quality, names, forms, fingerings]) => {
   });
 });
 
+function pitchClass(note) {
+  const natural = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  return (natural[note[0]] + [...note.slice(1)].reduce((sum, accidental) => sum + (accidental === '#' ? 1 : -1), 0) + 12) % 12;
+}
+
+const OPEN_PITCHES = [64, 59, 55, 50, 45, 40];
+function soundingPitches(form) {
+  return form.flatMap((fret, string) => fret === null ? [] : [OPEN_PITCHES[string] + fret]);
+}
+
+// Classify the exact sounding form after all variants have been added. Keep
+// names, forms and fingerings together when moving or sorting positions.
+GROUPS.forEach((group) => {
+  group[5] ||= group[3].map((name, i) => FINGERINGS[formKey(group[4][i])] || FINGERINGS[name]);
+});
+GROUPS.filter(([, , quality]) => quality === 'Seventh').forEach((group) => {
+  const root = pitchClass(group[1]);
+  const withoutFifth = GROUPS.find(([, en, quality]) => en === group[1] && quality === 'SeventhNoFifth');
+  for (let i = group[4].length - 1; i >= 0; i--) {
+    if (soundingPitches(group[4][i]).some((pitch) => (pitch - root + 12) % 12 === 7)) continue;
+    if (!withoutFifth[4].some((form) => formKey(form) === formKey(group[4][i]))) {
+      for (const field of [3, 4, 5]) withoutFifth[field].push(group[field][i]);
+    }
+    for (const field of [3, 4, 5]) group[field].splice(i, 1);
+  }
+});
+GROUPS.forEach((group) => {
+  if (group[1] === 'Dim7') return; // Symmetric sets have no single root.
+  const root = pitchClass(group[1]);
+  const positions = group[4].map((form, i) => ({
+    name: group[3][i], form, fingering: group[5][i],
+    bass: (Math.min(...soundingPitches(form)) - root + 12) % 12,
+  })).sort((a, b) => a.bass - b.bass);
+  group[3] = positions.map((position) => position.name);
+  group[4] = positions.map((position) => position.form);
+  group[5] = positions.map((position) => position.fingering);
+});
+
 // Spell chord tones by thirds, then label the exact sounding string positions.
 function stringNotes(name, form) {
   const natural = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };

@@ -35,7 +35,7 @@ for (const locale of ['es', 'en']) {
         const group = GROUPS.find(([, name, variant]) => name === root && variant === quality);
         assert.ok(group, root + ' ' + quality + ' forms');
         const [, , , names, forms, fingerings] = group;
-        assert.ok(forms.length >= 3, 'root position and inversions');
+        assert.ok(forms.length >= (quality === 'Seventh' ? 2 : 3), root + ' ' + quality + ' positions');
         for (let i = 0; i < forms.length; i++) {
           const form = forms[i];
           const pitches = sounding(form);
@@ -160,7 +160,6 @@ test('dominant sevenths without fifths cover all 12 roots and all three bass ton
       assert.equal(form.slice(3).filter((fret) => fret !== null).length, 1, 'one bass string');
       const intervals = (notes) => [...new Set(notes.map((pitch) => (pitch - root + 12) % 12))].sort((a, b) => a - b);
       assert.deepEqual(intervals(pitches), [0, 4, 10], names[i] + ' contains root, major third and minor seventh only');
-      assert.deepEqual(intervals(pitches.slice(0, 3)), [0, 4, 10], names[i] + ' treble tones');
       const bass = Math.min(...pitches) % 12;
       assert.equal(bass, pitchClass(names[i].split('/')[1] || rootName));
       basses.push((bass - root + 12) % 12);
@@ -168,7 +167,8 @@ test('dominant sevenths without fifths cover all 12 roots and all three bass ton
         if (fret > 0) assert.match(fingerings[i][string], /^[1-4]$/, names[i] + ' has fingering');
       });
     });
-    assert.deepEqual(basses.sort((a, b) => a - b), [0, 4, 10]);
+    assert.deepEqual([...new Set(basses)].sort((a, b) => a - b), [0, 4, 10]);
+    assert.equal(new Set(forms.map(JSON.stringify)).size, forms.length, rootName + ' has no duplicate forms');
   }
 });
 
@@ -231,5 +231,40 @@ for (const locale of ['es', 'en']) {
     const diagram = JSON.parse(popup.match(/data-chord="([^"]+)"/)[1].replaceAll('&quot;', '"'));
     assert.deepEqual(diagram.fingers.map(([, fret]) => fret === 'x' ? null : fret === 'o' ? 0 : fret), form);
     assert.deepEqual(diagram.stringNotes, ['', 'B', 'G', 'D', '', 'G']);
+  });
+}
+
+test('standard dominant seventh blocks never contain voicings without the fifth', () => {
+  for (const [, root, quality, names, forms] of GROUPS) {
+    if (quality !== 'Seventh') continue;
+    forms.forEach((form, i) => assert.ok(
+      sounding(form).some((pitch) => (pitch - pitchClass(root) + 12) % 12 === 7),
+      root + ': ' + names[i] + ' ' + JSON.stringify(form) + ' belongs only in the no-fifth block',
+    ));
+  }
+});
+
+test('every quality groups root positions before inversions across all keys', () => {
+  for (const [, root, quality, names] of GROUPS) {
+    if (root === 'Dim7') continue;
+    const bassOrder = names.map((name) => name.includes('/') ? (pitchClass(name.split('/')[1]) - pitchClass(root) + 12) % 12 : 0);
+    assert.deepEqual(bassOrder, [...bassOrder].sort((a, b) => a - b), root + ' ' + quality + ': ' + names.join(', '));
+  }
+});
+
+for (const locale of ['es', 'en']) {
+  test('G7 without D appears only once, below the no-fifth heading in ' + locale, () => {
+    const html = renderBody(locale, require('../src/i18n/strings.' + locale + '.json'));
+    const section = html.split('<section').find((part) => part.includes('id="arpeggio-G-root"')).split('</section>')[0];
+    const figures = [...section.matchAll(/data-value='([^']+)'/g)]
+      .map((match) => JSON.parse(match[1]).flat().map((column) => column.map((note) => note === null ? null : note.fret)));
+    const form = [1, 0, 0, null, null, 3];
+    assert.equal(figures.flat().filter((candidate) => JSON.stringify(candidate) === JSON.stringify(form)).length, 1);
+    const [, , , names, forms] = GROUPS.find(([, root, quality]) => root === 'G' && quality === 'Seventh');
+    assert.deepEqual(names, ['G7', 'G7/B', 'G7/D']);
+    assert.deepEqual(forms[0], [null, 3, 4, 3, null, 3]);
+    const lowerBlock = section.split('arpeggio-block-label')[1];
+    const lowerForms = JSON.parse(lowerBlock.match(/data-value='([^']+)'/)[1]).flat();
+    assert.ok(lowerForms.some((column) => JSON.stringify(column.map((note) => note === null ? null : note.fret)) === JSON.stringify(form)));
   });
 }
