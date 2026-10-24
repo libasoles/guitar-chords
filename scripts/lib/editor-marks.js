@@ -28,7 +28,7 @@ const MARKS = {
 
 const PIECES = {
   sor: { favorite: [5], effort: [1] },
-  'carcassi-preludios': { favorite: [2, 4] },
+  'carcassi-preludios': { favorite: [2, 4], insightful: [9] },
   'carcassi-progresivas': { favorite: [1] },
   'carcassi-valses': { favorite: [10] },
   'santisteban-preludios': { favorite: [2, 3, 4] },
