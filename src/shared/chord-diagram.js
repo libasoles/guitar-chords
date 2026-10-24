@@ -144,6 +144,18 @@
     });
   }
 
+  function spaceStringNotes(svg) {
+    if (!svg) return;
+    const labels = svg.querySelectorAll('.tuning');
+    if (!labels.length) return;
+
+    // Leave breathing room below the strings and preserve the bottom margin.
+    const padding = 16;
+    labels.forEach((label) => label.setAttribute('transform', `translate(0 ${padding})`));
+    const [x, y, width, height] = svg.getAttribute('viewBox').split(/\s+/).map(Number);
+    svg.setAttribute('viewBox', `${x} ${y} ${width} ${height + padding}`);
+  }
+
   // svguitar dibuja cada dedo en su traste ABSOLUTO dentro de la ventana de
   // `frets` trastes; `position` sólo cambia la etiqueta "Xfr", no corre la
   // ventana. Nuestra base (chords-db) numera los trastes desde la cejuela, así
@@ -184,6 +196,7 @@
     addNeckBackground(svg, config.neckBackgroundColor);
     normalizeHeaderSpacing(svg, chord, config);
     alignOpenStringMarkers(svg, config);
+    spaceStringNotes(svg);
   }
 
   window.ChordDiagram = {
