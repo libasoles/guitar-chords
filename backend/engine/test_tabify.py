@@ -429,3 +429,51 @@ class PdfTabStaffTests(unittest.TestCase):
         self.assertEqual([n for _, _, n in names], list('EBGDAD'))
         self.assertTrue(all(int(x) < 1920 for x, _, _ in names))  # left of the staff
         self.assertEqual(out.count('class="stringNames"'), 1)
+
+
+class BarreTests(unittest.TestCase):
+    """«C 7» over a dashed line: the notes under it keep to fret 7 or higher (no open strings)."""
+
+    def measures(self, text="C 7", dashes=True):
+        def n(step, octave, extra=""):
+            return (f'<note><pitch><step>{step}</step><octave>{octave}</octave></pitch><duration>1</duration>'
+                    f'<type>quarter</type>{extra}</note>')
+        mark = f'<direction><direction-type><words>{text}</words></direction-type></direction>'
+        start = '<direction><direction-type><dashes type="start" number="1"/></direction-type></direction>' if dashes else ''
+        stop = '<direction><direction-type><dashes type="stop" number="1"/></direction-type></direction>' if dashes else ''
+        body = ('<measure number="1"><attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time>'
+                '<clef><sign>G</sign><line>2</line></clef></attributes>'
+                + n('E', 4) + mark + start + n('B', 4) + n('E', 5) + n('B', 4) + '</measure>'
+                '<measure number="2">' + n('E', 4) + stop + n('E', 4) + n('E', 4) + n('E', 4) + '</measure>')
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "s.musicxml"
+            path.write_text(score_xml(body))
+            _, part = tabify.load_score([str(path)])
+        measures, _ = tabify.build_columns(part)
+        tabify.assign_frets(measures)
+        return measures
+
+    def cells(self, measures):
+        return [col["cells"] for m in measures for col in m["columns"]]
+
+    def test_barre_text_survives_without_keep_text(self):
+        measures = self.measures()
+        self.assertEqual(measures[0]["columns"][1]["barre"], (7, 6))
+
+    def test_span_covers_the_dashed_line_inclusive(self):
+        measures = self.measures()
+        barres = [[c["barre"] for c in m["columns"]] for m in measures]
+        self.assertEqual(barres, [[None, (7, 6), (7, 6), (7, 6)], [(7, 6), None, None, None]])
+
+    def test_notes_under_the_barre_are_not_open_strings(self):
+        free = self.cells(self.measures("Fin"))
+        held = self.cells(self.measures())
+        self.assertIn(0, [f for cells in free for f in cells if f is not None])  # open strings without the barre
+        for cells in held[1:5]:
+            self.assertTrue(all(f >= 7 for f in cells if f is not None), cells)
+
+    def test_half_barre_marks_three_strings_and_without_a_line_lasts_the_measure(self):
+        measures = self.measures("½C 5", dashes=False)
+        self.assertEqual(measures[0]["columns"][1]["barre"], (5, 3))
+        self.assertEqual([c["barre"] for c in measures[0]["columns"]], [None, (5, 3), (5, 3), (5, 3)])
+        self.assertEqual([c["barre"] for c in measures[1]["columns"]], [None] * 4)

@@ -207,6 +207,7 @@ def read_pdf(path=SOURCE):
         threes = italic_threes(page)
         fingers = finger_marks(page)
         plucks = finger_marks(page, 'pima')
+        barres = barre_marks(page, drawings, notation)
         for index, lines in enumerate(notation):
             for y, number in labels:
                 if y < lines[0]:
@@ -226,7 +227,8 @@ def read_pdf(path=SOURCE):
             space = (lines[-1] - lines[0]) / 4
             for m in system['measures']:
                 m['tuplets'] = [(x, y) for x, y in threes if m['left'] <= x <= m['right'] and lines[0] - 9 * space <= y <= lines[-1] + 7 * space]
-            lesson = lessons.setdefault(current, {'fifths': None, 'time': None, 'measures': [], 'tab': [], 'cells': []})
+            lesson = lessons.setdefault(current, {'fifths': None, 'time': None, 'measures': [], 'tab': [], 'cells': [], 'barres': []})
+            lesson['barres'].extend({**b, 'first': len(lesson['measures']), 'count': len(system['measures'])} for b in barres.get(index, []))
             if system['key'] is not None and lesson['fifths'] is None:
                 lesson['fifths'] = system['key']
             symbol = [g for g in glyph if g[0] in (0xE08A, 0xE08B) and lines[0] - 1 <= g[2] <= lines[-1] + 6 * (lines[-1] - lines[0]) / 4]
@@ -245,6 +247,30 @@ def read_pdf(path=SOURCE):
                 lesson['cells'].extend(cells)
                 lesson['tab'].extend((x, OPEN_MIDI[string] + fret) for x, string, fret in cells)
     return lessons
+
+
+def barre_marks(page, drawings, notation):
+    """Cejillas impresas de la pagina: «₵N» (fuente FreeSerif) seguida de una linea punteada horizontal que dura lo que
+    la cejilla. -> {indice del pentagrama de `notation`: [{'fret', 'x0', 'x1'}]}. Cada marca va al pentagrama que
+    tiene debajo; sin linea, `x1` es None."""
+    glyphs = []
+    for block in page.get_text('rawdict')['blocks']:
+        for line in block.get('lines', []):
+            for span in line['spans']:
+                text = ''.join(c['c'] for c in span['chars'])
+                if text.startswith('₵') and text[1:].isdigit():
+                    glyphs.append((int(text[1:]), span['bbox']))
+    dashed = [d['rect'] for d in drawings if d['type'] == 's' and d.get('dashes') and d['rect'].height < 0.5 and d['rect'].width > 4]
+    out = {}
+    for fret, box in glyphs:
+        below = [(lines[0] - box[3], index) for index, lines in enumerate(notation) if lines[0] - box[3] > -2]
+        if not below:
+            continue
+        index = min(below)[1]
+        line = min((r for r in dashed if abs(r.x0 - box[2]) < 8 and abs((r.y0 + r.y1) / 2 - (box[1] + box[3]) / 2) < 12),
+                   key=lambda r: abs(r.x0 - box[2]), default=None)
+        out.setdefault(index, []).append({'fret': fret, 'x0': box[0], 'x1': line.x1 if line is not None else None})
+    return out
 
 
 def tab_cells(lines, words, measures):

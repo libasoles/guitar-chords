@@ -2934,6 +2934,13 @@
     </measure>
     <!--========================= Measure 3 ==========================-->
     <measure implicit="no" number="3">
+      <direction placement="above">
+        <direction-type>
+          <words>½C 3</words>
+        </direction-type>
+        <offset>30240</offset>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-71">
         <pitch>
           <step>G</step>
@@ -2956,6 +2963,12 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="1" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-73">
         <pitch>
           <step>A</step>
@@ -4231,7 +4244,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -4284,7 +4297,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>1</fret>
+            <string>3</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -4305,7 +4318,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -4383,6 +4396,12 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="1" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-108">
         <pitch>
           <step>F</step>
@@ -5171,7 +5190,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>0</fret>
+            <string>5</string><fret>5</fret>
           </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
@@ -5202,7 +5221,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -5245,7 +5264,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>0</fret>
+            <string>4</string><fret>5</fret>
           </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
@@ -5276,7 +5295,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -5375,7 +5394,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -5397,7 +5416,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>0</fret>
+            <string>4</string><fret>5</fret>
           </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
@@ -5451,7 +5470,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -5473,7 +5492,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>0</fret>
+            <string>5</string><fret>5</fret>
           </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
@@ -5818,6 +5837,18 @@
     </measure>
     <!--========================= Measure 5 ==========================-->
     <measure implicit="no" number="5">
+      <direction placement="above">
+        <direction-type>
+          <words>½C 3</words>
+        </direction-type>
+        <staff>1</staff>
+      </direction>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="2" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-141">
         <pitch>
           <step>G</step>
@@ -5840,6 +5871,12 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="2" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-143">
         <pitch>
           <step>F</step>
@@ -6670,7 +6707,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>0</fret>
+            <string>4</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -6691,7 +6728,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -6713,7 +6750,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>0</fret>
+            <string>5</string><fret>5</fret>
           </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
@@ -6744,7 +6781,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>0</fret>
+            <string>4</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -6765,7 +6802,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -6818,7 +6855,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>0</fret>
+            <string>4</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -6839,7 +6876,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -6861,7 +6898,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>0</fret>
+            <string>5</string><fret>5</fret>
           </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
@@ -6892,7 +6929,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>0</fret>
+            <string>4</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -6913,7 +6950,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -6966,7 +7003,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>0</fret>
+            <string>4</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -6987,7 +7024,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -7009,7 +7046,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>0</fret>
+            <string>5</string><fret>5</fret>
           </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
@@ -7040,7 +7077,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>0</fret>
+            <string>4</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -7061,7 +7098,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -7114,7 +7151,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>0</fret>
+            <string>4</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -7135,7 +7172,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -7188,7 +7225,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>0</fret>
+            <string>4</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -7209,7 +7246,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -7276,6 +7313,18 @@
     </measure>
     <!--========================= Measure 6 ==========================-->
     <measure implicit="no" number="6">
+      <direction placement="above">
+        <direction-type>
+          <words>½C 2</words>
+        </direction-type>
+        <staff>1</staff>
+      </direction>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="3" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-177">
         <pitch>
           <step>E</step>
@@ -7328,6 +7377,12 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="3" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-180">
         <pitch>
           <step>E</step>
@@ -8056,7 +8111,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -8110,7 +8165,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -9682,7 +9737,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -9700,7 +9755,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -14893,7 +14948,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -14967,7 +15022,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -15041,7 +15096,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -15115,7 +15170,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -15189,7 +15244,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -15263,7 +15318,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -15337,7 +15392,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -15411,7 +15466,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -15499,6 +15554,18 @@
     </measure>
     <!--========================= Measure 12 =========================-->
     <measure implicit="no" number="12">
+      <direction placement="above">
+        <direction-type>
+          <words>½C 2</words>
+        </direction-type>
+        <staff>1</staff>
+      </direction>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="4" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-379">
         <pitch>
           <step>A</step>
@@ -16342,7 +16409,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>1</fret>
+            <string>3</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -16416,7 +16483,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>1</fret>
+            <string>3</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -16490,7 +16557,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>1</fret>
+            <string>3</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -16564,7 +16631,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>1</fret>
+            <string>3</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -16638,7 +16705,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>1</fret>
+            <string>3</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -16712,7 +16779,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>1</fret>
+            <string>3</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -16734,7 +16801,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>6</string><fret>5</fret>
+            <string>5</string><fret>0</fret>
           </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
@@ -16765,7 +16832,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>2</fret>
+            <string>4</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -16786,7 +16853,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>1</fret>
+            <string>3</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -16860,7 +16927,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>1</fret>
+            <string>3</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -16944,6 +17011,12 @@
           </technical>
         </notations>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="4" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note>
         <rest />
         <duration>10080</duration>
@@ -17781,7 +17854,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>1</fret>
+            <string>3</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -17855,7 +17928,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>1</fret>
+            <string>3</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -17929,7 +18002,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>1</fret>
+            <string>3</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -18003,7 +18076,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>1</fret>
+            <string>3</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -19128,7 +19201,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -19682,7 +19755,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -19735,7 +19808,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>1</fret>
+            <string>3</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -19756,7 +19829,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -20679,7 +20752,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>0</fret>
+            <string>5</string><fret>5</fret>
           </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
@@ -20710,7 +20783,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -20753,7 +20826,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>0</fret>
+            <string>4</string><fret>5</fret>
           </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
@@ -20784,7 +20857,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -20905,7 +20978,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>0</fret>
+            <string>4</string><fret>5</fret>
           </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>
@@ -21205,7 +21278,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>0</fret>
+            <string>5</string><fret>5</fret>
           </technical>
           <tuplet bracket="no" number="1" type="start">
             <tuplet-actual>

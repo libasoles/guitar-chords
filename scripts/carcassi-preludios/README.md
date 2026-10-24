@@ -47,6 +47,14 @@ para la modal en `full/`. Los PDF de Santisteban llevan su nombre en el archivo
 y en el subtítulo para distinguirlos una vez descargados. El build falla
 si el motor descarta notas.
 
+**Cejillas (Santisteban).** La edición marca `b_II` (cejilla pequeña: las tres cuerdas agudas) y `B_IV` (grande: las seis)
+sobre la nota donde empiezan, y vale hasta la marca siguiente (una posición suelta, `II`, la cierra). `santisteban_barres.py`
+las lee de `sources/santisteban.ly` y escribe `santisteban/barres.json`; `transcribe_lib.write` y `transcribe_triplets.write`
+las inyectan en el MusicXML (`C 2` / `½C 2` con línea punteada, `backend/engine/barres.py`) y el motor (`tabify` y las reglas
+de arpegio de `extract.py`) deja bajo ellas las cuerdas cubiertas en ese traste o más arriba. Preludios 5 a 16.
+`santisteban_barres.py --check` compara los compases del `.ly` con los del MusicXML. La edición original de Carcassi no
+imprime cejillas en estos preludios.
+
 El PDF se genera desde el MusicXML: no es un recorte del libro. Se fijan autor y
 título y se eliminan productor, fechas y bloque `encoding`. El motor propone la
 digitación de la TAB con afinación estándar; `avoid_repeated_strings` evita saltos

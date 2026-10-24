@@ -72,6 +72,19 @@ un silencio de negra y toca los dos acordes en los tiempos 2 y 3. Comparar solo 
 que esos ataques se hayan desplazado: la regresión de `test/sagreras.unit.js` verifica también sus inicios y
 duraciones en la fuente y en el MusicXML publicado.
 
+## Cejillas
+
+Marieh imprime la cejilla como «₵N» (fuente FreeSerif) seguida de una línea punteada que dura lo que ella. `marieh_notes.barre_marks`
+las lee de la página y `transcribe.barre_spans` las pasa a compás y posición con el eje `x → inicio` que expone
+`convert_measure`: empieza en la primera nota a la derecha de la marca y termina en la última que alcanza la línea (sin línea,
+dura el compás). `backend/engine/barres.py` las escribe en el MusicXML como `C 2` más una línea punteada, y `tabify` las lee
+de vuelta: bajo una cejilla ninguna de las seis cuerdas queda al aire ni por debajo de su traste. Están marcadas las
+lecciones 55, 74, 76 y 79 a 86.
+
+Algunas fuentes se curaron a mano después de leerlas del PDF (55, 76, 79 y 84 ya no coinciden con lo que regenera `transcribe.py`),
+así que **no se regeneran para añadir cejillas**: `transcribe.py barres [N ...]` borra las marcas de cada `sources/NN.musicxml` y
+escribe las del PDF sin tocar sus notas. Una lección nueva las recibe sola al convertirse.
+
 ## Reproducir
 
 ```sh

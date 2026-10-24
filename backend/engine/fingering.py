@@ -18,6 +18,7 @@ strings).
 """
 
 import collections
+import re
 
 SAME_STRING = 8.0       # two different notes in a row on one string
 REPEAT_MOVED = 3.0      # a repeated note changes string
@@ -136,23 +137,25 @@ def _one_cell_per_pitch(layers, owner, chosen, opens, active):
     return restricted
 
 
-def avoid_repeated_strings(tabs, opens, max_fret=9, open_reach=6, measures=None, economy=False):
+def avoid_repeated_strings(tabs, opens, max_fret=9, open_reach=6, measures=None, economy=False, barres=None):
     """Apply the module's rules to `tabs` (one list of columns per measure, cells string 1 first) in place.
     `opens`: open-string MIDI, string 1 first. `measures`: indexes of the measures to treat as arpeggios
     (default all). `economy` adds rule 3 (off for the published collections, which predate it). Single-note columns of those measures are re-chosen over the whole piece (see `solve`);
-    chords and the other measures keep their cells."""
+    chords and the other measures keep their cells. `barres`: per measure, per column, the barre `(fret, strings)` in
+    force or None; a single note keeps to the cells the barre allows."""
     active = set(range(len(tabs))) if measures is None else set(measures)
     flat = [col for measure in tabs for col in measure]
     owner = [m for m, measure in enumerate(tabs) for _ in measure]
     layers = []
-    for m, col in zip(owner, flat):
+    held = [b for measure in (barres or [[None] * len(m) for m in tabs]) for b in measure]
+    for m, col, barre in zip(owner, flat, held):
         cells = tuple((s, f) for s, f in enumerate(col) if f is not None)
         if len(cells) != 1 or m not in active:
             layers.append(([cells], cells))
             continue
         pitch = opens[cells[0][0]] + cells[0][1]
-        options = [((s, pitch - o),) for s, o in enumerate(opens) if 0 <= pitch - o <= max_fret]
-        layers.append((options or [cells], cells))
+        allowed = under_barre([(s, pitch - o) for s, o in enumerate(opens) if 0 <= pitch - o <= max_fret], barre)
+        layers.append(([(cell,) for cell in allowed] or [cells], cells))
     if not flat:
         return tabs
 
@@ -185,16 +188,55 @@ def avoid_repeated_strings(tabs, opens, max_fret=9, open_reach=6, measures=None,
 EXTENSION = 1   # frets the hand may stretch beyond its position before a finger combination is impossible
 
 
-def allowed_cells(midi, opens, hint, max_fret):
-    """The (string, fret) cells for `midi` that agree with its hint {string, fret, finger}; all of them if the hint
-    contradicts the pitch (the pitch wins: a misread annotation must not drop a note)."""
+def allowed_cells(midi, opens, hint, max_fret, barre=None):
+    """The (string, fret) cells for `midi` that agree with its hint {string, fret, finger} and with the barre
+    ((fret, strings), see `parse_barre`) in force; all of them if the hint contradicts the pitch (the pitch wins: a
+    misread annotation must not drop a note). A barre that leaves the note no cell is ignored for it."""
     cells = [(s, midi - o) for s, o in enumerate(opens) if 0 <= midi - o <= max_fret]
     narrowed = [(s, f) for s, f in cells
                 if (hint.get("string") is None or s == hint["string"])
                 and (hint.get("fret") is None or f == hint["fret"])
                 and (hint.get("finger") != 0 or f == 0)
                 and not (hint.get("fretted") and f == 0)]
-    return narrowed or cells
+    return under_barre(narrowed or cells, barre)
+
+
+# --- Barre ("cejilla") ------------------------------------------------------------------------------------
+# The first finger lies across several strings at one fret for a stretch of the piece. Scores write it as «C 7»
+# (full barre at fret VII) or «½C 7» (half barre) over a dashed line that lasts as long as the barre. While it
+# holds, no string it covers can be open or sound below its fret: every note there is played at the barre's fret or
+# higher. A full barre covers the six strings; a half barre the three highest (Carcassi, «The Barrer»).
+
+BARRE_TEXT = re.compile(r"^\s*(½|1/2)?\s*C\.?\s*(\d{1,2}|[IVX]{1,5})\s*$")
+ROMAN = {"I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7, "VIII": 8, "IX": 9, "X": 10, "XI": 11, "XII": 12}
+HALF_BARRE_STRINGS = 3
+
+
+def parse_barre(text):
+    """`(fret, strings)` for a barre mark such as «C 7», «C.VII» or «½C 2»; None for any other text. `strings` is how
+    many strings, counted from the highest, the barre covers."""
+    match = BARRE_TEXT.match(text or "")
+    if not match:
+        return None
+    word = match.group(2)
+    fret = int(word) if word.isdigit() else ROMAN.get(word)
+    if not fret:
+        return None
+    return fret, HALF_BARRE_STRINGS if match.group(1) else 6
+
+
+def barre_text(fret, strings=6):
+    """The mark a score prints for a barre (the inverse of `parse_barre`)."""
+    return ("" if strings >= 6 else "½") + f"C {fret}"
+
+
+def under_barre(cells, barre):
+    """`cells` ((string, fret) alternatives of one note) that a barre `(fret, strings)` allows; all of them when it
+    allows none (a bass note below the barre keeps its pitch)."""
+    if not barre:
+        return cells
+    fret, strings = barre
+    return [(s, f) for s, f in cells if s >= strings or f >= fret] or cells
 
 
 def fingers_possible(combo, fingers):

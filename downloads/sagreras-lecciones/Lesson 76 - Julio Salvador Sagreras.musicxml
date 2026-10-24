@@ -959,6 +959,18 @@
     </measure>
     <!--========================= Measure 3 ==========================-->
     <measure implicit="no" number="3">
+      <direction placement="above">
+        <direction-type>
+          <words>C 2</words>
+        </direction-type>
+        <staff>1</staff>
+      </direction>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="1" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-26">
         <pitch>
           <step>G</step>
@@ -1007,6 +1019,12 @@
           </technical>
         </notations>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="1" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <backup>
         <duration>30240</duration>
       </backup>
@@ -1416,7 +1434,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>5</string><fret>0</fret>
+            <string>6</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -2775,6 +2793,18 @@
     </measure>
     <!--========================= Measure 7 ==========================-->
     <measure implicit="no" number="7">
+      <direction placement="above">
+        <direction-type>
+          <words>C 2</words>
+        </direction-type>
+        <staff>1</staff>
+      </direction>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="2" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-78">
         <pitch>
           <step>G</step>
@@ -2823,6 +2853,12 @@
           </technical>
         </notations>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="2" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <backup>
         <duration>30240</duration>
       </backup>
@@ -3144,7 +3180,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>0</fret>
+            <string>4</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -3160,7 +3196,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>5</string><fret>0</fret>
+            <string>6</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -3180,7 +3216,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>5</string><fret>0</fret>
+            <string>6</string><fret>5</fret>
           </technical>
         </notations>
       </note>

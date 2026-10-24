@@ -8,7 +8,7 @@ Pitch "R" = silencio visible; "B3~" empieza una ligadura y "B3_" la termina.
 import os
 from xml.sax.saxutils import escape
 
-from transcribe_lib import Accidentals, parse, pitch_xml
+from transcribe_lib import Accidentals, barre_marks, barres_of, parse, pitch_xml
 
 DIVISIONS = 3
 TYPES = {1: "eighth", 3: "quarter", 6: "half", 9: "half"}
@@ -103,14 +103,18 @@ def measure_xml(number, fifths, bass, up, first=False):
     return f'<measure number="{number}">{attrs}{v1}<backup><duration>{LENGTH}</duration></backup>{v2}</measure>'
 
 
-def write(path, title, fifths, measures):
-    """`measures`: [{"bass": [...], "up": [...]}]; escribe el MusicXML corregido en `path`."""
+def write(path, title, fifths, measures, barres=None):
+    """`measures`: [{"bass": [...], "up": [...]}]; escribe el MusicXML corregido en `path`, con las cejillas
+    de `barres.json` (ver `transcribe_lib.write`)."""
     body = "".join(measure_xml(i + 1, fifths, m["bass"], m["up"], first=i == 0) for i, m in enumerate(measures))
     xml = ('<?xml version="1.0" encoding="UTF-8"?>'
            f'<score-partwise version="3.1"><work><work-title>{escape(title)}</work-title></work>'
            '<identification><creator type="composer">Matteo Carcassi</creator></identification>'
            '<part-list><score-part id="P1"><part-name>Guitar</part-name></score-part></part-list>'
            f'<part id="P1">{body}</part></score-partwise>\n')
+    spans = barres_of(path) if barres is None else barres
+    if spans:
+        xml = barre_marks.inject(xml, spans)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         f.write(xml)

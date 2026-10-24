@@ -17,6 +17,12 @@ import xml.etree.ElementTree as ET
 from fractions import Fraction
 from xml.sax.saxutils import escape
 
+sys.path.insert(0, str(__import__('pathlib').Path(__file__).resolve().parents[2] / 'backend' / 'engine'))
+import barres as barre_marks  # noqa: E402
+
+# «C.VII» (cejilla en el VII), «Barré», «Ceja», «Ceja á prevencion»: ver Converter.barre_spans
+BARRE_TEXT = re.compile(r'\bC\.([IVX]+)\b|Barr[eé]|\bCeja')
+ROMAN_FRETS = {'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6, 'VII': 7, 'VIII': 8, 'IX': 9, 'X': 10, 'XI': 11, 'XII': 12}
 DIVISIONS = 480  # por negra: alcanza para fusas y tresillos de semicorcheas
 HALVED = {'whole': 'half', 'half': 'quarter', 'quarter': 'eighth', 'eighth': '16th', '16th': '32nd', '32nd': '64th'}
 TYPE_QUARTERS = {'whole': Fraction(4), 'half': Fraction(2), 'quarter': Fraction(1), 'eighth': Fraction(1, 2),
@@ -165,11 +171,48 @@ class Converter:
             elif open_starts and open_starts.pop(0) in ('2', '3'):
                 self.text_ends.add(id(el))
         self.hair_events = []
-        return self.render()
+        xml = self.render()
+        spans = self.barre_spans()
+        return barre_marks.inject(xml, spans) if spans else xml
+
+    # -- cejillas ----------------------------------------------------------------------------------
+    def barre_spans(self):
+        """Tramos de cejilla (`backend/engine/barres.py`) de los textos «C.VII», «Barré», «Ceja»...: no traen ni el final ni,
+        casi siempre, el traste. Salen de la TAB que TabGuitar dibuja (cuerda y traste de cada nota del archivo): de las
+        cejillas posibles (el traste escrito en el texto, o cada traste pisado en el compas de la marca; entera o media) se
+        toma la que esa TAB respeta por mas notas seguidas, sin cuerda al aire ni traste menor bajo ella, y con alguna nota
+        pisada en su traste; a igualdad, la de traste mas alto y entera. Dura hasta la primera nota que la contradice o hasta
+        la marca siguiente."""
+        marks = sorted(self.barre_marks)
+        events = sorted(self.tab_events, key=lambda e: e[:2])
+        spans = []
+        for k, (bar, at, written) in enumerate(marks):
+            following = marks[k + 1][:2] if k + 1 < len(marks) else None
+            window = [e for e in events if e[:2] >= (bar, at) and (following is None or e[:2] < following)]
+            frets = [written] if written else sorted({f for e in window if e[0] == bar for _, f in e[2] if f > 0})
+            best = None
+            for fret in frets:
+                for strings in (6, 3):
+                    run = next((i for i, e in enumerate(window) if any(s < strings and f < fret for s, f in e[2])), len(window))
+                    used = any(s < strings and f == fret for e in window[:run] for s, f in e[2])
+                    score = (run, fret, strings)
+                    if run and used and (best is None or score > best[0]):
+                        best = (score, fret, strings)
+            if best is None:
+                continue
+            (run, _, _), fret, strings = best
+            span = {'bar': bar, 'at': float(at), 'fret': fret, 'strings': strings}
+            if run < len(window):
+                span['end_bar'], span['end_at'] = window[run][0], float(window[run][1])
+            else:
+                span['end_bar'], span['end_at'] = (following[0], float(following[1])) if following else (self.bars + 1, 0)
+            spans.append(span)
+        return spans
 
     def render(self):
         measures = [m for m in self.staff.findall('Measure')]
         self.plan_voltas(measures)
+        self.barre_marks, self.tab_events, self.bars = [], [], len(measures)
         self.tempo = self.tempo_text
         self.fifths, self.time, self.clef_written = 0, (4, 4), False
         out = []
@@ -329,6 +372,11 @@ class Converter:
                     pending.append('<direction placement="below"><direction-type><wedge type="%s"/></direction-type></direction>' % wedge)
                 elif el.find('prev') is not None and id(el) not in self.text_ends:
                     pending.append('<direction><direction-type><wedge type="stop"/></direction-type></direction>')
+            elif tag == 'StaffText':
+                found = BARRE_TEXT.search(rich_text(el))
+                if found:
+                    roman = found.group(1)
+                    self.barre_marks.append((self.index + 1, total, ROMAN_FRETS[roman] if roman else None))
             elif tag == 'Fermata':
                 fermata = not self.no_fermata
             elif tag == 'Rest':
@@ -346,6 +394,9 @@ class Converter:
                 dur, kind = duration_of(el, length, tuplet, self.halve)
                 out += ''.join(pending); pending = []
                 if not grace:
+                    cells = [(int(n.findtext('string')), int(n.findtext('fret'))) for n in el.findall('Note')
+                             if n.findtext('string') is not None and n.findtext('fret') is not None]
+                    self.tab_events.append((self.index + 1, total, cells))
                     level = BEAM_LEVEL.get(kind, 0)
                     events.append({'level': level, 'pos': offset + total, 'mode': el.findtext('BeamMode')})
                 out += self.chord(el, dur, kind, number, stem, tuplet, grace, len(events) - 1, fermata and not grace)

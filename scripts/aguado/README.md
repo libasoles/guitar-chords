@@ -33,7 +33,12 @@ RESOURCES_DIR=/ruta/al/checkout/resources .venv-carcassi/bin/python scripts/agua
   conversor, como `<fingering>`); el motor toma los dedos como pista de la TAB y no cambia las letras. Los números de
   cuerda con círculo no se copian. Cada PDF lleva al pie el crédito a TabGuitar (`pdf_footer.py`, igual que Sagreras con
   Marieh); la web ya lo cita en la introducción.
-- Se descartan las marcas de ceja, barré y posición (`DROP_TEXTS`). Se añaden o corrigen los textos que el libro imprime
+- **Cejillas**: los textos `C.VII`, `Barré` y `Ceja` no se imprimen tal cual (`DROP_TEXTS`), pero el conversor los lee
+  (`Converter.barre_spans`) y escribe una cejilla `C 7` / `½C 7` con línea punteada (`backend/engine/barres.py`); el motor
+  mantiene bajo ella las cuerdas que cubre en ese traste o más arriba. Como no traen final ni, casi siempre, el traste,
+  salen de la TAB que TabGuitar dibuja en el archivo (cuerda y traste de cada nota): se elige la cejilla que esa TAB respeta
+  por más notas seguidas y dura hasta la primera que la contradice o hasta la marca siguiente. Las marcas de posición
+  (`VII D7`) se descartan. Se añaden o corrigen los textos que el libro imprime
   (`Andante.`, `Wals.`, `Fin.`, `Cantabile.`) en `pieces.json`.
 - El libro abrevia compases con el signo de repetición de compás; el archivo los escribe completos y así se publican.
 - **Estudio 2 de TabGuitar queda fuera**: es una pieza en 12/8 distinta del «Est. 2.º» del libro (2/4, Andante).

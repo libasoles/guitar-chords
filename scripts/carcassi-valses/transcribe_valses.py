@@ -117,7 +117,8 @@ def convert_measure(m, fifths, full, scale=1, rest_voices=False):
                 if i.get('fingers'):
                     fingers[(len(voices), i['onset'])] = i['fingers']
             voices.append({'stem': name, 'events': [(i['onset'], i['dur'], i['pitch'], None, i.get('graces', []), i.get('ties', {})) for i in lane]})
-    out = {'voices': voices, 'fingers': fingers}
+    out = {'voices': voices, 'fingers': fingers,
+           'axis': sorted({(round(i['x'], 1), i['onset']) for lane in lanes.values() for l in lane for i in l})}  # x -> inicio
     out['length'] = max([e[0] + e[1] for v in voices for e in v['events']] + [0])
     return out
 

@@ -571,6 +571,13 @@
     </measure>
     <!--========================= Measure 3 ==========================-->
     <measure implicit="no" number="3">
+      <direction placement="above">
+        <direction-type>
+          <words>C 2</words>
+        </direction-type>
+        <offset>2520</offset>
+        <staff>1</staff>
+      </direction>
       <note>
         <rest />
         <duration>2520</duration>
@@ -578,6 +585,12 @@
         <type>16th</type>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="1" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-16">
         <pitch>
           <step>C</step>
@@ -679,6 +692,12 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="1" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <backup>
         <duration>20160</duration>
       </backup>
@@ -1361,6 +1380,13 @@
     </measure>
     <!--========================= Measure 6 ==========================-->
     <measure implicit="no" number="6">
+      <direction placement="above">
+        <direction-type>
+          <words>C 3</words>
+        </direction-type>
+        <offset>2520</offset>
+        <staff>1</staff>
+      </direction>
       <note>
         <rest />
         <duration>2520</duration>
@@ -1368,6 +1394,12 @@
         <type>16th</type>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="2" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-40">
         <pitch>
           <step>D</step>
@@ -1462,6 +1494,12 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="2" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <backup>
         <duration>20160</duration>
       </backup>
@@ -2722,6 +2760,13 @@
     </measure>
     <!--========================= Measure 11 =========================-->
     <measure implicit="no" number="11">
+      <direction placement="above">
+        <direction-type>
+          <words>C 2</words>
+        </direction-type>
+        <offset>2520</offset>
+        <staff>1</staff>
+      </direction>
       <note>
         <rest />
         <duration>2520</duration>
@@ -2729,6 +2774,12 @@
         <type>16th</type>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="3" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-81">
         <pitch>
           <step>C</step>
@@ -2820,6 +2871,12 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="3" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <backup>
         <duration>20160</duration>
       </backup>
@@ -3492,6 +3549,13 @@
     </measure>
     <!--========================= Measure 14 =========================-->
     <measure implicit="no" number="14">
+      <direction placement="above">
+        <direction-type>
+          <words>C 3</words>
+        </direction-type>
+        <offset>2520</offset>
+        <staff>1</staff>
+      </direction>
       <note>
         <rest />
         <duration>2520</duration>
@@ -3499,6 +3563,12 @@
         <type>16th</type>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="4" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-105">
         <pitch>
           <step>D</step>
@@ -3588,6 +3658,12 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="4" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <backup>
         <duration>20160</duration>
       </backup>

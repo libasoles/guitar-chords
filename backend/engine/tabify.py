@@ -165,8 +165,8 @@ def load_score(paths):
         # Curated scores (the site's Carcassi collections) set KEEP_TEXT to print their tempo and D.C. marks.
         for el in list(score.recurse().getElementsByClass(
                 (m21.expressions.TextExpression, m21.expressions.RehearsalMark, m21.tempo.TempoIndication))):
-            if KEEP_TEXT and isinstance(el, m21.expressions.TextExpression):
-                continue
+            if isinstance(el, m21.expressions.TextExpression) and (KEEP_TEXT or fingering.parse_barre(el.content)):
+                continue  # a barre mark is a playing instruction, not OCR noise
             el.activeSite.remove(el)
     part = scores[0].parts[0]
     first = part.getElementsByClass(m21.stream.Measure).first()
@@ -224,6 +224,7 @@ def build_columns(part, shifts=None):
         raise ValueError("Las transposiciones guardadas no coinciden con los compases.")
     measures = []
     key = 0
+    barres = barre_spans(part)
     for measure, shift in zip(source, shifts):
         by_offset = {}
         hints = {}
@@ -248,11 +249,39 @@ def build_columns(part, shifts=None):
                     continue
                 column.append((note, note.pitch.midi + shift))
         columns = [{"offset": o, "notes": by_offset[o]} for o in sorted(by_offset)]
+        start = float(measure.getOffsetInHierarchy(part))
         for column in columns:
             column["hints"] = {m: hints[m] for _, m in column["notes"] if hints.get(m)}
+            column["barre"] = next((b["barre"] for b in barres if b["start"] - 1e-6 <= start + column["offset"] <= b["end"] + 1e-6),
+                                   None)
         measures.append({"number": measure.number, "measure": measure, "columns": columns})
     # Reported shift: the one most measures use.
     return measures, max(set(shifts), key=shifts.count, default=0)
+
+
+def barre_spans(part):
+    """The barres written in the part: [{start, end, barre: (fret, strings)}] with offsets in quarter lengths from the
+    start of the part (both ends included). A barre is a text such as «C 7» (see `fingering.parse_barre`) and the
+    dashed line that follows it, which ends with the last note it covers (that note's whole length); without a line it lasts to the end of its
+    measure."""
+    lines = sorted((float(line.getFirst().getOffsetInHierarchy(part)),
+                    float(line.getLast().getOffsetInHierarchy(part) + line.getLast().duration.quarterLength) - 1e-3)
+                   for line in part.recurse().getElementsByClass(m21.spanner.Line)
+                   if line.lineType == "dashed" and line.getFirst() is not None and line.getLast() is not None)
+    marks = sorted((float(text.getOffsetInHierarchy(part)), fingering.parse_barre(text.content), text)
+                   for text in part.recurse().getElementsByClass(m21.expressions.TextExpression)
+                   if fingering.parse_barre(text.content))
+    spans = []
+    for start, barre, text in marks:
+        line = next((l for l in lines if l[0] >= start - 1e-6), None)
+        if line is not None:
+            lines.remove(line)
+            end = line[1]
+        else:
+            measure = text.getContextByClass(m21.stream.Measure)
+            end = float(measure.getOffsetInHierarchy(part) + measure.duration.quarterLength) - 1e-3 if measure else start
+        spans.append({"start": start, "end": end, "barre": barre})
+    return spans
 
 
 def midi_key(note, shift):
@@ -300,13 +329,13 @@ def dropped_notes(measures):
 
 # --- String/fret assignment ------------------------------------------------
 
-def candidates(midis, opens, hints=None):
+def candidates(midis, opens, hints=None, barre=None):
     """Every way to put the (distinct) pitches on distinct strings. `hints` ({midi: {string, fret, finger}}, from
     the score's annotations) narrow the cells of a note and rule out finger combinations nobody can hold; if the
-    annotations leave nothing playable they are ignored for this column."""
+    annotations leave nothing playable they are ignored for this column. `barre` ((fret, strings), see
+    `fingering.parse_barre`) keeps the notes of the strings it covers at its fret or higher."""
     hints = hints or {}
-    options = [[(s, f) for s, f in fingering.allowed_cells(m, opens, hints.get(m, {}), MAX_FRET)] if hints.get(m)
-               else [(s, m - o) for s, o in enumerate(opens) if 0 <= m - o <= MAX_FRET] for m in midis]
+    options = [fingering.allowed_cells(m, opens, hints.get(m, {}), MAX_FRET, barre) for m in midis]
     out = []
     for combo in itertools.product(*options):
         strings = [s for s, _ in combo]
@@ -341,11 +370,11 @@ def hand(combo):
     return min(fretted) if fretted else None
 
 
-def playable_subset(midis, opens, hints=None):
+def playable_subset(midis, opens, hints=None, barre=None):
     """Drops pitches until the rest fit on the strings: out-of-range ones first,
     then inner voices (keep bass and melody)."""
     midis = [m for m in midis if any(0 <= m - o <= MAX_FRET for o in opens)]
-    while midis and not candidates(midis, opens, hints):
+    while midis and not candidates(midis, opens, hints, barre):
         midis.pop(len(midis) // 2)
     return midis
 
@@ -364,9 +393,9 @@ def assign_frets(measures, tuning=STANDARD_TUNING, arpeggio=False):
         fingering.mark_fretted({m: h for col in measure["columns"] for m, h in col.get("hints", {}).items()}, opens, MAX_FRET)
     for col in flat:
         midis = sorted({m for _, m in col["notes"]}, reverse=True)
-        midis = playable_subset(midis, opens, col.get("hints"))
+        midis = playable_subset(midis, opens, col.get("hints"), col.get("barre"))
         col["midis"] = midis
-        combos = candidates(midis, opens, col.get("hints")) or [()]
+        combos = candidates(midis, opens, col.get("hints"), col.get("barre")) or [()]
         combos.sort(key=local_cost)
         layers.append([(c, local_cost(c)) for c in combos[:CANDIDATES_PER_COLUMN]])
 
@@ -405,7 +434,8 @@ def apply_arpeggio_rules(measures, opens, arpeggio):
     if not active:
         return
     tabs = [[list(c["cells"]) for c in m["columns"]] for m in measures]
-    fingering.avoid_repeated_strings(tabs, opens, measures=active, economy=True)
+    fingering.avoid_repeated_strings(tabs, opens, measures=active, economy=True,
+                                     barres=[[c.get("barre") for c in m["columns"]] for m in measures])
     for m, tab in zip(measures, tabs):
         for col, cells in zip(m["columns"], tab):
             if cells != col["cells"]:
@@ -957,6 +987,8 @@ def _suggestion(measures, tuning, shifts, title, subtitles):
         "arpeggio_measures": [m["number"] for m in measures if m.get("arpeggio")],
         # One ascii-tabs Tab (Column[]) per measure: the Digitación sugerida.
         "tabs": [[c["cells"] for c in m["columns"]] for m in measures],
+        # Per measure, per Column: the barre (fret, strings) written over it, or null (`fingering.parse_barre`).
+        "barres": [[c.get("barre") for c in m["columns"]] for m in measures],
         "preview_columns": [preview_columns(m) for m in measures],
     }
 

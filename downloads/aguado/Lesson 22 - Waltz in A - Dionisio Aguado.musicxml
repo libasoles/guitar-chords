@@ -1501,6 +1501,13 @@
     </measure>
     <!--========================= Measure 6 ==========================-->
     <measure implicit="no" number="6">
+      <direction placement="above">
+        <direction-type>
+          <words>½C 7</words>
+        </direction-type>
+        <offset>7560</offset>
+        <staff>1</staff>
+      </direction>
       <note>
         <rest />
         <duration>7560</duration>
@@ -1509,6 +1516,12 @@
         <dot />
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="1" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-39">
         <pitch>
           <step>B</step>
@@ -1776,6 +1789,12 @@
         <dot />
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="1" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-46">
         <pitch>
           <step>G</step>
@@ -1961,7 +1980,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>3</fret>
+            <string>3</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -1977,7 +1996,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>4</fret>
+            <string>4</string><fret>9</fret>
           </technical>
         </notations>
       </note>
@@ -2029,7 +2048,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>2</fret>
+            <string>5</string><fret>7</fret>
           </technical>
         </notations>
       </note>
