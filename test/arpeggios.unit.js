@@ -102,3 +102,49 @@ test('popup note labels match every exact voicing and leave silent strings empty
   assert.deepEqual(chords.find((chord) => chord.name === 'Cm').stringNotes, ['G', 'E♭', 'G', '', 'C', '']);
   assert.deepEqual(chords.find((chord) => chord.name === 'D/F#').stringNotes, ['F♯', 'D', 'A', '', '', 'F♯']);
 });
+
+
+test('dominant sevenths without fifths cover all 12 roots and all three bass tones', () => {
+  const groups = GROUPS.filter(([, , quality]) => quality === 'SeventhNoFifth');
+  assert.equal(groups.length, 12);
+  assert.equal(new Set(groups.map(([, root]) => pitchClass(root))).size, 12);
+  for (const [, rootName, , names, forms, fingerings] of groups) {
+    const root = pitchClass(rootName);
+    const basses = [];
+    forms.forEach((form, i) => {
+      const pitches = sounding(form);
+      assert.equal(pitches.length, 4);
+      assert.ok(form.slice(0, 3).every((fret) => fret !== null), 'three treble strings');
+      assert.equal(form.slice(3).filter((fret) => fret !== null).length, 1, 'one bass string');
+      const intervals = (notes) => [...new Set(notes.map((pitch) => (pitch - root + 12) % 12))].sort((a, b) => a - b);
+      assert.deepEqual(intervals(pitches), [0, 4, 10], names[i] + ' contains root, major third and minor seventh only');
+      assert.deepEqual(intervals(pitches.slice(0, 3)), [0, 4, 10], names[i] + ' treble tones');
+      const bass = Math.min(...pitches) % 12;
+      assert.equal(bass, pitchClass(names[i].split('/')[1] || rootName));
+      basses.push((bass - root + 12) % 12);
+      form.forEach((fret, string) => {
+        if (fret > 0) assert.match(fingerings[i][string], /^[1-4]$/, names[i] + ' has fingering');
+      });
+    });
+    assert.deepEqual(basses.sort((a, b) => a - b), [0, 4, 10]);
+  }
+});
+
+for (const locale of ['es', 'en']) {
+  test('no-fifth blocks share the seventh tab and appear in search in ' + locale, () => {
+    const strings = require('../src/i18n/strings.' + locale + '.json');
+    const html = renderBody(locale, strings);
+    const search = JSON.parse(html.match(/id="arpeggio-search-data">([^<]+)/)[1]);
+    for (const [, root, , names, forms] of GROUPS.filter(([, , quality]) => quality === 'SeventhNoFifth')) {
+      const section = html.split('<section').find((part) => part.includes('id="arpeggio-' + root + '-root"')).split('</section>')[0];
+      assert.ok(!section.includes('>' + strings.artArpeggiosSeventhNoFifth + '</button>'), 'no separate tab');
+      const panel = section.split('<div role="tabpanel"').find((part) => part.includes('arpeggio-block-label'));
+      assert.ok(panel.includes('>' + strings.artArpeggiosSeventhNoFifth + '</h3>'));
+      const tabId = panel.match(/aria-labelledby="([^"]+)"/)[1];
+      assert.ok(section.includes('id="' + tabId + '"'));
+      assert.match(section.split('id="' + tabId + '"')[1].split('</button>')[0], />7$/);
+      const indexed = search.roots.find((item) => item.id === 'arpeggio-' + root).chords;
+      forms.forEach((form, i) => assert.ok(indexed.some((chord) => chord.name === names[i] && JSON.stringify(chord.form) === JSON.stringify(form))));
+    }
+  });
+}

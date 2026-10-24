@@ -131,12 +131,12 @@ const PDFS = [
       await page.waitForSelector('.arpeggio-group ascii-tabs .ascii-tabs-tab');
       assert.equal(await page.locator('h1').textContent(), locale === 'es' ? 'Tablaturas para arpegios' : 'Tabs for arpeggios');
       assert.equal(await page.locator('.lead a').getAttribute('href'), pagePath('articulo-carcassi', locale));
-      assert.equal(await page.locator('ascii-tabs[readonly]').count(), 45);
+      assert.equal(await page.locator('ascii-tabs[readonly]').count(), 57);
       const titles = await page.locator('.arpeggio-group figcaption').allTextContents();
       assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Do menor', 'Do 7'] : ['C major', 'C minor', 'C 7']);
       const groups = await page.locator('.arpeggio-group ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
       groups.flat().forEach((form) => assert.equal(form.filter((f) => f !== null).length, 4));
-      assert.deepEqual(groups[14][1], [0, 3, 1, null, 2, null]);
+      assert.deepEqual(await page.locator('#arpeggio-E-panel-2 ascii-tabs').first().evaluate((el) => el.value[0][2].map((note) => note === null ? null : note.fret)), [0, 3, 1, null, 2, null]);
       assert.equal(await page.locator('ascii-tabs[variant="flat"]').count(), groups.length);
       const weights = await page.locator('.ascii-tabs-has').evaluateAll((cells) => cells.map((cell) => ({
         string: Number(cell.dataset.s),
@@ -145,7 +145,7 @@ const PDFS = [
       weights.forEach(({ string, weight }) => assert.equal(weight, string >= 3 ? '700' : '400'));
       if (locale === 'es') assert.match(await page.locator('.lead a').textContent(), /^descomposición/);
       // The names are annotation buttons above the strings, without underline.
-      assert.deepEqual(await page.locator('.arpeggio-group ascii-tabs').nth(8).locator('.ascii-tabs-annotations .arpeggio-chord').allTextContents(), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
+      assert.deepEqual(await page.locator('#arpeggio-D-panel-2 ascii-tabs').first().locator('.ascii-tabs-annotations .arpeggio-chord').allTextContents(), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
       // The white paper starts below the names.
       const [nameBottom, paperTop] = await page.locator('.arpeggio-group ascii-tabs').first().evaluate((el) => [
         el.querySelector('.arpeggio-chord').getBoundingClientRect().bottom,
@@ -153,11 +153,11 @@ const PDFS = [
       ]);
       assert.ok(nameBottom <= paperTop + 1,'chord names sit above the paper');
       assert.equal(await page.locator('.arpeggio-chord').first().evaluate((el) => getComputedStyle(el).textDecorationLine), 'none');
-      assert.deepEqual(groups[8], [
+      assert.deepEqual(await page.locator('#arpeggio-D-panel-2 ascii-tabs').first().evaluate((el) => el.value[0].filter((column) => column.some((note) => note !== null)).map((column) => column.map((note) => note === null ? null : note.fret))), [
         [2, 1, 2, 0, null, null], [2, 1, 2, 4, null, null],
         [2, 1, 2, null, 0, null], [2, 1, 2, null, 3, null],
       ]);
-      assert.equal(await page.locator('.arpeggio-group').count(), 8);
+      assert.equal(await page.locator('.arpeggio-group').count(), 13);
 
       // Note search: typed frets keep every chord of each root that has them, in one tab per root.
       const toggle = page.locator('.arpeggio-search-toggle');
@@ -182,17 +182,17 @@ const PDFS = [
       assert.equal(await page.locator('.arpeggio-search-popup').isHidden(), true);
       assert.equal(await page.locator('.arpeggio-group:visible').count(), 3);
       await toggle.click();
-      assert.equal(await page.locator('.arpeggio-group:visible').count(), 8);
+      assert.equal(await page.locator('.arpeggio-group:visible').count(), 13);
       assert.equal(await page.locator('#arpeggio-results-title').isHidden(), true);
-      assert.equal(await page.locator('.arpeggio-group:visible [role="tabpanel"]:visible').count(), 8);
+      assert.equal(await page.locator('.arpeggio-group:visible [role="tabpanel"]:visible').count(), 13);
       assert.equal(await toggle.getAttribute('aria-label'), locale === 'es' ? 'Buscar por notas' : 'Search by notes');
-      assert.equal(await page.locator('[role="tabpanel"]:visible').count(), 8);
+      assert.equal(await page.locator('[role="tabpanel"]:visible').count(), 13);
       // Footer button: clears the typed notes, keeps the popup open and puts the cursor back on the first string.
       await toggle.click();
       await page.waitForFunction(() => document.activeElement && document.activeElement.classList.contains('ascii-tabs-input'));
       await page.keyboard.type('0');
       await page.locator('.arpeggio-search-clear').click();
-      assert.equal(await page.locator('.arpeggio-group:visible').count(), 8);
+      assert.equal(await page.locator('.arpeggio-group:visible').count(), 13);
       assert.equal(await page.locator('.arpeggio-search-popup').isVisible(), true);
       assert.equal(await page.locator('.arpeggio-search ascii-tabs').evaluate((el) => (el.value[0][0] || []).every((n) => n === null)), true);
       await page.waitForFunction(() => document.activeElement && document.activeElement.classList.contains('ascii-tabs-input'));
@@ -215,8 +215,8 @@ const PDFS = [
         const label = require('../src/i18n/strings.' + locale + '.json')['artArpeggios' + quality];
         await page.locator('#arpeggio-' + root + '-root').locator('..').getByRole('tab', { name: label, exact: true }).click();
         const panel = page.locator('.arpeggio-group').filter({ has: page.locator('#arpeggio-' + root + '-root') }).locator('[role="tabpanel"]:visible');
-        assert.deepEqual(await panel.locator('.arpeggio-chord').allTextContents(), names);
-        const forms = await panel.locator('ascii-tabs').evaluate((el) => el.value[0].filter((column) => column.some((note) => note !== null)));
+        assert.deepEqual(await panel.locator('ascii-tabs').first().locator('.arpeggio-chord').allTextContents(), names);
+        const forms = await panel.locator('ascii-tabs').first().evaluate((el) => el.value[0].filter((column) => column.some((note) => note !== null)));
         if (root === 'A' && quality === 'Seventh') {
           assert.deepEqual(forms[1].map((note) => note === null ? null : note.fret), [3, 2, 0, null, 0, null]);
         }
@@ -254,7 +254,7 @@ const PDFS = [
         const target = await button.getAttribute('popovertarget');
         const panel = button.locator('xpath=ancestor::*[@role="tabpanel"]');
         const tabId = await panel.getAttribute('aria-labelledby');
-        await page.locator('#' + tabId).click();
+        await page.locator('[id="' + tabId + '"]').click();
         await button.click();
         const popup = page.locator('#' + target);
         assert.ok(await popup.evaluate((el) => el.matches(':popover-open')));

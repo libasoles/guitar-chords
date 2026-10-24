@@ -57,7 +57,7 @@ async function checkArpeggioLayout() {
       const first = groups.first();
       const second = groups.nth(1);
       const viewSwitch = first.getByRole('switch');
-      assert.equal(await page.getByRole('switch', { checked: true }).count(), 8);
+      assert.equal(await page.getByRole('switch', { checked: true }).count(), 13);
       assert.equal(await first.locator('.arpeggio-diagrams:visible').count(), 0);
       await viewSwitch.click();
       assert.equal(await viewSwitch.getAttribute('aria-checked'), 'false');
@@ -71,7 +71,13 @@ async function checkArpeggioLayout() {
       await page.keyboard.press('Space');
       assert.equal(await viewSwitch.getAttribute('aria-checked'), 'true');
       assert.equal(await first.locator('ascii-tabs:visible').count(), 1);
+      await first.getByRole('tab', { name: '7', exact: true }).click();
+      assert.equal(await first.locator('.arpeggio-block-label').textContent(), '7 sin 5ta');
+      assert.equal(await first.locator('ascii-tabs:visible').count(), 2, 'both seventh blocks show tablature');
       await viewSwitch.click();
+      assert.equal(await first.locator('ascii-tabs:visible').count(), 0);
+      assert.equal(await first.locator('.arpeggio-diagrams:visible').count(), 2, 'both seventh blocks show diagrams');
+      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible').last().locator('.name').allTextContents(), ['C7', 'C7/E', 'C7/Bb']);
       // Every search resets all roots to tablature, including hidden roots.
       await second.getByRole('switch').click();
       await groups.last().getByRole('switch').click();
@@ -83,7 +89,7 @@ async function checkArpeggioLayout() {
       await page.locator('h1').click();
       const expected = await page.evaluate(() => JSON.parse(document.getElementById('arpeggio-search-data').textContent).roots[0].chords.filter((chord) => chord.form[0] === 0).map((chord) => chord.name));
       assert.equal(await viewSwitch.isVisible(), true);
-      assert.equal(await page.getByRole('switch', { checked: true, includeHidden: true }).count(), 8);
+      assert.equal(await page.getByRole('switch', { checked: true, includeHidden: true }).count(), 13);
       assert.equal(await first.locator('.arpeggio-results ascii-tabs').isVisible(), true);
       await viewSwitch.click();
       assert.deepEqual(await first.locator('.arpeggio-results .arpeggio-diagrams:visible .name').allTextContents(), expected);
@@ -93,15 +99,15 @@ async function checkArpeggioLayout() {
       await page.locator('.arpeggio-search ascii-tabs').evaluate((el) => {
         el.dispatchEvent(new CustomEvent('change', { detail: { value: [[[null, 1, null, null, null, null]]] } }));
       });
-      assert.equal(await page.getByRole('switch', { checked: true, includeHidden: true }).count(), 8, 'editing the query resets the view again');
+      assert.equal(await page.getByRole('switch', { checked: true, includeHidden: true }).count(), 13, 'editing the query resets the view again');
       assert.equal(await first.locator('.arpeggio-results ascii-tabs').isVisible(), true);
       await viewSwitch.click();
       await page.locator('.arpeggio-search-toggle').click();
-      assert.equal(await page.getByRole('switch', { checked: true, includeHidden: true }).count(), 8);
-      assert.equal(await first.locator('[role="tabpanel"]:visible ascii-tabs').isVisible(), true);
+      assert.equal(await page.getByRole('switch', { checked: true, includeHidden: true }).count(), 13);
+      assert.equal(await first.locator('[role="tabpanel"]:visible ascii-tabs:visible').count(), 2);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'representations fit viewport');
       await page.reload();
-      assert.equal(await page.getByRole('switch', { checked: true }).count(), 8, 'switch state is volatile');
+      assert.equal(await page.getByRole('switch', { checked: true }).count(), 13, 'switch state is volatile');
       await page.locator('.arpeggio-search-toggle').click();
       await page.waitForFunction(() => document.activeElement?.classList.contains('ascii-tabs-input'));
       await page.keyboard.type('1');

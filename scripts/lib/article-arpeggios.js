@@ -181,6 +181,50 @@ const GROUPS = [
   ]],
 ];
 
+// Root, major third and minor seventh only; the three treble strings hold
+// all three tones, doubled by one bass on strings 4–6. String 1 first.
+const SEVENTH_NO_FIFTH = [
+  ['Do', 'C', ['C7', 'C7/E', 'C7/Bb'], [
+    [0, 1, 3, null, 3, null], [0, 1, 3, null, null, 0], [0, 1, 3, null, 1, null],
+  ], ['014-3-', '014--0', '014-1-']],
+  ['Re♭', 'Db', ['Db7', 'Db7/F', 'Db7/Cb'], [
+    [1, 2, 4, null, 4, null], [1, 2, 4, null, null, 1], [1, 2, 4, null, 2, null],
+  ], ['124-3-', '124--1', '124-3-']],
+  ['Re', 'D', ['D7', 'D7/F#', 'D7/C'], [
+    [2, 3, 5, 0, null, null], [2, 3, 5, null, null, 2], [2, 3, 5, null, 3, null],
+  ], ['1240--', '124--1', '124-3-']],
+  ['Mi♭', 'Eb', ['Eb7', 'Eb7/G', 'Eb7/Db'], [
+    [3, 4, 6, null, 6, null], [3, 4, 6, null, null, 3], [3, 4, 6, null, 4, null],
+  ], ['124-3-', '124--1', '124-3-']],
+  ['Mi', 'E', ['E7', 'E7/G#', 'E7/D'], [
+    [0, 3, 1, null, null, 0], [0, 3, 1, null, null, 4], [0, 3, 1, 0, null, null],
+  ], ['031--0', '031--4', '0310--']],
+  ['Fa', 'F', ['F7', 'F7/A', 'F7/Eb'], [
+    [1, 4, 2, null, null, 1], [1, 4, 2, null, 0, null], [1, 4, 2, 1, null, null],
+  ], ['142--1', '142-0-', '1421--']],
+  ['Fa♯', 'F#', ['F#7', 'F#7/A#', 'F#7/E'], [
+    [2, 5, 3, null, null, 2], [2, 5, 3, null, 1, null], [2, 5, 3, null, null, 0],
+  ], ['142--1', '243-1-', '142--0']],
+  ['Sol', 'G', ['G7', 'G7/B', 'G7/F'], [
+    [1, 0, 0, null, null, 3], [1, 0, 0, null, 2, null], [1, 0, 0, null, null, 1],
+  ], ['100--3', '100-2-', '100--2']],
+  ['La♭', 'Ab', ['Ab7', 'Ab7/C', 'Ab7/Gb'], [
+    [2, 1, 1, null, null, 4], [2, 1, 1, null, 3, null], [2, 1, 1, null, null, 2],
+  ], ['211--4', '211-3-', '211--3']],
+  ['La', 'A', ['A7', 'A7/C#', 'A7/G'], [
+    [3, 2, 2, null, 0, null], [3, 2, 2, null, 4, null], [3, 2, 2, null, null, 3],
+  ], ['211-0-', '211-3-', '211--3']],
+  ['Si♭', 'Bb', ['Bb7', 'Bb7/D', 'Bb7/Ab'], [
+    [4, 3, 3, null, 1, null], [4, 3, 3, 0, null, null], [4, 3, 3, null, null, 4],
+  ], ['423-1-', '2110--', '211--3']],
+  ['Si', 'B', ['B7', 'B7/D#', 'B7/A'], [
+    [5, 4, 4, null, 2, null], [5, 4, 4, null, 6, null], [5, 4, 4, null, 0, null],
+  ], ['423-1-', '211-3-', '211-0-']],
+];
+SEVENTH_NO_FIFTH.forEach(([es, en, names, forms, fingerings]) => {
+  GROUPS.push([es, en, 'SeventhNoFifth', names, forms, fingerings]);
+});
+
 // The tab labels of the diminished seventh groups: the notes they share.
 const DIM7_LABELS = { Dim7C: 'C · Eb · Gb · A', Dim7Db: 'C# · E · G · Bb', Dim7D: 'D · F · Ab · B' };
 
@@ -263,8 +307,8 @@ function stringNotes(name, form) {
   return form.map((fret, string) => fret === null ? '' : spellings.get((open[string] + fret) % 12));
 }
 
-function chordPopover(id, name, form, strings) {
-  const fingering = FINGERINGS[form.map((fret) => fret === null ? 'x' : fret).join(' ')] || FINGERINGS[name];
+function chordPopover(id, name, form, strings, exactFingering) {
+  const fingering = exactFingering || FINGERINGS[form.map((fret) => fret === null ? 'x' : fret).join(' ')] || FINGERINGS[name];
   const fingers = form.map(function (fret, string) {
     return [string + 1, fret === null ? 'x' : fret === 0 ? 'o' : fret, fret > 0 ? Number(fingering[string]) || undefined : undefined];
   });
@@ -275,15 +319,21 @@ function chordPopover(id, name, form, strings) {
   });
 }
 
+const ROOT_ORDER = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B', 'Dim7'];
+
+function orderedRoots(roots) {
+  return [...roots].sort(([a], [b]) => ROOT_ORDER.indexOf(a) - ROOT_ORDER.indexOf(b));
+}
+
 function renderBody(locale, strings) {
   const popovers = [];
   const roots = new Map();
-  GROUPS.forEach(function ([es, en, quality, names, forms], group) {
+  GROUPS.forEach(function ([es, en, quality, names, forms, fingerings], group) {
     const title = (locale === 'es' ? es : en) + ' ' + qualityLabel(quality, strings);
     // The names sit above the white sheet, one per chord column, as buttons.
     const buttons = names.map(function (name, i) {
       const id = 'arpeggio-chord-' + group + '-' + i;
-      popovers.push(chordPopover(id, name, forms[i], strings));
+      popovers.push(chordPopover(id, name, forms[i], strings, fingerings && fingerings[i]));
       // Forms sit on every other Column: a blank Column separates the chords.
       return { column: 2 * i, text: name, html: '<button type="button" class="arpeggio-chord" popovertarget="' + id + '" aria-label="' + strings.artArpeggiosShowFingering + ' ' + name + '">' + name + '</button>' };
     });
@@ -293,10 +343,18 @@ function renderBody(locale, strings) {
       });
     });
     if (!roots.has(en)) roots.set(en, { title: en === 'Dim7' ? strings.artArpeggiosDim7Title : locale === 'es' ? es : en, note: en === 'Dim7' ? strings.artArpeggiosDim7Note : '', variants: [] });
-    roots.get(en).variants.push({ title: qualityLabel(quality, strings), figure: tabFigure(title, styledForms, locale, null, buttons) +
-      '<div class="arpeggio-diagrams" hidden data-chords="' + names.map((_, i) => 'arpeggio-chord-' + group + '-' + i).join(' ') + '"></div>' });
+    const tabQuality = quality === 'SeventhNoFifth' ? 'Seventh' : quality;
+    const variants = roots.get(en).variants;
+    let variant = variants.find((item) => item.quality === tabQuality);
+    if (!variant) {
+      variant = { quality: tabQuality, title: qualityLabel(tabQuality, strings), figure: '' };
+      variants.push(variant);
+    }
+    variant.figure += (quality === 'SeventhNoFifth' ? '<h3 class="arpeggio-block-label">' + qualityLabel(quality, strings) + '</h3>' : '') +
+      tabFigure(title, styledForms, locale, null, buttons) +
+      '<div class="arpeggio-diagrams" hidden data-chords="' + names.map((_, i) => 'arpeggio-chord-' + group + '-' + i).join(' ') + '"></div>';
   });
-  const tabs = Array.from(roots, function ([root, { title, note, variants }]) {
+  const tabs = Array.from(orderedRoots(roots), function ([root, { title, note, variants }]) {
     const id = 'arpeggio-' + root;
     return '<section class="arpeggio-group" aria-label="' + title + '">' +
       '<div class="arpeggio-group-header"><span class="arpeggio-root" id="' + id + '-root">' + title + '</span>' +
@@ -323,7 +381,7 @@ function searchIndex(locale, strings) {
       roots.get(en).chords.push({ name, form: forms[i], popover: 'arpeggio-chord-' + group + '-' + i });
     });
   });
-  const data = { locale, showFingering: strings.artArpeggiosShowFingering, roots: Array.from(roots.values()) };
+  const data = { locale, showFingering: strings.artArpeggiosShowFingering, roots: orderedRoots(roots).map(([, root]) => root) };
   return '<script type="application/json" id="arpeggio-search-data">' + JSON.stringify(data).replace(/</g, '\\u003c') + '</script>';
 }
 
@@ -401,22 +459,22 @@ document.querySelectorAll('.arpeggio-group').forEach(function(group) {
     group.classList.toggle('is-diagrams', diagrams);
     var container = group.classList.contains('is-filtering') ? group.querySelector('.arpeggio-results') : group.querySelector('[role="tabpanel"]:not([hidden])');
     if (!container || group.hidden) return;
-    var row = container.querySelector('.arpeggio-diagrams');
-    if (!row) return;
-    row.hidden = !diagrams;
-    if (!diagrams || row.dataset.rendered) return;
-    row.replaceChildren();
-    (row.dataset.chords || '').split(' ').filter(Boolean).forEach(function(id) {
-      var source = document.getElementById(id).querySelector('[data-chord-card]');
-      var slot = document.createElement('div');
-      slot.setAttribute('data-chord-card', '');
-      slot.dataset.chord = source.dataset.chord;
-      slot.setAttribute('role', 'img');
-      slot.setAttribute('aria-label', source.getAttribute('aria-label'));
-      row.appendChild(slot);
-      window.ChordCard.render(slot);
+    container.querySelectorAll('.arpeggio-diagrams').forEach(function(row) {
+      row.hidden = !diagrams;
+      if (!diagrams || row.dataset.rendered) return;
+      row.replaceChildren();
+      (row.dataset.chords || '').split(' ').filter(Boolean).forEach(function(id) {
+        var source = document.getElementById(id).querySelector('[data-chord-card]');
+        var slot = document.createElement('div');
+        slot.setAttribute('data-chord-card', '');
+        slot.dataset.chord = source.dataset.chord;
+        slot.setAttribute('role', 'img');
+        slot.setAttribute('aria-label', source.getAttribute('aria-label'));
+        row.appendChild(slot);
+        window.ChordCard.render(slot);
+      });
+      row.dataset.rendered = '1';
     });
-    row.dataset.rendered = '1';
   }
   viewSwitch.addEventListener('click', function() {
     viewSwitch.setAttribute('aria-checked', String(viewSwitch.getAttribute('aria-checked') !== 'true'));

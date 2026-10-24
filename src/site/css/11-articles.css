@@ -756,6 +756,11 @@ body:has(.modal-full:popover-open) {
 .arpeggio-group[hidden] {
   display: none;
 }
+.arpeggio-block-label {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
 .arpeggio-note {
   margin: 0 0 0.75rem;
   color: var(--ink-soft);
