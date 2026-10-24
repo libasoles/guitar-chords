@@ -131,7 +131,7 @@ const PDFS = [
       await page.waitForSelector('.arpeggio-group ascii-tabs .ascii-tabs-tab');
       assert.equal(await page.locator('h1').textContent(), locale === 'es' ? 'Tablaturas para arpegios' : 'Tabs for arpeggios');
       assert.equal(await page.locator('.lead a').getAttribute('href'), pagePath('articulo-carcassi', locale));
-      assert.equal(await page.locator('ascii-tabs[readonly]').count(), 87);
+      assert.equal(await page.locator('.sequence-forms ascii-tabs[readonly]').count(), 87);
       const titles = await page.locator('.arpeggio-group figcaption').allTextContents();
       assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Do menor', 'Do 7'] : ['C major', 'C minor', 'C 7']);
       const groups = await page.locator('.arpeggio-group ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
