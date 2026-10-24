@@ -148,3 +148,46 @@ for (const locale of ['es', 'en']) {
     }
   });
 }
+
+
+test('middle-string voicings cover major, minor and dominant chords with the named bass', () => {
+  for (const rootName of ['C', 'D', 'E', 'F', 'G', 'A', 'B']) {
+    for (const quality of ['Major', 'Minor', 'Seventh']) {
+      const [, , , names, forms, fingerings] = GROUPS.find(([, root, variant]) => root === rootName && variant === quality);
+      const variants = forms.map((form, i) => ({ form, name: names[i], fingering: fingerings[i] }))
+        .filter(({ form, name }) => form[0] === null && (quality !== 'Seventh' || name === rootName + '7'));
+      assert.equal(variants.length, quality === 'Seventh' ? 1 : 3, rootName + ' ' + quality);
+      for (const { form, name, fingering } of variants) {
+        assert.ok(form.slice(1, 4).every((fret) => fret !== null));
+        assert.equal(form.slice(4).filter((fret) => fret !== null).length, 1);
+        const pitches = sounding(form);
+        const intervals = [...new Set(pitches.map((pitch) => (pitch - pitchClass(rootName) + 12) % 12))].sort((a, b) => a - b);
+        assert.deepEqual(intervals, quality === 'Minor' ? [0, 3, 7] : quality === 'Seventh' ? [0, 4, 7, 10] : [0, 4, 7], name);
+        assert.equal(Math.min(...pitches) % 12, pitchClass(name.split('/')[1] || rootName), name + ' bass');
+        form.forEach((fret, string) => {
+          assert.match(fingering[string], fret === null ? /^-$/ : fret === 0 ? /^0$/ : /^[1-4]$/, name + ' string ' + (string + 1));
+        });
+      }
+    }
+  }
+});
+
+for (const locale of ['es', 'en']) {
+  test('middle-string G appears in tabs, diagrams and search with only its bass emphasized in ' + locale, () => {
+    const html = renderBody(locale, require('../src/i18n/strings.' + locale + '.json'));
+    const search = JSON.parse(html.match(/id="arpeggio-search-data">([^<]+)/)[1]);
+    const form = [null, 0, 0, 0, null, 3];
+    const chord = search.roots.find((root) => root.id === 'arpeggio-G').chords
+      .find((chord) => chord.name === 'G' && JSON.stringify(chord.form) === JSON.stringify(form));
+    assert.ok(chord);
+    const panel = html.split('id="arpeggio-G-panel-0"')[1].split('</figure>')[0];
+    const columns = JSON.parse(panel.match(/data-value='([^']+)'/)[1]).flat();
+    const column = columns.find((column) => JSON.stringify(column.map((note) => note === null ? null : note.fret)) === JSON.stringify(form));
+    assert.ok(column);
+    assert.deepEqual(column.map((note) => note?.bold || false), [false, false, false, false, false, true]);
+    const popup = html.split('id="' + chord.popover + '"')[1].split('</div></div>')[0];
+    const diagram = JSON.parse(popup.match(/data-chord="([^"]+)"/)[1].replaceAll('&quot;', '"'));
+    assert.deepEqual(diagram.fingers.map(([, fret]) => fret === 'x' ? null : fret === 'o' ? 0 : fret), form);
+    assert.deepEqual(diagram.stringNotes, ['', 'B', 'G', 'D', '', 'G']);
+  });
+}

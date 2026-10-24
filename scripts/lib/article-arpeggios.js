@@ -181,6 +181,59 @@ const GROUPS = [
   ]],
 ];
 
+// Alternate upper voices on strings 2–4, with the bass on string 5 or 6.
+// Each fingering belongs to its exact form (string 1 first), not just its name.
+const MIDDLE_STRING_POSITIONS = [
+  ['C', 'Major', ['C', 'C/E', 'C/G'], [
+    [null, 1, 0, 2, 3, null], [null, 1, 0, 2, null, 0], [null, 1, 0, 2, null, 3],
+  ], ['-1023-', '-102-0', '-102-3']],
+  ['C', 'Minor', ['Cm', 'Cm/Eb', 'Cm/G'], [
+    [null, 1, 0, 1, 3, null], [null, 4, 5, 5, 6, null], [null, 4, 5, 5, null, 3],
+  ], ['-1024-', '-1234-', '-234-1']],
+  ['D', 'Major', ['D', 'D/F#', 'D/A'], [
+    [null, 3, 2, 4, 5, null], [null, 3, 2, 4, null, 2], [null, 3, 2, 4, 0, null],
+  ], ['-2134-', '-214-1', '-2130-']],
+  ['D', 'Minor', ['Dm', 'Dm/F', 'Dm/A'], [
+    [null, 3, 2, 3, 5, null], [null, 3, 2, 3, null, 1], [null, 3, 2, 3, 0, null],
+  ], ['-2134-', '-324-1', '-2130-']],
+  ['E', 'Major', ['E', 'E/G#', 'E/B'], [
+    [null, 0, 1, 2, null, 0], [null, 0, 1, 2, null, 4], [null, 0, 1, 2, 2, null],
+  ], ['-012-0', '-012-4', '-0132-']],
+  ['E', 'Minor', ['Em', 'Em/G', 'Em/B'], [
+    [null, 0, 0, 2, null, 0], [null, 0, 0, 2, null, 3], [null, 0, 0, 2, 2, null],
+  ], ['-002-0', '-002-3', '-0032-']],
+  ['F', 'Major', ['F', 'F/A', 'F/C'], [
+    [null, 1, 2, 3, null, 1], [null, 1, 2, 3, 0, null], [null, 1, 2, 3, 3, null],
+  ], ['-123-1', '-1230-', '-1243-']],
+  ['F', 'Minor', ['Fm', 'Fm/Ab', 'Fm/C'], [
+    [null, 1, 1, 3, null, 1], [null, 1, 1, 3, null, 4], [null, 1, 1, 3, 3, null],
+  ], ['-113-1', '-112-4', '-1143-']],
+  ['G', 'Major', ['G', 'G/B', 'G/D'], [
+    [null, 0, 0, 0, null, 3], [null, 0, 0, 0, 2, null], [null, 0, 0, 0, 5, null],
+  ], ['-000-3', '-0002-', '-0004-']],
+  ['G', 'Minor', ['Gm', 'Gm/Bb', 'Gm/D'], [
+    [null, 3, 3, 5, null, 3], [null, 3, 3, 5, 1, null], [null, 3, 3, 5, 5, null],
+  ], ['-113-1', '-2231-', '-1143-']],
+  ['A', 'Major', ['A', 'A/C#', 'A/E'], [
+    [null, 2, 2, 2, 0, null], [null, 2, 2, 2, 4, null], [null, 2, 2, 2, null, 0],
+  ], ['-1110-', '-1113-', '-111-0']],
+  ['A', 'Minor', ['Am', 'Am/C', 'Am/E'], [
+    [null, 1, 2, 2, 0, null], [null, 1, 2, 2, 3, null], [null, 1, 2, 2, null, 0],
+  ], ['-1320-', '-1324-', '-132-0']],
+  ['B', 'Major', ['B', 'B/D#', 'B/F#'], [
+    [null, 4, 4, 4, 2, null], [null, 4, 4, 4, 6, null], [null, 4, 4, 4, null, 2],
+  ], ['-3331-', '-1113-', '-333-1']],
+  ['B', 'Minor', ['Bm', 'Bm/D', 'Bm/F#'], [
+    [null, 3, 4, 4, 2, null], [null, 3, 4, 4, 5, null], [null, 3, 4, 4, null, 2],
+  ], ['-2341-', '-1324-', '-234-1']],
+  ['C', 'Seventh', ['C7'], [[null, 5, 3, 5, 3, null]], ['-4131-']],
+  ['D', 'Seventh', ['D7'], [[null, 1, 2, 4, 5, null]], ['-1234-']],
+  ['E', 'Seventh', ['E7'], [[null, 0, 1, 0, null, 0]], ['-010-0']],
+  ['F', 'Seventh', ['F7'], [[null, 1, 2, 1, null, 1]], ['-121-1']],
+  ['G', 'Seventh', ['G7'], [[null, 3, 4, 3, null, 3]], ['-121-1']],
+  ['A', 'Seventh', ['A7'], [[null, 2, 0, 2, 0, null]], ['-2010-']],
+  ['B', 'Seventh', ['B7'], [[null, 4, 2, 4, 2, null]], ['-4131-']],
+];
 // Root, major third and minor seventh only; the three treble strings hold
 // all three tones, doubled by one bass on strings 4–6. String 1 first.
 const SEVENTH_NO_FIFTH = [
@@ -288,6 +341,22 @@ const FINGERINGS = {
   Ddim7: '1020--', Fdim7: '3141--', Abdim7: '123--4', Bdim7: '131-2-',
 };
 
+function formKey(form) {
+  return form.map((fret) => fret === null ? 'x' : fret).join(' ');
+}
+
+MIDDLE_STRING_POSITIONS.forEach(([root, quality, names, forms, fingerings]) => {
+  const group = GROUPS.find(([, en, variant]) => en === root && variant === quality);
+  // Keep all variants together in the existing quality tab and search index.
+  group[5] = group[3].map((name, i) => FINGERINGS[formKey(group[4][i])] || FINGERINGS[name]);
+  forms.forEach((form, i) => {
+    if (group[4].some((existing) => formKey(existing) === formKey(form))) return;
+    group[3].push(names[i]);
+    group[4].push(form);
+    group[5].push(fingerings[i]);
+  });
+});
+
 // Spell chord tones by thirds, then label the exact sounding string positions.
 function stringNotes(name, form) {
   const natural = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
@@ -339,7 +408,7 @@ function renderBody(locale, strings) {
     });
     const styledForms = forms.map(function (form) {
       return form.map(function (fret, string) {
-        return fret === null ? null : { fret, bold: string >= 3 };
+        return fret === null ? null : { fret, bold: string === form.findLastIndex((fret) => fret !== null) };
       });
     });
     if (!roots.has(en)) roots.set(en, { title: en === 'Dim7' ? strings.artArpeggiosDim7Title : locale === 'es' ? es : en, note: en === 'Dim7' ? strings.artArpeggiosDim7Note : '', variants: [] });
@@ -573,7 +642,7 @@ const SEARCH_LOADER = `<script>
         var columns = tabs[tabs.length - 1];
         if (columns.length) columns.push([null, null, null, null, null, null]);
         annotations[annotations.length - 1].push({ column: columns.length, text: chord.name, html: '<button type="button" class="arpeggio-chord" popovertarget="' + chord.popover + '" aria-label="' + data.showFingering + ' ' + chord.name + '">' + chord.name + '</button>' });
-        columns.push(chord.form.map(function(fret, s) { return fret === null ? null : { fret: fret, bold: s >= 3 }; }));
+        columns.push(chord.form.map(function(fret, s) { return fret === null ? null : { fret: fret, bold: s === chord.form.findLastIndex(function(fret) { return fret !== null; }) }; }));
       });
       section.dispatchEvent(new Event('arpeggioresultschange'));
       // Keep a readable font; the component wraps the matches into staves.

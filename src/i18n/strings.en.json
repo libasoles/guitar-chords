@@ -466,7 +466,7 @@
   "artArpeggiosH1": "Tabs for arpeggios",
   "artArpeggiosMetaDescription": "Positions for practicing arpeggios on 4 strings, with bass variations and inversions.",
   "artArpeggiosLead": "As we have seen in <a href=\"%%CARCASSI_HREF%%\">Chord decomposition for arpeggios</a>, a chord can be broken down in several ways. For example, by changing the bass or inverting it.",
-  "artArpeggiosIntro": "Here are some positions for practicing arpeggios on 4 strings",
+  "artArpeggiosIntro": "Here are some positions for practicing arpeggios on 4 strings. Variants place the upper voices on strings 1, 2 and 3, or on strings 2, 3 and 4; the bass is shown in bold.",
   "artArpeggiosTabView": "Show tablature",
   "artArpeggiosToggleView": "Toggle tablature and chord diagrams",
   "artArpeggiosClose": "Close",
