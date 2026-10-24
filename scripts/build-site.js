@@ -35,7 +35,6 @@ const {
 } = require("./lib/structured-data");
 const { renderSharedTabEditor } = require("./lib/tab-editor");
 const { parseAsciiTab } = require("./lib/ascii-tab");
-const { renderBoldDemo } = require("./lib/tab-tutorial");
 const articleArpeggios = require("./lib/article-arpeggios");
 const articleCarcassi = require("./lib/article-carcassi");
 const articlePreludes = require("./lib/article-carcassi-preludes");
@@ -1574,8 +1573,6 @@ function renderPartituraPage(template, strings, locale) {
     .join(v7PageHref(locale, PRIVACY_SLUG))
     .split("%%TAB_EDITOR_PAGE_HREF%%")
     .join(v7PageHref(locale, TAB_EDITOR_SLUG))
-    .split("%%PART_BOLD_DEMO%%")
-    .join(renderBoldDemo())
     .split("%%PARTITURA_CONFIG%%")
     .join(JSON.stringify(config).replace(/</g, "\\u003c"));
   const faq = [1, 2, 3, 4].map(function (n) {
