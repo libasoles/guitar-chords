@@ -71,6 +71,10 @@ body {
 }
 
 .panel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   padding-top: 0.75rem;
   text-align: left;
   font-family: var(--sans);
@@ -82,11 +86,12 @@ body {
   align-items: center;
   gap: 0.3rem;
   color: #888;
+  border-bottom: none;
   text-decoration: none;
 }
 
 .panel-footer a:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .panel-footer a:focus-visible {
