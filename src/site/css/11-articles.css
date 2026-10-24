@@ -811,10 +811,19 @@ body:has(.modal-full:popover-open) {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  width: max-content;
+  max-width: calc(100% - 48px);
+  box-sizing: border-box;
   padding: 0.25em 0.6em;
   background: #fff;
   font-family: var(--mono);
   font-size: 1.5rem;
+  text-align: center;
+}
+.arpeggio-empty-label p {
+  margin: 0.4rem 0 0;
+  font-family: var(--sans);
+  font-size: 1rem;
 }
 
 /* Arpeggio tabs and search results always span the full width, even with few notes. */

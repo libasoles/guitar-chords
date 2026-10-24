@@ -602,9 +602,9 @@ function renderBody(locale, strings) {
   });
   return '<p>' + strings.artArpeggiosIntro + '</p><h2 class="arpeggio-results-title" id="arpeggio-results-title" hidden>' + strings.artArpeggiosResults +
     '</h2><div class="arpeggio-no-results" id="arpeggio-no-results" role="status" hidden>' +
-    '<div class="arpeggio-empty-tab" aria-hidden="true">' + tabFigure('', [new Array(6).fill(null)], locale) +
-    '<span class="arpeggio-empty-label">Oh no</span></div><p>' + strings.artArpeggiosNoResults +
-    '</p></div><div class="sequence-forms">' + tabs.join('') + '</div>' + popovers.join('') + CHORD_CARD_LOADER + TAB_LOADER + POPOVER_LOADER + QUALITY_TABS_LOADER +
+    '<div class="arpeggio-empty-tab"><div aria-hidden="true">' + tabFigure('', [new Array(6).fill(null)], locale) +
+    '</div><div class="arpeggio-empty-label"><span>Oh no</span><p>' + strings.artArpeggiosNoResults +
+    '</p></div></div></div><div class="sequence-forms">' + tabs.join('') + '</div>' + popovers.join('') + CHORD_CARD_LOADER + TAB_LOADER + POPOVER_LOADER + QUALITY_TABS_LOADER +
     searchIndex(locale, strings) + SEARCH_LOADER;
 }
 
