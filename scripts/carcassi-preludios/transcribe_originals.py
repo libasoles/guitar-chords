@@ -105,7 +105,7 @@ def originals():
     ]] + [ending('B3', 'D4+F#4+B4', 8, 4)]
     scores[7] = legacy(7)
     scores[7][4] = repeat('A3 A4 C#5 A4 C#5 A4', 'A3 A4 C#5 A4 G5 A4')
-    scores[7][5] = halves('D4 A4 D5 A4 F#5 A4', 'D#4 A4 C5 A4 G5 A4')
+    scores[7][5] = halves('D4 A4 D5 A4 F#5 A4', 'D#4 A4 C5 A4 F#5 A4')
     scores[7][6] = halves('E4 A4 C#5 A4 E5 A4', 'E3 G#4 B4 G#4 E5 G#4')
     scores[7][7] = {'bass': bass((0, 6, 'A3'), (6, 4, 'A3')),
                     'up': [(0, 2, 'A4', None), (2, 2, 'C#5', None), (4, 2, 'E5', None), (6, 2, 'C#5', None), (8, 2, 'A5', None), (10, 2, 'R', None)]}

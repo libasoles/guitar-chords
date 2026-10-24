@@ -2156,14 +2156,13 @@
       </note>
       <note id="tab-note-68">
         <pitch>
-          <step>G</step>
-          <alter>0</alter>
+          <step>F</step>
+          <alter>1</alter>
           <octave>5</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
         <type>16th</type>
-        <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">continue</beam>
@@ -2360,17 +2359,19 @@
       </note>
       <note>
         <pitch>
-          <step>G</step>
+          <step>F</step>
+          <alter>1</alter>
           <octave>4</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
         <type>16th</type>
+        <accidental>sharp</accidental>
         <stem>none</stem>
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>3</fret>
+            <string>1</string><fret>2</fret>
           </technical>
         </notations>
       </note>
