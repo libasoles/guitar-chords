@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Guitar Tabs — store images</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --ink-soft: #555;
+    --paper: #fdfaf5;
+    --rule: #d8d2c4;
+    --accent: #8b0000;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); font-family: var(--serif); color: var(--ink); overflow: hidden; }
+  body { display: flex; align-items: center; }
+  .brand { display: flex; align-items: center; gap: 18px; }
+  .brand img { display: block; }
+  .brand h1 { margin: 0; font-weight: 400; letter-spacing: -0.01em; }
+  .tagline { font-family: var(--sans); color: var(--ink-soft); line-height: 1.5; margin: 0; }
+  .tagline strong { color: var(--accent); font-weight: 700; }
+  .chips { display: flex; gap: 10px; flex-wrap: wrap; }
+  .chip { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; background: #efe9db; border: 1px solid var(--rule); border-radius: 7px; color: var(--ink); }
+  .shot { background: #fff; border-radius: 14px; box-shadow: 0 14px 36px rgba(0,0,0,.16), 0 3px 10px rgba(0,0,0,.08); overflow: hidden; border: 1px solid var(--rule); }
+  .shot img { display: block; width: 100%; }
+
+  /* 1280x800 screenshot: caption left, framed capture right */
+  body.shot-page { width: 1280px; height: 800px; padding: 0 60px; gap: 50px; }
+  .shot-page .copy { flex: 0 0 280px; }
+  .shot-page h2 { font-weight: 400; font-size: 44px; line-height: 1.15; margin: 0 0 22px; letter-spacing: -0.01em; }
+  .shot-page .tagline { font-size: 20px; }
+  .shot-page .shot { flex: 0 0 auto; width: 830px; }
+
+  /* 1400x560 marquee */
+  body.marquee { width: 1400px; height: 560px; padding: 0 90px; }
+  .marquee .left { flex: 0 0 620px; }
+  .marquee .brand { margin-bottom: 26px; }
+  .marquee .brand img { width: 76px; height: 76px; }
+  .marquee .brand h1 { font-size: 56px; }
+  .marquee .tagline { font-size: 22px; max-width: 480px; margin-bottom: 24px; }
+  .marquee .chip { font-size: 16px; padding: 8px 14px; }
+  .marquee .right { flex: 1 1 auto; position: relative; height: 440px; }
+  .marquee .shot { position: absolute; width: 520px; }
+  .marquee .back { top: 150px; right: -20px; transform: rotate(3deg); height: 250px; }
+  .marquee .front { top: 20px; right: 220px; transform: rotate(-2deg); height: 270px; }
+  .marquee .shot img { width: 100%; object-fit: cover; object-position: left top; height: 100%; }
+
+  /* 440x280 small tile */
+  body.tile { width: 440px; height: 280px; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  .tile .brand { flex-direction: column; gap: 12px; }
+  .tile .brand img { width: 84px; height: 84px; }
+  .tile .brand h1 { font-size: 36px; }
+  .tile .tagline { font-size: 15px; margin-top: 18px; }
+</style>
+</head>
+<body>
+<script>
+  const q = new URLSearchParams(location.search);
+  const mode = q.get('mode');
+  const icon = '../src/extensions/tabs/icon.svg';
+  const shots = ['image.png', 'image 2.png', 'image 3.png'].map(f => '../store/tabs/screenshots/' + encodeURI(f));
+  const copy = {
+    1: ['Write tabs by typing fret numbers', 'Click a string and type. Spacing, copy and delete are one click away.'],
+    2: ['Several tabs, one popup', 'Add as many tabs as you need. Everything is saved on your device.'],
+    3: ['Edit at the speed of your ideas', 'Drag notes, duplicate columns, fill open strings with zeros.'],
+  };
+  document.body.className = mode === 'shot' ? 'shot-page' : mode;
+  if (mode === 'shot') {
+    const n = +q.get('n');
+    document.body.innerHTML = `<div class="copy"><h2>${copy[n][0]}</h2><p class="tagline">${copy[n][1]}</p></div><div class="shot"><img src="${shots[n - 1]}"></div>`;
+  } else if (mode === 'marquee') {
+    document.body.innerHTML = `
+      <div class="left">
+        <div class="brand"><img src="${icon}"><h1>Guitar Tabs</h1></div>
+        <p class="tagline">Licks, riffs and arpeggios in a popup.<br>Saved on your device, <strong>100% offline</strong>.</p>
+        <div class="chips"><span class="chip">Drag &amp; drop</span><span class="chip">Duplicate</span><span class="chip">Copy as text</span></div>
+      </div>
+      <div class="right">
+        <div class="shot back"><img src="${shots[1]}"></div>
+        <div class="shot front"><img src="${shots[0]}"></div>
+      </div>`;
+  } else {
+    document.body.innerHTML = `<div class="brand"><img src="${icon}"><h1>Guitar Tabs</h1></div><p class="tagline">Write riffs · Save locally · Copy as text</p>`;
+  }
+</script>
+</body>
+</html>
