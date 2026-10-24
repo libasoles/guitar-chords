@@ -61,6 +61,24 @@ async function checkArpeggioLayout() {
       const groups = page.locator('.arpeggio-group');
       const first = groups.first();
       const second = groups.nth(1);
+      const rootToggle = first.locator('.arpeggio-root');
+      const firstTab = first.locator('ascii-tabs').first();
+      const fretText = await firstTab.textContent();
+      assert.equal(await rootToggle.getAttribute('aria-pressed'), 'false');
+      await rootToggle.click();
+      assert.equal(await rootToggle.getAttribute('aria-pressed'), 'true');
+      assert.equal(await firstTab.getAttribute('notation'), 'solfege');
+      assert.match(await firstTab.textContent(), /do/);
+      assert.notEqual(await firstTab.textContent(), fretText);
+      assert.equal(await rootToggle.evaluate((el) => getComputedStyle(el).color === getComputedStyle(el.closest('section').querySelector('[aria-selected="true"]')).color), true, 'active root uses the selected-tab blue');
+      assert.equal(await second.locator('.arpeggio-root').getAttribute('aria-pressed'), 'false');
+      await first.getByRole('tab', { name: 'menor', exact: true }).click();
+      assert.equal(await first.locator('ascii-tabs:visible').getAttribute('notation'), 'solfege');
+      await rootToggle.focus();
+      await page.keyboard.press('Space');
+      assert.equal(await rootToggle.getAttribute('aria-pressed'), 'false');
+      assert.equal(await firstTab.textContent(), fretText, 'toggle restores the original fret digits');
+      await first.getByRole('tab', { name: 'mayor', exact: true }).click();
       const viewSwitch = first.getByRole('switch');
       assert.equal(await page.getByRole('switch', { checked: true }).count(), 13);
       assert.equal(await first.locator('.arpeggio-diagrams:visible').count(), 0);
@@ -87,6 +105,7 @@ async function checkArpeggioLayout() {
       await second.getByRole('switch').click();
       await groups.last().getByRole('switch').click();
       await page.locator('.arpeggio-search-toggle').click();
+      await rootToggle.click();
       await page.locator('.arpeggio-search ascii-tabs').evaluate((el) => {
         el.dispatchEvent(new CustomEvent('change', { detail: { value: [[[0, null, null, null, null, null]]] } }));
       });
@@ -96,6 +115,9 @@ async function checkArpeggioLayout() {
       assert.equal(await viewSwitch.isVisible(), true);
       assert.equal(await page.getByRole('switch', { checked: true, includeHidden: true }).count(), 13);
       assert.equal(await first.locator('.arpeggio-results ascii-tabs').isVisible(), true);
+      assert.equal(await first.locator('.arpeggio-results ascii-tabs').getAttribute('notation'), 'solfege', 'new search results inherit note mode');
+      await rootToggle.click();
+      assert.equal(await first.locator('.arpeggio-results ascii-tabs').getAttribute('notation'), 'frets');
       await viewSwitch.click();
       assert.deepEqual(await first.locator('.arpeggio-results .arpeggio-diagrams:visible .name').allTextContents(), expected);
       await viewSwitch.click();

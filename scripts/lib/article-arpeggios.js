@@ -591,7 +591,7 @@ function renderBody(locale, strings) {
   const tabs = Array.from(orderedRoots(roots), function ([root, { title, note, variants }]) {
     const id = 'arpeggio-' + root;
     return '<section class="arpeggio-group" aria-label="' + title + '">' +
-      '<div class="arpeggio-group-header"><span class="arpeggio-root" id="' + id + '-root">' + title + '</span>' +
+      '<div class="arpeggio-group-header"><button type="button" class="arpeggio-root" aria-pressed="false" id="' + id + '-root">' + title + '</button>' +
       '<div role="tablist" aria-labelledby="' + id + '-root">' + variants.map(function (variant, i) {
         return '<button type="button" role="tab" id="' + id + '-tab-' + i + '" aria-controls="' + id + '-panel-' + i +
           '" aria-selected="' + (i === 0) + '" tabindex="' + (i === 0 ? '0' : '-1') + '">' + variant.title + '</button>';
@@ -690,7 +690,11 @@ const QUALITY_TABS_LOADER = `<script>
 document.querySelectorAll('.arpeggio-group').forEach(function(group) {
   var tabs = Array.from(group.querySelectorAll('[role="tab"]'));
   var viewSwitch = group.querySelector('.arpeggio-view-switch');
+  var root = group.querySelector('.arpeggio-root');
   function updateView() {
+    group.querySelectorAll('ascii-tabs').forEach(function(tab) {
+      tab.setAttribute('notation', root.getAttribute('aria-pressed') === 'true' ? (tab.lang === 'es' ? 'solfege' : 'letters') : 'frets');
+    });
     var diagrams = viewSwitch.getAttribute('aria-checked') === 'false';
     group.classList.toggle('is-diagrams', diagrams);
     var container = group.classList.contains('is-filtering') ? group.querySelector('.arpeggio-results') : group.querySelector('[role="tabpanel"]:not([hidden])');
@@ -712,6 +716,10 @@ document.querySelectorAll('.arpeggio-group').forEach(function(group) {
       row.dataset.rendered = '1';
     });
   }
+  root.addEventListener('click', function() {
+    root.setAttribute('aria-pressed', String(root.getAttribute('aria-pressed') !== 'true'));
+    updateView();
+  });
   viewSwitch.addEventListener('click', function() {
     viewSwitch.setAttribute('aria-checked', String(viewSwitch.getAttribute('aria-checked') !== 'true'));
     updateView();

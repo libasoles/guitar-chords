@@ -650,7 +650,16 @@ body:has(.modal-full:popover-open) {
   margin-bottom: 1.25rem;
 }
 .arpeggio-root {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
   font-weight: 700;
+  cursor: pointer;
+}
+.arpeggio-root[aria-pressed="true"] {
+  color: var(--blue-france);
 }
 .arpeggio-group [role="tablist"] {
   display: flex;
@@ -671,6 +680,7 @@ body:has(.modal-full:popover-open) {
   color: var(--blue-france);
   font-weight: 700;
 }
+.arpeggio-root:focus-visible,
 .arpeggio-group [role="tab"]:focus-visible,
 .arpeggio-group [role="tabpanel"]:focus-visible {
   outline: 2px solid var(--blue-france);
