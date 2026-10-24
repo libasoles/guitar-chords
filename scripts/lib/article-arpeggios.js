@@ -601,8 +601,10 @@ function renderBody(locale, strings) {
       }).join('') + '</section>';
   });
   return '<p>' + strings.artArpeggiosIntro + '</p><h2 class="arpeggio-results-title" id="arpeggio-results-title" hidden>' + strings.artArpeggiosResults +
-    '</h2><p class="arpeggio-no-results" id="arpeggio-no-results" role="status" hidden>' + strings.artArpeggiosNoResults +
-    '</p><div class="sequence-forms">' + tabs.join('') + '</div>' + popovers.join('') + CHORD_CARD_LOADER + TAB_LOADER + POPOVER_LOADER + QUALITY_TABS_LOADER +
+    '</h2><div class="arpeggio-no-results" id="arpeggio-no-results" role="status" hidden>' +
+    '<div class="arpeggio-empty-tab" aria-hidden="true">' + tabFigure('', [new Array(6).fill(null)], locale) +
+    '<span class="arpeggio-empty-label">Oh no</span></div><p>' + strings.artArpeggiosNoResults +
+    '</p></div><div class="sequence-forms">' + tabs.join('') + '</div>' + popovers.join('') + CHORD_CARD_LOADER + TAB_LOADER + POPOVER_LOADER + QUALITY_TABS_LOADER +
     searchIndex(locale, strings) + SEARCH_LOADER;
 }
 

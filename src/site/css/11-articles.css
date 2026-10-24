@@ -787,10 +787,30 @@ body:has(.modal-full:popover-open) {
 .arpeggio-no-results[hidden] {
   display: none;
 }
+.arpeggio-empty-tab {
+  position: relative;
+}
+.arpeggio-empty-tab .tab-figure {
+  margin: 0;
+}
+.arpeggio-empty-tab figcaption {
+  display: none;
+}
+.arpeggio-empty-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0.25em 0.6em;
+  background: #fff;
+  font-family: var(--mono);
+  font-size: 1.5rem;
+}
 
 /* Arpeggio tabs and search results always span the full width, even with few notes. */
 .arpeggio-group .article-tab,
-.arpeggio-results .article-tab {
+.arpeggio-results .article-tab,
+.arpeggio-empty-tab .article-tab {
   width: 100%;
 }
 
