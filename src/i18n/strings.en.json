@@ -260,6 +260,7 @@
   "tabNoteNames": "Show note names (C, D, E)",
   "tabLetterLabels": "String labels as letters (E, B, G)",
   "tabLead": "Licks, riffs, arpeggios.",
+  "tabDesktopLink": "Tabs in desktop",
   "tabHowToH2": "How to create a tab",
   "tabHowTo1": "Click (or tap, on a phone) the string and beat where the note goes.",
   "tabHowTo2": "Type the fret number: <strong>0</strong> is the open string and you can go up to fret 24.",

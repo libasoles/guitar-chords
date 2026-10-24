@@ -60,11 +60,27 @@
   const q = new URLSearchParams(location.search);
   const mode = q.get('mode');
   const icon = '../src/extensions/tabs/icon.svg';
-  const shots = ['image.png', 'image 2.png', 'image 3.png'].map(f => '../store/tabs/screenshots/' + encodeURI(f));
-  const copy = {
+  const es = q.get('lang') === 'es';
+  const shots = es
+    ? [1, 2, 3].map(n => '../store/tabs/screenshots/es/capture-' + n + '.png')
+    : ['image.png', 'image 2.png', 'image 3.png'].map(f => '../store/tabs/screenshots/' + encodeURI(f));
+  const copy = es ? {
+    1: ['Escribí tablaturas tecleando los trastes', 'Hacé clic en una cuerda y escribí. Espaciado, copiar y borrar a un clic.'],
+    2: ['Varias tablaturas, un solo popup', 'Agregá todas las que necesites. Todo se guarda en tu dispositivo.'],
+    3: ['Editá a la velocidad de tus ideas', 'Arrastrá notas, duplicá columnas y completá cuerdas al aire con ceros.'],
+  } : {
     1: ['Write tabs by typing fret numbers', 'Click a string and type. Spacing, copy and delete are one click away.'],
     2: ['Several tabs, one popup', 'Add as many tabs as you need. Everything is saved on your device.'],
     3: ['Edit at the speed of your ideas', 'Drag notes, duplicate columns, fill open strings with zeros.'],
+  };
+  const text = es ? {
+    tagline: 'Punteos, riffs y arpegios en un popup.<br>Guardado en tu dispositivo, <strong>100% sin conexión</strong>.',
+    chips: ['Arrastrar', 'Duplicar', 'Copiar como texto'],
+    tile: 'Bosquejá · Guardá · Copiá como texto',
+  } : {
+    tagline: 'Licks, riffs and arpeggios in a popup.<br>Saved on your device, <strong>100% offline</strong>.',
+    chips: ['Drag &amp; drop', 'Duplicate', 'Copy as text'],
+    tile: 'Write riffs · Save locally · Copy as text',
   };
   document.body.className = mode === 'shot' ? 'shot-page' : mode;
   if (mode === 'shot') {
@@ -74,15 +90,15 @@
     document.body.innerHTML = `
       <div class="left">
         <div class="brand"><img src="${icon}"><h1>Guitar Tabs</h1></div>
-        <p class="tagline">Licks, riffs and arpeggios in a popup.<br>Saved on your device, <strong>100% offline</strong>.</p>
-        <div class="chips"><span class="chip">Drag &amp; drop</span><span class="chip">Duplicate</span><span class="chip">Copy as text</span></div>
+        <p class="tagline">${text.tagline}</p>
+        <div class="chips">${text.chips.map(c => `<span class="chip">${c}</span>`).join('')}</div>
       </div>
       <div class="right">
         <div class="shot back"><img src="${shots[1]}"></div>
         <div class="shot front"><img src="${shots[0]}"></div>
       </div>`;
   } else {
-    document.body.innerHTML = `<div class="brand"><img src="${icon}"><h1>Guitar Tabs</h1></div><p class="tagline">Write riffs · Save locally · Copy as text</p>`;
+    document.body.innerHTML = `<div class="brand"><img src="${icon}"><h1>Guitar Tabs</h1></div><p class="tagline">${text.tile}</p>`;
   }
 </script>
 </body>

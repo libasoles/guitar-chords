@@ -3,6 +3,8 @@
 /* promo-tabs.js — Generates the Guitar Tabs Chrome Web Store images in
    store/tabs/screenshots/ from the captures image.png, image 2.png, image 3.png:
    01-editor, 02-tabs, 03-tutorial (1280×800), promo-small-440x280 and promo-marquee-1400x560.
+   The Spanish set goes to store/tabs/screenshots/es/ from es/capture-{1,2,3}.png
+   (made by capture-tabs-es.js).
    Usage: node scripts/promo-tabs.js */
 
 const path = require('path');
@@ -22,12 +24,12 @@ const IMAGES = [
 
 async function run() {
   const browser = await chromium.launch();
-  for (const { file, query, width, height } of IMAGES) {
+  for (const lang of ['en', 'es']) for (const { file, query, width, height } of IMAGES) {
     const page = await (await browser.newContext({ viewport: { width, height } })).newPage();
-    await page.goto(`${PAGE}?${query}`);
+    await page.goto(`${PAGE}?${query}&lang=${lang}`);
     await page.waitForFunction(() => [...document.images].every(img => img.complete && img.naturalWidth));
-    await page.screenshot({ path: path.join(OUT, file) });
-    console.log('saved →', path.join('store/tabs/screenshots', file));
+    await page.screenshot({ path: path.join(OUT, lang === 'es' ? 'es' : '', file) });
+    console.log('saved →', path.join('store/tabs/screenshots', lang === 'es' ? 'es' : '', file));
   }
   await browser.close();
 }

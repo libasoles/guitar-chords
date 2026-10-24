@@ -38,6 +38,7 @@ module.exports = {
         const html = template.replace('%%LOCALE%%', locale).replace('%%TAB_EDITOR%%', editor)
           .replace('%%ARPEGGIOS_URL%%', 'https://acordesdeguitarra.com.ar' + pagePath('articulo-tablaturas-arpegios', locale))
           .replace('%%ARPEGGIOS_LABEL%%', strings.artArpeggiosH1)
+          .replace('%%DESKTOP_TABS_LABEL%%', strings.tabDesktopLink)
           .replace('%%DESKTOP_TABS_URL%%', 'https://acordesdeguitarra.com.ar' + pagePath('crear-tablaturas-de-guitarra', locale));
         fs.writeFileSync(path.join(output, 'popup.' + locale + '.html'), html);
       }
