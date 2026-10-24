@@ -55,7 +55,7 @@ function suite(collection, catalog, MEASURES) {
   });
 
   for (const piece of pieces) {
-    const label = catalog.pieceName(piece, 'en');
+    const label = catalog.pieceName(piece, collection === 'lecciones' ? 'es' : 'en');
 
     test(label + ': PDF y MusicXML con el nombre de pieces.json', () => {
       assert.ok(fs.existsSync(path.join(DOWNLOADS_DIR, piece.base + '.pdf')));
@@ -100,6 +100,11 @@ function suite(collection, catalog, MEASURES) {
       // El PDF escapa algunos caracteres (p. ej. : como \072).
       assert.equal(info[1].replace(/\\(\d{3})/g, (_, octal) => String.fromCharCode(parseInt(octal, 8))).replace(/\\([()\\])/g, '$1'), label);
       assert.ok(xml.includes('<work-title>' + label + '</work-title>'));
+      if (collection === 'lecciones') {
+        const svg = fs.readFileSync(path.join(PREVIEW_DIR, 'full', SCORE_PREFIX + String(piece.number).padStart(2, '0') + '-p1.svg'), 'utf8');
+        assert.ok(svg.includes('>' + label + '</tspan>'), 'titulo en español dentro del visor');
+        assert.doesNotMatch(svg, /Lesson \d+:/);
+      }
       assert.match(text, new RegExp('/Author\\s*\\(' + AUTHOR + '\\)'));
       assert.doesNotMatch(text, /\/Producer|\/Creator|\/CreationDate|\/ModDate/);
       assert.doesNotMatch(text, /<x:xmpmeta|\/Metadata/);

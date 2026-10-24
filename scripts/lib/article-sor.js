@@ -4,7 +4,7 @@
 
 const { createSorCollection } = require('./article-sor-collection');
 
-/* Titulo de la pieza: «Lesson 4: E-flat Major» / «Lección 4: Mi bemol mayor» (es el /Title del PDF en ingles). */
+/* Titulo de la pieza: «Lesson 4: E-flat Major» / «Lección 4: Mi bemol mayor» (el PDF y el visor llevan el titulo en español). */
 function pieceName(piece, locale) {
   return (locale === 'es' ? 'Lección ' : 'Lesson ') + piece.n + ': ' + (locale === 'es' ? piece.es : piece.form);
 }

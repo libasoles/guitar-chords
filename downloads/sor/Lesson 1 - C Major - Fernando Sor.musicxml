@@ -2,9 +2,9 @@
 <!DOCTYPE score-partwise  PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
 <score-partwise version="4.0">
   <work>
-    <work-title>Lesson 1: C Major</work-title>
+    <work-title>Lección 1: Do mayor</work-title>
   </work>
-  <movement-title>Lesson 1: C Major</movement-title>
+  <movement-title>Lección 1: Do mayor</movement-title>
   <identification>
     <creator type="composer">Fernando Sor</creator>
   </identification>
@@ -14,7 +14,7 @@
       <tenths>40</tenths>
     </scaling>
   </defaults>
-  <credit page="1"><credit-words default-x="1050" default-y="1150" justify="center" valign="top">Lesson 1: C Major</credit-words></credit><credit page="1"><credit-words default-x="1900" default-y="1090" justify="right" valign="top">Fernando Sor</credit-words></credit><credit page="1"><credit-words default-x="1050" default-y="1030" justify="center" valign="top"> </credit-words></credit><part-list>
+  <credit page="1"><credit-words default-x="1050" default-y="1150" justify="center" valign="top">Lección 1: Do mayor</credit-words></credit><credit page="1"><credit-words default-x="1900" default-y="1090" justify="right" valign="top">Fernando Sor</credit-words></credit><credit page="1"><credit-words default-x="1050" default-y="1030" justify="center" valign="top"> </credit-words></credit><part-list>
     <score-part id="P1">
       <part-name print-object="no"></part-name>
     </score-part>

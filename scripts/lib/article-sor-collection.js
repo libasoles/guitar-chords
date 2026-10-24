@@ -16,7 +16,7 @@ const ROOT = path.join(__dirname, '..', '..');
 const AUTHOR = 'Fernando Sor';
 
 /* options: folder (downloads, vistas y assets), catalog (JSON de scripts/sor), prefix (de los archivos de vista),
-   pieceName(piece, locale): titulo de la pieza en cada idioma (el ingles es tambien el /Title del PDF). */
+   pieceName(piece, locale): titulo de la pieza en cada idioma (el ingles fija los nombres de archivo). */
 function createSorCollection({ folder, catalog, prefix, pieceName }) {
   const DOWNLOADS_DIR = path.join(ROOT, 'downloads', folder);
   const PREVIEW_DIR = path.join(ROOT, 'src', 'site', 'articles', folder);
