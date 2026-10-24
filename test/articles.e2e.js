@@ -131,21 +131,26 @@ const PDFS = [
       await page.waitForSelector('.arpeggio-group ascii-tabs .ascii-tabs-tab');
       assert.equal(await page.locator('h1').textContent(), locale === 'es' ? 'Tablaturas para arpegios' : 'Tabs for arpeggios');
       assert.equal(await page.locator('.lead a').getAttribute('href'), pagePath('articulo-carcassi', locale));
-      assert.equal(await page.locator('ascii-tabs[readonly]').count(), 57);
+      assert.equal(await page.locator('ascii-tabs[readonly]').count(), 87);
       const titles = await page.locator('.arpeggio-group figcaption').allTextContents();
       assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Do menor', 'Do 7'] : ['C major', 'C minor', 'C 7']);
       const groups = await page.locator('.arpeggio-group ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
       groups.flat().forEach((form) => assert.equal(form.filter((f) => f !== null).length, 4));
       assert.deepEqual(await page.locator('#arpeggio-E-panel-2 ascii-tabs').first().evaluate((el) => el.value[0][2].map((note) => note === null ? null : note.fret)), [0, 3, 1, null, 2, null]);
       assert.equal(await page.locator('ascii-tabs[variant="flat"]').count(), groups.length);
-      const weights = await page.locator('.ascii-tabs-has').evaluateAll((cells) => cells.map((cell) => ({
-        string: Number(cell.dataset.s),
-        weight: getComputedStyle(cell.querySelector('.ascii-tabs-fret')).fontWeight,
-      })));
-      weights.forEach(({ string, weight }) => assert.equal(weight, string >= 3 ? '700' : '400'));
+      // Only the bass (the lowest sounding string of each chord) is bold.
+      const weights = await page.locator('ascii-tabs').evaluateAll((tabs) => tabs.flatMap((tab) => {
+        const cells = [...tab.querySelectorAll('.ascii-tabs-has')];
+        return cells.map((cell) => ({
+          bass: Number(cell.dataset.s) === Math.max(...cells.filter((other) => other.dataset.t === cell.dataset.t && other.dataset.c === cell.dataset.c).map((other) => Number(other.dataset.s))),
+          weight: getComputedStyle(cell.querySelector('.ascii-tabs-fret')).fontWeight,
+        }));
+      }));
+      assert.ok(weights.length > 0);
+      weights.forEach(({ bass, weight }) => assert.equal(weight, bass ? '700' : '400'));
       if (locale === 'es') assert.match(await page.locator('.lead a').textContent(), /^descomposición/);
       // The names are annotation buttons above the strings, without underline.
-      assert.deepEqual(await page.locator('#arpeggio-D-panel-2 ascii-tabs').first().locator('.ascii-tabs-annotations .arpeggio-chord').allTextContents(), ['D7', 'D7/F#', 'D7/A', 'D7/C']);
+      assert.deepEqual(await page.locator('#arpeggio-D-panel-2 ascii-tabs').first().locator('.ascii-tabs-annotations .arpeggio-chord').allTextContents(), ['D7', 'D7/F#', 'D7/A', 'D7/C', 'D7']);
       // The white paper starts below the names.
       const [nameBottom, paperTop] = await page.locator('.arpeggio-group ascii-tabs').first().evaluate((el) => [
         el.querySelector('.arpeggio-chord').getBoundingClientRect().bottom,
@@ -155,7 +160,7 @@ const PDFS = [
       assert.equal(await page.locator('.arpeggio-chord').first().evaluate((el) => getComputedStyle(el).textDecorationLine), 'none');
       assert.deepEqual(await page.locator('#arpeggio-D-panel-2 ascii-tabs').first().evaluate((el) => el.value[0].filter((column) => column.some((note) => note !== null)).map((column) => column.map((note) => note === null ? null : note.fret))), [
         [2, 1, 2, 0, null, null], [2, 1, 2, 4, null, null],
-        [2, 1, 2, null, 0, null], [2, 1, 2, null, 3, null],
+        [2, 1, 2, null, 0, null], [2, 1, 2, null, 3, null], [null, 1, 2, 4, 5, null],
       ]);
       assert.equal(await page.locator('.arpeggio-group').count(), 13);
 
@@ -205,11 +210,11 @@ const PDFS = [
         ['G', 'MinorSeventh', ['Gm7', 'Gm7/Bb', 'Gm7/D', 'Gm7/F'], [7, 10, 2, 5], [7, 10, 2, 5]],
         ['A', 'MinorSeventh', ['Am7', 'Am7/C', 'Am7/E', 'Am7/G'], [9, 0, 4, 7], [9, 0, 4, 7]],
         ['B', 'MinorSeventh', ['Bm7', 'Bm7/D', 'Bm7/F#', 'Bm7/A'], [11, 2, 6, 9], [11, 2, 6, 9]],
-        ['F', 'Minor', ['Fm', 'Fm/Ab', 'Fm/C'], [5, 8, 0], [5, 8, 0]],
-        ['F', 'Seventh', ['F7', 'F7/A', 'F7/C', 'F7/Eb'], [5, 9, 0, 3], [5, 9, 0, 3]],
-        ['G', 'Minor', ['Gm', 'Gm/Bb', 'Gm/D'], [7, 10, 2], [7, 10, 2]],
-        ['A', 'Seventh', ['A7', 'A7', 'A7/C#', 'A7/E', 'A7/G'], [9, 1, 4, 7], [9, 9, 1, 4, 7]],
-        ['B', 'Minor', ['Bm', 'Bm/D', 'Bm/F#'], [11, 2, 6], [11, 2, 6]],
+        ['F', 'Minor', ['Fm', 'Fm/Ab', 'Fm/C', 'Fm', 'Fm/Ab', 'Fm/C'], [5, 8, 0], [5, 8, 0, 5, 8, 0]],
+        ['F', 'Seventh', ['F7', 'F7/A', 'F7/C', 'F7/Eb', 'F7'], [5, 9, 0, 3], [5, 9, 0, 3, 5]],
+        ['G', 'Minor', ['Gm', 'Gm/Bb', 'Gm/D', 'Gm', 'Gm/Bb', 'Gm/D'], [7, 10, 2], [7, 10, 2, 7, 10, 2]],
+        ['A', 'Seventh', ['A7', 'A7', 'A7/C#', 'A7/E', 'A7/G', 'A7'], [9, 1, 4, 7], [9, 9, 1, 4, 7, 9]],
+        ['B', 'Minor', ['Bm', 'Bm/D', 'Bm/F#', 'Bm', 'Bm/D', 'Bm/F#'], [11, 2, 6], [11, 2, 6, 11, 2, 6]],
         ['B', 'Seventh', ['B7', 'B7', 'B7/D#', 'B7/F#', 'B7/F#'], [11, 3, 6, 9], [11, 11, 3, 6, 6]],
       ]) {
         const label = require('../src/i18n/strings.' + locale + '.json')['artArpeggios' + quality];
@@ -236,7 +241,7 @@ const PDFS = [
       await page.keyboard.press('ArrowRight');
       assert.equal(await qualityTabs.nth(1).getAttribute('aria-selected'), 'true');
       assert.ok(await qualityTabs.nth(1).evaluate((el) => el === document.activeElement));
-      assert.deepEqual(await firstGroup.locator('[role="tabpanel"]:visible .arpeggio-chord').allTextContents(), ['Cm', 'Cm/Eb', 'Cm/G']);
+      assert.deepEqual(await firstGroup.locator('[role="tabpanel"]:visible .arpeggio-chord').allTextContents(), ['Cm', 'Cm/Eb', 'Cm/G', 'Cm', 'Cm/Eb', 'Cm/G']);
       await page.keyboard.press('End');
       assert.equal(await qualityTabs.nth(5).getAttribute('aria-selected'), 'true');
       await page.keyboard.press('ArrowRight');

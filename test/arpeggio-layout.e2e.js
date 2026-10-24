@@ -36,6 +36,7 @@ async function checkArpeggioLayout() {
         assert.ok(Math.abs(rect.top - after[i].top) < 1, 'group stays in place at ' + width);
         assert.ok(Math.abs(rect.height - after[i].height) < 1, 'reserved height matches at ' + width);
       });
+      let checkedFirstC = false;
       for (const button of await page.locator('.arpeggio-group [role="tabpanel"]:visible .arpeggio-chord').all()) {
         await button.click();
         const popup = page.locator('.arpeggio-popover:popover-open');
@@ -48,7 +49,11 @@ async function checkArpeggioLayout() {
         assert.ok(Math.min(Math.abs(box.y - trigger.y - trigger.height), Math.abs(trigger.y - box.y - box.height)) <= 11, 'popup stays by trigger');
         const labels = await popup.locator('svg .tuning').allTextContents();
         assert.equal(labels.filter(Boolean).length, 4, 'only sounding strings have notes');
-        if (await button.textContent() === 'C') assert.deepEqual(labels, ['', 'C', '', 'G', 'C', 'E']);
+        // Other voicings share the name C; only the first is the open-position one.
+        if (!checkedFirstC && await button.textContent() === 'C') {
+          checkedFirstC = true;
+          assert.deepEqual(labels, ['', 'C', '', 'G', 'C', 'E']);
+        }
         await page.keyboard.press('Escape');
         assert.equal(await popup.count(), 0);
         assert.ok(await button.evaluate((el) => el === document.activeElement));
@@ -62,11 +67,11 @@ async function checkArpeggioLayout() {
       await viewSwitch.click();
       assert.equal(await viewSwitch.getAttribute('aria-checked'), 'false');
       assert.equal(await first.locator('ascii-tabs:visible').count(), 0);
-      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible .name').allTextContents(), ['C', 'C/E', 'C/G']);
+      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible .name').allTextContents(), ['C', 'C/E', 'C/G', 'C', 'C/E', 'C/G']);
       assert.equal(await second.getByRole('switch').getAttribute('aria-checked'), 'true');
       assert.equal(await second.locator('ascii-tabs:visible').count(), 1);
       await first.getByRole('tab', { name: 'menor', exact: true }).click();
-      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible .name').allTextContents(), ['Cm', 'Cm/Eb', 'Cm/G']);
+      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible .name').allTextContents(), ['Cm', 'Cm/Eb', 'Cm/G', 'Cm', 'Cm/Eb', 'Cm/G']);
       await viewSwitch.focus();
       await page.keyboard.press('Space');
       assert.equal(await viewSwitch.getAttribute('aria-checked'), 'true');
