@@ -478,6 +478,8 @@ const SEARCH_LOADER = `<script>
     var found = false;
     data.roots.forEach(function(root) {
       var section = document.getElementById(root.id + '-root').closest('.arpeggio-group');
+      // Every query starts in tablature, including roots hidden by the filter.
+      section.querySelector('.arpeggio-view-switch').setAttribute('aria-checked', 'true');
       var results = section.querySelector('.arpeggio-results');
       var matches = root.chords.filter(function(chord) {
         return query.every(function(fret, s) { return fret === null || chord.form[s] === fret; });

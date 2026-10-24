@@ -72,8 +72,9 @@ async function checkArpeggioLayout() {
       assert.equal(await viewSwitch.getAttribute('aria-checked'), 'true');
       assert.equal(await first.locator('ascii-tabs:visible').count(), 1);
       await viewSwitch.click();
-      // Filter by an open first string: diagrams follow the actual matches,
-      // while each other root keeps its independent representation.
+      // Every search resets all roots to tablature, including hidden roots.
+      await second.getByRole('switch').click();
+      await groups.last().getByRole('switch').click();
       await page.locator('.arpeggio-search-toggle').click();
       await page.locator('.arpeggio-search ascii-tabs').evaluate((el) => {
         el.dispatchEvent(new CustomEvent('change', { detail: { value: [[[0, null, null, null, null, null]]] } }));
@@ -82,12 +83,22 @@ async function checkArpeggioLayout() {
       await page.locator('h1').click();
       const expected = await page.evaluate(() => JSON.parse(document.getElementById('arpeggio-search-data').textContent).roots[0].chords.filter((chord) => chord.form[0] === 0).map((chord) => chord.name));
       assert.equal(await viewSwitch.isVisible(), true);
+      assert.equal(await page.getByRole('switch', { checked: true, includeHidden: true }).count(), 8);
+      assert.equal(await first.locator('.arpeggio-results ascii-tabs').isVisible(), true);
+      await viewSwitch.click();
       assert.deepEqual(await first.locator('.arpeggio-results .arpeggio-diagrams:visible .name').allTextContents(), expected);
       await viewSwitch.click();
       assert.equal(await first.locator('.arpeggio-results ascii-tabs').isVisible(), true);
       await viewSwitch.click();
+      await page.locator('.arpeggio-search ascii-tabs').evaluate((el) => {
+        el.dispatchEvent(new CustomEvent('change', { detail: { value: [[[null, 1, null, null, null, null]]] } }));
+      });
+      assert.equal(await page.getByRole('switch', { checked: true, includeHidden: true }).count(), 8, 'editing the query resets the view again');
+      assert.equal(await first.locator('.arpeggio-results ascii-tabs').isVisible(), true);
+      await viewSwitch.click();
       await page.locator('.arpeggio-search-toggle').click();
-      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible .name').allTextContents(), ['Cm', 'Cm/Eb', 'Cm/G']);
+      assert.equal(await page.getByRole('switch', { checked: true, includeHidden: true }).count(), 8);
+      assert.equal(await first.locator('[role="tabpanel"]:visible ascii-tabs').isVisible(), true);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'representations fit viewport');
       await page.reload();
       assert.equal(await page.getByRole('switch', { checked: true }).count(), 8, 'switch state is volatile');
