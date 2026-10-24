@@ -1228,6 +1228,13 @@
     </measure>
     <!--========================= Measure 3 ==========================-->
     <measure implicit="no" number="3">
+      <direction placement="above">
+        <direction-type>
+          <words>C 2</words>
+        </direction-type>
+        <offset>3360</offset>
+        <staff>1</staff>
+      </direction>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>3360</duration>
@@ -1235,6 +1242,12 @@
         <type>eighth</type>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="1" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-24">
         <pitch>
           <step>A</step>
@@ -1484,6 +1497,12 @@
           <tuplet number="1" type="stop" />
         </notations>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="1" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <backup>
         <duration>40320</duration>
       </backup>
@@ -1819,7 +1838,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>5</string><fret>0</fret>
+            <string>6</string><fret>5</fret>
           </technical>
         </notations>
       </note>

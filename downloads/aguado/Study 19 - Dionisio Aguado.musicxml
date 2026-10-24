@@ -1974,7 +1974,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>11</fret>
+            <string>3</string><fret>6</fret>
           </technical>
         </notations>
       </note>
@@ -2043,7 +2043,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>0</fret>
+            <string>4</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -2329,7 +2329,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>4</string><fret>9</fret>
           </technical>
         </notations>
       </note>
@@ -3569,6 +3569,18 @@
     </measure>
     <!--========================= Measure 10 =========================-->
     <measure implicit="no" number="10">
+      <direction placement="above">
+        <direction-type>
+          <words>½C 9</words>
+        </direction-type>
+        <staff>1</staff>
+      </direction>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="1" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-105">
         <pitch>
           <step>E</step>
@@ -3635,6 +3647,12 @@
           </technical>
         </notations>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="1" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <backup>
         <duration>30240</duration>
       </backup>
@@ -3798,7 +3816,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>5</fret>
+            <string>2</string><fret>10</fret>
           </technical>
         </notations>
       </note>
@@ -3835,7 +3853,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>3</string><fret>9</fret>
           </technical>
         </notations>
       </note>
@@ -3851,7 +3869,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>3</string><fret>9</fret>
           </technical>
         </notations>
       </note>
@@ -3869,7 +3887,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>6</fret>
+            <string>4</string><fret>11</fret>
           </technical>
         </notations>
       </note>
@@ -3885,7 +3903,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>3</string><fret>9</fret>
           </technical>
         </notations>
       </note>
@@ -3901,7 +3919,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>3</string><fret>9</fret>
           </technical>
         </notations>
       </note>
@@ -4351,6 +4369,18 @@
     </measure>
     <!--========================= Measure 12 =========================-->
     <measure implicit="no" number="12">
+      <direction placement="above">
+        <direction-type>
+          <words>½C 9</words>
+        </direction-type>
+        <staff>1</staff>
+      </direction>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="2" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-129">
         <pitch>
           <step>C</step>
@@ -4606,7 +4636,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>5</fret>
+            <string>2</string><fret>10</fret>
           </technical>
         </notations>
       </note>
@@ -4622,7 +4652,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>5</fret>
+            <string>2</string><fret>10</fret>
           </technical>
         </notations>
       </note>
@@ -4666,7 +4696,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>3</string><fret>9</fret>
           </technical>
         </notations>
       </note>
@@ -4700,7 +4730,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>6</fret>
+            <string>4</string><fret>11</fret>
           </technical>
         </notations>
       </note>
@@ -5204,6 +5234,12 @@
           <tied type="start" />
         </notations>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="2" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-154">
         <pitch>
           <step>C</step>
@@ -5569,7 +5605,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>7</fret>
+            <string>3</string><fret>11</fret>
           </technical>
         </notations>
       </note>
@@ -5587,7 +5623,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>7</fret>
+            <string>3</string><fret>11</fret>
           </technical>
         </notations>
       </note>
@@ -5603,7 +5639,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>4</string><fret>9</fret>
           </technical>
         </notations>
       </note>
@@ -10295,7 +10331,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -10380,7 +10416,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>2</fret>
+            <string>3</string><fret>6</fret>
           </technical>
         </notations>
       </note>
@@ -10398,7 +10434,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>2</fret>
+            <string>3</string><fret>6</fret>
           </technical>
         </notations>
       </note>
@@ -11944,6 +11980,18 @@
     </measure>
     <!--========================= Measure 30 =========================-->
     <measure implicit="no" number="30">
+      <direction placement="above">
+        <direction-type>
+          <words>½C 5</words>
+        </direction-type>
+        <staff>1</staff>
+      </direction>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="3" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-357">
         <pitch>
           <step>A</step>
@@ -12187,7 +12235,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -12235,7 +12283,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -12251,7 +12299,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -12350,6 +12398,12 @@
         <staff>1</staff>
         <beam number="1">end</beam>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="3" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note>
         <grace slash="yes" />
         <pitch>
@@ -12716,7 +12770,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>

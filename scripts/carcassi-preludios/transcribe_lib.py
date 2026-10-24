@@ -13,8 +13,14 @@ semicorcheas va solo en `bass` (la tablatura no la duplica). Alteraciones: la pr
 aparición en el compás de cada altura que difiere de la armadura o de lo ya alterado.
 Los dedos van como `fingering`; las letras p-i-m-a no se transcriben (el motor no las dibuja).
 """
+import json
 import os
+import re
+import sys
 from xml.sax.saxutils import escape
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "backend", "engine"))
+import barres as barre_marks  # noqa: E402
 
 DIVISIONS = 4  # por negra: 1 = semicorchea
 TYPES = {1: "16th", 2: "eighth", 3: "eighth", 4: "quarter", 6: "quarter", 8: "half", 12: "half", 16: "whole"}
@@ -149,14 +155,29 @@ def measure_xml(number, fifths, bass, up, first=False, time=(4, 4), group=None):
     return (f'<measure number="{number}">{attrs}{v1}<backup><duration>{length}</duration></backup>{v2}</measure>')
 
 
-def write(path, title, fifths, measures, time=(4, 4), group=None):
-    """`measures`: [{"bass": [...], "up": [...]}]; escribe el MusicXML corregido en `path`."""
+def barres_of(path):
+    """Cejillas del preludio que escribe `path` (`prelude-NN.musicxml`), de `barres.json` junto a él: ver
+    `santisteban_barres.py`. Vacío si el archivo no existe o el preludio no tiene."""
+    index = os.path.join(os.path.dirname(path), "barres.json")
+    number = re.search(r"prelude-(\d+)", os.path.basename(path))
+    if not number or not os.path.exists(index):
+        return []
+    with open(index, encoding="utf-8") as f:
+        return json.load(f).get(str(int(number.group(1))), [])
+
+
+def write(path, title, fifths, measures, time=(4, 4), group=None, barres=None):
+    """`measures`: [{"bass": [...], "up": [...]}]; escribe el MusicXML corregido en `path`, con las cejillas
+    (`barres`, o las de `barres.json`) escritas como texto y línea punteada (`backend/engine/barres.py`)."""
     body = "".join(measure_xml(i + 1, fifths, m["bass"], m["up"], first=i == 0, time=time, group=m.get("group", group)) for i, m in enumerate(measures))
     xml = ('<?xml version="1.0" encoding="UTF-8"?>'
            f'<score-partwise version="3.1"><work><work-title>{escape(title)}</work-title></work>'
            '<identification><creator type="composer">Matteo Carcassi</creator></identification>'
            '<part-list><score-part id="P1"><part-name>Guitar</part-name></score-part></part-list>'
            f'<part id="P1">{body}</part></score-partwise>\n')
+    spans = barres_of(path) if barres is None else barres
+    if spans:
+        xml = barre_marks.inject(xml, spans)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         f.write(xml)

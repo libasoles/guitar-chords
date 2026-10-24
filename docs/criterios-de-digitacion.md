@@ -121,6 +121,7 @@ Quién lo dice (verificado): **Carcassi** (dedos «unmoved» entre acordes del a
 | 13 | `string`/`fret` de MusicXML | MusicXML 4.0 | anotado | duro |
 | 14 | Orden de dedos = orden de trastes en un acorde | física; Al Kasimi 2007 (sin cruces) | acorde | duro |
 | 15 | Cejilla: ≥ 2 cuerdas, mismo traste, dedo 1 | Carcassi; Aguado §138 | acorde | duro; costo 1.5 de cejilla |
+| 15b | Cejilla **escrita** (`C 7`, `½C 7` + línea punteada): las cuerdas que cubre no suenan al aire ni bajo su traste mientras dure | Carcassi, «The Barrer»; Sagreras (`₵`), Aguado (`Ceja`, `C.VII`), Santisteban (`b_II`, `B_IV`) | marcada en la partitura | duro, por nota (se ignora si ninguna celda la cumple) |
 | 16 | Mismo dedo no sostiene dos notas | Al Kasimi 2007 | todo | duro |
 | 17 | Dedos guía y let-ring: no levantar nota sostenida | Carcassi; Aguado §87; Heijink | arpegio | blando 2 por dedo levantado; −0.5 por reutilización |
 | 18 | Ligado en la misma cuerda | Carcassi, «Of the Slur» | melodía con ligadura | duro: misma cuerda, distinto traste |

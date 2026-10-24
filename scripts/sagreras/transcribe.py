@@ -2,6 +2,7 @@
 
     python scripts/sagreras/transcribe.py 3 [4 5 ...]     # escribe sources/NN.musicxml y compara con la TAB impresa
     python scripts/sagreras/transcribe.py check [N ...]   # solo compara (sin escribir)
+    python scripts/sagreras/transcribe.py barres [N ...]  # reescribe las cejillas de sources/NN.musicxml (sin tocar sus notas)
 
 Las notas se leen de la geometria del PDF (marieh_notes.py + carcassi-valses/pdf_notes.py); no se copia nada del PDF
 a la salida: el MusicXML lleva solo alturas y duraciones, y la TAB la propone el motor (ver build.py). Alturas escritas
@@ -25,6 +26,8 @@ sys.path.insert(0, str(ROOT / 'scripts' / 'carcassi-preludios'))
 import marieh_notes as M  # noqa: E402
 import pdf_notes as P  # noqa: E402
 import transcribe_lib as T  # noqa: E402
+sys.path.insert(0, str(ROOT / 'backend' / 'engine'))
+import barres as barre_marks  # noqa: E402
 import transcribe_valses as V  # noqa: E402
 
 SOURCES = HERE / 'sources'
@@ -438,6 +441,29 @@ ENGINE_FAILS = set()
 PENDING_REVIEW = {76, 78, 81, 82, 84}
 
 
+END_MARGIN = 1.5  # pt: una nota cuya cabeza queda justo al final de la linea punteada sigue bajo la cejilla
+
+
+def barre_spans(lesson, measures):
+    """Cejillas de la leccion como tramos de `backend/engine/barres.py`. La marca «₵N» empieza en la primera nota a su
+    derecha y la linea punteada termina en la ultima nota que alcanza; sin linea, la cejilla dura el compas. La
+    posicion de cada nota sale de `axis` (x -> inicio) del conversor."""
+    spans = []
+    quarter = 4 * SCALE
+    for b in lesson['barres']:
+        bars = range(b['first'], b['first'] + b['count'])
+        items = [(i, x, onset) for i in bars for x, onset in measures[i]['axis']]
+        start = next(((i, x, o) for i, x, o in items if x >= b['x0'] - 1), None)
+        if start is None:
+            continue
+        span = {'bar': start[0] + 1, 'at': start[2] / quarter, 'fret': b['fret'], 'strings': 6}
+        if b['x1'] is not None:
+            end = next(((i, x, o) for i, x, o in items if x > b['x1'] + END_MARGIN), None)
+            span['end_bar'], span['end_at'] = (end[0] + 1, end[2] / quarter) if end else (bars[-1] + 2, 0)
+        spans.append(span)
+    return spans
+
+
 def record_measures(n, count):
     """Compases de cada leccion (los lee test/sagreras.unit.js)."""
     path = HERE / 'measures.json'
@@ -467,12 +493,36 @@ def run(numbers, write):
               f"cortos/largos={odd} notacion-de-mas={missing} tab-de-mas={extra}")
         if write and (n in PENDING_REVIEW or (status == 'OK ' and n not in ENGINE_FAILS)):
             SOURCES.mkdir(exist_ok=True)
-            (SOURCES / f'{n:02d}.musicxml').write_text(to_xml(n, lesson, measures), encoding='utf-8')
+            xml = to_xml(n, lesson, measures)
+            if lesson['barres']:
+                xml = barre_marks.inject(xml, barre_spans(lesson, measures))
+            (SOURCES / f'{n:02d}.musicxml').write_text(xml, encoding='utf-8')
             record_measures(n, len(measures))
+
+
+def mark_barres(numbers):
+    """Escribe las cejillas impresas en las fuentes ya publicadas. Algunas se curaron a mano despues de leerlas del PDF, asi
+    que no se regeneran: solo se reponen las marcas de cejilla (se borran las anteriores y se escriben las del PDF)."""
+    lessons = read_lessons()
+    for n in numbers:
+        path = SOURCES / f'{n:02d}.musicxml'
+        if not path.exists():
+            continue
+        lesson = lessons[n]
+        text = path.read_text(encoding='utf-8')
+        if not lesson['barres'] and '<dashes' not in text:
+            continue
+        spans = barre_spans(lesson, lesson_measures(lesson)) if lesson['barres'] else []
+        path.write_text(barre_marks.replace(text, spans), encoding='utf-8')
+        if spans:
+            print(f'{n:2d} cejillas: {[(s["bar"], s["fret"]) for s in spans]}')
 
 
 if __name__ == '__main__':
     args = sys.argv[1:]
+    if args[:1] == ['barres']:
+        mark_barres([int(a) for a in args[1:]] or list(range(1, 87)))
+        sys.exit()
     write = args[:1] != ['check']
     if not write:
         args = args[1:]

@@ -42,6 +42,13 @@
           <line>5</line>
         </clef><staff-details number="2"><staff-lines>6</staff-lines><staff-tuning line="1"><tuning-step>E</tuning-step><tuning-octave>2</tuning-octave></staff-tuning><staff-tuning line="2"><tuning-step>A</tuning-step><tuning-octave>2</tuning-octave></staff-tuning><staff-tuning line="3"><tuning-step>D</tuning-step><tuning-octave>3</tuning-octave></staff-tuning><staff-tuning line="4"><tuning-step>G</tuning-step><tuning-octave>3</tuning-octave></staff-tuning><staff-tuning line="5"><tuning-step>B</tuning-step><tuning-octave>3</tuning-octave></staff-tuning><staff-tuning line="6"><tuning-step>E</tuning-step><tuning-octave>4</tuning-octave></staff-tuning></staff-details>
       </attributes>
+      <direction placement="above">
+        <direction-type>
+          <words>C 2</words>
+        </direction-type>
+        <offset>20160</offset>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-0">
         <pitch>
           <step>E</step>
@@ -70,6 +77,12 @@
           </technical>
         </notations>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="1" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-2">
         <pitch>
           <step>G</step>
@@ -103,6 +116,12 @@
           </technical>
         </notations>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="1" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <backup>
         <duration>40320</duration>
       </backup>
@@ -431,7 +450,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>5</string><fret>0</fret>
+            <string>6</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -2458,6 +2477,13 @@
     </measure>
     <!--========================= Measure 5 ==========================-->
     <measure implicit="no" number="5">
+      <direction placement="above">
+        <direction-type>
+          <words>C 2</words>
+        </direction-type>
+        <offset>20160</offset>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-70">
         <pitch>
           <step>E</step>
@@ -2486,6 +2512,12 @@
           </technical>
         </notations>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="2" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-72">
         <pitch>
           <step>G</step>
@@ -2519,6 +2551,12 @@
           </technical>
         </notations>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="2" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <backup>
         <duration>40320</duration>
       </backup>
@@ -2837,7 +2875,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>5</string><fret>0</fret>
+            <string>6</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -3075,6 +3113,18 @@
     </measure>
     <!--========================= Measure 6 ==========================-->
     <measure implicit="no" number="6">
+      <direction placement="above">
+        <direction-type>
+          <words>C 7</words>
+        </direction-type>
+        <staff>1</staff>
+      </direction>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="3" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-88">
         <pitch>
           <step>B</step>
@@ -3130,6 +3180,12 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="3" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <backup>
         <duration>40320</duration>
       </backup>
@@ -3430,7 +3486,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>0</fret>
+            <string>6</string><fret>10</fret>
           </technical>
         </notations>
       </note>
@@ -3446,7 +3502,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>0</fret>
+            <string>6</string><fret>10</fret>
           </technical>
         </notations>
       </note>
@@ -3472,7 +3528,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>3</fret>
+            <string>3</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -3490,7 +3546,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>2</fret>
+            <string>2</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -3506,7 +3562,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>3</fret>
+            <string>3</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -3529,7 +3585,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>3</fret>
+            <string>3</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -3547,7 +3603,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>2</fret>
+            <string>2</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -3563,7 +3619,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>3</fret>
+            <string>3</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -3586,7 +3642,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>3</fret>
+            <string>3</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -3604,7 +3660,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>2</fret>
+            <string>2</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -3620,7 +3676,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>3</fret>
+            <string>3</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -3643,7 +3699,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>3</fret>
+            <string>3</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -3661,7 +3717,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>2</fret>
+            <string>2</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -3677,13 +3733,25 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>3</fret>
+            <string>3</string><fret>7</fret>
           </technical>
         </notations>
       </note>
     </measure>
     <!--========================= Measure 7 ==========================-->
     <measure implicit="no" number="7">
+      <direction placement="above">
+        <direction-type>
+          <words>C 5</words>
+        </direction-type>
+        <staff>1</staff>
+      </direction>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="4" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-106">
         <pitch>
           <step>A</step>
@@ -3695,6 +3763,12 @@
         <stem>up</stem>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="4" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-107">
         <pitch>
           <step>A</step>
@@ -4099,7 +4173,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>2</fret>
+            <string>3</string><fret>6</fret>
           </technical>
         </notations>
       </note>
@@ -4115,7 +4189,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -4133,7 +4207,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>2</fret>
+            <string>3</string><fret>6</fret>
           </technical>
         </notations>
       </note>
@@ -4307,6 +4381,18 @@
     </measure>
     <!--========================= Measure 8 ==========================-->
     <measure implicit="no" number="8">
+      <direction placement="above">
+        <direction-type>
+          <words>C 2</words>
+        </direction-type>
+        <staff>1</staff>
+      </direction>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="5" type="start" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <note id="tab-note-123">
         <pitch>
           <step>A</step>
@@ -4347,6 +4433,12 @@
         <type>quarter</type>
         <staff>1</staff>
       </note>
+      <direction placement="above">
+        <direction-type>
+          <bracket line-end="none" line-type="dashed" number="5" type="stop" />
+        </direction-type>
+        <staff>1</staff>
+      </direction>
       <backup>
         <duration>40320</duration>
       </backup>
@@ -4549,7 +4641,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>5</string><fret>0</fret>
+            <string>6</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -4581,7 +4673,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>5</string><fret>0</fret>
+            <string>6</string><fret>5</fret>
           </technical>
         </notations>
       </note>

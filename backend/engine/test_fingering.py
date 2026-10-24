@@ -300,3 +300,24 @@ class HeldFretsTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class BarreTextTests(unittest.TestCase):
+    def test_parse(self):
+        self.assertEqual(fingering.parse_barre("C 7"), (7, 6))
+        self.assertEqual(fingering.parse_barre("C.VII"), (7, 6))
+        self.assertEqual(fingering.parse_barre("½C 2"), (2, 3))
+        self.assertEqual(fingering.parse_barre("Ceja"), None)
+        self.assertEqual(fingering.parse_barre("Allegro"), None)
+        self.assertEqual(fingering.parse_barre(fingering.barre_text(5, 3)), (5, 3))
+
+    def test_cells_under_a_barre_keep_to_its_fret(self):
+        opens = [64, 59, 55, 50, 45, 40]
+        self.assertEqual(fingering.allowed_cells(71, opens, {}, 19, (7, 6)), [(0, 7), (1, 12), (2, 16)])  # B4 on strings 1-3
+        self.assertEqual(fingering.allowed_cells(40, opens, {}, 19, (7, 6)), [(5, 0)])  # nothing fits: the pitch wins
+
+    def test_arpeggio_rules_respect_the_barre(self):
+        opens = [64, 59, 55, 50, 45, 40]
+        tabs = [[[2, None, None, None, None, None], [None, 3, None, None, None, None]]]  # F#4 and D4 low on the neck
+        out = fingering.avoid_repeated_strings(tabs, opens, barres=[[(7, 6), (7, 6)]])
+        self.assertTrue(all(f >= 7 for col in out[0] for f in col if f is not None))

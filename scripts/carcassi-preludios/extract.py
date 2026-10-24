@@ -284,7 +284,7 @@ def build(number):
             suggestion = json.load(f)
         tabs = suggestion["tabs"]
         if not contextual:
-            tabs = avoid_repeated_strings(tabs, tabify.open_midis(tabify.STANDARD_TUNING))
+            tabs = avoid_repeated_strings(tabs, tabify.open_midis(tabify.STANDARD_TUNING), barres=suggestion.get("barres"))
         if EDITION == "carcassi" and number == 9:
             # Requested TAB voicing: play the B bass on the sixth string in m. 15,
             # and play G# on the third string in the closing chord (m. 16).
