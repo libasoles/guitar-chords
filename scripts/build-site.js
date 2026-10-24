@@ -2248,6 +2248,7 @@ function siteMenu(strings, locale) {
   if (PARTITURA_ENABLED)
     items.push(link(pagePath(PARTITURA_SLUG, locale), strings.menuAddTabs));
   items.push(link(pagePath("circulo-de-quintas", locale), strings.menuFifths));
+  items.push(link(pagePath(ARTICLE_ARPEGGIOS_SLUG, locale), strings.artArpeggiosH1));
   const articles = [
     [ARTICLE_CARCASSI_SLUG, strings.artCarcH1],
     [ARTICLE_PRELUDES_SLUG, strings.artPreludesH1],
@@ -2258,7 +2259,6 @@ function siteMenu(strings, locale) {
     [ARTICLE_SAGRERAS_SLUG, strings.artSagrerasH1],
     [ARTICLE_SOR_SLUG, strings.artSorH1],
     [ARTICLE_SOR_ESTUDIOS_SLUG, strings.artSorEstudiosH1],
-    [ARTICLE_ARPEGGIOS_SLUG, strings.artArpeggiosH1],
   ];
   return (
     '<details class="site-menu"><summary aria-label="' +
