@@ -91,6 +91,31 @@ async function checkArpeggioLayout() {
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'representations fit viewport');
       await page.reload();
       assert.equal(await page.getByRole('switch', { checked: true }).count(), 8, 'switch state is volatile');
+      await page.locator('.arpeggio-search-toggle').click();
+      await page.waitForFunction(() => document.activeElement?.classList.contains('ascii-tabs-input'));
+      await page.keyboard.type('1');
+      await page.keyboard.press('Enter');
+      await page.waitForFunction(() => Array.from(document.querySelectorAll('.arpeggio-results:not([hidden]) ascii-tabs')).every((tab) => parseFloat(getComputedStyle(tab).fontSize) >= 16));
+      const searchRows = await page.locator('.arpeggio-group:visible').evaluateAll((groups) => groups.map((group) => {
+        const result = group.querySelector('.arpeggio-results');
+        const tab = result.querySelector('ascii-tabs');
+        return {
+          root: group.querySelector('.arpeggio-root').textContent,
+          font: parseFloat(getComputedStyle(tab).fontSize),
+          names: Array.from(tab.querySelectorAll('.arpeggio-chord'), (button) => button.textContent),
+          rows: Array.from(tab.querySelectorAll('.ascii-tabs-staff'), (staff) => staff.querySelectorAll('.arpeggio-chord').length),
+        };
+      }));
+      assert.ok(searchRows.some((group) => group.names.length > 6), 'reproduces a long result group');
+      for (const group of searchRows) {
+        assert.ok(group.rows.every((count) => count <= 6), group.root + ' wraps at six chords');
+        if (group.names.length > 6) assert.ok(group.rows.length > 1);
+        if (width === 1280) assert.deepEqual(group.rows, Array.from({ length: Math.ceil(group.names.length / 6) }, (_, i) => Math.min(6, group.names.length - i * 6)), 'desktop groups six chords per row');
+        assert.ok(group.font >= 16, 'readable search font');
+      }
+      const namesByRoot = await page.evaluate(() => JSON.parse(document.getElementById('arpeggio-search-data').textContent).roots.map((root) => root.chords.filter((chord) => chord.form[0] === 1).map((chord) => chord.name)).filter((names) => names.length));
+      assert.deepEqual(searchRows.map((group) => group.names), namesByRoot, 'wrap preserves every chord and its order');
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'wrapped search fits viewport');
       assert.deepEqual(errors, []);
       await page.close();
     }

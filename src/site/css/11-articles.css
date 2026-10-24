@@ -874,3 +874,14 @@ body:has(.modal-full:popover-open) {
   right: 0;
   transform: none;
 }
+
+/* The long dim7 title gets its own row on mobile, leaving the tabs and
+   their switch alongside each other without overlapping their hit areas. */
+@media (max-width: 480px) {
+  .arpeggio-group:not(.is-filtering) .arpeggio-group-header:has(#arpeggio-Dim7-root) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .arpeggio-group:not(.is-filtering) #arpeggio-Dim7-root {
+    grid-column: 1 / -1;
+  }
+}

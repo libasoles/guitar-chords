@@ -506,18 +506,21 @@ const SEARCH_LOADER = `<script>
       }
       row.dataset.chords = matches.map(function(chord) { return chord.popover; }).join(' ');
       delete row.dataset.rendered;
-      var columns = [];
+      var tabs = [];
       var annotations = [];
       matches.forEach(function(chord, i) {
-        if (i > 0) columns.push([null, null, null, null, null, null]);
-        annotations.push({ column: columns.length, text: chord.name, html: '<button type="button" class="arpeggio-chord" popovertarget="' + chord.popover + '" aria-label="' + data.showFingering + ' ' + chord.name + '">' + chord.name + '</button>' });
+        if (i % 6 === 0) { tabs.push([]); annotations.push([]); }
+        var columns = tabs[tabs.length - 1];
+        if (columns.length) columns.push([null, null, null, null, null, null]);
+        annotations[annotations.length - 1].push({ column: columns.length, text: chord.name, html: '<button type="button" class="arpeggio-chord" popovertarget="' + chord.popover + '" aria-label="' + data.showFingering + ' ' + chord.name + '">' + chord.name + '</button>' });
         columns.push(chord.form.map(function(fret, s) { return fret === null ? null : { fret: fret, bold: s >= 3 }; }));
       });
       section.dispatchEvent(new Event('arpeggioresultschange'));
-      results.style.setProperty('--chars', Math.max(23, 4 * columns.length + 3));
+      // Keep a readable font; the component wraps the matches into staves.
+      results.style.setProperty('--chars', 23);
       var tab = results.querySelector('ascii-tabs');
       customElements.whenDefined('ascii-tabs').then(function() {
-        tab.setDocument({ value: [columns], annotations: [annotations] });
+        tab.setDocument({ value: tabs, annotations: annotations });
       });
     });
     document.getElementById('arpeggio-results-title').hidden = !on;
