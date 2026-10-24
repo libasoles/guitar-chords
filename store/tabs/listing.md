@@ -23,7 +23,7 @@ Español e inglés según el navegador. Sin cuentas, analítica, permisos especi
 ## Chrome Web Store form — Privacy practices tab
 
 **Single purpose** (1000 chars max):
-Write guitar tablatures in the extension popup, save them locally on the device and copy them as plain text.
+Draft guitar tablature ideas and copy them as plain text to paste anywhere.
 
 **Permission justification:** The extension requests no permissions, host permissions or content scripts, so there is nothing to justify. Tablatures and preferences are kept with the page's own `localStorage` inside the extension; the clipboard is only written to (Copy) or read (paste into the editor) on direct user action, which needs no manifest permission.
 
