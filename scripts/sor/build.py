@@ -92,11 +92,12 @@ def name_of(number):
 
 
 def title_of(number):
-    return name_of(number)[0]
+    # Las lecciones se graban en español, tanto en el visor como en el PDF.
+    return name_of(number)[1 if COLLECTION == 'lecciones' else 0]
 
 
 def file_base(number):
-    return f"{title_of(number).replace(': ', ' - ')} - {AUTHOR}"
+    return f"{name_of(number)[0].replace(': ', ' - ')} - {AUTHOR}"
 
 
 def convert(number):

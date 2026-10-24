@@ -22,6 +22,10 @@ node --test test/sor.unit.js
 Los originales (con su `.mid` y `.rdf`) están en `resources/sor/mutopia/` (no versionado). El libro de 1830
 (*Méthode pour la guitare*, `resources/sor/metodo-1830/`) son escaneos difusos y casi todo son ejemplos cortos: no sirve.
 
+Las lecciones del Op. 60 llevan el título en español («Lección 1: Do mayor») dentro del PDF, sus metadatos,
+el MusicXML y las páginas del visor. Los nombres de archivo se conservan en inglés para mantener las URL de descarga.
+Las tarjetas y la navegación siguen el idioma de la página.
+
 ## El conversor
 
 LilyPond no está instalado y no exporta MusicXML, así que `ly_to_musicxml.py` lee el `.ly` directamente: modo
