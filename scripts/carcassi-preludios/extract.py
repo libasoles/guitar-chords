@@ -293,6 +293,13 @@ def build(number):
                     if column[old_string] == old_fret:
                         column[old_string] = None
                         column[new_string] = new_fret
+        if EDITION == "santisteban" and number == 12:
+            # Requested TAB voicing: the three D bass quarters of the last bar (m. 12 in the file,
+            # shown as 13) all on the open fourth string instead of fret 5 on the fifth.
+            for column in tabs[11]:
+                if column[4] == 5:
+                    column[4] = None
+                    column[3] = 0
         tabify.export(os.path.join(prepared, tabify.NORMALIZED_NAME), os.path.join(prepared, tabify.SUGGESTION_NAME),
                       tabs,
                       "standard", exported, title=title, subtitle=subtitle)
