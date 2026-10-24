@@ -788,3 +788,23 @@ body:has(.modal-full:popover-open) {
 .arpeggio-results .article-tab {
   width: 100%;
 }
+
+/* Six string lines (9em), the annotation band (1.2em), and paper padding.
+   Keep the same space before the custom element and its script have loaded. */
+.arpeggio-group .article-tab {
+  min-height: calc(10.2em + 42px);
+}
+.arpeggio-popover {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overflow-x: clip;
+  /* Leave room for the close button inside the scrollable viewport. */
+  padding: 12px;
+}
+.arpeggio-popover .modal-close {
+  top: 0;
+  right: 0;
+}

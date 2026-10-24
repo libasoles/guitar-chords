@@ -84,3 +84,21 @@ for (const locale of ['es', 'en']) {
     }
   });
 }
+
+test('popup note labels match every exact voicing and leave silent strings empty', () => {
+  const html = renderBody('es', require('../src/i18n/strings.es.json'));
+  const chords = [...html.matchAll(/data-chord="([^"]+)"/g)].map((match) => JSON.parse(match[1].replaceAll('&quot;', '"')));
+  assert.equal(chords.length, GROUPS.reduce((count, group) => count + group[3].length, 0));
+  for (const chord of chords) {
+    assert.equal(chord.stringNotes.length, 6);
+    chord.fingers.forEach(([string, fret]) => {
+      const note = chord.stringNotes[string - 1];
+      if (fret === 'x') { assert.equal(note, ''); return; }
+      assert.match(note, /^[A-G][♯♭]*$/, chord.name);
+      const alteration = [...note.slice(1)].reduce((sum, accidental) => sum + (accidental === '♯' ? 1 : -1), 0);
+      assert.equal((PITCH[note[0]] + alteration + 12) % 12, (OPEN[string - 1] + (fret === 'o' ? 0 : fret)) % 12, chord.name + ' string ' + string);
+    });
+  }
+  assert.deepEqual(chords.find((chord) => chord.name === 'Cm').stringNotes, ['G', 'E♭', 'G', '', 'C', '']);
+  assert.deepEqual(chords.find((chord) => chord.name === 'D/F#').stringNotes, ['F♯', 'D', 'A', '', '', 'F♯']);
+});

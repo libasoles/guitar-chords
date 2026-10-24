@@ -244,6 +244,25 @@ const FINGERINGS = {
   Ddim7: '1020--', Fdim7: '3141--', Abdim7: '123--4', Bdim7: '131-2-',
 };
 
+// Spell chord tones by thirds, then label the exact sounding string positions.
+function stringNotes(name, form) {
+  const natural = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  const letters = 'CDEFGAB';
+  const [, root, accidental, quality] = name.match(/^([A-G])([#b]?)([^/]*)/);
+  const rootPitch = natural[root] + (accidental === '#' ? 1 : accidental === 'b' ? -1 : 0);
+  const intervals = quality === 'dim7' ? [0, 3, 6, 9] : quality === 'dim' ? [0, 3, 6] :
+    quality === 'm7' ? [0, 3, 7, 10] : quality === 'm' ? [0, 3, 7] :
+    quality === 'maj7' ? [0, 4, 7, 11] : quality === '7' ? [0, 4, 7, 10] : [0, 4, 7];
+  const spellings = new Map(intervals.map(function (interval, i) {
+    const pitch = (rootPitch + interval + 12) % 12;
+    const letter = letters[(letters.indexOf(root) + 2 * i) % 7];
+    const delta = (pitch - natural[letter] + 18) % 12 - 6;
+    return [pitch, letter + (delta < 0 ? '♭'.repeat(-delta) : '♯'.repeat(delta))];
+  }));
+  const open = [4, 11, 7, 2, 9, 4];
+  return form.map((fret, string) => fret === null ? '' : spellings.get((open[string] + fret) % 12));
+}
+
 function chordPopover(id, name, form, strings) {
   const fingering = FINGERINGS[form.map((fret) => fret === null ? 'x' : fret).join(' ')] || FINGERINGS[name];
   const fingers = form.map(function (fret, string) {
@@ -251,8 +270,8 @@ function chordPopover(id, name, form, strings) {
   });
   const label = strings.artChordDiagramLabel + ' ' + name;
   return modal({
-    id, label, closeLabel: strings.artArpeggiosClose, className: 'chord-popover',
-    content: chordCard({ name, fingers, barres: [], position: 1 }, label),
+    id, label, closeLabel: strings.artArpeggiosClose, className: 'chord-popover arpeggio-popover',
+    content: chordCard({ name, fingers, barres: [], position: 1, stringNotes: stringNotes(name, form) }, label),
   });
 }
 
@@ -290,7 +309,7 @@ function renderBody(locale, strings) {
   });
   return '<p>' + strings.artArpeggiosIntro + '</p><h2 class="arpeggio-results-title" id="arpeggio-results-title" hidden>' + strings.artArpeggiosResults +
     '</h2><p class="arpeggio-no-results" id="arpeggio-no-results" role="status" hidden>' + strings.artArpeggiosNoResults +
-    '</p><div class="sequence-forms">' + tabs.join('') + '</div>' + popovers.join('') + CHORD_CARD_LOADER + TAB_LOADER + QUALITY_TABS_LOADER +
+    '</p><div class="sequence-forms">' + tabs.join('') + '</div>' + popovers.join('') + CHORD_CARD_LOADER + TAB_LOADER + POPOVER_LOADER + QUALITY_TABS_LOADER +
     searchIndex(locale, strings) + SEARCH_LOADER;
 }
 
@@ -322,6 +341,43 @@ function searchControl(strings) {
     '<ascii-tabs class="article-tab" theme="light" labels="notes" spacing="3"><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>' +
     '<div class="arpeggio-search-footer"><button type="button" class="arpeggio-search-clear">' + strings.artArpeggiosClearNotes + '</button></div></div></div>';
 }
+
+// Keep native popover dismissal and focus behavior, positioning against the actual
+// invoker (the search can create a second button for the same chord).
+const POPOVER_LOADER = `<script>
+(function() {
+  var trigger;
+  function position(popup) {
+    if (!trigger || !trigger.isConnected) return;
+    var rect = trigger.getBoundingClientRect();
+    var box = popup.getBoundingClientRect();
+    var padding = 16;
+    var gap = 10;
+    var left = rect.left + (rect.width - box.width) / 2;
+    var top = rect.bottom + gap;
+    if (top + box.height > innerHeight - padding) top = rect.top - gap - box.height;
+    popup.style.left = Math.max(padding, Math.min(left, innerWidth - box.width - padding)) + 'px';
+    popup.style.top = Math.max(padding, Math.min(top, innerHeight - box.height - padding)) + 'px';
+  }
+  document.addEventListener('click', function(event) {
+    var button = event.target.closest('.arpeggio-chord');
+    if (button) trigger = button;
+  }, true);
+  document.querySelectorAll('.arpeggio-popover').forEach(function(popup) {
+    popup.addEventListener('toggle', function(event) {
+      if (event.newState !== 'open') return;
+      window.ChordCard.renderAll(popup);
+      position(popup);
+    });
+  });
+  function reposition() {
+    var popup = document.querySelector('.arpeggio-popover:popover-open');
+    if (popup) position(popup);
+  }
+  window.addEventListener('resize', reposition);
+  document.addEventListener('scroll', reposition, true);
+})();
+</script>`;
 
 // Each root keeps its own selection. Arrow keys follow the horizontal tab pattern.
 const QUALITY_TABS_LOADER = `<script>
