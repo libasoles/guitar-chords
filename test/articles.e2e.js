@@ -160,7 +160,7 @@ const PDFS = [
       assert.equal(await page.locator('.arpeggio-chord').first().evaluate((el) => getComputedStyle(el).textDecorationLine), 'none');
       assert.deepEqual(await page.locator('#arpeggio-D-panel-2 ascii-tabs').first().evaluate((el) => el.value[0].filter((column) => column.some((note) => note !== null)).map((column) => column.map((note) => note === null ? null : note.fret))), [
         [2, 1, 2, 0, null, null], [null, 1, 2, 4, 5, null],
-        [2, 1, 2, 4, null, null], [2, 1, 2, null, 0, null], [2, 1, 2, null, 3, null],
+        [5, 3, 5, 4, null, null], [2, 3, 5, null, 0, null], [2, 3, 2, null, 3, null],
       ]);
       assert.equal(await page.locator('.arpeggio-group').count(), 13);
 
@@ -229,7 +229,7 @@ const PDFS = [
           const pitches = form.map((note, string) => note === null ? null : ([64, 59, 55, 50, 45, 40][string] + note.fret));
           const sounding = pitches.filter((pitch) => pitch !== null);
           assert.equal(sounding.length, 4);
-          sounding.forEach((pitch) => assert.ok(chordNotes.includes(pitch % 12), names[i] + ' uses chord tones'));
+          assert.deepEqual([...new Set(sounding.map((pitch) => pitch % 12))].sort((a, b) => a - b), [...chordNotes].sort((a, b) => a - b), names[i] + ' contains every chord tone');
           assert.equal(Math.min(...sounding) % 12, bassNotes[i], names[i] + ' bass');
           assert.ok(sounding.some((pitch) => pitch % 12 === chordNotes[1]), names[i] + ' third');
           if (quality.endsWith('Seventh')) assert.ok(sounding.some((pitch) => pitch % 12 === chordNotes[3]), names[i] + ' seventh');
