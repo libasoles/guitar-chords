@@ -109,11 +109,39 @@ async function checkArpeggioLayout() {
       await groups.last().getByRole('switch').click();
       await page.locator('.arpeggio-search-toggle').click();
       await rootToggle.click();
+      await page.locator('.arpeggio-search ascii-tabs').evaluate(async (el) => {
+        const change = (fret) => el.dispatchEvent(new CustomEvent('change', { detail: { value: [[[fret, null, null, null, null, null]]] } }));
+        change(19);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        change(18);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
+      assert.equal(await page.locator('.arpeggio-results').count(), 0, 'typing restarts the debounce before rendering');
+      await page.locator('.arpeggio-search-clear').evaluate((el) => el.click());
+      await page.waitForTimeout(300);
+      assert.equal(await page.locator('.arpeggio-group:visible').count(), 13, 'clearing cancels a pending search');
+      assert.equal(await page.locator('.arpeggio-results').count(), 0);
+      await page.locator('.arpeggio-search ascii-tabs').evaluate((el) => new Promise((resolve) => {
+        const first = document.querySelector('.arpeggio-group');
+        const observer = new MutationObserver(() => {
+          if (!first.classList.contains('is-filtering')) return;
+          observer.disconnect();
+          // Replace the query while the previous search is between roots.
+          el.dispatchEvent(new CustomEvent('change', { detail: { value: [[[19, null, null, null, null, null]]] } }));
+          resolve();
+        });
+        observer.observe(first, { attributes: true, attributeFilter: ['class'] });
+        el.dispatchEvent(new CustomEvent('change', { detail: { value: [[[0, null, null, null, null, null]]] } }));
+      }));
+      await page.waitForFunction(() => document.querySelector('.arpeggio-search').getAttribute('aria-busy') === 'false');
+      assert.equal(await page.locator('.arpeggio-group:visible').count(), 0, 'a newer query cancels the search already rendering');
+      await page.locator('.arpeggio-search-clear').evaluate((el) => el.click());
       await page.locator('.arpeggio-search ascii-tabs').evaluate((el) => {
         el.dispatchEvent(new CustomEvent('change', { detail: { value: [[[0, null, null, null, null, null]]] } }));
       });
       await page.keyboard.press('Escape');
       await page.locator('h1').click();
+      await page.waitForFunction(() => document.querySelector('.arpeggio-search').getAttribute('aria-busy') === 'false');
       const expected = await page.evaluate(() => JSON.parse(document.getElementById('arpeggio-search-data').textContent).roots[0].chords.filter((chord) => chord.form[0] === 0).map((chord) => chord.name));
       assert.equal(await viewSwitch.isVisible(), true);
       assert.equal(await page.getByRole('switch', { checked: true, includeHidden: true }).count(), 13);
@@ -129,6 +157,7 @@ async function checkArpeggioLayout() {
       await page.locator('.arpeggio-search ascii-tabs').evaluate((el) => {
         el.dispatchEvent(new CustomEvent('change', { detail: { value: [[[null, 1, null, null, null, null]]] } }));
       });
+      await page.waitForFunction(() => document.querySelector('.arpeggio-search').getAttribute('aria-busy') === 'false');
       assert.equal(await page.getByRole('switch', { checked: true, includeHidden: true }).count(), 13, 'editing the query resets the view again');
       assert.equal(await first.locator('.arpeggio-results ascii-tabs').isVisible(), true);
       await viewSwitch.click();
@@ -142,6 +171,7 @@ async function checkArpeggioLayout() {
       await page.waitForFunction(() => document.activeElement?.classList.contains('ascii-tabs-input'));
       await page.keyboard.type('1');
       await page.keyboard.press('Enter');
+      await page.waitForFunction(() => document.querySelector('.arpeggio-search').getAttribute('aria-busy') === 'false');
       await page.waitForFunction(() => Array.from(document.querySelectorAll('.arpeggio-results:not([hidden]) ascii-tabs')).every((tab) => parseFloat(getComputedStyle(tab).fontSize) >= 16));
       const searchRows = await page.locator('.arpeggio-group:visible').evaluateAll((groups) => groups.map((group) => {
         const result = group.querySelector('.arpeggio-results');

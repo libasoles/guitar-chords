@@ -174,6 +174,7 @@ const PDFS = [
       await page.keyboard.type('1');
       await page.keyboard.press('ArrowRight');
       assert.equal(await page.locator('.arpeggio-search ascii-tabs').evaluate((el) => el.value[0].length), 1);
+      await page.waitForFunction(() => document.querySelector('.arpeggio-search').getAttribute('aria-busy') === 'false');
       const expectedSearchRoots = [...new Set(ARPEGGIOS.filter((group) => group[4].some((form) => form[0] === 0 && form[1] === 1)).map((group) => locale === 'es' ? group[0] : group[1]))];
       const visibleSearchRoots = await page.locator('.arpeggio-group:visible .arpeggio-root').allTextContents();
       assert.deepEqual([...visibleSearchRoots].sort(), expectedSearchRoots.sort());
@@ -183,11 +184,13 @@ const PDFS = [
       assert.equal(await page.locator('#arpeggio-results-title').isVisible(), true);
       assert.equal(await page.locator('#arpeggio-no-results').isHidden(), true);
       await page.keyboard.type('9');
+      await page.waitForFunction(() => document.querySelector('.arpeggio-search').getAttribute('aria-busy') === 'false');
       assert.equal(await page.locator('.arpeggio-group:visible').count(), 0);
       assert.equal(await page.locator('#arpeggio-no-results').isVisible(), true);
       await page.keyboard.press('Backspace');
       await page.mouse.click(10, 700);
       assert.equal(await page.locator('.arpeggio-search-popup').isHidden(), true);
+      await page.waitForFunction(() => document.querySelector('.arpeggio-search').getAttribute('aria-busy') === 'false');
       assert.equal(await page.locator('.arpeggio-group:visible').count(), expectedSearchRoots.length);
       await toggle.click();
       assert.equal(await page.locator('.arpeggio-group:visible').count(), 13);

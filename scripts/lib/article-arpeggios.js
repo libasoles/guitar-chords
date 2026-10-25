@@ -817,6 +817,8 @@ const SEARCH_LOADER = `<script>
   var EMPTY = [[null, null, null, null, null, null]];
   var query = [];
   var open = false;
+  var searchTimer;
+  var searchVersion = 0;
 
   function fretOf(note) { return note !== null && typeof note === 'object' ? note.fret : note; }
   function active() { return query.some(function(fret) { return fret !== null; }); }
@@ -829,16 +831,34 @@ const SEARCH_LOADER = `<script>
     popup.hidden = !open;
   }
 
-  function filter() {
-    var on = active();
+  function yieldToInput() {
+    return window.scheduler && window.scheduler.yield
+      ? window.scheduler.yield()
+      : new Promise(function(resolve) { setTimeout(resolve, 0); });
+  }
+
+  function scheduleFilter(immediate) {
+    clearTimeout(searchTimer);
+    var version = ++searchVersion;
+    search.setAttribute('aria-busy', 'true');
+    var frets = query.slice();
+    if (immediate) filter(frets, version);
+    else searchTimer = setTimeout(function() { filter(frets, version); }, 250);
+  }
+
+  async function filter(frets, version) {
+    var on = frets.some(function(fret) { return fret !== null; });
     var found = false;
-    data.roots.forEach(function(root) {
+    for (var root of data.roots) {
+      // Rendering a root can be expensive: let pending typing run between roots.
+      if (on) await yieldToInput();
+      if (version !== searchVersion) return;
       var section = document.getElementById(root.id + '-root').closest('.arpeggio-group');
       // Every query starts in tablature, including roots hidden by the filter.
       section.querySelector('.arpeggio-view-switch').setAttribute('aria-checked', 'true');
       var results = section.querySelector('.arpeggio-results');
       var matches = root.chords.filter(function(chord) {
-        return query.every(function(fret, s) { return fret === null || chord.form[s] === fret; });
+        return frets.every(function(fret, s) { return fret === null || chord.form[s] === fret; });
       });
       section.classList.toggle('is-filtering', on);
       section.hidden = on && !matches.length;
@@ -849,10 +869,10 @@ const SEARCH_LOADER = `<script>
         results.innerHTML = '<ascii-tabs class="article-tab" readonly theme="light" labels="notes" spacing="3" variant="flat" lang="' + data.locale + '"><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>';
         section.appendChild(results);
       }
-      if (!on) {
+      if (!on || !matches.length) {
         if (results) results.hidden = true;
         section.dispatchEvent(new Event('arpeggioresultschange'));
-        return;
+        continue;
       }
       results.hidden = false;
       var row = results.querySelector('.arpeggio-diagrams');
@@ -877,12 +897,13 @@ const SEARCH_LOADER = `<script>
       // Keep a readable font; the component wraps the matches into staves.
       results.style.setProperty('--chars', 23);
       var tab = results.querySelector('ascii-tabs');
-      customElements.whenDefined('ascii-tabs').then(function() {
-        tab.setDocument({ value: tabs, annotations: annotations });
-      });
-    });
+      await customElements.whenDefined('ascii-tabs');
+      if (version !== searchVersion) return;
+      tab.setDocument({ value: tabs, annotations: annotations });
+    }
     document.getElementById('arpeggio-results-title').hidden = !on;
     document.getElementById('arpeggio-no-results').hidden = !on || found;
+    search.setAttribute('aria-busy', 'false');
   }
 
   // Focus is given by replaying a press on the first cell, which has no real pointer to capture.
@@ -911,7 +932,7 @@ const SEARCH_LOADER = `<script>
   input.addEventListener('change', function(event) {
     var tab = event.detail.value[0] || [];
     query = (tab[0] || EMPTY[0]).map(function(note) { return note === null ? null : fretOf(note); });
-    filter();
+    scheduleFilter(!active());
     render();
     if (tab.length > 1) {
       input.setDocument({ value: [[(tab[0] || EMPTY[0]).slice()]] });
@@ -924,7 +945,7 @@ const SEARCH_LOADER = `<script>
       query = [];
       open = false;
       resetInput();
-      filter();
+      scheduleFilter(true);
     } else {
       open = true;
     }
@@ -935,7 +956,7 @@ const SEARCH_LOADER = `<script>
   popup.querySelector('.arpeggio-search-clear').addEventListener('click', function() {
     query = [];
     resetInput();
-    filter();
+    scheduleFilter(!active());
     render();
     requestAnimationFrame(focusFirstCell);
   });
