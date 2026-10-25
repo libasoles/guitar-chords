@@ -16,6 +16,36 @@ function sounding(form) {
   return form.map((fret, string) => fret === null ? null : OPEN[string] + fret).filter((pitch) => pitch !== null);
 }
 
+test('every catalogued form contains every advertised chord tone and the named bass', () => {
+  const qualities = {
+    Major: [0, 4, 7], Minor: [0, 3, 7], Seventh: [0, 4, 7, 10],
+    MinorSeventh: [0, 3, 7, 10], MajorSeventh: [0, 4, 7, 11],
+    Diminished: [0, 3, 6], SeventhNoFifth: [0, 4, 10],
+  };
+  const failures = [];
+  for (const [, root, quality, names, forms] of GROUPS) {
+    if (root === 'Dim7') continue; // Symmetric sets have their own exhaustive test below.
+    forms.forEach((form, i) => {
+      const pitches = sounding(form);
+      const intervals = [...new Set(pitches.map((pitch) => (pitch - pitchClass(root) + 12) % 12))].sort((a, b) => a - b);
+      if (JSON.stringify(intervals) !== JSON.stringify(qualities[quality])) {
+        failures.push(names[i] + ' ' + JSON.stringify(form) + ': ' + intervals + ' expected ' + qualities[quality]);
+      }
+      assert.equal(pitches.length, 4, names[i] + ' sounds four strings');
+      assert.equal(Math.min(...pitches) % 12, pitchClass(names[i].split('/')[1] || root), names[i] + ' bass');
+    });
+  }
+  assert.deepEqual(failures, [], 'incomplete or foreign chord tones');
+});
+
+test('every form has fingering for its exact frets and silent strings', () => {
+  for (const [, , , names, forms, fingerings] of GROUPS) {
+    forms.forEach((form, i) => {
+      form.forEach((fret, string) => assert.match(fingerings[i][string], fret === null ? /^-$/ : fret === 0 ? /^0$/ : /^[1-4]$/, names[i] + ' string ' + (string + 1)));
+    });
+  }
+});
+
 for (const locale of ['es', 'en']) {
   test('accidental roots offer every chord quality in tabs, diagrams and search in ' + locale, () => {
     const strings = require('../src/i18n/strings.' + locale + '.json');
@@ -91,7 +121,7 @@ for (const locale of ['es', 'en']) {
     const columns = JSON.parse(panel.match(/data-value='([^']+)'/)[1])[0];
     const forms = columns.filter((column) => column.some((note) => note !== null))
       .map((column) => column.map((note) => note === null ? null : note.fret));
-    for (const form of [[2, 4, 2, null, null, 2], [null, 4, 2, 4, null, 2]]) {
+    for (const form of [[5, 4, 4, null, null, 2], [null, 0, 2, 1, null, 2]]) {
       assert.ok(forms.some((candidate) => JSON.stringify(candidate) === JSON.stringify(form)), 'B7/F# includes ' + JSON.stringify(form));
       const index = forms.findIndex((candidate) => JSON.stringify(candidate) === JSON.stringify(form));
       const annotations = JSON.parse(panel.match(/data-annotations="([^"]+)"/)[1].replaceAll('&quot;', '"').replaceAll('&lt;', '<').replaceAll('&amp;', '&'))[0];
@@ -100,7 +130,7 @@ for (const locale of ['es', 'en']) {
       const id = annotation.html.match(/popovertarget="([^"]+)"/)[1];
       const modal = html.split('id="' + id + '"')[1].split('</div></div>')[0];
       const chord = JSON.parse(modal.match(/data-chord="([^"]+)"/)[1].replaceAll('&quot;', '"'));
-      assert.deepEqual(chord.fingers.map(([, fret]) => fret === 'x' ? null : fret), form);
+      assert.deepEqual(chord.fingers.map(([, fret]) => fret === 'x' ? null : fret === 'o' ? 0 : fret), form);
       chord.fingers.forEach(([, fret, finger]) => {
         if (typeof fret === 'number' && fret > 0) assert.ok(finger >= 1 && finger <= 4, 'fretted notes have a finger');
       });
