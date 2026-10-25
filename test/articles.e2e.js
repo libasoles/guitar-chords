@@ -14,6 +14,9 @@ const sagreras = require('../scripts/lib/article-sagreras');
 const sor = require('../scripts/lib/article-sor');
 const sorEstudios = require('../scripts/lib/article-sor-estudios');
 
+const { GROUPS: ARPEGGIOS } = require('../scripts/lib/article-arpeggios');
+const arpeggioGroup = (root, quality) => ARPEGGIOS.find((group) => group[1] === root && group[2] === quality);
+
 const DIST = path.join(__dirname, '..', 'dist/site');
 const BASE_URL = 'https://acordesdeguitarra.com.ar';
 const PDFS = [
@@ -136,7 +139,7 @@ const PDFS = [
       assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Do menor', 'Do 7'] : ['C major', 'C minor', 'C 7']);
       const groups = await page.locator('.arpeggio-group ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
       groups.flat().forEach((form) => assert.equal(form.filter((f) => f !== null).length, 4));
-      assert.deepEqual(await page.locator('#arpeggio-E-panel-2 ascii-tabs').first().evaluate((el) => el.value[0][2].map((note) => note === null ? null : note.fret)), [0, 3, 1, null, 2, null]);
+      assert.deepEqual(await page.locator('#arpeggio-E-panel-2 ascii-tabs').first().evaluate((el) => el.value[0].filter((column) => column.some((note) => note !== null)).map((column) => column.map((note) => note === null ? null : note.fret))), arpeggioGroup('E', 'Seventh')[4]);
       assert.equal(await page.locator('ascii-tabs[variant="flat"]').count(), groups.length);
       // Only the bass (the lowest sounding string of each chord) is bold.
       const weights = await page.locator('ascii-tabs').evaluateAll((tabs) => tabs.flatMap((tab) => {
@@ -150,7 +153,7 @@ const PDFS = [
       weights.forEach(({ bass, weight }) => assert.equal(weight, bass ? '700' : '400'));
       if (locale === 'es') assert.match(await page.locator('.lead a').textContent(), /^descomposición/);
       // The names are annotation buttons above the strings, without underline.
-      assert.deepEqual(await page.locator('#arpeggio-D-panel-2 ascii-tabs').first().locator('.ascii-tabs-annotations .arpeggio-chord').allTextContents(), ['D7', 'D7', 'D7/F#', 'D7/A', 'D7/C']);
+      assert.deepEqual(await page.locator('#arpeggio-D-panel-2 ascii-tabs').first().locator('.ascii-tabs-annotations .arpeggio-chord').allTextContents(), arpeggioGroup('D', 'Seventh')[3]);
       // The white paper starts below the names.
       const [nameBottom, paperTop] = await page.locator('.arpeggio-group ascii-tabs').first().evaluate((el) => [
         el.querySelector('.arpeggio-chord').getBoundingClientRect().bottom,
@@ -158,10 +161,7 @@ const PDFS = [
       ]);
       assert.ok(nameBottom <= paperTop + 1,'chord names sit above the paper');
       assert.equal(await page.locator('.arpeggio-chord').first().evaluate((el) => getComputedStyle(el).textDecorationLine), 'none');
-      assert.deepEqual(await page.locator('#arpeggio-D-panel-2 ascii-tabs').first().evaluate((el) => el.value[0].filter((column) => column.some((note) => note !== null)).map((column) => column.map((note) => note === null ? null : note.fret))), [
-        [2, 1, 2, 0, null, null], [null, 1, 2, 4, 5, null],
-        [5, 3, 5, 4, null, null], [2, 3, 5, null, 0, null], [2, 3, 2, null, 3, null],
-      ]);
+      assert.deepEqual(await page.locator('#arpeggio-D-panel-2 ascii-tabs').first().evaluate((el) => el.value[0].filter((column) => column.some((note) => note !== null)).map((column) => column.map((note) => note === null ? null : note.fret))), arpeggioGroup('D', 'Seventh')[4]);
       assert.equal(await page.locator('.arpeggio-group').count(), 13);
 
       // Note search: typed frets keep every chord of each root that has them, in one tab per root.
@@ -174,8 +174,11 @@ const PDFS = [
       await page.keyboard.type('1');
       await page.keyboard.press('ArrowRight');
       assert.equal(await page.locator('.arpeggio-search ascii-tabs').evaluate((el) => el.value[0].length), 1);
-      assert.deepEqual(await page.locator('.arpeggio-group:visible .arpeggio-root').allTextContents(), locale === 'es' ? ['Do', 'Fa', 'La'] : ['C', 'F', 'A']);
-      assert.deepEqual(await page.locator('.arpeggio-group:visible').first().locator('.arpeggio-results .arpeggio-chord').allTextContents().then((names) => names.slice(0, 3)), ['C', 'C/E', 'C/G']);
+      const expectedSearchRoots = [...new Set(ARPEGGIOS.filter((group) => group[4].some((form) => form[0] === 0 && form[1] === 1)).map((group) => locale === 'es' ? group[0] : group[1]))];
+      const visibleSearchRoots = await page.locator('.arpeggio-group:visible .arpeggio-root').allTextContents();
+      assert.deepEqual([...visibleSearchRoots].sort(), expectedSearchRoots.sort());
+      const expectedCSearch = ARPEGGIOS.filter((group) => group[1] === 'C').flatMap((group) => group[3].filter((name, i) => group[4][i][0] === 0 && group[4][i][1] === 1));
+      assert.deepEqual(await page.locator('.arpeggio-group:visible').first().locator('.arpeggio-results .arpeggio-chord').allTextContents(), expectedCSearch);
       assert.equal(await page.locator('.arpeggio-group:visible [role="tabpanel"]:visible').count(), 0);
       assert.equal(await page.locator('#arpeggio-results-title').isVisible(), true);
       assert.equal(await page.locator('#arpeggio-no-results').isHidden(), true);
@@ -185,7 +188,7 @@ const PDFS = [
       await page.keyboard.press('Backspace');
       await page.mouse.click(10, 700);
       assert.equal(await page.locator('.arpeggio-search-popup').isHidden(), true);
-      assert.equal(await page.locator('.arpeggio-group:visible').count(), 3);
+      assert.equal(await page.locator('.arpeggio-group:visible').count(), expectedSearchRoots.length);
       await toggle.click();
       assert.equal(await page.locator('.arpeggio-group:visible').count(), 13);
       assert.equal(await page.locator('#arpeggio-results-title').isHidden(), true);
@@ -202,21 +205,24 @@ const PDFS = [
       assert.equal(await page.locator('.arpeggio-search ascii-tabs').evaluate((el) => (el.value[0][0] || []).every((n) => n === null)), true);
       await page.waitForFunction(() => document.activeElement && document.activeElement.classList.contains('ascii-tabs-input'));
       await toggle.click();
-      for (const [root, quality, names, chordNotes, bassNotes] of [
-        ['C', 'MinorSeventh', ['Cm7', 'Cm7/Eb', 'Cm7/G', 'Cm7/Bb'], [0, 3, 7, 10], [0, 3, 7, 10]],
-        ['D', 'MinorSeventh', ['Dm7', 'Dm7/F', 'Dm7/A', 'Dm7/C'], [2, 5, 9, 0], [2, 5, 9, 0]],
-        ['E', 'MinorSeventh', ['Em7', 'Em7/G', 'Em7/B', 'Em7/D'], [4, 7, 11, 2], [4, 7, 11, 2]],
-        ['F', 'MinorSeventh', ['Fm7', 'Fm7/Ab', 'Fm7/C', 'Fm7/Eb'], [5, 8, 0, 3], [5, 8, 0, 3]],
-        ['G', 'MinorSeventh', ['Gm7', 'Gm7/Bb', 'Gm7/D', 'Gm7/F'], [7, 10, 2, 5], [7, 10, 2, 5]],
-        ['A', 'MinorSeventh', ['Am7', 'Am7/C', 'Am7/E', 'Am7/G'], [9, 0, 4, 7], [9, 0, 4, 7]],
-        ['B', 'MinorSeventh', ['Bm7', 'Bm7/D', 'Bm7/F#', 'Bm7/A'], [11, 2, 6, 9], [11, 2, 6, 9]],
-        ['F', 'Minor', ['Fm', 'Fm', 'Fm/Ab', 'Fm/Ab', 'Fm/C', 'Fm/C'], [5, 8, 0], [5, 5, 8, 8, 0, 0]],
-        ['F', 'Seventh', ['F7', 'F7/C'], [5, 9, 0, 3], [5, 0]],
-        ['G', 'Minor', ['Gm', 'Gm', 'Gm/Bb', 'Gm/Bb', 'Gm/D', 'Gm/D'], [7, 10, 2], [7, 7, 10, 10, 2, 2]],
-        ['A', 'Seventh', ['A7', 'A7', 'A7/C#', 'A7/E', 'A7/G'], [9, 1, 4, 7], [9, 9, 1, 4, 7]],
-        ['B', 'Minor', ['Bm', 'Bm', 'Bm/D', 'Bm/D', 'Bm/F#', 'Bm/F#'], [11, 2, 6], [11, 11, 2, 2, 6, 6]],
-        ['B', 'Seventh', ['B7', 'B7', 'B7/D#', 'B7/F#', 'B7/F#'], [11, 3, 6, 9], [11, 11, 3, 6, 6]],
+      for (const [root, quality, chordNotes] of [
+        ['C', 'MinorSeventh', [0, 3, 7, 10]],
+        ['D', 'MinorSeventh', [2, 5, 9, 0]],
+        ['E', 'MinorSeventh', [4, 7, 11, 2]],
+        ['F', 'MinorSeventh', [5, 8, 0, 3]],
+        ['G', 'MinorSeventh', [7, 10, 2, 5]],
+        ['A', 'MinorSeventh', [9, 0, 4, 7]],
+        ['B', 'MinorSeventh', [11, 2, 6, 9]],
+        ['F', 'Minor', [5, 8, 0]],
+        ['F', 'Seventh', [5, 9, 0, 3]],
+        ['G', 'Minor', [7, 10, 2]],
+        ['A', 'Seventh', [9, 1, 4, 7]],
+        ['B', 'Minor', [11, 2, 6]],
+        ['B', 'Seventh', [11, 3, 6, 9]],
       ]) {
+        const names = arpeggioGroup(root, quality)[3];
+        const expectedForms = arpeggioGroup(root, quality)[4];
+        const bassNotes = expectedForms.map((form) => Math.min(...form.flatMap((fret, string) => fret === null ? [] : [[64, 59, 55, 50, 45, 40][string] + fret])) % 12);
         const label = require('../src/i18n/strings.' + locale + '.json')['artArpeggios' + quality];
         await page.locator('#arpeggio-' + root + '-root').locator('..').getByRole('tab', { name: label, exact: true }).click();
         const panel = page.locator('.arpeggio-group').filter({ has: page.locator('#arpeggio-' + root + '-root') }).locator('[role="tabpanel"]:visible');
@@ -241,7 +247,7 @@ const PDFS = [
       await page.keyboard.press('ArrowRight');
       assert.equal(await qualityTabs.nth(1).getAttribute('aria-selected'), 'true');
       assert.ok(await qualityTabs.nth(1).evaluate((el) => el === document.activeElement));
-      assert.deepEqual(await firstGroup.locator('[role="tabpanel"]:visible .arpeggio-chord').allTextContents(), ['Cm', 'Cm', 'Cm/Eb', 'Cm/Eb', 'Cm/G', 'Cm/G']);
+      assert.deepEqual(await firstGroup.locator('[role="tabpanel"]:visible .arpeggio-chord').allTextContents(), arpeggioGroup('C', 'Minor')[3]);
       await page.keyboard.press('End');
       assert.equal(await qualityTabs.nth(5).getAttribute('aria-selected'), 'true');
       await page.keyboard.press('ArrowRight');

@@ -6,6 +6,9 @@ const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
 const { serveStatic } = require('../scripts/lib/static-server');
 const { pagePath } = require('../scripts/lib/slugs');
 
+const { GROUPS: ARPEGGIOS } = require('../scripts/lib/article-arpeggios');
+const arpeggioGroup = (root, quality) => ARPEGGIOS.find((group) => group[1] === root && group[2] === quality);
+
 async function checkArpeggioLayout() {
   const server = await serveStatic(path.join(__dirname, '../dist/site'), 0);
   const browser = await chromium.launch({ executablePath: playwrightExecutablePath() });
@@ -85,11 +88,11 @@ async function checkArpeggioLayout() {
       await viewSwitch.click();
       assert.equal(await viewSwitch.getAttribute('aria-checked'), 'false');
       assert.equal(await first.locator('ascii-tabs:visible').count(), 0);
-      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible .name').allTextContents(), ['C', 'C', 'C/E', 'C/E', 'C/G', 'C/G']);
+      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible .name').allTextContents(), arpeggioGroup('C', 'Major')[3]);
       assert.equal(await second.getByRole('switch').getAttribute('aria-checked'), 'true');
       assert.equal(await second.locator('ascii-tabs:visible').count(), 1);
       await first.getByRole('tab', { name: 'menor', exact: true }).click();
-      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible .name').allTextContents(), ['Cm', 'Cm', 'Cm/Eb', 'Cm/Eb', 'Cm/G', 'Cm/G']);
+      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible .name').allTextContents(), arpeggioGroup('C', 'Minor')[3]);
       await viewSwitch.focus();
       await page.keyboard.press('Space');
       assert.equal(await viewSwitch.getAttribute('aria-checked'), 'true');
@@ -100,7 +103,7 @@ async function checkArpeggioLayout() {
       await viewSwitch.click();
       assert.equal(await first.locator('ascii-tabs:visible').count(), 0);
       assert.equal(await first.locator('.arpeggio-diagrams:visible').count(), 2, 'both seventh blocks show diagrams');
-      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible').last().locator('.name').allTextContents(), ['C7', 'C7/E', 'C7/E', 'C7/Bb']);
+      assert.deepEqual(await first.locator('.arpeggio-diagrams:visible').last().locator('.name').allTextContents(), arpeggioGroup('C', 'SeventhNoFifth')[3]);
       // Every search resets all roots to tablature, including hidden roots.
       await second.getByRole('switch').click();
       await groups.last().getByRole('switch').click();

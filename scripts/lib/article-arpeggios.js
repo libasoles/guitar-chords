@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const { firstPositionForms } = require('./article-arpeggio-positions');
 const { chordCard, CHORD_CARD_LOADER } = require('./chord-forms');
 const { tabFigure, TAB_LOADER } = require('./article-carcassi');
 const { modal } = require('./modal');
@@ -548,6 +549,19 @@ GROUPS.filter(([, , quality]) => quality === 'Seventh').forEach((group) => {
       for (const field of [3, 4, 5]) withoutFifth[field].push(group[field][i]);
     }
     for (const field of [3, 4, 5]) group[field].splice(i, 1);
+  }
+});
+// Keep the curated positions, then complete first position for every quality.
+GROUPS.forEach((group) => {
+  const root = group[1] === 'Dim7' ? group[3][0].replace(/dim7$/, '') : group[1];
+  const existing = new Set(group[4].map(formKey));
+  for (const position of firstPositionForms(root, group[2])) {
+    const key = formKey(position.form);
+    if (existing.has(key)) continue;
+    existing.add(key);
+    group[3].push(position.name);
+    group[4].push(position.form);
+    group[5].push(position.fingering);
   }
 });
 GROUPS.forEach((group) => {

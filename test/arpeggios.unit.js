@@ -46,6 +46,75 @@ test('every form has fingering for its exact frets and silent strings', () => {
   }
 });
 
+test('catalogue exhausts open strings through fret 4 on both treble layouts', () => {
+  const qualities = {
+    Major: [0, 4, 7], Minor: [0, 3, 7], Seventh: [0, 4, 7, 10],
+    MinorSeventh: [0, 3, 7, 10], MajorSeventh: [0, 4, 7, 11],
+    Diminished: [0, 3, 6], SeventhNoFifth: [0, 4, 10],
+  };
+  // Enumerate independently of the production generator, including invalid
+  // chords. Every candidate satisfying the musical contract must be present.
+  const candidates = [];
+  for (const strings of [[0, 1, 2, 3], [0, 1, 2, 4], [0, 1, 2, 5], [1, 2, 3, 4], [1, 2, 3, 5]]) {
+    for (let encoded = 0; encoded < 625; encoded++) {
+      let value = encoded;
+      const form = Array(6).fill(null);
+      for (const string of strings) { form[string] = value % 5; value = Math.floor(value / 5); }
+      candidates.push({ form, tones: [...new Set(sounding(form).map((pitch) => pitch % 12))].sort((a, b) => a - b) });
+    }
+  }
+  for (const [, root, quality, names, forms] of GROUPS) {
+    const symmetric = root === 'Dim7';
+    const rootPitch = pitchClass(symmetric ? names[0].replace(/dim7$/, '') : root);
+    const tones = (symmetric ? [0, 3, 6, 9] : qualities[quality]).map((interval) => (rootPitch + interval) % 12).sort((a, b) => a - b);
+    const existing = new Set(forms.map(JSON.stringify));
+    assert.equal(existing.size, forms.length, root + ' ' + quality + ' no duplicates');
+    for (const candidate of candidates) {
+      if (JSON.stringify(candidate.tones) !== JSON.stringify(tones)) continue;
+      assert.ok(existing.has(JSON.stringify(candidate.form)), root + ' ' + quality + ' missing ' + JSON.stringify(candidate.form));
+    }
+  }
+});
+
+test('generated fingerings never use a finger on different frets or barre across an open string', () => {
+  const { firstPositionForms } = require('../scripts/lib/article-arpeggio-positions');
+  for (const [, root, quality, names] of GROUPS) {
+    const generatorRoot = root === 'Dim7' ? names[0].replace(/dim7$/, '') : root;
+    for (const position of firstPositionForms(generatorRoot, quality)) {
+      for (const finger of '1234') {
+        const strings = [...position.fingering].flatMap((value, string) => value === finger ? [string] : []);
+        if (!strings.length) continue;
+        const fret = position.form[strings[0]];
+        assert.ok(fret >= 1 && fret <= 4, position.name);
+        assert.ok(strings.every((string) => position.form[string] === fret), position.name + ' same finger, same fret');
+        assert.ok(position.form.slice(strings[0], strings.at(-1) + 1).every((value) => value === null || value >= fret), position.name + ' playable barre');
+      }
+    }
+  }
+});
+
+for (const locale of ['es', 'en']) {
+  test('requested middle-string forms appear with correct names, blocks and diagrams in ' + locale, () => {
+    const html = renderBody(locale, require('../src/i18n/strings.' + locale + '.json'));
+    const search = JSON.parse(html.match(/id="arpeggio-search-data">([^<]+)/)[1]);
+    for (const [root, quality, name, form] of [
+      ['B', 'MinorSeventh', 'Bm7/F#', [null, 0, 2, 0, null, 2]],
+      ['E', 'SeventhNoFifth', 'E7', [null, 3, 1, 2, null, 0]],
+      ['E', 'Seventh', 'E7/B', [null, 3, 1, 2, 2, null]],
+    ]) {
+      const group = GROUPS.find((group) => group[1] === root && group[2] === quality);
+      const index = group[4].findIndex((candidate) => JSON.stringify(candidate) === JSON.stringify(form));
+      assert.ok(index >= 0, name);
+      assert.equal(group[3][index], name);
+      const chord = search.roots.find((item) => item.id === 'arpeggio-' + root).chords.find((item) => item.name === name && JSON.stringify(item.form) === JSON.stringify(form));
+      assert.ok(chord, name + ' indexed');
+      const popup = html.split('id="' + chord.popover + '"')[1].split('</div></div>')[0];
+      const diagram = JSON.parse(popup.match(/data-chord="([^"]+)"/)[1].replaceAll('&quot;', '"'));
+      assert.deepEqual(diagram.fingers.map(([, fret]) => fret === 'x' ? null : fret === 'o' ? 0 : fret), form);
+    }
+  });
+}
+
 for (const locale of ['es', 'en']) {
   test('accidental roots offer every chord quality in tabs, diagrams and search in ' + locale, () => {
     const strings = require('../src/i18n/strings.' + locale + '.json');
@@ -186,8 +255,9 @@ test('dominant sevenths without fifths cover all 12 roots and all three bass ton
     forms.forEach((form, i) => {
       const pitches = sounding(form);
       assert.equal(pitches.length, 4);
-      assert.ok(form.slice(0, 3).every((fret) => fret !== null), 'three treble strings');
-      assert.equal(form.slice(3).filter((fret) => fret !== null).length, 1, 'one bass string');
+      const treble = form[0] === null ? 1 : 0;
+      assert.ok(form.slice(treble, treble + 3).every((fret) => fret !== null), 'three consecutive treble strings');
+      assert.equal(form.slice(treble + 3).filter((fret) => fret !== null).length, 1, 'one bass string');
       const intervals = (notes) => [...new Set(notes.map((pitch) => (pitch - root + 12) % 12))].sort((a, b) => a - b);
       assert.deepEqual(intervals(pitches), [0, 4, 10], names[i] + ' contains root, major third and minor seventh only');
       const bass = Math.min(...pitches) % 12;
@@ -228,7 +298,7 @@ test('middle-string voicings cover major, minor and dominant chords with the nam
       const [, , , names, forms, fingerings] = GROUPS.find(([, root, variant]) => root === rootName && variant === quality);
       const variants = forms.map((form, i) => ({ form, name: names[i], fingering: fingerings[i] }))
         .filter(({ form, name }) => form[0] === null && (quality !== 'Seventh' || name === rootName + '7'));
-      assert.equal(variants.length, quality === 'Seventh' ? 1 : 3, rootName + ' ' + quality);
+      assert.ok(variants.length >= (quality === 'Seventh' ? 1 : 3), rootName + ' ' + quality);
       for (const { form, name, fingering } of variants) {
         assert.ok(form.slice(1, 4).every((fret) => fret !== null));
         assert.equal(form.slice(4).filter((fret) => fret !== null).length, 1);
@@ -291,7 +361,7 @@ for (const locale of ['es', 'en']) {
     const form = [1, 0, 0, null, null, 3];
     assert.equal(figures.flat().filter((candidate) => JSON.stringify(candidate) === JSON.stringify(form)).length, 1);
     const [, , , names, forms] = GROUPS.find(([, root, quality]) => root === 'G' && quality === 'Seventh');
-    assert.deepEqual(names, ['G7', 'G7/B', 'G7/D']);
+    for (const name of ['G7', 'G7/B', 'G7/D']) assert.ok(names.includes(name));
     assert.deepEqual(forms[0], [null, 3, 4, 3, null, 3]);
     const lowerBlock = section.split('arpeggio-block-label')[1];
     const lowerForms = JSON.parse(lowerBlock.match(/data-value='([^']+)'/)[1]).flat();
