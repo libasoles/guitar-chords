@@ -35,11 +35,12 @@ _stem_groups = A.P.stem_groups
 def stem_groups(m):
     """Las corcheas de una pieza en tresillos continuos (el «3» solo se imprime al principio) valen 2/3."""
     groups = _stem_groups(m)
-    if m.get('eighth_triplets'):
-        for g in groups:
-            if g['dur'] == 2 and not g.get('triplet') and not g['grace']:
-                g['dur'] = 4 / 3
-                g['triplet'] = True
+    for key, dur in (('eighth_triplets', 2), ('sixteenth_sextuplets', 1)):
+        if m.get(key):
+            for g in groups:
+                if g['dur'] == dur and not g.get('triplet') and not g['grace']:
+                    g['dur'] = dur * 2 / 3
+                    g['triplet'] = True
     return groups
 
 
@@ -51,9 +52,10 @@ def read_piece(n):
     piece = A.read_pdf(RESOURCES / spec['pdf'])
     for i in spec.get('fine', ()):  # «Fine» que el PDF dibuja como grafico y no como texto
         piece['measures'][i - 1]['fine'] = True
-    if spec.get('eighth_triplets'):
-        for m in piece['measures']:
-            m['eighth_triplets'] = True
+    for key in ('eighth_triplets', 'sixteenth_sextuplets'):
+        if spec.get(key):
+            for m in piece['measures']:
+                m[key] = True
     if spec.get('time'):
         piece['time'] = tuple(spec['time'])
     if piece['time'] is None:
@@ -66,6 +68,24 @@ def read_piece(n):
         for m in piece['measures']:
             m['fifths'] = piece['fifths']
     return spec, piece
+
+
+def measures_of(piece):
+    """`lesson_measures` de Sagreras, recortando los silencios finales de una voz que desbordan el compas: un silencio
+    de la voz aguda cuya altura cae bajo el centro del pentagrama se asigna a la voz grave (cierre del Preludio en Do menor)."""
+    measures = S.lesson_measures(piece)
+    full = piece['time'][0] * 16 // piece['time'][1] * S.SCALE
+    for data in measures:
+        if data['length'] <= full:
+            continue
+        for voice in data['voices']:
+            events = sorted(voice['events'])
+            while events and events[-1][2] == 'R' and events[-1][0] + events[-1][1] > full:
+                events.pop()
+            voice['events'] = events
+        end = max([o + d for voice in data['voices'] for o, d, *_ in voice['events']], default=0)
+        data['length'] = full if end <= full else end
+    return measures
 
 
 def odd_measures(piece, measures, short=()):
@@ -91,7 +111,7 @@ def run(numbers, write):
     for n in numbers:
         spec, piece = read_piece(n)
         try:
-            measures = S.lesson_measures(piece)
+            measures = measures_of(piece)
         except Exception as error:  # noqa: BLE001
             print(f'{n:2d} ERROR de lectura: {type(error).__name__}: {error}')
             continue
