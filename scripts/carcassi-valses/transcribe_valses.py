@@ -82,6 +82,22 @@ def convert_measure(m, fifths, full, scale=1, rest_voices=False):
         # dos voces con la misma direccion de plica: los inicios salen de la posicion horizontal, tomando como
         # eje del tiempo la direccion que llena el compas exactamente
         ref = next((name for name in ('up', 'down') if totals[name] == full), None)
+        if not ref:
+            # Ninguna direccion suma el compas (p. ej. bajo y semicorcheas con plica abajo y la melodia arriba): el eje
+            # del tiempo es la cadena de notas mas largas que si lo llena; las demas se ubican por su posicion.
+            chain = longest_chain(items, full)
+            if chain:
+                pos = 0
+                for i in sorted(chain, key=lambda i: i['x']):
+                    i['onset'] = pos
+                    pos += i['dur']
+                axis = sorted((i['x'], i['onset']) for i in chain)
+                axis.append((m['right'], full))
+                others = [i for i in items if not any(i is c for c in chain)]
+                grid = math.gcd(*[i['dur'] for i in others if i['dur'] > 0] or [1])
+                for i in others:
+                    onset = round(interpolate(axis, i['x']) / grid) * grid
+                    i['onset'] = max(0, min(full - grid, onset))
         if ref:
             axis = sorted((i['x'], i['onset']) for i in items if i['dir'] == ref)
             # El ultimo grupo suele estar mas comprimido: la barra final fija el fin del compas.
@@ -121,6 +137,20 @@ def convert_measure(m, fifths, full, scale=1, rest_voices=False):
            'axis': sorted({(round(i['x'], 1), i['onset']) for lane in lanes.values() for l in lane for i in l})}  # x -> inicio
     out['length'] = max([e[0] + e[1] for v in voices for e in v['events']] + [0])
     return out
+
+
+def longest_chain(items, full):
+    """Notas (no silencios) de una misma direccion de plica que, tomadas de la mas larga a la mas corta, suman exactamente
+    el compas; [] si ninguna direccion lo logra."""
+    for name in ('up', 'down'):
+        chain, total = [], 0
+        for i in sorted((i for i in items if i['dir'] == name and i['pitch'] and i['pitch'] != 'R'), key=lambda i: -i['dur']):
+            if total + i['dur'] <= full:
+                chain.append(i)
+                total += i['dur']
+            if total == full:
+                return chain
+    return []
 
 
 def interpolate(axis, x):
