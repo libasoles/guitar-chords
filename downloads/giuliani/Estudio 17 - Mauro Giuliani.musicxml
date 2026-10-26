@@ -6920,6 +6920,12 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <string>2</string>
+            <fret>5</fret>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-196">
         <pitch>
@@ -7037,7 +7043,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>

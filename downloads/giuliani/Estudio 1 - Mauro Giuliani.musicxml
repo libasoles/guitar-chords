@@ -363,6 +363,12 @@
         <stem>down</stem>
         <staff>1</staff>
         <beam number="1">end</beam>
+        <notations>
+          <technical>
+            <string>2</string>
+            <fret>5</fret>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-16">
         <pitch>
@@ -387,6 +393,12 @@
         <stem>down</stem>
         <staff>1</staff>
         <beam number="1">end</beam>
+        <notations>
+          <technical>
+            <string>2</string>
+            <fret>5</fret>
+          </technical>
+        </notations>
       </note>
       <backup>
         <duration>40320</duration>
@@ -550,7 +562,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -582,7 +594,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>

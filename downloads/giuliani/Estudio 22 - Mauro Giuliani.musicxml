@@ -5658,6 +5658,8 @@
         <notations>
           <technical>
             <fingering alternate="no" substitution="no">2</fingering>
+            <string>2</string>
+            <fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -5794,7 +5796,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -5980,7 +5982,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -6090,7 +6092,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>5</string><fret>1</fret>
+            <string>6</string><fret>6</fret>
           </technical>
         </notations>
       </note>

@@ -5066,6 +5066,8 @@
         <notations>
           <technical>
             <fingering alternate="no" substitution="no">4</fingering>
+            <string>2</string>
+            <fret>5</fret>
           </technical>
           <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
@@ -5199,6 +5201,10 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
+          <technical>
+            <string>2</string>
+            <fret>5</fret>
+          </technical>
           <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -5326,6 +5332,10 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
+          <technical>
+            <string>2</string>
+            <fret>5</fret>
+          </technical>
           <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -5453,6 +5463,10 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
+          <technical>
+            <string>2</string>
+            <fret>5</fret>
+          </technical>
           <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>3</tuplet-number>
@@ -5501,6 +5515,10 @@
         <beam number="1">end</beam>
         <beam number="2">end</beam>
         <notations>
+          <technical>
+            <string>2</string>
+            <fret>5</fret>
+          </technical>
           <tuplet number="1" type="stop" />
         </notations>
       </note>
@@ -5610,7 +5628,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -5653,7 +5671,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
           <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
@@ -5705,141 +5723,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
-          </technical>
-          <tuplet number="1" type="stop" />
-        </notations>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>1680</duration>
-        <voice>1</voice>
-        <type>16th</type>
-        <staff>2</staff>
-      </note>
-      <note>
-        <pitch>
-          <step>E</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>1680</duration>
-        <voice>1</voice>
-        <type>16th</type>
-        <time-modification>
-          <actual-notes>3</actual-notes>
-          <normal-notes>2</normal-notes>
-          <normal-type>16th</normal-type>
-        </time-modification>
-        <stem>none</stem>
-        <staff>2</staff>
-        <notations>
-          <technical>
-            <string>1</string><fret>0</fret>
-          </technical>
-          <tuplet bracket="yes" number="1" placement="above" type="start">
-            <tuplet-actual>
-              <tuplet-number>3</tuplet-number>
-              <tuplet-type>16th</tuplet-type>
-            </tuplet-actual>
-            <tuplet-normal>
-              <tuplet-number>2</tuplet-number>
-              <tuplet-type>16th</tuplet-type>
-            </tuplet-normal>
-          </tuplet>
-        </notations>
-      </note>
-      <note>
-        <pitch>
-          <step>A</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>1680</duration>
-        <voice>1</voice>
-        <type>16th</type>
-        <time-modification>
-          <actual-notes>3</actual-notes>
-          <normal-notes>2</normal-notes>
-          <normal-type>16th</normal-type>
-        </time-modification>
-        <stem>none</stem>
-        <staff>2</staff>
-        <notations>
-          <technical>
-            <string>1</string><fret>5</fret>
-          </technical>
-          <tuplet number="1" type="stop" />
-        </notations>
-      </note>
-      <note>
-        <pitch>
-          <step>E</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>1680</duration>
-        <voice>1</voice>
-        <type>16th</type>
-        <time-modification>
-          <actual-notes>3</actual-notes>
-          <normal-notes>2</normal-notes>
-          <normal-type>16th</normal-type>
-        </time-modification>
-        <stem>none</stem>
-        <staff>2</staff>
-        <notations>
-          <technical>
-            <string>1</string><fret>0</fret>
-          </technical>
-          <tuplet bracket="yes" number="1" placement="above" type="start">
-            <tuplet-actual>
-              <tuplet-number>3</tuplet-number>
-              <tuplet-type>16th</tuplet-type>
-            </tuplet-actual>
-            <tuplet-normal>
-              <tuplet-number>2</tuplet-number>
-              <tuplet-type>16th</tuplet-type>
-            </tuplet-normal>
-          </tuplet>
-        </notations>
-      </note>
-      <note>
-        <pitch>
-          <step>A</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>1680</duration>
-        <voice>1</voice>
-        <type>16th</type>
-        <time-modification>
-          <actual-notes>3</actual-notes>
-          <normal-notes>2</normal-notes>
-          <normal-type>16th</normal-type>
-        </time-modification>
-        <stem>none</stem>
-        <staff>2</staff>
-        <notations>
-          <technical>
-            <string>1</string><fret>5</fret>
-          </technical>
-        </notations>
-      </note>
-      <note>
-        <pitch>
-          <step>E</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>1680</duration>
-        <voice>1</voice>
-        <type>16th</type>
-        <time-modification>
-          <actual-notes>3</actual-notes>
-          <normal-notes>2</normal-notes>
-          <normal-type>16th</normal-type>
-        </time-modification>
-        <stem>none</stem>
-        <staff>2</staff>
-        <notations>
-          <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -5868,7 +5752,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
           <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
@@ -5921,7 +5805,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
           <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
@@ -5973,7 +5857,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -6002,7 +5886,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
           <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
@@ -6055,7 +5939,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
           <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
@@ -6107,7 +5991,141 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
+          </technical>
+          <tuplet number="1" type="stop" />
+        </notations>
+      </note>
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>1680</duration>
+        <voice>1</voice>
+        <type>16th</type>
+        <staff>2</staff>
+      </note>
+      <note>
+        <pitch>
+          <step>E</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>1680</duration>
+        <voice>1</voice>
+        <type>16th</type>
+        <time-modification>
+          <actual-notes>3</actual-notes>
+          <normal-notes>2</normal-notes>
+          <normal-type>16th</normal-type>
+        </time-modification>
+        <stem>none</stem>
+        <staff>2</staff>
+        <notations>
+          <technical>
+            <string>2</string><fret>5</fret>
+          </technical>
+          <tuplet bracket="yes" number="1" placement="above" type="start">
+            <tuplet-actual>
+              <tuplet-number>3</tuplet-number>
+              <tuplet-type>16th</tuplet-type>
+            </tuplet-actual>
+            <tuplet-normal>
+              <tuplet-number>2</tuplet-number>
+              <tuplet-type>16th</tuplet-type>
+            </tuplet-normal>
+          </tuplet>
+        </notations>
+      </note>
+      <note>
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>1680</duration>
+        <voice>1</voice>
+        <type>16th</type>
+        <time-modification>
+          <actual-notes>3</actual-notes>
+          <normal-notes>2</normal-notes>
+          <normal-type>16th</normal-type>
+        </time-modification>
+        <stem>none</stem>
+        <staff>2</staff>
+        <notations>
+          <technical>
+            <string>1</string><fret>5</fret>
+          </technical>
+          <tuplet number="1" type="stop" />
+        </notations>
+      </note>
+      <note>
+        <pitch>
+          <step>E</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>1680</duration>
+        <voice>1</voice>
+        <type>16th</type>
+        <time-modification>
+          <actual-notes>3</actual-notes>
+          <normal-notes>2</normal-notes>
+          <normal-type>16th</normal-type>
+        </time-modification>
+        <stem>none</stem>
+        <staff>2</staff>
+        <notations>
+          <technical>
+            <string>2</string><fret>5</fret>
+          </technical>
+          <tuplet bracket="yes" number="1" placement="above" type="start">
+            <tuplet-actual>
+              <tuplet-number>3</tuplet-number>
+              <tuplet-type>16th</tuplet-type>
+            </tuplet-actual>
+            <tuplet-normal>
+              <tuplet-number>2</tuplet-number>
+              <tuplet-type>16th</tuplet-type>
+            </tuplet-normal>
+          </tuplet>
+        </notations>
+      </note>
+      <note>
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>1680</duration>
+        <voice>1</voice>
+        <type>16th</type>
+        <time-modification>
+          <actual-notes>3</actual-notes>
+          <normal-notes>2</normal-notes>
+          <normal-type>16th</normal-type>
+        </time-modification>
+        <stem>none</stem>
+        <staff>2</staff>
+        <notations>
+          <technical>
+            <string>1</string><fret>5</fret>
+          </technical>
+        </notations>
+      </note>
+      <note>
+        <pitch>
+          <step>E</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>1680</duration>
+        <voice>1</voice>
+        <type>16th</type>
+        <time-modification>
+          <actual-notes>3</actual-notes>
+          <normal-notes>2</normal-notes>
+          <normal-type>16th</normal-type>
+        </time-modification>
+        <stem>none</stem>
+        <staff>2</staff>
+        <notations>
+          <technical>
+            <string>2</string><fret>5</fret>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
