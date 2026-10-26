@@ -1,0 +1,19 @@
+{
+  "1": {"pdf": "ligado_la.pdf", "title": "Estudio del Ligado en La mayor", "en": "Estudio del Ligado in A major", "imslp": "Estudio_del_Ligado_en_La_mayor", "year": 2018, "eighth_triplets": true, "short": [1, 2, 6, 7, 11, 12, 20, 21, 25, 26]},
+  "2": {"pdf": "ligado_re.pdf", "title": "Estudio del Ligado en Re menor", "en": "Estudio del Ligado in D minor", "imslp": "Estudio_del_Ligado_en_Re_menor", "year": 2018, "tuning": "dropd"},
+  "3": {"pdf": "estudio_ambas_manos.pdf", "title": "Estudio para ambas manos", "en": "Estudio para ambas manos", "imslp": "Estudio_para_ambas_manos", "year": 2018, "short": [1, 28, 29]},
+  "4": {"pdf": "estudio2_arpegio.pdf", "title": "Estudio No. 2 en Arpegio", "en": "Estudio No. 2 en Arpegio", "imslp": "Estudio_No.2_en_Arpegio", "year": 2018},
+  "5": {"pdf": "estudio3.pdf", "title": "Estudio No. 3", "en": "Estudio No. 3", "imslp": "Estudio_No.3", "year": 2018},
+  "6": {"pdf": "estudio4_arabescos.pdf", "title": "Estudio No. 4 (Arabescos)", "en": "Estudio No. 4 (Arabescos)", "imslp": "Estudio_No.4", "year": 2018},
+  "7": {"pdf": "estudio_si_menor.pdf", "title": "Estudio en Si menor", "en": "Estudio in B minor", "imslp": "Estudio_en_Si_menor", "year": 2017},
+  "8": {"pdf": "estudio_sol_menor.pdf", "title": "Estudio en Sol menor", "en": "Estudio in G minor", "imslp": "Estudio_en_Sol_menor", "year": 2018},
+  "9": {"pdf": "estudio_inconcluso.pdf", "title": "Estudio inconcluso", "en": "Estudio inconcluso", "imslp": "Estudio_inconcluso", "year": 2018},
+  "10": {"pdf": "minueto_do.pdf", "title": "Minueto en Do mayor", "en": "Minueto in C major", "imslp": "Minuet_in_C_major", "year": 2018},
+  "11": {"pdf": "minueto_mi.pdf", "title": "Minueto en Mi mayor", "en": "Minueto in E major", "imslp": "Minueto_en_Mi_Mayor", "year": 2019},
+  "12": {"pdf": "minueto_la1.pdf", "title": "Minueto No. 1 en La menor", "en": "Minueto No. 1 in A minor", "imslp": "Minueto_No.1_in_A_minor", "year": 2018},
+  "13": {"pdf": "minueto_la2.pdf", "title": "Minueto No. 2 en La mayor", "en": "Minueto No. 2 in A major", "imslp": "Minueto_No.2_in_A_major", "year": 2018},
+  "14": {"pdf": "minueto_si.pdf", "title": "Minueto en Si mayor", "en": "Minueto in B major", "imslp": "Minueto_en_Si_Mayor", "year": 2018},
+  "15": {"pdf": "do_menor.pdf", "title": "Preludio en Do menor", "en": "Preludio in C minor", "imslp": "Prelude_in_C_minor", "year": 2019},
+  "16": {"pdf": "preludio_la_menor.pdf", "title": "Preludio en La menor", "en": "Preludio in A minor", "imslp": "Preludio_en_La_menor", "year": 2019},
+  "17": {"pdf": "preludio_mi_menor.pdf", "title": "Preludio en Mi menor", "en": "Preludio in E minor", "imslp": "Preludio_en_Mi_menor", "year": 2018}
+}

@@ -28,6 +28,7 @@ const SLUGS = {
   'articulo-lecciones-sagreras': { es: 'articulos/primeras-lecciones-de-sagreras', en: 'articles/sagreras-first-lessons', isNew: true },
   'articulo-lecciones-sor': { es: 'articulos/lecciones-progresivas-de-sor', en: 'articles/sor-progressive-lessons', isNew: true },
   'articulo-estudios-sor': { es: 'articulos/estudios-de-sor', en: 'articles/sor-studies', isNew: true },
+  'articulo-partituras-barrios': { es: 'articulos/partituras-de-barrios', en: 'articles/barrios-sheet-music', isNew: true },
 };
 
 function slugFor(key, locale) {

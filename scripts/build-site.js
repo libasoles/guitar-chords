@@ -43,6 +43,7 @@ const articleAguado = require("./lib/article-aguado");
 const articleSagreras = require("./lib/article-sagreras");
 const articleSor = require("./lib/article-sor");
 const articleSorEstudios = require("./lib/article-sor-estudios");
+const articleBarrios = require("./lib/article-barrios");
 const { renderArticleLinks } = require("./lib/article-link");
 const {
   pagePath,
@@ -406,6 +407,7 @@ const ARTICLE_AGUADO_SLUG = "articulo-partituras-aguado";
 const ARTICLE_SAGRERAS_SLUG = "articulo-lecciones-sagreras";
 const ARTICLE_SOR_SLUG = "articulo-lecciones-sor";
 const ARTICLE_SOR_ESTUDIOS_SLUG = "articulo-estudios-sor";
+const ARTICLE_BARRIOS_SLUG = "articulo-partituras-barrios";
 // YouTube video the exercise was taken from, embedded below the tabs.
 const SIXTHS_VIDEO_ID = "NNwTR8Q8JN4";
 const SIXTHS_TABS = [
@@ -1264,7 +1266,8 @@ function renderArticlesIndex(strings, locale) {
     articleCard(ARTICLE_AGUADO_SLUG, locale, articleAguado.cardImage().url, articleAguado.cardImage().size, strings.artAguadoH1, strings.artAguadoCardSummary) +
     articleCard(ARTICLE_SAGRERAS_SLUG, locale, articleSagreras.cardImage().url, articleSagreras.cardImage().size, strings.artSagrerasH1, strings.artSagrerasCardSummary) +
     articleCard(ARTICLE_SOR_SLUG, locale, articleSor.cardImage().url, articleSor.cardImage().size, strings.artSorH1, strings.artSorCardSummary) +
-    articleCard(ARTICLE_SOR_ESTUDIOS_SLUG, locale, articleSorEstudios.cardImage().url, articleSorEstudios.cardImage().size, strings.artSorEstudiosH1, strings.artSorEstudiosCardSummary);
+    articleCard(ARTICLE_SOR_ESTUDIOS_SLUG, locale, articleSorEstudios.cardImage().url, articleSorEstudios.cardImage().size, strings.artSorEstudiosH1, strings.artSorEstudiosCardSummary) +
+    articleCard(ARTICLE_BARRIOS_SLUG, locale, articleBarrios.cardImage().url, articleBarrios.cardImage().size, strings.artBarriosH1, strings.artBarriosCardSummary);
   return renderArticlePage(
     strings,
     locale,
@@ -1470,6 +1473,28 @@ function renderSorEstudiosArticle(strings, locale) {
   );
 }
 
+function renderBarriosArticle(strings, locale) {
+  const back =
+    '<p class="article-back"><a href="' +
+    pagePath(ARTICLES_SLUG, locale) +
+    '">' +
+    escapeHtml(strings.artBackToIndex) +
+    "</a></p>";
+  return renderArticlePage(
+    strings,
+    locale,
+    ARTICLE_BARRIOS_SLUG,
+    {
+      title: "artBarriosPageTitle",
+      meta: "artBarriosMetaDescription",
+      h1: "artBarriosH1",
+      lead: "artBarriosLead",
+    },
+    articleBarrios.renderBody(locale, strings),
+    back,
+  );
+}
+
 function writeArticlePages(strings, locale) {
   [
     [ARTICLES_SLUG, renderArticlesIndex],
@@ -1482,6 +1507,7 @@ function writeArticlePages(strings, locale) {
     [ARTICLE_SAGRERAS_SLUG, renderSagrerasArticle],
     [ARTICLE_SOR_SLUG, renderSorArticle],
     [ARTICLE_SOR_ESTUDIOS_SLUG, renderSorEstudiosArticle],
+    [ARTICLE_BARRIOS_SLUG, renderBarriosArticle],
     [ARTICLE_ARPEGGIOS_SLUG, renderArpeggiosArticle],
   ].forEach(function (entry) {
     const outFile = path.join(DIST_SITE, pageFile(entry[0], locale));
@@ -1874,7 +1900,7 @@ copyFile(
   path.join(articlePdfDist, articleCarcassi.cardImage().name),
 );
 // Independent score downloads and modal pages for each edition.
-[articlePreludes, articlePreludes.santisteban, articlePreludes.waltzes, articleProgressive, articleAguado, articleSagreras, articleSor, articleSorEstudios].forEach(function (edition) {
+[articlePreludes, articlePreludes.santisteban, articlePreludes.waltzes, articleProgressive, articleAguado, articleSagreras, articleSor, articleSorEstudios, articleBarrios].forEach(function (edition) {
   const folder = path.basename(edition.PREVIEW_DIR);
   const target = path.join(ASSETS_DIST, "articles", folder);
   ensureDir(path.join(target, "full"));
@@ -2256,6 +2282,7 @@ function siteMenu(strings, locale) {
     [ARTICLE_SAGRERAS_SLUG, strings.artSagrerasH1],
     [ARTICLE_SOR_SLUG, strings.artSorH1],
     [ARTICLE_SOR_ESTUDIOS_SLUG, strings.artSorEstudiosH1],
+    [ARTICLE_BARRIOS_SLUG, strings.artBarriosH1],
   ];
   return (
     '<details class="site-menu"><summary aria-label="' +
@@ -2429,7 +2456,7 @@ addSlugPages(
 addSlugPages([DIM_SLUG, NOTE_FINDER_SLUG, SIXTHS_SLUG]);
 addSlugPages([TAB_EDITOR_SLUG], ["0.7", "0.6"]);
 addSlugPages([PRIVACY_SLUG], ["0.3", "0.3"]);
-addSlugPages([ARTICLES_SLUG, ARTICLE_CARCASSI_SLUG, ARTICLE_PRELUDES_SLUG, ARTICLE_SANTISTEBAN_SLUG, ARTICLE_WALTZES_SLUG, ARTICLE_PROGRESSIVE_SLUG, ARTICLE_AGUADO_SLUG, ARTICLE_SAGRERAS_SLUG, ARTICLE_SOR_SLUG, ARTICLE_SOR_ESTUDIOS_SLUG, ARTICLE_ARPEGGIOS_SLUG]);
+addSlugPages([ARTICLES_SLUG, ARTICLE_CARCASSI_SLUG, ARTICLE_PRELUDES_SLUG, ARTICLE_SANTISTEBAN_SLUG, ARTICLE_WALTZES_SLUG, ARTICLE_PROGRESSIVE_SLUG, ARTICLE_AGUADO_SLUG, ARTICLE_SAGRERAS_SLUG, ARTICLE_SOR_SLUG, ARTICLE_SOR_ESTUDIOS_SLUG, ARTICLE_BARRIOS_SLUG, ARTICLE_ARPEGGIOS_SLUG]);
 if (PARTITURA_ENABLED) addSlugPages([PARTITURA_SLUG], ["0.7", "0.6"]);
 addSlugPages(
   ALL_PICKING_PAGES.map(function (page) {

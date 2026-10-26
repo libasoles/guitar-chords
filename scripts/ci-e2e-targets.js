@@ -58,7 +58,7 @@ const SUITES = {
     paths: [
       /^src\/site\/(article\.html|articles\/)/,
       /^src\/shared\//,
-      /^scripts\/(articles|aguado|sagreras|sor|carcassi-[^/]+)\//,
+      /^scripts\/(articles|aguado|barrios|sagreras|sor|carcassi-[^/]+)\//,
       /^scripts\/(lib\/(article-|score-|editor-marks|chord-forms|structured-data|lastmod|fingerprint)|og-articles)/,
       /^test\/(articles|arpeggio-layout)\./,
     ],
