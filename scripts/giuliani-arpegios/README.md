@@ -1,0 +1,48 @@
+# Los 120 arpegios de Giuliani (Op. 1, parte 1)
+
+Página: `/articulos/120-arpegios-de-giuliani`. Una tarjeta por ejercicio (1–120), con vista previa, partitura completa
+con TAB en un modal y descarga en PDF. Es una página independiente de la de Giuliani Op. 48 (`scripts/giuliani/`).
+
+Cada ejercicio tiene tres compases: el arpegio sobre do mayor, el arpegio sobre sol con séptima (con el si en el
+bajo), repetidos, y un acorde final de do. Cambia solo la combinación de dedos de la mano derecha.
+
+## De dónde salen las notas
+
+[IMSLP #660049](https://imslp.org/wiki/Studio_per_la_chitarra,_Op.1_(Giuliani,_Mauro)): «Degli arpeggi, Esercizio per la
+mano destra (120, tablature)», edición de **Marieh** (2020), **CC0 1.0**, PDF vectorial de MuseScore 3.4.2 (fuente
+`MScore`, 26 páginas, cinco ejercicios por página). Misma transcriptora y mismo programa que Sagreras, así que se lee con
+las rutinas de `scripts/sagreras/` sin tocarlas. El original queda en
+`resources/giuliani-arpegios/IMSLP660049-giuliani-op1-parte1-tab.pdf` (no versionado). Como `resources/` solo existe en el
+checkout principal, desde un worktree hay que fijar `RESOURCES_DIR`.
+
+Descarga sin captcha: `https://s9.imslp.org/files/imglnks/usimg/c/ca/IMSLP660049-PMLP58675-Giuliani_Op.1_Parte_1_tab.pdf`
+(`c/ca` son los dos primeros hex del MD5 del nombre `PMLP58675-Giuliani_Op.1_Parte_1_tab.pdf`, el mismo de la ruta
+`/images/`).
+
+1. `transcribe.py N …` convierte cada ejercicio en `sources/NNN.musicxml`. Solo escribe la fuente si pasa el control: las
+   alturas leídas deben coincidir con las de la TAB impresa y cada compás debe sumar su duración. `transcribe.py check`
+   solo compara. `measures.json` guarda los compases por ejercicio (lo lee `test/giuliani-arpegios.unit.js`).
+2. `build.py N …` (o `all`) pasa la fuente por el motor y deja PDF y MusicXML en `downloads/giuliani-arpegios/`, la vista
+   previa en `src/site/articles/giuliani-arpegios/arpeggio-NN.svg` y las páginas del modal en `full/`.
+3. `compare_positions.py` mide cuántas casillas (cuerda y traste) del motor difieren de la TAB impresa.
+
+## Particularidades de la edición
+
+- **Tresillos y sextillos sin «3»**: en 4/4 los compases traen 12 corcheas (tresillos) o 24 semicorcheas (sextillos), pero
+  la edición no imprime la cifra. `mark_triplets` los detecta por voz: si las figuras cortas de una voz suman más de un
+  compás, se leen en grupos de tres y se escribe 3:2 (corcheas) o 6:4 (semicorcheas, `TUPLET_SIZE = 6` en
+  `scripts/sagreras/transcribe.py`).
+- **Etiquetas**: la del ejercicio 28 es «No28» (sin punto) y las páginas 23-24 detectan mal el grosor del pentagrama (se
+  fuerza 0,5). Las letras de la mano derecha van en mayúsculas en la edición y se escriben `p i m a`.
+- **Letras sin nota**: en 89, 91, 93, 101 y 115 quedan cinco letras sin cabeza (dos letras sobre una cabeza compartida);
+  no se publican.
+- **Ejercicios 96, 100 y 110**: las reglas de arpegio del motor mandan el mi5 repetido a la 2.ª cuerda (traste 5). Su fuente
+  lleva las casillas impresas como `<string>`/`<fret>` y `build.py` no aplica las reglas (`PRINTED_TAB`). Con eso la TAB
+  publicada coincide con la edición en las 5890 casillas de los 120 ejercicios.
+- **Revisión pendiente**: los 120 llevan la marca (`scripts/lib/editor-marks.js`) hasta cotejarlos con el libro. Los
+  116 a 119 (polifonía con fusas y silencios) pasan el control de alturas y compases, pero son los que más lo necesitan.
+
+## Licencia y crédito
+
+CC0 no exige atribución; el pie del PDF la da igualmente («Con modificaciones a partir de» / «Marieh (2020) · CC0 1.0»,
+con enlaces).

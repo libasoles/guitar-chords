@@ -44,6 +44,7 @@ const articleSagreras = require("./lib/article-sagreras");
 const articleSor = require("./lib/article-sor");
 const articleSorEstudios = require("./lib/article-sor-estudios");
 const articleBarrios = require("./lib/article-barrios");
+const articleGiulianiArpegios = require("./lib/article-giuliani-arpegios");
 const { renderArticleLinks } = require("./lib/article-link");
 const {
   pagePath,
@@ -408,6 +409,7 @@ const ARTICLE_SAGRERAS_SLUG = "articulo-lecciones-sagreras";
 const ARTICLE_SOR_SLUG = "articulo-lecciones-sor";
 const ARTICLE_SOR_ESTUDIOS_SLUG = "articulo-estudios-sor";
 const ARTICLE_BARRIOS_SLUG = "articulo-partituras-barrios";
+const ARTICLE_GIULIANI_ARPEGIOS_SLUG = "articulo-arpegios-giuliani";
 // YouTube video the exercise was taken from, embedded below the tabs.
 const SIXTHS_VIDEO_ID = "NNwTR8Q8JN4";
 const SIXTHS_TABS = [
@@ -1267,7 +1269,8 @@ function renderArticlesIndex(strings, locale) {
     articleCard(ARTICLE_SAGRERAS_SLUG, locale, articleSagreras.cardImage().url, articleSagreras.cardImage().size, strings.artSagrerasH1, strings.artSagrerasCardSummary) +
     articleCard(ARTICLE_SOR_SLUG, locale, articleSor.cardImage().url, articleSor.cardImage().size, strings.artSorH1, strings.artSorCardSummary) +
     articleCard(ARTICLE_SOR_ESTUDIOS_SLUG, locale, articleSorEstudios.cardImage().url, articleSorEstudios.cardImage().size, strings.artSorEstudiosH1, strings.artSorEstudiosCardSummary) +
-    articleCard(ARTICLE_BARRIOS_SLUG, locale, articleBarrios.cardImage().url, articleBarrios.cardImage().size, strings.artBarriosH1, strings.artBarriosCardSummary);
+    articleCard(ARTICLE_BARRIOS_SLUG, locale, articleBarrios.cardImage().url, articleBarrios.cardImage().size, strings.artBarriosH1, strings.artBarriosCardSummary) +
+    articleCard(ARTICLE_GIULIANI_ARPEGIOS_SLUG, locale, articleGiulianiArpegios.cardImage().url, articleGiulianiArpegios.cardImage().size, strings.artGiulianiArpegiosH1, strings.artGiulianiArpegiosCardSummary);
   return renderArticlePage(
     strings,
     locale,
@@ -1473,6 +1476,28 @@ function renderSorEstudiosArticle(strings, locale) {
   );
 }
 
+function renderGiulianiArpegiosArticle(strings, locale) {
+  const back =
+    '<p class="article-back"><a href="' +
+    pagePath(ARTICLES_SLUG, locale) +
+    '">' +
+    escapeHtml(strings.artBackToIndex) +
+    "</a></p>";
+  return renderArticlePage(
+    strings,
+    locale,
+    ARTICLE_GIULIANI_ARPEGIOS_SLUG,
+    {
+      title: "artGiulianiArpegiosPageTitle",
+      meta: "artGiulianiArpegiosMetaDescription",
+      h1: "artGiulianiArpegiosH1",
+      lead: "artGiulianiArpegiosLead",
+    },
+    articleGiulianiArpegios.renderBody(locale, strings),
+    back,
+  );
+}
+
 function renderBarriosArticle(strings, locale) {
   const back =
     '<p class="article-back"><a href="' +
@@ -1508,6 +1533,7 @@ function writeArticlePages(strings, locale) {
     [ARTICLE_SOR_SLUG, renderSorArticle],
     [ARTICLE_SOR_ESTUDIOS_SLUG, renderSorEstudiosArticle],
     [ARTICLE_BARRIOS_SLUG, renderBarriosArticle],
+    [ARTICLE_GIULIANI_ARPEGIOS_SLUG, renderGiulianiArpegiosArticle],
     [ARTICLE_ARPEGGIOS_SLUG, renderArpeggiosArticle],
   ].forEach(function (entry) {
     const outFile = path.join(DIST_SITE, pageFile(entry[0], locale));
@@ -1900,7 +1926,7 @@ copyFile(
   path.join(articlePdfDist, articleCarcassi.cardImage().name),
 );
 // Independent score downloads and modal pages for each edition.
-[articlePreludes, articlePreludes.santisteban, articlePreludes.waltzes, articleProgressive, articleAguado, articleSagreras, articleSor, articleSorEstudios, articleBarrios].forEach(function (edition) {
+[articlePreludes, articlePreludes.santisteban, articlePreludes.waltzes, articleProgressive, articleAguado, articleSagreras, articleSor, articleSorEstudios, articleBarrios, articleGiulianiArpegios].forEach(function (edition) {
   const folder = path.basename(edition.PREVIEW_DIR);
   const target = path.join(ASSETS_DIST, "articles", folder);
   ensureDir(path.join(target, "full"));
@@ -2283,6 +2309,7 @@ function siteMenu(strings, locale) {
     [ARTICLE_SOR_SLUG, strings.artSorH1],
     [ARTICLE_SOR_ESTUDIOS_SLUG, strings.artSorEstudiosH1],
     [ARTICLE_BARRIOS_SLUG, strings.artBarriosH1],
+    [ARTICLE_GIULIANI_ARPEGIOS_SLUG, strings.artGiulianiArpegiosH1],
   ];
   return (
     '<details class="site-menu"><summary aria-label="' +
@@ -2456,7 +2483,7 @@ addSlugPages(
 addSlugPages([DIM_SLUG, NOTE_FINDER_SLUG, SIXTHS_SLUG]);
 addSlugPages([TAB_EDITOR_SLUG], ["0.7", "0.6"]);
 addSlugPages([PRIVACY_SLUG], ["0.3", "0.3"]);
-addSlugPages([ARTICLES_SLUG, ARTICLE_CARCASSI_SLUG, ARTICLE_PRELUDES_SLUG, ARTICLE_SANTISTEBAN_SLUG, ARTICLE_WALTZES_SLUG, ARTICLE_PROGRESSIVE_SLUG, ARTICLE_AGUADO_SLUG, ARTICLE_SAGRERAS_SLUG, ARTICLE_SOR_SLUG, ARTICLE_SOR_ESTUDIOS_SLUG, ARTICLE_BARRIOS_SLUG, ARTICLE_ARPEGGIOS_SLUG]);
+addSlugPages([ARTICLES_SLUG, ARTICLE_CARCASSI_SLUG, ARTICLE_PRELUDES_SLUG, ARTICLE_SANTISTEBAN_SLUG, ARTICLE_WALTZES_SLUG, ARTICLE_PROGRESSIVE_SLUG, ARTICLE_AGUADO_SLUG, ARTICLE_SAGRERAS_SLUG, ARTICLE_SOR_SLUG, ARTICLE_SOR_ESTUDIOS_SLUG, ARTICLE_BARRIOS_SLUG, ARTICLE_GIULIANI_ARPEGIOS_SLUG, ARTICLE_ARPEGGIOS_SLUG]);
 if (PARTITURA_ENABLED) addSlugPages([PARTITURA_SLUG], ["0.7", "0.6"]);
 addSlugPages(
   ALL_PICKING_PAGES.map(function (page) {

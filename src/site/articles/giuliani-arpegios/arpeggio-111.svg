@@ -1,0 +1,1531 @@
+<svg viewBox="0 0 580 262" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" overflow="visible" id="c1oqxm1h">
+   <desc>Engraved by Verovio 6.3.0-425dd7b</desc>
+   <defs>
+      <g id="E050-c1oqxm1h">
+         <path transform="scale(1,-1)" d="M441 -245c-23 -4 -48 -6 -76 -6c-59 0 -102 7 -130 20c-88 42 -150 93 -187 154c-26 44 -43 103 -48 176c0 6 -1 13 -1 19c0 54 15 111 45 170c29 57 65 106 110 148s96 85 153 127c-3 16 -8 46 -13 92c-4 43 -5 73 -5 89c0 117 16 172 69 257c34 54 64 82 89 82 c21 0 43 -30 69 -92s39 -115 41 -159v-15c0 -109 -21 -162 -67 -241c-13 -20 -63 -90 -98 -118c-13 -9 -25 -19 -37 -29l31 -181c8 1 18 2 28 2c58 0 102 -12 133 -35c59 -43 92 -104 98 -184c1 -7 1 -15 1 -22c0 -123 -87 -209 -181 -248c8 -57 17 -110 25 -162 c5 -31 6 -58 6 -80c0 -30 -5 -53 -14 -70c-35 -64 -88 -99 -158 -103c-5 0 -11 -1 -16 -1c-37 0 -72 10 -108 27c-50 24 -77 59 -80 105v11c0 29 7 55 20 76c18 28 45 42 79 44h6c49 0 93 -42 97 -87v-9c0 -51 -34 -86 -105 -106c17 -24 51 -36 102 -36c62 0 116 43 140 85 c9 16 13 41 13 74c0 20 -1 42 -5 67c-8 53 -18 106 -26 159zM461 939c-95 0 -135 -175 -135 -286c0 -24 2 -48 5 -71c50 39 92 82 127 128c40 53 60 100 60 140v8c-4 53 -22 81 -55 81h-2zM406 119l54 -326c73 25 110 78 110 161c0 7 0 15 -1 23c-7 95 -57 142 -151 142h-12 zM382 117c-72 -2 -128 -47 -128 -120v-7c2 -46 43 -99 75 -115c-3 -2 -7 -5 -10 -10c-70 33 -116 88 -123 172v11c0 68 44 126 88 159c23 17 49 29 78 36l-29 170c-21 -13 -52 -37 -92 -73c-50 -44 -86 -84 -109 -119c-45 -69 -67 -130 -67 -182v-13c5 -68 35 -127 93 -176 s125 -73 203 -73c25 0 50 3 75 9c-19 111 -36 221 -54 331z" />
+      </g>
+      <g id="E08A-c1oqxm1h">
+         <path transform="scale(1,-1)" d="M340 179c-9 24 -56 41 -89 41c-46 0 -81 -28 -100 -58c-17 -28 -25 -78 -25 -150c0 -65 2 -111 8 -135c8 -31 18 -49 40 -67c20 -17 43 -25 70 -25c54 0 92 36 115 75c14 25 23 54 28 88h27c0 -63 -24 -105 -58 -141c-35 -38 -82 -56 -140 -56c-45 0 -83 13 -115 39 c-57 45 -101 130 -101 226c0 59 33 127 68 163c36 37 97 72 160 72c36 0 93 -21 121 -40c11 -8 23 -17 33 -30c19 -23 27 -48 27 -76c0 -51 -35 -88 -86 -88c-43 0 -76 27 -76 68c0 26 7 35 21 51c15 17 32 27 58 32c7 2 14 7 14 11z" />
+      </g>
+      <g id="E0A4-c1oqxm1h">
+         <path transform="scale(1,-1)" d="M0 -39c0 68 73 172 200 172c66 0 114 -37 114 -95c0 -84 -106 -171 -218 -171c-64 0 -96 30 -96 94z" />
+      </g>
+      <g id="E883-c1oqxm1h">
+         <path transform="scale(1,-1)" d="M161 326c52 0 94 -17 94 -68c0 -50 -40 -76 -82 -94c26 -21 39 -42 39 -64c0 -52 -56 -100 -118 -100h-12c-40 0 -82 23 -82 56c0 30 12 49 37 49c17 0 31 -16 34 -31c0 -5 -4 -12 -11 -21c-7 -5 -13 -10 -13 -21l11 -9l17 -4c21 0 40 12 56 37c13 21 19 45 19 70 c-9 30 -28 35 -66 35l6 23c34 0 60 4 77 13c20 11 30 35 30 70c0 28 -12 38 -39 40l-20 -3c-8 -3 -12 -9 -12 -16c2 -7 4 -11 5 -14l4 -11l3 -10l-3 -12c-5 -6 -11 -11 -20 -13c-2 0 -4 -1 -6 -1c-16 0 -30 13 -30 28c0 39 43 71 82 71z" />
+      </g>
+      <g id="E06D-c1oqxm1h">
+         <path transform="scale(1,-1)" d="M18 697v53h369v-53h-154v-418h-60v418h-155zM111 -94l-50 -141h-64l168 470h78l165 -470h-67l-49 141h-181zM276 -43l-73 214l-77 -214h150zM27 -750v471h191c89 0 139 -51 139 -120c0 -47 -22 -82 -65 -102c60 -23 86 -58 86 -114c0 -78 -54 -135 -139 -135h-212z M203 -332h-116v-150h116c67 0 94 27 94 75s-27 75 -94 75zM234 -535h-147v-162h147c56 0 84 36 84 81c0 46 -28 81 -84 81z" />
+      </g>
+      <g id="E240-c1oqxm1h">
+         <path transform="scale(1,-1)" d="M179 -646c15 29 29 55 46 102c18 49 30 108 30 138c0 105 -80 173 -168 200c-18 5 -47 9 -87 16v190h22c8 0 33 -61 71 -95c4 -3 -2 3 61 -56c62 -58 122 -137 122 -241c0 -38 -13 -106 -35 -163c-20 -51 -43 -99 -66 -132c-6 -5 -10 -7 -13 -7s-5 2 -5 5l4 10 c1 3 14 25 18 33z" />
+      </g>
+      <g id="E241-c1oqxm1h">
+         <path transform="scale(1,-1)" d="M179 646c-4 8 -17 30 -18 33l-4 10c0 3 2 5 5 5s7 -2 13 -7c23 -33 46 -81 66 -132c22 -57 35 -125 35 -163c0 -104 -60 -183 -122 -241c-63 -59 -57 -53 -61 -56c-38 -34 -63 -95 -71 -95h-22v190c40 7 69 11 87 16c88 27 168 95 168 200c0 30 -12 89 -30 138 c-17 47 -31 73 -46 102z" />
+      </g>
+      <g id="E044-c1oqxm1h">
+         <path transform="scale(1,-1)" d="M0 0c0 28 22 50 50 50s50 -22 50 -50s-22 -50 -50 -50s-50 22 -50 50z" />
+      </g>
+      <g id="E0A2-c1oqxm1h">
+         <path transform="scale(1,-1)" d="M198 133c102 0 207 -45 207 -133c0 -92 -118 -133 -227 -133c-101 0 -178 46 -178 133c0 88 93 133 198 133zM293 -21c0 14 -3 29 -8 44c-7 20 -18 38 -33 54c-20 21 -43 31 -68 31l-20 -2c-15 -5 -27 -14 -36 -28c-4 -9 -6 -17 -8 -24s-3 -16 -3 -27c0 -15 3 -34 9 -57 s18 -41 34 -55c15 -15 36 -23 62 -23c4 0 10 1 18 2c19 5 32 15 40 30s13 34 13 55z" />
+      </g>
+   </defs>
+   <style type="text/css">#c1oqxm1h g.ending, #c1oqxm1h g.fing, #c1oqxm1h g.reh, #c1oqxm1h g.tempo {font-weight:bold;}#c1oqxm1h g.dir, #c1oqxm1h g.dynam, #c1oqxm1h g.mNum {font-style:italic;}#c1oqxm1h g.label {font-weight:normal;}#c1oqxm1h ellipse, #c1oqxm1h path, #c1oqxm1h polygon, #c1oqxm1h polyline, #c1oqxm1h rect {stroke:currentColor}#c1oqxm1h g.cursor {fill:dodgerblue; color:dodgerblue;}#c1oqxm1h g.cursor.chord {fill:limegreen; color:limegreen;}</style>
+   <svg class="definition-scale" color="black" font-family="Helvetica, Arial, DejaVu Sans, sans-serif" viewBox="0 0 14480 6530">
+      <g class="page-margin" transform="translate(600, 0)">
+         <g data-class="score" class="score pageMilestone">
+            <title class="labelAttr">[selectionScore]</title>
+         </g>
+         <g data-class="system" class="system">
+            <path d="M13 1412 L13 5736" stroke-width="27" />
+
+            <g data-class="measure" class="measure">
+               <g data-class="staff" class="staff">
+                  <path d="M0 1412 L6599 1412" stroke-width="13" />
+                  <path d="M0 1592 L6599 1592" stroke-width="13" />
+                  <path d="M0 1772 L6599 1772" stroke-width="13" />
+                  <path d="M0 1952 L6599 1952" stroke-width="13" />
+                  <path d="M0 2132 L6599 2132" stroke-width="13" />
+                  <g data-class="clef" class="clef">
+                     <use xlink:href="#E050-c1oqxm1h" transform="translate(206, 1952) scale(0.72, 0.72)" />
+                  </g>
+                  <g data-class="keySig" class="keySig" />
+                  <g data-class="meterSig" class="meterSig">
+                     <use xlink:href="#E08A-c1oqxm1h" transform="translate(918, 1772) scale(0.72, 0.72)" />
+                  </g>
+                  <g data-class="ledgerLines" class="ledgerLines below">
+                     <g data-class="lineDash" class="lineDash" data-related="#tab-note-6">
+                        <path d="M2111 2312 L2433 2312" stroke-width="22" />
+                     </g>
+                     <g data-class="lineDash" class="lineDash" data-related="#tab-note-9">
+                        <path d="M3191 2312 L3513 2312" stroke-width="22" />
+                     </g>
+                     <g data-class="lineDash" class="lineDash" data-related="#tab-note-12">
+                        <path d="M4271 2312 L4593 2312" stroke-width="22" />
+                     </g>
+                     <g data-class="lineDash" class="lineDash" data-related="#tab-note-15">
+                        <path d="M5351 2312 L5673 2312" stroke-width="22" />
+                     </g>
+                  </g>
+                  <g data-class="layer" class="layer">
+                     <g data-class="note" class="note">
+                        <g data-class="notehead" class="notehead">
+                           <use xlink:href="#E0A4-c1oqxm1h" transform="translate(2159, 1682) scale(0.72, 0.72)" />
+                        </g>
+                        <g data-class="stem" class="stem">
+                           <path d="M2376 1654 L2376 1112" stroke-width="18" />
+                        </g>
+                     </g>
+                     <g data-class="note" class="note">
+                        <g data-class="notehead" class="notehead">
+                           <use xlink:href="#E0A4-c1oqxm1h" transform="translate(3239, 1592) scale(0.72, 0.72)" />
+                        </g>
+                        <g data-class="stem" class="stem">
+                           <path d="M3456 1564 L3456 1052" stroke-width="18" />
+                        </g>
+                     </g>
+                     <g data-class="note" class="note">
+                        <g data-class="notehead" class="notehead">
+                           <use xlink:href="#E0A4-c1oqxm1h" transform="translate(4319, 1502) scale(0.72, 0.72)" />
+                        </g>
+                        <g data-class="stem" class="stem">
+                           <path d="M4536 1474 L4536 992" stroke-width="18" />
+                        </g>
+                     </g>
+                     <g data-class="beam" class="beam">
+                        <polygon points="5607,1187 6345,1007 6345,1097 5607,1277" />
+                        <g data-class="tuplet" class="tuplet">
+                           <g data-class="tupletNum" class="tupletNum">
+                              <use xlink:href="#E883-c1oqxm1h" transform="translate(5780, 1058) scale(0.72, 0.72)" />
+                           </g>
+                           <g data-class="tupletBracket" class="tupletBracket">
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="5408,1176 5408,1059 5735,976 " />
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="6336,940 6336,823 6008,907 " />
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(5399, 1682) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M5616 1654 L5616 1205" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(5759, 1592) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M5976 1564 L5976 1115" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(6119, 1502) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M6336 1474 L6336 1025" stroke-width="18" />
+                              </g>
+                           </g>
+                        </g>
+                     </g>
+                  </g>
+                  <g data-class="layer" class="layer">
+                     <g data-class="beam" class="beam">
+                        <polygon points="2159,2762 2897,2582 2897,2492 2159,2672" />
+                        <g data-class="tuplet" class="tuplet">
+                           <g data-class="tupletNum" class="tupletNum">
+                              <use xlink:href="#E883-c1oqxm1h" transform="translate(2540, 1349) scale(0.72, 0.72)" />
+                           </g>
+                           <g data-class="tupletBracket" class="tupletBracket">
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="2168,1349 2168,1232 2495,1232 " />
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="3096,1349 3096,1232 2768,1232 " />
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(2159, 2312) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M2168 2340 L2168 2744" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(2519, 2132) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M2528 2160 L2528 2654" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(2879, 1952) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M2888 1980 L2888 2564" stroke-width="18" />
+                              </g>
+                           </g>
+                        </g>
+                     </g>
+                     <g data-class="beam" class="beam">
+                        <polygon points="3239,2852 3977,2672 3977,2582 3239,2762" />
+                        <g data-class="tuplet" class="tuplet">
+                           <g data-class="tupletNum" class="tupletNum">
+                              <use xlink:href="#E883-c1oqxm1h" transform="translate(3620, 1349) scale(0.72, 0.72)" />
+                           </g>
+                           <g data-class="tupletBracket" class="tupletBracket">
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="3248,1349 3248,1232 3575,1232 " />
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="4176,1349 4176,1232 3848,1232 " />
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(3239, 2402) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M3248 2430 L3248 2834" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(3599, 2222) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M3608 2250 L3608 2744" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(3959, 1952) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M3968 1980 L3968 2654" stroke-width="18" />
+                              </g>
+                           </g>
+                        </g>
+                     </g>
+                     <g data-class="beam" class="beam">
+                        <polygon points="4319,2762 5057,2582 5057,2492 4319,2672" />
+                        <g data-class="tuplet" class="tuplet">
+                           <g data-class="tupletNum" class="tupletNum">
+                              <use xlink:href="#E883-c1oqxm1h" transform="translate(4700, 1349) scale(0.72, 0.72)" />
+                           </g>
+                           <g data-class="tupletBracket" class="tupletBracket">
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="4328,1349 4328,1232 4655,1232 " />
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="5256,1349 5256,1232 4928,1232 " />
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(4319, 2312) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M4328 2340 L4328 2744" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(4679, 2132) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M4688 2160 L4688 2654" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(5039, 1952) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M5048 1980 L5048 2564" stroke-width="18" />
+                              </g>
+                           </g>
+                        </g>
+                     </g>
+                     <g data-class="beam" class="beam">
+                        <polygon points="5399,2762 6137,2582 6137,2492 5399,2672" />
+                        <g data-class="tuplet" class="tuplet">
+                           <g data-class="tupletNum" class="tupletNum">
+                              <use xlink:href="#E883-c1oqxm1h" transform="translate(5780, 1349) scale(0.72, 0.72)" />
+                           </g>
+                           <g data-class="tupletBracket" class="tupletBracket">
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="5408,1349 5408,1232 5735,1232 " />
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="6336,1349 6336,1232 6008,1232 " />
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(5399, 2312) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M5408 2340 L5408 2744" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(5759, 2132) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M5768 2160 L5768 2654" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(6119, 1952) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M6128 1980 L6128 2564" stroke-width="18" />
+                              </g>
+                           </g>
+                        </g>
+                     </g>
+                  </g>
+               </g>
+               <g data-class="staff" class="staff">
+                  <path d="M0 4161 L4306 4161" stroke-width="23" />
+                  <path d="M4558 4161 L6106 4161" stroke-width="23" />
+                  <path d="M6358 4161 L6599 4161" stroke-width="23" />
+                  <path d="M0 4476 L2146 4476" stroke-width="23" />
+                  <path d="M2398 4476 L3226 4476" stroke-width="23" />
+                  <path d="M3478 4476 L5386 4476" stroke-width="23" />
+                  <path d="M5638 4476 L5746 4476" stroke-width="23" />
+                  <path d="M5998 4476 L6599 4476" stroke-width="23" />
+                  <path d="M0 4791 L2866 4791" stroke-width="23" />
+                  <path d="M3118 4791 L3946 4791" stroke-width="23" />
+                  <path d="M4198 4791 L5026 4791" stroke-width="23" />
+                  <path d="M5278 4791 L6106 4791" stroke-width="23" />
+                  <path d="M6358 4791 L6599 4791" stroke-width="23" />
+                  <path d="M0 5106 L2506 5106" stroke-width="23" />
+                  <path d="M2758 5106 L3586 5106" stroke-width="23" />
+                  <path d="M3838 5106 L4666 5106" stroke-width="23" />
+                  <path d="M4918 5106 L5746 5106" stroke-width="23" />
+                  <path d="M5998 5106 L6599 5106" stroke-width="23" />
+                  <path d="M0 5421 L2146 5421" stroke-width="23" />
+                  <path d="M2398 5421 L3226 5421" stroke-width="23" />
+                  <path d="M3478 5421 L4306 5421" stroke-width="23" />
+                  <path d="M4558 5421 L5386 5421" stroke-width="23" />
+                  <path d="M5638 5421 L6599 5421" stroke-width="23" />
+                  <path d="M0 5736 L6599 5736" stroke-width="23" />
+                  <g data-class="clef" class="clef"><text x="411" y="4769" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="378px" fill="#000000" stroke="none">T</text><text x="411" y="5084" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="378px" fill="#000000" stroke="none">A</text><text x="411" y="5399" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="378px" fill="#000000" stroke="none">B</text></g>
+
+                  <g data-class="layer" class="layer">
+                     <g data-class="tabGrp" class="tabGrp">
+                        <g data-class="tabDurSym" class="tabDurSym">
+                           <g data-class="stem" class="stem">
+                              <path d="M2272 4004 L2272 3376" stroke-width="31" />
+                           </g>
+                        </g>
+                        <g data-class="note" class="note">
+                           <text x="2272" y="4585" text-anchor="middle" font-size="0px">
+                              <tspan font-size="324px">1</tspan>
+                           </text>
+                        </g>
+                     </g>
+                     <g data-class="tabGrp" class="tabGrp">
+                        <g data-class="tabDurSym" class="tabDurSym">
+                           <g data-class="stem" class="stem">
+                              <path d="M3352 4004 L3352 3376" stroke-width="31" />
+                           </g>
+                        </g>
+                        <g data-class="note" class="note">
+                           <text x="3352" y="4585" text-anchor="middle" font-size="0px">
+                              <tspan font-size="324px">3</tspan>
+                           </text>
+                        </g>
+                     </g>
+                     <g data-class="tabGrp" class="tabGrp">
+                        <g data-class="tabDurSym" class="tabDurSym">
+                           <g data-class="stem" class="stem">
+                              <path d="M4432 4004 L4432 3376" stroke-width="31" />
+                           </g>
+                        </g>
+                        <g data-class="note" class="note">
+                           <text x="4432" y="4271" text-anchor="middle" font-size="0px">
+                              <tspan font-size="324px">0</tspan>
+                           </text>
+                        </g>
+                     </g>
+                     <g data-class="tuplet" class="tuplet">
+                        <g data-class="tupletNum" class="tupletNum">
+                           <use xlink:href="#E883-c1oqxm1h" transform="translate(5977, 3164) scale(0.72, 0.72)" />
+                        </g>
+                        <g data-class="tupletBracket" class="tupletBracket">
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="5527,3164 5527,3047 5899,3047 " />
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="6611,3164 6611,3047 6238,3047 " />
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M5512 4004 L5512 3376" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E240-c1oqxm1h" transform="translate(5497, 3376) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="5512" y="4585" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">1</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M5872 4004 L5872 3376" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E240-c1oqxm1h" transform="translate(5857, 3376) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="5872" y="4585" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">3</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M6232 4004 L6232 3376" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E240-c1oqxm1h" transform="translate(6217, 3376) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="6232" y="4271" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">0</tspan>
+                              </text>
+                           </g>
+                        </g>
+                     </g>
+                  </g>
+                  <g data-class="layer" class="layer">
+                     <g data-class="tuplet" class="tuplet">
+                        <g data-class="tupletNum" class="tupletNum">
+                           <use xlink:href="#E883-c1oqxm1h" transform="translate(2737, 3964) scale(0.72, 0.72)" />
+                        </g>
+                        <g data-class="tupletBracket" class="tupletBracket">
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="2287,3964 2287,3847 2659,3847 " />
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="3371,3964 3371,3847 2998,3847 " />
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M2272 5893 L2272 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(2257, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="2272" y="5527" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">3</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M2632 5893 L2632 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(2617, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="2632" y="5213" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">2</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M2992 5893 L2992 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(2977, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="2992" y="4899" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">0</tspan>
+                              </text>
+                           </g>
+                        </g>
+                     </g>
+                     <g data-class="tuplet" class="tuplet">
+                        <g data-class="tupletNum" class="tupletNum">
+                           <use xlink:href="#E883-c1oqxm1h" transform="translate(3817, 3964) scale(0.72, 0.72)" />
+                        </g>
+                        <g data-class="tupletBracket" class="tupletBracket">
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="3367,3964 3367,3847 3739,3847 " />
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="4451,3964 4451,3847 4078,3847 " />
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M3352 5893 L3352 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(3337, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="3352" y="5527" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">2</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M3712 5893 L3712 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(3697, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="3712" y="5213" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">0</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M4072 5893 L4072 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(4057, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="4072" y="4899" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">0</tspan>
+                              </text>
+                           </g>
+                        </g>
+                     </g>
+                     <g data-class="tuplet" class="tuplet">
+                        <g data-class="tupletNum" class="tupletNum">
+                           <use xlink:href="#E883-c1oqxm1h" transform="translate(4897, 3964) scale(0.72, 0.72)" />
+                        </g>
+                        <g data-class="tupletBracket" class="tupletBracket">
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="4447,3964 4447,3847 4819,3847 " />
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="5531,3964 5531,3847 5158,3847 " />
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M4432 5893 L4432 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(4417, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="4432" y="5527" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">3</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M4792 5893 L4792 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(4777, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="4792" y="5213" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">2</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M5152 5893 L5152 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(5137, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="5152" y="4899" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">0</tspan>
+                              </text>
+                           </g>
+                        </g>
+                     </g>
+                     <g data-class="tuplet" class="tuplet">
+                        <g data-class="tupletNum" class="tupletNum">
+                           <use xlink:href="#E883-c1oqxm1h" transform="translate(5977, 3964) scale(0.72, 0.72)" />
+                        </g>
+                        <g data-class="tupletBracket" class="tupletBracket">
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="5527,3964 5527,3847 5899,3847 " />
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="6611,3964 6611,3847 6238,3847 " />
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M5512 5893 L5512 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(5497, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="5512" y="5527" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">3</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M5872 5893 L5872 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(5857, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="5872" y="5213" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">2</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M6232 5893 L6232 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(6217, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="6232" y="4899" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">0</tspan>
+                              </text>
+                           </g>
+                        </g>
+                     </g>
+                  </g>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="2272" y="993" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">m</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="3352" y="1113" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">4</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="4432" y="1113" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">a</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="5512" y="704" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">m</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="5872" y="393" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">4</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="6232" y="387" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">a</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="2632" y="1005" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">p</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="2992" y="1113" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">i</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="3712" y="1005" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">p</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="4072" y="1113" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">i</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="4792" y="1005" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">p</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="5152" y="1113" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">i</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="5872" y="704" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">p</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="6232" y="704" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">i</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="barLine" class="barLine">
+                  <path d="M1575 1412 L1575 2132" stroke-width="90" />
+                  <path d="M1705 1412 L1705 2132" stroke-width="27" />
+                  <use xlink:href="#E044-c1oqxm1h" transform="translate(1751, 1682) scale(0.72, 0.72)" />
+                  <use xlink:href="#E044-c1oqxm1h" transform="translate(1751, 1862) scale(0.72, 0.72)" />
+                  <path d="M1575 4161 L1575 5731" stroke-width="90" />
+                  <path d="M1705 4161 L1705 5731" stroke-width="27" />
+                  <use xlink:href="#E044-c1oqxm1h" transform="translate(1751, 4630) scale(1.26, 1.26)" />
+                  <use xlink:href="#E044-c1oqxm1h" transform="translate(1751, 4945) scale(1.26, 1.26)" />
+                  <use xlink:href="#E044-c1oqxm1h" transform="translate(1751, 5260) scale(1.26, 1.26)" />
+                  <path d="M1575 2132 L1575 4161" stroke-width="90" />
+                  <path d="M1705 2132 L1705 4161" stroke-width="27" />
+               </g>
+               <g data-class="barLine" class="barLine">
+                  <path d="M6586 1412 L6586 2132" stroke-width="27" />
+                  <path d="M6586 4161 L6586 5731" stroke-width="27" />
+                  <path d="M6586 2132 L6586 4161" stroke-width="27" />
+               </g>
+            </g>
+            <g data-class="measure" class="measure">
+               <g data-class="staff" class="staff">
+                  <path d="M6599 1412 L11640 1412" stroke-width="13" />
+                  <path d="M6599 1592 L11640 1592" stroke-width="13" />
+                  <path d="M6599 1772 L11640 1772" stroke-width="13" />
+                  <path d="M6599 1952 L11640 1952" stroke-width="13" />
+                  <path d="M6599 2132 L11640 2132" stroke-width="13" />
+                  <g data-class="ledgerLines" class="ledgerLines below">
+                     <g data-class="lineDash" class="lineDash" data-related="#tab-note-24">
+                        <path d="M6833 2312 L7155 2312" stroke-width="22" />
+                     </g>
+                     <g data-class="lineDash" class="lineDash" data-related="#tab-note-27">
+                        <path d="M7913 2312 L8235 2312" stroke-width="22" />
+                     </g>
+                     <g data-class="lineDash" class="lineDash" data-related="#tab-note-30">
+                        <path d="M8993 2312 L9315 2312" stroke-width="22" />
+                     </g>
+                     <g data-class="lineDash" class="lineDash" data-related="#tab-note-33">
+                        <path d="M10073 2312 L10395 2312" stroke-width="22" />
+                     </g>
+                  </g>
+                  <g data-class="layer" class="layer">
+                     <g data-class="note" class="note">
+                        <g data-class="notehead" class="notehead">
+                           <use xlink:href="#E0A4-c1oqxm1h" transform="translate(6881, 1412) scale(0.72, 0.72)" />
+                        </g>
+                        <g data-class="stem" class="stem">
+                           <path d="M7098 1384 L7098 932" stroke-width="18" />
+                        </g>
+                     </g>
+                     <g data-class="note" class="note">
+                        <g data-class="notehead" class="notehead">
+                           <use xlink:href="#E0A4-c1oqxm1h" transform="translate(7961, 1502) scale(0.72, 0.72)" />
+                        </g>
+                        <g data-class="stem" class="stem">
+                           <path d="M8178 1474 L8178 992" stroke-width="18" />
+                        </g>
+                     </g>
+                     <g data-class="note" class="note">
+                        <g data-class="notehead" class="notehead">
+                           <use xlink:href="#E0A4-c1oqxm1h" transform="translate(9041, 1592) scale(0.72, 0.72)" />
+                        </g>
+                        <g data-class="stem" class="stem">
+                           <path d="M9258 1564 L9258 1052" stroke-width="18" />
+                        </g>
+                     </g>
+                     <g data-class="beam" class="beam">
+                        <polygon points="10329,872 11067,1052 11067,1142 10329,962" />
+                        <g data-class="tuplet" class="tuplet">
+                           <g data-class="tupletNum" class="tupletNum">
+                              <use xlink:href="#E883-c1oqxm1h" transform="translate(10502, 875) scale(0.72, 0.72)" />
+                           </g>
+                           <g data-class="tupletBracket" class="tupletBracket">
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="10130,757 10130,640 10457,724 " />
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="11058,994 11058,877 10730,794 " />
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(10121, 1322) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M10338 1294 L10338 890" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(10481, 1412) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M10698 1384 L10698 980" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(10841, 1592) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M11058 1564 L11058 1070" stroke-width="18" />
+                              </g>
+                           </g>
+                        </g>
+                     </g>
+                  </g>
+                  <g data-class="layer" class="layer">
+                     <g data-class="beam" class="beam">
+                        <polygon points="6881,2852 7619,2672 7619,2582 6881,2762" />
+                        <g data-class="tuplet" class="tuplet">
+                           <g data-class="tupletNum" class="tupletNum">
+                              <use xlink:href="#E883-c1oqxm1h" transform="translate(7262, 1349) scale(0.72, 0.72)" />
+                           </g>
+                           <g data-class="tupletBracket" class="tupletBracket">
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="6890,1349 6890,1232 7217,1232 " />
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="7818,1349 7818,1232 7490,1232 " />
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(6881, 2402) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M6890 2430 L6890 2834" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(7241, 2222) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M7250 2250 L7250 2744" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(7601, 1952) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M7610 1980 L7610 2654" stroke-width="18" />
+                              </g>
+                           </g>
+                        </g>
+                     </g>
+                     <g data-class="beam" class="beam">
+                        <polygon points="7961,2762 8699,2582 8699,2492 7961,2672" />
+                        <g data-class="tuplet" class="tuplet">
+                           <g data-class="tupletNum" class="tupletNum">
+                              <use xlink:href="#E883-c1oqxm1h" transform="translate(8342, 1349) scale(0.72, 0.72)" />
+                           </g>
+                           <g data-class="tupletBracket" class="tupletBracket">
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="7970,1349 7970,1232 8297,1232 " />
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="8898,1349 8898,1232 8570,1232 " />
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(7961, 2312) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M7970 2340 L7970 2744" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(8321, 2132) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M8330 2160 L8330 2654" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(8681, 1952) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M8690 1980 L8690 2564" stroke-width="18" />
+                              </g>
+                           </g>
+                        </g>
+                     </g>
+                     <g data-class="beam" class="beam">
+                        <polygon points="9041,2852 9779,2672 9779,2582 9041,2762" />
+                        <g data-class="tuplet" class="tuplet">
+                           <g data-class="tupletNum" class="tupletNum">
+                              <use xlink:href="#E883-c1oqxm1h" transform="translate(9422, 1349) scale(0.72, 0.72)" />
+                           </g>
+                           <g data-class="tupletBracket" class="tupletBracket">
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="9050,1349 9050,1232 9377,1232 " />
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="9978,1349 9978,1232 9650,1232 " />
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(9041, 2402) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M9050 2430 L9050 2834" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(9401, 2222) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M9410 2250 L9410 2744" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(9761, 1952) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M9770 1980 L9770 2654" stroke-width="18" />
+                              </g>
+                           </g>
+                        </g>
+                     </g>
+                     <g data-class="beam" class="beam">
+                        <polygon points="10121,2852 10859,2672 10859,2582 10121,2762" />
+                        <g data-class="tuplet" class="tuplet">
+                           <g data-class="tupletNum" class="tupletNum">
+                              <use xlink:href="#E883-c1oqxm1h" transform="translate(10502, 1349) scale(0.72, 0.72)" />
+                           </g>
+                           <g data-class="tupletBracket" class="tupletBracket">
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="10130,1349 10130,1232 10457,1232 " />
+                              <polyline stroke-width="18" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="11058,1349 11058,1232 10730,1232 " />
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(10121, 2402) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M10130 2430 L10130 2834" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(10481, 2222) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M10490 2250 L10490 2744" stroke-width="18" />
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <g data-class="notehead" class="notehead">
+                                 <use xlink:href="#E0A4-c1oqxm1h" transform="translate(10841, 1952) scale(0.72, 0.72)" />
+                              </g>
+                              <g data-class="stem" class="stem">
+                                 <path d="M10850 1980 L10850 2654" stroke-width="18" />
+                              </g>
+                           </g>
+                        </g>
+                     </g>
+                  </g>
+               </g>
+               <g data-class="staff" class="staff">
+                  <path d="M6599 4161 L6868 4161" stroke-width="23" />
+                  <path d="M7120 4161 L7948 4161" stroke-width="23" />
+                  <path d="M8200 4161 L10108 4161" stroke-width="23" />
+                  <path d="M10360 4161 L10468 4161" stroke-width="23" />
+                  <path d="M10720 4161 L11640 4161" stroke-width="23" />
+                  <path d="M6599 4476 L9028 4476" stroke-width="23" />
+                  <path d="M9280 4476 L10828 4476" stroke-width="23" />
+                  <path d="M11080 4476 L11640 4476" stroke-width="23" />
+                  <path d="M6599 4791 L7588 4791" stroke-width="23" />
+                  <path d="M7840 4791 L8668 4791" stroke-width="23" />
+                  <path d="M8920 4791 L9748 4791" stroke-width="23" />
+                  <path d="M10000 4791 L10828 4791" stroke-width="23" />
+                  <path d="M11080 4791 L11640 4791" stroke-width="23" />
+                  <path d="M6599 5106 L7228 5106" stroke-width="23" />
+                  <path d="M7480 5106 L8308 5106" stroke-width="23" />
+                  <path d="M8560 5106 L9388 5106" stroke-width="23" />
+                  <path d="M9640 5106 L10468 5106" stroke-width="23" />
+                  <path d="M10720 5106 L11640 5106" stroke-width="23" />
+                  <path d="M6599 5421 L6868 5421" stroke-width="23" />
+                  <path d="M7120 5421 L7948 5421" stroke-width="23" />
+                  <path d="M8200 5421 L9028 5421" stroke-width="23" />
+                  <path d="M9280 5421 L10108 5421" stroke-width="23" />
+                  <path d="M10360 5421 L11640 5421" stroke-width="23" />
+                  <path d="M6599 5736 L11640 5736" stroke-width="23" />
+                  <g data-class="layer" class="layer">
+                     <g data-class="tabGrp" class="tabGrp">
+                        <g data-class="tabDurSym" class="tabDurSym">
+                           <g data-class="stem" class="stem">
+                              <path d="M6994 4004 L6994 3376" stroke-width="31" />
+                           </g>
+                        </g>
+                        <g data-class="note" class="note">
+                           <text x="6994" y="4271" text-anchor="middle" font-size="0px">
+                              <tspan font-size="324px">1</tspan>
+                           </text>
+                        </g>
+                     </g>
+                     <g data-class="tabGrp" class="tabGrp">
+                        <g data-class="tabDurSym" class="tabDurSym">
+                           <g data-class="stem" class="stem">
+                              <path d="M8074 4004 L8074 3376" stroke-width="31" />
+                           </g>
+                        </g>
+                        <g data-class="note" class="note">
+                           <text x="8074" y="4271" text-anchor="middle" font-size="0px">
+                              <tspan font-size="324px">0</tspan>
+                           </text>
+                        </g>
+                     </g>
+                     <g data-class="tabGrp" class="tabGrp">
+                        <g data-class="tabDurSym" class="tabDurSym">
+                           <g data-class="stem" class="stem">
+                              <path d="M9154 4004 L9154 3376" stroke-width="31" />
+                           </g>
+                        </g>
+                        <g data-class="note" class="note">
+                           <text x="9154" y="4585" text-anchor="middle" font-size="0px">
+                              <tspan font-size="324px">3</tspan>
+                           </text>
+                        </g>
+                     </g>
+                     <g data-class="tuplet" class="tuplet">
+                        <g data-class="tupletNum" class="tupletNum">
+                           <use xlink:href="#E883-c1oqxm1h" transform="translate(10699, 3164) scale(0.72, 0.72)" />
+                        </g>
+                        <g data-class="tupletBracket" class="tupletBracket">
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="10249,3164 10249,3047 10621,3047 " />
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="11333,3164 11333,3047 10960,3047 " />
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M10234 4004 L10234 3376" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E240-c1oqxm1h" transform="translate(10219, 3376) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="10234" y="4271" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">3</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M10594 4004 L10594 3376" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E240-c1oqxm1h" transform="translate(10579, 3376) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="10594" y="4271" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">1</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M10954 4004 L10954 3376" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E240-c1oqxm1h" transform="translate(10939, 3376) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="10954" y="4585" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">3</tspan>
+                              </text>
+                           </g>
+                        </g>
+                     </g>
+                  </g>
+                  <g data-class="layer" class="layer">
+                     <g data-class="tuplet" class="tuplet">
+                        <g data-class="tupletNum" class="tupletNum">
+                           <use xlink:href="#E883-c1oqxm1h" transform="translate(7459, 3964) scale(0.72, 0.72)" />
+                        </g>
+                        <g data-class="tupletBracket" class="tupletBracket">
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="7009,3964 7009,3847 7381,3847 " />
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="8093,3964 8093,3847 7720,3847 " />
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M6994 5893 L6994 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(6979, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="6994" y="5527" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">2</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M7354 5893 L7354 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(7339, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="7354" y="5213" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">0</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M7714 5893 L7714 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(7699, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="7714" y="4899" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">0</tspan>
+                              </text>
+                           </g>
+                        </g>
+                     </g>
+                     <g data-class="tuplet" class="tuplet">
+                        <g data-class="tupletNum" class="tupletNum">
+                           <use xlink:href="#E883-c1oqxm1h" transform="translate(8539, 3964) scale(0.72, 0.72)" />
+                        </g>
+                        <g data-class="tupletBracket" class="tupletBracket">
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="8089,3964 8089,3847 8461,3847 " />
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="9173,3964 9173,3847 8800,3847 " />
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M8074 5893 L8074 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(8059, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="8074" y="5527" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">3</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M8434 5893 L8434 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(8419, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="8434" y="5213" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">2</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M8794 5893 L8794 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(8779, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="8794" y="4899" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">0</tspan>
+                              </text>
+                           </g>
+                        </g>
+                     </g>
+                     <g data-class="tuplet" class="tuplet">
+                        <g data-class="tupletNum" class="tupletNum">
+                           <use xlink:href="#E883-c1oqxm1h" transform="translate(9619, 3964) scale(0.72, 0.72)" />
+                        </g>
+                        <g data-class="tupletBracket" class="tupletBracket">
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="9169,3964 9169,3847 9541,3847 " />
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="10253,3964 10253,3847 9880,3847 " />
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M9154 5893 L9154 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(9139, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="9154" y="5527" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">2</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M9514 5893 L9514 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(9499, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="9514" y="5213" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">0</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M9874 5893 L9874 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(9859, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="9874" y="4899" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">0</tspan>
+                              </text>
+                           </g>
+                        </g>
+                     </g>
+                     <g data-class="tuplet" class="tuplet">
+                        <g data-class="tupletNum" class="tupletNum">
+                           <use xlink:href="#E883-c1oqxm1h" transform="translate(10699, 3964) scale(0.72, 0.72)" />
+                        </g>
+                        <g data-class="tupletBracket" class="tupletBracket">
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="10249,3964 10249,3847 10621,3847 " />
+                           <polyline stroke-width="31" stroke-linecap="butt" stroke-linejoin="miter" fill="none" points="11333,3964 11333,3847 10960,3847 " />
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M10234 5893 L10234 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(10219, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="10234" y="5527" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">2</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M10594 5893 L10594 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(10579, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="10594" y="5213" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">0</tspan>
+                              </text>
+                           </g>
+                        </g>
+                        <g data-class="tabGrp" class="tabGrp">
+                           <g data-class="tabDurSym" class="tabDurSym">
+                              <g data-class="stem" class="stem">
+                                 <path d="M10954 5893 L10954 6521" stroke-width="31" />
+                                 <g data-class="flag" class="flag">
+                                    <use xlink:href="#E241-c1oqxm1h" transform="translate(10939, 6521) scale(0.72, 0.72)" />
+                                 </g>
+                              </g>
+                           </g>
+                           <g data-class="note" class="note">
+                              <text x="10954" y="4899" text-anchor="middle" font-size="0px">
+                                 <tspan font-size="324px">0</tspan>
+                              </text>
+                           </g>
+                        </g>
+                     </g>
+                  </g>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="6994" y="1113" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">a</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="8074" y="1113" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">a</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="9154" y="933" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">m</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="10234" y="521" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">4</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="10594" y="210" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">1</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="10954" y="204" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">4</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="7354" y="1005" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">p</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="7714" y="1113" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">i</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="8434" y="1005" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">p</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="8794" y="1113" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">i</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="9514" y="1005" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">p</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="9874" y="1113" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">i</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="10594" y="521" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">p</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="10954" y="521" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">i</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="barLine" class="barLine">
+                  <path d="M11465 1412 L11465 2132" stroke-width="27" />
+                  <path d="M11595 1412 L11595 2132" stroke-width="90" />
+                  <use xlink:href="#E044-c1oqxm1h" transform="translate(11348, 1682) scale(0.72, 0.72)" />
+                  <use xlink:href="#E044-c1oqxm1h" transform="translate(11348, 1862) scale(0.72, 0.72)" />
+                  <path d="M11465 4161 L11465 5731" stroke-width="27" />
+                  <path d="M11595 4161 L11595 5731" stroke-width="90" />
+                  <use xlink:href="#E044-c1oqxm1h" transform="translate(11294, 4630) scale(1.26, 1.26)" />
+                  <use xlink:href="#E044-c1oqxm1h" transform="translate(11294, 4945) scale(1.26, 1.26)" />
+                  <use xlink:href="#E044-c1oqxm1h" transform="translate(11294, 5260) scale(1.26, 1.26)" />
+                  <path d="M11465 2132 L11465 4161" stroke-width="27" />
+                  <path d="M11595 2132 L11595 4161" stroke-width="90" />
+               </g>
+            </g>
+            <g data-class="systemMilestoneEnd" class="systemMilestoneEnd h1hv5js8" />
+            <g data-class="section" class="section systemMilestone" />
+            <g data-class="measure" class="measure">
+               <g data-class="staff" class="staff">
+                  <path d="M11640 1412 L13687 1412" stroke-width="13" />
+                  <path d="M11640 1592 L13687 1592" stroke-width="13" />
+                  <path d="M11640 1772 L13687 1772" stroke-width="13" />
+                  <path d="M11640 1952 L13687 1952" stroke-width="13" />
+                  <path d="M11640 2132 L13687 2132" stroke-width="13" />
+                  <g data-class="ledgerLines" class="ledgerLines below">
+                     <g data-class="lineDash" class="lineDash" data-related="#tab-note-40">
+                        <path d="M11875 2312 L12261 2312" stroke-width="22" />
+                     </g>
+                  </g>
+                  <g data-class="layer" class="layer">
+                     <g data-class="chord" class="chord">
+                        <g data-class="note" class="note">
+                           <g data-class="notehead" class="notehead">
+                              <use xlink:href="#E0A2-c1oqxm1h" transform="translate(11923, 1502) scale(0.72, 0.72)" />
+                           </g>
+                        </g>
+                        <g data-class="note" class="note">
+                           <g data-class="notehead" class="notehead">
+                              <use xlink:href="#E0A2-c1oqxm1h" transform="translate(11923, 1682) scale(0.72, 0.72)" />
+                           </g>
+                        </g>
+                        <g data-class="note" class="note">
+                           <g data-class="notehead" class="notehead">
+                              <use xlink:href="#E0A2-c1oqxm1h" transform="translate(11923, 1952) scale(0.72, 0.72)" />
+                           </g>
+                        </g>
+                        <g data-class="note" class="note">
+                           <g data-class="notehead" class="notehead">
+                              <use xlink:href="#E0A2-c1oqxm1h" transform="translate(11923, 2132) scale(0.72, 0.72)" />
+                           </g>
+                        </g>
+                        <g data-class="note" class="note">
+                           <g data-class="notehead" class="notehead">
+                              <use xlink:href="#E0A2-c1oqxm1h" transform="translate(11923, 2312) scale(0.72, 0.72)" />
+                           </g>
+                        </g>
+                     </g>
+                  </g>
+               </g>
+               <g data-class="staff" class="staff">
+                  <path d="M11640 4161 L11909 4161" stroke-width="23" />
+                  <path d="M12161 4161 L13687 4161" stroke-width="23" />
+                  <path d="M11640 4476 L11909 4476" stroke-width="23" />
+                  <path d="M12161 4476 L13687 4476" stroke-width="23" />
+                  <path d="M11640 4791 L11909 4791" stroke-width="23" />
+                  <path d="M12161 4791 L13687 4791" stroke-width="23" />
+                  <path d="M11640 5106 L11909 5106" stroke-width="23" />
+                  <path d="M12161 5106 L13687 5106" stroke-width="23" />
+                  <path d="M11640 5421 L11909 5421" stroke-width="23" />
+                  <path d="M12161 5421 L13687 5421" stroke-width="23" />
+                  <path d="M11640 5736 L13687 5736" stroke-width="23" />
+                  <g data-class="layer" class="layer">
+                     <g data-class="tabGrp" class="tabGrp">
+                        <g data-class="tabDurSym" class="tabDurSym" />
+                        <g data-class="note" class="note">
+                           <text x="12035" y="4271" text-anchor="middle" font-size="0px">
+                              <tspan font-size="324px">0</tspan>
+                           </text>
+                        </g>
+                        <g data-class="note" class="note">
+                           <text x="12035" y="4585" text-anchor="middle" font-size="0px">
+                              <tspan font-size="324px">1</tspan>
+                           </text>
+                        </g>
+                        <g data-class="note" class="note">
+                           <text x="12035" y="4899" text-anchor="middle" font-size="0px">
+                              <tspan font-size="324px">0</tspan>
+                           </text>
+                        </g>
+                        <g data-class="note" class="note">
+                           <text x="12035" y="5213" text-anchor="middle" font-size="0px">
+                              <tspan font-size="324px">2</tspan>
+                           </text>
+                        </g>
+                        <g data-class="note" class="note">
+                           <text x="12035" y="5527" text-anchor="middle" font-size="0px">
+                              <tspan font-size="324px">3</tspan>
+                           </text>
+                        </g>
+                     </g>
+                  </g>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="12068" y="673" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">3</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="12068" y="988" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">2</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="fing" class="fing">
+                  <text x="12068" y="1302" text-anchor="middle" font-size="0px">
+                     <tspan data-class="text" class="text">
+                        <tspan font-size="303px">1</tspan>
+                     </tspan>
+                  </text>
+               </g>
+               <g data-class="barLine" class="barLine">
+                  <path d="M13512 1412 L13512 2132" stroke-width="27" />
+                  <path d="M13642 1412 L13642 2132" stroke-width="90" />
+                  <path d="M13512 4161 L13512 5731" stroke-width="27" />
+                  <path d="M13642 4161 L13642 5731" stroke-width="90" />
+                  <path d="M13512 2132 L13512 4161" stroke-width="27" />
+                  <path d="M13642 2132 L13642 4161" stroke-width="90" />
+               </g>
+            </g>
+         </g>
+      </g>
+   <style>g.tabDurSym, g.tabRhythm { display: none; }</style></svg>
+</svg>

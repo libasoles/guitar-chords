@@ -57,7 +57,7 @@ def convert_measure(m, fifths, full, scale=1, rest_voices=False):
         ties = {names[id(h)]: (bool(h.get('tie_prev')), bool(h.get('tie_next'))) for h in kept if h.get('tie_prev') or h.get('tie_next')}
         items.append({'x': g['x'], 'dur': round(g['dur'] * scale), 'pitch': pitch, 'dir': g['dir'] if len(directions) == 2 else 'up',
                       'grace': g['grace'], 'grace_type': g['grace_type'], 'beams': g['beams'], 'ties': ties,
-                      'fingers': {names[id(h)]: '|'.join(x for x in (h.get('finger'), h.get('pluck')) if x) for h in kept if h.get('finger') or h.get('pluck')}})
+                      'fingers': {names[id(h)]: '|'.join(x for x in (h.get('finger'), h.get('pluck'), h.get('cell')) if x) for h in kept if h.get('finger') or h.get('pluck') or h.get('cell')}})
     graces = [i for i in items if i['grace']]
     items = [i for i in items if not i['grace']]
     for r in m['rests']:
