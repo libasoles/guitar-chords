@@ -7,7 +7,7 @@
   "6": {"pdf": "estudio4_arabescos.pdf", "title": "Estudio No. 4 (Arabescos)", "en": "Estudio No. 4 (Arabescos)", "imslp": "Estudio_No.4", "year": 2018, "tuning": "dropd", "key_changes": true, "fine": [8]},
   "7": {"pdf": "estudio_si_menor.pdf", "title": "Estudio en Si menor", "en": "Estudio in B minor", "imslp": "Estudio_en_Si_menor", "year": 2017},
   "8": {"pdf": "estudio_sol_menor.pdf", "title": "Estudio en Sol menor", "en": "Estudio in G minor", "imslp": "Estudio_en_Sol_menor", "year": 2018, "tuning": "dropd"},
-  "9": {"pdf": "estudio_inconcluso.pdf", "title": "Estudio inconcluso", "en": "Estudio inconcluso", "imslp": "Estudio_inconcluso", "year": 2018},
+  "9": {"pdf": "estudio_inconcluso.pdf", "title": "Estudio inconcluso", "en": "Estudio inconcluso", "imslp": "Estudio_inconcluso", "year": 2018, "short": [5]},
   "10": {"pdf": "minueto_do.pdf", "title": "Minueto en Do mayor", "en": "Minueto in C major", "imslp": "Minuet_in_C_major", "year": 2018},
   "11": {"pdf": "minueto_mi.pdf", "title": "Minueto en Mi mayor", "en": "Minueto in E major", "imslp": "Minueto_en_Mi_Mayor", "year": 2019},
   "12": {"pdf": "minueto_la1.pdf", "title": "Minueto en La mayor (No. 1)", "en": "Minueto in A major (No. 1)", "imslp": "Minueto_No.1_in_A_minor", "year": 2018, "key_changes": true},
