@@ -73,7 +73,7 @@ def odd_measures(piece, measures, short=()):
     full = piece['time'][0] * 16 // piece['time'][1] * S.SCALE
     odd = [i + 1 for i, d in enumerate(measures) if d['length'] != full]
     if short:
-        return [i for i in odd if i not in short] + [i for i in short if measures[i - 1]['length'] >= full]
+        return [i for i in odd if i not in short] + [i for i in short if i > len(measures) or measures[i - 1]['length'] >= full]
     if odd and set(odd) <= {1, len(measures)} and measures[0]['length'] + measures[-1]['length'] == full:
         return []  # anacrusa y compas final complementarios
     if odd == [1] and measures[0]['length'] < full:

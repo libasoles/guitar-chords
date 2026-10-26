@@ -1,5 +1,5 @@
 {
-  "1": {"pdf": "ligado_la.pdf", "title": "Estudio del Ligado en La mayor", "en": "Estudio del Ligado in A major", "imslp": "Estudio_del_Ligado_en_La_mayor", "year": 2018, "eighth_triplets": true, "short": [1, 2, 6, 7, 11, 12, 20, 21, 25, 26]},
+  "1": {"pdf": "ligado_la.pdf", "title": "Estudio del Ligado en La mayor", "en": "Estudio del Ligado in A major", "imslp": "Estudio_del_Ligado_en_La_mayor", "year": 2018, "eighth_triplets": true},
   "2": {"pdf": "ligado_re.pdf", "title": "Estudio del Ligado en Re menor", "en": "Estudio del Ligado in D minor", "imslp": "Estudio_del_Ligado_en_Re_menor", "year": 2018, "tuning": "dropd"},
   "3": {"pdf": "estudio_ambas_manos.pdf", "title": "Estudio para ambas manos", "en": "Estudio para ambas manos", "imslp": "Estudio_para_ambas_manos", "year": 2018, "short": [1, 28, 29]},
   "4": {"pdf": "estudio2_arpegio.pdf", "title": "Estudio No. 2 en Arpegio", "en": "Estudio No. 2 en Arpegio", "imslp": "Estudio_No.2_en_Arpegio", "year": 2018},

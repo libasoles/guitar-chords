@@ -126,8 +126,11 @@ def read_pdf(path):
             lo = (notation[k - 1][-1] + lines[0]) / 2 if k else -1e9
             hi = (lines[-1] + notation[k + 1][0]) / 2 if k + 1 < len(notation) else 1e9
             mid = lambda r: lo <= (r.y0 + r.y1) / 2 <= hi  # noqa: E731
+            # Una barra de compas mide lo que el pentagrama; la vertical de un corchete de posicion («[ IV ---┐») lo cruza
+            # pero sobresale, y partia el compas en dos.
+            exact = lambda r: abs(r.y0 - lines[0]) < 1 and abs(r.y1 - lines[-1]) < 1  # noqa: E731
             system = P.read_system(lines, [g for g in glyph if lo <= g[2] <= hi], [s for s in stems if mid(s)],
-                                   [b for b in clip(bars) if mid(b)], [t for t in clip(thick) if mid(t)],
+                                   [b for b in clip(bars) if mid(b) and exact(b)], [t for t in clip(thick) if mid(t) and exact(t)],
                                    [p for p in beams if lo <= sum(q[1] for q in p) / len(p) <= hi])
             M.mark_ties(system, drawings, lines)
             for marks, key in ((fingers, 'finger'), (plucks, 'pluck')):
