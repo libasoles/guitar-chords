@@ -29,6 +29,7 @@ const SLUGS = {
   'articulo-lecciones-sor': { es: 'articulos/lecciones-progresivas-de-sor', en: 'articles/sor-progressive-lessons', isNew: true },
   'articulo-estudios-sor': { es: 'articulos/estudios-de-sor', en: 'articles/sor-studies', isNew: true },
   'articulo-partituras-barrios': { es: 'articulos/partituras-de-barrios', en: 'articles/barrios-sheet-music', isNew: true },
+  'articulo-estudios-giuliani': { es: 'articulos/estudios-de-giuliani', en: 'articles/giuliani-studies', isNew: true },
 };
 
 function slugFor(key, locale) {
