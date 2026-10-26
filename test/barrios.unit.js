@@ -12,7 +12,7 @@ const path = require('path');
 const catalog = require('../scripts/lib/article-barrios');
 
 /* Compases de cada pieza, contados sobre la edicion de origen (la anacrusa cuenta como compas). */
-const MEASURES = { 1: 29, 2: 44 };
+const MEASURES = { 1: 29, 2: 44, 3: 31 };
 
 /* Cadenas de los archivos de origen: programa y textos por defecto de MuseScore. */
 const SOURCE_TRACES = [/MuseScore/i, /Eingerichtet/i, /Vlotho/i, /\.mscz/i];
