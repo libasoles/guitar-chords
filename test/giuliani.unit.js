@@ -12,7 +12,7 @@ const path = require('path');
 const catalog = require('../scripts/lib/article-giuliani');
 
 /* Compases de cada pieza, contados sobre la edicion de origen (la anacrusa cuenta como compas). */
-const MEASURES = { 1: 19, 2: 14, 3: 35 };
+const MEASURES = { 1: 19, 2: 14, 3: 35, 4: 16 };
 
 /* Cadenas de los archivos de origen: programa y textos por defecto de MuseScore. */
 const SOURCE_TRACES = [/MuseScore/i, /Eingerichtet/i, /Vlotho/i, /\.mscz/i];

@@ -42,6 +42,42 @@ def _tagged_read_system(*args, **kwargs):
 
 
 A.P.read_system = _tagged_read_system
+_configure_rhythm = S.configure_rhythm
+
+
+def configure_rhythm(scale):
+    """Con fusas (escala 6) la semicorchea con puntillo (9 unidades) tambien hace falta: Estudio 15 y siguientes."""
+    _configure_rhythm(scale)
+    if scale == 6:
+        S.T.TYPES[9] = '16th'
+        S.T.DOTTED.add(9)
+
+
+S.configure_rhythm = configure_rhythm
+
+
+def rests_xml(length, voice):
+    """Silencios ocultos que suman `length`: la descomposicion voraz de Sagreras deja 1 unidad suelta en 9 (8 + 1)."""
+    sizes = (96, 48, 24, 16, 12, 8, 6, 4, 3, 2) if S.SCALE == 6 else (48, 24, 12, 8, 6, 4, 3, 2, 1)
+    rest = int(length)
+    greedy = []
+    for size in sizes:
+        while rest >= size:
+            greedy.append(size)
+            rest -= size
+    if not rest:
+        return ''.join(S.T.hidden_rest(size, voice) for size in greedy)
+    best = {0: []}
+    for total in range(1, int(length) + 1):
+        options = [best[total - size] + [size] for size in sizes if total >= size and (total - size) in best]
+        if options:
+            best[total] = min(options, key=len)
+    if int(length) not in best:
+        raise ValueError(f'hueco de {length} unidades sin silencio posible')
+    return ''.join(S.T.hidden_rest(size, voice) for size in best[int(length)])
+
+
+S.rests_xml = rests_xml
 _book = None
 
 
@@ -103,7 +139,12 @@ def run(numbers, write):
         print(f"{n:2d} {status} {spec['title']} {piece['time']} fifths={piece['fifths']} compases={len(measures)} cortos/largos={odd} ligados={count}")
         if write and (not odd or spec.get('force')):
             SOURCES.mkdir(exist_ok=True)
-            (SOURCES / f'{n:02d}.musicxml').write_text(to_xml(n, spec, piece, measures), encoding='utf-8')
+            try:
+                xml = to_xml(n, spec, piece, measures)
+            except (ValueError, KeyError) as error:
+                print(f'{n:2d} ERROR al escribir: {error}')
+                continue
+            (SOURCES / f'{n:02d}.musicxml').write_text(xml, encoding='utf-8')
 
 
 if __name__ == '__main__':
