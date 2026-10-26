@@ -32,7 +32,7 @@ const PIECES = {
   'carcassi-progresivas': { favorite: [1] },
   'carcassi-valses': { favorite: [10] },
   'santisteban-preludios': { favorite: [2, 3, 4] },
-  sagreras: { favorite: [36, 40, 42, 59, 62, 75], insightful: [16, 61], effort: [38, 43], pending: [76, 78, 81, 84] },
+  sagreras: { favorite: [36, 40, 42, 49, 59, 62, 75], insightful: [16, 61], effort: [38, 43], pending: [76, 78, 81, 84] },
   aguado: { pending: Object.keys(require('../aguado/pieces.json')).map(Number) },
   barrios: { pending: Array.from({ length: 18 }, (_, i) => i + 1) },
 };
