@@ -12,7 +12,7 @@
   "11": {"pdf": "minueto_mi.pdf", "title": "Minueto en Mi mayor", "en": "Minueto in E major", "imslp": "Minueto_en_Mi_Mayor", "year": 2019},
   "12": {"pdf": "minueto_la1.pdf", "title": "Minueto en La mayor (No. 1)", "en": "Minueto in A major (No. 1)", "imslp": "Minueto_No.1_in_A_minor", "year": 2018, "key_changes": true},
   "13": {"pdf": "minueto_la2.pdf", "title": "Minueto en La mayor (No. 2)", "en": "Minueto in A major (No. 2)", "imslp": "Minueto_No.2_in_A_major", "year": 2018},
-  "14": {"pdf": "minueto_si.pdf", "title": "Minueto en Si mayor", "en": "Minueto in B major", "imslp": "Minueto_en_Si_Mayor", "year": 2018},
+  "14": {"pdf": "minueto_si.pdf", "title": "Minueto en Si mayor", "en": "Minueto in B major", "imslp": "Minueto_en_Si_Mayor", "year": 2018, "short": [9, 46], "ds": [46]},
   "15": {"pdf": "do_menor.pdf", "title": "Preludio en Do menor", "en": "Preludio in C minor", "imslp": "Prelude_in_C_minor", "year": 2019, "sixteenth_sextuplets": true},
   "16": {"pdf": "preludio_la_menor.pdf", "title": "Preludio en La menor", "en": "Preludio in A minor", "imslp": "Preludio_en_La_menor", "year": 2019},
   "17": {"pdf": "preludio_mi_menor.pdf", "title": "Preludio en Mi menor", "en": "Preludio in E minor", "imslp": "Preludio_en_Mi_menor", "year": 2018, "eighth_triplets": true}

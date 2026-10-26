@@ -52,6 +52,8 @@ S._original_groups = original_groups
 def read_piece(n):
     spec = PIECES[str(n)]
     piece = A.read_pdf(RESOURCES / spec['pdf'])
+    for i in spec.get('ds', ()):  # «D.S. al Fine»: el lector solo conoce D.C. y toma la palabra Fine por un Fine
+        piece['measures'][i - 1].update(fine=False, dc=True)
     for i in spec.get('fine', ()):  # «Fine» que el PDF dibuja como grafico y no como texto
         piece['measures'][i - 1]['fine'] = True
     for key in ('eighth_triplets', 'sixteenth_sextuplets'):
@@ -107,6 +109,8 @@ def odd_measures(piece, measures, short=()):
 def to_xml(n, spec, piece, measures):
     xml = S.to_xml(n, piece, measures)
     xml = xml.replace(f'<work-title>Lesson {n}</work-title>', f'<work-title>{spec["title"]}</work-title>')
+    if spec.get('ds'):
+        xml = xml.replace('D.C. al Fine', 'D.S. al Fine')
     return xml.replace('Julio Salvador Sagreras', AUTHOR)
 
 
