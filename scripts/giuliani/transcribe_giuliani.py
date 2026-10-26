@@ -107,10 +107,13 @@ def read_piece(n):
     for m in measures:
         if not spec.get('key_changes'):
             m['fifths'] = piece['fifths']  # una armadura por estudio: un sostenido junto a una barra se leia como cambio
-        for key in ('eighth_triplets', 'sixteenth_sextuplets'):
+        for key, dur in (('eighth_triplets', 2), ('sixteenth_sextuplets', 1)):
             if spec.get(key):
                 m[key] = True
                 m['tuplets'] = []  # las cifras impresas ya estan contadas
+                for r in m['rests']:  # y los silencios del grupo valen 2/3 como sus notas
+                    if r['dur'] == dur:
+                        r['dur'] = dur * 2 / 3
     for i, x in spec.get('low_rests', ()):  # silencios de la voz grave que el lector asigna a la aguda: [compas, x del silencio]
         for r in measures[i - 1]['rests']:
             if abs(r['x'] - x) < 3:
@@ -166,6 +169,12 @@ def run(numbers, write):
         except Exception as error:  # noqa: BLE001
             print(f'{n:2d} ERROR de lectura: {type(error).__name__}: {error}')
             continue
+        full = piece['time'][0] * 16 // piece['time'][1] * S.SCALE
+        for i, onset, dur in spec.get('durations', ()):  # figuras mal leidas: [compas, inicio, duracion] en unidades del compas
+            for voice in measures[i - 1]['voices']:
+                voice['events'] = [(e[0], dur, *e[2:]) if e[0] == onset else e for e in voice['events']]
+        for i in spec.get('pad', ()):  # compases cuyos silencios finales no se leen: se completan con silencios
+            measures[i - 1]['length'] = full
         odd = B.odd_measures(piece, measures, spec.get('short', ()))
         status = 'OK ' if not odd else 'REVISAR'
         print(f"{n:2d} {status} {spec['title']} {piece['time']} fifths={piece['fifths']} compases={len(measures)} cortos/largos={odd} ligados={count}")
