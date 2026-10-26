@@ -82,8 +82,7 @@ function fullScore(piece, name, href, strings, pieces, locale) {
       '" loading="lazy" decoding="async" alt="' + escapeAttr(name + (all.length > 1 ? ' (' + (i + 1) + '/' + all.length + ')' : '')) + '">';
   });
   return '<div class="modal-pages">' + editorMarks('barrios', piece.number, strings) + pages.join('') + '</div>' +
-    '<div class="modal-footer"><div class="modal-keys">' +
-    scoreNavigation(pieces, piece, 'barrios-score-', pieceName, locale, { mobile: true }) + '</div><a class="modal-download" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' +
+    '<div class="modal-footer">' + scoreNavigation(pieces, piece, 'barrios-score-', pieceName, locale) + '<div class="modal-keys"></div><a class="modal-download" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' +
     DOWNLOAD_ICON + '<span>' + strings.artPreludesDownload + '</span></a></div>';
 }
 
