@@ -285,6 +285,11 @@
   width: 1.1rem;
   height: 1.1rem;
 }
+/* The pending-review mark is larger in the card preview so it stands out. */
+.prelude-card-title .editor-mark-pending svg {
+  width: 1.7rem;
+  height: 1.7rem;
+}
 /* The title button opens the full score; its ::after stretches over the whole card so any click on the preview opens it. */
 .prelude-open {
   padding: 0;

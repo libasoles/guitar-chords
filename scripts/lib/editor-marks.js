@@ -33,6 +33,7 @@ const PIECES = {
   'carcassi-valses': { favorite: [10] },
   'santisteban-preludios': { favorite: [2, 3, 4] },
   sagreras: { favorite: [36, 40, 42, 59, 62, 75], insightful: [16, 61], effort: [38, 43], pending: [76, 78, 81, 84] },
+  barrios: { pending: Array.from({ length: 18 }, (_, i) => i + 1) },
 };
 
 /* Iconos de las marcas de la pieza dentro de un <span class="editor-marks">; vacio si no tiene ninguna. */
@@ -40,7 +41,7 @@ function editorMarks(collection, number, strings) {
   const marks = Object.keys(MARKS).filter((mark) => ((PIECES[collection] || {})[mark] || []).includes(number));
   return marks.length
     ? '<span class="editor-marks">' + marks.map((mark) =>
-      '<span class="editor-mark tooltip" role="img" tabindex="0" aria-label="' + strings[MARKS[mark].labelKey].replace(/"/g, '&quot;') + '" ' +
+      '<span class="editor-mark editor-mark-' + mark + ' tooltip" role="img" tabindex="0" aria-label="' + strings[MARKS[mark].labelKey].replace(/"/g, '&quot;') + '" ' +
       'data-tooltip="' + strings[MARKS[mark].labelKey].replace(/"/g, '&quot;') + '">' + MARKS[mark].icon + '</span>').join('') + '</span>'
     : '';
 }
