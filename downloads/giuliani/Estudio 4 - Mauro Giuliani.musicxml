@@ -1042,7 +1042,7 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
         <notations>
-          <slur number="4" type="stop" />
+          <slur number="5" type="start" />
         </notations>
       </note>
       <note id="tab-note-32">
@@ -1058,7 +1058,7 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <slur number="5" type="start" />
+          <slur number="5" type="stop" />
         </notations>
       </note>
       <note id="tab-note-33">
@@ -1074,7 +1074,7 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <slur number="5" type="stop" />
+          <slur number="6" type="start" />
           <technical>
             <fingering alternate="no" substitution="no">2</fingering>
           </technical>
@@ -1093,7 +1093,7 @@
         <beam number="1">end</beam>
         <beam number="2">end</beam>
         <notations>
-          <slur number="6" type="start" />
+          <slur number="6" type="stop" />
         </notations>
       </note>
       <note id="tab-note-35">
@@ -1109,7 +1109,7 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
         <notations>
-          <slur number="6" type="stop" />
+          <slur number="1" type="start" />
         </notations>
       </note>
       <note id="tab-note-36">
@@ -1125,7 +1125,7 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <slur number="1" type="start" />
+          <slur number="1" type="stop" />
         </notations>
       </note>
       <note id="tab-note-37">
@@ -1154,7 +1154,7 @@
         <beam number="1">end</beam>
         <beam number="2">end</beam>
         <notations>
-          <slur number="1" type="stop" />
+          <slur number="2" type="start" />
         </notations>
       </note>
       <note id="tab-note-39">
@@ -1170,7 +1170,7 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
         <notations>
-          <slur number="2" type="start" />
+          <slur number="2" type="stop" />
         </notations>
       </note>
       <note id="tab-note-40">
@@ -1199,7 +1199,7 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <slur number="2" type="stop" />
+          <slur number="3" type="start" />
         </notations>
       </note>
       <note id="tab-note-42">
@@ -1215,7 +1215,7 @@
         <beam number="1">end</beam>
         <beam number="2">end</beam>
         <notations>
-          <slur number="3" type="start" />
+          <slur number="3" type="stop" />
         </notations>
       </note>
       <note id="tab-note-43">
@@ -1230,9 +1230,6 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
-        <notations>
-          <slur number="3" type="stop" />
-        </notations>
       </note>
       <note id="tab-note-44">
         <pitch>
@@ -1247,7 +1244,7 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <slur number="4" type="start" />
+          <slur number="4" type="stop" />
         </notations>
       </note>
       <note id="tab-note-45">
@@ -1276,7 +1273,7 @@
         <beam number="1">end</beam>
         <beam number="2">end</beam>
         <notations>
-          <slur number="4" type="stop" />
+          <slur number="4" type="start" />
         </notations>
       </note>
       <backup>
@@ -2062,7 +2059,7 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
         <notations>
-          <slur number="3" type="stop" />
+          <slur number="4" type="start" />
         </notations>
       </note>
       <note id="tab-note-64">
@@ -2091,7 +2088,7 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <slur number="4" type="start" />
+          <slur number="4" type="stop" />
         </notations>
       </note>
       <note id="tab-note-66">
@@ -2107,7 +2104,7 @@
         <beam number="1">end</beam>
         <beam number="2">end</beam>
         <notations>
-          <slur number="4" type="stop" />
+          <slur number="5" type="start" />
         </notations>
       </note>
       <note id="tab-note-67">
@@ -2123,7 +2120,7 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
         <notations>
-          <slur number="5" type="start" />
+          <slur number="5" type="stop" />
         </notations>
       </note>
       <note id="tab-note-68">
@@ -2152,7 +2149,7 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <slur number="5" type="stop" />
+          <slur number="6" type="start" />
         </notations>
       </note>
       <note id="tab-note-70">
@@ -2181,7 +2178,7 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
         <notations>
-          <slur number="6" type="start" />
+          <slur number="6" type="stop" />
         </notations>
       </note>
       <note id="tab-note-72">
@@ -2197,7 +2194,7 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <slur number="6" type="stop" />
+          <slur number="1" type="start" />
         </notations>
       </note>
       <note id="tab-note-73">
@@ -2213,7 +2210,7 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <slur number="1" type="start" />
+          <slur number="1" type="stop" />
         </notations>
       </note>
       <note id="tab-note-74">
@@ -2242,7 +2239,7 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
         <notations>
-          <slur number="1" type="stop" />
+          <slur number="2" type="start" />
         </notations>
       </note>
       <note id="tab-note-76">
@@ -2258,7 +2255,7 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <slur number="2" type="start" />
+          <slur number="2" type="stop" />
         </notations>
       </note>
       <note id="tab-note-77">
@@ -2274,7 +2271,7 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <slur number="2" type="stop" />
+          <slur number="3" type="stop" />
         </notations>
       </note>
       <note id="tab-note-78">
@@ -6635,7 +6632,7 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
         <notations>
-          <slur number="5" type="stop" />
+          <slur number="6" type="start" />
         </notations>
       </note>
       <note id="tab-note-204">
@@ -6664,7 +6661,7 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <slur number="6" type="start" />
+          <slur number="6" type="stop" />
         </notations>
       </note>
       <note id="tab-note-206">
@@ -6693,7 +6690,7 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
         <notations>
-          <slur number="6" type="stop" />
+          <slur number="1" type="start" />
         </notations>
       </note>
       <note id="tab-note-208">
@@ -6709,7 +6706,7 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <slur number="1" type="start" />
+          <slur number="1" type="stop" />
         </notations>
       </note>
       <note id="tab-note-209">
@@ -6725,7 +6722,7 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <slur number="1" type="stop" />
+          <slur number="2" type="start" />
         </notations>
       </note>
       <note id="tab-note-210">
@@ -6741,7 +6738,7 @@
         <beam number="1">end</beam>
         <beam number="2">end</beam>
         <notations>
-          <slur number="2" type="start" />
+          <slur number="2" type="stop" />
         </notations>
       </note>
       <note id="tab-note-211">
@@ -6770,7 +6767,7 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <slur number="2" type="stop" />
+          <slur number="3" type="start" />
         </notations>
       </note>
       <note id="tab-note-213">
@@ -6799,7 +6796,7 @@
         <beam number="1">end</beam>
         <beam number="2">end</beam>
         <notations>
-          <slur number="3" type="start" />
+          <slur number="3" type="stop" />
         </notations>
       </note>
       <note id="tab-note-215">
@@ -6815,7 +6812,7 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
         <notations>
-          <slur number="3" type="stop" />
+          <slur number="4" type="start" />
           <technical>
             <fingering alternate="no" substitution="no">2</fingering>
           </technical>
@@ -6834,7 +6831,7 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <slur number="4" type="start" />
+          <slur number="4" type="stop" />
           <technical>
             <fingering alternate="no" substitution="no">4</fingering>
           </technical>
@@ -6871,7 +6868,7 @@
         <beam number="1">end</beam>
         <beam number="2">end</beam>
         <notations>
-          <slur number="4" type="stop" />
+          <slur number="5" type="stop" />
         </notations>
       </note>
       <backup>

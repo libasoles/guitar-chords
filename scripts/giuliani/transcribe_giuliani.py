@@ -9,6 +9,7 @@ cada estudio termina en una barra final, y por ahi se parte la lectura de todo e
 """
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -119,8 +120,39 @@ def read_piece(n):
     return spec, piece
 
 
+def order_slurs(xml):
+    """Verovio enlaza cada <slur> de inicio con el siguiente de fin segun el orden del documento. En un compas con dos voces
+    la voz 2 va despues de un <backup>, asi que un ligado de la voz 2 hacia la 1 (o al reves) puede tener el fin escrito antes
+    que el inicio y la curva se alarga hasta otro compas. Se intercambian los dos extremos: une las mismas notas."""
+    def fix(measure):
+        marks = list(re.finditer(r'<slur type="(start|stop)" number="(\d+)"/>', measure.group(0)))
+        flips, early, depth, renumber = set(), {}, {}, {}
+        for i, mark in enumerate(marks):
+            kind, number = mark.groups()
+            if kind == 'start':
+                if early.get(number):
+                    first = early[number].pop(0)  # empareja con el primer fin sin inicio
+                    flips.update({first, i})
+                    renumber[first] = renumber[i] = 9 + len(renumber) // 2 % 8  # numero propio: varias en fila no se confunden
+                else:
+                    depth[number] = depth.get(number, 0) + 1
+            elif depth.get(number):
+                depth[number] -= 1
+            else:
+                early.setdefault(number, []).append(i)  # fin sin inicio antes en el documento
+        out, last = [], 0
+        for i, mark in enumerate(marks):
+            kind, number = mark.groups()
+            if i in flips:
+                kind = 'start' if kind == 'stop' else 'stop'
+            out.append(measure.group(0)[last:mark.start()] + f'<slur type="{kind}" number="{renumber.get(i, number)}"/>')
+            last = mark.end()
+        return ''.join(out) + measure.group(0)[last:]
+    return re.sub(r'<measure\b.*?</measure>', fix, xml, flags=re.S)
+
+
 def to_xml(n, spec, piece, measures):
-    xml = S.to_xml(n, piece, measures)
+    xml = order_slurs(S.to_xml(n, piece, measures))
     xml = xml.replace(f'<work-title>Lesson {n}</work-title>', f'<work-title>{spec["title"]}</work-title>')
     return xml.replace('Julio Salvador Sagreras', AUTHOR)
 

@@ -2074,6 +2074,9 @@
         <stem>up</stem>
         <staff>1</staff>
         <beam number="1">end</beam>
+        <notations>
+          <slur number="3" type="start" />
+        </notations>
       </note>
       <note id="tab-note-69">
         <pitch>
@@ -2138,6 +2141,9 @@
         <type>half</type>
         <stem>down</stem>
         <staff>1</staff>
+        <notations>
+          <slur number="3" type="stop" />
+        </notations>
       </note>
       <backup>
         <duration>40320</duration>
