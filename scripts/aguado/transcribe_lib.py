@@ -112,38 +112,44 @@ def fill(events, length):
 
 
 def beam_states(events, bounds):
-    """Barras por grupo (`bounds` = limites de pulso): por cada nivel, tramos de notas con ese numero de corchetes;
-    un tramo de una sola nota queda sin barra salvo en los niveles 2 y 3, donde lleva un gancho."""
+    """Barras por grupo (`bounds` = limites de pulso): solo se unen notas contiguas con corchetes; por cada nivel, tramos
+    con ese numero de corchetes; un tramo de una sola nota queda sin barra salvo en los niveles 2 y 3, donde lleva un gancho."""
     flagged = [(e, FLAGS.get(TYPES[e[1]], 0)) for e in sorted(events) if e[2] != "R"]
     beamed = {}
     for start, end in zip(bounds, bounds[1:]):
         group = [(e, f) for e, f in flagged if start <= e[0] < end]
-        # un silencio visible o una nota larga corta el grupo; las notas sin corchete no entran
-        if len(group) < 2:
-            continue
-        for level in (1, 2, 3):
-            i = 0
-            while i < len(group):
-                if group[i][1] < level:
-                    i += 1
-                    continue
-                j = i
-                while j + 1 < len(group) and group[j + 1][1] >= level:
-                    j += 1
-                run = group[i:j + 1]
-                for k, (e, _) in enumerate(run):
-                    if len(run) > 1:
-                        state = "begin" if k == 0 else "end" if k == len(run) - 1 else "continue"
-                    elif level == 1:
+        # un hueco entre dos notas (silencio o nota larga) corta el grupo en tramos contiguos
+        segments, current = [], []
+        for item in group:
+            if current and current[-1][0][0] + current[-1][0][1] != item[0][0]:
+                segments.append(current)
+                current = []
+            current.append(item)
+        segments.append(current)
+        for segment in (seg for seg in segments if len(seg) > 1 and all(f for _, f in seg)):
+            for level in (1, 2, 3):
+                i = 0
+                while i < len(segment):
+                    if segment[i][1] < level:
+                        i += 1
                         continue
-                    else:
-                        state = "forward hook" if i == 0 else "backward hook"
-                    beamed.setdefault(e[0], {})[level] = state
-                i = j + 1
+                    j = i
+                    while j + 1 < len(segment) and segment[j + 1][1] >= level:
+                        j += 1
+                    run = segment[i:j + 1]
+                    for k, (e, _) in enumerate(run):
+                        if len(run) > 1:
+                            state = "begin" if k == 0 else "end" if k == len(run) - 1 else "continue"
+                        elif level == 1:
+                            continue
+                        else:
+                            state = "forward hook" if i == 0 else "backward hook"
+                        beamed.setdefault(e[0], {})[level] = state
+                    i = j + 1
     return beamed
 
 
-def measure_xml(number, fifths, time, voices, first=False, bounds=None, repeat=None, words=None):
+def measure_xml(number, fifths, time, voices, first=False, bounds=None, repeat=None, words=None, bar=None):
     beats, beat_type = time
     length = beats * 32 // beat_type
     acc = Accidentals(fifths)
@@ -158,7 +164,8 @@ def measure_xml(number, fifths, time, voices, first=False, bounds=None, repeat=N
     left = ('<barline location="left"><bar-style>heavy-light</bar-style><repeat direction="forward"/></barline>'
             if repeat in ("forward", "both") else "")
     right = ('<barline location="right"><bar-style>light-heavy</bar-style><repeat direction="backward"/></barline>'
-             if repeat in ("backward", "both") else "")
+             if repeat in ("backward", "both") else
+             '<barline location="right"><bar-style>light-heavy</bar-style></barline>' if bar == "double" else "")
     direction = (f'<direction placement="above"><direction-type><words font-weight="bold">{escape(words)}</words></direction-type></direction>'
                  if words else "")
     rendered = {}
@@ -176,7 +183,7 @@ def measure_xml(number, fifths, time, voices, first=False, bounds=None, repeat=N
 
 
 def measure(voices=None, up=None, down=None, **options):
-    """Compas: `up`/`down` son atajos de las voces 1 y 2; `options`: repeat, words, bounds."""
+    """Compas: `up`/`down` son atajos de las voces 1 y 2; `options`: repeat, words, bounds, bar ("double": doble barra fina-gruesa)."""
     voices = dict(voices or {})
     if up is not None:
         voices[1] = up
@@ -187,7 +194,7 @@ def measure(voices=None, up=None, down=None, **options):
 
 def write(number, title, fifths, time, measures, composer="Dionisio Aguado"):
     body = "".join(measure_xml(i + 1, fifths, time, m["voices"], first=i == 0, bounds=m.get("bounds"),
-                               repeat=m.get("repeat"), words=m.get("words")) for i, m in enumerate(measures))
+                               repeat=m.get("repeat"), words=m.get("words"), bar=m.get("bar")) for i, m in enumerate(measures))
     xml = ('<?xml version="1.0" encoding="UTF-8"?>'
            f'<score-partwise version="3.1"><work><work-title>{escape(title)}</work-title></work>'
            f'<identification><creator type="composer">{escape(composer)}</creator></identification>'
