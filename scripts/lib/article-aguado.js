@@ -10,6 +10,7 @@ const { modal, CLOSE_ICON } = require('./modal');
 const { pagePath } = require('./slugs');
 const { scoreNavigation } = require('./score-navigation');
 const { escapeAttr, inlineScore, glyphDefs, DOWNLOAD_ICON } = require('./score-svg');
+const { editorMarks } = require('./editor-marks');
 
 const ROOT = path.join(__dirname, '..', '..');
 const FOLDER = 'aguado';
@@ -69,7 +70,7 @@ function card(piece, locale, strings, sharedGlyphs, pieces) {
   /* El titulo es el boton que abre la partitura completa en un modal; su ::after cubre toda la tarjeta.
      El enlace de descarga del pie queda por encima. */
   return '<article class="example-card prelude-card">' +
-    '<h2 class="prelude-card-title"><button type="button" class="prelude-open" popovertarget="' + id + '" aria-haspopup="dialog" ' +
+    '<h2 class="prelude-card-title">' + editorMarks('aguado', piece.number, strings) + '<button type="button" class="prelude-open" popovertarget="' + id + '" aria-haspopup="dialog" ' +
       'aria-label="' + escapeAttr(strings.artPreludesView + ' ' + name) + '">' + name + '</button>' +
       '<a class="prelude-pdf-link" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' + name + '</a></h2>' +
     inlineScore(svg, strings.artPreludesAltPrefix + ' ' + name, sharedGlyphs) +
@@ -95,7 +96,7 @@ function fullScore(piece, name, href, strings, pieces, locale) {
     return '<img class="modal-page" src="' + ASSETS_URL + 'full/' + file + '" width="' + width + '" height="' + height +
       '" loading="lazy" decoding="async" alt="' + escapeAttr(name + (all.length > 1 ? ' (' + (i + 1) + '/' + all.length + ')' : '')) + '">';
   });
-  return '<div class="modal-pages">' + pages.join('') + '</div>' +
+  return '<div class="modal-pages">' + editorMarks('aguado', piece.number, strings) + pages.join('') + '</div>' +
     '<div class="modal-footer">' + scoreNavigation(pieces, piece, 'aguado-score-', pieceName, locale) + '<div class="modal-keys"></div><a class="modal-download" href="' + href + '" download="' + escapeAttr(piece.pdf) + '">' +
     DOWNLOAD_ICON + '<span>' + strings.artPreludesDownload + '</span></a></div>';
 }
