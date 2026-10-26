@@ -14,6 +14,7 @@ const sagreras = require('../scripts/lib/article-sagreras');
 const sor = require('../scripts/lib/article-sor');
 const sorEstudios = require('../scripts/lib/article-sor-estudios');
 const barrios = require('../scripts/lib/article-barrios');
+const giuliani = require('../scripts/lib/article-giuliani');
 
 const { GROUPS: ARPEGGIOS } = require('../scripts/lib/article-arpeggios');
 const arpeggioGroup = (root, quality) => ARPEGGIOS.find((group) => group[1] === root && group[2] === quality);
@@ -44,7 +45,7 @@ const PDFS = [
 
       // Index: one card per article, linking to it.
       await page.goto(base + index);
-      assert.equal(await page.locator('.article-card').count(), 11);
+      assert.equal(await page.locator('.article-card').count(), 12);
       assert.equal(await page.locator('.article-card').first().getAttribute('href'), article);
       assert.equal(await page.locator('.article-card').nth(1).getAttribute('href'), pagePath('articulo-preludios-carcassi', locale));
       assert.match(await page.locator('.article-card p').first().textContent(), /Carcassi/);
@@ -651,6 +652,37 @@ const PDFS = [
       }
     }
 
+    // Giuliani's sheet music: one card per published piece, in catalog order, with a score modal and a PDF download.
+    {
+      const published = giuliani.publishedPieces();
+      for (const locale of ['es', 'en']) {
+        const url = pagePath('articulo-estudios-giuliani', locale);
+        await page.setViewportSize({ width: 1280, height: 800 });
+        await page.goto(base + url);
+        const cards = page.locator('.prelude-card');
+        assert.equal(await cards.count(), published.length);
+        const hrefs = await page.locator('.prelude-card > .example-download').evaluateAll((els) => els.map((el) => decodeURIComponent(el.getAttribute('href'))));
+        assert.deepEqual(hrefs.map((href) => href.split('/').pop()), published.map((p) => p.pdf));
+        const titles = await cards.locator('.prelude-open').allTextContents();
+        assert.deepEqual(titles, published.map((p) => giuliani.pieceName(p, locale)));
+        assert.equal(await cards.locator('svg.score-svg').count(), published.length);
+        assert.equal(await page.locator('.article-back a[href="' + pagePath('articulos', locale) + '"]').count(), 1);
+        await cards.first().click();
+        const modal = page.locator('.modal-full:popover-open');
+        assert.equal(await modal.count(), 1);
+        const first = modal.locator('img.modal-page').first();
+        await first.evaluate((img) => img.decode());
+        assert.ok(await first.evaluate((img) => img.naturalWidth > 0));
+        assert.match(await first.getAttribute('src'), /\/full\/giuliani-01-p1(?:\.[a-f0-9]+)?\.svg$/);
+        assert.equal(decodeURIComponent(await modal.locator('.modal-footer .modal-download').getAttribute('href')).split('/').pop(), published[0].pdf);
+        await modal.locator('.modal-close').click();
+        assert.equal(await page.locator('.modal-full:popover-open').count(), 0);
+        await page.setViewportSize({ width: 375, height: 800 });
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+        assert.ok(overflow <= 0, 'scroll horizontal de ' + overflow + 'px en ' + url);
+      }
+    }
+
     // Sor's studies: one card per published piece, in catalog order, with a score modal and a PDF download.
     {
       const published = sorEstudios.publishedPieces();
@@ -734,7 +766,7 @@ const PDFS = [
     // All author collections share lateral desktop navigation, including sparse publication lists.
     for (const slug of ['articulo-preludios-carcassi', 'articulo-preludios-santisteban',
       'articulo-valses-carcassi', 'articulo-piezas-progresivas-carcassi',
-      'articulo-partituras-aguado', 'articulo-lecciones-sagreras', 'articulo-lecciones-sor', 'articulo-estudios-sor', 'articulo-partituras-barrios']) {
+      'articulo-partituras-aguado', 'articulo-lecciones-sagreras', 'articulo-lecciones-sor', 'articulo-estudios-sor', 'articulo-partituras-barrios', 'articulo-estudios-giuliani']) {
       for (const locale of ['es', 'en']) {
         await page.setViewportSize({ width: 1280, height: 800 });
         await page.goto(base + pagePath(slug, locale));

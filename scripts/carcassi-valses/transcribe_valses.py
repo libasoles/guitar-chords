@@ -54,7 +54,8 @@ def convert_measure(m, fifths, full, scale=1, rest_voices=False):
         shorter = [h for h in g['shared'] if any(o is not g and o['dur'] > g['dur'] and any(h is x for x in o['heads']) for o in groups)]
         kept = [h for h in reversed(g['heads']) if not any(h is x for x in shorter)]  # de grave a agudo
         pitch = '+'.join(names[id(h)] for h in kept)
-        ties = {names[id(h)]: (bool(h.get('tie_prev')), bool(h.get('tie_next'))) for h in kept if h.get('tie_prev') or h.get('tie_next')}
+        ties = {names[id(h)]: (bool(h.get('tie_prev')), bool(h.get('tie_next'))) + ((h.get('slur_stop', ()), h.get('slur_start', ())) if h.get('slur_stop') or h.get('slur_start') else ())
+                for h in kept if h.get('tie_prev') or h.get('tie_next') or h.get('slur_stop') or h.get('slur_start')}
         items.append({'x': g['x'], 'dur': round(g['dur'] * scale), 'pitch': pitch, 'dir': g['dir'] if len(directions) == 2 else 'up',
                       'grace': g['grace'], 'grace_type': g['grace_type'], 'beams': g['beams'], 'ties': ties,
                       'fingers': {names[id(h)]: '|'.join(x for x in (h.get('finger'), h.get('pluck')) if x) for h in kept if h.get('finger') or h.get('pluck')}})
@@ -191,9 +192,12 @@ def add_ties(xml, ties):
             alter = int(re.search(r'<alter>(-?\d)</alter>', note).group(1)) if '<alter>' in note else 0
             name = f"{step.group(1)}{'#' if alter == 1 else 'b' if alter == -1 else ''}{re.search(r'<octave>(\d)</octave>', note).group(1)}"
             if name in ties:
-                stop, start = ties[name]
+                stop, start = ties[name][:2]
                 marks = ('<tie type="stop"/>' if stop else '') + ('<tie type="start"/>' if start else '')
                 tied = ('<tied type="stop"/>' if stop else '') + ('<tied type="start"/>' if start else '')
+                # Ligaduras de expresion (ligados): numeros de las que terminan y de las que empiezan en esta nota.
+                slurs = ties[name][2:] or ((), ())
+                tied += ''.join(f'<slur type="stop" number="{n}"/>' for n in slurs[0]) + ''.join(f'<slur type="start" number="{n}"/>' for n in slurs[1])
                 note = note.replace('</duration>', '</duration>' + marks, 1)
                 note = (note.replace('<notations>', '<notations>' + tied, 1) if '<notations>' in note
                         else note.replace('</note>', f'<notations>{tied}</notations></note>'))
