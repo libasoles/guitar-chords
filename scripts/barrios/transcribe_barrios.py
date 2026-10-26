@@ -51,7 +51,7 @@ S._original_groups = original_groups
 
 def read_piece(n):
     spec = PIECES[str(n)]
-    piece = A.read_pdf(RESOURCES / spec['pdf'])
+    piece = A.read_pdf(RESOURCES / spec['pdf'], spec.get('staves', 1), spec.get('part', 0))
     for i in spec.get('ds', ()):  # «D.S. al Fine»: el lector solo conoce D.C. y toma la palabra Fine por un Fine
         piece['measures'][i - 1].update(fine=False, dc=True)
     for i in spec.get('fine', ()):  # «Fine» que el PDF dibuja como grafico y no como texto

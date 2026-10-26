@@ -5,7 +5,7 @@
   "4": {"pdf": "estudio2_arpegio.pdf", "title": "Estudio No. 2 en Arpegio", "en": "Estudio No. 2 en Arpegio", "imslp": "Estudio_No.2_en_Arpegio", "year": 2018},
   "5": {"pdf": "estudio3.pdf", "title": "Estudio No. 3", "en": "Estudio No. 3", "imslp": "Estudio_No.3", "year": 2018},
   "6": {"pdf": "estudio4_arabescos.pdf", "title": "Estudio No. 4 (Arabescos)", "en": "Estudio No. 4 (Arabescos)", "imslp": "Estudio_No.4", "year": 2018, "tuning": "dropd", "key_changes": true, "fine": [8]},
-  "7": {"pdf": "estudio_si_menor.pdf", "title": "Estudio en Si menor", "en": "Estudio in B minor", "imslp": "Estudio_en_Si_menor", "year": 2017},
+  "7": {"pdf": "estudio_si_menor.pdf", "title": "Estudio en Si menor (guitarra 1)", "en": "Estudio in B minor (guitar 1)", "imslp": "Estudio_en_Si_menor", "year": 2017, "staves": 2, "part": 0},
   "8": {"pdf": "estudio_sol_menor.pdf", "title": "Estudio en Sol menor", "en": "Estudio in G minor", "imslp": "Estudio_en_Sol_menor", "year": 2018, "tuning": "dropd"},
   "9": {"pdf": "estudio_inconcluso.pdf", "title": "Estudio inconcluso", "en": "Estudio inconcluso", "imslp": "Estudio_inconcluso", "year": 2018, "short": [5]},
   "10": {"pdf": "minueto_do.pdf", "title": "Minueto en Do mayor", "en": "Minueto in C major", "imslp": "Minuet_in_C_major", "year": 2018, "short": [1, 19, 20, 44]},
@@ -15,5 +15,6 @@
   "14": {"pdf": "minueto_si.pdf", "title": "Minueto en Si mayor", "en": "Minueto in B major", "imslp": "Minueto_en_Si_Mayor", "year": 2018, "short": [9, 46], "ds": [46]},
   "15": {"pdf": "do_menor.pdf", "title": "Preludio en Do menor", "en": "Preludio in C minor", "imslp": "Prelude_in_C_minor", "year": 2019, "sixteenth_sextuplets": true},
   "16": {"pdf": "preludio_la_menor.pdf", "title": "Preludio en La menor", "en": "Preludio in A minor", "imslp": "Preludio_en_La_menor", "year": 2019},
+  "18": {"pdf": "estudio_si_menor.pdf", "title": "Estudio en Si menor (guitarra 2)", "en": "Estudio in B minor (guitar 2)", "imslp": "Estudio_en_Si_menor", "year": 2017, "staves": 2, "part": 1},
   "17": {"pdf": "preludio_mi_menor.pdf", "title": "Preludio en Mi menor", "en": "Preludio in E minor", "imslp": "Preludio_en_Mi_menor", "year": 2018, "eighth_triplets": true}
 }

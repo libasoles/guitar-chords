@@ -98,7 +98,7 @@ def digit_marks(page, drawings):
     return fingers, strings
 
 
-def read_pdf(path):
+def read_pdf(path, staves=1, part=0):
     """-> {'fifths', 'time', 'measures'} de la pieza del PDF (todas las paginas)."""
     doc = pymupdf.open(str(path))
     piece = {'fifths': None, 'time': None, 'measures': []}
@@ -120,6 +120,8 @@ def read_pdf(path):
         fingers, strings = digit_marks(page, drawings)
         plucks = M.finger_marks(page, 'pima')
         for k, lines in enumerate(notation):
+            if k % staves != part:
+                continue  # piezas para dos guitarras: cada sistema lleva un pentagrama por guitarra
             space = (lines[-1] - lines[0]) / 4
             clip = lambda rs: [pymupdf.Rect(r.x0, r.y0, r.x1, lines[-1]) if abs(r.y0 - lines[0]) < 0.6 and r.y1 > lines[-1] + 3 * space else r for r in rs]  # noqa: E731
             # Los sistemas estan mas juntos que en Sagreras: cada uno solo ve lo que cae hasta el punto medio con sus vecinos.
