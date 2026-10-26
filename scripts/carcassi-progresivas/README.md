@@ -23,7 +23,10 @@ descripción: un PDF con TAB y su archivo MuseScore (`.mscz`). Se usa el MuseSco
    `src/site/articles/carcassi-progresivas/` la vista previa (`progressive-NN.svg`) y las páginas del modal
    (`full/`). Reutiliza el grabado de los preludios (`scripts/carcassi-preludios/extract.py`).
 
-La TAB es la digitación sugerida por el motor (afinación estándar). No se publican los PDF del canal, ni los
+La TAB es la digitación sugerida por el motor (afinación estándar). Las piezas listadas en `ARPEGGIO` de `build.py`
+(hoy la 18) pasan además por las reglas de arpegio del motor (`backend/engine/fingering.py`): dos notas distintas
+seguidas no comparten cuerda, así que un arpegio que repite una forma de acorde (p. ej. la 18, c. 4: cejilla en el
+traste 2 y 4 en las cuerdas 3 y 2, `244x2x`) se toca en posición y no con el si al aire. No se publican los PDF del canal, ni los
 números de dedos del libro, ni las letras de la mano derecha. Las notas de adorno se escriben pero el motor no
 les asigna cuerda (no aparecen en la TAB).
 

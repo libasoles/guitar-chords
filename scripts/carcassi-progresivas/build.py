@@ -34,7 +34,7 @@ PER_ROW = {}
 PDF_OVERRIDES = {}
 # Piezas a las que se aplican las reglas de arpegio del motor (backend/engine/fingering.py): el motor detecta los
 # compases de arpegio de cada una, y los demas quedan como los digita el Viterbi. Vacio: ninguna.
-ARPEGGIO = set()
+ARPEGGIO = {18}
 # Pagina virtual mas grande con escala menor (el PDF sigue midiendo lo mismo, como en los preludios
 # largos): el grabado se achica y caben mas compases por sistema y mas sistemas por pagina. Se prueba de menos a mas
 # reduccion y se queda con el primer nivel que ocupa menos paginas.
