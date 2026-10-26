@@ -77,7 +77,9 @@ def note_xml(event, voice, stem, acc, beams=None):
     accidental = acc.xml(step, alter, octave)
     accidental = f"<accidental>{accidental}</accidental>" if accidental else ""
     beam = "".join(f'<beam number="{n}">{state}</beam>' for n, state in (beams or {}).items())
-    technical = "".join(f"<fingering>{f}</fingering>" for f in (finger or "").split("|") if f) + ("<harmonic/>" if harmonic else "")
+    # «@cuerda/traste»: casilla fija de la TAB impresa (<string> y <fret>, que el motor respeta); lo demas son dedos
+    technical = "".join(f"<string>{f[1:].split('/')[0]}</string><fret>{f[1:].split('/')[1]}</fret>" if f.startswith("@") else f"<fingering>{f}</fingering>"
+                        for f in (finger or "").split("|") if f) + ("<harmonic/>" if harmonic else "")
     notations = f"<notations><technical>{technical}</technical></notations>" if technical else ""
     head = "<notehead>diamond</notehead>" if harmonic else ""
     return (f"<note>{pitch_xml(step, alter, octave)}<duration>{dur}</duration><voice>{voice}</voice>{kind}"

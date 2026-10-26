@@ -328,13 +328,15 @@ def rests_xml(length, voice):
     return out
 
 
+TUPLET_SIZE = 3  # notas por grupo: 3 (tresillo, 3:2) o 6 (sextillo de semicorcheas, 6:4)
 MODIFICATION = '<time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification>'
+SEXTUPLET = '<time-modification><actual-notes>6</actual-notes><normal-notes>4</normal-notes></time-modification>'
 
 
 def tuplet_marks(xml, role):
     """Tresillo: <time-modification> en toda nota o silencio del grupo y <tuplet> en la primera y la ultima."""
     marks = '<stem>' if '<stem>' in xml else '</note>'
-    xml = xml.replace(marks, MODIFICATION + marks, 1)
+    xml = xml.replace(marks, (SEXTUPLET if TUPLET_SIZE == 6 else MODIFICATION) + marks, 1)
     if not role:
         return xml
     tag = f'<tuplet type="{role}" placement="above"/>'  # debajo chocaria con la redonda del bajo
@@ -382,13 +384,13 @@ def measure_xml(number, time, data, first, implicit, key_change, prev_fifths):
         slots = {}
         for event in events:
             if event[1] in TRIPLET:
-                slots.setdefault(event[0] // (event[1] * 3), []).append(event[0])
+                slots.setdefault(event[0] // (event[1] * TUPLET_SIZE), []).append(event[0])
         for event in events:
             if event[0] > cursor:
                 body += rests_xml(event[0] - cursor, v + 1)
             xml = rendered[(v, event[0])]
             if event[1] in TRIPLET:
-                group = slots[event[0] // (event[1] * 3)]
+                group = slots[event[0] // (event[1] * TUPLET_SIZE)]
                 role = 'start' if event[0] == group[0] else 'stop' if event[0] == group[-1] else None
                 xml = tuplet_marks(xml, role)
             body += xml
