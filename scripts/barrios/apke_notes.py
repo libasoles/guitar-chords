@@ -129,7 +129,6 @@ def read_pdf(path):
             system = P.read_system(lines, [g for g in glyph if lo <= g[2] <= hi], [s for s in stems if mid(s)],
                                    [b for b in clip(bars) if mid(b)], [t for t in clip(thick) if mid(t)],
                                    [p for p in beams if lo <= sum(q[1] for q in p) / len(p) <= hi])
-            fix_barlines(system, [t for t in clip(thick) if mid(t)], [g for g in glyph if lo <= g[2] <= hi and g[0] == 0xE044])
             M.mark_ties(system, drawings, lines)
             for marks, key in ((fingers, 'finger'), (plucks, 'pluck')):
                 lost = M.attach_fingers(system, marks, lines, key)
@@ -146,6 +145,7 @@ def read_pdf(path):
             if system['time'] and not piece['time']:
                 piece['time'] = system['time']
             inherited = piece['measures'][-1]['fifths'] if piece['measures'] else piece['fifths']
-            M.assign_measure_keys(system, glyph, inherited)
+            M.assign_measure_keys(system, glyph, inherited)  # usa las barras dobles: normalizarlas despues
+            fix_barlines(system, [t for t in clip(thick) if mid(t)], [g for g in glyph if lo <= g[2] <= hi and g[0] == 0xE044])
             piece['measures'].extend(system['measures'])
     return piece

@@ -4,7 +4,7 @@
   "3": {"pdf": "estudio_ambas_manos.pdf", "title": "Estudio para ambas manos", "en": "Estudio para ambas manos", "imslp": "Estudio_para_ambas_manos", "year": 2018, "short": [1, 28, 29]},
   "4": {"pdf": "estudio2_arpegio.pdf", "title": "Estudio No. 2 en Arpegio", "en": "Estudio No. 2 en Arpegio", "imslp": "Estudio_No.2_en_Arpegio", "year": 2018},
   "5": {"pdf": "estudio3.pdf", "title": "Estudio No. 3", "en": "Estudio No. 3", "imslp": "Estudio_No.3", "year": 2018},
-  "6": {"pdf": "estudio4_arabescos.pdf", "title": "Estudio No. 4 (Arabescos)", "en": "Estudio No. 4 (Arabescos)", "imslp": "Estudio_No.4", "year": 2018},
+  "6": {"pdf": "estudio4_arabescos.pdf", "title": "Estudio No. 4 (Arabescos)", "en": "Estudio No. 4 (Arabescos)", "imslp": "Estudio_No.4", "year": 2018, "tuning": "dropd", "key_changes": true, "fine": [8]},
   "7": {"pdf": "estudio_si_menor.pdf", "title": "Estudio en Si menor", "en": "Estudio in B minor", "imslp": "Estudio_en_Si_menor", "year": 2017},
   "8": {"pdf": "estudio_sol_menor.pdf", "title": "Estudio en Sol menor", "en": "Estudio in G minor", "imslp": "Estudio_en_Sol_menor", "year": 2018},
   "9": {"pdf": "estudio_inconcluso.pdf", "title": "Estudio inconcluso", "en": "Estudio inconcluso", "imslp": "Estudio_inconcluso", "year": 2018},

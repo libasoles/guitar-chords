@@ -49,6 +49,8 @@ A.P.stem_groups = stem_groups
 def read_piece(n):
     spec = PIECES[str(n)]
     piece = A.read_pdf(RESOURCES / spec['pdf'])
+    for i in spec.get('fine', ()):  # «Fine» que el PDF dibuja como grafico y no como texto
+        piece['measures'][i - 1]['fine'] = True
     if spec.get('eighth_triplets'):
         for m in piece['measures']:
             m['eighth_triplets'] = True
