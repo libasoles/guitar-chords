@@ -10,7 +10,10 @@ Rules (arpeggio measures only; a melody by steps or a scale puts notes on one st
 3. Economy of fingers: within a measure a pitch keeps one cell, so the finger that fretted it can stay or
    return to it instead of the hand re-learning a second shape (Carcassi: the fingers of an arpeggio chord
    "must remain unmoved"; Aguado: the finger stays while its note lasts).
-4. A measure that mixes open strings with notes from fret `open_reach` to 11 is fingered as a full chord
+4. A beamed group of three notes (an eighth in triplets, a 6/8 beat) is plucked p-i-m across three strings: each
+   note of the group gets its own string, so a pitch that repeats inside the group (C4 E4 E4) is played on two
+   strings rather than twice on one.
+5. A measure that mixes open strings with notes from fret `open_reach` to 11 is fingered as a full chord
    shape in position, like a barre, with no open strings (fret 12 is a harmonic).
 Secondary costs, hand-tuned on Carcassi's 16 preludes: leaving the engine's choice (0.5 per changed note),
 high frets (0.4 per fret over the 4th) and hand movement (0.6 per fret, the hand keeps its position over open
@@ -25,6 +28,8 @@ REPEAT_MOVED = 3.0      # a repeated note changes string
 KEEP_ENGINE = 0.5       # per changed note
 HIGH_FRET = 0.4         # per fret over the 4th
 HAND_MOVE = 0.6         # per fret of hand movement
+GROUP_SHARED = 5.0      # two notes of one beamed group of three on one string, even the same pitch
+MAX_GROUP = 3           # larger groups (a run of six) cannot give each note a string of its own
 
 # Detection: a measure is an arpeggio when its notes are sung one at a time, jump, recur and keep a steady pulse.
 MIN_SINGLES = 4         # single-note columns needed
@@ -67,9 +72,10 @@ def _single(option):
     return option[0] if len(option) == 1 else None
 
 
-def solve(layers, opens):
+def solve(layers, opens, groups=None):
     """Viterbi over layers `[(options, original)]`: the cheapest option per layer. Costs: leaving the engine's
-    choice, high frets, hand movement, and the string rules 1 and 2 between consecutive single notes."""
+    choice, high frets, hand movement, and the string rules 1 and 2 between consecutive single notes. `groups`: per
+    layer, the id of the beamed group of three it belongs to or None (rule 4)."""
     def own(option, original):
         h = hand(option)
         return (0 if option == original else KEEP_ENGINE) + (HIGH_FRET * max(0, h - 4) if h else 0)
@@ -89,8 +95,11 @@ def solve(layers, opens):
                     c += HAND_MOVE * abs(h - ph)
                 now, was = _single(option), _single(prev)
                 if now and was:
+                    together = groups is not None and groups[i] is not None and groups[i] == groups[i - 1]
                     same_pitch = opens[now[0]] + now[1] == opens[was[0]] + was[1]
-                    if same_pitch and now[0] != was[0]:
+                    if together and same_pitch and now[0] == was[0]:
+                        c += GROUP_SHARED
+                    elif same_pitch and now[0] != was[0] and not together:
                         c += REPEAT_MOVED
                     elif not same_pitch and now[0] == was[0]:
                         c += SAME_STRING
@@ -110,26 +119,36 @@ def solve(layers, opens):
     return chosen
 
 
-def violations(chosen, opens):
-    """Consecutive different single notes on one string (rule 1) in a chosen sequence."""
+def violations(chosen, opens, groups=None):
+    """Consecutive different single notes on one string (rule 1), and consecutive notes of one group on one string
+    (rule 4), in a chosen sequence."""
     count = 0
-    for a, b in zip(chosen, chosen[1:]):
+    for i, (a, b) in enumerate(zip(chosen, chosen[1:]), 1):
         x, y = _single(a), _single(b)
-        if x and y and x[0] == y[0] and opens[x[0]] + x[1] != opens[y[0]] + y[1]:
-            count += 1
+        if x and y and x[0] == y[0]:
+            together = groups is not None and groups[i] is not None and groups[i] == groups[i - 1]
+            if together or opens[x[0]] + x[1] != opens[y[0]] + y[1]:
+                count += 1
     return count
 
 
-def _one_cell_per_pitch(layers, owner, chosen, opens, active):
-    """Rule 3: restrict each pitch of an active measure to the cell most of its notes were given."""
+def _one_cell_per_pitch(layers, owner, chosen, opens, active, groups=None):
+    """Rule 3: restrict each pitch of an active measure to the cell most of its notes were given. A pitch that
+    repeats inside a group is left free: rule 4 wants it on two strings."""
+    in_group = collections.Counter(
+        (g, opens[original[0][0]] + original[0][1]) for g, (_, original) in zip(groups or [None] * len(layers), layers)
+        if g is not None and len(original) == 1)
     votes = collections.defaultdict(collections.Counter)
     for m, option in zip(owner, chosen):
         if m in active and len(option) == 1:
             votes[m][option[0]] += 1
     restricted = []
-    for m, (options, original) in zip(owner, layers):
+    for m, g, (options, original) in zip(owner, groups or [None] * len(layers), layers):
         if m in active and len(original) == 1:
             pitch = opens[original[0][0]] + original[0][1]
+            if g is not None and in_group[(g, pitch)] > 1:
+                restricted.append((options, original))
+                continue
             winners = [cell for cell, _ in votes[m].most_common() if opens[cell[0]] + cell[1] == pitch]
             kept = [o for o in options if len(o) == 1 and winners and o[0] == winners[0]]
             options = kept or options
@@ -137,12 +156,13 @@ def _one_cell_per_pitch(layers, owner, chosen, opens, active):
     return restricted
 
 
-def avoid_repeated_strings(tabs, opens, max_fret=9, open_reach=6, measures=None, economy=False, barres=None):
+def avoid_repeated_strings(tabs, opens, max_fret=9, open_reach=6, measures=None, economy=False, barres=None, groups=None):
     """Apply the module's rules to `tabs` (one list of columns per measure, cells string 1 first) in place.
     `opens`: open-string MIDI, string 1 first. `measures`: indexes of the measures to treat as arpeggios
     (default all). `economy` adds rule 3 (off for the published collections, which predate it). Single-note columns of those measures are re-chosen over the whole piece (see `solve`);
     chords and the other measures keep their cells. `barres`: per measure, per column, the barre `(fret, strings)` in
-    force or None; a single note keeps to the cells the barre allows."""
+    force or None; a single note keeps to the cells the barre allows. `groups`: per measure, per column, the id of the beamed group
+    the column belongs to or None (rule 4; only groups of up to `MAX_GROUP` columns count)."""
     active = set(range(len(tabs))) if measures is None else set(measures)
     flat = [col for measure in tabs for col in measure]
     owner = [m for m, measure in enumerate(tabs) for _ in measure]
@@ -158,8 +178,14 @@ def avoid_repeated_strings(tabs, opens, max_fret=9, open_reach=6, measures=None,
         layers.append(([(cell,) for cell in allowed] or [cells], cells))
     if not flat:
         return tabs
+    flat_groups = None
+    if groups is not None:
+        ids = [(m, g) if g is not None and m in active else None
+               for m, measure in enumerate(groups) for g in measure]
+        size = collections.Counter(i for i in ids if i is not None)
+        flat_groups = [i if i is not None and size[i] <= MAX_GROUP else None for i in ids]
 
-    chosen = solve(layers, opens)
+    chosen = solve(layers, opens, flat_groups)
     frets = {}
     for m, option in zip(owner, chosen):
         frets.setdefault(m, []).extend(f for _, f in option)
@@ -167,11 +193,11 @@ def avoid_repeated_strings(tabs, opens, max_fret=9, open_reach=6, measures=None,
     if stretched:
         layers = [([o for o in options if m not in stretched or len(o) != 1 or o[0][1] > 0] or options, original)
                   for m, (options, original) in zip(owner, layers)]
-        chosen = solve(layers, opens)
+        chosen = solve(layers, opens, flat_groups)
     # Economy of fingers: one cell per pitch in a measure, kept only when it does not break rule 1.
     if economy:
-        tidy = solve(_one_cell_per_pitch(layers, owner, chosen, opens, active), opens)
-        if violations(tidy, opens) <= violations(chosen, opens):
+        tidy = solve(_one_cell_per_pitch(layers, owner, chosen, opens, active, flat_groups), opens, flat_groups)
+        if violations(tidy, opens, flat_groups) <= violations(chosen, opens, flat_groups):
             chosen = tidy
     for col, option in zip(flat, chosen):
         for s in range(len(col)):

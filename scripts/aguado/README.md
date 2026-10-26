@@ -46,3 +46,6 @@ RESOURCES_DIR=/ruta/al/checkout/resources .venv-carcassi/bin/python scripts/agua
   publica (1, 3, 4, 6, 7, 12, 15–18, 20–27), las lecciones sin ejemplo en TabGuitar y los ejercicios de ambas manos.
 
 Verificación: `node --test test/aguado.unit.js`.
+
+`ARPEGGIO` de `build.py` (hoy el estudio 5) aplica las reglas de arpegio del motor, entre ellas la de los grupos de tres
+notas: cada nota del tresillo va en su cuerda (si re mi = 3ª traste 4, 2ª traste 3, 1ª al aire).

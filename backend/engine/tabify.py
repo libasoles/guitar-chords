@@ -435,12 +435,38 @@ def apply_arpeggio_rules(measures, opens, arpeggio):
         return
     tabs = [[list(c["cells"]) for c in m["columns"]] for m in measures]
     fingering.avoid_repeated_strings(tabs, opens, measures=active, economy=True,
-                                     barres=[[c.get("barre") for c in m["columns"]] for m in measures])
+                                     barres=[[c.get("barre") for c in m["columns"]] for m in measures],
+                                     groups=[beam_groups(m["columns"]) for m in measures])
     for m, tab in zip(measures, tabs):
         for col, cells in zip(m["columns"], tab):
             if cells != col["cells"]:
                 col["cells"] = cells
                 col["fingering"] = fingering_from_cells(col, cells, opens)
+
+
+def beam_groups(columns):
+    """Per column, the id of the group of notes it belongs to (a tuplet, else a beamed run; a single note), None
+    otherwise."""
+    ids, current, open_group = [], 0, False
+    for col in columns:
+        note = col["notes"][0][0] if len(col["notes"]) == 1 else None
+        tuplets = note.duration.tuplets if note is not None else []
+        beams = note.beams.beamsList if note is not None else []
+        if tuplets:
+            kind, ending = tuplets[0].type, tuplets[0].type == "stop"
+        elif beams:
+            kind, ending = beams[0].type, beams[0].type == "stop"
+        else:
+            kind, ending = None, True
+        if note is None or (kind is None and not tuplets and not beams):
+            ids.append(None)
+            open_group = False
+            continue
+        if kind == "start" or not open_group:
+            current += 1
+        ids.append(current)
+        open_group = not ending
+    return ids
 
 
 def set_column(col, combo, opens):

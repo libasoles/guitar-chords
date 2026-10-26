@@ -321,3 +321,25 @@ class BarreTextTests(unittest.TestCase):
         tabs = [[[2, None, None, None, None, None], [None, 3, None, None, None, None]]]  # F#4 and D4 low on the neck
         out = fingering.avoid_repeated_strings(tabs, opens, barres=[[(7, 6), (7, 6)]])
         self.assertTrue(all(f >= 7 for col in out[0] for f in col if f is not None))
+
+
+class GroupTests(unittest.TestCase):
+    def test_a_repeated_pitch_inside_a_group_goes_on_another_string(self):
+        """C4 E4 E4 beamed as a triplet: three strings, not two."""
+        tabs = tab_of([60, 64, 64])
+        fingering.avoid_repeated_strings(tabs, OPENS, groups=[[1, 1, 1]])
+        strings = [s for s, _ in played(tabs)[0]]
+        self.assertEqual(len(set(strings)), 3, strings)
+        self.assertEqual([pitch(s, f) for s, f in played(tabs)[0]], [60, 64, 64])
+
+    def test_a_repeated_pitch_across_groups_stays_on_its_string(self):
+        tabs = tab_of([64, 64, 64, 59])
+        fingering.avoid_repeated_strings(tabs, OPENS, groups=[[1, 2, 3, 4]])
+        strings = [s for s, _ in played(tabs)[0]]
+        self.assertEqual(strings[:3], [strings[0]] * 3)
+
+    def test_groups_larger_than_three_are_ignored(self):
+        tabs = tab_of([64, 64, 64, 64])
+        fingering.avoid_repeated_strings(tabs, OPENS, groups=[[1, 1, 1, 1]])
+        strings = [s for s, _ in played(tabs)[0]]
+        self.assertEqual(len(set(strings)), 1)
