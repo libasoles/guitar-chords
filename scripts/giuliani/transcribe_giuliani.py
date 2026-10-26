@@ -74,6 +74,10 @@ def read_piece(n):
             if spec.get(key):
                 m[key] = True
                 m['tuplets'] = []  # las cifras impresas ya estan contadas
+    for i, x in spec.get('low_rests', ()):  # silencios de la voz grave que el lector asigna a la aguda: [compas, x del silencio]
+        for r in measures[i - 1]['rests']:
+            if abs(r['x'] - x) < 3:
+                r['y'] = measures[i - 1]['bottom'] + measures[i - 1]['space']
     for i in spec.get('fine', ()):
         measures[i - 1]['fine'] = True
     return spec, piece

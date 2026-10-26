@@ -1,7 +1,7 @@
 {
   "1": {"title": "Estudio 1", "en": "Study 1"},
   "2": {"title": "Estudio 2", "en": "Study 2"},
-  "3": {"title": "Estudio 3", "en": "Study 3"},
+  "3": {"title": "Estudio 3", "en": "Study 3", "low_rests": [[18, 490], [18, 547]]},
   "4": {"title": "Estudio 4", "en": "Study 4"},
   "5": {"title": "Estudio 5", "en": "Study 5"},
   "6": {"title": "Estudio 6", "en": "Study 6"},
