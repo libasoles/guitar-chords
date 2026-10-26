@@ -34,7 +34,7 @@ const PIECES = {
   'santisteban-preludios': { favorite: [2, 3, 4] },
   sagreras: { favorite: [36, 40, 42, 59, 62, 75], insightful: [16, 61], effort: [38, 43], pending: [76, 78, 81, 84] },
   barrios: { pending: Array.from({ length: 18 }, (_, i) => i + 1) },
-  // Lecciones 7-13 transcritas a mano del facsimil (claves 21-27 de scripts/aguado/pieces.json): sin cotejar con el editor.
+  // Lecciones 7, 8 y 10-13 transcritas a mano del facsimil (claves 21-27 de scripts/aguado/pieces.json): sin cotejar con el editor.
   aguado: { pending: Array.from({ length: 7 }, (_, i) => i + 21) },
 };
 
