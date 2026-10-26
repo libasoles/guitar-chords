@@ -35,6 +35,8 @@ const PIECES = {
   sagreras: { favorite: [36, 40, 42, 59, 62, 75], insightful: [16, 61], effort: [38, 43], pending: [76, 78, 81, 84] },
   aguado: { pending: Object.keys(require('../aguado/pieces.json')).map(Number) },
   barrios: { pending: Array.from({ length: 18 }, (_, i) => i + 1) },
+  // Lecciones 7, 8 y 10-13 transcritas a mano del facsimil (claves 21-27 de scripts/aguado/pieces.json): sin cotejar con el editor.
+  aguado: { pending: Array.from({ length: 7 }, (_, i) => i + 21) },
 };
 
 /* Iconos de las marcas de la pieza dentro de un <span class="editor-marks">; vacio si no tiene ninguna. */
