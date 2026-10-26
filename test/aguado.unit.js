@@ -11,7 +11,7 @@ const path = require('path');
 const catalog = require('../scripts/lib/article-aguado');
 
 /* Compases de cada pieza, contados sobre la fuente curada (la partitura del libro; la anacrusa cuenta como compas). */
-const MEASURES = { 1: 19, 2: 16, 3: 16, 4: 24, 5: 24, 6: 24, 7: 16, 8: 16, 9: 24, 10: 35, 11: 41, 13: 24, 14: 16, 15: 16, 16: 17, 17: 16, 18: 16, 19: 18, 20: 32, 21: 16, 24: 32, 25: 24 };
+const MEASURES = { 1: 19, 2: 16, 3: 16, 4: 24, 5: 24, 6: 24, 7: 16, 8: 16, 9: 24, 10: 35, 11: 41, 13: 24, 14: 16, 15: 16, 16: 17, 17: 16, 18: 16, 19: 18, 20: 32, 21: 16, 24: 32, 25: 24, 26: 16 };
 
 /* Cadenas de los archivos de origen: programa, editor y textos por defecto de MuseScore. */
 const SOURCE_TRACES = [/MuseScore/i, /TabGuitar/i, /tabguitar\.it/i, /\.mscz/i, /Boije/i, /Borgognoni/i];
