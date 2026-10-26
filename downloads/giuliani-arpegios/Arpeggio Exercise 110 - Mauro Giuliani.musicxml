@@ -1356,7 +1356,7 @@
         <staff>1</staff>
         <notations>
           <technical>
-            <fingering alternate="no" substitution="no">3</fingering>
+            <fingering alternate="no" substitution="no">1</fingering>
             <string>5</string>
             <fret>3</fret>
             <string>4</string>
@@ -1400,7 +1400,7 @@
         <staff>1</staff>
         <notations>
           <technical>
-            <fingering alternate="no" substitution="no">1</fingering>
+            <fingering alternate="no" substitution="no">3</fingering>
           </technical>
         </notations>
       </note>

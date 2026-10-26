@@ -34,13 +34,16 @@ Descarga sin captcha: `https://s9.imslp.org/files/imglnks/usimg/c/ca/IMSLP660049
   `scripts/sagreras/transcribe.py`).
 - **Etiquetas**: la del ejercicio 28 es «No28» (sin punto) y las páginas 23-24 detectan mal el grosor del pentagrama (se
   fuerza 0,5). Las letras de la mano derecha van en mayúsculas en la edición y se escriben `p i m a`.
+- **Dedos del acorde final**: la edición apila «1 2 3» sobre el acorde, de arriba abajo; la lectura los dejaba invertidos
+  (3 2 1) en las notas agudas. `fix_final_chord_fingers` los pone donde van: 3 en el do grave, 2 en el mi grave y 1 en el do
+  de la 2.ª cuerda (el sol y el mi agudo, al aire).
 - **Letras sin nota**: en 89, 91, 93, 101 y 115 quedan cinco letras sin cabeza (dos letras sobre una cabeza compartida);
   no se publican.
 - **Ejercicios 96, 100 y 110**: las reglas de arpegio del motor mandan el mi5 repetido a la 2.ª cuerda (traste 5). Su fuente
   lleva las casillas impresas como `<string>`/`<fret>` y `build.py` no aplica las reglas (`PRINTED_TAB`). Con eso la TAB
   publicada coincide con la edición en las 5890 casillas de los 120 ejercicios.
-- **Revisión pendiente**: los 120 llevan la marca (`scripts/lib/editor-marks.js`) hasta cotejarlos con el libro. Los
-  116 a 119 (polifonía con fusas y silencios) pasan el control de alturas y compases, pero son los que más lo necesitan.
+- **Revisión pendiente**: los ejercicios 11 a 120 llevan la marca (`scripts/lib/editor-marks.js`) hasta cotejarlos con el
+  libro; el 1 al 10 ya están revisados. Los 116 a 119 (polifonía con fusas y silencios) pasan el control de alturas y compases, pero son los que más lo necesitan.
 
 ## Licencia y crédito
 

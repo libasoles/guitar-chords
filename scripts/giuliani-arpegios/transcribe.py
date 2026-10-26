@@ -104,7 +104,19 @@ def read_pdf(path=SOURCE):
                     m['tab'] = [(x, P.OPEN_MIDI[string] + fret) for x, string, fret in cells if m['left'] <= x < m['right']]
                 exercise['cells'].extend(cells)
                 exercise['tab'].extend((x, P.OPEN_MIDI[string] + fret) for x, string, fret in cells)
+    for exercise in exercises.values():
+        fix_final_chord_fingers(exercise)
     return exercises
+
+
+def fix_final_chord_fingers(exercise):
+    """El acorde final (do, mi, sol, do, mi) trae «1 2 3» apilado encima, de arriba abajo; las cifras caen en las cabezas
+    mas cercanas (mi, do, sol agudos) y salen invertidas. Son los dedos del acorde de do: 3 en el do grave, 2 en el mi
+    grave y 1 en el do de la 2.a cuerda; el sol y el mi agudo suenan al aire."""
+    heads = sorted((h for h in exercise['measures'][-1]['items'] if not h['grace']), key=lambda h: -h['y'])
+    if len(heads) == 5 and sum(1 for h in heads if h.get('finger')) == 3:
+        for h, finger in zip(heads, ('3', '2', None, '1', None)):
+            h['finger'] = finger
 
 
 PRINTED_TAB = B.PRINTED_TAB  # ejercicios cuya fuente lleva las casillas de la TAB impresa como <string>/<fret>
