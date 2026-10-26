@@ -168,6 +168,7 @@ def measure_xml(number, fifths, time, voices, first=False, bounds=None, repeat=N
              '<barline location="right"><bar-style>light-heavy</bar-style></barline>' if bar == "double" else "")
     direction = (f'<direction placement="above"><direction-type><words font-weight="bold">{escape(words)}</words></direction-type></direction>'
                  if words else "")
+    voices = {1: [], **voices}  # la voz 1 siempre existe (si solo hay voz grave, la aguda queda en silencio oculto)
     rendered = {}
     order = sorted((e[0], voice, e) for voice, events in voices.items() for e in events)
     beams = {voice: beam_states(events, bounds) for voice, events in voices.items()}

@@ -19,5 +19,6 @@
   "19": {"kind": "study", "n": "14", "source": "Aguado_Nuevo_Metodo_Estudio14.mscz", "texts": {"Estudio 14°.\nAllegro.": "Allegro."}},
   "20": {"kind": "study", "n": "19", "source": "Aguado_Nuevo_Metodo_Estudio19_pen.mscz", "words": [[1, "Cantabile."]]},
   "21": {"kind": "lesson", "n": "7", "form": "Waltz in G", "es": "Vals en Sol", "credit": "Transcripción del facsímil de 1843 (Biblioteca Nacional de España, vía IMSLP)", "credit_url": "https://imslp.org/wiki/Nuevo_m%C3%A9todo_para_guitarra_(Aguado,_Dionisio)"},
-  "24": {"kind": "lesson", "n": "10", "form": "Waltz in C", "es": "Vals en Do", "credit": "Transcripción del facsímil de 1843 (Biblioteca Nacional de España, vía IMSLP)", "credit_url": "https://imslp.org/wiki/Nuevo_m%C3%A9todo_para_guitarra_(Aguado,_Dionisio)"}
+  "24": {"kind": "lesson", "n": "10", "form": "Waltz in C", "es": "Vals en Do", "credit": "Transcripción del facsímil de 1843 (Biblioteca Nacional de España, vía IMSLP)", "credit_url": "https://imslp.org/wiki/Nuevo_m%C3%A9todo_para_guitarra_(Aguado,_Dionisio)"},
+  "25": {"kind": "lesson", "n": "11", "credit": "Transcripción del facsímil de 1843 (Biblioteca Nacional de España, vía IMSLP)", "credit_url": "https://imslp.org/wiki/Nuevo_m%C3%A9todo_para_guitarra_(Aguado,_Dionisio)"}
 }
