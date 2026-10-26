@@ -154,6 +154,23 @@ def order_slurs(xml):
     return re.sub(r'<measure\b.*?</measure>', fix, xml, flags=re.S)
 
 
+def respace(data, durs, full):
+    """Compas de una sola voz cuyo ritmo no se lee (seisillos y quintillos de fusas seguidos): las notas, en el orden en que
+    se leyeron, pasan a una voz con las duraciones `durs`. Los dedos y ligados viajan con cada nota."""
+    old = [(v, e) for v, voice in enumerate(data['voices']) for e in sorted(voice['events'])]
+    if len(old) != len(durs):
+        raise ValueError(f'respace: {len(old)} notas y {len(durs)} duraciones')
+    events, fingers, onset = [], {}, 0
+    for (v, e), dur in zip(old, durs):
+        events.append((onset, dur, *e[2:]))
+        if (v, e[0]) in data['fingers']:
+            fingers[(0, onset)] = data['fingers'][(v, e[0])]
+        onset += dur
+    data['voices'] = [{'stem': data['voices'][0]['stem'], 'events': events}]
+    data['fingers'] = fingers
+    data['length'] = full
+
+
 def to_xml(n, spec, piece, measures):
     xml = order_slurs(S.to_xml(n, piece, measures))
     xml = xml.replace(f'<work-title>Lesson {n}</work-title>', f'<work-title>{spec["title"]}</work-title>')
@@ -173,6 +190,8 @@ def run(numbers, write):
         for i, onset, dur in spec.get('durations', ()):  # figuras mal leidas: [compas, inicio, duracion] en unidades del compas
             for voice in measures[i - 1]['voices']:
                 voice['events'] = [(e[0], dur, *e[2:]) if e[0] == onset else e for e in voice['events']]
+        for key, durs in spec.get('respace', {}).items():
+            respace(measures[int(key) - 1], durs, full)
         for i in spec.get('pad', ()):  # compases cuyos silencios finales no se leen: se completan con silencios
             measures[i - 1]['length'] = full
         odd = B.odd_measures(piece, measures, spec.get('short', ()))

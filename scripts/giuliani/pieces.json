@@ -9,7 +9,7 @@
   "8": {"title": "Estudio 8", "en": "Study 8"},
   "9": {"title": "Estudio 9", "en": "Study 9", "durations": [[35, 21, 3]], "pad": [35]},
   "10": {"title": "Estudio 10", "en": "Study 10", "pad": [6]},
-  "11": {"title": "Estudio 11", "en": "Study 11"},
+  "11": {"title": "Estudio 11", "en": "Study 11", "respace": {"17": [6, 6, 6, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4], "18": [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4]}},
   "12": {"title": "Estudio 12", "en": "Study 12"},
   "13": {"title": "Estudio 13", "en": "Study 13"},
   "14": {"title": "Estudio 14", "en": "Study 14"},
