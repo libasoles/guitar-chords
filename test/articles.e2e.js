@@ -481,7 +481,7 @@ const PDFS = [
         const first = modal.locator('img.modal-page').first();
         await first.evaluate((img) => img.decode());
         assert.ok(await first.evaluate((img) => img.naturalWidth > 0));
-        assert.match(await first.getAttribute('src'), /\/full\/aguado-01-p1(?:\.[a-f0-9]+)?\.svg$/);
+        assert.match(await first.getAttribute('src'), new RegExp('/full/aguado-' + String(published[0].number).padStart(2, '0') + '-p1(?:\\.[a-f0-9]+)?\\.svg$'));
         assert.equal(decodeURIComponent(await modal.locator('.modal-footer .modal-download').getAttribute('href')).split('/').pop(), published[0].pdf);
         await modal.locator('.modal-close').click();
         assert.equal(await page.locator('.modal-full:popover-open').count(), 0);

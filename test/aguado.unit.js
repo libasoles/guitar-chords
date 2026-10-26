@@ -11,7 +11,7 @@ const path = require('path');
 const catalog = require('../scripts/lib/article-aguado');
 
 /* Compases de cada pieza, contados sobre la fuente curada (la partitura del libro; la anacrusa cuenta como compas). */
-const MEASURES = { 1: 19, 2: 16, 3: 16, 4: 24, 5: 24, 6: 24, 7: 16, 8: 16, 9: 24, 10: 35, 11: 41, 13: 24, 14: 16, 15: 16, 16: 17, 17: 16, 18: 16, 19: 18, 20: 32 };
+const MEASURES = { 1: 19, 2: 16, 3: 16, 4: 24, 5: 24, 6: 24, 7: 16, 8: 16, 9: 24, 10: 35, 11: 41, 13: 24, 14: 16, 15: 16, 16: 17, 17: 16, 18: 16, 19: 18, 20: 32, 21: 16 };
 
 /* Cadenas de los archivos de origen: programa, editor y textos por defecto de MuseScore. */
 const SOURCE_TRACES = [/MuseScore/i, /TabGuitar/i, /tabguitar\.it/i, /\.mscz/i, /Boije/i, /Borgognoni/i];
@@ -39,9 +39,11 @@ function scoreShape(xml) {
 const pieces = catalog.publishedPieces();
 const { DOWNLOADS_DIR, PREVIEW_DIR, SCORE_PREFIX, AUTHOR } = catalog;
 
-test('hay al menos una pieza publicada y salen en orden numerico', () => {
+test('hay al menos una pieza publicada y salen en el orden del libro', () => {
   assert.ok(pieces.length > 0);
-  assert.deepEqual(pieces.map((p) => p.number), pieces.map((p) => p.number).sort((a, b) => a - b));
+  const rank = { lesson: 0, righthand: 1, study: 2 };
+  const order = pieces.map((p) => [rank[p.kind], parseInt(p.n, 10)]);
+  assert.deepEqual(order, [...order].sort((a, b) => a[0] - b[0] || a[1] - b[1]));
 });
 
 for (const piece of pieces) {
@@ -77,11 +79,17 @@ for (const piece of pieces) {
     const text = pdf.toString('latin1');
     for (const trace of PDF_TRACES) assert.doesNotMatch(text, trace, 'PDF: ' + trace);
     for (const trace of SOURCE_TRACES) assert.doesNotMatch(xml, trace, 'MusicXML: ' + trace);
-    assert.match(text, /\(Con modificaciones a partir de\)/);
-    assert.match(text, /\(Luigi Borgognoni \\\(TabGuitar\\\)\)/);
     const uris = [...text.matchAll(/\/URI\s*\(((?:\\.|[^\\)])*)\)/g)]
       .map((m) => m[1].replace(/\\(\d{3})/g, (_, octal) => String.fromCharCode(parseInt(octal, 8))));
-    assert.ok(uris.includes('https://www.tabguitar.it/autori/aguado-metodi-e-studi/'), 'enlace a la transcripcion de origen');
+    if (piece.credit) {
+      // Transcrita a mano del facsimil de IMSLP: el pie cita el libro, no a TabGuitar.
+      assert.doesNotMatch(text, /TabGuitar/);
+      assert.ok(uris.includes(piece.credit_url), 'enlace al facsimil de origen');
+    } else {
+      assert.match(text, /\(Con modificaciones a partir de\)/);
+      assert.match(text, /\(Luigi Borgognoni \\\(TabGuitar\\\)\)/);
+      assert.ok(uris.includes('https://www.tabguitar.it/autori/aguado-metodi-e-studi/'), 'enlace a la transcripcion de origen');
+    }
     const info = text.match(/\/Title\s*\(((?:\\.|[^\\)])*)\)/);
     assert.ok(info, 'el PDF declara /Title');
     // El PDF escapa algunos caracteres (p. ej. : como \072).

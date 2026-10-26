@@ -23,6 +23,20 @@ RESOURCES_DIR=/ruta/al/checkout/resources .venv-carcassi/bin/python scripts/agua
 .venv-carcassi/bin/python scripts/aguado/build.py 1
 ```
 
+## Lecciones transcritas del facsímil
+
+TabGuitar no publica las lecciones 7 a 13. Se transcriben a mano del facsímil de 1843
+(`resources/partituras/aguado/nuevo-metodo/partituras/lecciones/leccion-NN.pdf`, IMSLP265882), con
+`transcribe_lib.py` (alturas escritas, compases en treintaidosavos, voces, acordes `"A4+C5"`, repeticiones, barras) y un
+`transcribe_NN.py` por lección que escribe `sources/NN+14.musicxml` (clave del catálogo: lección 7 = 21, 8 = 22, …). Esas
+piezas llevan `credit` y `credit_url` en `pieces.json` y su PDF cita el facsímil en el pie, no a TabGuitar. El orden en la
+página no depende de la clave: lecciones por número, luego ejercicios de mano derecha y estudios.
+
+Cómo leer el escaneo: ampliar cada compás (350 ppp, ×2,4) y contar las líneas del pentagrama en esa zona, porque la página
+está curvada y una rejilla global no sirve. En el libro el círculo con un número es la **cuerda**, no un tresillo; ※ es el
+sostenido (también en la armadura); la figura Γ es el silencio de negra. Los dedos de la izquierda (1-4) y las letras p i m a
+se copian donde el libro los imprime.
+
 ## Lo que difiere del archivo de TabGuitar
 
 - Son archivos de MuseScore 3 (y algunos con esquema de MuseScore 2): el conversor los lleva al esquema de MuseScore 4

@@ -2,6 +2,7 @@
 
     python scripts/aguado/build.py N [N ...]            # un MusicXML de sources/ -> downloads/ + vistas
     python scripts/aguado/build.py convert N [file.mscz]  # MuseScore -> sources/NN.musicxml
+    python scripts/aguado/transcribe_07.py                # lecciones del facsimil: transcritas a mano, ver transcribe_lib.py
 
 Usa el motor, el conversor de MuseScore y las rutinas de grabado de las piezas progresivas de Carcassi
 (scripts/carcassi-progresivas/build.py y scripts/carcassi-preludios/extract.py).
@@ -26,6 +27,11 @@ AUTHOR = 'Dionisio Aguado'
 # Credito a la transcripcion de origen, en un pie gris a la izquierda de cada pagina del PDF (como en Sagreras).
 FOOTER_LINES = [[('Con modificaciones a partir de', None)],
                 [('Luigi Borgognoni (TabGuitar)', 'https://www.tabguitar.it/autori/aguado-metodi-e-studi/')]]
+
+
+def footer_lines(piece):
+    """Las piezas transcritas a mano del facsimil (`credit` en pieces.json) citan el libro de IMSLP, no a TabGuitar."""
+    return [[(piece['credit'], piece['credit_url'])]] if 'credit' in piece else FOOTER_LINES
 SOURCES = os.path.join(HERE, 'sources')
 OUT_DIR = os.path.join(ROOT, 'downloads', 'aguado')
 PREVIEW_DIR = os.path.join(ROOT, 'src', 'site', 'articles', 'aguado')
@@ -140,7 +146,7 @@ def build(number):
         with open(base + '.musicxml', 'w', encoding='utf-8') as f:
             f.write(xml)
         writer = PdfWriter(clone_from=PdfReader(os.path.join(exported, 'score.pdf')))
-        pdf_footer.stamp_footer(writer, FOOTER_LINES)
+        pdf_footer.stamp_footer(writer, footer_lines(PIECES[number]))
         writer.add_metadata({'/Title': title_of(number), '/Author': AUTHOR})
         for key in ('/Producer', '/Creator', '/CreationDate', '/ModDate'):
             writer._info.get_object().pop(NameObject(key), None)

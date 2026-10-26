@@ -42,14 +42,22 @@ function previewFile(number) {
   return SCORE_PREFIX + String(number).padStart(2, '0') + '.svg';
 }
 
-/* [{number, base, pdf, ...pieza}] de las piezas con PDF, MusicXML y vista previa, en orden numerico. */
+/* Orden en la pagina: lecciones por numero, luego ejercicios de mano derecha y estudios por numero. La clave del
+   catalogo solo da el nombre de los archivos (aguado-NN), asi una leccion nueva puede ir antes de las ya publicadas. */
+const KIND_ORDER = { lesson: 0, righthand: 1, study: 2 };
+
+function pageOrder(a, b) {
+  return KIND_ORDER[a.kind] - KIND_ORDER[b.kind] || parseInt(a.n, 10) - parseInt(b.n, 10);
+}
+
+/* [{number, base, pdf, ...pieza}] de las piezas con PDF, MusicXML y vista previa, en el orden de la pagina. */
 function publishedPieces() {
   return Object.keys(PIECES)
     .map((key) => ({ number: Number(key), ...PIECES[key] }))
     .map((piece) => ({ ...piece, base: fileBase(piece), pdf: fileBase(piece) + '.pdf' }))
     .filter((p) => fs.existsSync(path.join(DOWNLOADS_DIR, p.pdf)) && fs.existsSync(path.join(DOWNLOADS_DIR, p.base + '.musicxml')) &&
       fs.existsSync(path.join(PREVIEW_DIR, previewFile(p.number))))
-    .sort((a, b) => a.number - b.number);
+    .sort(pageOrder);
 }
 
 function card(piece, locale, strings, sharedGlyphs, pieces) {
