@@ -29,12 +29,14 @@ PIECES = json.loads((HERE / 'pieces.json').read_text(encoding='utf-8'))
 AUTHOR = 'Agustin Barrios Mangore'
 
 
-_stem_groups = A.P.stem_groups
+_original_groups = S._original_groups
 
 
-def stem_groups(m):
-    """Las corcheas de una pieza en tresillos continuos (el «3» solo se imprime al principio) valen 2/3."""
-    groups = _stem_groups(m)
+def original_groups(m):
+    """Lectura base de grupos de plica. Las corcheas (o semicorcheas) de una pieza en tresillos continuos, con el «3» o
+    el «6» impreso solo al principio, valen 2/3: se escala aqui, antes de las reglas de Sagreras (que comparan el total
+    del compas para decidir si es una sola voz)."""
+    groups = _original_groups(m)
     for key, dur in (('eighth_triplets', 2), ('sixteenth_sextuplets', 1)):
         if m.get(key):
             for g in groups:
@@ -44,7 +46,7 @@ def stem_groups(m):
     return groups
 
 
-A.P.stem_groups = stem_groups
+S._original_groups = original_groups
 
 
 def read_piece(n):
@@ -56,6 +58,7 @@ def read_piece(n):
         if spec.get(key):
             for m in piece['measures']:
                 m[key] = True
+                m['tuplets'] = []  # las cifras impresas ya estan contadas
     if spec.get('time'):
         piece['time'] = tuple(spec['time'])
     if piece['time'] is None:

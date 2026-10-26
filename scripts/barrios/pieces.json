@@ -15,5 +15,5 @@
   "14": {"pdf": "minueto_si.pdf", "title": "Minueto en Si mayor", "en": "Minueto in B major", "imslp": "Minueto_en_Si_Mayor", "year": 2018},
   "15": {"pdf": "do_menor.pdf", "title": "Preludio en Do menor", "en": "Preludio in C minor", "imslp": "Prelude_in_C_minor", "year": 2019, "sixteenth_sextuplets": true},
   "16": {"pdf": "preludio_la_menor.pdf", "title": "Preludio en La menor", "en": "Preludio in A minor", "imslp": "Preludio_en_La_menor", "year": 2019},
-  "17": {"pdf": "preludio_mi_menor.pdf", "title": "Preludio en Mi menor", "en": "Preludio in E minor", "imslp": "Preludio_en_Mi_menor", "year": 2018}
+  "17": {"pdf": "preludio_mi_menor.pdf", "title": "Preludio en Mi menor", "en": "Preludio in E minor", "imslp": "Preludio_en_Mi_menor", "year": 2018, "eighth_triplets": true}
 }

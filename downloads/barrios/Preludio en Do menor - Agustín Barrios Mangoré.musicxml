@@ -19440,6 +19440,13 @@
     </measure>
     <!--========================= Measure 32 =========================-->
     <measure implicit="no" number="32">
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>1680</duration>
+        <voice>1</voice>
+        <type>16th</type>
+        <staff>1</staff>
+      </note>
       <note id="tab-note-372">
         <pitch>
           <step>E</step>
@@ -19496,6 +19503,7 @@
           <technical>
             <fingering alternate="no" substitution="no">4</fingering>
           </technical>
+          <tuplet number="1" type="stop" />
         </notations>
       </note>
       <note id="tab-note-374">
@@ -19516,7 +19524,16 @@
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
         <notations>
-          <tuplet number="1" type="stop" />
+          <tuplet bracket="yes" number="1" placement="above" type="start">
+            <tuplet-actual>
+              <tuplet-number>3</tuplet-number>
+              <tuplet-type>16th</tuplet-type>
+            </tuplet-actual>
+            <tuplet-normal>
+              <tuplet-number>2</tuplet-number>
+              <tuplet-type>16th</tuplet-type>
+            </tuplet-normal>
+          </tuplet>
         </notations>
       </note>
       <note id="tab-note-375">
@@ -19540,16 +19557,6 @@
           <technical>
             <fingering alternate="no" substitution="no">2</fingering>
           </technical>
-          <tuplet bracket="yes" number="1" placement="above" type="start">
-            <tuplet-actual>
-              <tuplet-number>3</tuplet-number>
-              <tuplet-type>16th</tuplet-type>
-            </tuplet-actual>
-            <tuplet-normal>
-              <tuplet-number>2</tuplet-number>
-              <tuplet-type>16th</tuplet-type>
-            </tuplet-normal>
-          </tuplet>
         </notations>
       </note>
       <note id="tab-note-376">
@@ -19577,18 +19584,11 @@
           <tuplet number="1" type="stop" />
         </notations>
       </note>
-      <note print-object="no" print-spacing="yes">
+      <note>
         <rest />
         <duration>10080</duration>
         <voice>1</voice>
         <type>quarter</type>
-        <staff>1</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>1680</duration>
-        <voice>1</voice>
-        <type>16th</type>
         <staff>1</staff>
       </note>
       <backup>
@@ -19629,6 +19629,13 @@
       <backup>
         <duration>20160</duration>
       </backup>
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>1680</duration>
+        <voice>1</voice>
+        <type>16th</type>
+        <staff>2</staff>
+      </note>
       <note>
         <pitch>
           <step>E</step>
@@ -19683,6 +19690,7 @@
           <technical>
             <string>2</string><fret>4</fret>
           </technical>
+          <tuplet number="1" type="stop" />
         </notations>
       </note>
       <note>
@@ -19704,7 +19712,16 @@
           <technical>
             <string>3</string><fret>0</fret>
           </technical>
-          <tuplet number="1" type="stop" />
+          <tuplet bracket="yes" number="1" placement="above" type="start">
+            <tuplet-actual>
+              <tuplet-number>3</tuplet-number>
+              <tuplet-type>16th</tuplet-type>
+            </tuplet-actual>
+            <tuplet-normal>
+              <tuplet-number>2</tuplet-number>
+              <tuplet-type>16th</tuplet-type>
+            </tuplet-normal>
+          </tuplet>
         </notations>
       </note>
       <note>
@@ -19726,16 +19743,6 @@
           <technical>
             <string>2</string><fret>1</fret>
           </technical>
-          <tuplet bracket="yes" number="1" placement="above" type="start">
-            <tuplet-actual>
-              <tuplet-number>3</tuplet-number>
-              <tuplet-type>16th</tuplet-type>
-            </tuplet-actual>
-            <tuplet-normal>
-              <tuplet-number>2</tuplet-number>
-              <tuplet-type>16th</tuplet-type>
-            </tuplet-normal>
-          </tuplet>
         </notations>
       </note>
       <note>
@@ -19767,13 +19774,6 @@
         <duration>10080</duration>
         <voice>1</voice>
         <type>quarter</type>
-        <staff>2</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>1680</duration>
-        <voice>1</voice>
-        <type>16th</type>
         <staff>2</staff>
       </note>
       <backup>
