@@ -155,8 +155,9 @@ def measure_xml(number, fifths, time, voices, first=False, bounds=None, repeat=N
     acc = Accidentals(fifths)
     attrs = ""
     if first:
+        symbol = ' symbol="common"' if time == (4, 4) else ""
         attrs = (f"<attributes><divisions>{DIVISIONS}</divisions><key><fifths>{fifths}</fifths></key>"
-                 f"<time><beats>{beats}</beats><beat-type>{beat_type}</beat-type></time>"
+                 f"<time{symbol}><beats>{beats}</beats><beat-type>{beat_type}</beat-type></time>"
                  "<clef><sign>G</sign><line>2</line></clef></attributes>")
     if bounds is None:  # un pulso: negra en 2/4, 3/4 y 4/4; la corchea con puntillo (tres corcheas) en 3/8, 6/8
         step = 8 if beat_type == 4 else 12 if beats % 3 == 0 and beat_type == 8 and beats > 3 else length
