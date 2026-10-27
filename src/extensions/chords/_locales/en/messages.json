@@ -27,6 +27,10 @@
     "message": "https://acordesdeguitarra.com.ar/en/identify-chords-by-notes",
     "description": "URL of the chord identifier in English"
   },
+  "tabFinderLabel": {
+    "message": "Identify chords by tabs",
+    "description": "Link to the tab chord identifier in the footer"
+  },
   "noResults": {
     "message": "No matching chords.",
     "description": "Message shown when search returns no results"

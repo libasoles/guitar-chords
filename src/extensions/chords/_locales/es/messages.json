@@ -27,6 +27,10 @@
     "message": "https://acordesdeguitarra.com.ar/identificar-acordes-por-notas",
     "description": "URL del identificador de acordes en español"
   },
+  "tabFinderLabel": {
+    "message": "Identificar acordes por tablatura",
+    "description": "Link to the tab chord identifier in the footer"
+  },
   "noResults": {
     "message": "No hay acordes que coincidan.",
     "description": "Mensaje cuando la búsqueda no devuelve resultados"

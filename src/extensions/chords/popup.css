@@ -394,8 +394,13 @@ body {
   font-size: 0.75rem;
 }
 
+.panel-footer a + a {
+  margin-top: 0.35rem;
+}
+
 .panel-footer a {
-  display: inline-flex;
+  display: flex;
+  width: fit-content;
   align-items: center;
   gap: 0.3rem;
   color: #888;
