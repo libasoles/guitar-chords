@@ -100,7 +100,7 @@ body.score-body {
 
 .score-author {
   margin: 1rem 36px 0;
-  font-family: var(--sans);
+  font-family: var(--serif);
   font-size: 0.95rem;
   text-align: right;
 }
