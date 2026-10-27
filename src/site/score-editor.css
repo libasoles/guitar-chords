@@ -176,6 +176,7 @@ body.score-body {
 
 .score-palette {
   display: flex;
+  flex: 1;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.2rem;
@@ -186,6 +187,15 @@ body.score-body {
   align-self: stretch;
   margin: 0.2rem 0.4rem;
   background: var(--rule);
+}
+
+.score-status:empty {
+  display: none;
+}
+
+/* The first separator pushes the rests, dot and accidentals group to the right edge. */
+.score-palette-sep:first-of-type {
+  margin-left: auto;
 }
 
 .score-toolbar-gap {
@@ -271,7 +281,7 @@ body.score-body {
 
 .score-status {
   min-height: 1.5rem;
-  margin: 0.5rem 0 0;
+  margin: 0;
   color: var(--accent);
   font-family: var(--sans);
   font-size: 0.85rem;
