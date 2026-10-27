@@ -542,11 +542,21 @@ html.part-modal-open body { overflow: hidden; }
 /* Positioned frets mask the string with paper. Follow the cell background
    during interaction so that mask does not cover ascii-tabs' own highlight. */
 .part-rows ascii-tabs .ascii-tabs-area .ascii-tabs-cell:is(:hover, .ascii-tabs-selected, .ascii-tabs-drop) .ascii-tabs-fret,
-.part-rows ascii-tabs.ascii-tabs-editing .ascii-tabs-area .ascii-tabs-cur .ascii-tabs-fret {
+.part-rows ascii-tabs .ascii-tabs-area .ascii-tabs-cur .ascii-tabs-fret {
   background: inherit;
 }
+.part-rows .ascii-tabs-fret {
+  font-size: 0.92em;
+}
 .part-names-mode .ascii-tabs-fret {
-  font-size: 0.8em;
+  font-size: 0.74em;
+}
+/* Strings a little closer together than ascii-tabs' default 1.5em. */
+.part-row-tabs ascii-tabs .ascii-tabs-line,
+.part-row-tabs ascii-tabs .ascii-tabs-area,
+.part-row-tabs ascii-tabs .ascii-tabs-cell {
+  height: 1.38em;
+  line-height: 1.38em;
 }
 .part-measure-tab,
 .part-example-tab {
