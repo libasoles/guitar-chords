@@ -104,6 +104,20 @@
     return score.rows.flat();
   }
 
+  // Las barras se guardan aparte: JSON no conserva propiedades de los arrays de figuras.
+  function setBarline(score, mi, type) {
+    if (!Number.isInteger(mi) || mi < 0 || mi >= measures(score).length || !['single', 'start', 'end'].includes(type)) return false;
+    if (!score.barlines) score.barlines = {};
+    if (type === 'single') score.barlines[mi] = { single: true };
+    else {
+      const bar = score.barlines[mi] || {};
+      delete bar.single;
+      bar[type] = true;
+      score.barlines[mi] = bar;
+    }
+    return true;
+  }
+
   function meterOf(score) {
     return score && METERS.includes(score.meter) ? score.meter : '4/4';
   }
@@ -179,7 +193,13 @@
       return result;
     });
     while (rows.length < MIN_ROWS) rows.push(emptyRow());
-    return Object.assign({ meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {});
+    const barlines = {};
+    Object.entries(data.barlines || {}).forEach(([index, bar]) => {
+      if (!/^(0|[1-9]\d*)$/.test(index) || +index >= rows.length * PER_ROW || !bar) return;
+      if (bar.start === true || bar.end === true) barlines[index] = { start: bar.start === true, end: bar.end === true };
+      else if (bar.single === true) barlines[index] = { single: true };
+    });
+    return Object.assign(Object.keys(barlines).length ? { barlines } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {});
   }
 
   // Rellena huecos con silencios ocultos: el final del compas y el espacio entre figuras sueltas.
@@ -297,6 +317,8 @@
           `<time><beats>${beats}</beats><beat-type>${unit}</beat-type></time>` +
           `<clef><sign>${clef.sign}</sign><line>${clef.line}</line>${clef.octave && !plainGuitarClef ? `<clef-octave-change>${clef.octave}</clef-octave-change>` : ''}</clef></attributes>`;
       }
+      const bar = score.barlines && score.barlines[mi];
+      if (bar && bar.start) xml += '<barline location="left"><repeat direction="forward"/></barline>';
       const starts = onsets(measure);
       // Las voces se exportan por separado, pero las alteraciones siguen el orden temporal del compas.
       const accidentals = new Map();
@@ -327,6 +349,8 @@
         });
         hidden(cursor, capacity(score));
       });
+      if (bar && bar.end) xml += '<barline location="right"><repeat direction="backward"/></barline>';
+      else if (bar && bar.single) xml += '<barline location="right"><bar-style>regular</bar-style></barline>';
       xml += '</measure>';
     });
     return xml + '</part></score-partwise>\n';
@@ -335,6 +359,6 @@
   return {
     DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
     length, onsets, settle, placement, insertAt, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, fits, canDot,
-    meterOf, clefOf, fifthsOf, bottomLine, keyAlter, capacity, setMeter, sanitize, toMusicXml,
+    meterOf, clefOf, fifthsOf, bottomLine, keyAlter, capacity, setMeter, setBarline, sanitize, toMusicXml,
   };
 });

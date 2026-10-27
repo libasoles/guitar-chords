@@ -37,7 +37,6 @@
     <main class="score-page">
       <div class="score-toolbar" role="toolbar" aria-label="%%scoreToolbar%%">
         <div id="scorePalette" class="score-palette"></div>
-        <button id="scoreTrash" class="score-tool" type="button" aria-label="%%scoreDelete%%" title="%%scoreDelete%%"></button>
         <span class="score-toolbar-gap"></span>
         <div id="scoreDownloads" class="score-downloads">
           <button id="scoreDownloadToggle" class="score-download" type="button" data-icon="download" aria-label="%%partDownloadsHeading%%" title="%%partDownloadsHeading%%" aria-expanded="false" aria-controls="scoreDownloadOptions"></button>
@@ -48,10 +47,13 @@
         </div>
       </div>
       <p id="scoreStatus" class="score-status" role="status" aria-live="polite"></p>
-      <section class="score-sheet" aria-label="%%scoreLabel%%">
-        <h1 class="score-title"><input id="scoreTitle" type="text" aria-label="%%scoreTitleLabel%%" value="%%PAGE_H1%%" /></h1>
-        <div id="scoreStage" class="score-stage" tabindex="0" aria-label="%%scoreLabel%%"></div>
-      </section>
+      <div class="score-workspace">
+        <section class="score-sheet" aria-label="%%scoreLabel%%">
+          <h1 class="score-title"><input id="scoreTitle" type="text" aria-label="%%scoreTitleLabel%%" value="%%PAGE_H1%%" /></h1>
+          <div id="scoreStage" class="score-stage" tabindex="0" aria-label="%%scoreLabel%%"></div>
+        </section>
+        <div id="scoreBarlines" class="score-barlines" role="toolbar" aria-label="%%scoreBarlines%%" aria-orientation="vertical"></div>
+      </div>
       <div class="score-rows">
         <button id="scoreAddRow" class="score-tool" type="button" aria-label="%%scoreAddRow%%" title="%%scoreAddRow%%"></button>
         <button id="scoreRemoveRow" class="score-tool" type="button" aria-label="%%scoreRemoveRow%%" title="%%scoreRemoveRow%%" hidden></button>

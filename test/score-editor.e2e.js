@@ -6,6 +6,51 @@ const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
 const { serveStatic } = require('../scripts/lib/static-server');
 
+async function checkBarlines(page) {
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+  assert.equal(await page.locator('#scoreTrash').count(), 0);
+  assert.equal(await page.locator('#scoreBarlines button').count(), 3);
+  async function apply(type, mi) {
+    await page.locator('[data-barline="' + type + '"]').click();
+    const point = await page.locator('#scoreStage g.measure').nth(mi).evaluate(node => {
+      const r = node.querySelector('g.staff > path').getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + 10 };
+    });
+    await page.mouse.click(point.x, point.y);
+  }
+  await apply('start', 0);
+  await apply('end', 3);
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barlines), { 0: { start: true }, 3: { end: true } });
+  assert.ok(await page.locator('#scoreStage g.barLine').count() > 0);
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+  assert.equal(await page.evaluate(() => scoreEditor.score.barlines[0].start), true);
+  await apply('single', 0);
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barlines[0]), { single: true });
+  await page.keyboard.press('ControlOrMeta+z');
+  assert.equal(await page.evaluate(() => scoreEditor.score.barlines[0].start), true);
+  await page.keyboard.press('Escape');
+  // Arrastrar una barra tambien la aplica sin insertar figuras.
+  const button = await page.locator('[data-barline="end"]').boundingBox();
+  const target = await page.locator('#scoreStage g.measure').nth(1).boundingBox();
+  await page.mouse.move(button.x + button.width / 2, button.y + button.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, { steps: 5 });
+  await page.mouse.up();
+  assert.equal(await page.evaluate(() => scoreEditor.score.barlines[1].end), true);
+  for (const width of [1280, 375]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.waitForTimeout(200);
+    const sheet = await page.locator('.score-sheet').boundingBox();
+    const toolbar = await page.locator('#scoreBarlines').boundingBox();
+    assert.ok(toolbar.x >= sheet.x + sheet.width, 'las barras quedan a la derecha');
+    assert.ok(toolbar.x + toolbar.width <= width, 'la barra cabe en la pantalla');
+    assert.equal(await page.locator('.site-header').evaluate(el => getComputedStyle(el).borderBottomWidth), '0px');
+  }
+}
+
 async function checkDrag(page) {
     const target = await page.locator('#scoreStage g.staff').first().evaluate(staff => {
       const r = staff.querySelector('path').getBoundingClientRect();
@@ -259,6 +304,7 @@ async function run() {
     await dragPage.goto(url);
     await dragPage.waitForSelector('#scoreStage g.measure');
     await checkDrag(dragPage);
+    await checkBarlines(dragPage);
     await dragPage.close();
     for (const [route, keys] of [
       ['/partitura', ['p', 's', 'b', 'c']],
