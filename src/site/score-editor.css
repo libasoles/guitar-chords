@@ -14,16 +14,36 @@ body.score-body {
   gap: 0.75rem;
 }
 
-.score-barlines {
+.score-side {
   position: sticky;
   top: 6rem;
   z-index: 4;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  align-self: start;
+  max-height: calc(100vh - 6.5rem);
   margin-top: 0.5rem;
-  padding: 0.3rem;
   background: var(--paper);
+}
+
+.score-side-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: auto;
+  padding: 0.3rem;
+}
+
+.score-side-actions .score-download {
+  width: 100%;
+  min-height: 2.75rem;
+}
+
+.score-barlines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.3rem;
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -167,8 +187,8 @@ body.score-body {
 
 .score-download-options {
   position: absolute;
-  top: calc(100% + 0.4rem);
-  right: 0;
+  bottom: 0;
+  right: calc(100% + 0.4rem);
   display: grid;
   gap: 0.2rem;
   min-width: 9rem;
@@ -490,4 +510,68 @@ body.score-dragging {
 .score-barre-number:focus-visible {
   outline: 2px solid var(--note-selected);
   outline-offset: 1px;
+}
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #0006;
+}
+
+.confirm-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 1001;
+  width: min(26rem, calc(100vw - 2rem));
+  padding: 1.5rem;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid #000;
+  font-family: var(--sans);
+}
+
+.confirm-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.confirm-description {
+  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.confirm-button {
+  height: 2.5rem;
+  padding: 0 1rem;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.confirm-button:hover {
+  background: #0000000f;
+}
+
+.confirm-danger {
+  color: #fff;
+  background: var(--accent-brand);
+  border-color: var(--accent-brand);
+}
+
+.confirm-danger:hover {
+  background: var(--accent-brand);
+  filter: brightness(0.92);
 }

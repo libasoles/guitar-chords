@@ -1169,7 +1169,7 @@ function linkifyEmails(text) {
 // Render the private score editor page (src/site/score-editor.html).
 function renderScoreEditorPage(template, strings, locale) {
   let html = fillPageChrome(template, strings, locale, SCORE_EDITOR_SLUG);
-  ["scoreTitleLabel", "scoreToolbar", "scoreBarlines", "scoreLabel", "scoreAddRow", "scoreRemoveRow", "partDownloadsHeading"].forEach(
+  ["scoreTitleLabel", "scoreToolbar", "scoreBarlines", "scoreLabel", "scoreAddRow", "scoreRemoveRow", "scoreClear", "partDownloadsHeading"].forEach(
     function (key) {
       html = html.split("%%" + key + "%%").join(escapeHtml(strings[key] || ""));
     },
@@ -1951,6 +1951,14 @@ copyFile(
 // Private score editor (/partitura): Verovio draws the staff, jsPDF exports it.
 ["score-model.js", "score-editor.js", "score-editor.css"].forEach(function (f) {
   copyFile(path.join(SRC_SITE, f), path.join(ASSETS_DIST, f));
+});
+require("esbuild").buildSync({
+  entryPoints: [path.join(SRC_SITE, "score-confirm.js")],
+  outfile: path.join(ASSETS_DIST, "score-confirm.js"),
+  bundle: true,
+  minify: true,
+  format: "iife",
+  define: { "process.env.NODE_ENV": '"production"' },
 });
 copyFile(
   path.join(SRC_SITE, "partitura-loading.svg"),

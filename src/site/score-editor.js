@@ -926,6 +926,7 @@
     x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
     plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
     minus: '<path d="M5 12h14"/>',
+    trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
     download: '<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
   };
 
@@ -1055,7 +1056,19 @@
 
   addRow.innerHTML = lucide('plus');
   removeRow.innerHTML = lucide('minus');
-  document.querySelectorAll('[data-icon="download"]').forEach((node) => { node.insertAdjacentHTML('afterbegin', lucide('download')); });
+  document.querySelectorAll('[data-icon]').forEach((node) => { node.insertAdjacentHTML('afterbegin', lucide(node.dataset.icon)); });
+
+  document.getElementById('scoreClear').addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    const confirmed = await window.ScoreConfirm.ask({
+      title: t.clearTitle, description: t.clearDescription, confirm: t.clearConfirm, cancel: t.clearCancel,
+    });
+    if (confirmed) change(() => {
+      selected = null;
+      score = Object.assign(M.emptyScore(), { title: score.title });
+    });
+    button.focus();
+  });
 
   const downloads = document.getElementById('scoreDownloads');
   const downloadToggle = document.getElementById('scoreDownloadToggle');

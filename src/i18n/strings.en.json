@@ -574,7 +574,12 @@
   "scoreLabel": "Sheet music",
   "scoreAddRow": "Add a staff row",
   "scoreRemoveRow": "Remove the last row",
+  "scoreClear": "Clear the score",
   "scoreUiStrings": {
+    "clearTitle": "Clear the score?",
+    "clearDescription": "All notes and barlines will be removed. You can undo it with Ctrl+Z.",
+    "clearConfirm": "Clear",
+    "clearCancel": "Cancel",
     "selectBarline": "Select barline",
     "deleteBarline": "Delete barline",
 
