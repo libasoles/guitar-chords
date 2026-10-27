@@ -28,7 +28,9 @@
   let score = docs[active];
   const defaultTitle = tabsBar.dataset.defaultTitle;
   if (typeof score.title !== 'string') score.title = defaultTitle;
-  let title = null; // el input de la pestana activa
+  const title = document.getElementById('scoreTitle'); // el titulo completo, sobre la partitura
+  let tabTitle = null; // el input de la pestana activa: el mismo titulo, abreviado por el ancho de la pestana
+  title.value = score.title;
   const author = document.getElementById('scoreAuthor');
   author.value = score.author || '';
   author.addEventListener('input', () => {
@@ -119,6 +121,18 @@
 
   // ---- pestanas -----------------------------------------------------------
 
+  title.addEventListener('input', () => {
+    score.title = title.value;
+    if (tabTitle) tabTitle.value = score.title;
+    save();
+  });
+  title.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      title.blur();
+    }
+  });
+
   function tabLabel(one, index) {
     return one.title || t.untitledScore.replace('{n}', index + 1);
   }
@@ -129,25 +143,27 @@
     docs.forEach((one, index) => {
       if (index === active) {
         const wrap = document.createElement('div');
-        wrap.className = 'score-doc-tab score-title is-active';
+        wrap.className = 'score-doc-tab is-active';
         wrap.setAttribute('role', 'tab');
         wrap.setAttribute('aria-selected', 'true');
-        title = document.createElement('input');
-        title.id = 'scoreTitle';
-        title.type = 'text';
-        title.setAttribute('aria-label', t.titleLabel);
+        tabTitle = document.createElement('input');
+        tabTitle.type = 'text';
+        tabTitle.className = 'score-doc-tab-input';
+        tabTitle.setAttribute('aria-label', t.titleLabel);
+        tabTitle.value = score.title;
         title.value = score.title;
-        title.addEventListener('input', () => {
-          score.title = title.value;
+        tabTitle.addEventListener('input', () => {
+          score.title = tabTitle.value;
+          title.value = score.title;
           save();
         });
-        title.addEventListener('keydown', (event) => {
+        tabTitle.addEventListener('keydown', (event) => {
           if (event.key === 'Enter') {
             event.preventDefault();
-            title.blur();
+            tabTitle.blur();
           }
         });
-        wrap.appendChild(title);
+        wrap.appendChild(tabTitle);
         tabsBar.insertBefore(wrap, add);
       } else {
         const button = document.createElement('button');
@@ -183,8 +199,8 @@
     docs.push(Object.assign(M.emptyScore(), { title: defaultTitle }));
     histories.push([]);
     switchTo(docs.length - 1);
-    title.focus();
-    title.select();
+    tabTitle.focus();
+    tabTitle.select();
   }
 
   // ---- edicion ------------------------------------------------------------
