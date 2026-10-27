@@ -4,7 +4,8 @@
   'use strict';
 
   const M = window.ScoreModel;
-  const STORAGE_KEY = 'scoreEditor.v1';
+  const STORAGE_KEY = 'scoreEditor.v2';
+  const LEGACY_KEY = 'scoreEditor.v1'; // guardada con 8 divisiones por negra
   const SCALE = 60;
   const HISTORY_LIMIT = 100;
   const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -34,7 +35,8 @@
     }
   });
   let toolkit = null;
-  let selected = null; // { mi, i }
+  let selected = null; // { mi, i }: la figura principal
+  let group = []; // con dos o mas figuras elegidas, todas (incluida la principal)
   let drag = null;
   let activeItem = null;
   let layout = []; // por compas: { left, right, lines: [y1..y5] } relativo al escenario
@@ -44,7 +46,9 @@
 
   function load() {
     try {
-      return M.sanitize(JSON.parse(localStorage.getItem(STORAGE_KEY)));
+      const current = localStorage.getItem(STORAGE_KEY);
+      if (current) return M.sanitize(JSON.parse(current));
+      return M.sanitize(JSON.parse(localStorage.getItem(LEGACY_KEY)), 8);
     } catch (e) {
       return M.emptyScore();
     }
@@ -105,12 +109,44 @@
     if (!history.length) return;
     score = Object.assign(history.pop(), { title: score.title });
     selected = null;
+    group = [];
     save();
     render();
   }
 
   function eventAt(sel) {
     return sel && M.measures(score)[sel.mi] && M.measures(score)[sel.mi][sel.i];
+  }
+
+  const same = (a, b) => a.mi === b.mi && a.i === b.i;
+
+  function picks() {
+    return group.length > 1 ? group : selected ? [selected] : [];
+  }
+
+  function setPicks(list) {
+    selected = list.length ? list[list.length - 1] : null;
+    group = list.length > 1 ? list : [];
+    markSelected();
+  }
+
+  function togglePick(ref) {
+    const list = picks().slice();
+    const k = list.findIndex((p) => same(p, ref));
+    if (k >= 0) list.splice(k, 1);
+    else list.push(ref);
+    setPicks(list);
+  }
+
+  // Shift + flechas: suma la figura vecina en orden de lectura; sin Shift, la reemplaza.
+  function stepSelection(dir, extend) {
+    const list = picks();
+    if (!list.length) return;
+    const order = M.sequence(score);
+    const at = list.map((p) => order.findIndex((o) => same(o, p)));
+    const next = order[(dir > 0 ? Math.max(...at) : Math.min(...at)) + dir];
+    if (!next || list.some((p) => same(p, next))) return;
+    setPicks(extend ? list.concat(next) : [next]);
   }
 
   function dropNew(item, target) {
@@ -138,6 +174,7 @@
         ev.d = spot.d;
         if (spot.dot) ev.dot = true;
         selected = { mi: target.mi, i: M.insertAt(measure, ev, spot.at) };
+        group = [];
       });
     }
   }
@@ -173,6 +210,7 @@
     const ev = eventAt(selected);
     if (!ev || (ev.d === item.d && !!ev.rest === (item.kind === 'rest'))) return;
     const replacement = Object.assign({}, ev, { d: item.d });
+    delete replacement.tp;
     if (item.kind === 'rest') { replacement.rest = true; delete replacement.n; delete replacement.acc; }
     else { delete replacement.rest; replacement.n = ev.rest ? M.bottomLine(score) : ev.n; }
     if (item.d === 'w' || item.d === 's') delete replacement.dot;
@@ -189,7 +227,7 @@
     const column = measure.filter((o) => o.at === ev.at && o.d === ev.d && !!o.dot === !!ev.dot && !o.rest === !ev.rest);
     if (item.kind === 'dot') {
       if (ev.dot) return change(() => { column.forEach((o) => { delete o.dot; }); });
-      if (!M.canDot(measure, hit.i, score)) return say(ev.d === 'w' || ev.d === 's' ? t.noDot : t.full);
+      if (!M.canDot(measure, hit.i, score)) return say(ev.d === 'w' || ev.d === 's' || ev.tp ? t.noDot : t.full);
       return change(() => { column.forEach((o) => { o.dot = true; }); });
     }
     if (ev.rest) return;
@@ -205,6 +243,7 @@
     const destination = all[target.mi];
     const others = destination.filter((o) => o !== ev);
     const moved = Object.assign({}, ev);
+    ['tp', 'tie', 'slur', 'beam'].forEach((key) => { delete moved[key]; });
     if (!ev.rest) moved.n = target.n;
     const spot = M.placement(others, moved, target.t, score);
     if (!spot) return say(t.full);
@@ -214,21 +253,79 @@
       if (spot.dot) moved.dot = true;
       else delete moved.dot;
       selected = { mi: target.mi, i: M.insertAt(destination, moved, spot.at) };
+      group = [];
+    });
+  }
+
+  // Mueve las figuras elegidas juntas: el mismo desplazamiento en tiempo, compas y altura que la figura agarrada.
+  function moveGroup(refs, from, target) {
+    const all = M.measures(score);
+    const anchor = eventAt(from);
+    const items = refs.map((r) => ({ ev: all[r.mi][r.i], mi: r.mi, at: M.onsets(all[r.mi])[r.i] }));
+    const anchorAt = items.find((x) => x.ev === anchor).at;
+    const grid = items.some((x) => x.ev.tp) ? 2 : M.GRID;
+    const dt = Math.round((target.t - anchorAt) / grid) * grid;
+    const dmi = target.mi - from.mi;
+    const pitched = items.filter((x) => !x.ev.rest);
+    let dn = anchor.rest ? 0 : target.n - anchor.n;
+    if (pitched.length) {
+      dn = Math.max(M.LOWEST - Math.min(...pitched.map((x) => x.ev.n)), Math.min(M.HIGHEST - Math.max(...pitched.map((x) => x.ev.n)), dn));
+    }
+    if (!dt && !dmi && !dn) return;
+    const moving = new Set(items.map((x) => x.ev));
+    const plan = items.map((x) => Object.assign({}, x, { to: x.mi + dmi, at: x.at + dt }));
+    const clash = (p) => {
+      const rest = all[p.to] && all[p.to].filter((o) => !moving.has(o));
+      const starts = rest && M.onsets(rest);
+      return !rest || p.at < 0 || p.at + M.length(p.ev) > M.capacity(score) ||
+        (!p.ev.rest && rest.some((o, i) => !o.rest && starts[i] === p.at && o.n === p.ev.n + dn && o.acc === p.ev.acc));
+    };
+    if (plan.some(clash)) return say(t.full);
+    change(() => {
+      all.forEach((measure) => {
+        for (let i = measure.length - 1; i >= 0; i -= 1) if (moving.has(measure[i])) measure.splice(i, 1);
+      });
+      const ids = new Map();
+      plan.sort((a, b) => a.at - b.at).forEach((p) => {
+        const destination = all[p.to];
+        if (!p.ev.rest) p.ev.n += dn;
+        delete p.ev.tie;
+        delete p.ev.slur;
+        if (p.ev.tp) {
+          const key = p.mi + '-' + p.ev.tp;
+          if (!ids.has(key)) ids.set(key, Math.max(0, ...destination.map((o) => o.tp || 0)) + 1);
+          p.ev.tp = ids.get(key);
+        }
+        M.insertAt(destination, p.ev, p.at);
+      });
+      const refsAfter = plan.map((p) => ({ mi: p.to, i: all[p.to].indexOf(p.ev) }));
+      selected = refsAfter[refsAfter.length - 1];
+      group = refsAfter.length > 1 ? refsAfter : [];
     });
   }
 
   function removeSelected() {
-    if (!eventAt(selected)) return;
+    const list = picks().filter(eventAt);
+    if (!list.length) return;
     change(() => {
-      M.measures(score)[selected.mi].splice(selected.i, 1);
+      list.sort((a, b) => b.mi - a.mi || b.i - a.i).forEach((p) => M.measures(score)[p.mi].splice(p.i, 1));
       selected = null;
+      group = [];
     });
   }
 
   function shiftSelected(delta) {
-    const ev = eventAt(selected);
-    if (!ev || ev.rest) return;
-    change(() => { ev.n = M.clampPitch(ev.n + delta); });
+    const notes = picks().map(eventAt).filter((ev) => ev && !ev.rest);
+    if (!notes.length) return;
+    change(() => { notes.forEach((ev) => { ev.n = M.clampPitch(ev.n + delta); }); });
+  }
+
+  function applyAction(action) {
+    const list = picks();
+    const result = change(() => M.applySelection(score, list, action));
+    if (!result) say(t.full);
+    else say('');
+    stage.focus({ preventScroll: true });
   }
 
   // ---- dibujo -------------------------------------------------------------
@@ -515,10 +612,52 @@
 
   function markSelected() {
     stage.querySelectorAll('.is-selected').forEach((n) => n.classList.remove('is-selected'));
-    if (!selected) return;
-    const node = stage.querySelector('[id="e' + selected.mi + '-' + selected.i + '"]');
-    if (node) node.classList.add('is-selected');
-    else selected = null;
+    if (!selected) group = [];
+    const nodes = picks().map((p) => stage.querySelector('[id="e' + p.mi + '-' + p.i + '"]'));
+    if (nodes.some((node) => !node)) {
+      selected = null;
+      group = [];
+    } else nodes.forEach((node) => node.classList.add('is-selected'));
+    updateSelectionMenu();
+  }
+
+  // ---- menu contextual de la seleccion --------------------------------------
+
+  function hideSelectionMenu() {
+    stage.querySelector('.score-selection-menu')?.remove();
+  }
+
+  // Aparece junto a las figuras elegidas con lo que se puede hacer con ellas; se va al cambiar la seleccion.
+  function updateSelectionMenu() {
+    hideSelectionMenu();
+    const list = picks();
+    if (!list.length || drag?.active) return;
+    const actions = M.selectionActions(score, list);
+    if (!actions.length) return;
+    const origin = stage.getBoundingClientRect();
+    const boxes = list.map((p) => stage.querySelector('[id="e' + p.mi + '-' + p.i + '"]').getBoundingClientRect());
+    const top = Math.min(...boxes.map((b) => b.top)) - origin.top;
+    const bottom = Math.max(...boxes.map((b) => b.bottom)) - origin.top;
+    const center = (Math.min(...boxes.map((b) => b.left)) + Math.max(...boxes.map((b) => b.right))) / 2 - origin.left;
+    const menu = document.createElement('div');
+    menu.className = 'score-selection-menu';
+    menu.setAttribute('role', 'toolbar');
+    menu.setAttribute('aria-label', t.selectionActions);
+    actions.forEach((action) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'score-selection-action';
+      button.dataset.action = action;
+      button.innerHTML = lucide(ACTION_ICONS[action]) + '<span></span>';
+      button.lastChild.textContent = t[action];
+      button.addEventListener('click', () => applyAction(action));
+      menu.appendChild(button);
+    });
+    stage.appendChild(menu);
+    const width = menu.offsetWidth;
+    const height = menu.offsetHeight;
+    menu.style.left = Math.max(4, Math.min(stage.clientWidth - width - 4, center - width / 2)) + 'px';
+    menu.style.top = (top - height - 12 >= 4 ? top - height - 12 : bottom + 12) + 'px';
   }
 
   // ---- hit-testing --------------------------------------------------------
@@ -579,7 +718,7 @@
     let markX = Math.max(m.left, Math.min(m.right, x));
     let near = null;
     centers.forEach((c, i) => {
-      const own = skip && skip.mi === mi && skip.i === i;
+      const own = skip && [].concat(skip).some((s) => s.mi === mi && s.i === i);
       if (own || measure[i].rest || Math.abs(c - x) > space * 1.5) return;
       if (!near || Math.abs(c - x) < Math.abs(near.c - x)) near = { c, i };
     });
@@ -665,7 +804,7 @@
   function updateHoverGhost() {
     const point = hoverPoint;
     const over = point && document.elementFromPoint(point.clientX, point.clientY);
-    const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span');
+    const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span, .score-selection-menu');
     const hit = activeItem && !drag && overStage && locate(point.clientX, point.clientY);
     if (!hit) { clearHoverGhost(); return; }
     if (!hoverGhost) {
@@ -704,6 +843,7 @@
     if (!drag.active) {
       if (Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 5) return;
       drag.active = true;
+      hideSelectionMenu();
       if (drag.insert) return;
       drag.ghost = startGhost(drag.glyph, event, drag.kind);
       document.body.classList.add('score-dragging');
@@ -718,7 +858,7 @@
       const hit = eventUnder(event.clientX, event.clientY);
       if (hit) stage.querySelector('[id="e' + hit.mi + '-' + hit.i + '"]').classList.add('is-target');
     } else {
-      showMarker(locate(event.clientX, event.clientY, drag.from));
+      showMarker(locate(event.clientX, event.clientY, drag.group || drag.from));
     }
   }, { passive: false });
 
@@ -732,6 +872,7 @@
     if (d.ghost) d.ghost.remove();
     if (cancelled) return;
     if (!d.active) {
+      if (d.group) setPicks([d.from]);
       if (d.item) activateTool(d.item);
       else if (d.from && isModifier(activeItem)) applyModifier(activeItem, d.from);
       else if (d.insert) {
@@ -746,10 +887,12 @@
       if (hit) applyModifier(d.item, hit);
       return;
     }
-    const target = locate(event.clientX, event.clientY, d.from);
-    if (!target) return;
-    if (d.from) moveEvent(d.from, target);
+    const target = locate(event.clientX, event.clientY, d.group || d.from);
+    if (!target) { markSelected(); return; }
+    if (d.group) moveGroup(d.group, d.from, target);
+    else if (d.from) moveEvent(d.from, target);
     else dropNew(d.item, target);
+    markSelected();
   }
 
   document.addEventListener('pointerup', (event) => {
@@ -759,7 +902,7 @@
   document.addEventListener('pointercancel', (event) => endDrag(event, true));
 
   stage.addEventListener('pointerdown', (event) => {
-    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span')) return;
+    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span, .score-selection-menu')) return;
     if (isPlacing(activeItem)) {
       event.preventDefault();
       stage.focus({ preventScroll: true });
@@ -767,20 +910,81 @@
       return;
     }
     const match = eventUnder(event.clientX, event.clientY);
+    const additive = event.shiftKey || event.ctrlKey || event.metaKey;
     if (!match) {
-      selected = null;
-      markSelected();
+      if (!additive) setPicks([]);
       stage.focus({ preventScroll: true });
       if (activeItem) beginDrag(event, { insert: true });
+      else if (event.pointerType !== 'touch') beginMarquee(event, additive);
       return;
     }
     event.preventDefault();
     stage.focus({ preventScroll: true });
-    selected = match;
-    markSelected();
-    const ev = eventAt(selected);
-    beginDrag(event, { from: selected, kind: ev.rest ? 'rest' : 'note', glyph: glyphFor({ kind: ev.rest ? 'rest' : 'note', d: ev.d }) });
+    if (additive) { togglePick(match); return; }
+    const inGroup = group.length > 1 && group.some((p) => same(p, match));
+    if (inGroup) selected = match;
+    else setPicks([match]);
+    const ev = eventAt(match);
+    beginDrag(event, {
+      from: match,
+      group: inGroup ? group.slice() : null,
+      kind: ev.rest ? 'rest' : 'note',
+      glyph: glyphFor({ kind: ev.rest ? 'rest' : 'note', d: ev.d }),
+    });
   });
+
+  // ---- marco de seleccion ---------------------------------------------------
+
+  let marquee = null;
+
+  function beginMarquee(event, additive) {
+    marquee = { x: event.clientX, y: event.clientY, id: event.pointerId, active: false, additive, base: additive ? picks().slice() : [], el: null };
+  }
+
+  function marqueeRect(m, event) {
+    return {
+      left: Math.min(m.x, event.clientX),
+      top: Math.min(m.y, event.clientY),
+      right: Math.max(m.x, event.clientX),
+      bottom: Math.max(m.y, event.clientY),
+    };
+  }
+
+  document.addEventListener('pointermove', (event) => {
+    if (!marquee || event.pointerId !== marquee.id) return;
+    if (!marquee.active) {
+      if (Math.hypot(event.clientX - marquee.x, event.clientY - marquee.y) < 5) return;
+      marquee.active = true;
+      marquee.el = document.createElement('div');
+      marquee.el.className = 'score-marquee';
+      stage.appendChild(marquee.el);
+    }
+    const origin = stage.getBoundingClientRect();
+    const r = marqueeRect(marquee, event);
+    Object.assign(marquee.el.style, {
+      left: r.left - origin.left + 'px',
+      top: r.top - origin.top + 'px',
+      width: r.right - r.left + 'px',
+      height: r.bottom - r.top + 'px',
+    });
+  });
+
+  function endMarquee(event, cancelled) {
+    if (!marquee || event.pointerId !== marquee.id) return;
+    const m = marquee;
+    marquee = null;
+    if (m.el) m.el.remove();
+    if (!m.active || cancelled) return;
+    const r = marqueeRect(m, event);
+    const found = [...stage.querySelectorAll('g.note, g.rest')].filter((node) => {
+      const b = (node.querySelector('.notehead') || node).getBoundingClientRect();
+      return b.left <= r.right && b.right >= r.left && b.top <= r.bottom && b.bottom >= r.top;
+    }).map((node) => /^e(\d+)-(\d+)$/.exec(node.id)).filter(Boolean).map((match) => ({ mi: +match[1], i: +match[2] }));
+    setPicks(m.base.concat(found.filter((f) => !m.base.some((b) => same(b, f)))));
+  }
+
+  document.addEventListener('pointerup', (event) => endMarquee(event, false));
+  document.addEventListener('pointercancel', (event) => endMarquee(event, true));
 
   stage.addEventListener('dblclick', (event) => {
     const hit = eventUnder(event.clientX, event.clientY);
@@ -795,7 +999,10 @@
     if (event.key === 'Delete' || event.key === 'Backspace') { event.preventDefault(); removeSelected(); }
     else if (event.key === 'ArrowUp') { event.preventDefault(); shiftSelected(1); }
     else if (event.key === 'ArrowDown') { event.preventDefault(); shiftSelected(-1); }
-    else if (event.key === 'Escape') { selected = null; markSelected(); }
+    else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault();
+      stepSelection(event.key === 'ArrowRight' ? 1 : -1, event.shiftKey);
+    } else if (event.key === 'Escape') setPicks([]);
   });
 
   document.addEventListener('keydown', (event) => {
@@ -1044,8 +1251,17 @@
     plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
     minus: '<path d="M5 12h14"/>',
     trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
+    link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+    unlink: '<path d="m18.84 12.25 1.72-1.71h-.02a5.004 5.004 0 0 0-.12-7.07 5.006 5.006 0 0 0-6.95 0l-1.72 1.71"/><path d="m5.17 11.75-1.71 1.71a5.004 5.004 0 0 0 .12 7.07 5.006 5.006 0 0 0 6.95 0l1.71-1.71"/><line x1="8" x2="8" y1="2" y2="5"/><line x1="2" x2="5" y1="8" y2="8"/><line x1="16" x2="16" y1="19" y2="22"/><line x1="19" x2="22" y1="16" y2="16"/>',
+    beam: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+    // Sin equivalente en Lucide: tresillo, tresillo quitado y notas separadas.
+    triplet: '<path d="M3 19v-5h6M21 19v-5h-6"/><path d="M10 7.500c.5-1 4-1.500 4 .500 0 1.200-1.500 1.800-2 1.800.600 0 2.200.400 2.200 2 0 2-3.700 1.800-4.200.700" stroke-width="1.700"/>',
+    untriplet: '<path d="M3 19v-5h6M21 19v-5h-6"/><path d="M10 7.500c.5-1 4-1.500 4 .500 0 1.200-1.500 1.800-2 1.800.600 0 2.200.400 2.200 2 0 2-3.700 1.800-4.200.700" stroke-width="1.700"/><path d="M4 4l16 12"/>',
+    unbeam: '<circle cx="6" cy="18" r="3"/><path d="M9 18V4"/><circle cx="18" cy="16" r="3"/><path d="M21 16V2"/>',
     download: '<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
   };
+
+  const ACTION_ICONS = { triplet: 'triplet', untriplet: 'untriplet', link: 'link', unlink: 'unlink', beam: 'beam', unbeam: 'unbeam' };
 
   function lucide(name) {
     return '<svg class="lucide" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" ' +

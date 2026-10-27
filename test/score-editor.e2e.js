@@ -106,7 +106,7 @@ async function checkBarre(page) {
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
   await page.evaluate(() => {
-    scoreEditor.score.rows[0][0] = [{ d: 'q', n: 30, at: 0 }, { d: 'q', n: 32, at: 8 }, { d: 'q', n: 34, at: 16 }, { d: 'q', n: 35, at: 24 }];
+    scoreEditor.score.rows[0][0] = [{ d: 'q', n: 30, at: 0 }, { d: 'q', n: 32, at: 24 }, { d: 'q', n: 34, at: 48 }, { d: 'q', n: 35, at: 72 }];
     scoreEditor.render();
   });
   async function dropBarre(selector) {
@@ -122,11 +122,11 @@ async function checkBarre(page) {
   }
   // Sobre una nota que no es la primera, la cejilla arranca ahi con un 1 en foco para escribir otro numero.
   await dropBarre('[id="e0-2"] .notehead');
-  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres), { 0: { at: 16, fret: 1 } });
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres), { 0: { at: 48, fret: 1 } });
   assert.equal(await page.evaluate(() => document.activeElement.className + ':' + document.activeElement.value), 'score-barre-number:1');
   await page.keyboard.type('7');
   await page.keyboard.press('Enter');
-  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres), { 0: { at: 16, fret: 7 } });
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres), { 0: { at: 48, fret: 7 } });
   assert.equal(await page.locator('.score-barre-number').inputValue(), '7');
   // El campo del numero no tiene bordes.
   assert.equal(await page.locator('.score-barre-number').evaluate((el) => getComputedStyle(el).borderTopWidth + getComputedStyle(el).outlineStyle), '0pxnone');
@@ -145,7 +145,7 @@ async function checkBarre(page) {
   await page.mouse.down();
   await page.mouse.move(lastNote - 4, grip.y + grip.height / 2, { steps: 6 });
   await page.mouse.up();
-  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres[0]), { at: 16, to: 24, fret: 7 });
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres[0]), { at: 48, to: 72, fret: 7 });
   // El inicio se mueve hacia la izquierda hasta la primera nota.
   await page.mouse.move(line.x + 5, line.y + 2);
   const startGrip = await page.locator('.score-barre-grip[data-side="start"]').boundingBox();
@@ -153,10 +153,10 @@ async function checkBarre(page) {
   await page.mouse.down();
   await page.mouse.move(60, startGrip.y + startGrip.height / 2, { steps: 8 });
   await page.mouse.up();
-  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres[0]), { at: 0, to: 24, fret: 7 });
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres[0]), { at: 0, to: 72, fret: 7 });
   await page.keyboard.press('ControlOrMeta+z');
   await page.keyboard.press('ControlOrMeta+z');
-  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres[0]), { at: 16, fret: 7 });
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres[0]), { at: 48, fret: 7 });
   // Fuera de una nota (compas vacio) arranca al comienzo del compas.
   await page.keyboard.press('Escape');
   await dropBarre('[id="m1"] g.staff');
@@ -339,7 +339,7 @@ async function checkDoubleClick(page) {
     const measures = ScoreModel.measures(scoreEditor.score);
     measures[0].push({ n: 32, d: 'q', at: 0 }, { n: 34, d: 'q', at: 0 });
     measures[1].push({ n: 32, d: 'w', at: 0 });
-    measures[2].push({ n: 32, d: 'q', at: 24 });
+    measures[2].push({ n: 32, d: 'q', at: 72 });
     scoreEditor.render();
   });
   const note = page.locator('#e0-0 .notehead');
