@@ -396,6 +396,7 @@
     liftBarreMarks(svg);
     measureLayout();
     mountBarlineButtons();
+    mountLastMeasureRemove();
     mountBarreInputs();
     markSelected();
     updateHoverGhost();
@@ -442,6 +443,8 @@
         const box = node.getBoundingClientRect();
         if (!box.height) return;
         const side = hasStart && index === 0 ? 'start' : 'end';
+        const bar = (score.barlines && score.barlines[mi]) || {};
+        const simple = side === 'end' && !bar.double && !bar.end;
         const x = box.left + box.width / 2 - origin.left;
         const y = box.top - origin.top;
         const button = document.createElement('button');
@@ -451,8 +454,10 @@
         button.dataset.side = side;
         button.setAttribute('aria-label', t.selectBarline);
         button.setAttribute('aria-pressed', 'false');
-        button.setAttribute('aria-haspopup', 'dialog');
-        button.setAttribute('aria-expanded', 'false');
+        if (!simple) {
+          button.setAttribute('aria-haspopup', 'dialog');
+          button.setAttribute('aria-expanded', 'false');
+        }
         button.style.left = x + 'px';
         button.style.top = y + 'px';
         button.style.width = Math.max(20, box.width + 12) + 'px';
@@ -479,7 +484,7 @@
           stage.appendChild(remove);
           // La armadura rige desde el compas siguiente si la barra cierra el compas, o desde este si la abre.
           const target = side === 'start' ? mi : mi + 1;
-          if (target < M.measures(score).length) {
+          if (!simple && target < M.measures(score).length) {
             if (clefPopup.matches(':popover-open')) clefPopup.hidePopover();
             else openClefPopup({ kind: 'bar', mi, side }, target);
           }
@@ -488,6 +493,47 @@
       });
     });
   }
+
+  // Los renglones tienen siempre cuatro compases: el ultimo compas, si todo el ultimo renglon esta vacio, se quita con el renglon.
+  function removeLastRow() {
+    if (score.rows.length <= M.MIN_ROWS) return false;
+    selected = null;
+    score.rows.pop();
+    M.pruneKeys(score);
+    if (score.barlines) Object.keys(score.barlines).forEach((mi) => {
+      if (+mi >= M.measures(score).length) delete score.barlines[mi];
+    });
+    if (score.barres) Object.keys(score.barres).forEach((mi) => {
+      if (+mi >= M.measures(score).length) M.removeBarre(score, +mi);
+    });
+  }
+
+  // Al pasar el mouse por el ultimo compas vacio aparece un boton - para borrarlo.
+  function mountLastMeasureRemove() {
+    const last = layout[layout.length - 1];
+    if (!last || score.rows.length <= M.MIN_ROWS || !score.rows[score.rows.length - 1].every((measure) => !measure.length)) return;
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'score-measure-remove tooltip';
+    remove.setAttribute('aria-label', t.deleteMeasure);
+    remove.dataset.tooltip = t.deleteMeasure;
+    remove.innerHTML = lucide('minus');
+    remove.style.left = ((last.left + last.right) / 2) + 'px';
+    remove.style.top = (last.lines[0] - 4) + 'px';
+    remove.addEventListener('click', () => change(removeLastRow));
+    stage.appendChild(remove);
+  }
+
+  stage.addEventListener('pointermove', (event) => {
+    const remove = stage.querySelector('.score-measure-remove');
+    const last = layout[layout.length - 1];
+    if (!remove || !last) return;
+    const box = stage.getBoundingClientRect();
+    remove.classList.toggle('is-visible', event.pointerType === 'mouse'
+      && event.clientX >= box.left + last.left && event.clientX <= box.left + last.right
+      && event.clientY >= box.top + last.lines[0] - 40 && event.clientY <= box.top + last.lines[4] + 40);
+  });
+  stage.addEventListener('pointerleave', () => stage.querySelector('.score-measure-remove')?.classList.remove('is-visible'));
 
   // Tiempo -> x dentro del compas, con las mismas anclas que timeAt.
   function xAtTime(time, m, starts, centers) {
@@ -1605,18 +1651,7 @@
   });
 
   addRow.addEventListener('click', () => change(() => { score.rows.push(M.emptyRow()); }));
-  removeRow.addEventListener('click', () => change(() => {
-    if (score.rows.length <= M.MIN_ROWS) return false;
-    selected = null;
-    score.rows.pop();
-    M.pruneKeys(score);
-    if (score.barlines) Object.keys(score.barlines).forEach((mi) => {
-      if (+mi >= M.measures(score).length) delete score.barlines[mi];
-    });
-    if (score.barres) Object.keys(score.barres).forEach((mi) => {
-      if (+mi >= M.measures(score).length) M.removeBarre(score, +mi);
-    });
-  }));
+  removeRow.addEventListener('click', () => change(removeLastRow));
 
   function download(blob, name) {
     const url = URL.createObjectURL(blob);

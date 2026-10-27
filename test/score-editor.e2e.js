@@ -115,7 +115,13 @@ async function checkKeyChanges(page) {
   assert.deepEqual(await keys(), [0, { 4: 2 }]);
   assert.equal(await page.locator('#scoreStage g.measure').nth(0).locator('g.keyAccid').count(), 0);
   assert.equal(await page.locator('#scoreStage g.measure').nth(4).locator('g.keyAccid').count(), 2);
-  // La barra de cierre de un compas cambia la armadura del compas siguiente.
+  // Una barra simple solo ofrece eliminarla, sin menu de clave y armadura.
+  await page.locator('.score-barline-trigger[data-measure="1"][data-side="end"]').click();
+  assert.equal(await page.locator('#scoreClefPopup').isVisible(), false);
+  assert.equal(await page.locator('.score-barline-remove').count(), 1);
+  await page.keyboard.press('Escape');
+  // La barra de cierre de un compas (aqui doble) cambia la armadura del compas siguiente.
+  await page.evaluate(() => { scoreEditor.score.barlines = { 1: { double: true } }; scoreEditor.render(); });
   await page.locator('.score-barline-trigger[data-measure="1"][data-side="end"]').click();
   assert.equal(await page.locator('#scoreClefPopup').isVisible(), true);
   await page.locator('.score-key-options [data-fifths="-2"]').click();
@@ -135,6 +141,26 @@ async function checkKeyChanges(page) {
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
   assert.deepEqual(await keys(), [0, { 2: -2, 4: 2, 5: 1 }]);
+}
+
+async function checkLastMeasureRemove(page) {
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+  // Con los renglones minimos no se ofrece borrar.
+  assert.equal(await page.locator('.score-measure-remove').count(), 0);
+  await page.evaluate(() => { scoreEditor.score.rows.push([[], [], [], []]); scoreEditor.render(); });
+  const rows = await page.evaluate(() => scoreEditor.score.rows.length);
+  const last = page.locator('#scoreStage g.measure').last();
+  await last.scrollIntoViewIfNeeded();
+  const box = await last.locator('g.staff > path').first().boundingBox();
+  const button = page.locator('.score-measure-remove');
+  assert.equal(await button.evaluate((el) => getComputedStyle(el).opacity), '0');
+  await page.mouse.move(box.x + box.width / 2, box.y + 5);
+  assert.equal(await button.evaluate((el) => getComputedStyle(el).opacity), '1');
+  await button.click();
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows.length), rows - 1);
+  assert.equal(await page.locator('.score-measure-remove').count(), 0);
 }
 
 async function checkBarre(page) {
@@ -579,6 +605,7 @@ async function run() {
     await checkBarlines(dragPage);
     await checkBarre(dragPage);
     await checkKeyChanges(dragPage);
+    await checkLastMeasureRemove(dragPage);
     await dragPage.close();
     for (const [route, keys] of [
       ['/partitura', ['p', 's', 'b', 'c']],

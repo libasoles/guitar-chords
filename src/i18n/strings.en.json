@@ -584,6 +584,7 @@
     "clearCancel": "Cancel",
     "selectBarline": "Select barline",
     "deleteBarline": "Delete barline",
+    "deleteMeasure": "Delete measure",
 
     "barDouble": "Double barline",
     "barRepeatStart": "Start repeat",
