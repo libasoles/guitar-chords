@@ -13,7 +13,6 @@
   const t = JSON.parse(document.getElementById('scoreStrings').textContent);
 
   const stage = document.getElementById('scoreStage');
-  const status = document.getElementById('scoreStatus');
   const palette = document.getElementById('scorePalette');
   const barlines = document.getElementById('scoreBarlines');
   const toolbars = document.querySelector('.score-page');
@@ -75,8 +74,9 @@
     }
   }
 
+  // Messages are Radix alert toasts; an empty text leaves any toast to expire on its own.
   function say(text) {
-    status.textContent = text;
+    if (text && window.SiteToast) window.SiteToast.show(text, { variant: 'alert' });
   }
 
   function vendorUrl(file) {

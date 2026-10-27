@@ -3,7 +3,10 @@ import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import * as Toast from '@radix-ui/react-toast';
 
-const strings = window.PARTITURA_CONFIG.strings;
+// Strings come from the Partitura tool page config, or from the score editor's own strings block.
+const strings = window.PARTITURA_CONFIG
+  ? window.PARTITURA_CONFIG.strings
+  : JSON.parse(document.getElementById('scoreStrings').textContent);
 const host = document.createElement('div');
 document.body.appendChild(host);
 const root = createRoot(host);
