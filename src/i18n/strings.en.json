@@ -574,6 +574,8 @@
   "scoreAddRow": "Add a staff row",
   "scoreRemoveRow": "Remove the last row",
   "scoreUiStrings": {
+    "meter": "Time signature",
+    "meterFull": "The existing notes do not fit in that time signature. Remove or move some before changing it.",
     "scoreLabel": "Sheet music",
     "full": "The measure has no room for that figure.",
     "noDot": "That figure cannot be dotted.",

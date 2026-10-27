@@ -574,6 +574,8 @@
   "scoreAddRow": "Agregar un renglón",
   "scoreRemoveRow": "Quitar el último renglón",
   "scoreUiStrings": {
+    "meter": "Compás",
+    "meterFull": "Las figuras existentes no caben en ese compás. Quitá o mové algunas antes de cambiarlo.",
     "scoreLabel": "Partitura",
     "full": "El compás no tiene lugar para esa figura.",
     "noDot": "Esa figura no admite puntillo.",
