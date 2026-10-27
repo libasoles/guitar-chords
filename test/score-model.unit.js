@@ -296,3 +296,15 @@ test('las alteraciones siguen el tiempo del compas al exportar voces por separad
   assert.match(bodies.get('e0-3'), /<alter>1<\/alter>/);
   assert.match(xml, /<backup>/);
 });
+
+
+test('la clave de guitarra se dibuja sin el 8 y conserva la posicion de las notas', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ d: 'q', n: 30 }];
+  const xml = M.toMusicXml(score, { plainGuitarClef: true });
+  assert.match(xml, /<clef><sign>G<\/sign><line>2<\/line><\/clef>/);
+  assert.match(xml, /<step>E<\/step><octave>4<\/octave>/);
+  assert.match(M.toMusicXml(score), /<step>E<\/step><octave>3<\/octave>/);
+  score.clef = 'treble';
+  assert.equal(M.toMusicXml(score, { plainGuitarClef: true }), M.toMusicXml(score));
+});

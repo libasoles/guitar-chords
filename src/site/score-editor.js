@@ -220,7 +220,7 @@
     if (!width) return;
     renderedWidth = width;
     toolkit.setOptions(layoutOptions(width));
-    toolkit.loadData(M.toMusicXml(score));
+    toolkit.loadData(M.toMusicXml(score, { plainGuitarClef: true }));
     meterPopup.hidePopover();
     clefPopup.hidePopover();
     stage.innerHTML = toolkit.renderToSVG(1);
@@ -846,7 +846,7 @@
         minLastJustification: 0,
         mnumInterval: 0,
       });
-      pdfToolkit.loadData(M.toMusicXml(score));
+      pdfToolkit.loadData(M.toMusicXml(score, { plainGuitarClef: true }));
       const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
       for (let page = 1; page <= pdfToolkit.getPageCount(); page += 1) {
         const image = await rasterize(withoutMeasureNumbers(pdfToolkit.renderToSVG(page)), 1654, 2339);
