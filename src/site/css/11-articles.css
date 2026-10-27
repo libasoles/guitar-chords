@@ -404,7 +404,8 @@
 /* Lazy pages show the loading animation until they arrive (the script in build-site.js sets data-loading). */
 .modal-page[data-loading] {
   min-height: 16rem;
-  background: url("partitura-loading.svg") center / 8rem no-repeat;
+  /* Pages are taller than the viewport, so the animation is pinned to the viewport's center (the page clips it). */
+  background: url("partitura-loading.svg") center / 8rem no-repeat fixed;
 }
 .modal-footer {
   align-items: center;
