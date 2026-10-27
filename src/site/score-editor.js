@@ -207,6 +207,7 @@
 
   function deactivateTool() {
     activeItem = null;
+    stage.classList.remove('has-tool');
     clearHoverGhost();
     toolbars.querySelectorAll('.score-palette-item[aria-pressed]').forEach((button) => button.setAttribute('aria-pressed', 'false'));
   }
@@ -214,6 +215,7 @@
   function activateTool(item) {
     if (activeItem === item) { deactivateTool(); return; }
     activeItem = item;
+    stage.classList.add('has-tool');
     clearHoverGhost();
     updateHoverGhost();
     toolbars.querySelectorAll('.score-palette-item[aria-pressed]').forEach((button) => {

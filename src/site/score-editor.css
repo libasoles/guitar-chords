@@ -347,6 +347,11 @@ body.score-body {
   cursor: grab;
 }
 
+.score-stage.has-tool g.note,
+.score-stage.has-tool g.rest {
+  cursor: default;
+}
+
 .score-stage .is-selected,
 .score-stage .is-target {
   fill: var(--note-selected);
