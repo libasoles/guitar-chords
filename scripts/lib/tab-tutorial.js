@@ -30,12 +30,15 @@ function stage(notes) {
   );
 }
 
+// `captionFirst` puts the title and description above the animation (Partitura).
 function demo(opts) {
-  return (
-    '<li><figure class="tab-demo ' + opts.cls + '">' +
+  const caption = '<figcaption><h3>' + opts.title + '</h3><p>' + opts.body + '</p></figcaption>';
+  const media =
     stage(opts.notes) +
-    '<div class="tab-demo__keys" aria-hidden="true">' + opts.keys.join('<span class="tab-demo__plus">+</span>') + '</div>' +
-    '<figcaption><h3>' + opts.title + '</h3><p>' + opts.body + '</p></figcaption>' +
+    '<div class="tab-demo__keys" aria-hidden="true">' + opts.keys.join('<span class="tab-demo__plus">+</span>') + '</div>';
+  return (
+    '<li><figure class="tab-demo ' + opts.cls + (opts.captionFirst ? ' tab-demo--caption-first' : '') + '">' +
+    (opts.captionFirst ? caption + media : media + caption) +
     '</figure></li>'
   );
 }
@@ -112,4 +115,4 @@ function renderTabTutorial(strings) {
   );
 }
 
-module.exports = { renderTabTutorial, renderBoldDemo };
+module.exports = { renderTabTutorial, renderBoldDemo, demo, note, key };

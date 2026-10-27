@@ -587,6 +587,11 @@
   "scoreDotBody": "Hacé doble clic sobre una nota para ponerle el puntillo; otro doble clic se lo saca.",
   "scoreBarTitle": "Borrar una barra",
   "scoreBarBody": "Hacé clic en una barra doble o de repetición y apretá la x que aparece para borrarla.",
+  "scoreTabEditTitle": "Editar una tablatura",
+  "scoreTabEditBody": "Hacé clic sobre un número de la tablatura y escribí el traste nuevo; tu digitación se guarda y el pentagrama no cambia.",
+  "scoreTabMoveTitle": "Mover una celda de la tablatura",
+  "scoreTabMoveBody": "Arrastrá un número a otra cuerda o a otro tiempo y soltalo donde quieras.",
+  "scoreTabMoveKey": "Arrastrar",
   "scoreFeaturesH2": "Qué podés hacer con el editor",
   "scoreFeatures": [
     "<strong>Notas y silencios:</strong> desde la redonda hasta la fusa, con puntillo y alteraciones (sostenidos, bemoles y becuadros).",

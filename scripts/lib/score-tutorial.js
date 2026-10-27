@@ -7,7 +7,9 @@
    text carries the instructions. The glyph paths mirror GLYPHS in
    src/site/score-editor.js (Lucide has no musical figures). */
 
-const HEAD = 'M13.2 29.2c-3.6 0-6.2-1.6-6.2-3.9 0-2.9 3.7-5.5 7.6-5.5 3.3 0 5.4 1.5 5.4 3.8 0 3.1-3.6 5.6-6.8 5.6z';
+const tabTutorial = require('./tab-tutorial');
+
+const HEAD ='M13.2 29.2c-3.6 0-6.2-1.6-6.2-3.9 0-2.9 3.7-5.5 7.6-5.5 3.3 0 5.4 1.5 5.4 3.8 0 3.1-3.6 5.6-6.8 5.6z';
 const HOLLOW_HEAD = 'M14.4 19.8c3.5 0 5.6 1.5 5.6 3.8 0 3-3.7 5.7-7.2 5.7-3.4 0-5.8-1.6-5.8-3.9 0-3 3.9-5.6 7.4-5.6zm-.4 1.9c-2.7 1.2-5 3.3-5 4.7 0 .9.9 1.4 2.2 1.4 2.4-.9 4.9-3.2 4.9-4.7 0-.8-.8-1.5-2.1-1.4z';
 const STEM = 'stroke="currentColor" stroke-width="1.6" fill="none"';
 const LINE = 'stroke="currentColor" stroke-width="1.7" fill="none"';
@@ -65,9 +67,9 @@ const CURSOR = '<path d="M2 1l11 7-5 1.2L5.5 14z" fill="#222" stroke="#fff" stro
 
 function demo(cls, svg, title, body) {
   return (
-    '<li><figure class="tab-demo score-demo ' + cls + '">' +
-    '<svg class="score-demo__stage" viewBox="0 -10 150 62" aria-hidden="true">' + svg + '</svg>' +
+    '<li><figure class="tab-demo tab-demo--caption-first score-demo ' + cls + '">' +
     '<figcaption><h3>' + title + '</h3><p>' + body + '</p></figcaption>' +
+    '<svg class="score-demo__stage" viewBox="0 -10 150 62" aria-hidden="true">' + svg + '</svg>' +
     '</figure></li>'
   );
 }
@@ -101,6 +103,36 @@ function barDemo(s) {
   return demo('score-demo--bar', svg, s('scoreBarTitle'), s('scoreBarBody'));
 }
 
+// The two ways to change a tab under the staff: type a new fret into a cell, or drag a cell elsewhere.
+function tabEditDemo(s) {
+  const note = tabTutorial.note;
+  return tabTutorial.demo({
+    cls: 'tab-demo--edit',
+    captionFirst: true,
+    notes: [
+      note(0, 3, 5),
+      note(1, 1, 2, 'tab-demo__note--before'),
+      note(1, 1, 7, 'tab-demo__note--after'),
+      '<span class="tab-demo__cursor tab-demo__cursor--edit"></span>',
+    ],
+    keys: [tabTutorial.key('0–9', 'tab-demo__key--digit')],
+    title: s('scoreTabEditTitle'),
+    body: s('scoreTabEditBody'),
+  });
+}
+
+function tabMoveDemo(s) {
+  const note = tabTutorial.note;
+  return tabTutorial.demo({
+    cls: 'tab-demo--drag',
+    captionFirst: true,
+    notes: [note(0, 3, 5), note(1, 1, 2, 'tab-demo__note--dragged'), '<span class="tab-demo__cursor"></span>'],
+    keys: [tabTutorial.key(s('scoreTabMoveKey'), 'tab-demo__key--drag')],
+    title: s('scoreTabMoveTitle'),
+    body: s('scoreTabMoveBody'),
+  });
+}
+
 function renderScoreTutorial(strings) {
   const s = function (k) { return strings[k] || ''; };
   const keys = (strings.scoreUiStrings && strings.scoreUiStrings.shortcuts) || {};
@@ -114,7 +146,7 @@ function renderScoreTutorial(strings) {
     keyGroup(s('scoreShortcutsRests'), rests) +
     keyGroup(s('scoreShortcutsMarks'), marks) +
     '</div>' +
-    '<ul class="tab-tutorial__list">' + dotDemo(s) + barDemo(s) + '</ul>'
+    '<ul class="tab-tutorial__list">' + dotDemo(s) + barDemo(s) + tabEditDemo(s) + tabMoveDemo(s) + '</ul>'
   );
 }
 
