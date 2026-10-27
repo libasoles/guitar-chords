@@ -363,6 +363,29 @@ async function checkDoubleClick(page) {
   assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].dot), true, 'dot is saved');
 }
 
+async function checkClear(page) {
+  await page.locator('[data-shortcut="3"]').click();
+  const point = await page.locator('#scoreStage g.measure').first().evaluate(node => {
+    const r = node.querySelector('g.staff > path').getBoundingClientRect();
+    return { x: r.left + r.width * 0.5, y: r.top + 10 };
+  });
+  await page.mouse.click(point.x, point.y);
+  const filled = () => page.evaluate(() => scoreEditor.score.rows.flat(2).length);
+  assert.ok(await filled() > 0, 'a note was placed');
+  const [clear, download] = await Promise.all(['#scoreClear', '#scoreDownloadToggle'].map(id => page.locator(id).boundingBox()));
+  assert.ok(clear.y < download.y, 'delete sits right above download');
+  assert.ok(download.x > (await page.locator('#scoreStage').boundingBox()).x + 300, 'both live in the side menu');
+  await page.locator('#scoreClear').click();
+  await page.locator('.confirm-content').waitFor();
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('.confirm-content').count(), 0);
+  assert.ok(await filled() > 0, 'cancel keeps the score');
+  await page.locator('#scoreClear').click();
+  await page.locator('.confirm-danger').click();
+  assert.equal(await filled(), 0);
+  console.log('Score editor clear: Radix confirm guards the delete.');
+}
+
 async function run() {
   const server = await serveStatic(path.join(__dirname, '..', 'dist', 'site'), 0);
   let browser;
@@ -476,6 +499,11 @@ async function run() {
     await doubleClickPage.waitForSelector('#scoreStage g.measure');
     await checkDoubleClick(doubleClickPage);
     await doubleClickPage.close();
+    const clearPage = await browser.newPage();
+    await clearPage.goto(url);
+    await clearPage.waitForSelector('#scoreStage g.measure');
+    await checkClear(clearPage);
+    await clearPage.close();
     console.log('score-editor e2e: OK');
   } finally {
     if (browser) await browser.close();

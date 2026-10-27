@@ -37,14 +37,6 @@
     <main class="score-page">
       <div class="score-toolbar" role="toolbar" aria-label="%%scoreToolbar%%">
         <div id="scorePalette" class="score-palette"></div>
-        <span class="score-toolbar-gap"></span>
-        <div id="scoreDownloads" class="score-downloads">
-          <button id="scoreDownloadToggle" class="score-download" type="button" data-icon="download" aria-label="%%partDownloadsHeading%%" title="%%partDownloadsHeading%%" aria-expanded="false" aria-controls="scoreDownloadOptions"></button>
-          <div id="scoreDownloadOptions" class="score-download-options" hidden>
-            <button id="scoreDownloadPdf" class="score-download" type="button">PDF</button>
-            <button id="scoreDownloadXml" class="score-download" type="button">MusicXML</button>
-          </div>
-        </div>
       </div>
       <p id="scoreStatus" class="score-status" role="status" aria-live="polite"></p>
       <div class="score-workspace">
@@ -52,7 +44,19 @@
           <h1 class="score-title"><input id="scoreTitle" type="text" aria-label="%%scoreTitleLabel%%" value="%%PAGE_H1%%" /></h1>
           <div id="scoreStage" class="score-stage" tabindex="0" aria-label="%%scoreLabel%%"></div>
         </section>
-        <div id="scoreBarlines" class="score-barlines" role="toolbar" aria-label="%%scoreBarlines%%" aria-orientation="vertical"></div>
+        <aside class="score-side">
+          <div id="scoreBarlines" class="score-barlines" role="toolbar" aria-label="%%scoreBarlines%%" aria-orientation="vertical"></div>
+          <div class="score-side-actions">
+            <button id="scoreClear" class="score-download" type="button" data-icon="trash" aria-label="%%scoreClear%%" title="%%scoreClear%%"></button>
+            <div id="scoreDownloads" class="score-downloads">
+              <button id="scoreDownloadToggle" class="score-download" type="button" data-icon="download" aria-label="%%partDownloadsHeading%%" title="%%partDownloadsHeading%%" aria-expanded="false" aria-controls="scoreDownloadOptions"></button>
+              <div id="scoreDownloadOptions" class="score-download-options" hidden>
+                <button id="scoreDownloadPdf" class="score-download" type="button">PDF</button>
+                <button id="scoreDownloadXml" class="score-download" type="button">MusicXML</button>
+              </div>
+            </div>
+          </div>
+        </aside>
       </div>
       <div class="score-rows">
         <button id="scoreAddRow" class="score-tool" type="button" aria-label="%%scoreAddRow%%" title="%%scoreAddRow%%"></button>
@@ -61,6 +65,7 @@
     </main>
 
     <script type="application/json" id="scoreStrings">%%SCORE_STRINGS%%</script>
+    <script src="%%ASSETS_PREFIX%%score-confirm.js"></script>
     <script src="%%ASSETS_PREFIX%%score-model.js"></script>
     <script src="%%ASSETS_PREFIX%%score-editor.js"></script>
   </body>

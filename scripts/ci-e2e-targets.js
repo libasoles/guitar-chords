@@ -47,7 +47,7 @@ const SUITES = {
   'score-editor': {
     build: 'site',
     paths: [
-      /^src\/site\/score-(editor|model)\./,
+      /^src\/site\/score-(editor|model|confirm)\./,
       /^test\/score-editor\./,
     ],
   },
