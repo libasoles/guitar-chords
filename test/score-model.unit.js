@@ -231,3 +231,68 @@ test('el título se conserva al guardar y se escapa al exportar MusicXML', () =>
   assert.equal(M.sanitize(Object.assign(M.emptyScore(), { title: 42 })).title, undefined);
   assert.equal(M.sanitize(Object.assign(M.emptyScore(), { title: '' })).title, '');
 });
+
+test('las claves conservan la altura sonora y la armadura al guardar y exportar', () => {
+  const expected = {
+    guitar: ['G', 2, 30], treble: ['G', 2, 37], bass: ['F', 4, 25],
+    alto: ['C', 3, 31], tenor: ['C', 4, 29],
+  };
+  for (const [clef, [sign, line, bottom]] of Object.entries(expected)) {
+    const score = M.emptyScore();
+    score.clef = clef;
+    score.fifths = -3;
+    score.rows[0][0] = [{ d: 'q', n: 30, at: 0 }];
+    assert.deepEqual(M.sanitize(JSON.parse(JSON.stringify(score))), score);
+    assert.equal(M.bottomLine(score), bottom);
+    const xml = M.toMusicXml(score);
+    assert.ok(xml.includes(`<clef><sign>${sign}</sign><line>${line}</line>`));
+    assert.match(xml, /<fifths>-3<\/fifths>/);
+    assert.match(xml, /<step>E<\/step><alter>-1<\/alter><octave>3<\/octave>/);
+    assert.equal(xml.includes('<clef-octave-change>-1</clef-octave-change>'), clef === 'guitar');
+  }
+});
+
+test('las armaduras aplican sus alteraciones y los becuadros duran un compas', () => {
+  const score = M.emptyScore();
+  score.fifths = 2;
+  score.rows[0][0] = [
+    { d: 'q', n: 31 }, { d: 'q', n: 31, acc: 'n' },
+    { d: 'q', n: 31 }, { d: 'q', n: 38 },
+  ];
+  score.rows[0][1] = [{ d: 'q', n: 31 }];
+  const xml = M.toMusicXml(score);
+  const notes = [...xml.matchAll(/<note id="e\d+-\d+">([^]*?)<\/note>/g)].map((m) => m[1]);
+  assert.deepEqual(notes.map((n) => n.includes('<alter>1</alter>')), [true, false, false, true, true]);
+  assert.match(notes[1], /<accidental>natural<\/accidental>/);
+  for (let fifths = -7; fifths <= 7; fifths++) {
+    score.fifths = fifths;
+    const alteredSteps = Array.from({ length: 7 }, (_, i) => M.keyAlter(28 + i, score));
+    assert.equal(alteredSteps.filter(Boolean).length, Math.abs(fifths));
+    assert.ok(alteredSteps.every((a) => a === 0 || a === Math.sign(fifths)));
+  }
+});
+
+test('las partituras anteriores conservan sol de guitarra sin armadura y se descartan opciones invalidas', () => {
+  for (const options of [{}, { clef: 'invalid', fifths: 8 }, { clef: 'toString', fifths: '2' }]) {
+    const score = M.sanitize({ ...options, rows: [] });
+    assert.equal(score.clef, 'guitar');
+    assert.equal(score.fifths, 0);
+  }
+});
+
+test('las alteraciones siguen el tiempo del compas al exportar voces por separado', () => {
+  const score = M.emptyScore();
+  score.fifths = 1;
+  score.rows[0][0] = [
+    { d: 'q', n: 31, at: 0, acc: 'n' },
+    { d: 'w', n: 28, at: 0 },
+    { d: 'q', n: 31, at: 8 },
+    { d: 'h', n: 31, at: 16, acc: '#' },
+  ];
+  const xml = M.toMusicXml(score);
+  const bodies = new Map([...xml.matchAll(/<note id="(e0-\d+)">([^]*?)<\/note>/g)].map((m) => [m[1], m[2]]));
+  assert.ok(!bodies.get('e0-0').includes('<alter>'));
+  assert.ok(!bodies.get('e0-2').includes('<alter>'));
+  assert.match(bodies.get('e0-3'), /<alter>1<\/alter>/);
+  assert.match(xml, /<backup>/);
+});

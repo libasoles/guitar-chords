@@ -238,7 +238,8 @@ body.score-dragging {
 }
 
 /* El boton transparente conserva la cifra grabada y amplia su zona de clic. */
-.score-meter-trigger {
+.score-meter-trigger,
+.score-clef-trigger {
   position: absolute;
   width: 44px;
   transform: translate(-50%, -50%);
@@ -250,7 +251,9 @@ body.score-dragging {
 }
 
 .score-meter-trigger:hover,
-.score-meter-trigger:focus-visible {
+.score-meter-trigger:focus-visible,
+.score-clef-trigger:hover,
+.score-clef-trigger:focus-visible {
   border-color: var(--rule);
   background: rgb(0 0 0 / 4%);
 }
@@ -297,4 +300,39 @@ body.score-dragging {
 .score-meter-options button[aria-pressed="true"] {
   color: var(--paper);
   background: var(--ink);
+}
+
+.score-clef-popup {
+  width: min(20rem, calc(100vw - 2.5rem));
+  max-height: calc(100dvh - 2.5rem);
+  overflow-y: auto;
+}
+
+.score-clef-popup label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.score-clef-popup select,
+.score-clef-popup button {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  font: inherit;
+}
+
+.score-clef-popup select {
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.score-clef-popup button {
+  color: var(--paper);
+  background: var(--ink);
+  cursor: pointer;
 }
