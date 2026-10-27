@@ -566,7 +566,7 @@ async function run() {
   let browser;
   try {
     browser = await chromium.launch({ executablePath: playwrightExecutablePath() });
-    const page = await browser.newPage();
+    const page = await browser.newPage({ reducedMotion: 'reduce' });
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
     const url = 'http://localhost:' + server.address().port + '/partitura';
@@ -671,7 +671,7 @@ async function run() {
     await page.locator('.score-key-trigger').first().click();
     assert.equal(await page.getByRole('group', { name: 'Key signature', exact: true }).locator('button').count(), 15);
     assert.deepEqual(errors, []);
-    const dragPage = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    const dragPage = await browser.newPage({ reducedMotion: 'reduce', viewport: { width: 1280, height: 900 } });
     await dragPage.goto(url);
     await dragPage.waitForSelector('#scoreStage g.measure');
     await checkDrag(dragPage);
@@ -684,21 +684,21 @@ async function run() {
       ['/partitura', ['p', 's', 'b', 'c']],
       ['/en/sheet-music-editor', ['d', 's', 'f', 'n']],
     ]) {
-      const modifierPage = await browser.newPage();
+      const modifierPage = await browser.newPage({ reducedMotion: 'reduce' });
       await checkModifiers(modifierPage, 'http://localhost:' + server.address().port + route, keys);
       await modifierPage.close();
     }
-    const doubleClickPage = await browser.newPage();
+    const doubleClickPage = await browser.newPage({ reducedMotion: 'reduce' });
     await doubleClickPage.goto(url);
     await doubleClickPage.waitForSelector('#scoreStage g.measure');
     await checkDoubleClick(doubleClickPage);
     await doubleClickPage.close();
-    const clearPage = await browser.newPage();
+    const clearPage = await browser.newPage({ reducedMotion: 'reduce' });
     await clearPage.goto(url);
     await clearPage.waitForSelector('#scoreStage g.measure');
     await checkClear(clearPage);
     await clearPage.close();
-    const tabsPage = await browser.newPage();
+    const tabsPage = await browser.newPage({ reducedMotion: 'reduce' });
     await tabsPage.goto(url);
     await tabsPage.waitForSelector('#scoreStage g.measure');
     await checkTabs(tabsPage);
