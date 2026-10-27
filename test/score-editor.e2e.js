@@ -172,6 +172,35 @@ async function checkModifiers(page, url, keys) {
   assert.equal(await page.locator('.score-palette-item[aria-pressed="true"]').count(), 0);
 }
 
+async function checkDoubleClick(page) {
+  await page.evaluate(() => {
+    const measures = ScoreModel.measures(scoreEditor.score);
+    measures[0].push({ n: 32, d: 'q', at: 0 }, { n: 34, d: 'q', at: 0 });
+    measures[1].push({ n: 32, d: 'w', at: 0 });
+    measures[2].push({ n: 32, d: 'q', at: 24 });
+    scoreEditor.render();
+  });
+  const note = page.locator('#e0-0 .notehead');
+  await note.click();
+  assert.equal(await page.evaluate(() => !!scoreEditor.score.rows[0][0][0].dot), false, 'single click only selects');
+  await note.dblclick();
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map(ev => !!ev.dot)), [true, true], 'double click dots the chord');
+  assert.ok(await page.locator('#scoreStage g.dots').count(), 'dots are rendered');
+  await note.dblclick();
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map(ev => !!ev.dot)), [false, false], 'double click removes the dots');
+  assert.equal(await page.locator('#scoreStage g.dots').count(), 0);
+  await page.keyboard.press('ControlOrMeta+z');
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].dot), true, 'dot toggle can be undone');
+  // Hollow noteheads can have a staff line at their center; hit-testing uses coordinates.
+  await page.locator('#e1-0 .notehead').dblclick({ force: true });
+  assert.equal(await page.evaluate(() => !!scoreEditor.score.rows[0][1][0].dot), false, 'whole notes cannot be dotted');
+  await page.locator('#e2-0 .notehead').dblclick({ force: true });
+  assert.equal(await page.evaluate(() => !!scoreEditor.score.rows[0][2][0].dot), false, 'dot cannot overflow the measure');
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.note');
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].dot), true, 'dot is saved');
+}
+
 async function run() {
   const server = await serveStatic(path.join(__dirname, '..', 'dist', 'site'), 0);
   let browser;
@@ -274,6 +303,11 @@ async function run() {
       await checkModifiers(modifierPage, 'http://localhost:' + server.address().port + route, keys);
       await modifierPage.close();
     }
+    const doubleClickPage = await browser.newPage();
+    await doubleClickPage.goto(url);
+    await doubleClickPage.waitForSelector('#scoreStage g.measure');
+    await checkDoubleClick(doubleClickPage);
+    await doubleClickPage.close();
     console.log('score-editor e2e: OK');
   } finally {
     if (browser) await browser.close();

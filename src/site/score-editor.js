@@ -528,6 +528,14 @@
     beginDrag(event, { from: selected, kind: ev.rest ? 'rest' : 'note', glyph: glyphFor({ kind: ev.rest ? 'rest' : 'note', d: ev.d }) });
   });
 
+  stage.addEventListener('dblclick', (event) => {
+    const hit = eventUnder(event.clientX, event.clientY);
+    if (!hit || eventAt(hit).rest) return;
+    event.preventDefault();
+    selected = hit;
+    applyModifier({ kind: 'dot' }, hit);
+  });
+
   stage.addEventListener('keydown', (event) => {
     if (event.target !== stage) return;
     if (event.key === 'Delete' || event.key === 'Backspace') { event.preventDefault(); removeSelected(); }
