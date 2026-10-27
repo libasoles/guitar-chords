@@ -17,6 +17,7 @@
   const MEASURE = 32; // 4/4
   const PER_ROW = 4;
   const MIN_ROWS = 3;
+  const GRID = 2; // semicorchea: la posicion se redondea a esta cuadricula
   const BOTTOM_LINE = 30; // E4: linea inferior de la clave de sol
   const LOWEST = 20;
   const HIGHEST = 44;
@@ -29,8 +30,58 @@
     return ev.dot ? VALUES[ev.d] * 1.5 : VALUES[ev.d];
   }
 
+  // Inicio de cada figura dentro del compas. Una figura sin `at` sigue a la anterior;
+  // las que comparten `at` forman un acorde.
+  function onsets(measure) {
+    let cursor = 0;
+    return measure.map((ev) => {
+      const at = Number.isInteger(ev.at) ? ev.at : cursor;
+      cursor = Math.max(cursor, at + length(ev));
+      return at;
+    });
+  }
+
   function measureLength(measure) {
-    return measure.reduce((sum, ev) => sum + length(ev), 0);
+    const starts = onsets(measure);
+    return measure.reduce((end, ev, i) => Math.max(end, starts[i] + length(ev)), 0);
+  }
+
+  // Deja `at` explicito en todas las figuras para que ninguna se mueva si se agrega o quita otra.
+  function settle(measure) {
+    const starts = onsets(measure);
+    measure.forEach((ev, i) => { ev.at = starts[i]; });
+    return measure;
+  }
+
+  // Donde cae `ev` si se suelta cerca del tiempo `t`, entre las figuras `others` (ya sin `ev`).
+  // Sobre la columna de una nota se vuelve acorde (y toma su duracion); si no, el hueco libre mas cercano.
+  function placement(others, ev, t) {
+    const starts = onsets(others);
+    const want = Math.max(0, Math.min(MEASURE - 1, Math.round(t / GRID) * GRID));
+    if (!ev.rest) {
+      const column = others.findIndex((o, i) => !o.rest && starts[i] === want);
+      if (column >= 0) {
+        if (others.some((o, i) => starts[i] === want && !o.rest && o.n === ev.n)) return null;
+        return { at: want, d: others[column].d, dot: others[column].dot };
+      }
+    }
+    const size = length(ev);
+    const spans = others.map((o, i) => [starts[i], starts[i] + length(o)]);
+    const free = (c) => c >= 0 && c + size <= MEASURE && spans.every(([a, b]) => c >= b || c + size <= a);
+    const candidates = [want, 0, MEASURE - size];
+    spans.forEach(([a, b]) => candidates.push(b, a - size));
+    const best = candidates.filter(free).sort((x, y) => Math.abs(x - want) - Math.abs(y - want))[0];
+    return best === undefined ? null : { at: best, d: ev.d, dot: ev.dot };
+  }
+
+  // Inserta `ev` con su `at`, antes de la primera figura que empieza despues.
+  function insertAt(measure, ev, at) {
+    const starts = onsets(measure);
+    let index = starts.findIndex((s) => s > at);
+    if (index < 0) index = measure.length;
+    ev.at = at;
+    measure.splice(index, 0, ev);
+    return index;
   }
 
   function clampPitch(n) {
@@ -61,7 +112,10 @@
 
   function canDot(measure, index) {
     const ev = measure[index];
-    return !ev.dot && ev.d !== 'w' && measureLength(measure) + VALUES[ev.d] / 2 <= MEASURE && ev.d !== 's';
+    if (ev.dot || ev.d === 'w' || ev.d === 's') return false;
+    const starts = onsets(measure);
+    const end = starts[index] + VALUES[ev.d] * 1.5;
+    return end <= MEASURE && starts.every((s) => s <= starts[index] || s >= end);
   }
 
   // Descarta lo que no sea una partitura valida (por ejemplo, datos viejos o editados a mano).
@@ -79,7 +133,12 @@
           else return;
           if (raw.dot && raw.d !== 'w' && raw.d !== 's') ev.dot = true;
           if (!ev.rest && ACCIDENTALS[raw.acc]) ev.acc = raw.acc;
-          if (measureLength(events) + length(ev) <= MEASURE) events.push(ev);
+          if (Number.isInteger(raw.at) && raw.at >= 0) ev.at = raw.at;
+          const at = Number.isInteger(ev.at) ? ev.at : measureLength(events);
+          if (at + length(ev) > MEASURE) return;
+          const taken = placement(events, ev, at);
+          if (!taken || taken.at !== at || taken.d !== ev.d || !taken.dot !== !ev.dot) return;
+          insertAt(events, ev, at);
         });
         result[m] = events;
       });
@@ -89,10 +148,9 @@
     return { rows };
   }
 
-  // Rellena lo que falta del compas con silencios ocultos para que mida lo mismo que uno completo.
-  function padding(used) {
+  // Rellena huecos con silencios ocultos: el final del compas y el espacio entre figuras sueltas.
+  function padding(left) {
     const parts = [];
-    let left = MEASURE - used;
     [32, 16, 8, 4, 2, 1].forEach((size) => {
       while (left >= size) {
         parts.push(size);
@@ -102,45 +160,55 @@
     return parts;
   }
 
-  // Ligaduras de corchea y semicorchea dentro de cada pulso.
+  // Ligaduras de corchea y semicorchea dentro de cada pulso; el acorde comparte las de su columna.
   function beamStates(measure) {
     const states = measure.map(() => null);
-    let onset = 0;
+    const starts = onsets(measure);
+    const columns = [];
+    measure.forEach((ev, i) => {
+      const last = columns[columns.length - 1];
+      if (last && starts[last[0]] === starts[i]) last.push(i);
+      else columns.push([i]);
+    });
     const runs = [];
     let run = null;
-    measure.forEach((ev, i) => {
-      const beat = Math.floor(onset / DIVISIONS);
+    let end = 0;
+    columns.forEach((col) => {
+      const ev = measure[col[0]];
+      const at = starts[col[0]];
+      const beat = Math.floor(at / DIVISIONS);
       if (!ev.rest && (ev.d === 'e' || ev.d === 's')) {
-        if (run && run.beat === beat) run.items.push(i);
-        else runs.push((run = { beat, items: [i] }));
+        if (run && run.beat === beat && end === at) run.items.push(col);
+        else runs.push((run = { beat, items: [col] }));
       } else {
         run = null;
       }
-      onset += length(ev);
+      end = at + length(ev);
     });
     runs.filter((r) => r.items.length > 1).forEach((r) => {
-      r.items.forEach((i, k) => {
+      r.items.forEach((col, k) => {
         const first = k === 0;
         const last = k === r.items.length - 1;
         const state = { 1: first ? 'begin' : last ? 'end' : 'continue' };
-        if (measure[i].d === 's') {
-          const prev = k > 0 && measure[r.items[k - 1]].d === 's';
-          const next = !last && measure[r.items[k + 1]].d === 's';
+        if (measure[col[0]].d === 's') {
+          const prev = k > 0 && measure[r.items[k - 1][0]].d === 's';
+          const next = !last && measure[r.items[k + 1][0]].d === 's';
           if (prev && next) state[2] = 'continue';
           else if (prev) state[2] = 'end';
           else if (next) state[2] = 'begin';
           else state[2] = first ? 'forward hook' : 'backward hook';
         }
-        states[i] = state;
+        col.forEach((i) => { states[i] = state; });
       });
     });
     return states;
   }
 
-  function noteXml(ev, id, beams) {
+  function noteXml(ev, id, beams, chord) {
     const dur = length(ev);
     const base = VALUES[ev.d];
     let xml = `<note id="${id}">`;
+    if (chord) xml += '<chord/>';
     if (ev.rest) {
       xml += '<rest/>';
     } else {
@@ -167,18 +235,31 @@
           '<clef><sign>G</sign><line>2</line><clef-octave-change>-1</clef-octave-change></clef></attributes>';
       }
       const beams = beamStates(measure);
-      measure.forEach((ev, i) => { xml += noteXml(ev, `e${mi}-${i}`, beams[i]); });
-      padding(measureLength(measure)).forEach((size) => {
-        xml += `<note print-object="no"><rest/><duration>${size}</duration><voice>1</voice><type>${TYPES[size]}</type></note>`;
+      const starts = onsets(measure);
+      const hidden = (from, to) => {
+        padding(to - from).forEach((size) => {
+          xml += `<note print-object="no"><rest/><duration>${size}</duration><voice>1</voice><type>${TYPES[size]}</type></note>`;
+        });
+      };
+      let cursor = 0;
+      measure.forEach((ev, i) => {
+        const chord = i > 0 && starts[i] === starts[i - 1];
+        if (!chord) {
+          hidden(cursor, starts[i]);
+          cursor = starts[i];
+        }
+        xml += noteXml(ev, `e${mi}-${i}`, beams[i], chord);
+        if (!chord) cursor = starts[i] + length(ev);
       });
+      hidden(cursor, MEASURE);
       xml += '</measure>';
     });
     return xml + '</part></score-partwise>\n';
   }
 
   return {
-    DIVISIONS, MEASURE, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    length, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, fits, canDot,
+    DIVISIONS, MEASURE, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
+    length, onsets, settle, placement, insertAt, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, fits, canDot,
     sanitize, toMusicXml,
   };
 });

@@ -29,7 +29,7 @@ test('el puntillo suma la mitad y no entra en redonda ni semicorchea', () => {
 test('sanitize descarta figuras invalidas y completa los renglones', () => {
   const score = M.sanitize({ rows: [[[{ d: 'x', n: 30 }, { d: 'q', n: 30 }, { d: 'q' }, { d: 'q', rest: true }]]] });
   assert.equal(score.rows.length, 3);
-  assert.deepEqual(score.rows[0][0], [{ d: 'q', n: 30 }, { d: 'q', rest: true }]);
+  assert.deepEqual(score.rows[0][0], [{ d: 'q', n: 30, at: 0 }, { d: 'q', rest: true, at: 8 }]);
   assert.deepEqual(M.sanitize(null), M.emptyScore());
 });
 
@@ -61,4 +61,30 @@ test('las corcheas del mismo pulso se ligan y las de pulsos distintos no', () =>
   const first = M.toMusicXml(score).split('<measure ')[1];
   const beams = [...first.matchAll(/<beam number="1">(\w+)<\/beam>/g)].map((m) => m[1]);
   assert.deepEqual(beams, ['begin', 'end', 'begin', 'end']);
+});
+
+test('una figura soltada en medio de un compas vacio conserva su lugar y el MusicXML deja el hueco', () => {
+  const measure = [];
+  const spot = M.placement(measure, { d: 'q', n: 30 }, 16);
+  assert.equal(spot.at, 16);
+  M.insertAt(measure, { d: 'q', n: 30 }, spot.at);
+  const score = M.emptyScore();
+  score.rows[0][0] = measure;
+  const first = M.toMusicXml(score).split('<measure ')[1];
+  assert.match(first, /<rest\/><duration>16<\/duration>[^]*<step>E<\/step>/);
+});
+
+test('soltar sobre la columna de una nota hace un acorde con su duracion', () => {
+  const measure = [{ d: 'e', n: 30, at: 8 }];
+  const spot = M.placement(measure, { d: 'q', n: 34 }, 8);
+  assert.deepEqual(spot, { at: 8, d: 'e', dot: undefined });
+  assert.equal(M.placement(measure, { d: 'q', n: 30 }, 8), null);
+  M.insertAt(measure, { d: 'e', n: 34 }, 8);
+  assert.match(M.toMusicXml({ rows: [[measure, [], [], []]] }), /<chord\/>/);
+});
+
+test('una figura que pisa a otra se corre al hueco libre mas cercano', () => {
+  const measure = [{ d: 'h', n: 30, at: 0 }];
+  assert.equal(M.placement(measure, { d: 'q', n: 31 }, 8).at, 16);
+  assert.equal(M.placement([{ d: 'w', n: 30, at: 0 }], { d: 'q', n: 31 }, 8), null);
 });

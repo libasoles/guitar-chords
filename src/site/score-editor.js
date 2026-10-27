@@ -102,18 +102,25 @@
       const ev = { d: item.d };
       if (item.kind === 'rest') ev.rest = true;
       else ev.n = target.n;
-      if (!M.fits(measure, ev)) return say(t.full);
-      change(() => { measure.splice(target.index, 0, ev); selected = { mi: target.mi, i: target.index }; });
+      const spot = M.placement(measure, ev, target.t);
+      if (!spot) return say(t.full);
+      change(() => {
+        ev.d = spot.d;
+        if (spot.dot) ev.dot = true;
+        selected = { mi: target.mi, i: M.insertAt(measure, ev, spot.at) };
+      });
     }
   }
 
+  // Los miembros de un acorde comparten duracion, asi que el puntillo va a todos.
   function applyModifier(item, hit) {
     const measure = M.measures(score)[hit.mi];
     const ev = measure[hit.i];
+    const column = measure.filter((o) => o.at === ev.at && !o.rest === !ev.rest);
     if (item.kind === 'dot') {
-      if (ev.dot) return change(() => { delete ev.dot; });
+      if (ev.dot) return change(() => { column.forEach((o) => { delete o.dot; }); });
       if (!M.canDot(measure, hit.i)) return say(ev.d === 'w' || ev.d === 's' ? t.noDot : t.full);
-      return change(() => { ev.dot = true; });
+      return change(() => { column.forEach((o) => { o.dot = true; }); });
     }
     if (ev.rest) return;
     change(() => {
@@ -126,15 +133,17 @@
     const all = M.measures(score);
     const ev = all[from.mi][from.i];
     const destination = all[target.mi];
-    const same = from.mi === target.mi;
-    if (!M.fits(destination, ev, same ? from.i : undefined)) return say(t.full);
+    const others = destination.filter((o) => o !== ev);
+    const moved = Object.assign({}, ev);
+    if (!ev.rest) moved.n = target.n;
+    const spot = M.placement(others, moved, target.t);
+    if (!spot) return say(t.full);
     change(() => {
       all[from.mi].splice(from.i, 1);
-      let index = target.index;
-      if (same && index > from.i) index -= 1;
-      if (!ev.rest) ev.n = target.n;
-      destination.splice(index, 0, ev);
-      selected = { mi: target.mi, i: index };
+      moved.d = spot.d;
+      if (spot.dot) moved.dot = true;
+      else delete moved.dot;
+      selected = { mi: target.mi, i: M.insertAt(destination, moved, spot.at) };
     });
   }
 
@@ -228,31 +237,57 @@
     return (r.left + r.right) / 2 - origin.left;
   }
 
-  function locate(clientX, clientY) {
+  // Tiempo (en divisiones) que le corresponde a una x dentro del compas, interpolando entre las figuras ya dibujadas.
+  function timeAt(x, m, starts, centers) {
+    const anchors = [{ x: m.left, t: 0 }, { x: m.right, t: M.MEASURE }];
+    centers.forEach((c, i) => anchors.push({ x: c, t: starts[i] }));
+    anchors.sort((p, q) => p.x - q.x || p.t - q.t);
+    for (let k = 1; k < anchors.length; k += 1) {
+      const a = anchors[k - 1];
+      const b = anchors[k];
+      if (x <= b.x && b.x > a.x) return a.t + ((x - a.x) / (b.x - a.x)) * (b.t - a.t);
+    }
+    return M.MEASURE;
+  }
+
+  // Donde queda lo que se suelta en (clientX, clientY): el compas mas cercano, el tono por la altura y el
+  // tiempo por la posicion horizontal. Sobre la columna de una nota cercana se alinea con ella.
+  function locate(clientX, clientY, skip) {
     const origin = stage.getBoundingClientRect();
     const x = clientX - origin.left;
     const y = clientY - origin.top;
     let best = null;
     layout.forEach((m, mi) => {
-      if (x < m.left || x > m.right) return;
       const space = (m.lines[4] - m.lines[0]) / 4;
-      const middle = m.lines[2];
-      const distance = Math.abs(y - middle);
-      if (distance > space * 7 || (best && distance >= best.distance)) return;
-      best = { mi, m, space, distance };
+      const dx = Math.max(m.left - x, 0, x - m.right);
+      const dy = Math.abs(y - m.lines[2]);
+      if (dy > space * 7 || dx > space * 3) return;
+      const cost = dy + dx * 2;
+      if (best && cost >= best.cost) return;
+      best = { mi, m, space, cost };
     });
     if (!best) return null;
     const { mi, m, space } = best;
     const half = space / 2;
     const n = M.clampPitch(M.BOTTOM_LINE + Math.round((m.lines[4] - y) / half));
+    const measure = M.measures(score)[mi];
+    const starts = M.onsets(measure);
     const centers = eventNodes(mi).map((node) => centerX(node, origin));
-    let index = centers.findIndex((c) => c > x);
-    if (index < 0) index = centers.length;
-    const before = index > 0 ? centers[index - 1] : m.left;
-    const after = index < centers.length ? centers[index] : m.right;
-    const markX = index === 0 ? (m.left + after) / 2 : index === centers.length ? (before + m.right) / 2 : (before + after) / 2;
+    let at = timeAt(Math.max(m.left, Math.min(m.right, x)), m, starts, centers);
+    let markX = Math.max(m.left, Math.min(m.right, x));
+    let near = null;
+    centers.forEach((c, i) => {
+      const own = skip && skip.mi === mi && skip.i === i;
+      if (own || measure[i].rest || Math.abs(c - x) > space * 1.5) return;
+      if (!near || Math.abs(c - x) < Math.abs(near.c - x)) near = { c, i };
+    });
+    if (near) {
+      at = starts[near.i];
+      markX = near.c;
+    }
     return {
-      mi, index, n, space,
+      mi, n, space,
+      t: at,
       x: markX,
       y: m.lines[4] - (n - M.BOTTOM_LINE) * half,
       top: m.lines[0],
@@ -332,7 +367,7 @@
       const hit = eventUnder(event.clientX, event.clientY);
       if (hit) stage.querySelector('[id="e' + hit.mi + '-' + hit.i + '"]').classList.add('is-target');
     } else {
-      showMarker(locate(event.clientX, event.clientY), drag.kind);
+      showMarker(locate(event.clientX, event.clientY, drag.from), drag.kind);
     }
     drag.overTrash = !!document.elementFromPoint(event.clientX, event.clientY)?.closest('#scoreTrash');
   }, { passive: false });
@@ -355,7 +390,7 @@
       if (hit) applyModifier(d.item, hit);
       return;
     }
-    const target = locate(event.clientX, event.clientY);
+    const target = locate(event.clientX, event.clientY, d.from);
     if (!target) return;
     if (d.from) moveEvent(d.from, target);
     else dropNew(d.item, target);
