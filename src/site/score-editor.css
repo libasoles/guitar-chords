@@ -196,10 +196,6 @@ body.score-body {
   background: var(--rule);
 }
 
-.score-status:empty {
-  display: none;
-}
-
 /* The first separator pushes the rests, dot and accidentals group to the right edge. */
 .score-palette-sep:first-of-type {
   margin-left: auto;
