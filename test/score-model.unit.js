@@ -4,6 +4,16 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const M = require('../src/site/score-model');
 
+test('sanitize conserva la tablatura por renglon y descarta datos invalidos', () => {
+  const base = M.emptyScore();
+  const tabs = { 0: [[3, null, null, null, null, null], [null, 99, 'x', null, 0, null]], 1: [[null, null, null, null, null, null]], 7: [[1, 1, 1, 1, 1, 1]] };
+  const clean = M.sanitize({ ...base, showTabs: true, tabs });
+  assert.equal(clean.showTabs, true);
+  assert.deepEqual(clean.tabs, { 0: [[3, null, null, null, null, null], [null, null, null, null, 0, null]] });
+  assert.equal(M.sanitize({ ...base, showTabs: 'si' }).showTabs, undefined);
+  assert.equal(M.toMusicXml(clean), M.toMusicXml(M.sanitize(base)));
+});
+
 test('la partitura nueva tiene tres renglones de cuatro compases vacios', () => {
   const score = M.emptyScore();
   assert.equal(score.rows.length, 3);

@@ -642,6 +642,8 @@
     "barreFretRange": "El traste de la cejilla debe estar entre 1 y 24",
     "barreStart": "Inicio de la cejilla",
     "barreEnd": "Fin de la cejilla",
+    "tabToggle": "Tablatura bajo cada renglón",
+    "tabLabel": "Tablatura del renglón",
     "clefAndKey": "Clave y armadura",
     "clef": "Clave",
     "keySignature": "Armadura",

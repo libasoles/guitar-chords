@@ -642,6 +642,8 @@
     "barreFretRange": "The barre fret must be between 1 and 24",
     "barreStart": "Barre start",
     "barreEnd": "Barre end",
+    "tabToggle": "Tablature under each row",
+    "tabLabel": "Row tablature",
     "clefAndKey": "Clef and key signature",
     "clef": "Clef",
     "keySignature": "Key signature",

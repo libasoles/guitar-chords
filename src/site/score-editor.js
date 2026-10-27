@@ -54,6 +54,7 @@
   let layout = []; // por compas: { left, right, lines: [y1..y5] } relativo al escenario
   let history = [];
   let renderedWidth = 0;
+  let tabSpace = 0; // unidades de Verovio que se reservan bajo cada renglon para su tablatura
   let focusBarre = null; // compas cuya cejilla recien se coloco: su numero queda en foco
 
   function load() {
@@ -120,7 +121,10 @@
 
   function undo() {
     if (!history.length) return;
-    score = Object.assign(history.pop(), { title: score.title }, score.author ? { author: score.author } : {});
+    const restored = history.pop();
+    // La tablatura no depende de las notas: deshacer no la toca.
+    ['showTabs', 'tabs'].forEach((key) => { if (score[key]) restored[key] = score[key]; else delete restored[key]; });
+    score = Object.assign(restored, { title: score.title }, score.author ? { author: score.author } : {});
     selected = null;
     group = [];
     save();
@@ -380,7 +384,7 @@
     const width = stage.clientWidth;
     if (!width) return;
     renderedWidth = width;
-    toolkit.setOptions(layoutOptions(width));
+    toolkit.setOptions(layoutOptions(width, score.showTabs && tabSpace ? { spacingSystem: 12 + tabSpace, pageMarginBottom: 60 + tabSpace } : undefined));
     toolkit.loadData(M.toMusicXml(score));
     meterPopup.hidePopover();
     clefPopup.hidePopover();
@@ -398,6 +402,8 @@
     mountBarlineButtons();
     mountRowTools();
     mountBarreInputs();
+    mountTabs();
+    document.getElementById('scoreTabToggle')?.setAttribute('aria-pressed', String(!!score.showTabs));
     markSelected();
     updateHoverGhost();
     removeRow.hidden = score.rows.length <= M.MIN_ROWS;
@@ -537,6 +543,54 @@
     });
     if (score.barres) Object.keys(score.barres).forEach((mi) => {
       if (+mi >= M.measures(score).length) M.removeBarre(score, +mi);
+    });
+  }
+
+  // Una tablatura (<ascii-tabs>) bajo cada renglon, con su propio texto: editarla no cambia las notas del pentagrama.
+  const TAB_FONT = 15;
+  const TAB_GAP = 8;
+  const TAB_CLEF_CLEARANCE = 22; // la clave de guitarra (con su 8) baja por debajo del pentagrama
+  function mountTabs() {
+    if (!score.showTabs) { tabSpace = 0; return; }
+    const first = layout[0];
+    if (!first || first.lines.length < 5) return;
+    const unit = (first.lines[1] - first.lines[0]) / 2; // un staff space = 2 unidades de Verovio
+    const mounted = [];
+    M.rowStarts(score).forEach((start, row) => {
+      const head = layout[start];
+      const last = layout[start + score.rows[row].length - 1];
+      if (!head || !last) return;
+      const tabs = document.createElement('ascii-tabs');
+      tabs.className = 'score-tab';
+      tabs.setAttribute('labels', 'none');
+      tabs.setAttribute('variant', 'flat');
+      tabs.setAttribute('theme', 'light');
+      tabs.setAttribute('lang', document.documentElement.lang === 'en' ? 'en' : 'es');
+      tabs.setAttribute('aria-label', t.tabLabel + ' ' + (row + 1));
+      tabs.style.setProperty('--ascii-tabs-font-size', TAB_FONT + 'px');
+      tabs.style.left = head.left + 'px';
+      tabs.style.top = (last.lines[4] + TAB_CLEF_CLEARANCE) + 'px';
+      tabs.style.width = (last.right - head.left) + 'px';
+      tabs.appendChild(document.createElement('ascii-tabs-sheet'));
+      // El componente se redibuja al hacer clic, asi que el escenario ya no puede reconocer el destino: no le llega el evento.
+      tabs.addEventListener('pointerdown', (event) => event.stopPropagation());
+      stage.appendChild(tabs);
+      mounted.push({ tabs, row });
+    });
+    customElements.whenDefined('ascii-tabs').then(() => {
+      if (!mounted.length || !mounted[0].tabs.isConnected) return;
+      mounted.forEach(({ tabs, row }) => {
+        if (score.tabs && score.tabs[row]) tabs.value = [score.tabs[row]];
+        tabs.addEventListener('change', (event) => {
+          const columns = M.sanitizeTabs({ 0: event.detail.value[0] }, 1)[0];
+          score.tabs = score.tabs || {};
+          if (columns) score.tabs[row] = columns; else delete score.tabs[row];
+          if (!Object.keys(score.tabs).length) delete score.tabs;
+          save();
+        });
+      });
+      const want = Math.ceil((mounted[0].tabs.getBoundingClientRect().height + TAB_CLEF_CLEARANCE + TAB_GAP) / unit);
+      if (want !== tabSpace) { tabSpace = want; render(); }
     });
   }
 
@@ -1091,7 +1145,7 @@
   document.addEventListener('pointercancel', (event) => endDrag(event, true));
 
   stage.addEventListener('pointerdown', (event) => {
-    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-key-trigger, .score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span, .score-selection-menu')) return;
+    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-key-trigger, .score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span, .score-selection-menu, .score-tab')) return;
     if (isPlacing(activeItem)) {
       event.preventDefault();
       stage.focus({ preventScroll: true });
@@ -1211,7 +1265,7 @@
   });
 
   document.addEventListener('keydown', (event) => {
-    if (event.target.closest('input, textarea, select, [contenteditable]')) return;
+    if (event.target.closest('input, textarea, select, [contenteditable], ascii-tabs')) return;
     if (event.key === 'Escape') {
       clearBarSelection();
       deactivateTool();
@@ -1676,6 +1730,21 @@
     });
     (item.kind === 'bar' || item.kind === 'barre' ? barlines : palette).appendChild(button);
   });
+
+  // TAB: muestra u oculta una tablatura bajo cada renglon.
+  const tabToggle = document.createElement('button');
+  tabToggle.type = 'button';
+  tabToggle.id = 'scoreTabToggle';
+  tabToggle.className = 'score-palette-item score-tab-toggle tooltip';
+  tabToggle.textContent = 'TAB';
+  tabToggle.setAttribute('aria-label', t.tabToggle);
+  tabToggle.dataset.tooltip = t.tabToggle;
+  tabToggle.addEventListener('click', () => {
+    if (score.showTabs) delete score.showTabs; else score.showTabs = true;
+    save();
+    render();
+  });
+  barlines.appendChild(tabToggle);
 
   // ---- renglones, descargas ----------------------------------------------
 

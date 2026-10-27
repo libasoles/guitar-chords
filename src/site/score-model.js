@@ -320,6 +320,24 @@
     return end <= capacity(score);
   }
 
+  // Tablatura de un renglon: columnas de 6 cuerdas (de la 1a a la 6a) con un traste o null. No depende de las notas del pentagrama.
+  const TAB_STRINGS = 6;
+  const TAB_MAX_COLUMNS = 400;
+  function sanitizeTabs(tabs, rowCount) {
+    const result = {};
+    if (!tabs || typeof tabs !== 'object') return result;
+    Object.keys(tabs).forEach((row) => {
+      const columns = tabs[row];
+      if (!Number.isInteger(+row) || +row < 0 || +row >= rowCount || !Array.isArray(columns)) return;
+      const clean = columns.slice(0, TAB_MAX_COLUMNS).map((column) => Array.from({ length: TAB_STRINGS }, (_, s) => {
+        const fret = Array.isArray(column) ? column[s] : null;
+        return Number.isInteger(fret) && fret >= 0 && fret <= MAX_FRET ? fret : null;
+      }));
+      if (clean.some((column) => column.some((fret) => fret !== null))) result[row] = clean;
+    });
+    return result;
+  }
+
   // Descarta lo que no sea una partitura valida (por ejemplo, datos viejos o editados a mano).
   // `scale` son las divisiones de negra con que se guardaron los datos (8 antes de los tresillos).
   function sanitize(data, scale) {
@@ -384,7 +402,8 @@
       if (Number.isInteger(to) && (span ? to > 0 : to > at) && to < capacity({ meter })) result.to = to;
       barres[index] = result;
     });
-    return Object.assign(Object.keys(barlines).length ? { barlines } : {}, Object.keys(keys).length ? { keys } : {}, Object.keys(barres).length ? { barres } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
+    const tabs = sanitizeTabs(data.tabs, rows.length);
+    return Object.assign(Object.keys(barlines).length ? { barlines } : {}, Object.keys(keys).length ? { keys } : {}, Object.keys(barres).length ? { barres } : {}, data.showTabs === true ? { showTabs: true } : {}, Object.keys(tabs).length ? { tabs } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
   }
 
   // Rellena huecos con silencios ocultos: el final del compas y el espacio entre figuras sueltas.
@@ -783,7 +802,7 @@
   return {
     DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
     length, gridOf, onsets, settle, placement, insertAt, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot,
-    meterOf, clefOf, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, toMusicXml,
+    meterOf, clefOf, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };
 });

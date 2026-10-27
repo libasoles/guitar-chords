@@ -317,6 +317,17 @@ body.score-body {
   -webkit-user-select: none;
 }
 
+.score-tab {
+  position: absolute;
+}
+
+.score-tab-toggle {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .score-stage[aria-busy="true"] {
   background: #fff url("partitura-loading.svg") center / 3rem no-repeat;
 }
