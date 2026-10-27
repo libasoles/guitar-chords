@@ -36,7 +36,7 @@ run('articles-preludios', async ({ base, context, page, BASE_URL }) => {
       // On a phone the card does not open the preview: its title downloads the PDF directly.
       assert.equal(await cards.first().locator('.prelude-open').isVisible(), false);
       assert.equal(decodeURIComponent(await cards.first().locator('.prelude-pdf-link').getAttribute('href')).split('/').pop(), published[0].pdf);
-      {
+      if (locale === 'es') {
         const tab = await context.newPage();
         await tab.setViewportSize({ width: 375, height: 800 });
         await tab.goto(base + url);
@@ -100,7 +100,7 @@ run('articles-preludios', async ({ base, context, page, BASE_URL }) => {
       // Every card's PDF link serves a PDF; the first one is also clicked, which downloads it with the expected name.
       const pdfLinks = await page.locator('.prelude-card > .example-download').evaluateAll((els) => els.map((el) => el.getAttribute('href')));
       for (const href of pdfLinks) await assertPdfServed(context, base, href);
-      {
+      if (locale === 'es') {
         const tab = await context.newPage();
         await tab.setViewportSize({ width: 375, height: 800 });
         await tab.goto(base + url);

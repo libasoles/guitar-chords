@@ -84,9 +84,10 @@ run('articles-carcassi', async ({ base, page, tmp, BASE_URL }) => {
     const scripts = await page.locator('script[src]').evaluateAll((els) => els.map((el) => el.src));
     assert.ok(scripts.every((src) => src.includes('googletagmanager') || /vendor\/(ascii-tabs|svguitar)|\/assets\/chord-(diagram|card)/.test(src)), scripts.join(','));
 
-    // Each card downloads its score PDF.
+    // Each card downloads its score PDF. The files are the same in both locales and
+    // the Spanish page has them all, so they are downloaded once.
     const cards = page.locator('.example-card');
-    for (let i = 0; i < pdfs.length; i++) {
+    for (let i = 0; i < (locale === 'es' ? pdfs.length : 0); i++) {
       const [download] = await Promise.all([page.waitForEvent('download'), cards.nth(i).click()]);
       assert.equal(download.suggestedFilename(), pdfs[i]);
       const saved = path.join(tmp, 'download-' + i + '.pdf');

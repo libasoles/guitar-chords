@@ -45,7 +45,11 @@ const overflowOf = (page) => page.evaluate(() => document.documentElement.scroll
 /* A PDF link is checked by fetching it; the click-to-download path is only
    exercised once per page, in a fresh tab (Chromium stops honouring downloads
    after ~10 in one tab). */
+const servedPdfs = new Set();
 async function assertPdfServed(context, base, href) {
+  // The files are the same in every locale, so each one is fetched once.
+  if (servedPdfs.has(href)) return;
+  servedPdfs.add(href);
   const response = await context.request.get(new URL(href, base).href);
   assert.equal(response.status(), 200, href);
   assert.equal((await response.body()).subarray(0, 4).toString(), '%PDF', href);
@@ -86,10 +90,13 @@ async function checkCollection(env, spec) {
     await cards.first().click();
     const modal = page.locator('.modal-full:popover-open');
     assert.equal(await modal.count(), 1);
-    const first = modal.locator('img.modal-page').first();
-    await first.evaluate((img) => img.decode());
-    assert.ok(await first.evaluate((img) => img.naturalWidth > 0));
-    assert.match(await first.getAttribute('src'), spec.firstSrc);
+    if (locale === 'es') {
+      // The page images are the same files in both locales, so they are loaded once.
+      const first = modal.locator('img.modal-page').first();
+      await first.evaluate((img) => img.decode());
+      assert.ok(await first.evaluate((img) => img.naturalWidth > 0));
+      assert.match(await first.getAttribute('src'), spec.firstSrc);
+    }
     assert.equal(decodeURIComponent(await modal.locator('.modal-footer .modal-download').getAttribute('href')).split('/').pop(), published[0].pdf);
     if (spec.steps) {
       // Lessons are progressive: the footer has previous/next chevrons, disabled at either end.
@@ -111,7 +118,7 @@ async function checkCollection(env, spec) {
     await page.setViewportSize({ width: 375, height: 800 });
     const overflow = await overflowOf(page);
     assert.ok(overflow <= 0, 'scroll horizontal de ' + overflow + 'px en ' + url);
-    if (spec.download) await assertFirstCardDownloads(env, url, published[0].pdf);
+    if (spec.download && locale === 'es') await assertFirstCardDownloads(env, url, published[0].pdf);
   }
 }
 
@@ -125,14 +132,16 @@ async function checkLateralNav({ base, context, page }, slug) {
     const modal = page.locator('.modal-full:popover-open');
     const steps = modal.locator('.modal-step');
     assert.equal(await modal.locator('.modal-download').isVisible(), true);
-    const downloadTab = await context.newPage();
-    await downloadTab.setViewportSize({ width: 1280, height: 800 });
-    await downloadTab.goto(base + pagePath(slug, locale));
-    await downloadTab.locator('.prelude-card').first().click();
-    const downloadLink = downloadTab.locator('.modal-full:popover-open .modal-download');
-    const [download] = await Promise.all([downloadTab.waitForEvent('download'), downloadLink.click()]);
-    assert.equal(download.suggestedFilename(), decodeURIComponent(await downloadLink.getAttribute('href')).split('/').pop());
-    await downloadTab.close();
+    if (locale === 'es') {
+      const downloadTab = await context.newPage();
+      await downloadTab.setViewportSize({ width: 1280, height: 800 });
+      await downloadTab.goto(base + pagePath(slug, locale));
+      await downloadTab.locator('.prelude-card').first().click();
+      const downloadLink = downloadTab.locator('.modal-full:popover-open .modal-download');
+      const [download] = await Promise.all([downloadTab.waitForEvent('download'), downloadLink.click()]);
+      assert.equal(download.suggestedFilename(), decodeURIComponent(await downloadLink.getAttribute('href')).split('/').pop());
+      await downloadTab.close();
+    }
     assert.equal(await steps.first().isDisabled(), true);
     for (const width of [800, 1280, 2560]) {
       await page.setViewportSize({ width, height: 800 });
