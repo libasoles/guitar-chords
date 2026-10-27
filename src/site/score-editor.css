@@ -224,7 +224,7 @@ body.score-body {
 .score-palette-item:hover,
 .score-tool:hover,
 .score-download:hover {
-  background: #fff;
+  color: var(--blue-france);
 }
 
 .score-palette-item[aria-pressed="true"] {
@@ -385,8 +385,8 @@ body.score-dragging {
 .score-meter-trigger:focus-visible,
 .score-clef-trigger:hover,
 .score-clef-trigger:focus-visible {
-  border-color: var(--rule);
-  background: rgb(0 0 0 / 4%);
+  color: var(--blue-france);
+  border-color: var(--blue-france);
 }
 
 .score-meter-popup {
@@ -425,7 +425,8 @@ body.score-dragging {
 }
 
 .score-meter-options button:hover {
-  background: #fff;
+  color: var(--blue-france);
+  border-color: var(--blue-france);
 }
 
 .score-meter-options button[aria-pressed="true"] {
@@ -471,7 +472,7 @@ body.score-dragging {
 }
 
 .score-signature-option:hover {
-  background: #fff;
+  color: var(--blue-france);
 }
 
 .score-signature-option[aria-pressed="true"] {
@@ -502,7 +503,6 @@ body.score-dragging {
   left: auto;
   transform: none;
 }
-
 
 .score-barline-trigger {
   position: absolute;
@@ -544,7 +544,7 @@ body.score-dragging {
 }
 
 .score-barline-remove:hover {
-  background: #f0eae0;
+  color: var(--blue-france);
 }
 
 .score-barre-field {
@@ -615,6 +615,13 @@ body.score-dragging {
 .score-barre-grip:focus-visible,
 .is-resizing-barre .score-barre-grip {
   opacity: 1;
+}
+
+.score-barre-live {
+  position: absolute;
+  height: 0;
+  border-top: 1.5px dashed var(--ink);
+  pointer-events: none;
 }
 
 .score-barre-preview {
@@ -732,7 +739,7 @@ html body[data-scroll-locked] {
 
 .score-selection-action:hover,
 .score-selection-action:focus-visible {
-  background: rgb(0 0 0 / 6%);
+  color: var(--blue-france);
 }
 
 .score-marquee {

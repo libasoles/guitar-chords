@@ -573,11 +573,28 @@
       const { starts, centers } = anchors.get(k);
       return xAtTime(time - (k - mi) * end, layout[k], starts, centers);
     };
-    const line = stage.querySelector('[id="m' + mi + '"] g.bracketSpan path').getBoundingClientRect();
+    const path = stage.querySelector('[id="m' + mi + '"] g.bracketSpan path');
+    const line = path.getBoundingClientRect();
+    const zone = stage.querySelector('.score-barre-span');
+    const fixed = (side === 'end' ? line.left : line.right) - origin.left;
     const preview = document.createElement('span');
     preview.className = 'score-barre-preview';
     preview.style.top = (line.top + line.height / 2 - origin.top) + 'px';
     stage.appendChild(preview);
+    // La linea punteada original se oculta y se redibuja en vivo entre el extremo fijo y el que se arrastra.
+    const live = document.createElement('span');
+    live.className = 'score-barre-live';
+    live.style.top = preview.style.top;
+    stage.appendChild(live);
+    path.style.visibility = 'hidden';
+    const place = (x) => {
+      const left = Math.min(fixed, x);
+      const width = Math.abs(x - fixed);
+      live.style.left = left + 'px';
+      live.style.width = width + 'px';
+      zone.style.left = left + 'px';
+      zone.style.width = width + 'px';
+    };
     stage.classList.add('is-resizing-barre');
     barreResize = {
       id: event.pointerId,
@@ -589,13 +606,19 @@
           if (!best || Math.abs(tx - x) < Math.abs(best.x - x)) best = { time, x: tx };
         });
         barreResize.pick = best && best.time;
-        if (best) preview.style.left = best.x + 'px';
+        if (best) {
+          preview.style.left = best.x + 'px';
+          place(best.x);
+        }
       },
       finish(commit) {
         preview.remove();
+        live.remove();
+        path.style.visibility = '';
         stage.classList.remove('is-resizing-barre');
         barreResize = null;
         if (commit && this.pick !== undefined) resizeBarre(mi, side, this.pick);
+        render(); // deja asas y linea en su lugar si no hubo cambio
       },
     };
     barreResize.move(event);
