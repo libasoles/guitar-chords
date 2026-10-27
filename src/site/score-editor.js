@@ -438,6 +438,8 @@
         button.dataset.side = side;
         button.setAttribute('aria-label', t.selectBarline);
         button.setAttribute('aria-pressed', 'false');
+        button.setAttribute('aria-haspopup', 'dialog');
+        button.setAttribute('aria-expanded', 'false');
         button.style.left = x + 'px';
         button.style.top = y + 'px';
         button.style.width = Math.max(20, box.width + 12) + 'px';
@@ -462,6 +464,12 @@
             if (event.key === 'Escape') { clearBarSelection(); button.focus(); }
           });
           stage.appendChild(remove);
+          // La armadura rige desde el compas siguiente si la barra cierra el compas, o desde este si la abre.
+          const target = side === 'start' ? mi : mi + 1;
+          if (target < M.measures(score).length) {
+            if (clefPopup.matches(':popover-open')) clefPopup.hidePopover();
+            else openClefPopup({ kind: 'bar', mi, side }, target);
+          }
         });
         stage.appendChild(button);
       });
@@ -1139,7 +1147,9 @@
   clefPopup.setAttribute('role', 'dialog');
   clefPopup.setAttribute('aria-label', t.clefAndKey);
   document.querySelector('.score-page').appendChild(clefPopup);
-  let clefAnchor = 0;
+  // Donde se abrio el popup (clave de un renglon o barra) y compas desde el que rige la armadura que se elija.
+  let clefAnchor = { kind: 'clef', index: 0 };
+  let keyMeasure = 0;
   let previewToolkit = null;
   let galleryClef = null;
 
@@ -1162,9 +1172,10 @@
     button.dataset.tooltip = label;
     button.setAttribute('aria-label', label);
     button.addEventListener('click', () => {
-      const current = field === 'clef' ? M.clefOf(score) : M.fifthsOf(score);
-      if (current !== value) change(() => { score[field] = value; });
-      openClefPopup(clefAnchor, button);
+      if (field === 'clef') {
+        if (M.clefOf(score) !== value) change(() => { score.clef = value; });
+      } else if (M.keyAt(score, keyMeasure) !== value) change(() => M.setKey(score, keyMeasure, value));
+      openClefPopup(clefAnchor, keyMeasure, button);
     });
     group.appendChild(button);
     return button;
@@ -1231,14 +1242,21 @@
     svg.setAttribute('viewBox', `${left} ${top} ${width} ${height}`);
   }
 
-  function openClefPopup(index, focusButton) {
-    clefAnchor = index;
-    const anchorButton = stage.querySelectorAll('.score-clef-trigger')[index];
+  function anchorButtonOf(anchor) {
+    return anchor.kind === 'clef'
+      ? stage.querySelectorAll('.score-clef-trigger')[anchor.index]
+      : stage.querySelector('.score-barline-trigger[data-measure="' + anchor.mi + '"][data-side="' + anchor.side + '"]');
+  }
+
+  function openClefPopup(origin, measure, focusButton) {
+    clefAnchor = origin;
+    keyMeasure = measure;
+    const anchorButton = anchorButtonOf(origin);
     clefOptions.querySelectorAll('button').forEach((button) => {
       button.setAttribute('aria-pressed', String(button.dataset.clef === M.clefOf(score)));
     });
     keyOptions.querySelectorAll('button').forEach((button) => {
-      button.setAttribute('aria-pressed', String(Number(button.dataset.fifths) === M.fifthsOf(score)));
+      button.setAttribute('aria-pressed', String(Number(button.dataset.fifths) === M.keyAt(score, keyMeasure)));
     });
     if (!clefPopup.matches(':popover-open')) clefPopup.showPopover();
     clefOptions.querySelectorAll('button').forEach((button) => {
@@ -1261,7 +1279,10 @@
 
   clefPopup.addEventListener('toggle', (event) => {
     stage.querySelectorAll('.score-clef-trigger').forEach((button, i) => {
-      button.setAttribute('aria-expanded', String(event.newState === 'open' && i === clefAnchor));
+      button.setAttribute('aria-expanded', String(event.newState === 'open' && clefAnchor.kind === 'clef' && i === clefAnchor.index));
+    });
+    stage.querySelectorAll('.score-barline-trigger').forEach((button) => {
+      button.setAttribute('aria-expanded', String(event.newState === 'open' && clefAnchor.kind === 'bar' && Number(button.dataset.measure) === clefAnchor.mi && button.dataset.side === clefAnchor.side));
     });
   });
 
@@ -1272,7 +1293,7 @@
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'score-clef-trigger';
-      button.setAttribute('aria-label', t.clefAndKey + ': ' + t.clefs[M.clefOf(score)] + ', ' + t.keys[M.fifthsOf(score) + 7]);
+      button.setAttribute('aria-label', t.clefAndKey + ': ' + t.clefs[M.clefOf(score)] + ', ' + t.keys[M.keyAt(score, i * M.PER_ROW) + 7]);
       button.setAttribute('aria-controls', clefPopup.id);
       button.setAttribute('aria-haspopup', 'dialog');
       button.setAttribute('aria-expanded', 'false');
@@ -1281,7 +1302,7 @@
       button.style.height = Math.max(44, box.height + 8) + 'px';
       button.addEventListener('click', () => {
         if (clefPopup.matches(':popover-open')) { clefPopup.hidePopover(); return; }
-        openClefPopup(i);
+        openClefPopup({ kind: 'clef', index: i }, i * M.PER_ROW);
       });
       stage.appendChild(button);
     });
@@ -1487,6 +1508,7 @@
     if (score.rows.length <= M.MIN_ROWS) return false;
     selected = null;
     score.rows.pop();
+    M.pruneKeys(score);
     if (score.barlines) Object.keys(score.barlines).forEach((mi) => {
       if (+mi >= M.measures(score).length) delete score.barlines[mi];
     });

@@ -577,3 +577,36 @@ test('las fusas se unen con una tercera barra', () => {
   assert.deepEqual(level(3), ['begin', 'end']);
   assert.deepEqual(level(2), ['begin', 'continue', 'continue', 'end']);
 });
+
+test('un cambio de armadura rige desde su compas y no toca los anteriores', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ d: 'w', n: 31 }];
+  score.rows[1][0] = [{ d: 'w', n: 31 }];
+  score.rows[2][0] = [{ d: 'w', n: 31 }];
+  assert.ok(M.setKey(score, 4, 2));
+  assert.deepEqual(score.keys, { 4: 2 });
+  assert.equal(score.fifths, 0);
+  assert.deepEqual([0, 3, 4, 7, 8, 11].map((mi) => M.keyAt(score, mi)), [0, 0, 2, 2, 2, 2]);
+  assert.ok(M.setKey(score, 8, -1));
+  assert.deepEqual([4, 7, 8].map((mi) => M.keyAt(score, mi)), [2, 2, -1]);
+  const xml = M.toMusicXml(score);
+  assert.deepEqual([...xml.matchAll(/<fifths>(-?\d+)<\/fifths>/g)].map((m) => m[1]), ['0', '2', '-1']);
+  const notes = [...xml.matchAll(/<note id="e\d+-\d+">([^]*?)<\/note>/g)].map((m) => m[1]);
+  assert.deepEqual(notes.map((n) => n.includes('<alter>')), [false, true, false]);
+  assert.equal(M.keyAlter(31, score, 8), 0);
+  assert.equal(M.keyAlter(31, score, 4), 1);
+  // Repetir la armadura anterior quita el cambio.
+  assert.ok(M.setKey(score, 8, 2));
+  assert.deepEqual(score.keys, { 4: 2 });
+  assert.ok(M.setKey(score, 4, 0));
+  assert.equal(score.keys, undefined);
+  assert.ok(!M.setKey(score, 12, 1));
+  assert.ok(!M.setKey(score, 1, 8));
+});
+
+test('los cambios de armadura se conservan al sanear y se descartan los invalidos', () => {
+  const base = M.emptyScore();
+  const data = { ...base, fifths: 1, keys: { 0: 3, 4: 1, 5: 2, 6: 9, 7: '2', x: 1, 99: 1, 8: -2 } };
+  assert.deepEqual(M.sanitize(data).keys, { 5: 2, 8: -2 });
+  assert.equal(M.sanitize({ ...base }).keys, undefined);
+});

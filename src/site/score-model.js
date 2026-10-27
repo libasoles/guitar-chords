@@ -196,8 +196,38 @@
     return CLEFS[clefOf(score)].bottom;
   }
 
-  function keyAlter(n, score) {
-    const fifths = fifthsOf(score);
+  // Armadura vigente en el compas `mi`: la inicial, cambiada por `score.keys` (compas -> quintas) hasta el siguiente cambio.
+  function keyAt(score, mi) {
+    let fifths = fifthsOf(score);
+    let last = 0;
+    Object.entries((score && score.keys) || {}).forEach(([index, value]) => {
+      if (+index <= mi && +index > last && Number.isInteger(value) && Math.abs(value) <= 7) { fifths = value; last = +index; }
+    });
+    return fifths;
+  }
+
+  // La armadura nueva rige desde el compas `mi` hasta el siguiente cambio; los compases anteriores no se tocan.
+  function setKey(score, mi, fifths) {
+    if (!Number.isInteger(mi) || mi < 0 || mi >= measures(score).length || !Number.isInteger(fifths) || Math.abs(fifths) > 7) return false;
+    if (mi === 0) score.fifths = fifths;
+    else (score.keys = score.keys || {})[mi] = fifths;
+    pruneKeys(score);
+    return true;
+  }
+
+  // Quita los cambios fuera de la partitura y los que repiten la armadura anterior.
+  function pruneKeys(score) {
+    if (!score.keys) return;
+    let previous = fifthsOf(score);
+    Object.keys(score.keys).map(Number).sort((a, b) => a - b).forEach((mi) => {
+      if (mi < 1 || mi >= measures(score).length || score.keys[mi] === previous) delete score.keys[mi];
+      else previous = score.keys[mi];
+    });
+    if (!Object.keys(score.keys).length) delete score.keys;
+  }
+
+  function keyAlter(n, score, mi) {
+    const fifths = mi === undefined ? fifthsOf(score) : keyAt(score, mi);
     const order = fifths > 0 ? ['F', 'C', 'G', 'D', 'A', 'E', 'B'] : ['B', 'E', 'A', 'D', 'G', 'C', 'F'];
     return order.slice(0, Math.abs(fifths)).includes(STEPS[n % 7]) ? Math.sign(fifths) : 0;
   }
@@ -272,6 +302,12 @@
       else if (bar.double === true || bar.single === true) barlines[index] = { double: true };
       if (bar.hidden === true && bar.end !== true) barlines[index] = Object.assign(barlines[index] || {}, { hidden: true });
     });
+    const keys = {};
+    let previousKey = fifthsOf(data);
+    Object.entries(data.keys || {}).filter(([index]) => /^[1-9]\d*$/.test(index) && +index < rows.length * PER_ROW).sort((a, b) => a[0] - b[0]).forEach(([index, value]) => {
+      if (!Number.isInteger(value) || Math.abs(value) > 7 || value === previousKey) return;
+      keys[index] = previousKey = value;
+    });
     const barres = {};
     Object.entries(data.barres || {}).forEach(([index, barre]) => {
       if (!/^(0|[1-9]\d*)$/.test(index) || +index >= rows.length * PER_ROW || !barre) return;
@@ -287,7 +323,7 @@
       if (Number.isInteger(to) && (span ? to > 0 : to > at) && to < capacity({ meter })) result.to = to;
       barres[index] = result;
     });
-    return Object.assign(Object.keys(barlines).length ? { barlines } : {}, Object.keys(barres).length ? { barres } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
+    return Object.assign(Object.keys(barlines).length ? { barlines } : {}, Object.keys(keys).length ? { keys } : {}, Object.keys(barres).length ? { barres } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
   }
 
   // Rellena huecos con silencios ocultos: el final del compas y el espacio entre figuras sueltas.
@@ -605,6 +641,7 @@
           `<time><beats>${beats}</beats><beat-type>${unit}</beat-type></time>` +
           `<clef><sign>${clef.sign}</sign><line>${clef.line}</line>${clef.octave ? `<clef-octave-change>${clef.octave}</clef-octave-change>` : ''}</clef></attributes>`;
       }
+      if (mi > 0 && keyAt(score, mi) !== keyAt(score, mi - 1)) xml += `<attributes><key><fifths>${keyAt(score, mi)}</fifths></key></attributes>`;
       const bar = score.barlines && score.barlines[mi];
       if (bar && bar.start) xml += '<barline location="left"><repeat direction="forward"/></barline>';
       const starts = onsets(measure);
@@ -614,7 +651,7 @@
       measure.map((ev, i) => i).sort((a, b) => starts[a] - starts[b]).forEach((i) => {
         const ev = measure[i];
         if (!ev.rest && ev.acc) accidentals.set(ev.n, ACCIDENTALS[ev.acc].alter);
-        alters[i] = accidentals.has(ev.n) ? accidentals.get(ev.n) : keyAlter(ev.n, score);
+        alters[i] = accidentals.has(ev.n) ? accidentals.get(ev.n) : keyAlter(ev.n, score, mi);
       });
       const barre = score.barres && score.barres[mi];
       // Una cejilla que viene de compases anteriores solo cierra aqui.
@@ -684,7 +721,7 @@
   return {
     DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
     length, gridOf, onsets, settle, placement, insertAt, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, fits, canDot,
-    meterOf, clefOf, fifthsOf, bottomLine, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, toMusicXml,
+    meterOf, clefOf, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };
 });

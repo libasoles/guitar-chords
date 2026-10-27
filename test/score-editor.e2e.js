@@ -103,6 +103,40 @@ async function checkBarlines(page) {
   }
 }
 
+async function checkKeyChanges(page) {
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+  const keys = () => page.evaluate(() => [scoreEditor.score.fifths, scoreEditor.score.keys || null]);
+  // La armadura elegida en el segundo renglon no toca el primero.
+  await page.locator('.score-clef-trigger').nth(1).click();
+  await page.locator('.score-key-options [data-fifths="2"]').click();
+  await page.keyboard.press('Escape');
+  assert.deepEqual(await keys(), [0, { 4: 2 }]);
+  assert.equal(await page.locator('#scoreStage g.measure').nth(0).locator('g.keyAccid').count(), 0);
+  assert.equal(await page.locator('#scoreStage g.measure').nth(4).locator('g.keyAccid').count(), 2);
+  // La barra de cierre de un compas cambia la armadura del compas siguiente.
+  await page.locator('.score-barline-trigger[data-measure="1"][data-side="end"]').click();
+  assert.equal(await page.locator('#scoreClefPopup').isVisible(), true);
+  await page.locator('.score-key-options [data-fifths="-2"]').click();
+  await page.keyboard.press('Escape');
+  assert.deepEqual(await keys(), [0, { 2: -2, 4: 2 }]);
+  // La barra de inicio de un compas (repeticion) cambia la armadura de ese mismo compas.
+  await page.locator('[data-barline="start"]').click();
+  const point = await page.locator('#scoreStage g.measure').nth(5).evaluate(node => {
+    const r = node.querySelector('g.staff > path').getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + 10 };
+  });
+  await page.mouse.click(point.x, point.y);
+  await page.locator('.score-barline-trigger[data-measure="5"][data-side="start"]').click();
+  await page.locator('.score-key-options [data-fifths="1"]').click();
+  await page.keyboard.press('Escape');
+  assert.deepEqual(await keys(), [0, { 2: -2, 4: 2, 5: 1 }]);
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+  assert.deepEqual(await keys(), [0, { 2: -2, 4: 2, 5: 1 }]);
+}
+
 async function checkBarre(page) {
   await page.evaluate(() => localStorage.clear());
   await page.reload();
@@ -527,6 +561,7 @@ async function run() {
     await checkDrag(dragPage);
     await checkBarlines(dragPage);
     await checkBarre(dragPage);
+    await checkKeyChanges(dragPage);
     await dragPage.close();
     for (const [route, keys] of [
       ['/partitura', ['p', 's', 'b', 'c']],
