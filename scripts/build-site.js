@@ -1796,6 +1796,10 @@ const ASSETS_DIST = path.join(DIST_SITE, "assets");
 const VENDOR_DIST = path.join(ASSETS_DIST, "vendor");
 ensureDir(ASSETS_DIST);
 ensureDir(VENDOR_DIST);
+copyFile(
+  path.join(ROOT, "src/extensions/tabs/icon.svg"),
+  path.join(ASSETS_DIST, "guitar-tabs.svg"),
+);
 
 // Shared JS.
 [
@@ -2366,7 +2370,10 @@ function siteMenu(strings, locale) {
     escapeHtml(strings.menuChordFinder) +
     "</strong><small>" +
     escapeHtml(strings.extensionDescription) +
-    '</small></span><img src="/assets/guitar-player-cubist-left-head.svg" alt="" width="48" height="48"></a></div></nav></details>' +
+    '</small></span><img src="/assets/guitar-player-cubist-left-head.svg" alt="" width="48" height="48"></a>' +
+    '<a class="site-menu-ext" href="https://chromewebstore.google.com/detail/guitar-tabs/ikhfhclkbcienaofdjjjnaalcigehkhk?authuser=0&amp;hl=es-419" target="_blank" rel="noopener"><span><strong>Guitar Tabs</strong><small>' +
+    escapeHtml(strings.menuTabsExtensionDescription) +
+    '</small></span><img src="/assets/guitar-tabs.svg" alt="" width="48" height="48"></a></div></nav></details>' +
     SITE_MENU_SCRIPT
   );
 }
