@@ -140,9 +140,12 @@ const PDFS = [
       assert.equal(await page.locator('.sequence-forms ascii-tabs[readonly]').count(), 87);
       const titles = await page.locator('.arpeggio-group figcaption').allTextContents();
       assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Do menor', 'Do 7'] : ['C major', 'C minor', 'C 7']);
-      const groups = await page.locator('.arpeggio-group ascii-tabs').evaluateAll((els) => els.map((el) => el.value[0].filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
+      const groups = await page.locator('.arpeggio-group ascii-tabs').evaluateAll((els) => els.map((el) => el.value.flat().filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
+      // Include every staff: long groups wrap after six forms.
+      const groupIds = await page.locator('.arpeggio-group ascii-tabs').evaluateAll((els) => els.map((el) => Number(el.querySelector('.arpeggio-chord').getAttribute('popovertarget').match(/^arpeggio-chord-(\d+)-/)[1])));
+      assert.deepEqual(groups, groupIds.map((id) => ARPEGGIOS[id][4]));
       groups.flat().forEach((form) => assert.equal(form.filter((f) => f !== null).length, 4));
-      assert.deepEqual(await page.locator('#arpeggio-E-panel-2 ascii-tabs').first().evaluate((el) => el.value[0].filter((column) => column.some((note) => note !== null)).map((column) => column.map((note) => note === null ? null : note.fret))), arpeggioGroup('E', 'Seventh')[4]);
+      assert.deepEqual(await page.locator('#arpeggio-E-panel-2 ascii-tabs').first().evaluate((el) => el.value.flat().filter((column) => column.some((note) => note !== null)).map((column) => column.map((note) => note === null ? null : note.fret))), arpeggioGroup('E', 'Seventh')[4]);
       assert.equal(await page.locator('ascii-tabs[variant="flat"]').count(), groups.length);
       // Only the bass (the lowest sounding string of each chord) is bold.
       const weights = await page.locator('ascii-tabs').evaluateAll((tabs) => tabs.flatMap((tab) => {
@@ -164,7 +167,7 @@ const PDFS = [
       ]);
       assert.ok(nameBottom <= paperTop + 1,'chord names sit above the paper');
       assert.equal(await page.locator('.arpeggio-chord').first().evaluate((el) => getComputedStyle(el).textDecorationLine), 'none');
-      assert.deepEqual(await page.locator('#arpeggio-D-panel-2 ascii-tabs').first().evaluate((el) => el.value[0].filter((column) => column.some((note) => note !== null)).map((column) => column.map((note) => note === null ? null : note.fret))), arpeggioGroup('D', 'Seventh')[4]);
+      assert.deepEqual(await page.locator('#arpeggio-D-panel-2 ascii-tabs').first().evaluate((el) => el.value.flat().filter((column) => column.some((note) => note !== null)).map((column) => column.map((note) => note === null ? null : note.fret))), arpeggioGroup('D', 'Seventh')[4]);
       assert.equal(await page.locator('.arpeggio-group').count(), 13);
 
       // Note search: typed frets keep every chord of each root that has them, in one tab per root.
@@ -233,7 +236,7 @@ const PDFS = [
         await page.locator('#arpeggio-' + root + '-root').locator('..').getByRole('tab', { name: label, exact: true }).click();
         const panel = page.locator('.arpeggio-group').filter({ has: page.locator('#arpeggio-' + root + '-root') }).locator('[role="tabpanel"]:visible');
         assert.deepEqual(await panel.locator('ascii-tabs').first().locator('.arpeggio-chord').allTextContents(), names);
-        const forms = await panel.locator('ascii-tabs').first().evaluate((el) => el.value[0].filter((column) => column.some((note) => note !== null)));
+        const forms = await panel.locator('ascii-tabs').first().evaluate((el) => el.value.flat().filter((column) => column.some((note) => note !== null)));
         if (root === 'A' && quality === 'Seventh') {
           assert.deepEqual(forms[1].map((note) => note === null ? null : note.fret), [null, 2, 0, 2, 0, null]);
         }
