@@ -34,6 +34,19 @@
       title.blur();
     }
   });
+  const author = document.getElementById('scoreAuthor');
+  author.value = score.author || '';
+  author.addEventListener('input', () => {
+    if (author.value) score.author = author.value;
+    else delete score.author;
+    save();
+  });
+  author.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      author.blur();
+    }
+  });
   let toolkit = null;
   let selected = null; // { mi, i }: la figura principal
   let group = []; // con dos o mas figuras elegidas, todas (incluida la principal)
@@ -107,7 +120,7 @@
 
   function undo() {
     if (!history.length) return;
-    score = Object.assign(history.pop(), { title: score.title });
+    score = Object.assign(history.pop(), { title: score.title }, score.author ? { author: score.author } : {});
     selected = null;
     group = [];
     save();
@@ -1397,7 +1410,7 @@
     });
     if (confirmed) change(() => {
       selected = null;
-      score = Object.assign(M.emptyScore(), { title: score.title });
+      score = Object.assign(M.emptyScore(), { title: score.title }, score.author ? { author: score.author } : {});
     });
     button.focus();
   });
@@ -1505,7 +1518,7 @@
         svgViewBox: true,
         pageMarginLeft: 100,
         pageMarginRight: 100,
-        pageMarginTop: score.title ? 230 : 150,
+        pageMarginTop: score.title || score.author ? 230 : 150,
         pageMarginBottom: 150,
         justifyVertically: false,
         minLastJustification: 0,
@@ -1517,6 +1530,13 @@
         const image = await rasterize(withoutMeasureNumbers(pdfToolkit.renderToSVG(page)), 1654, 2339);
         if (page > 1) pdf.addPage();
         pdf.addImage(image, 'JPEG', 0, 0, 210, 297);
+        if (page === 1 && score.author) {
+          pdf.setFont('times', 'normal');
+          pdf.setFontSize(11);
+          pdf.setTextColor(120);
+          pdf.text(score.author, 201.25, 10, { align: 'right' });
+          pdf.setTextColor(0);
+        }
         if (page === 1 && score.title) {
           pdf.setFont('times', 'bold');
           pdf.setFontSize(18);

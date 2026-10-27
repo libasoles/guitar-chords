@@ -569,6 +569,8 @@
   "scoreMetaDescription": "A minimal sheet music editor.",
   "scoreH1": "Sheet music",
   "scoreTitleLabel": "Score title",
+  "scoreAuthorLabel": "Score author",
+  "scoreAuthorPlaceholder": "Author",
   "scoreToolbar": "Notes, rests and accidentals",
   "scoreBarlines": "Barlines",
   "scoreLabel": "Sheet music",

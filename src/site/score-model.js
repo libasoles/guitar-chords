@@ -259,7 +259,7 @@
       if (!Number.isInteger(barre.fret) || barre.fret < 1 || barre.fret > MAX_FRET) return;
       barres[index] = Number.isInteger(to) && to > at && to < capacity({ meter }) ? { at, to, fret: barre.fret } : { at, fret: barre.fret };
     });
-    return Object.assign(Object.keys(barlines).length ? { barlines } : {}, Object.keys(barres).length ? { barres } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {});
+    return Object.assign(Object.keys(barlines).length ? { barlines } : {}, Object.keys(barres).length ? { barres } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
   }
 
   // Rellena huecos con silencios ocultos: el final del compas y el espacio entre figuras sueltas.
@@ -555,6 +555,7 @@
     const [beats, unit] = meterOf(score).split('/');
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<score-partwise version="3.1">' +
       (score.title ? '<work><work-title>' + score.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</work-title></work>' : '') +
+      (score.author ? '<identification><creator type="composer">' + score.author.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</creator></identification>' : '') +
       '<part-list><score-part id="P1"><part-name print-object="no">Guitar</part-name></score-part></part-list><part id="P1">';
     const roles = new Map();
     const roleOf = (ref) => {

@@ -569,6 +569,8 @@
   "scoreMetaDescription": "Editor mínimo de partituras.",
   "scoreH1": "Partitura",
   "scoreTitleLabel": "Título de la partitura",
+  "scoreAuthorLabel": "Autor de la partitura",
+  "scoreAuthorPlaceholder": "Autor",
   "scoreToolbar": "Notas, silencios y alteraciones",
   "scoreBarlines": "Barras de compás",
   "scoreLabel": "Partitura",
