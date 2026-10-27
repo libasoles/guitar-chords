@@ -374,6 +374,8 @@ async function checkClear(page) {
   assert.ok(await filled() > 0, 'a note was placed');
   const [clear, download] = await Promise.all(['#scoreClear', '#scoreDownloadToggle'].map(id => page.locator(id).boundingBox()));
   assert.ok(clear.y < download.y, 'delete sits right above download');
+  assert.equal(await page.locator('.score-side #scoreClear, .score-side #scoreDownloadToggle').count(), 0, 'actions are their own sidebar, apart from the barlines');
+  assert.ok(download.y + download.height > page.viewportSize().height - 60, 'download sits at the bottom of the viewport');
   assert.ok(download.x > (await page.locator('#scoreStage').boundingBox()).x + 300, 'both live in the side menu');
   await page.locator('#scoreClear').click();
   await page.locator('.confirm-content').waitFor();

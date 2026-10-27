@@ -20,9 +20,21 @@ body.score-body {
   z-index: 4;
   display: flex;
   flex-direction: column;
+  grid-column: 2;
+  grid-row: 1;
   align-self: start;
-  max-height: calc(100vh - 6.5rem);
   margin-top: 0.5rem;
+  background: var(--paper);
+}
+
+/* Second sidebar: shares the right column with the barlines but stays pinned to the bottom of the viewport. */
+.score-side-bottom {
+  grid-column: 2;
+  grid-row: 1;
+  position: sticky;
+  bottom: 1rem;
+  z-index: 4;
+  align-self: end;
   background: var(--paper);
 }
 
@@ -30,7 +42,6 @@ body.score-body {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  margin-top: auto;
   padding: 0.3rem;
 }
 
