@@ -178,7 +178,7 @@
         <beam number="2">end</beam>
         <notations>
           <technical>
-            <fingering alternate="no" substitution="no">p</fingering>
+            <fingering alternate="no" substitution="no">a</fingering>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -613,7 +613,7 @@
         <staff>1</staff>
         <notations>
           <technical>
-            <fingering alternate="no" substitution="no">a</fingering>
+            <fingering alternate="no" substitution="no">p</fingering>
           </technical>
           <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
