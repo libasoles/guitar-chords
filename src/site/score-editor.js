@@ -135,7 +135,7 @@
     if (!ev || (ev.d === item.d && !!ev.rest === (item.kind === 'rest'))) return;
     const replacement = Object.assign({}, ev, { d: item.d });
     if (item.kind === 'rest') { replacement.rest = true; delete replacement.n; delete replacement.acc; }
-    else { delete replacement.rest; replacement.n = ev.rest ? M.BOTTOM_LINE : ev.n; }
+    else { delete replacement.rest; replacement.n = ev.rest ? M.bottomLine(score) : ev.n; }
     if (item.d === 'w' || item.d === 's') delete replacement.dot;
     const measure = M.measures(score)[selected.mi];
     if (M.onsets(measure)[selected.i] + M.length(replacement) > M.capacity(score)) return say(t.full);
@@ -471,12 +471,12 @@
   });
 
   document.addEventListener('keydown', (event) => {
-    if (event.target.closest('input, textarea, [contenteditable]')) return;
+    if (event.target.closest('input, textarea, select, [contenteditable]')) return;
     if (event.key === 'Escape') {
       activeItem = null;
       palette.querySelectorAll('[aria-pressed]').forEach((button) => button.setAttribute('aria-pressed', 'false'));
     }
-    if (!event.metaKey && !event.ctrlKey && !event.altKey && !meterPopup.matches(':popover-open')) {
+    if (!event.metaKey && !event.ctrlKey && !event.altKey && !meterPopup.matches(':popover-open') && !clefPopup.matches(':popover-open')) {
       const item = ITEMS.find((item) => item && item.key === event.key);
       if (item) { event.preventDefault(); activateFigure(item); return; }
     }
