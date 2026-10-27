@@ -126,13 +126,28 @@
     }
   }
 
-  function activateFigure(item) {
+  function isModifier(item) {
+    return item && (item.kind === 'dot' || item.kind === 'acc');
+  }
+
+  function deactivateTool() {
+    activeItem = null;
+    clearHoverGhost();
+    palette.querySelectorAll('[aria-pressed]').forEach((button) => button.setAttribute('aria-pressed', 'false'));
+  }
+
+  function activateTool(item) {
+    if (activeItem === item) { deactivateTool(); return; }
     activeItem = item;
     clearHoverGhost();
     updateHoverGhost();
     palette.querySelectorAll('[aria-pressed]').forEach((button) => {
       button.setAttribute('aria-pressed', String(button.dataset.shortcut === item.key));
     });
+    if (isModifier(item)) {
+      if (eventAt(selected)) applyModifier(item, selected);
+      return;
+    }
     const ev = eventAt(selected);
     if (!ev || (ev.d === item.d && !!ev.rest === (item.kind === 'rest'))) return;
     const replacement = Object.assign({}, ev, { d: item.d });
@@ -389,7 +404,10 @@
   function clearHoverGhost() {
     if (hoverGhost) hoverGhost.remove();
     hoverGhost = null;
-    if (!drag) showMarker(null);
+    if (!drag) {
+      showMarker(null);
+      stage.querySelectorAll('.is-target').forEach((node) => node.classList.remove('is-target'));
+    }
   }
 
   function updateHoverGhost() {
@@ -401,7 +419,12 @@
       hoverGhost = startGhost(glyphFor(activeItem), point, activeItem.kind);
       hoverGhost.classList.add('score-hover-ghost');
     } else moveGhost(hoverGhost, point);
-    showMarker(hit);
+    stage.querySelectorAll('.is-target').forEach((node) => node.classList.remove('is-target'));
+    if (isModifier(activeItem)) {
+      showMarker(null);
+      const target = eventUnder(point.clientX, point.clientY);
+      if (target) stage.querySelector('[id="e' + target.mi + '-' + target.i + '"]').classList.add('is-target');
+    } else showMarker(hit);
   }
 
   stage.addEventListener('pointermove', (event) => {
@@ -435,7 +458,7 @@
     if (drag.insert) return;
     event.preventDefault();
     moveGhost(drag.ghost, event);
-    const modifier = drag.item && (drag.item.kind === 'dot' || drag.item.kind === 'acc');
+    const modifier = isModifier(drag.item);
     if (modifier) {
       showMarker(null);
       stage.querySelectorAll('.is-target').forEach((n) => n.classList.remove('is-target'));
@@ -457,7 +480,8 @@
     if (d.ghost) d.ghost.remove();
     if (cancelled) return;
     if (!d.active) {
-      if (d.item && d.item.key) activateFigure(d.item);
+      if (d.item && d.item.key) activateTool(d.item);
+      else if (d.from && isModifier(activeItem)) applyModifier(activeItem, d.from);
       else if (d.insert) {
         const target = locate(event.clientX, event.clientY);
         if (target && activeItem) dropNew(activeItem, target);
@@ -469,7 +493,7 @@
       if (d.from) { selected = d.from; removeSelected(); }
       return;
     }
-    if (d.item && (d.item.kind === 'dot' || d.item.kind === 'acc')) {
+    if (isModifier(d.item)) {
       const hit = eventUnder(event.clientX, event.clientY);
       if (hit) applyModifier(d.item, hit);
       return;
@@ -515,13 +539,11 @@
   document.addEventListener('keydown', (event) => {
     if (event.target.closest('input, textarea, select, [contenteditable]')) return;
     if (event.key === 'Escape') {
-      activeItem = null;
-      clearHoverGhost();
-      palette.querySelectorAll('[aria-pressed]').forEach((button) => button.setAttribute('aria-pressed', 'false'));
+      deactivateTool();
     }
     if (!event.metaKey && !event.ctrlKey && !event.altKey && !meterPopup.matches(':popover-open') && !clefPopup.matches(':popover-open')) {
-      const item = ITEMS.find((item) => item && item.key === event.key);
-      if (item) { event.preventDefault(); activateFigure(item); return; }
+      const item = ITEMS.find((item) => item && item.key === event.key.toLowerCase());
+      if (item) { event.preventDefault(); if (!event.repeat) activateTool(item); return; }
     }
     if ((event.metaKey || event.ctrlKey) && !event.shiftKey && event.key.toLowerCase() === 'z') {
       event.preventDefault();
@@ -801,10 +823,10 @@
     { kind: 'rest', d: 'e', key: '9', label: t.restEighth },
     { kind: 'rest', d: 's', key: '0', label: t.restSixteenth },
     null,
-    { kind: 'dot', label: t.dot },
-    { kind: 'acc', acc: '#', label: t.sharp },
-    { kind: 'acc', acc: 'b', label: t.flat },
-    { kind: 'acc', acc: 'n', label: t.natural },
+    { kind: 'dot', key: t.shortcuts.dot, label: t.dot },
+    { kind: 'acc', acc: '#', key: t.shortcuts.sharp, label: t.sharp },
+    { kind: 'acc', acc: 'b', key: t.shortcuts.flat, label: t.flat },
+    { kind: 'acc', acc: 'n', key: t.shortcuts.natural, label: t.natural },
   ];
 
   ITEMS.forEach((item) => {
@@ -831,7 +853,7 @@
       key.textContent = item.key;
       button.appendChild(key);
       button.addEventListener('click', (event) => {
-        if (event.detail === 0) activateFigure(item);
+        if (event.detail === 0) activateTool(item);
       });
     }
     button.addEventListener('pointerdown', (event) => {

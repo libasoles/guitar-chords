@@ -618,6 +618,12 @@
     "restQuarter": "Silencio de negra",
     "restEighth": "Silencio de corchea",
     "restSixteenth": "Silencio de semicorchea",
+    "shortcuts": {
+      "dot": "p",
+      "sharp": "s",
+      "flat": "b",
+      "natural": "c"
+    },
     "dot": "Puntillo",
     "sharp": "Sostenido",
     "flat": "Bemol",

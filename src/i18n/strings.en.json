@@ -618,6 +618,12 @@
     "restQuarter": "Quarter rest",
     "restEighth": "Eighth rest",
     "restSixteenth": "Sixteenth rest",
+    "shortcuts": {
+      "dot": "d",
+      "sharp": "s",
+      "flat": "f",
+      "natural": "n"
+    },
     "dot": "Dot",
     "sharp": "Sharp",
     "flat": "Flat",
