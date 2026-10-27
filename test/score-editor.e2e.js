@@ -143,24 +143,46 @@ async function checkKeyChanges(page) {
   assert.deepEqual(await keys(), [0, { 2: -2, 4: 2, 5: 1 }]);
 }
 
-async function checkLastMeasureRemove(page) {
+async function checkRowMeasureTools(page) {
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
-  // Con los renglones minimos no se ofrece borrar.
-  assert.equal(await page.locator('.score-measure-remove').count(), 0);
-  await page.evaluate(() => { scoreEditor.score.rows.push([[], [], [], []]); scoreEditor.render(); });
-  const rows = await page.evaluate(() => scoreEditor.score.rows.length);
-  const last = page.locator('#scoreStage g.measure').last();
-  await last.scrollIntoViewIfNeeded();
-  const box = await last.locator('g.staff > path').first().boundingBox();
-  const button = page.locator('.score-measure-remove');
-  assert.equal(await button.evaluate((el) => getComputedStyle(el).opacity), '0');
-  await page.mouse.move(box.x + box.width / 2, box.y + 5);
-  assert.equal(await button.evaluate((el) => getComputedStyle(el).opacity), '1');
-  await button.click();
-  assert.equal(await page.evaluate(() => scoreEditor.score.rows.length), rows - 1);
-  assert.equal(await page.locator('.score-measure-remove').count(), 0);
+  const sizes = () => page.evaluate(() => scoreEditor.score.rows.map((row) => row.length));
+  const hover = async (row) => {
+    const measure = page.locator('#scoreStage g.measure').nth(row * 4 + (await sizes())[row] - 1);
+    await measure.scrollIntoViewIfNeeded();
+    const box = await measure.locator('g.staff > path').first().boundingBox();
+    await page.mouse.move(box.x + box.width / 2, box.y + 5);
+  };
+  const tool = (row, action) => page.locator(`.score-row-tools[data-row="${row}"] [data-action="${action}"]`);
+  const opacity = (row) => page.locator(`.score-row-tools[data-row="${row}"]`).evaluate((el) => getComputedStyle(el).opacity);
+  assert.equal(await opacity(0), '0');
+  await hover(0);
+  assert.equal(await opacity(0), '1');
+  assert.equal(await opacity(1), '0');
+  // Renglon lleno: + deshabilitado con aviso, - habilitado.
+  assert.equal(await tool(0, 'add').getAttribute('aria-disabled'), 'true');
+  assert.equal(await tool(0, 'add').getAttribute('data-tooltip'), await page.evaluate(() => JSON.parse(document.getElementById('scoreStrings').textContent).noRoomForMeasure));
+  assert.equal(await tool(0, 'remove').getAttribute('aria-disabled'), null);
+  await tool(0, 'add').click({ force: true });
+  assert.deepEqual(await sizes(), [4, 4, 4]);
+  await tool(0, 'remove').click();
+  assert.deepEqual(await sizes(), [3, 4, 4]);
+  assert.equal(await page.locator('#scoreStage g.measure').count(), 11);
+  await hover(0);
+  assert.equal(await tool(0, 'add').getAttribute('aria-disabled'), null);
+  await tool(0, 'add').click();
+  assert.deepEqual(await sizes(), [4, 4, 4]);
+  // Con un solo compas, - queda deshabilitado.
+  for (let i = 0; i < 3; i += 1) {
+    await hover(0);
+    await tool(0, 'remove').click();
+  }
+  assert.deepEqual(await sizes(), [1, 4, 4]);
+  await hover(0);
+  assert.equal(await tool(0, 'remove').getAttribute('aria-disabled'), 'true');
+  await tool(0, 'remove').click({ force: true });
+  assert.deepEqual(await sizes(), [1, 4, 4]);
 }
 
 async function checkBarre(page) {
@@ -605,7 +627,7 @@ async function run() {
     await checkBarlines(dragPage);
     await checkBarre(dragPage);
     await checkKeyChanges(dragPage);
-    await checkLastMeasureRemove(dragPage);
+    await checkRowMeasureTools(dragPage);
     await dragPage.close();
     for (const [route, keys] of [
       ['/partitura', ['p', 's', 'b', 'c']],

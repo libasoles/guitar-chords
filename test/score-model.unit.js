@@ -610,3 +610,51 @@ test('los cambios de armadura se conservan al sanear y se descartan los invalido
   assert.deepEqual(M.sanitize(data).keys, { 5: 2, 8: -2 });
   assert.equal(M.sanitize({ ...base }).keys, undefined);
 });
+
+test('agregar y quitar compases de un renglon corre las barras, armaduras y cejillas siguientes', () => {
+  const score = M.emptyScore();
+  assert.ok(M.removeMeasure(score, 0));
+  assert.deepEqual(score.rows.map((row) => row.length), [3, 4, 4]);
+  assert.deepEqual(M.rowStarts(score), [0, 3, 7]);
+  assert.deepEqual(M.rowOf(score, 3), { row: 1, first: 3, last: 6 });
+  score.barlines = { 2: { double: true }, 5: { double: true } };
+  score.keys = { 4: 2 };
+  assert.ok(M.setBarre(score, 3, 0, 2, undefined, 2));
+  assert.ok(M.addMeasure(score, 0));
+  assert.ok(!M.addMeasure(score, 0));
+  assert.deepEqual(score.barlines, { 2: { double: true }, 6: { double: true } });
+  assert.deepEqual(score.keys, { 5: 2 });
+  assert.deepEqual(Object.keys(score.barres), ['4']);
+  assert.ok(M.removeMeasure(score, 0));
+  assert.deepEqual(score.barlines, { 2: { double: true }, 5: { double: true } });
+  assert.deepEqual(Object.keys(score.barres), ['3']);
+});
+
+test('quitar el ultimo compas de un renglon descarta su barra y recorta la cejilla que lo cruza', () => {
+  const score = M.emptyScore();
+  score.barlines = { 3: { double: true } };
+  assert.ok(M.setBarre(score, 1, 0, 2, 12, 2));
+  assert.ok(M.removeMeasure(score, 0));
+  assert.equal(score.barlines, undefined);
+  assert.deepEqual(score.barres[1], { at: 0, fret: 2, span: 1 });
+  assert.ok(M.removeMeasure(score, 0));
+  assert.ok(M.removeMeasure(score, 0));
+  assert.ok(!M.removeMeasure(score, 0));
+  assert.equal(score.rows[0].length, 1);
+});
+
+test('una cejilla no cruza al renglon siguiente cuando los renglones tienen distinto largo', () => {
+  const score = M.emptyScore();
+  M.removeMeasure(score, 0);
+  assert.ok(!M.setBarre(score, 2, 0, 2, 12, 1));
+  assert.ok(M.setBarre(score, 3, 0, 2, 12, 1));
+});
+
+test('sanear conserva el largo de cada renglon y el exportado empieza un sistema por renglon', () => {
+  const score = M.emptyScore();
+  M.removeMeasure(score, 1);
+  const clean = M.sanitize(JSON.parse(JSON.stringify(score)));
+  assert.deepEqual(clean.rows.map((row) => row.length), [4, 3, 4]);
+  assert.equal(M.toMusicXml(clean).split('new-system').length - 1, 3);
+  assert.deepEqual(M.sanitize({ rows: [[], [[]]] }).rows.map((row) => row.length), [4, 1, 4]);
+});

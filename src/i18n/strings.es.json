@@ -585,6 +585,8 @@
     "selectBarline": "Seleccionar barra de compás",
     "deleteBarline": "Eliminar barra de compás",
     "deleteMeasure": "Eliminar compás",
+    "addMeasure": "Agregar compás",
+    "noRoomForMeasure": "No hay espacio",
 
     "barDouble": "Barra doble",
     "barRepeatStart": "Inicio de repetición",
