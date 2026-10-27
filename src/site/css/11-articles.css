@@ -843,10 +843,10 @@ body:has(.modal-full:popover-open) {
   width: 100%;
 }
 
-/* Six string lines (9em), the annotation band (1.2em), and paper padding.
-   Keep the same space before the custom element and its script have loaded. */
+/* Each staff reserves six string lines (9em), annotations (1.2em), and
+   paper padding (42px); sheets have a 24px gap, including before loading. */
 .arpeggio-group .article-tab {
-  min-height: calc(10.2em + 42px);
+  min-height: calc((10.2em + 66px) * var(--tab-staves, 1) - 24px);
 }
 /* Use the preview's 80% solfege size. Scale whole cells so their padding
    characters keep chord columns aligned, while string spacing stays unchanged. */

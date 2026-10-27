@@ -96,10 +96,16 @@ function tabChars(forms) {
 
 /* TAB de solo lectura, sin boton de copiar (la <ascii-tabs-sheet> vacia
    reemplaza las herramientas por defecto) ni pista de edicion. */
-function asciiTab(forms, locale, annotations) {
+function asciiTab(forms, locale, annotations, formsPerStaff = forms.length) {
+  const staves = [];
+  const annotationRows = [];
+  for (let start = 0; start < forms.length; start += formsPerStaff) {
+    staves.push(formsColumns(forms.slice(start, start + formsPerStaff)));
+    if (annotations) annotationRows.push(annotations.slice(start, start + formsPerStaff).map((entry) => ({ ...entry, column: entry.column - start * 2 })));
+  }
   return '<ascii-tabs class="article-tab" readonly theme="light" labels="notes" spacing="3" lang="' + locale + '"' +
-    (annotations ? ' variant="flat" data-annotations="' + escapeAttr(JSON.stringify([annotations])) + '"' : '') +
-    ' data-value=\'' + JSON.stringify([formsColumns(forms)]) + '\'><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>';
+    (annotations ? ' variant="flat" data-annotations="' + escapeAttr(JSON.stringify(annotationRows)) + '"' : '') +
+    ' data-value=\'' + JSON.stringify(staves) + '\'><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>';
 }
 
 /* Nombres de los acordes, uno sobre la columna de su forma (la misma
@@ -114,10 +120,11 @@ function chordNames(names) {
 }
 
 /* Titulo (y nombres de acorde) por fuera de la hoja blanca de la TAB. El
-   tamano de letra se comparte para que los nombres queden sobre sus columnas. */
-function tabFigure(caption, forms, locale, names, annotations) {
-  return '<figure class="form tab-figure" style="--chars:' + tabChars(forms) + '"><figcaption>' + caption + '</figcaption>' +
-    (names && !annotations ? chordNames(names) : '') + asciiTab(forms, locale, annotations) + '</figure>';
+   tamano de letra se comparte para que los nombres queden sobre sus columnas.
+   formsPerStaff divide grupos largos sin encoger la letra para el grupo entero. */
+function tabFigure(caption, forms, locale, names, annotations, formsPerStaff = forms.length) {
+  return '<figure class="form tab-figure" style="--chars:' + tabChars(forms.slice(0, formsPerStaff)) + ';--tab-staves:' + Math.ceil(forms.length / formsPerStaff) + '"><figcaption>' + caption + '</figcaption>' +
+    (names && !annotations ? chordNames(names) : '') + asciiTab(forms, locale, annotations, formsPerStaff) + '</figure>';
 }
 
 function formFigure(caption, form, locale) {

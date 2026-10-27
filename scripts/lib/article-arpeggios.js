@@ -639,7 +639,7 @@ function renderBody(locale, strings) {
       variants.push(variant);
     }
     variant.figure += (quality === 'SeventhNoFifth' ? '<h3 class="arpeggio-block-label">' + qualityLabel(quality, strings) + '</h3>' : '') +
-      tabFigure(title, styledForms, locale, null, buttons) +
+      tabFigure(title, styledForms, locale, null, buttons, 6) +
       '<div class="arpeggio-diagrams" hidden data-chords="' + names.map((_, i) => 'arpeggio-chord-' + group + '-' + i).join(' ') + '"></div>';
   });
   const tabs = Array.from(orderedRoots(roots), function ([root, { title, note, variants }]) {
