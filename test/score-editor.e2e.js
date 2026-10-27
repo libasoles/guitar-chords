@@ -88,7 +88,11 @@ async function checkBarlines(page) {
   await page.mouse.click(measureBox.x + measureBox.width / 2, measureBox.y + measureBox.height / 2);
   await page.waitForSelector('.score-barline-remove');
   assert.equal(await page.locator('.score-barline-remove').count(), 1);
-  assert.ok((await page.locator('.score-barline-remove').boundingBox()).width <= 24);
+  assert.ok((await page.locator('.score-barline-remove').boundingBox()).width <= 28);
+  // El compas siguiente no tiene barra propia: la x sale sobre la barra de su izquierda (cierre del anterior).
+  const nextBox = await page.locator('[id="m2"]').boundingBox();
+  await page.mouse.click(nextBox.x + nextBox.width / 2, nextBox.y + nextBox.height / 2);
+  await page.waitForFunction(() => document.querySelectorAll('.score-barline-remove').length === 1);
   await page.locator('#scoreTitle').click();
   await page.locator('#scoreDownloadToggle').click();
   const pendingDownload = page.waitForEvent('download');
