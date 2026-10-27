@@ -187,13 +187,13 @@ for (const locale of ['es', 'en']) {
   test('arpeggios keep both B7/F# voicings with their exact diagrams in ' + locale, () => {
     const html = renderBody(locale, require('../src/i18n/strings.' + locale + '.json'));
     const panel = html.split('id="arpeggio-B-panel-2"')[1].split('</figure>')[0];
-    const columns = JSON.parse(panel.match(/data-value='([^']+)'/)[1])[0];
+    const columns = JSON.parse(panel.match(/data-value='([^']+)'/)[1]).flat();
     const forms = columns.filter((column) => column.some((note) => note !== null))
       .map((column) => column.map((note) => note === null ? null : note.fret));
     for (const form of [[5, 4, 4, null, null, 2], [null, 0, 2, 1, null, 2]]) {
       assert.ok(forms.some((candidate) => JSON.stringify(candidate) === JSON.stringify(form)), 'B7/F# includes ' + JSON.stringify(form));
       const index = forms.findIndex((candidate) => JSON.stringify(candidate) === JSON.stringify(form));
-      const annotations = JSON.parse(panel.match(/data-annotations="([^"]+)"/)[1].replaceAll('&quot;', '"').replaceAll('&lt;', '<').replaceAll('&amp;', '&'))[0];
+      const annotations = JSON.parse(panel.match(/data-annotations="([^"]+)"/)[1].replaceAll('&quot;', '"').replaceAll('&lt;', '<').replaceAll('&amp;', '&')).flat();
       const annotation = annotations[index];
       assert.equal(annotation.text, 'B7/F#');
       const id = annotation.html.match(/popovertarget="([^"]+)"/)[1];
@@ -366,5 +366,26 @@ for (const locale of ['es', 'en']) {
     const lowerBlock = section.split('arpeggio-block-label')[1];
     const lowerForms = JSON.parse(lowerBlock.match(/data-value='([^']+)'/)[1]).flat();
     assert.ok(lowerForms.some((column) => JSON.stringify(column.map((note) => note === null ? null : note.fret)) === JSON.stringify(form)));
+  });
+}
+
+for (const locale of ['es', 'en']) {
+  test('default arpeggios split into staves of at most six chords in ' + locale, () => {
+    const html = renderBody(locale, require('../src/i18n/strings.' + locale + '.json'));
+    const tabs = [...html.matchAll(/<ascii-tabs[^>]*data-annotations="([^"]+)"[^>]*data-value='([^']+)'/g)];
+    assert.equal(tabs.length, GROUPS.length);
+    tabs.forEach((match) => {
+      const annotations = JSON.parse(match[1].replaceAll('&quot;', '"').replaceAll('&lt;', '<').replaceAll('&amp;', '&'));
+      const group = GROUPS[Number(annotations[0][0].html.match(/arpeggio-chord-(\d+)-/)[1])];
+      const staves = JSON.parse(match[2]);
+      const forms = staves.map((staff) => staff.filter((column) => column.some((note) => note !== null)));
+      assert.ok(forms.every((staff) => staff.length <= 6), group[1] + ' ' + group[2]);
+      assert.deepEqual(forms.flat().map((form) => form.map((note) => note === null ? null : note.fret)), group[4]);
+      assert.deepEqual(annotations.flat().map((entry) => entry.text), group[3]);
+      annotations.forEach((row, i) => row.forEach((entry, j) => {
+        assert.equal(entry.column, j * 2);
+        assert.ok(staves[i][entry.column].some((note) => note !== null));
+      }));
+    });
   });
 }
