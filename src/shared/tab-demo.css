@@ -95,6 +95,97 @@
 .tab-demo--drag .tab-demo__cursor {
   animation: tab-demo-cursor 6s ease-in-out infinite;
 }
+/* Partitura: title and description first, the animation below them. */
+.tab-demo--caption-first figcaption {
+  margin-bottom: 0.8rem;
+}
+.tab-demo--caption-first figcaption h3 {
+  margin-top: 0;
+}
+
+/* Click a cell, type a digit: the old fret is replaced by the new one. */
+.tab-demo--edit .tab-demo__cursor--edit {
+  animation: tab-demo-edit-cursor 6s ease-in-out infinite;
+}
+.tab-demo--edit .tab-demo__note--before {
+  animation: tab-demo-edit-before 6s steps(1, end) infinite;
+}
+.tab-demo--edit .tab-demo__note--after {
+  animation: tab-demo-edit-after 6s steps(1, end) infinite;
+}
+.tab-demo--edit .tab-demo__key--digit {
+  animation: tab-demo-edit-key 6s steps(1, end) infinite;
+}
+@keyframes tab-demo-edit-cursor {
+  0%,
+  8% {
+    transform: translate(1.2em, 1.2em);
+    opacity: 0;
+  }
+  14% {
+    transform: none;
+    opacity: 1;
+  }
+  20%,
+  26% {
+    transform: scale(0.85);
+    opacity: 1;
+  }
+  34%,
+  100% {
+    transform: none;
+    opacity: 0;
+  }
+}
+@keyframes tab-demo-edit-before {
+  0%,
+  19% {
+    opacity: 1;
+    background: transparent;
+  }
+  20%,
+  34% {
+    opacity: 1;
+    background: var(--demo-lit);
+  }
+  35%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tab-demo-edit-after {
+  0%,
+  34% {
+    opacity: 0;
+    background: var(--demo-lit);
+  }
+  35%,
+  60% {
+    opacity: 1;
+    background: var(--demo-lit);
+  }
+  61%,
+  100% {
+    opacity: 1;
+    background: transparent;
+  }
+}
+@keyframes tab-demo-edit-key {
+  0%,
+  29%,
+  38%,
+  100% {
+    background: #fff;
+    border-color: var(--rule);
+    color: inherit;
+  }
+  30%,
+  37% {
+    background: var(--demo-lit);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
 .tab-demo__note--copy-1 {
   animation: tab-demo-appear-1 6s steps(1, end) infinite;
 }
@@ -338,6 +429,9 @@
   }
   .tab-demo--drag .tab-demo__note--dragged {
     transform: translate(calc(2 * var(--demo-cw)), var(--demo-rh));
+  }
+  .tab-demo--edit .tab-demo__note--before {
+    display: none;
   }
   .tab-demo:not(.tab-demo--drag) .tab-demo__key {
     background: var(--demo-lit);

@@ -587,6 +587,11 @@
   "scoreDotBody": "Double-click a note to add its dot; double-click again to remove it.",
   "scoreBarTitle": "Delete a barline",
   "scoreBarBody": "Click a double or repeat barline and press the x that appears to delete it.",
+  "scoreTabEditTitle": "Edit a tab",
+  "scoreTabEditBody": "Click a number in the tab and type the new fret; your fingering is saved and the staff does not change.",
+  "scoreTabMoveTitle": "Move a tab cell",
+  "scoreTabMoveBody": "Drag a number to another string or another beat and drop it wherever you want.",
+  "scoreTabMoveKey": "Drag",
   "scoreFeaturesH2": "What you can do with the editor",
   "scoreFeatures": [
     "<strong>Notes and rests:</strong> from whole to thirty-second notes, with dots and accidentals (sharps, flats and naturals).",
