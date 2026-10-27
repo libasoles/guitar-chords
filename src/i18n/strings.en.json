@@ -577,7 +577,7 @@
   "scoreClear": "Clear the score",
   "scoreUiStrings": {
     "clearTitle": "Clear the score?",
-    "clearDescription": "All notes and barlines will be removed. You can undo it with Ctrl+Z.",
+    "clearDescription": "All notes and barlines will be removed.",
     "clearConfirm": "Clear",
     "clearCancel": "Cancel",
     "selectBarline": "Select barline",

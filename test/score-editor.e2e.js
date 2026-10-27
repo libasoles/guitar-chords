@@ -379,8 +379,24 @@ async function checkClear(page) {
   assert.equal(await page.locator('.score-side #scoreClear, .score-side #scoreDownloadToggle').count(), 0, 'actions are their own sidebar, apart from the barlines');
   assert.ok(download.y + download.height > page.viewportSize().height - 60, 'download sits at the bottom of the viewport');
   assert.ok(download.x > (await page.locator('#scoreStage').boundingBox()).x + 300, 'both live in the side menu');
+  for (const id of ['#scoreClear', '#scoreDownloadToggle']) {
+    await page.locator(id).hover();
+    await page.waitForTimeout(250);
+    const tip = await page.locator(id).evaluate(el => ({ text: el.dataset.tooltip, opacity: getComputedStyle(el, '::after').opacity }));
+    assert.ok(tip.text, id + ' has tooltip text');
+    assert.equal(tip.opacity, '1', id + ' shows its tooltip on hover');
+  }
+  await page.locator('#scoreDownloadToggle').click();
+  assert.equal(await page.locator('#scoreDownloadOptions button svg.lucide').count(), 2, 'each download option has a Lucide icon');
+  assert.match(await page.locator('#scoreDownloadOptions').evaluate(el => getComputedStyle(el).fontFamily), /sans|Helvetica|Arial|system-ui/i, 'download popup uses the sans font');
+  await page.locator('#scoreDownloadToggle').click();
+  await page.mouse.move(0, 0);
+  const stageBefore =await page.locator('#scoreStage').boundingBox();
   await page.locator('#scoreClear').click();
   await page.locator('.confirm-content').waitFor();
+  const stageOpen = await page.locator('#scoreStage').boundingBox();
+  assert.equal(stageOpen.x, stageBefore.x, 'opening the dialog does not shift the page');
+  assert.equal(stageOpen.width, stageBefore.width);
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('.confirm-content').count(), 0);
   assert.ok(await filled() > 0, 'cancel keeps the score');

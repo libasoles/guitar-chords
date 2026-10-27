@@ -577,7 +577,7 @@
   "scoreClear": "Borrar la partitura",
   "scoreUiStrings": {
     "clearTitle": "¿Borrar la partitura?",
-    "clearDescription": "Se quitarán todas las notas y barras. Puedes deshacerlo con Ctrl+Z.",
+    "clearDescription": "Se quitarán todas las notas y barras.",
     "clearConfirm": "Borrar",
     "clearCancel": "Cancelar",
     "selectBarline": "Seleccionar barra de compás",
