@@ -24,10 +24,13 @@ body.score-body {
 .score-title input {
   display: block;
   box-sizing: border-box;
-  width: 100%;
+  field-sizing: content;
+  width: auto;
+  min-width: 1ch;
+  max-width: 100%;
   padding: 0.2rem 0;
   border: 0;
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 1px solid transparent;
   border-radius: 0;
   outline: none;
   background: transparent;
