@@ -92,7 +92,7 @@ escribe las del PDF sin tocar sus notas. Una lección nueva las recibe sola al c
 .venv-carcassi/bin/python scripts/sagreras/build.py 44
 ```
 
-Verificación: `node --test test/sagreras.unit.js`, `node scripts/build-site.js` y `node test/articles.e2e.js`.
+Verificación: `node --test test/sagreras.unit.js`, `node scripts/build-site.js` y `node test/articles-sagreras.e2e.js`.
 
 Regresiones del lector sin el PDF local: `.venv-carcassi/bin/python -m unittest discover -s scripts/sagreras -p 'test_*.py'`.
 El lector distingue las barras simples de 0,95 pt y las dobles de dos trazos de 0,8 pt; conserva el tipo

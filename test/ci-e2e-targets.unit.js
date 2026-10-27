@@ -16,13 +16,36 @@ test('a tool-specific change runs only its suite', () => {
   assert.deepEqual(targets(['src/site/score-editor.js', 'src/site/score-editor.css']), ['score-editor']);
 });
 
-test('a score change runs only the articles suite', () => {
-  assert.deepEqual(targets(['scripts/sagreras/pieces/sagreras-86.json', 'scripts/lib/article-sagreras.js']), ['articles']);
+test('a score change runs only its article suite', () => {
+  assert.deepEqual(targets(['scripts/sagreras/pieces/sagreras-86.json', 'scripts/lib/article-sagreras.js']), ['articles-sagreras']);
+  assert.deepEqual(targets(['scripts/lib/article-sor-estudios.js']), ['articles-sor-estudios']);
+});
+
+test('each article asset, source and test runs only its own suite', () => {
+  const cases = {
+    'articles-aguado': ['src/site/articles/aguado/aguado-01.svg', 'src/site/articles/aguado/body.es.html', 'scripts/aguado/pieces.json', 'test/articles-aguado.e2e.js'],
+    'articles-sagreras': ['src/site/articles/sagreras-lecciones/body.en.html', 'scripts/sagreras/build.py'],
+    'articles-preludios': ['src/site/articles/santisteban-preludios/x.svg', 'src/site/og-score-preludes.png', 'scripts/carcassi-preludios/corrected/prelude-01.musicxml'],
+    'articles-giuliani': ['src/site/articles/giuliani/body.es.html', 'scripts/lib/article-giuliani.js'],
+    'articles-giuliani-arpegios': ['src/site/articles/giuliani-arpegios/x.svg', 'scripts/giuliani-arpegios/build.py'],
+    'articles-arpeggios': ['src/site/articles/arpeggios/preview.svg', 'scripts/lib/article-arpeggio-positions.js', 'test/arpeggio-layout.e2e.js'],
+    'articles-site': ['test/articles-site.e2e.js'],
+  };
+  for (const [suite, files] of Object.entries(cases)) {
+    for (const file of files) assert.deepEqual(targets([file]), [suite], file);
+  }
+  assert.deepEqual(targets(['scripts/sor/pieces.json']).sort(), ['articles-sor', 'articles-sor-estudios']);
+});
+
+test('the shared article template and harness run every article suite', () => {
+  const articles = ALL.filter((n) => n.startsWith('articles-'));
+  assert.deepEqual(targets(['src/site/article.html']), articles);
+  assert.deepEqual(targets(['test/articles-harness.js']), articles);
 });
 
 test('shared chord data fans out to its consumers', () => {
   const run = targets(['src/shared/chords-db.js']);
-  for (const n of ['chord-finder', 'note-finder', 'articles', 'extensions']) assert.ok(run.includes(n), n);
+  for (const n of ['chord-finder', 'note-finder', 'articles-carcassi', 'articles-sagreras', 'extensions']) assert.ok(run.includes(n), n);
   assert.ok(!run.includes('picking-intervals'));
 });
 
