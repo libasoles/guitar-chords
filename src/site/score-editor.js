@@ -713,7 +713,7 @@
     const boxes = list.map((p) => stage.querySelector('[id="e' + p.mi + '-' + p.i + '"]').getBoundingClientRect());
     const top = Math.min(...boxes.map((b) => b.top)) - origin.top;
     const bottom = Math.max(...boxes.map((b) => b.bottom)) - origin.top;
-    const center = (Math.min(...boxes.map((b) => b.left)) + Math.max(...boxes.map((b) => b.right))) / 2 - origin.left;
+    const left = Math.min(...boxes.map((b) => b.left)) - origin.left;
     const menu = document.createElement('div');
     menu.className = 'score-selection-menu';
     menu.setAttribute('role', 'toolbar');
@@ -731,7 +731,7 @@
     stage.appendChild(menu);
     const width = menu.offsetWidth;
     const height = menu.offsetHeight;
-    menu.style.left = Math.max(4, Math.min(stage.clientWidth - width - 4, center - width / 2)) + 'px';
+    menu.style.left = Math.max(4, Math.min(stage.clientWidth - width - 4, left)) + 'px';
     menu.style.top = (top - height - 12 >= 4 ? top - height - 12 : bottom + 12) + 'px';
   }
 
