@@ -526,7 +526,7 @@ async function checkClear(page) {
   assert.equal(stageOpen.x, stageBefore.x, 'opening the dialog does not shift the page');
   assert.equal(stageOpen.width, stageBefore.width);
   await page.keyboard.press('Escape');
-  assert.equal(await page.locator('.confirm-content').count(), 0);
+  await page.locator('.confirm-content').waitFor({ state: 'detached' });
   assert.ok(await filled() > 0, 'cancel keeps the score');
   await page.locator('#scoreClear').click();
   await page.locator('.confirm-danger').click();
