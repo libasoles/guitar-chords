@@ -24,6 +24,53 @@ async function run() {
     assert.deepStrictEqual(fresh, [[], [], []]);
     assert.strictEqual(await page.evaluate(() => localStorage.getItem('tabEditor.tabs')), null);
 
+    // Titles and annotations are consumer-persisted metadata. In particular,
+    // an annotation on an empty trailing column must survive note-only storage.
+    const title = page.locator('.ascii-tabs-title').first();
+    const textEditor = page.locator('.ascii-tabs-text-editor');
+    await title.focus();
+    await page.keyboard.press('Enter');
+    await textEditor.fill('Estudio');
+    await textEditor.press('Shift+Enter');
+    await textEditor.press('End');
+    await textEditor.press('Enter');
+    assert.strictEqual(await title.textContent(), 'Estudio\n');
+    await page.locator('.ascii-tabs-annotation-slot[data-t="0"][data-c="3"]').click();
+    await textEditor.fill('Am <intro>');
+    await textEditor.press('Enter');
+    const annotatedDocument = await page.locator('ascii-tabs').evaluate(el => ({
+      value: el.value, annotations: el.annotations, tabTitles: el.tabTitles,
+    }));
+    assert.strictEqual(annotatedDocument.value[0].length, 4);
+    assert.deepStrictEqual(annotatedDocument.annotations[0], [{ column: 3, text: 'Am <intro>' }]);
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector('ascii-tabs')?.tabTitles?.[0] === 'Estudio\n');
+    assert.deepStrictEqual(await page.locator('ascii-tabs').evaluate(el => ({
+      value: el.value, annotations: el.annotations, tabTitles: el.tabTitles,
+    })), annotatedDocument);
+    assert.strictEqual(await page.locator('.ascii-tabs-annotation').textContent(), 'Am <intro>');
+    assert.strictEqual(await page.locator('.ascii-tabs-annotation intro').count(), 0);
+
+    // Touch-sized layout, cancel, blur-to-save and tab deletion all retain the
+    // matching metadata, including after its tab index changes.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await title.click();
+    await textEditor.fill('Cancelado');
+    await textEditor.press('Escape');
+    assert.strictEqual(await title.textContent(), 'Estudio\n');
+    await page.locator('.ascii-tabs-title').nth(1).click();
+    await textEditor.fill('Segunda');
+    await page.locator('h1').click();
+    assert.strictEqual(await page.locator('.ascii-tabs-title').nth(1).textContent(), 'Segunda');
+    await page.locator('.ascii-tabs-delete').first().click();
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector('ascii-tabs')?.tabTitles?.[0] === 'Segunda');
+    assert.deepStrictEqual(await page.locator('ascii-tabs').evaluate(el => el.annotations), [[], []]);
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
+
     // The reusable editor also works under an extension-style policy that
     // permits only local scripts: defaults, display controls and tutorial
     // opening cannot depend on inline executable scripts.
@@ -43,9 +90,10 @@ async function run() {
     assert.strictEqual(await restricted.locator('ascii-tabs').evaluate(el => el.notation), 'solfege');
     await restricted.close();
 
-    // Tabs saved by the previous editor (same key, frets as text) still load.
+    // Legacy notes still load, even if the full document is unreadable.
     await page.evaluate(() => {
       localStorage.setItem('tabEditor.tabs', JSON.stringify([[['', '', '', '', '3', ''], ['0', '', '', '2', '', '']]]));
+      localStorage.setItem('tabEditor.document', '{');
     });
     const legacyStored = await page.evaluate(() => localStorage.getItem('tabEditor.tabs'));
     await page.reload();

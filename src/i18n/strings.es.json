@@ -290,7 +290,7 @@
   "tabFaq3Q": "¿Dónde puedo pegar la tablatura?",
   "tabFaq3A": "En cualquier lugar que acepte texto: WhatsApp, un correo, un documento o un foro de guitarra. Para que las columnas se vean alineadas, usá una fuente monoespaciada.",
   "tabTutorialSummary": "Cómo usar el editor: arrastrar, duplicar, completar con ceros y negritas",
-  "tabTutorialIntro": "Las teclas resaltadas en color son las que hay que apretar.",
+  "tabTutorialIntro": "Hacé clic sobre una tablatura para agregar su título, o en la franja sobre una columna para anotarla. Enter guarda, Escape cancela y Mayús+Enter agrega una línea. Los títulos y las anotaciones se guardan automáticamente. Las teclas resaltadas en color son las que hay que apretar.",
   "tabTutorialModifierKey": "Alt / ⌘",
   "tabTutorialDragKey": "Arrastrar",
   "tabDragTitle": "Arrastrar y soltar",

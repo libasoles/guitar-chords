@@ -5,6 +5,33 @@ editor.value = [[], [], []];
 await import('./vendor/ascii-tabs.js');
 await customElements.whenDefined('ascii-tabs');
 
+// Built-in storage preserves the legacy notes key. Save the full document as
+// well: annotations can anchor to empty columns omitted by note-only storage.
+const DOCUMENT_KEY = 'tabEditor.document';
+try {
+  const saved = JSON.parse(localStorage.getItem(DOCUMENT_KEY));
+  if (saved?.version === 1 && Array.isArray(saved.value)) {
+    editor.setDocument(saved);
+  }
+} catch {
+  // An unavailable or invalid document leaves the legacy notes in place.
+}
+function saveDocument() {
+  try {
+    localStorage.setItem(DOCUMENT_KEY, JSON.stringify({
+      version: 1,
+      value: editor.value,
+      annotations: editor.annotations,
+      tabTitles: editor.tabTitles,
+    }));
+  } catch {
+    // Editing still works when storage is unavailable or full.
+  }
+}
+for (const event of ['change', 'annotationchange', 'titlechange']) {
+  editor.addEventListener(event, saveDocument);
+}
+
 const noteNames = document.getElementById('tabNoteNames');
 const letterLabels = document.getElementById('tabLetterLabels');
 const LETTER_LABELS_KEY = 'tabLetterLabels';
