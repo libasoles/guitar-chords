@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.join(ROOT, 'scripts', 'carcassi-preludios'))
 sys.path.insert(0, os.path.join(ROOT, 'backend', 'engine'))
 
 import extract  # noqa: E402  (rutinas de grabado compartidas con los preludios)
-from engraving import clear_triplets, separate_rests
+from engraving import barre_above_line, clear_rests, clear_triplets, separate_rests
 
 AUTHOR = 'Julio Salvador Sagreras'
 # Atribucion que exige la licencia de la edicion de origen (CC BY-NC 4.0): pie gris en sans, a la izquierda de cada pagina.
@@ -40,8 +40,11 @@ PDF_OVERRIDES = {}
 # compases de arpegio de cada una, y los demas quedan como los digita el Viterbi. Vacio: ninguna.
 ARPEGGIO = set()
 # Ajustes de grabado sobre el SVG de Verovio (scripts/sagreras/engraving.py): tresillos sobre las plicas
-# (49, 55; en la 55 tambien el indicador de cejilla) y silencios de dos voces encimados (53, 54, 65).
-ENGRAVING_FIXES = {49: clear_triplets, 55: clear_triplets, 53: separate_rests, 54: separate_rests, 65: separate_rests}
+# (49, 55, 84; en la 55 y la 84 tambien el indicador de cejilla), silencios de dos voces encimados (53, 54, 65, 67),
+# silencios sobre las cabezas de otras voces (72, 73, 79, 85) y cejilla encima de su linea punteada (80, 81).
+ENGRAVING_FIXES = {49: clear_triplets, 55: clear_triplets, 53: separate_rests, 54: separate_rests, 65: separate_rests,
+                   67: separate_rests, 72: clear_rests, 73: clear_rests, 79: clear_rests, 80: barre_above_line,
+                   81: barre_above_line, 84: clear_triplets, 85: clear_rests}
 # Pagina virtual mas grande con escala menor (el PDF sigue midiendo lo mismo, como en los preludios
 # largos): el grabado se achica y caben mas compases por sistema y mas sistemas por pagina. Se prueba de menos a mas
 # reduccion y se queda con el primer nivel que ocupa menos paginas.
