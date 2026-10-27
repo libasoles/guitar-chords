@@ -39,12 +39,12 @@
   stroke: var(--accent) !important;
   transform: scale(1.25);
 }
-.picking-figure figcaption {
-  font-family: var(--sans);
-  font-size: 0.85rem;
-  color: var(--ink-soft);
-  margin-top: 0.15rem;
-  text-align: center;
+.picking-figure h2 {
+  font-size: 1.4rem;
+  margin: 0 0 0.4rem;
+  padding: 0;
+  border: 0;
+  text-align: left;
 }
 
 /* ----- 404 page ----- */
