@@ -120,12 +120,15 @@
     return true;
   }
 
-  // Cejilla: arranca en `at` y llega hasta el final del compas. Una por compas.
-  function setBarre(score, mi, at, fret) {
-    if (!Number.isInteger(mi) || mi < 0 || mi >= measures(score).length || !Number.isInteger(at) || at < 0 || at >= capacity(score)) return false;
+  // Cejilla: va de `at` a `to` (por defecto el final del compas, que no se guarda). Una por compas.
+  function setBarre(score, mi, at, fret, to) {
+    const end = capacity(score);
+    if (to === undefined) to = end;
+    if (!Number.isInteger(mi) || mi < 0 || mi >= measures(score).length || !Number.isInteger(at) || at < 0 || at >= end) return false;
+    if (!Number.isInteger(to) || to <= at || to > end) return false;
     if (!Number.isInteger(fret) || fret < 1 || fret > MAX_FRET) return false;
     if (!score.barres) score.barres = {};
-    score.barres[mi] = { at, fret };
+    score.barres[mi] = to < end ? { at, to, fret } : { at, fret };
     return true;
   }
 
@@ -182,6 +185,11 @@
   function setMeter(score, meter) {
     if (!METERS.includes(meter) || measures(score).some((m) => measureLength(m) > capacity({ meter }))) return false;
     score.meter = meter;
+    Object.keys(score.barres || {}).forEach((mi) => {
+      const barre = score.barres[mi];
+      if (barre.at >= capacity(score)) removeBarre(score, mi);
+      else if (barre.to >= capacity(score)) delete barre.to;
+    });
     return true;
   }
 
@@ -238,7 +246,7 @@
       if (!/^(0|[1-9]\d*)$/.test(index) || +index >= rows.length * PER_ROW || !barre) return;
       if (!Number.isInteger(barre.at) || barre.at < 0 || barre.at >= capacity({ meter })) return;
       if (!Number.isInteger(barre.fret) || barre.fret < 1 || barre.fret > MAX_FRET) return;
-      barres[index] = { at: barre.at, fret: barre.fret };
+      barres[index] = Number.isInteger(barre.to) && barre.to > barre.at && barre.to < capacity({ meter }) ? { at: barre.at, to: barre.to, fret: barre.fret } : { at: barre.at, fret: barre.fret };
     });
     return Object.assign(Object.keys(barlines).length ? { barlines } : {}, Object.keys(barres).length ? { barres } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {});
   }
@@ -368,7 +376,14 @@
         alters[i] = accidentals.has(ev.n) ? accidentals.get(ev.n) : keyAlter(ev.n, score);
       });
       const barre = score.barres && score.barres[mi];
+      const marks = barre ? [
+        { t: barre.at, start: true, xml: `<direction placement="above"><direction-type><words>C ${barre.fret}</words></direction-type></direction>` +
+          '<direction placement="above"><direction-type><bracket type="start" number="1" line-end="none" line-type="dashed"/></direction-type></direction>' },
+        { t: Number.isInteger(barre.to) ? barre.to : capacity(score), xml: '<direction placement="above"><direction-type><bracket type="stop" number="1" line-end="none"/></direction-type></direction>' },
+      ] : [];
+      const stopXml = marks.length ? marks[1].xml : '';
       let barreOpen = false;
+      let barreClosed = false;
       voices(measure).forEach((voice, vi, all) => {
         if (vi > 0) xml += `<backup><duration>${capacity(score)}</duration></backup>`;
         const indices = voice.groups.flatMap((g) => g.indices);
@@ -379,15 +394,19 @@
             xml += `<note print-object="no"><rest/><duration>${size}</duration><voice>${vi + 1}</voice><type>${TYPES[size]}</type></note>`;
           });
         };
-        // La cejilla se escribe en la primera voz que tenga un hueco (o un limite) justo en su inicio.
+        // Inicio y fin de la cejilla se escriben en la primera voz con un hueco (o un limite) justo en ese tiempo.
         const hidden = (from, to) => {
-          if (!barreOpen && barre && barre.at >= from && barre.at <= to) {
-            pad(from, barre.at);
-            xml += `<direction placement="above"><direction-type><words>C ${barre.fret}</words></direction-type></direction>` +
-              '<direction placement="above"><direction-type><bracket type="start" number="1" line-end="none" line-type="dashed"/></direction-type></direction>';
-            barreOpen = true;
-            pad(barre.at, to);
-          } else pad(from, to);
+          let at = from;
+          marks.forEach((mark) => {
+            if (mark.done || mark.t < at || mark.t > to || (!mark.start && !barreOpen)) return;
+            pad(at, mark.t);
+            xml += mark.xml;
+            at = mark.t;
+            mark.done = true;
+            if (mark.start) barreOpen = true;
+            else barreClosed = true;
+          });
+          pad(at, to);
         };
         let cursor = 0;
         let index = 0;
@@ -399,7 +418,7 @@
           cursor = group.at + group.size;
         });
         hidden(cursor, capacity(score));
-        if (barreOpen && vi === all.length - 1) xml += '<direction placement="above"><direction-type><bracket type="stop" number="1" line-end="none"/></direction-type></direction>';
+        if (barreOpen && !barreClosed && vi === all.length - 1) xml += stopXml;
       });
       if (bar && bar.end) xml += '<barline location="right"><repeat direction="backward"/></barline>';
       else if (bar && bar.hidden) xml += '<barline location="right"><bar-style>none</bar-style></barline>';

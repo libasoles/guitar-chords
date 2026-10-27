@@ -11,7 +11,7 @@ async function checkBarlines(page) {
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
   assert.equal(await page.locator('#scoreTrash').count(), 0);
-  assert.equal(await page.locator('#scoreBarlines button').count(), 3);
+  assert.equal(await page.locator('#scoreBarlines button').count(), 4);
   async function apply(type, mi) {
     await page.locator('[data-barline="' + type + '"]').click();
     const point = await page.locator('#scoreStage g.measure').nth(mi).evaluate(node => {
@@ -33,7 +33,7 @@ async function checkBarlines(page) {
   assert.equal(await page.evaluate(() => scoreEditor.score.barlines[0].start), true);
   await page.keyboard.press('Escape');
   // Las tres barras comparten el eje vertical x=15 para que apiladas no se vean cortadas.
-  const axes = await page.locator('#scoreBarlines button svg').evaluateAll((svgs) => svgs.map((svg) => {
+  const axes = await page.locator('#scoreBarlines [data-barline] svg').evaluateAll((svgs) => svgs.map((svg) => {
     const box = svg.getBoundingClientRect();
     return Math.round((box.left + box.width * 15 / 30) * 2) / 2;
   }));
@@ -128,6 +128,35 @@ async function checkBarre(page) {
   await page.keyboard.press('Enter');
   assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres), { 0: { at: 16, fret: 7 } });
   assert.equal(await page.locator('.score-barre-number').inputValue(), '7');
+  // El campo del numero no tiene bordes.
+  assert.equal(await page.locator('.score-barre-number').evaluate((el) => getComputedStyle(el).borderTopWidth + getComputedStyle(el).outlineStyle), '0pxnone');
+  // Al pasar el mouse por la linea aparecen las asas; arrastrar la del fin la acorta hasta la nota anterior.
+  const line = await page.locator('#scoreStage [id="m0"] g.bracketSpan path').boundingBox();
+  await page.mouse.move(5, 5);
+  assert.equal(await page.locator('.score-barre-grip[data-side="end"]').evaluate((el) => getComputedStyle(el).opacity), '0');
+  await page.mouse.move(line.x + line.width / 2, line.y + line.height / 2);
+  assert.equal(await page.locator('.score-barre-grip[data-side="end"]').evaluate((el) => getComputedStyle(el).opacity), '1');
+  const grip = await page.locator('.score-barre-grip[data-side="end"]').boundingBox();
+  const lastNote = await page.evaluate(() => {
+    const r = document.querySelector('[id="e0-3"] .notehead').getBoundingClientRect();
+    return (r.left + r.right) / 2;
+  });
+  await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(lastNote - 4, grip.y + grip.height / 2, { steps: 6 });
+  await page.mouse.up();
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres[0]), { at: 16, to: 24, fret: 7 });
+  // El inicio se mueve hacia la izquierda hasta la primera nota.
+  await page.mouse.move(line.x + 5, line.y + 2);
+  const startGrip = await page.locator('.score-barre-grip[data-side="start"]').boundingBox();
+  await page.mouse.move(startGrip.x + startGrip.width / 2, startGrip.y + startGrip.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(60, startGrip.y + startGrip.height / 2, { steps: 8 });
+  await page.mouse.up();
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres[0]), { at: 0, to: 24, fret: 7 });
+  await page.keyboard.press('ControlOrMeta+z');
+  await page.keyboard.press('ControlOrMeta+z');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres[0]), { at: 16, fret: 7 });
   // Fuera de una nota (compas vacio) arranca al comienzo del compas.
   await page.keyboard.press('Escape');
   await dropBarre('[id="m1"] g.staff');

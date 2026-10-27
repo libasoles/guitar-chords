@@ -385,6 +385,26 @@ test('las cejillas se guardan por compas, se sanean y se exportan como C n con l
   assert.doesNotMatch(M.toMusicXml(restored), /<words>/);
 });
 
+test('una cejilla puede terminar antes del final del compas y el fin se ajusta al cambiar el metro', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ d: 'q', n: 30, at: 0 }, { d: 'q', n: 32, at: 8 }, { d: 'q', n: 34, at: 16 }, { d: 'q', n: 35, at: 24 }];
+  assert.equal(M.setBarre(score, 0, 8, 3, 24), true);
+  assert.deepEqual(score.barres[0], { at: 8, to: 24, fret: 3 });
+  assert.equal(M.setBarre(score, 0, 8, 3, 8), false);
+  assert.equal(M.setBarre(score, 0, 8, 3, 40), false);
+  assert.deepEqual(M.sanitize(M.clone(score)).barres[0], { at: 8, to: 24, fret: 3 });
+  const xml = M.toMusicXml(score);
+  const order = ['<words>C 3', 'type="start"', 'type="stop"'].map((s) => xml.indexOf(s));
+  assert.ok(order[0] > 0 && order[0] < order[1] && order[1] < order[2]);
+  assert.ok(xml.indexOf('type="stop"') < xml.lastIndexOf('<note id="e0-3"'), 'termina antes de la ultima nota');
+  M.setBarre(score, 0, 8, 3);
+  assert.deepEqual(score.barres[0], { at: 8, fret: 3 }, 'llegar al final del compas no se guarda');
+  M.setBarre(score, 0, 8, 3, 24);
+  score.rows[0][0].pop();
+  assert.equal(M.setMeter(score, '3/4'), true);
+  assert.deepEqual(score.barres[0], { at: 8, fret: 3 });
+});
+
 test('una cejilla que empieza dentro de una nota larga de otra voz se escribe una vez', () => {
   const score = M.emptyScore();
   score.rows[0][0] = [{ d: 'w', n: 30, at: 0 }, { d: 'q', n: 34, at: 8 }, { d: 'q', n: 35, at: 16 }];

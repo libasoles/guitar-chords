@@ -123,7 +123,7 @@
       // Sobre una nota que no es la primera arranca ahi; si no, cubre desde el inicio del compas.
       const existing = score.barres && score.barres[target.mi];
       focusBarre = target.mi;
-      if (!change(() => M.setBarre(score, target.mi, target.onNote ? target.t : 0, existing ? existing.fret : 1))) focusBarre = null;
+      if (!change(() => M.setBarre(score, target.mi, target.onNote ? target.t : 0, existing ? existing.fret : 1, existing && existing.to > (target.onNote ? target.t : 0) ? existing.to : undefined))) focusBarre = null;
       say('');
       return;
     }
@@ -347,6 +347,122 @@
     });
   }
 
+  // Tiempo -> x dentro del compas, con las mismas anclas que timeAt.
+  function xAtTime(time, m, starts, centers) {
+    const anchors = [{ x: m.left, t: 0 }, { x: m.right, t: M.capacity(score) }];
+    centers.forEach((c, i) => anchors.push({ x: c, t: starts[i] }));
+    anchors.sort((p, q) => p.t - q.t || p.x - q.x);
+    for (let k = 1; k < anchors.length; k += 1) {
+      const a = anchors[k - 1];
+      const b = anchors[k];
+      if (time <= b.t && b.t > a.t) return a.x + ((time - a.t) / (b.t - a.t)) * (b.x - a.x);
+    }
+    return m.right;
+  }
+
+  // Sobre la linea de la cejilla aparecen dos asas para mover su inicio y su fin, ajustados a las notas.
+  function mountBarreSpan(mi, barre, origin) {
+    const line = stage.querySelector('[id="m' + mi + '"] g.bracketSpan path');
+    if (!line) return;
+    const box = line.getBoundingClientRect();
+    const zone = document.createElement('span');
+    zone.className = 'score-barre-span';
+    zone.style.left = (box.left - origin.left) + 'px';
+    zone.style.top = (box.top + box.height / 2 - origin.top) + 'px';
+    zone.style.width = box.width + 'px';
+    [['start', t.barreStart], ['end', t.barreEnd]].forEach(([side, label]) => {
+      const grip = document.createElement('button');
+      grip.type = 'button';
+      grip.className = 'score-barre-grip';
+      grip.dataset.side = side;
+      grip.setAttribute('aria-label', label);
+      grip.addEventListener('pointerdown', (event) => beginBarreResize(event, mi, side));
+      grip.addEventListener('keydown', (event) => {
+        const step = event.key === 'ArrowLeft' ? -1 : event.key === 'ArrowRight' ? 1 : 0;
+        if (!step) return;
+        event.preventDefault();
+        const times = barreTimes(mi, side);
+        const current = side === 'start' ? barre.at : (barre.to || M.capacity(score));
+        const next = times[times.indexOf(current) + step];
+        if (next === undefined) return;
+        resizeBarre(mi, side, next);
+        stage.querySelector('.score-barre-grip[data-side="' + side + '"]')?.focus({ preventScroll: true });
+      });
+      zone.appendChild(grip);
+    });
+    stage.appendChild(zone);
+  }
+
+  // Tiempos validos para un extremo: inicios de nota (comienzo) o finales de nota (fin), mas los bordes del compas.
+  function barreTimes(mi, side) {
+    const measure = M.measures(score)[mi];
+    const starts = M.onsets(measure);
+    const barre = score.barres[mi];
+    const end = M.capacity(score);
+    const set = new Set(side === 'start' ? [0] : [end]);
+    measure.forEach((ev, i) => {
+      if (ev.rest) return;
+      set.add(side === 'start' ? starts[i] : Math.min(end, starts[i] + M.length(ev)));
+    });
+    return [...set].filter((time) => (side === 'start' ? time < (barre.to || end) : time > barre.at)).sort((a, b) => a - b);
+  }
+
+  function resizeBarre(mi, side, time) {
+    const barre = score.barres[mi];
+    const at = side === 'start' ? time : barre.at;
+    const to = side === 'end' ? time : barre.to;
+    if (at === barre.at && (to || M.capacity(score)) === (barre.to || M.capacity(score))) return;
+    change(() => M.setBarre(score, mi, at, barre.fret, to));
+  }
+
+  let barreResize = null;
+  function beginBarreResize(event, mi, side) {
+    event.preventDefault();
+    event.stopPropagation();
+    clearHoverGhost();
+    const m = layout[mi];
+    const origin = stage.getBoundingClientRect();
+    const measure = M.measures(score)[mi];
+    const starts = M.onsets(measure);
+    const centers = eventNodes(mi).map((node) => centerX(node, origin));
+    const line = stage.querySelector('[id="m' + mi + '"] g.bracketSpan path').getBoundingClientRect();
+    const preview = document.createElement('span');
+    preview.className = 'score-barre-preview';
+    preview.style.top = (line.top + line.height / 2 - origin.top) + 'px';
+    stage.appendChild(preview);
+    stage.classList.add('is-resizing-barre');
+    barreResize = {
+      id: event.pointerId,
+      move(e) {
+        const x = e.clientX - origin.left;
+        let best = null;
+        barreTimes(mi, side).forEach((time) => {
+          const tx = xAtTime(time, m, starts, centers);
+          if (!best || Math.abs(tx - x) < Math.abs(best.x - x)) best = { time, x: tx };
+        });
+        barreResize.pick = best && best.time;
+        if (best) preview.style.left = best.x + 'px';
+      },
+      finish(commit) {
+        preview.remove();
+        stage.classList.remove('is-resizing-barre');
+        barreResize = null;
+        if (commit && this.pick !== undefined) resizeBarre(mi, side, this.pick);
+      },
+    };
+    barreResize.move(event);
+  }
+
+  document.addEventListener('pointermove', (event) => {
+    if (barreResize && event.pointerId === barreResize.id) barreResize.move(event);
+  });
+  document.addEventListener('pointerup', (event) => {
+    if (barreResize && event.pointerId === barreResize.id) barreResize.finish(true);
+  });
+  document.addEventListener('pointercancel', (event) => {
+    if (barreResize && event.pointerId === barreResize.id) barreResize.finish(false);
+  });
+
   // El numero de la cejilla se edita sobre su etiqueta: un campo que tapa el texto dibujado por Verovio.
   function mountBarreInputs() {
     const origin = stage.getBoundingClientRect();
@@ -375,7 +491,7 @@
         const fret = Number(input.value);
         if (input.value.trim() === '') change(() => M.removeBarre(score, mi));
         else if (Number.isInteger(fret) && fret !== barre.fret) {
-          if (!change(() => M.setBarre(score, mi, barre.at, fret))) { input.value = barre.fret; say(t.barreFretRange); }
+          if (!change(() => M.setBarre(score, mi, barre.at, fret, barre.to))) { input.value = barre.fret; say(t.barreFretRange); }
           else say('');
         } else input.value = barre.fret;
       };
@@ -388,6 +504,7 @@
       input.addEventListener('blur', commit);
       field.append(letter, input);
       stage.appendChild(field);
+      mountBarreSpan(mi, barre, origin);
       if (focusBarre === mi) {
         input.focus({ preventScroll: true });
         input.select();
@@ -548,7 +665,7 @@
   function updateHoverGhost() {
     const point = hoverPoint;
     const over = point && document.elementFromPoint(point.clientX, point.clientY);
-    const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-barline-remove, .score-barre-field');
+    const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span');
     const hit = activeItem && !drag && overStage && locate(point.clientX, point.clientY);
     if (!hit) { clearHoverGhost(); return; }
     if (!hoverGhost) {
@@ -642,7 +759,7 @@
   document.addEventListener('pointercancel', (event) => endDrag(event, true));
 
   stage.addEventListener('pointerdown', (event) => {
-    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-barline-trigger, .score-barline-remove, .score-barre-field')) return;
+    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span')) return;
     if (isPlacing(activeItem)) {
       event.preventDefault();
       stage.focus({ preventScroll: true });
@@ -994,14 +1111,13 @@
     { kind: 'acc', acc: '#', key: t.shortcuts.sharp, label: t.sharp },
     { kind: 'acc', acc: 'b', key: t.shortcuts.flat, label: t.flat },
     { kind: 'acc', acc: 'n', key: t.shortcuts.natural, label: t.natural },
-    null,
-    { kind: 'barre', label: t.barre },
   ];
 
   const BARS = [
     { kind: 'bar', bar: 'double', label: t.barDouble },
     { kind: 'bar', bar: 'start', label: t.barRepeatStart },
     { kind: 'bar', bar: 'end', label: t.barRepeatEnd },
+    { kind: 'barre', label: t.barre },
   ];
 
   ITEMS.concat(BARS).forEach((item) => {
@@ -1048,7 +1164,7 @@
       event.preventDefault();
       beginDrag(event, { item, kind: item.kind, glyph: glyphFor(item) });
     });
-    (item.kind === 'bar' ? barlines : palette).appendChild(button);
+    (item.kind === 'bar' || item.kind === 'barre' ? barlines : palette).appendChild(button);
   });
 
   // ---- renglones, descargas ----------------------------------------------

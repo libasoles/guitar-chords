@@ -584,6 +584,8 @@
     "barre": "Cejilla",
     "barreFret": "Traste de la cejilla",
     "barreFretRange": "El traste de la cejilla debe estar entre 1 y 24",
+    "barreStart": "Inicio de la cejilla",
+    "barreEnd": "Fin de la cejilla",
 
     "clefAndKey": "Clave y armadura",
     "clef": "Clave",

@@ -584,6 +584,8 @@
     "barre": "Barre (cejilla)",
     "barreFret": "Barre fret",
     "barreFretRange": "The barre fret must be between 1 and 24",
+    "barreStart": "Barre start",
+    "barreEnd": "Barre end",
 
     "clefAndKey": "Clef and key signature",
     "clef": "Clef",
