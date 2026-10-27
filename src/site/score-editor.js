@@ -1282,10 +1282,10 @@
     'rest:q': '<path d="M12 5l7 8-5 5 6 7c-3-1-6.500-.5-6 3" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round"/>',
     'rest:e': '<circle cx="12" cy="11" r="2.4"/><path d="M13 12.500c3 0 5-1.300 6-3.500l-5 20" stroke="currentColor" stroke-width="1.700" fill="none"/>',
     'rest:s': '<circle cx="12" cy="9" r="2.400"/><circle cx="10" cy="17" r="2.400"/><path d="M13 10c3 0 5-1.300 6-3.500l-6.500 22" stroke="currentColor" stroke-width="1.700" fill="none"/>',
-    // Los tres comparten la linea x=15 (la gruesa en las repeticiones) para que apilados se lean como una sola barra.
-    'bar:double': '<path d="M15 4v24M20 4v24" stroke="currentColor" stroke-width="1.6"/>',
-    'bar:start': '<path d="M15 4v24M20 4v24" stroke="currentColor" stroke-width="1.6"/><path d="M15 4v24" stroke="currentColor" stroke-width="3.5"/><circle cx="25" cy="12" r="1.8"/><circle cx="25" cy="20" r="1.8"/>',
-    'bar:end': '<path d="M10 4v24M15 4v24" stroke="currentColor" stroke-width="1.6"/><path d="M15 4v24" stroke="currentColor" stroke-width="3.5"/><circle cx="5" cy="12" r="1.8"/><circle cx="5" cy="20" r="1.8"/>',
+    // Los tres comparten la misma linea fina en x=15 (y la gruesa de las repeticiones junto a ella), para que apilados se lean como una sola barra.
+    'bar:double': '<path d="M10 4v24M15 4v24" stroke="currentColor" stroke-width="1.6"/>',
+    'bar:start': '<path d="M10 4v24" stroke="currentColor" stroke-width="3.5"/><path d="M15 4v24" stroke="currentColor" stroke-width="1.6"/><circle cx="21" cy="12" r="1.8"/><circle cx="21" cy="20" r="1.8"/>',
+    'bar:end': '<path d="M15 4v24" stroke="currentColor" stroke-width="1.6"/><path d="M20 4v24" stroke="currentColor" stroke-width="3.5"/><circle cx="9" cy="12" r="1.8"/><circle cx="9" cy="20" r="1.8"/>',
     barre: '<text x="3" y="18" font-size="16" font-weight="700" font-family="serif">C</text><path d="M3 24h24" stroke="currentColor" stroke-width="1.6" stroke-dasharray="3 2.500" fill="none"/>',
     dot: '<circle cx="15" cy="15" r="3.200"/>',
     'acc:#': '<path d="M11 6v20M18 4v20M7.500 12.500l14-3.500M7.500 21l14-3.500" stroke="currentColor" stroke-width="1.800" fill="none"/>',

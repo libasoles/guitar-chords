@@ -32,12 +32,14 @@ async function checkBarlines(page) {
   await page.keyboard.press('ControlOrMeta+z');
   assert.equal(await page.evaluate(() => scoreEditor.score.barlines[0].start), true);
   await page.keyboard.press('Escape');
-  // Las tres barras comparten el eje vertical x=15 para que apiladas no se vean cortadas.
-  const axes = await page.locator('#scoreBarlines [data-barline] svg').evaluateAll((svgs) => svgs.map((svg) => {
+  // Las tres barras comparten la misma linea fina en x=15 y quedan en la misma columna, asi apiladas no se ven cortadas.
+  const thin = await page.locator('#scoreBarlines [data-barline] svg').evaluateAll((svgs) => svgs.map((svg) => {
+    const line = [...svg.querySelectorAll('path')].find((p) => p.getAttribute('d') === 'M15 4v24' && p.getAttribute('stroke-width') === '1.6' || p.getAttribute('d') === 'M10 4v24M15 4v24');
     const box = svg.getBoundingClientRect();
-    return Math.round((box.left + box.width * 15 / 30) * 2) / 2;
+    return Boolean(line) && Math.round(box.left) + '/' + Math.round(box.width);
   }));
-  assert.equal(new Set(axes).size, 1, 'ejes de las barras: ' + axes);
+  assert.equal(new Set(thin).size, 1, 'barras alineadas: ' + thin);
+  assert.ok(thin.every((x) => x), 'la linea fina comun esta en las tres: ' + thin);
   // Arrastrar una barra tambien la aplica sin insertar figuras.
   const button = await page.locator('[data-barline="end"]').boundingBox();
   const target = await page.locator('#scoreStage g.measure').nth(1).boundingBox();
