@@ -2521,17 +2521,17 @@ function siteMenu(strings, locale) {
     '</div><div class="site-menu-wide"><p class="site-menu-heading">' +
     escapeHtml(strings.menuExtensions) +
     "</p>" +
+    '<a class="site-menu-ext" href="' + escapeHtml(tabsExtensionStoreUrl()) +
+    '" target="_blank" rel="noopener"><span><strong>Guitar Tabs</strong><small>' +
+    escapeHtml(strings.menuTabsExtensionDescription) +
+    '</small></span><img src="/assets/guitar-tabs.svg" alt="" width="48" height="48"></a>' +
     '<a class="site-menu-ext" href="' +
     extensionStoreUrl() +
     '" target="_blank" rel="noopener"><span><strong>' +
     escapeHtml(strings.menuChordFinder) +
     "</strong><small>" +
     escapeHtml(strings.extensionDescription) +
-    '</small></span><img src="/assets/guitar-player-cubist-left-head.svg" alt="" width="48" height="48"></a>' +
-    '<a class="site-menu-ext" href="' + escapeHtml(tabsExtensionStoreUrl()) +
-    '" target="_blank" rel="noopener"><span><strong>Guitar Tabs</strong><small>' +
-    escapeHtml(strings.menuTabsExtensionDescription) +
-    '</small></span><img src="/assets/guitar-tabs.svg" alt="" width="48" height="48"></a></div></nav></details>' +
+    '</small></span><img src="/assets/guitar-player-cubist-left-head.svg" alt="" width="48" height="48"></a></div></nav></details>' +
     SITE_MENU_SCRIPT
   );
 }
