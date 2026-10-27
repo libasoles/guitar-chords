@@ -551,7 +551,7 @@
   // Una tablatura (<ascii-tabs>) bajo cada renglon. Las digitaciones salen solas de las notas (ScoreFingering) y cada
   // columna queda bajo su nota; lo que el usuario corrige se guarda aparte en score.tabs y nunca cambia el pentagrama.
   const TAB_GAP = 8;
-  const TAB_CLEF_CLEARANCE = 22; // la clave de guitarra (con su 8) baja por debajo del pentagrama
+  const TAB_CLEF_CLEARANCE = 32; // la clave de guitarra (con su 8) baja por debajo del pentagrama
   const sameColumn = (a, b) => a.length === b.length && a.every((fret, s) => fret === b[s]);
 
   // Como en el visor de partituras: barra de union con el pentagrama, barras de compas y "TAB" en vertical bajo la clave.

@@ -321,6 +321,16 @@ body.score-body {
   position: absolute;
 }
 
+/* Frets in regular weight and strings a little closer than the component's 1.5em. */
+.score-tab .ascii-tabs-fret {
+  font-weight: 400;
+}
+.score-tab .ascii-tabs-line,
+.score-tab .ascii-tabs-cell {
+  height: 1.35em;
+  line-height: 1.35em;
+}
+
 .score-tab-bar {
   position: absolute;
   width: 1.5px;
