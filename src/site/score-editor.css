@@ -1,4 +1,11 @@
 /* score-editor.css — Pagina /partitura (editor minimo de partituras, sin enlaces ni indexado). */
+/* The whole page is plain white; --paper follows so menus and dialogs match. */
+html:has(.score-body),
+body.score-body {
+  --paper: #fff;
+  background: #fff;
+}
+
 body.score-body {
   max-width: 1200px;
 }
