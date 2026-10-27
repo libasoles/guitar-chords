@@ -882,7 +882,7 @@
     'rest:q': '<path d="M12 5l7 8-5 5 6 7c-3-1-6.500-.5-6 3" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round"/>',
     'rest:e': '<circle cx="12" cy="11" r="2.4"/><path d="M13 12.500c3 0 5-1.300 6-3.500l-5 20" stroke="currentColor" stroke-width="1.700" fill="none"/>',
     'rest:s': '<circle cx="12" cy="9" r="2.400"/><circle cx="10" cy="17" r="2.400"/><path d="M13 10c3 0 5-1.300 6-3.500l-6.500 22" stroke="currentColor" stroke-width="1.700" fill="none"/>',
-    'bar:single': '<path d="M15 4v24" stroke="currentColor" stroke-width="1.6"/>',
+    'bar:double': '<path d="M12 4v24M18 4v24" stroke="currentColor" stroke-width="1.6"/>',
     'bar:start': '<path d="M9 4v24M14 4v24" stroke="currentColor" stroke-width="1.6"/><path d="M9 4v24" stroke="currentColor" stroke-width="3.5"/><circle cx="21" cy="12" r="1.8"/><circle cx="21" cy="20" r="1.8"/>',
     'bar:end': '<path d="M16 4v24M21 4v24" stroke="currentColor" stroke-width="1.6"/><path d="M21 4v24" stroke="currentColor" stroke-width="3.5"/><circle cx="9" cy="12" r="1.8"/><circle cx="9" cy="20" r="1.8"/>',
     dot: '<circle cx="15" cy="15" r="3.200"/>',
@@ -928,7 +928,7 @@
   ];
 
   const BARS = [
-    { kind: 'bar', bar: 'single', label: t.barSingle },
+    { kind: 'bar', bar: 'double', label: t.barDouble },
     { kind: 'bar', bar: 'start', label: t.barRepeatStart },
     { kind: 'bar', bar: 'end', label: t.barRepeatEnd },
   ];

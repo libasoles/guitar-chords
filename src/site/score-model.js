@@ -106,12 +106,12 @@
 
   // Las barras se guardan aparte: JSON no conserva propiedades de los arrays de figuras.
   function setBarline(score, mi, type) {
-    if (!Number.isInteger(mi) || mi < 0 || mi >= measures(score).length || !['single', 'start', 'end'].includes(type)) return false;
+    if (!Number.isInteger(mi) || mi < 0 || mi >= measures(score).length || !['double', 'start', 'end'].includes(type)) return false;
     if (!score.barlines) score.barlines = {};
-    if (type === 'single') score.barlines[mi] = { single: true };
+    if (type === 'double') score.barlines[mi] = { double: true };
     else {
       const bar = score.barlines[mi] || {};
-      delete bar.single;
+      delete bar.double;
       if (type === 'end') delete bar.hidden;
       bar[type] = true;
       score.barlines[mi] = bar;
@@ -126,7 +126,7 @@
     delete bar[side];
     Object.keys(bar).forEach((key) => { if (!bar[key]) delete bar[key]; });
     if (side === 'end') {
-      delete bar.single;
+      delete bar.double;
       bar.hidden = true;
     }
     if (Object.values(bar).some(Boolean)) score.barlines[mi] = bar;
@@ -213,7 +213,7 @@
     Object.entries(data.barlines || {}).forEach(([index, bar]) => {
       if (!/^(0|[1-9]\d*)$/.test(index) || +index >= rows.length * PER_ROW || !bar) return;
       if (bar.start === true || bar.end === true) barlines[index] = { start: bar.start === true, end: bar.end === true };
-      else if (bar.single === true) barlines[index] = { single: true };
+      else if (bar.double === true || bar.single === true) barlines[index] = { double: true };
       if (bar.hidden === true && bar.end !== true) barlines[index] = Object.assign(barlines[index] || {}, { hidden: true });
     });
     return Object.assign(Object.keys(barlines).length ? { barlines } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {});
@@ -368,7 +368,7 @@
       });
       if (bar && bar.end) xml += '<barline location="right"><repeat direction="backward"/></barline>';
       else if (bar && bar.hidden) xml += '<barline location="right"><bar-style>none</bar-style></barline>';
-      else if (bar && bar.single) xml += '<barline location="right"><bar-style>regular</bar-style></barline>';
+      else if (bar && bar.double) xml += '<barline location="right"><bar-style>light-light</bar-style></barline>';
       xml += '</measure>';
     });
     return xml + '</part></score-partwise>\n';
