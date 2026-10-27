@@ -40,8 +40,13 @@
         <div id="scorePalette" class="score-palette"></div>
         <button id="scoreTrash" class="score-tool" type="button" aria-label="%%scoreDelete%%" title="%%scoreDelete%%"></button>
         <span class="score-toolbar-gap"></span>
-        <button id="scoreDownloadXml" class="score-download" type="button" data-icon="download">MusicXML</button>
-        <button id="scoreDownloadPdf" class="score-download" type="button" data-icon="download">PDF</button>
+        <div id="scoreDownloads" class="score-downloads">
+          <button id="scoreDownloadToggle" class="score-download" type="button" data-icon="download" aria-label="%%partDownloadsHeading%%" title="%%partDownloadsHeading%%" aria-expanded="false" aria-controls="scoreDownloadOptions"></button>
+          <div id="scoreDownloadOptions" class="score-download-options" hidden>
+            <button id="scoreDownloadPdf" class="score-download" type="button">PDF</button>
+            <button id="scoreDownloadXml" class="score-download" type="button">MusicXML</button>
+          </div>
+        </div>
       </div>
       <p id="scoreStatus" class="score-status" role="status" aria-live="polite"></p>
       <div id="scoreStage" class="score-stage" tabindex="0" aria-label="%%scoreLabel%%"></div>

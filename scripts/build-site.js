@@ -1161,7 +1161,7 @@ function linkifyEmails(text) {
 // Render the private score editor page (src/site/score-editor.html).
 function renderScoreEditorPage(template, strings, locale) {
   let html = fillPageChrome(template, strings, locale, SCORE_EDITOR_SLUG);
-  ["scoreToolbar", "scoreDelete", "scoreLabel", "scoreAddRow", "scoreRemoveRow"].forEach(
+  ["scoreToolbar", "scoreDelete", "scoreLabel", "scoreAddRow", "scoreRemoveRow", "partDownloadsHeading"].forEach(
     function (key) {
       html = html.split("%%" + key + "%%").join(escapeHtml(strings[key] || ""));
     },

@@ -596,6 +596,34 @@
   removeRow.innerHTML = lucide('minus');
   document.querySelectorAll('[data-icon="download"]').forEach((node) => { node.insertAdjacentHTML('afterbegin', lucide('download')); });
 
+  const downloads = document.getElementById('scoreDownloads');
+  const downloadToggle = document.getElementById('scoreDownloadToggle');
+  const downloadOptions = document.getElementById('scoreDownloadOptions');
+  function closeDownloads() {
+    downloadOptions.hidden = true;
+    downloadToggle.setAttribute('aria-expanded', 'false');
+  }
+  downloadToggle.addEventListener('click', () => {
+    downloadOptions.hidden = !downloadOptions.hidden;
+    downloadToggle.setAttribute('aria-expanded', String(!downloadOptions.hidden));
+  });
+  document.addEventListener('click', (event) => {
+    if (!downloads.contains(event.target)) closeDownloads();
+  });
+  downloads.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !downloadOptions.hidden) {
+      event.preventDefault();
+      closeDownloads();
+      downloadToggle.focus();
+    }
+  });
+  downloadOptions.addEventListener('click', (event) => {
+    if (event.target.closest('button')) {
+      closeDownloads();
+      downloadToggle.focus();
+    }
+  });
+
   addRow.addEventListener('click', () => change(() => { score.rows.push(M.emptyRow()); }));
   removeRow.addEventListener('click', () => change(() => {
     if (score.rows.length <= M.MIN_ROWS) return false;
