@@ -575,6 +575,9 @@
   "scoreAddRow": "Add a staff row",
   "scoreRemoveRow": "Remove the last row",
   "scoreUiStrings": {
+    "selectBarline": "Select barline",
+    "deleteBarline": "Delete barline",
+
     "barSingle": "Single barline",
     "barRepeatStart": "Start repeat",
     "barRepeatEnd": "End repeat",

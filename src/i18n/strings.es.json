@@ -575,6 +575,9 @@
   "scoreAddRow": "Agregar un renglón",
   "scoreRemoveRow": "Quitar el último renglón",
   "scoreUiStrings": {
+    "selectBarline": "Seleccionar barra de compás",
+    "deleteBarline": "Eliminar barra de compás",
+
     "barSingle": "Barra simple",
     "barRepeatStart": "Inicio de repetición",
     "barRepeatEnd": "Fin de repetición",
