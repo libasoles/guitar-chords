@@ -427,14 +427,17 @@
   margin-left: auto;
   width: min(26rem, 100%);
 }
-/* The author line sits on the checkboxes' bottom edge whatever the font: the
-   44px labels centre a 1.5rem box, leaving (44px - 1.5rem) / 2 beneath it. */
-.part-toolbar > .part-header {
-  align-self: flex-end;
-  margin-bottom: calc((44px - 1.5rem) / 2);
+.part-header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 0.4rem 1.5rem;
+  margin-bottom: 0.4rem;
 }
-.part-header-row { display: flex; justify-content: flex-end; margin-bottom: 0.4rem; }
-.part-header-row .part-header { width: min(26rem, 100%); }
+.part-header-row .part-header { width: auto; margin-left: 0; }
+.part-header-row .part-header:first-child { flex: 2 1 14rem; }
+.part-header-row .part-header:last-child { flex: 1 1 10rem; }
 .part-header-input {
   width: 100%;
   box-sizing: border-box;

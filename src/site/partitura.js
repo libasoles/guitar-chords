@@ -1064,10 +1064,10 @@
     var titleWrap = el('div', 'part-header');
     titleWrap.appendChild(titleInput);
     titleRow.appendChild(titleWrap);
-    resultEl.appendChild(titleRow);
     var authorWrap = el('div', 'part-header');
     authorWrap.appendChild(authorInput);
-    toolbar.appendChild(authorWrap);
+    titleRow.appendChild(authorWrap);
+    resultEl.appendChild(titleRow);
     resultEl.appendChild(toolbar);
 
     // Sticky footer with the primary action.
