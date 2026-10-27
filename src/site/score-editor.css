@@ -177,7 +177,9 @@ body.score-body {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.5rem;
+  /* 36px is the score's side margin: the whole note and the natural sit over the staff's first and last edges,
+     the 9px being the blank space left of each glyph inside its button. */
+  padding: 0.5rem calc(36px - 9px);
   background: transparent;
   border: 0;
   font-family: var(--sans);
@@ -192,10 +194,7 @@ body.score-body {
 }
 
 .score-palette-sep {
-  width: 1px;
-  align-self: stretch;
-  margin: 0.2rem 0.4rem;
-  background: var(--rule);
+  width: 0.8rem;
 }
 
 /* The second separator pushes the dot and accidentals group to the right edge of the score. */

@@ -364,6 +364,16 @@
     }, extra);
   }
 
+  // The barlines sidebar starts level with the first staff instead of the top of the page.
+  function alignBarlinesToFirstStaff() {
+    const side = barlines.closest('.score-side');
+    const staff = stage.querySelector('g.staff');
+    if (!side || !staff) return;
+    side.style.marginTop = '0';
+    const offset = staff.getBoundingClientRect().top - side.getBoundingClientRect().top;
+    side.style.marginTop = Math.max(0, offset) + 'px';
+  }
+
   function render() {
     if (!toolkit) return;
     const width = stage.clientWidth;
@@ -374,6 +384,7 @@
     meterPopup.hidePopover();
     clefPopup.hidePopover();
     stage.innerHTML = toolkit.renderToSVG(1);
+    alignBarlinesToFirstStaff();
     marker = null;
     const svg = stage.querySelector('svg');
     svg.setAttribute('role', 'img');
