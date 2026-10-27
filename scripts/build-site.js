@@ -1169,6 +1169,10 @@ function linkifyEmails(text) {
 // Render the private score editor page (src/site/score-editor.html).
 function renderScoreEditorPage(template, strings, locale) {
   let html = fillPageChrome(template, strings, locale, SCORE_EDITOR_SLUG);
+  const toastStrings = {};
+  Object.keys(strings).forEach(function (key) {
+    if (key.indexOf("toast") === 0) toastStrings[key] = strings[key];
+  });
   ["scoreTitleLabel", "scoreAuthorLabel", "scoreAuthorPlaceholder", "scoreToolbar", "scoreBarlines", "scoreLabel", "scoreAddRow", "scoreRemoveRow", "scoreClear", "partDownloadsHeading"].forEach(
     function (key) {
       html = html.split("%%" + key + "%%").join(escapeHtml(strings[key] || ""));
@@ -1182,7 +1186,7 @@ function renderScoreEditorPage(template, strings, locale) {
     .split("%%PAGE_H1%%")
     .join(escapeHtml(strings.scoreH1 || ""))
     .split("%%SCORE_STRINGS%%")
-    .join(JSON.stringify(strings.scoreUiStrings).replace(/</g, "\\u003c"));
+    .join(JSON.stringify(Object.assign({}, strings.scoreUiStrings, toastStrings)).replace(/</g, "\\u003c"));
 }
 
 // Render the bilingual privacy policy (src/site/privacy.html).
@@ -1960,6 +1964,14 @@ require("esbuild").buildSync({
   format: "iife",
   define: { "process.env.NODE_ENV": '"production"' },
 });
+require("esbuild").buildSync({
+  entryPoints: [path.join(SRC_SITE, "toast.js")],
+  outfile: path.join(ASSETS_DIST, "toast.js"),
+  bundle: true,
+  minify: true,
+  format: "iife",
+  define: { "process.env.NODE_ENV": '"production"' },
+});
 copyFile(
   path.join(SRC_SITE, "partitura-loading.svg"),
   path.join(ASSETS_DIST, "partitura-loading.svg"),
@@ -1969,14 +1981,6 @@ copyFile(
   path.join(VENDOR_DIST, "verovio-toolkit-wasm.js"),
 );
 if (PARTITURA_ENABLED) {
-  require("esbuild").buildSync({
-    entryPoints: [path.join(SRC_SITE, "toast.js")],
-    outfile: path.join(ASSETS_DIST, "toast.js"),
-    bundle: true,
-    minify: true,
-    format: "iife",
-    define: { "process.env.NODE_ENV": '"production"' },
-  });
   copyFile(
     path.join(SRC_SITE, "partitura.js"),
     path.join(ASSETS_DIST, "partitura.js"),
