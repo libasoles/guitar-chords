@@ -133,6 +133,11 @@ async function checkKeyChanges(page) {
   assert.deepEqual(await keys(), [0, { 4: 2 }]);
   assert.equal(await page.locator('#scoreStage g.measure').nth(0).locator('g.keyAccid').count(), 0);
   assert.equal(await page.locator('#scoreStage g.measure').nth(4).locator('g.keyAccid').count(), 2);
+  // La clave elegida en el segundo renglon tampoco toca el primero.
+  await page.locator('.score-clef-trigger').nth(1).click();
+  await page.locator('.score-clef-options [data-clef="bass"]').click();
+  await page.keyboard.press('Escape');
+  assert.deepEqual(await page.evaluate(() => [scoreEditor.score.clef, scoreEditor.score.clefs || null]), ['guitar', { 4: 'bass' }]);
   // Una barra simple solo ofrece eliminarla, sin menu de clave y armadura.
   await page.locator('.score-barline-trigger[data-measure="1"][data-side="end"]').click();
   assert.equal(await page.locator('#scoreClefPopup').isVisible(), false);

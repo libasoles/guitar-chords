@@ -604,6 +604,26 @@ test('un cambio de armadura rige desde su compas y no toca los anteriores', () =
   assert.ok(!M.setKey(score, 1, 8));
 });
 
+test('un cambio de clave rige desde su compas y no toca los anteriores', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ d: 'w', n: 31 }];
+  assert.ok(M.setClef(score, 4, 'bass'));
+  assert.deepEqual(score.clefs, { 4: 'bass' });
+  assert.equal(score.clef, 'guitar');
+  assert.deepEqual([0, 3, 4, 11].map((mi) => M.clefAt(score, mi)), ['guitar', 'guitar', 'bass', 'bass']);
+  assert.equal(M.bottomLine(score, 3), 30);
+  assert.equal(M.bottomLine(score, 4), 25);
+  const xml = M.toMusicXml(score);
+  assert.deepEqual([...xml.matchAll(/<sign>(\w)<\/sign>/g)].map((m) => m[1]), ['G', 'F']);
+  assert.deepEqual(M.sanitize(score).clefs, { 4: 'bass' });
+  assert.ok(M.setClef(score, 4, 'guitar'));
+  assert.equal(score.clefs, undefined);
+  assert.ok(M.setClef(score, 0, 'treble'));
+  assert.equal(score.clef, 'treble');
+  assert.ok(!M.setClef(score, 12, 'bass'));
+  assert.ok(!M.setClef(score, 1, 'nope'));
+});
+
 test('los cambios de armadura se conservan al sanear y se descartan los invalidos', () => {
   const base = M.emptyScore();
   const data = { ...base, fifths: 1, keys: { 0: 3, 4: 1, 5: 2, 6: 9, 7: '2', x: 1, 99: 1, 8: -2 } };

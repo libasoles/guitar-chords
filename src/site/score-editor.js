@@ -226,7 +226,7 @@
     const replacement = Object.assign({}, ev, { d: item.d });
     delete replacement.tp;
     if (item.kind === 'rest') { replacement.rest = true; delete replacement.n; delete replacement.acc; }
-    else { delete replacement.rest; replacement.n = ev.rest ? M.bottomLine(score) : ev.n; }
+    else { delete replacement.rest; replacement.n = ev.rest ? M.bottomLine(score, selected.mi) : ev.n; }
     if (item.d === 'w' || item.d === 's' || item.d === 'f') delete replacement.dot;
     const measure = M.measures(score)[selected.mi];
     if (M.onsets(measure)[selected.i] + M.length(replacement) > M.capacity(score)) return say(t.full);
@@ -899,7 +899,7 @@
     if (!best) return null;
     const { mi, m, space } = best;
     const half = space / 2;
-    const n = M.clampPitch(M.bottomLine(score) + Math.round((m.lines[4] - y) / half));
+    const n = M.clampPitch(M.bottomLine(score, mi) + Math.round((m.lines[4] - y) / half));
     const measure = M.measures(score)[mi];
     const starts = M.onsets(measure);
     const centers = eventNodes(mi).map((node) => centerX(node, origin));
@@ -920,7 +920,7 @@
       onNote: !!near,
       t: at,
       x: markX,
-      y: m.lines[4] - (n - M.bottomLine(score)) * half,
+      y: m.lines[4] - (n - M.bottomLine(score, mi)) * half,
       top: m.lines[0],
       bottom: m.lines[4],
     };
@@ -1332,7 +1332,7 @@
     button.setAttribute('aria-label', label);
     button.addEventListener('click', () => {
       if (field === 'clef') {
-        if (M.clefOf(score) !== value) change(() => { score.clef = value; });
+        if (M.clefAt(score, keyMeasure) !== value) change(() => M.setClef(score, keyMeasure, value));
       } else if (M.keyAt(score, keyMeasure) !== value) change(() => M.setKey(score, keyMeasure, value));
       openClefPopup(clefAnchor, keyMeasure, button);
     });
@@ -1429,7 +1429,7 @@
     }
     const anchorButton = anchorButtonOf(origin);
     clefOptions.querySelectorAll('button').forEach((button) => {
-      button.setAttribute('aria-pressed', String(button.dataset.clef === M.clefOf(score)));
+      button.setAttribute('aria-pressed', String(button.dataset.clef === M.clefAt(score, keyMeasure)));
     });
     keyOptions.querySelectorAll('button').forEach((button) => {
       button.setAttribute('aria-pressed', String(Number(button.dataset.fifths) === M.keyAt(score, keyMeasure)));
@@ -1438,13 +1438,13 @@
     clefOptions.querySelectorAll('button').forEach((button) => {
       if (!button.querySelector('svg')) signaturePreview(button, button.dataset.clef, 0, 'clef');
     });
-    if (galleryClef !== M.clefOf(score)) {
+    if (galleryClef !== M.clefAt(score, keyMeasure)) {
       keyOptions.querySelectorAll('button').forEach((button) => {
         if (!Number(button.dataset.fifths)) return;
         button.querySelector('svg')?.remove();
-        signaturePreview(button, M.clefOf(score), Number(button.dataset.fifths), 'key');
+        signaturePreview(button, M.clefAt(score, keyMeasure), Number(button.dataset.fifths), 'key');
       });
-      galleryClef = M.clefOf(score);
+      galleryClef = M.clefAt(score, keyMeasure);
     }
     const anchor = anchorButton.getBoundingClientRect();
     const popup = clefPopup.getBoundingClientRect();
@@ -1511,7 +1511,7 @@
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'score-clef-trigger';
-      button.setAttribute('aria-label', t.clefAndKey + ': ' + t.clefs[M.clefOf(score)] + ', ' + t.keys[M.keyAt(score, M.rowStarts(score)[i]) + 7]);
+      button.setAttribute('aria-label', t.clefAndKey + ': ' + t.clefs[M.clefAt(score, M.rowStarts(score)[i])] + ', ' + t.keys[M.keyAt(score, M.rowStarts(score)[i]) + 7]);
       button.setAttribute('aria-controls', clefPopup.id);
       button.setAttribute('aria-haspopup', 'dialog');
       button.setAttribute('aria-expanded', 'false');

@@ -145,7 +145,7 @@
   function addMeasure(score, row) {
     if (!Number.isInteger(row) || row < 0 || row >= score.rows.length || score.rows[row].length >= PER_ROW) return false;
     const at = rowStarts(score)[row] + score.rows[row].length;
-    ['barlines', 'keys', 'barres'].forEach((name) => { if (score[name]) score[name] = shiftKeys(score[name], at, 1); });
+    ['barlines', 'keys', 'clefs', 'barres'].forEach((name) => { if (score[name]) score[name] = shiftKeys(score[name], at, 1); });
     score.rows[row].push([]);
     return true;
   }
@@ -163,7 +163,7 @@
         if (!barre.span) delete barre.span;
       }
     });
-    ['barlines', 'keys', 'barres'].forEach((name) => {
+    ['barlines', 'keys', 'clefs', 'barres'].forEach((name) => {
       if (!score[name]) return;
       delete score[name][at];
       score[name] = shiftKeys(score[name], at, -1);
@@ -251,8 +251,27 @@
     return score && Number.isInteger(score.fifths) && Math.abs(score.fifths) <= 7 ? score.fifths : 0;
   }
 
-  function bottomLine(score) {
-    return CLEFS[clefOf(score)].bottom;
+  function bottomLine(score, mi) {
+    return CLEFS[mi === undefined ? clefOf(score) : clefAt(score, mi)].bottom;
+  }
+
+  // Clave vigente en el compas `mi`: la inicial, cambiada por `score.clefs` (compas -> clave) hasta el siguiente cambio.
+  function clefAt(score, mi) {
+    let clef = clefOf(score);
+    let last = 0;
+    Object.entries((score && score.clefs) || {}).forEach(([index, value]) => {
+      if (+index <= mi && +index > last && Object.hasOwn(CLEFS, value)) { clef = value; last = +index; }
+    });
+    return clef;
+  }
+
+  // La clave nueva rige desde el compas `mi` hasta el siguiente cambio; los compases anteriores no se tocan.
+  function setClef(score, mi, clef) {
+    if (!Number.isInteger(mi) || mi < 0 || mi >= measures(score).length || !Object.hasOwn(CLEFS, clef)) return false;
+    if (mi === 0) score.clef = clef;
+    else (score.clefs = score.clefs || {})[mi] = clef;
+    pruneKeys(score);
+    return true;
   }
 
   // Armadura vigente en el compas `mi`: la inicial, cambiada por `score.keys` (compas -> quintas) hasta el siguiente cambio.
@@ -276,6 +295,7 @@
 
   // Quita los cambios fuera de la partitura y los que repiten la armadura anterior.
   function pruneKeys(score) {
+    pruneClefs(score);
     if (!score.keys) return;
     let previous = fifthsOf(score);
     Object.keys(score.keys).map(Number).sort((a, b) => a - b).forEach((mi) => {
@@ -283,6 +303,16 @@
       else previous = score.keys[mi];
     });
     if (!Object.keys(score.keys).length) delete score.keys;
+  }
+
+  function pruneClefs(score) {
+    if (!score.clefs) return;
+    let previous = clefOf(score);
+    Object.keys(score.clefs).map(Number).sort((a, b) => a - b).forEach((mi) => {
+      if (mi < 1 || mi >= measures(score).length || score.clefs[mi] === previous) delete score.clefs[mi];
+      else previous = score.clefs[mi];
+    });
+    if (!Object.keys(score.clefs).length) delete score.clefs;
   }
 
   function keyAlter(n, score, mi) {
@@ -369,6 +399,12 @@
       if (!Number.isInteger(value) || Math.abs(value) > 7 || value === previousKey) return;
       keys[index] = previousKey = value;
     });
+    const clefs = {};
+    let previousClef = clefOf(data);
+    Object.entries(data.clefs || {}).filter(([index]) => /^[1-9]\d*$/.test(index) && +index < total).sort((a, b) => a[0] - b[0]).forEach(([index, value]) => {
+      if (!Object.hasOwn(CLEFS, value) || value === previousClef) return;
+      clefs[index] = previousClef = value;
+    });
     const barres = {};
     Object.entries(data.barres || {}).forEach(([index, barre]) => {
       if (!/^(0|[1-9]\d*)$/.test(index) || +index >= total || !barre) return;
@@ -384,7 +420,7 @@
       if (Number.isInteger(to) && (span ? to > 0 : to > at) && to < capacity({ meter })) result.to = to;
       barres[index] = result;
     });
-    return Object.assign(Object.keys(barlines).length ? { barlines } : {}, Object.keys(keys).length ? { keys } : {}, Object.keys(barres).length ? { barres } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
+    return Object.assign(Object.keys(barlines).length ? { barlines } : {}, Object.keys(keys).length ? { keys } : {}, Object.keys(clefs).length ? { clefs } : {}, Object.keys(barres).length ? { barres } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
   }
 
   // Rellena huecos con silencios ocultos: el final del compas y el espacio entre figuras sueltas.
@@ -703,7 +739,11 @@
           `<time><beats>${beats}</beats><beat-type>${unit}</beat-type></time>` +
           `<clef><sign>${clef.sign}</sign><line>${clef.line}</line>${clef.octave ? `<clef-octave-change>${clef.octave}</clef-octave-change>` : ''}</clef></attributes>`;
       }
-      if (mi > 0 && keyAt(score, mi) !== keyAt(score, mi - 1)) xml += `<attributes><key><fifths>${keyAt(score, mi)}</fifths></key></attributes>`;
+      if (mi > 0 && (keyAt(score, mi) !== keyAt(score, mi - 1) || clefAt(score, mi) !== clefAt(score, mi - 1))) {
+        const changed = clefAt(score, mi) !== clefAt(score, mi - 1) ? CLEFS[clefAt(score, mi)] : null;
+        xml += '<attributes>' + (keyAt(score, mi) !== keyAt(score, mi - 1) ? `<key><fifths>${keyAt(score, mi)}</fifths></key>` : '') +
+          (changed ? `<clef><sign>${changed.sign}</sign><line>${changed.line}</line>${changed.octave ? `<clef-octave-change>${changed.octave}</clef-octave-change>` : ''}</clef>` : '') + '</attributes>';
+      }
       const bar = score.barlines && score.barlines[mi];
       if (bar && bar.start) xml += '<barline location="left"><repeat direction="forward"/></barline>';
       const starts = onsets(measure);
@@ -783,7 +823,7 @@
   return {
     DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
     length, gridOf, onsets, settle, placement, insertAt, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot,
-    meterOf, clefOf, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, toMusicXml,
+    meterOf, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };
 });
