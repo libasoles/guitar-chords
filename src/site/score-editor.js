@@ -458,16 +458,21 @@
     });
     if (!hit) return;
     const mi = Number(hit.id.slice(1));
-    const bar = score.barlines && score.barlines[mi];
-    if (!bar) return;
+    const bars = score.barlines || {};
+    const special = (bar, side) => bar && (side === 'start' ? bar.start : bar.double || bar.end);
+    // Izquierda: la apertura del compas o el cierre del anterior en la misma fila; derecha: su cierre.
+    const sides = [];
+    if (special(bars[mi], 'start')) sides.push([mi, 'start']);
+    else if (mi % M.PER_ROW && special(bars[mi - 1], 'end')) sides.push([mi - 1, 'end']);
+    if (special(bars[mi], 'end')) sides.push([mi, 'end']);
+    if (!sides.length) return;
     const origin = stage.getBoundingClientRect();
     clearBarSelection();
-    ['start', 'end'].forEach((side) => {
-      if (!(side === 'start' ? bar.start : bar.double || bar.end)) return;
-      const button = stage.querySelector('.score-barline-trigger[data-measure="' + mi + '"][data-side="' + side + '"]');
+    sides.forEach(([m, side]) => {
+      const button = stage.querySelector('.score-barline-trigger[data-measure="' + m + '"][data-side="' + side + '"]');
       if (!button) return;
       const box = button.getBoundingClientRect();
-      showBarRemove(mi, side, box.left + box.width / 2 - origin.left, box.top - origin.top, button);
+      showBarRemove(m, side, box.left + box.width / 2 - origin.left, box.top - origin.top, button);
     });
   }
 
