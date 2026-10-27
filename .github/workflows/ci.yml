@@ -10,7 +10,8 @@ on:
 
 jobs:
   # Picks the e2e suites a PR needs from its changed files (see
-  # scripts/ci-e2e-targets.js). Pushes to main always run every suite.
+  # scripts/ci-e2e-targets.js). Pushes to main diff against the previous tip;
+  # a new branch or a force-push whose old tip is gone runs every suite.
   changes:
     runs-on: ubuntu-latest
     outputs:
@@ -30,9 +31,12 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
           BASE_REF: ${{ github.base_ref }}
+          BEFORE: ${{ github.event.before }}
         run: |
           if [ "$EVENT" = "pull_request" ]; then
             git diff --name-only "origin/$BASE_REF...HEAD" | node scripts/ci-e2e-targets.js > matrix.json
+          elif git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            git diff --name-only "$BEFORE" HEAD | node scripts/ci-e2e-targets.js > matrix.json
           else
             node scripts/ci-e2e-targets.js --all < /dev/null > matrix.json
           fi
@@ -144,7 +148,10 @@ jobs:
   deploy:
     needs: [test-and-build, e2e]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # e2e is skipped when no suite is affected, which would skip this job too.
+    if: >-
+      !cancelled() && github.ref == 'refs/heads/main' && github.event_name == 'push' &&
+      needs.test-and-build.result == 'success' && contains(fromJSON('["success","skipped"]'), needs.e2e.result)
     concurrency:
       group: ${{ github.workflow }}-deploy
       cancel-in-progress: false
