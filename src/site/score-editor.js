@@ -679,13 +679,7 @@
   const clefOptions = signatureGroup(t.clef, 'score-clef-options');
   Object.keys(M.CLEFS).forEach((clef) => signatureButton(clefOptions, 'clef', clef, t.clefs[clef]));
   const keyOptions = signatureGroup(t.keySignature, 'score-key-options');
-  t.keys.forEach((label, i) => {
-    const button = signatureButton(keyOptions, 'fifths', i - 7, label);
-    const name = document.createElement('span');
-    name.className = 'score-key-name';
-    name.textContent = label.split(' · ')[0];
-    button.appendChild(name);
-  });
+  t.keys.forEach((label, i) => signatureButton(keyOptions, 'fifths', i - 7, label));
 
   // El mismo grabador de la partitura dibuja las muestras: posiciones de clave y armadura reales.
   function signaturePreview(button, clef, fifths, kind) {
@@ -711,16 +705,30 @@
     const staffBox = lines[0].getBBox();
     const bottom = lines[4].getBBox().y;
     const box = glyph && glyph.getBBox();
-    const width = kind === 'clef' ? 1100 : 2700;
-    const height = 1800;
+    const width = kind === 'clef' ? 1100 : Math.max(1100, (box?.width || 0) + 200);
+    const height = kind === 'clef' ? 1800 : Math.max(1100, (box?.height || 0) + 200);
     const center = box && box.width ? box.x + box.width / 2 : 1350;
     const left = center - width / 2;
-    const top = (staffBox.y + bottom) / 2 - height / 2;
+    const middle = kind === 'key' && box?.height ? box.y + box.height / 2 : (staffBox.y + bottom) / 2;
+    const top = middle - height / 2;
     lines.forEach((line) => {
       const y = line.getBBox().y;
       line.setAttribute('d', `M${left} ${y} L${left + width} ${y}`);
       line.setAttribute('stroke', 'currentColor');
     });
+    if (kind === 'key') {
+      lines.forEach((line) => line.remove());
+      if (!glyph || !box.width) {
+        const empty = document.createElementNS(SVG_NS, 'text');
+        empty.setAttribute('x', center);
+        empty.setAttribute('y', top + height / 2);
+        empty.setAttribute('text-anchor', 'middle');
+        empty.setAttribute('dominant-baseline', 'central');
+        empty.setAttribute('font-size', '650');
+        empty.textContent = '—';
+        svg.appendChild(empty);
+      }
+    }
     svg.setAttribute('viewBox', `${left} ${top} ${width} ${height}`);
   }
 
