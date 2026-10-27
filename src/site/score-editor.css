@@ -24,9 +24,9 @@ body.score-body {
   margin-top: 0.5rem;
   padding: 0.3rem;
   background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px #0002;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .score-barlines .score-palette-item {
@@ -417,4 +417,44 @@ body.score-dragging {
   right: 0;
   left: auto;
   transform: none;
+}
+
+
+.score-barline-trigger {
+  position: absolute;
+  transform: translateX(-50%);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.score-barline-trigger:focus-visible {
+  outline: 2px solid var(--note-selected);
+  outline-offset: 2px;
+}
+
+.score-stage .is-bar-selected {
+  color: var(--note-selected);
+  fill: var(--note-selected);
+  stroke: var(--note-selected);
+}
+
+.score-barline-remove {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  transform: translate(-50%, -100%);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.score-barline-remove:hover {
+  background: #f0eae0;
 }

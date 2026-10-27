@@ -40,6 +40,48 @@ async function checkBarlines(page) {
   await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, { steps: 5 });
   await page.mouse.up();
   assert.equal(await page.evaluate(() => scoreEditor.score.barlines[1].end), true);
+  assert.equal(await page.locator('#scoreBarlines').evaluate(el => getComputedStyle(el).borderWidth), '0px');
+  assert.equal(await page.locator('#scoreBarlines').evaluate(el => getComputedStyle(el).boxShadow), 'none');
+  async function selectBar(mi, side) {
+    const trigger = page.locator('.score-barline-trigger[data-measure="' + mi + '"][data-side="' + side + '"]');
+    await trigger.click();
+    const bar = await trigger.boundingBox();
+    const remove = await page.locator('.score-barline-remove').boundingBox();
+    assert.ok(remove.y + remove.height < bar.y, 'la x aparece encima de la barra');
+    assert.equal(await page.locator('.score-barline-remove').count(), 1);
+  }
+  // Seleccionar la barra desactiva la herramienta de insercion que seguia activa.
+  await selectBar(0, 'start');
+  await page.locator('.score-barline-remove').click();
+  assert.equal(await page.locator('.score-barline-trigger[data-measure="0"][data-side="start"]').count(), 0);
+  assert.equal(await page.locator('.score-barline-remove').count(), 0);
+  await page.keyboard.press('ControlOrMeta+z');
+  assert.equal(await page.evaluate(() => scoreEditor.score.barlines[0].start), true);
+  await selectBar(3, 'end');
+  await page.locator('.score-barline-remove').click();
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barlines[3]), { hidden: true });
+  assert.equal(await page.locator('[id="m3"] g.barLine path').count(), 0);
+  await selectBar(2, 'end'); // barra simple original
+  await page.locator('.score-barline-remove').focus();
+  await page.keyboard.press('Enter');
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+  assert.equal(await page.evaluate(() => scoreEditor.score.barlines[2].hidden), true);
+  assert.equal(await page.locator('.score-barline-trigger[data-measure="2"]').count(), 0);
+  await selectBar(1, 'end');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('.score-barline-remove').count(), 0);
+  await selectBar(1, 'end');
+  await page.locator('#scoreTitle').click();
+  assert.equal(await page.locator('.score-barline-remove').count(), 0);
+  await page.locator('#scoreDownloadToggle').click();
+  const pendingDownload = page.waitForEvent('download');
+  await page.locator('#scoreDownloadXml').click();
+  const download = await pendingDownload;
+  const stream = await download.createReadStream();
+  let xml = '';
+  for await (const chunk of stream) xml += chunk.toString();
+  assert.equal((xml.match(/<bar-style>none<\/bar-style>/g) || []).length, 2);
   for (const width of [1280, 375]) {
     await page.setViewportSize({ width, height: 900 });
     await page.waitForTimeout(200);
@@ -48,6 +90,8 @@ async function checkBarlines(page) {
     assert.ok(toolbar.x >= sheet.x + sheet.width, 'las barras quedan a la derecha');
     assert.ok(toolbar.x + toolbar.width <= width, 'la barra cabe en la pantalla');
     assert.equal(await page.locator('.site-header').evaluate(el => getComputedStyle(el).borderBottomWidth), '0px');
+    await selectBar(1, 'end');
+    await page.keyboard.press('Escape');
   }
 }
 

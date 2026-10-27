@@ -112,9 +112,25 @@
     else {
       const bar = score.barlines[mi] || {};
       delete bar.single;
+      if (type === 'end') delete bar.hidden;
       bar[type] = true;
       score.barlines[mi] = bar;
     }
+    return true;
+  }
+
+  function removeBarline(score, mi, side) {
+    if (!Number.isInteger(mi) || mi < 0 || mi >= measures(score).length || !['start', 'end'].includes(side)) return false;
+    if (!score.barlines) score.barlines = {};
+    const bar = score.barlines[mi] || {};
+    delete bar[side];
+    Object.keys(bar).forEach((key) => { if (!bar[key]) delete bar[key]; });
+    if (side === 'end') {
+      delete bar.single;
+      bar.hidden = true;
+    }
+    if (Object.values(bar).some(Boolean)) score.barlines[mi] = bar;
+    else delete score.barlines[mi];
     return true;
   }
 
@@ -198,6 +214,7 @@
       if (!/^(0|[1-9]\d*)$/.test(index) || +index >= rows.length * PER_ROW || !bar) return;
       if (bar.start === true || bar.end === true) barlines[index] = { start: bar.start === true, end: bar.end === true };
       else if (bar.single === true) barlines[index] = { single: true };
+      if (bar.hidden === true && bar.end !== true) barlines[index] = Object.assign(barlines[index] || {}, { hidden: true });
     });
     return Object.assign(Object.keys(barlines).length ? { barlines } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {});
   }
@@ -350,6 +367,7 @@
         hidden(cursor, capacity(score));
       });
       if (bar && bar.end) xml += '<barline location="right"><repeat direction="backward"/></barline>';
+      else if (bar && bar.hidden) xml += '<barline location="right"><bar-style>none</bar-style></barline>';
       else if (bar && bar.single) xml += '<barline location="right"><bar-style>regular</bar-style></barline>';
       xml += '</measure>';
     });
@@ -359,6 +377,6 @@
   return {
     DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
     length, onsets, settle, placement, insertAt, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, fits, canDot,
-    meterOf, clefOf, fifthsOf, bottomLine, keyAlter, capacity, setMeter, setBarline, sanitize, toMusicXml,
+    meterOf, clefOf, fifthsOf, bottomLine, keyAlter, capacity, setMeter, setBarline, removeBarline, sanitize, toMusicXml,
   };
 });

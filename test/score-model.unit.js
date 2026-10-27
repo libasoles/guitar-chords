@@ -334,3 +334,29 @@ test('sanitize descarta barras invalidas y compases que no existen', () => {
   score.barlines = { '-1': { start: true }, 0: null, 1: { end: 'true' }, 2: { start: true }, 12: { end: true } };
   assert.deepEqual(M.sanitize(score).barlines, { 2: { start: true, end: false } });
 });
+
+
+test('eliminar barras conserva el otro extremo y sobrevive al guardado', () => {
+  const score = M.emptyScore();
+  M.setBarline(score, 0, 'start');
+  M.setBarline(score, 0, 'end');
+  M.removeBarline(score, 0, 'end');
+  assert.deepEqual(score.barlines[0], { start: true, hidden: true });
+  assert.match(M.toMusicXml(M.sanitize(M.clone(score))), /<repeat direction="forward"/);
+  M.setBarline(score, 0, 'end');
+  M.removeBarline(score, 0, 'start');
+  assert.deepEqual(score.barlines[0], { end: true });
+  M.removeBarline(score, 0, 'end');
+  assert.deepEqual(score.barlines[0], { hidden: true });
+  M.removeBarline(score, 1, 'end'); // tambien se puede quitar una barra simple por defecto
+  const restored = M.sanitize(M.clone(score));
+  assert.deepEqual(restored.barlines, score.barlines);
+  assert.equal((M.toMusicXml(restored).match(/<bar-style>none<\/bar-style>/g) || []).length, 2);
+  M.setBarline(restored, 0, 'end');
+  assert.deepEqual(restored.barlines[0], { end: true });
+  M.setBarline(restored, 1, 'single');
+  assert.deepEqual(restored.barlines[1], { single: true });
+  assert.equal(M.removeBarline(restored, -1, 'end'), false);
+  assert.equal(M.removeBarline(restored, 12, 'start'), false);
+  assert.equal(M.removeBarline(restored, 0, 'invalid'), false);
+});

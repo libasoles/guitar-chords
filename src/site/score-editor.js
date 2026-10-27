@@ -256,6 +256,7 @@
     mountMeterButton();
     mountClefButtons();
     measureLayout();
+    mountBarlineButtons();
     markSelected();
     updateHoverGhost();
     removeRow.hidden = score.rows.length <= M.MIN_ROWS;
@@ -270,6 +271,64 @@
       });
       const box = node.querySelector(':scope > g.staff > path').getBoundingClientRect();
       return { left: box.left - origin.left, right: box.right - origin.left, lines };
+    });
+  }
+
+  function clearBarSelection() {
+    stage.querySelector('.score-barline-remove')?.remove();
+    stage.querySelectorAll('.is-bar-selected').forEach((node) => node.classList.remove('is-bar-selected'));
+    stage.querySelectorAll('.score-barline-trigger').forEach((button) => button.setAttribute('aria-pressed', 'false'));
+  }
+
+  document.addEventListener('pointerdown', (event) => {
+    if (!event.target.closest('.score-barline-trigger, .score-barline-remove')) clearBarSelection();
+  });
+
+  function mountBarlineButtons() {
+    const origin = stage.getBoundingClientRect();
+    stage.querySelectorAll('g.measure').forEach((measure) => {
+      const mi = Number(measure.id.slice(1));
+      const hasStart = score.barlines && score.barlines[mi]?.start;
+      measure.querySelectorAll('g.barLine').forEach((node, index) => {
+        const box = node.getBoundingClientRect();
+        if (!box.height) return;
+        const side = hasStart && index === 0 ? 'start' : 'end';
+        const x = box.left + box.width / 2 - origin.left;
+        const y = box.top - origin.top;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'score-barline-trigger';
+        button.dataset.measure = mi;
+        button.dataset.side = side;
+        button.setAttribute('aria-label', t.selectBarline);
+        button.setAttribute('aria-pressed', 'false');
+        button.style.left = x + 'px';
+        button.style.top = y + 'px';
+        button.style.width = Math.max(20, box.width + 12) + 'px';
+        button.style.height = Math.max(44, box.height) + 'px';
+        button.addEventListener('click', () => {
+          clearBarSelection();
+          deactivateTool();
+          selected = null;
+          markSelected();
+          node.classList.add('is-bar-selected');
+          button.setAttribute('aria-pressed', 'true');
+          const remove = document.createElement('button');
+          remove.type = 'button';
+          remove.className = 'score-barline-remove';
+          remove.setAttribute('aria-label', t.deleteBarline);
+          remove.title = t.deleteBarline;
+          remove.innerHTML = lucide('x');
+          remove.style.left = x + 'px';
+          remove.style.top = (y - 4) + 'px';
+          remove.addEventListener('click', () => change(() => M.removeBarline(score, mi, side)));
+          remove.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') { clearBarSelection(); button.focus(); }
+          });
+          stage.appendChild(remove);
+        });
+        stage.appendChild(button);
+      });
     });
   }
 
@@ -422,7 +481,8 @@
 
   function updateHoverGhost() {
     const point = hoverPoint;
-    const overStage = point && stage.contains(document.elementFromPoint(point.clientX, point.clientY));
+    const over = point && document.elementFromPoint(point.clientX, point.clientY);
+    const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-barline-remove');
     const hit = activeItem && !drag && overStage && locate(point.clientX, point.clientY);
     if (!hit) { clearHoverGhost(); return; }
     if (!hoverGhost) {
@@ -516,7 +576,7 @@
   document.addEventListener('pointercancel', (event) => endDrag(event, true));
 
   stage.addEventListener('pointerdown', (event) => {
-    if (event.target.closest('.score-meter-trigger, .score-clef-trigger')) return;
+    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-barline-trigger, .score-barline-remove')) return;
     if (activeItem && activeItem.kind === 'bar') {
       event.preventDefault();
       stage.focus({ preventScroll: true });
@@ -558,6 +618,7 @@
   document.addEventListener('keydown', (event) => {
     if (event.target.closest('input, textarea, select, [contenteditable]')) return;
     if (event.key === 'Escape') {
+      clearBarSelection();
       deactivateTool();
     }
     if (!event.metaKey && !event.ctrlKey && !event.altKey && !meterPopup.matches(':popover-open') && !clefPopup.matches(':popover-open')) {
@@ -796,6 +857,7 @@
   // ---- paleta -------------------------------------------------------------
 
   const ICONS = {
+    x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
     plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
     minus: '<path d="M5 12h14"/>',
     download: '<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
