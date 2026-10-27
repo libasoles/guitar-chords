@@ -207,7 +207,7 @@ async function checkDrag(page) {
     // Numbered tools stay active for repeated clicks and edit the selected figure.
     await page.reload();
     await page.waitForSelector('#scoreStage g.measure');
-    assert.deepEqual(await page.locator('.score-palette-key').allTextContents(), ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'p', 's', 'b', 'c']);
+    assert.deepEqual(await page.locator('.score-palette-key').allTextContents(), ['1', '2', '3', '4', '5', 'f', '6', '7', '8', '9', '0', 'r', 'p', 's', 'b', 'c']);
     await page.keyboard.press('4');
     assert.equal(await page.locator('[data-shortcut="4"]').getAttribute('aria-pressed'), 'true');
     const previewPoint = await page.locator('#scoreStage g.measure').nth(1).evaluate(node => {

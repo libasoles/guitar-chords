@@ -226,7 +226,7 @@
     delete replacement.tp;
     if (item.kind === 'rest') { replacement.rest = true; delete replacement.n; delete replacement.acc; }
     else { delete replacement.rest; replacement.n = ev.rest ? M.bottomLine(score) : ev.n; }
-    if (item.d === 'w' || item.d === 's') delete replacement.dot;
+    if (item.d === 'w' || item.d === 's' || item.d === 'f') delete replacement.dot;
     const measure = M.measures(score)[selected.mi];
     if (M.onsets(measure)[selected.i] + M.length(replacement) > M.capacity(score)) return say(t.full);
     change(() => { M.settle(measure); measure[selected.i] = replacement; });
@@ -240,7 +240,7 @@
     const column = measure.filter((o) => o.at === ev.at && o.d === ev.d && !!o.dot === !!ev.dot && !o.rest === !ev.rest);
     if (item.kind === 'dot') {
       if (ev.dot) return change(() => { column.forEach((o) => { delete o.dot; }); });
-      if (!M.canDot(measure, hit.i, score)) return say(ev.d === 'w' || ev.d === 's' || ev.tp ? t.noDot : t.full);
+      if (!M.canDot(measure, hit.i, score)) return say(ev.d === 'w' || ev.d === 's' || ev.d === 'f' || ev.tp ? t.noDot : t.full);
       return change(() => { column.forEach((o) => { o.dot = true; }); });
     }
     if (ev.rest) return;
@@ -276,7 +276,7 @@
     const anchor = eventAt(from);
     const items = refs.map((r) => ({ ev: all[r.mi][r.i], mi: r.mi, at: M.onsets(all[r.mi])[r.i] }));
     const anchorAt = items.find((x) => x.ev === anchor).at;
-    const grid = items.some((x) => x.ev.tp) ? 2 : M.GRID;
+    const grid = M.gridOf(items.map((x) => x.ev));
     const dt = Math.round((target.t - anchorAt) / grid) * grid;
     const dmi = target.mi - from.mi;
     const pitched = items.filter((x) => !x.ev.rest);
@@ -440,9 +440,9 @@
           button.setAttribute('aria-pressed', 'true');
           const remove = document.createElement('button');
           remove.type = 'button';
-          remove.className = 'score-barline-remove';
+          remove.className = 'score-barline-remove tooltip';
           remove.setAttribute('aria-label', t.deleteBarline);
-          remove.title = t.deleteBarline;
+          remove.dataset.tooltip = t.deleteBarline;
           remove.innerHTML = lucide('x');
           remove.style.left = x + 'px';
           remove.style.top = (y - 4) + 'px';
@@ -1290,11 +1290,13 @@
     'note:q': '<path d="' + HEAD + '"/><path d="M19.6 24.2V5" stroke="currentColor" stroke-width="1.6" fill="none"/>',
     'note:e': '<path d="' + HEAD + '"/><path d="M19.6 24.2V5c0 4 5 5.5 5 11" stroke="currentColor" stroke-width="1.6" fill="none"/>',
     'note:s': '<path d="' + HEAD + '"/><path d="M19.6 24.2V4m0 0c0 4 5 5.5 5 11m-5-6c0 4 5 5.5 5 11" stroke="currentColor" stroke-width="1.6" fill="none"/>',
-    'rest:w': '<path d="M5 12h20" stroke="currentColor" stroke-width="1.4"/><path d="M9 12h12v6H9z"/>',
+    'note:f': '<path d="' + HEAD + '"/><path d="M19.6 24.2V3m0 0c0 4 5 5.5 5 11m-5-6c0 4 5 5.5 5 11m-5-6c0 4 5 5.5 5 11" stroke="currentColor" stroke-width="1.6" fill="none"/>',
+    'rest:w':'<path d="M5 12h20" stroke="currentColor" stroke-width="1.4"/><path d="M9 12h12v6H9z"/>',
     'rest:h': '<path d="M5 18h20" stroke="currentColor" stroke-width="1.4"/><path d="M9 12h12v6H9z"/>',
     'rest:q': '<path d="M12 5l7 8-5 5 6 7c-3-1-6.500-.5-6 3" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round"/>',
     'rest:e': '<circle cx="12" cy="11" r="2.4"/><path d="M13 12.500c3 0 5-1.300 6-3.500l-5 20" stroke="currentColor" stroke-width="1.700" fill="none"/>',
     'rest:s': '<circle cx="12" cy="9" r="2.400"/><circle cx="10" cy="17" r="2.400"/><path d="M13 10c3 0 5-1.300 6-3.500l-6.500 22" stroke="currentColor" stroke-width="1.700" fill="none"/>',
+    'rest:f': '<circle cx="12" cy="5" r="2.200"/><circle cx="10" cy="12" r="2.200"/><circle cx="8" cy="19" r="2.200"/><path d="M13 6c3 0 5-1.300 6-3.500l-8 26" stroke="currentColor" stroke-width="1.700" fill="none"/>',
     // Los tres comparten la misma linea fina en x=15 (y la gruesa de las repeticiones junto a ella), para que apilados se lean como una sola barra.
     'bar:double': '<path d="M10 4v24M15 4v24" stroke="currentColor" stroke-width="1.6"/>',
     'bar:start': '<path d="M10 4v24" stroke="currentColor" stroke-width="3.5"/><path d="M15 4v24" stroke="currentColor" stroke-width="1.6"/><circle cx="21" cy="12" r="1.8"/><circle cx="21" cy="20" r="1.8"/>',
@@ -1330,12 +1332,14 @@
     { kind: 'note', d: 'q', key: '3', label: t.quarter },
     { kind: 'note', d: 'e', key: '4', label: t.eighth },
     { kind: 'note', d: 's', key: '5', label: t.sixteenth },
+    { kind: 'note', d: 'f', key: t.shortcuts.thirtySecond, label: t.thirtySecond },
     null,
     { kind: 'rest', d: 'w', key: '6', label: t.restWhole },
     { kind: 'rest', d: 'h', key: '7', label: t.restHalf },
     { kind: 'rest', d: 'q', key: '8', label: t.restQuarter },
     { kind: 'rest', d: 'e', key: '9', label: t.restEighth },
     { kind: 'rest', d: 's', key: '0', label: t.restSixteenth },
+    { kind: 'rest', d: 'f', key: t.shortcuts.restThirtySecond, label: t.restThirtySecond },
     null,
     { kind: 'dot', key: t.shortcuts.dot, label: t.dot },
     { kind: 'acc', acc: '#', key: t.shortcuts.sharp, label: t.sharp },
@@ -1359,9 +1363,9 @@
     }
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'score-palette-item';
+    button.className = 'score-palette-item tooltip';
     button.setAttribute('aria-label', item.label);
-    button.title = item.label;
+    button.dataset.tooltip = item.label;
     button.appendChild(glyphFor(item));
     button.setAttribute('aria-pressed', 'false');
     if (item.kind === 'bar') {
@@ -1380,7 +1384,7 @@
       button.dataset.shortcut = item.key;
       button.setAttribute('aria-keyshortcuts', item.key);
       button.setAttribute('aria-pressed', 'false');
-      button.title += ' (' + item.key + ')';
+      button.dataset.tooltip += ' (' + item.key + ')';
       const key = document.createElement('span');
       key.className = 'score-palette-key';
       key.setAttribute('aria-hidden', 'true');

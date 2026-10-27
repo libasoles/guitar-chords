@@ -257,3 +257,43 @@ a:hover {
   color: var(--ink-soft);
 }
 
+
+/* Black tooltip in the style of Radix UI's: small, rounded, with an arrow, above the element. Text comes from data-tooltip. */
+.tooltip {
+  position: relative;
+}
+.tooltip::before,
+.tooltip::after {
+  position: absolute;
+  left: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease-out;
+}
+.tooltip::after {
+  content: attr(data-tooltip);
+  bottom: calc(100% + 0.45rem);
+  transform: translateX(-50%);
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.3rem;
+  background: #000;
+  color: #fff;
+  font: 400 0.8rem/1.2 system-ui, sans-serif;
+  white-space: nowrap;
+  z-index: 3;
+}
+.tooltip::before {
+  content: "";
+  bottom: calc(100% + 0.1rem);
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #000;
+  transform: translateX(-50%) rotate(45deg);
+  z-index: 3;
+}
+.tooltip:hover::before,
+.tooltip:hover::after,
+.tooltip:focus-visible::before,
+.tooltip:focus-visible::after {
+  opacity: 1;
+}

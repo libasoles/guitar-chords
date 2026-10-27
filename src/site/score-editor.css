@@ -520,6 +520,10 @@ body.score-dragging {
   cursor: pointer;
 }
 
+.score-barline-remove.tooltip {
+  position: absolute;
+}
+
 .score-barline-remove:hover {
   background: #f0eae0;
 }
