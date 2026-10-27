@@ -420,8 +420,8 @@ const SIXTHS_SLUG = "ejercicio-de-sextas";
 const PARTITURA_SLUG = "partitura-y-tablatura";
 const PRIVACY_SLUG = "politica-de-privacidad";
 
-// Editor minimo de partituras (src/site/score-editor.html). Pagina privada: sin
-// enlaces desde el sitio, fuera del sitemap y con noindex; se entra por URL.
+// Editor minimo de partituras (src/site/score-editor.html). Pagina indexable:
+// en el sitemap, en el menu y con datos estructurados.
 const SCORE_EDITOR_SLUG = "partitura";
 
 // Articles section (src/site/article.html): an index and one article, found
@@ -1166,9 +1166,45 @@ function linkifyEmails(text) {
   );
 }
 
-// Render the private score editor page (src/site/score-editor.html).
+// Render the score editor page (src/site/score-editor.html).
 function renderScoreEditorPage(template, strings, locale) {
   let html = fillPageChrome(template, strings, locale, SCORE_EDITOR_SLUG);
+  const sheetToTabHref = PARTITURA_ENABLED ? v7PageHref(locale, PARTITURA_SLUG) : "";
+  // Without the sheet-to-tab page the link would be dead: keep its text only.
+  const faq = (strings.scoreFaq || []).map(function (item) {
+    return {
+      q: item[0],
+      a: sheetToTabHref
+        ? item[1].split("%%SHEET_TO_TAB_HREF%%").join(sheetToTabHref)
+        : item[1].replace(/<a [^>]*>(.*?)<\/a>/g, "$1"),
+    };
+  });
+  const list = function (items) {
+    return items.map(function (item) { return "<li>" + item + "</li>"; }).join("");
+  };
+  html = html
+    .split("%%ogLocale%%")
+    .join(locale === "es" ? "es_AR" : "en_US")
+    .split("%%scoreSeoH1%%")
+    .join(escapeHtml(strings.scoreSeoH1 || ""))
+    .split("%%scoreAboutLead%%")
+    .join(escapeHtml(strings.scoreAboutLead || ""))
+    .split("%%scoreFeaturesH2%%")
+    .join(escapeHtml(strings.scoreFeaturesH2 || ""))
+    .split("%%scoreHowH2%%")
+    .join(escapeHtml(strings.scoreHowH2 || ""))
+    .split("%%scoreFaqH2%%")
+    .join(escapeHtml(strings.scoreFaqH2 || ""))
+    .split("%%SCORE_FEATURES%%")
+    .join(list(strings.scoreFeatures || []))
+    .split("%%SCORE_HOW%%")
+    .join(list(strings.scoreHow || []))
+    .split("%%SCORE_FAQ%%")
+    .join(
+      faq
+        .map(function (item) { return "<h3>" + item.q + "</h3>\n        <p>" + item.a + "</p>"; })
+        .join("\n        "),
+    );
   const toastStrings = {};
   Object.keys(strings).forEach(function (key) {
     if (key.indexOf("toast") === 0) toastStrings[key] = strings[key];
@@ -1178,7 +1214,7 @@ function renderScoreEditorPage(template, strings, locale) {
       html = html.split("%%" + key + "%%").join(escapeHtml(strings[key] || ""));
     },
   );
-  return html
+  html = html
     .split("%%PAGE_TITLE%%")
     .join(escapeHtml(strings.scorePageTitle || ""))
     .split("%%PAGE_META_DESCRIPTION%%")
@@ -1187,6 +1223,14 @@ function renderScoreEditorPage(template, strings, locale) {
     .join(escapeHtml(strings.scoreH1 || ""))
     .split("%%SCORE_STRINGS%%")
     .join(JSON.stringify(Object.assign({}, strings.scoreUiStrings, toastStrings)).replace(/</g, "\\u003c"));
+  const opts = structuredDataOpts(
+    locale,
+    v7CanonicalUrl(locale, SCORE_EDITOR_SLUG),
+    strings.scorePageTitle || "",
+    strings.scoreMetaDescription || "",
+  );
+  opts.faq = faq;
+  return injectJsonLd(html, toolJsonLd(opts));
 }
 
 // Render the bilingual privacy policy (src/site/privacy.html).
@@ -2431,6 +2475,7 @@ function siteMenu(strings, locale) {
     link(pagePath(TAB_EDITOR_SLUG, locale), strings.menuCreateTabs),
     link(pagePath("identificar-acordes-por-notas", locale), strings.menuIdentifyChords),
   ];
+  items.push(link(pagePath(SCORE_EDITOR_SLUG, locale), strings.menuScoreEditor));
   if (PARTITURA_ENABLED)
     items.push(link(pagePath(PARTITURA_SLUG, locale), strings.menuAddTabs));
   items.push(link(pagePath("circulo-de-quintas", locale), strings.menuFifths));
@@ -2624,6 +2669,7 @@ addSlugPages(
 );
 addSlugPages([DIM_SLUG, NOTE_FINDER_SLUG, SIXTHS_SLUG]);
 addSlugPages([TAB_EDITOR_SLUG], ["0.7", "0.6"]);
+addSlugPages([SCORE_EDITOR_SLUG], ["0.8", "0.7"]);
 addSlugPages([PRIVACY_SLUG], ["0.3", "0.3"]);
 addSlugPages([ARTICLES_SLUG, ARTICLE_CARCASSI_SLUG, ARTICLE_PRELUDES_SLUG, ARTICLE_SANTISTEBAN_SLUG, ARTICLE_WALTZES_SLUG, ARTICLE_PROGRESSIVE_SLUG, ARTICLE_AGUADO_SLUG, ARTICLE_SAGRERAS_SLUG, ARTICLE_SOR_SLUG, ARTICLE_SOR_ESTUDIOS_SLUG, ARTICLE_BARRIOS_SLUG, ARTICLE_GIULIANI_SLUG, ARTICLE_GIULIANI_ARPEGIOS_SLUG, ARTICLE_ARPEGGIOS_SLUG]);
 if (PARTITURA_ENABLED) addSlugPages([PARTITURA_SLUG], ["0.7", "0.6"]);

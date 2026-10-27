@@ -10,6 +10,7 @@
   "menuCreateTabs": "Crear tablaturas",
   "menuIdentifyChords": "Identificar acordes",
   "menuAddTabs": "Partituras con Tablatura",
+  "menuScoreEditor": "Escribir partituras",
   "menuFifths": "Círculo de quintas",
   "menuResources": "Recursos",
   "menuArticles": "Artículos",
@@ -565,9 +566,47 @@
   "artGiulianiArpegiosMetaDescription": "Los 120 ejercicios de arpegio para la mano derecha del Op. 1 de Mauro Giuliani, con partitura y tablatura para ver y descargar en PDF.",
   "artGiulianiArpegiosCardSummary": "Los 120 ejercicios de arpegio de la mano derecha de Giuliani, con partitura y tablatura para descargar",
   "artGiulianiArpegiosLead": "Los <strong>120 ejercicios de arpegio</strong> para la mano derecha del Op. 1 de <strong>Mauro Giuliani</strong> (1781–1829), con partitura y tablatura para descargar.",
-  "scorePageTitle": "Partitura",
-  "scoreMetaDescription": "Creá partituras simples online, gratis y sin crear usuario. Escribí las notas y descargalas en PDF.",
+  "scorePageTitle": "Escribir partituras online gratis · Editor de partituras",
+  "scoreMetaDescription": "Editor de partituras online y gratis: escribí notas, silencios, compases, clave y armadura en el pentagrama, sin registrarte ni instalar nada, y descargá tu partitura en PDF o MusicXML.",
   "scoreH1": "Partitura",
+  "scoreSeoH1": "Editor de partituras online gratis",
+  "scoreAboutLead": "Escribí tu partitura directamente en el pentagrama: elegí la figura, hacé clic donde va la nota y listo. Es gratis, funciona en el navegador y no pide crear usuario ni instalar nada.",
+  "scoreFeaturesH2": "Qué podés hacer con el editor",
+  "scoreFeatures": [
+    "<strong>Notas y silencios:</strong> desde la redonda hasta la fusa, con puntillo y alteraciones (sostenidos, bemoles y becuadros).",
+    "<strong>Compases:</strong> elegí el compás (4/4, 3/4, 6/8…) y el editor no te deja pasarte de la duración.",
+    "<strong>Clave y armadura:</strong> clave de Sol, de Fa o de Do, y cualquier armadura de Do♭ a Do♯.",
+    "<strong>Barras especiales:</strong> barra doble, barras de repetición y cejillas para guitarra.",
+    "<strong>Descarga:</strong> exportá la partitura en PDF para imprimirla o en MusicXML para abrirla en MuseScore, Finale, Sibelius o Dorico.",
+    "<strong>Guardado automático:</strong> tu partitura queda guardada en tu navegador, así que podés seguir otro día."
+  ],
+  "scoreHowH2": "Cómo escribir una partitura online",
+  "scoreHow": [
+    "Poné el título y el autor arriba de la partitura.",
+    "Elegí una figura o un silencio en la barra de herramientas.",
+    "Hacé clic en el pentagrama para colocar cada nota; se agrupan solas en compases.",
+    "Ajustá la clave, la armadura y las barras de compás si hace falta.",
+    "Descargá la partitura en PDF o en MusicXML."
+  ],
+  "scoreFaqH2": "Preguntas frecuentes",
+  "scoreFaq": [
+    [
+      "¿Es realmente gratis escribir partituras acá?",
+      "Sí. El editor es gratis, sin límites de uso y sin crear usuario."
+    ],
+    [
+      "¿Tengo que registrarme o instalar un programa?",
+      "No. Funciona en cualquier navegador moderno, en computadora, tablet o celular. Tu partitura se guarda en tu propio navegador."
+    ],
+    [
+      "¿En qué formatos puedo descargar la partitura?",
+      "En PDF, para imprimir o compartir, y en MusicXML, el formato estándar que abren MuseScore, Finale, Sibelius y Dorico."
+    ],
+    [
+      "¿Sirve para guitarra?",
+      "Sí. Incluye la clave de Sol de guitarra (una octava más grave), barras de repetición y cejillas. Si ya tenés una partitura y querés la tablatura, probá <a href=\"%%SHEET_TO_TAB_HREF%%\">Partitura a tablatura</a>."
+    ]
+  ],
   "scoreTitleLabel": "Título de la partitura",
   "scoreAuthorLabel": "Autor de la partitura",
   "scoreAuthorPlaceholder": "Autor",
@@ -585,7 +624,6 @@
     "selectBarline": "Seleccionar barra de compás",
     "deleteBarline": "Eliminar barra de compás",
     "deleteMeasure": "Eliminar compás",
-
     "barDouble": "Barra doble",
     "barRepeatStart": "Inicio de repetición",
     "barRepeatEnd": "Fin de repetición",
@@ -594,7 +632,6 @@
     "barreFretRange": "El traste de la cejilla debe estar entre 1 y 24",
     "barreStart": "Inicio de la cejilla",
     "barreEnd": "Fin de la cejilla",
-
     "clefAndKey": "Clave y armadura",
     "clef": "Clave",
     "keySignature": "Armadura",

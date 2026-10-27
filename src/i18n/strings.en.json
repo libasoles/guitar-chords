@@ -10,6 +10,7 @@
   "menuCreateTabs": "Create tabs",
   "menuIdentifyChords": "Identify chords",
   "menuAddTabs": "Sheet music to tab",
+  "menuScoreEditor": "Write sheet music",
   "menuFifths": "Circle of fifths",
   "menuResources": "Resources",
   "menuArticles": "Articles",
@@ -565,9 +566,47 @@
   "artGiulianiArpegiosMetaDescription": "The 120 right-hand arpeggio exercises from Mauro Giuliani’s Op. 1, with sheet music and tablature to view and download as PDF.",
   "artGiulianiArpegiosCardSummary": "Giuliani’s 120 right-hand arpeggio exercises, with sheet music and tab to download",
   "artGiulianiArpegiosLead": "The <strong>120 right-hand arpeggio exercises</strong> from <strong>Mauro Giuliani</strong>’s (1781–1829) Op. 1, with sheet music and tab to download.",
-  "scorePageTitle": "Sheet music",
-  "scoreMetaDescription": "Create simple sheet music online, free and without an account. Write the notes and download them as PDF.",
+  "scorePageTitle": "Write Sheet Music Online Free · Sheet Music Editor",
+  "scoreMetaDescription": "Free online sheet music editor: write notes, rests, measures, clef and key signature on the staff, with no sign-up and nothing to install, and download your score as PDF or MusicXML.",
   "scoreH1": "Sheet music",
+  "scoreSeoH1": "Free online sheet music editor",
+  "scoreAboutLead": "Write your score straight onto the staff: pick a note value, click where the note goes, done. It is free, runs in your browser and needs no account or install.",
+  "scoreFeaturesH2": "What you can do with the editor",
+  "scoreFeatures": [
+    "<strong>Notes and rests:</strong> from whole to thirty-second notes, with dots and accidentals (sharps, flats and naturals).",
+    "<strong>Measures:</strong> pick the time signature (4/4, 3/4, 6/8…) and the editor will not let a measure overflow.",
+    "<strong>Clef and key signature:</strong> treble, bass and C clefs, and any key signature from C♭ to C♯.",
+    "<strong>Special barlines:</strong> double barlines, repeat signs and guitar barre marks.",
+    "<strong>Download:</strong> export the score as a PDF to print, or as MusicXML to open in MuseScore, Finale, Sibelius or Dorico.",
+    "<strong>Autosave:</strong> your score is kept in your browser, so you can pick it up another day."
+  ],
+  "scoreHowH2": "How to write sheet music online",
+  "scoreHow": [
+    "Type the title and the composer above the score.",
+    "Choose a note value or a rest in the toolbar.",
+    "Click on the staff to place each note; they group into measures on their own.",
+    "Adjust the clef, key signature and barlines if needed.",
+    "Download the score as PDF or MusicXML."
+  ],
+  "scoreFaqH2": "Frequently asked questions",
+  "scoreFaq": [
+    [
+      "Is it really free to write sheet music here?",
+      "Yes. The editor is free, with no usage limits and no account."
+    ],
+    [
+      "Do I need to sign up or install anything?",
+      "No. It works in any modern browser on a computer, tablet or phone. Your score is saved in your own browser."
+    ],
+    [
+      "Which formats can I download?",
+      "PDF, to print or share, and MusicXML, the standard format that MuseScore, Finale, Sibelius and Dorico open."
+    ],
+    [
+      "Is it good for guitar?",
+      "Yes. It includes the guitar treble clef (an octave lower), repeat signs and barre marks. If you already have a score and want the tab, try <a href=\"%%SHEET_TO_TAB_HREF%%\">Sheet music to tab</a>."
+    ]
+  ],
   "scoreTitleLabel": "Score title",
   "scoreAuthorLabel": "Score author",
   "scoreAuthorPlaceholder": "Author",
@@ -585,7 +624,6 @@
     "selectBarline": "Select barline",
     "deleteBarline": "Delete barline",
     "deleteMeasure": "Delete measure",
-
     "barDouble": "Double barline",
     "barRepeatStart": "Start repeat",
     "barRepeatEnd": "End repeat",
@@ -594,7 +632,6 @@
     "barreFretRange": "The barre fret must be between 1 and 24",
     "barreStart": "Barre start",
     "barreEnd": "Barre end",
-
     "clefAndKey": "Clef and key signature",
     "clef": "Clef",
     "keySignature": "Key signature",

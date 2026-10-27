@@ -1,4 +1,4 @@
-/* score-editor.css — Pagina /partitura (editor minimo de partituras, sin enlaces ni indexado). */
+/* score-editor.css — Pagina /partitura (editor minimo de partituras). */
 /* The whole page is plain white; --paper follows so menus and dialogs match. */
 html:has(.score-body),
 body.score-body {
@@ -818,4 +818,59 @@ html body[data-scroll-locked] {
   border: 1px dashed var(--note-selected);
   background: rgb(0 0 0 / 4%);
   pointer-events: none;
+}
+
+/* Visible copy below the editor, for readers and search. */
+.score-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.score-about {
+  max-width: 44rem;
+  margin: 5rem 0 3rem 36px;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.score-about h2 {
+  margin: 2rem 0 0;
+  font-size: 1.15rem;
+  color: var(--ink);
+}
+
+.score-about h3 {
+  margin: 1rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.score-about p {
+  margin: 0.4rem 0 0;
+}
+
+.score-about .score-about-lead {
+  margin-top: 0;
+  font-size: 1rem;
+}
+
+.score-about ul,
+.score-about ol {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.8rem 0 0;
+  padding-left: 1.3rem;
+}
+
+.score-about strong {
+  color: var(--ink);
 }
