@@ -97,7 +97,15 @@ function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
+// Dev mode (npm run dev): keep dist/site between builds, skip assets that are
+// already up to date, and leave out minify/fingerprint so a rebuild is cheap.
+const DEV = process.argv.includes("--dev");
+const DEV_MARKER = path.join(DIST_SITE, ".dev-build");
+
 function copyFile(src, dst) {
+  if (DEV && fs.existsSync(dst) && fs.statSync(dst).mtimeMs >= fs.statSync(src).mtimeMs) {
+    return;
+  }
   if (path.extname(src) === ".svg") {
     fs.writeFileSync(dst, normalizeScoreDirections(fs.readFileSync(src, "utf8")));
   } else {
@@ -1834,7 +1842,11 @@ function render404Page(template, strings) {
 
 console.log("==> Building site assets...");
 
-fs.rmSync(DIST_SITE, { recursive: true, force: true });
+// A dev build reuses the previous output only if that was a dev build too:
+// a production output holds fingerprinted file names.
+if (!DEV || !fs.existsSync(DEV_MARKER)) {
+  fs.rmSync(DIST_SITE, { recursive: true, force: true });
+}
 const ASSETS_DIST = path.join(DIST_SITE, "assets");
 const VENDOR_DIST = path.join(ASSETS_DIST, "vendor");
 ensureDir(ASSETS_DIST);
@@ -2128,7 +2140,15 @@ const swOut = swTemplate
   .split("%%START_URL%%")
   .join("/");
 const swFile = path.join(DIST_SITE, "sw.js");
-fs.writeFileSync(swFile, swOut, "utf8");
+fs.writeFileSync(
+  swFile,
+  DEV
+    ? // Unfingerprinted assets would go stale in a precache, so dev drops the worker.
+      "self.addEventListener('install',()=>self.skipWaiting());" +
+        "self.addEventListener('activate',e=>e.waitUntil(self.registration.unregister()));"
+    : swOut,
+  "utf8",
+);
 say(path.relative(ROOT, swFile));
 
 console.log("==> Rendering locale pages...");
@@ -2672,6 +2692,12 @@ say(path.relative(ROOT, noJekyll));
 // ---- Fingerprinted assets ---------------------------------
 // Last step: every reference (HTML, JS, manifests, sw.js precache) is rewritten
 // to content-hashed URLs, so a changed file always gets a new URL.
+
+if (DEV) {
+  fs.writeFileSync(DEV_MARKER, "", "utf8");
+  console.log("==> Done (dev build, no minify/fingerprint).");
+  process.exit(0);
+}
 
 console.log("==> Minifying assets...");
 const minified = minifyAssets(ASSETS_DIST);
