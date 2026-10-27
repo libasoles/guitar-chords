@@ -138,6 +138,8 @@ async function checkBarre(page) {
   assert.equal(await page.locator('.score-barre-grip[data-side="end"]').evaluate((el) => getComputedStyle(el).opacity), '0');
   await page.mouse.move(line.x + line.width / 2, line.y + line.height / 2);
   assert.equal(await page.locator('.score-barre-grip[data-side="end"]').evaluate((el) => getComputedStyle(el).opacity), '1');
+  assert.equal(await page.locator('.score-barre-grip[data-side="end"]').evaluate((el) => getComputedStyle(el).color), 'rgb(217, 45, 32)');
+  assert.equal(await page.locator('.score-barre-grip[data-side="end"] svg').count(), 1, 'asa con flecha de Lucide');
   const grip = await page.locator('.score-barre-grip[data-side="end"]').boundingBox();
   const lastNote = await page.evaluate(() => {
     const r = document.querySelector('[id="e0-3"] .notehead').getBoundingClientRect();
@@ -148,8 +150,28 @@ async function checkBarre(page) {
   await page.mouse.move(lastNote - 4, grip.y + grip.height / 2, { steps: 6 });
   await page.mouse.up();
   assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres[0]), { at: 48, to: 72, fret: 7 });
+  // El fin tambien pasa al compas siguiente (misma fila) arrastrando el asa mas alla de la barra.
+  await page.evaluate(() => {
+    scoreEditor.score.rows[0][1] = [{ d: 'q', n: 30, at: 0 }, { d: 'q', n: 32, at: 24 }];
+    scoreEditor.render();
+  });
+  const wide = await page.locator('#scoreStage [id="m0"] g.bracketSpan path').boundingBox();
+  await page.mouse.move(wide.x + wide.width / 2, wide.y + wide.height / 2);
+  const endGrip = await page.locator('.score-barre-grip[data-side="end"]').boundingBox();
+  const nextNote = await page.evaluate(() => {
+    const r = document.querySelector('[id="e1-1"] .notehead').getBoundingClientRect();
+    return (r.left + r.right) / 2;
+  });
+  await page.mouse.move(endGrip.x + endGrip.width / 2, endGrip.y + endGrip.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(nextNote, endGrip.y + endGrip.height / 2, { steps: 10 });
+  await page.mouse.up();
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres[0]), { at: 48, span: 1, to: 24, fret: 7 });
+  await page.keyboard.press('ControlOrMeta+z');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres[0]), { at: 48, to: 72, fret: 7 });
   // El inicio se mueve hacia la izquierda hasta la primera nota.
-  await page.mouse.move(line.x + 5, line.y + 2);
+  const current = await page.locator('#scoreStage [id="m0"] g.bracketSpan path').boundingBox();
+  await page.mouse.move(current.x + 5, current.y + 2);
   const startGrip = await page.locator('.score-barre-grip[data-side="start"]').boundingBox();
   await page.mouse.move(startGrip.x + startGrip.width / 2, startGrip.y + startGrip.height / 2);
   await page.mouse.down();

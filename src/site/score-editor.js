@@ -171,8 +171,9 @@
     if (item.kind === 'barre') {
       // Sobre una nota que no es la primera arranca ahi; si no, cubre desde el inicio del compas.
       const existing = score.barres && score.barres[target.mi];
+      const at = target.onNote ? target.t : 0;
       focusBarre = target.mi;
-      if (!change(() => M.setBarre(score, target.mi, target.onNote ? target.t : 0, existing ? existing.fret : 1, existing && existing.to > (target.onNote ? target.t : 0) ? existing.to : undefined))) focusBarre = null;
+      if (!change(() => M.setBarre(score, target.mi, at, existing ? existing.fret : 1, existing && (existing.span || existing.to > at) ? existing.to : undefined, existing && existing.span))) focusBarre = null;
       say('');
       return;
     }
@@ -379,12 +380,22 @@
     svg.setAttribute('aria-label', t.scoreLabel);
     mountMeterButton();
     mountClefButtons();
+    liftBarreMarks(svg);
     measureLayout();
     mountBarlineButtons();
     mountBarreInputs();
     markSelected();
     updateHoverGhost();
     removeRow.hidden = score.rows.length <= M.MIN_ROWS;
+  }
+
+  // Verovio pega la cejilla (letra y linea) al pentagrama; se sube un poco para que respire.
+  const BARRE_LIFT = 10;
+  function liftBarreMarks(svg) {
+    svg.querySelectorAll('g.measure g.dir, g.measure g.bracketSpan').forEach((node) => {
+      const scale = node.getScreenCTM() && node.getScreenCTM().a;
+      if (scale) node.setAttribute('transform', 'translate(0 ' + (-BARRE_LIFT / scale) + ')');
+    });
   }
 
   function measureLayout() {
@@ -486,13 +497,14 @@
       grip.className = 'score-barre-grip';
       grip.dataset.side = side;
       grip.setAttribute('aria-label', label);
+      grip.innerHTML = lucide(side === 'start' ? 'arrow-left' : 'arrow-right');
       grip.addEventListener('pointerdown', (event) => beginBarreResize(event, mi, side));
       grip.addEventListener('keydown', (event) => {
         const step = event.key === 'ArrowLeft' ? -1 : event.key === 'ArrowRight' ? 1 : 0;
         if (!step) return;
         event.preventDefault();
         const times = barreTimes(mi, side);
-        const current = side === 'start' ? barre.at : (barre.to || M.capacity(score));
+        const current = side === 'start' ? barre.at : barreEnd(barre);
         const next = times[times.indexOf(current) + step];
         if (next === undefined) return;
         resizeBarre(mi, side, next);
@@ -503,26 +515,39 @@
     stage.appendChild(zone);
   }
 
+  // Final de la cejilla como tiempo absoluto desde el inicio de su compas (puede pasar a compases siguientes).
+  function barreEnd(barre) {
+    return (barre.span || 0) * M.capacity(score) + (barre.to || M.capacity(score));
+  }
+
   // Tiempos validos para un extremo: inicios de nota (comienzo) o finales de nota (fin), mas los bordes del compas.
+  // El fin tambien puede caer en compases siguientes de la misma fila, hasta el proximo con otra cejilla.
   function barreTimes(mi, side) {
-    const measure = M.measures(score)[mi];
-    const starts = M.onsets(measure);
     const barre = score.barres[mi];
     const end = M.capacity(score);
-    const set = new Set(side === 'start' ? [0] : [end]);
-    measure.forEach((ev, i) => {
-      if (ev.rest) return;
-      set.add(side === 'start' ? starts[i] : Math.min(end, starts[i] + M.length(ev)));
-    });
-    return [...set].filter((time) => (side === 'start' ? time < (barre.to || end) : time > barre.at)).sort((a, b) => a - b);
+    const all = M.measures(score);
+    const rowLast = (Math.floor(mi / M.PER_ROW) + 1) * M.PER_ROW - 1;
+    const times = new Set(side === 'start' ? [0] : []);
+    for (let k = mi; k <= Math.min(rowLast, all.length - 1); k += 1) {
+      if (k > mi && (score.barres[k] || side === 'start')) break;
+      const starts = M.onsets(all[k]);
+      if (side === 'end') times.add((k - mi + 1) * end);
+      all[k].forEach((ev, i) => {
+        if (ev.rest) return;
+        times.add((k - mi) * end + (side === 'start' ? starts[i] : Math.min(end, starts[i] + M.length(ev))));
+      });
+    }
+    return [...times].filter((time) => (side === 'start' ? time < Math.min(end, barreEnd(barre)) : time > barre.at)).sort((a, b) => a - b);
   }
 
   function resizeBarre(mi, side, time) {
     const barre = score.barres[mi];
+    const end = M.capacity(score);
     const at = side === 'start' ? time : barre.at;
-    const to = side === 'end' ? time : barre.to;
-    if (at === barre.at && (to || M.capacity(score)) === (barre.to || M.capacity(score))) return;
-    change(() => M.setBarre(score, mi, at, barre.fret, to));
+    const last = side === 'end' ? time : barreEnd(barre);
+    if (at === barre.at && last === barreEnd(barre)) return;
+    const span = Math.ceil(last / end) - 1;
+    change(() => M.setBarre(score, mi, at, barre.fret, last - span * end, span));
   }
 
   let barreResize = null;
@@ -530,11 +555,16 @@
     event.preventDefault();
     event.stopPropagation();
     clearHoverGhost();
-    const m = layout[mi];
+    const end = M.capacity(score);
     const origin = stage.getBoundingClientRect();
-    const measure = M.measures(score)[mi];
-    const starts = M.onsets(measure);
-    const centers = eventNodes(mi).map((node) => centerX(node, origin));
+    const anchors = new Map();
+    // Tiempo absoluto de la cejilla -> x, usando el compas donde cae.
+    const xAt = (time) => {
+      const k = mi + (time > 0 ? Math.ceil(time / end) - 1 : 0);
+      if (!anchors.has(k)) anchors.set(k, { starts: M.onsets(M.measures(score)[k]), centers: eventNodes(k).map((node) => centerX(node, origin)) });
+      const { starts, centers } = anchors.get(k);
+      return xAtTime(time - (k - mi) * end, layout[k], starts, centers);
+    };
     const line = stage.querySelector('[id="m' + mi + '"] g.bracketSpan path').getBoundingClientRect();
     const preview = document.createElement('span');
     preview.className = 'score-barre-preview';
@@ -547,7 +577,7 @@
         const x = e.clientX - origin.left;
         let best = null;
         barreTimes(mi, side).forEach((time) => {
-          const tx = xAtTime(time, m, starts, centers);
+          const tx = xAt(time);
           if (!best || Math.abs(tx - x) < Math.abs(best.x - x)) best = { time, x: tx };
         });
         barreResize.pick = best && best.time;
@@ -1273,6 +1303,8 @@
     triplet: '<path d="M3 19v-5h6M21 19v-5h-6"/><path d="M10 7.500c.5-1 4-1.500 4 .500 0 1.200-1.500 1.800-2 1.800.600 0 2.200.400 2.200 2 0 2-3.700 1.800-4.200.700" stroke-width="1.700"/>',
     untriplet: '<path d="M3 19v-5h6M21 19v-5h-6"/><path d="M10 7.500c.5-1 4-1.500 4 .500 0 1.200-1.500 1.800-2 1.800.600 0 2.200.400 2.200 2 0 2-3.700 1.800-4.200.700" stroke-width="1.700"/><path d="M4 4l16 12"/>',
     unbeam: '<circle cx="6" cy="18" r="3"/><path d="M9 18V4"/><circle cx="18" cy="16" r="3"/><path d="M21 16V2"/>',
+    'arrow-left': '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+    'arrow-right': '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
     download: '<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
   };
 
