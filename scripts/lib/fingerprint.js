@@ -26,21 +26,20 @@ function hashOf(buf) {
   return crypto.createHash('sha256').update(buf).digest('hex').slice(0, HASH_LEN);
 }
 
-function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-
-function referenceRe(name, flags) {
-  // "(" precedes an unquoted url(name.svg), which minified CSS produces.
-  return new RegExp("(?<=[/'\"`(])" + escapeRe(name) + "(?=['\"`?#)\\s])", flags);
-}
+// Any asset-looking file name delimited like a reference. One scan per file
+// finds every candidate; a Map lookup decides whether it is one we renamed.
+// "(" precedes an unquoted url(name.svg), which minified CSS produces.
+const NAME_RE = "(?<=[/'\"`(])([^/'\"`()\\s?#]+\\.(?:js|css|svg|png))(?=['\"`?#)\\s])";
 
 /* Reemplaza el nombre de archivo cuando aparece como ultimo segmento de una
    ruta o literal ("/x/name.js", 'name.js', "name.js?v=1"). */
 function rewriteRefs(text, renames) {
-  let out = text;
-  renames.forEach((to, from) => {
-    out = out.replace(referenceRe(from, 'g'), to);
-  });
-  return out;
+  if (!renames.size) return text;
+  return text.replace(new RegExp(NAME_RE, 'g'), (m) => renames.get(m) || m);
+}
+
+function referencedNames(text) {
+  return new Set(text.match(new RegExp(NAME_RE, 'g')) || []);
 }
 
 function rewriteTextFiles(files, renames) {
@@ -69,27 +68,46 @@ function fingerprintAssets(siteDir) {
       (path.extname(f) !== '.png' || f.startsWith(iconsDir)));
     const renames = new Map();
 
-    // A target can only be named after every target it references. Processing
-    // this small dependency graph in order also avoids leaving CSS pointing at
-    // the pre-fingerprint name of an image it uses as a background.
-    const pending = new Map(targets.map((f) => [f, path.basename(f)]));
-    while (pending.size) {
-      const ready = [...pending].find(([f]) => {
-        if (!TEXT_EXT.has(path.extname(f))) return true;
-        const source = fs.readFileSync(f, 'utf8');
-        return ![...pending].some(([other, name]) =>
-          other !== f && referenceRe(name).test(source));
-      });
-      if (!ready) {
-        throw new Error('Cannot fingerprint cyclic asset references: ' + [...pending.values()].join(', '));
-      }
-
-      const [f, from] = ready;
-      let contents = fs.readFileSync(f);
+    // A target can only be named after every target it references. Each text
+    // target is scanned once for its references; targets are then processed in
+    // dependency order (Kahn), so CSS pointing at a background image includes
+    // the image's fingerprinted name before computing its own hash.
+    const sources = new Map();
+    const byName = new Map();
+    targets.forEach((f) => {
+      const name = path.basename(f);
+      byName.set(name, [...(byName.get(name) || []), f]);
+    });
+    const waiting = new Map(); // target -> unprocessed targets it references
+    const dependents = new Map(); // target -> targets waiting on it
+    targets.forEach((f) => {
+      const deps = new Set();
       if (TEXT_EXT.has(path.extname(f))) {
-        const rewritten = rewriteRefs(contents.toString('utf8'), renames);
-        contents = Buffer.from(rewritten, 'utf8');
+        const source = fs.readFileSync(f, 'utf8');
+        sources.set(f, source);
+        referencedNames(source).forEach((n) => {
+          (byName.get(n) || []).forEach((other) => {
+            if (other === f) return;
+            deps.add(other);
+            dependents.set(other, [...(dependents.get(other) || []), f]);
+          });
+        });
+      }
+      waiting.set(f, deps);
+    });
+    const queue = targets.filter((f) => !waiting.get(f).size);
+    let done = 0;
+
+    while (queue.length) {
+      const f = queue.shift();
+      const from = path.basename(f);
+      let contents;
+      if (sources.has(f)) {
+        contents = Buffer.from(rewriteRefs(sources.get(f), renames), 'utf8');
         fs.writeFileSync(f, contents);
+        sources.delete(f);
+      } else {
+        contents = fs.readFileSync(f);
       }
       const ext = path.extname(f);
       const base = path.basename(f, ext);
@@ -98,7 +116,16 @@ function fingerprintAssets(siteDir) {
       renames.set(from, path.basename(next));
       result.set(path.relative(siteDir, f).split(path.sep).join('/'),
         path.relative(siteDir, next).split(path.sep).join('/'));
-      pending.delete(f);
+      done++;
+      (dependents.get(f) || []).forEach((g) => {
+        const w = waiting.get(g);
+        w.delete(f);
+        if (!w.size && !queue.includes(g)) queue.push(g);
+      });
+    }
+    if (done < targets.length) {
+      throw new Error('Cannot fingerprint cyclic asset references: ' +
+        targets.filter((f) => fs.existsSync(f)).map((f) => path.basename(f)).join(', '));
     }
     rewriteTextFiles(walk(siteDir), renames);
   }
