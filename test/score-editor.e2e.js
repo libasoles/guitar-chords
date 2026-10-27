@@ -266,7 +266,7 @@ async function checkDoubleClick(page) {
     const measures = ScoreModel.measures(scoreEditor.score);
     measures[0].push({ n: 32, d: 'q', at: 0 }, { n: 34, d: 'q', at: 0 });
     measures[1].push({ n: 32, d: 'w', at: 0 });
-    measures[2].push({ n: 32, d: 'q', at: 24 });
+    measures[2].push({ n: 32, d: 'q', at: 72 });
     scoreEditor.render();
   });
   const note = page.locator('#e0-0 .notehead');

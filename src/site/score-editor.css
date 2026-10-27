@@ -457,3 +457,47 @@ body.score-dragging {
 .score-barline-remove:hover {
   background: #f0eae0;
 }
+
+.score-selection-menu {
+  position: absolute;
+  z-index: 6;
+  display: flex;
+  gap: 0.15rem;
+  padding: 0.25rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+  font-family: var(--sans);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.score-selection-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.25rem;
+  padding: 0 0.6rem;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.score-selection-action:hover,
+.score-selection-action:focus-visible {
+  background: rgb(0 0 0 / 6%);
+}
+
+.score-marquee {
+  position: absolute;
+  z-index: 3;
+  border: 1px dashed var(--note-selected);
+  background: rgb(0 0 0 / 4%);
+  pointer-events: none;
+}

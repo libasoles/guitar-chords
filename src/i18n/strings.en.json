@@ -636,6 +636,13 @@
     "sharp": "Sharp",
     "flat": "Flat",
     "natural": "Natural",
+    "selectionActions": "Actions for the selected notes",
+    "triplet": "Triplet",
+    "untriplet": "Remove triplet",
+    "link": "Tie",
+    "unlink": "Remove tie",
+    "beam": "Beam",
+    "unbeam": "Separate",
     "pdfError": "Could not generate the PDF.",
     "loadError": "Could not load the notation engine."
   }
