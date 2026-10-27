@@ -177,7 +177,8 @@ body.score-body {
   margin: 0;
   padding: 0.35rem 0.9rem;
   overflow: hidden;
-  border: 1px solid var(--rule);
+  border: 0;
+  border-bottom: 1px solid var(--rule);
   border-radius: 0;
   background: transparent;
   color: var(--ink-soft);
@@ -194,6 +195,7 @@ body.score-body {
 
 .score-doc-tab.is-active {
   background: #fff;
+  border: 1px solid var(--rule);
   border-bottom-color: #fff;
   color: var(--ink);
   cursor: text;
