@@ -144,8 +144,7 @@ body.score-body {
 }
 
 .score-palette-item[aria-pressed="true"] {
-  background: #f6c85f;
-  color: var(--ink);
+  color: var(--accent-brand);
 }
 
 .score-palette-key {
@@ -345,8 +344,8 @@ body.score-dragging {
 }
 
 .score-meter-options button[aria-pressed="true"] {
-  color: var(--paper);
-  background: var(--ink);
+  color: var(--accent-brand);
+  border-color: var(--accent-brand);
 }
 
 .score-clef-popup {
@@ -391,7 +390,7 @@ body.score-dragging {
 }
 
 .score-signature-option[aria-pressed="true"] {
-  background: #e9e4db;
+  color: var(--accent-brand);
 }
 
 .score-signature-preview {

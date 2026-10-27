@@ -151,7 +151,7 @@ async function checkDrag(page) {
     assert.equal(await page.locator('.score-ghost').count(), 1, 'changing tools replaces the hover glyph');
     await page.keyboard.press('4');
     assert.deepEqual(await page.evaluate(() => scoreEditor.score), beforeHover, 'hover does not edit the score');
-    assert.equal(await page.locator('[data-shortcut="4"]').evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(246, 200, 95)');
+    assert.equal(await page.locator('[data-shortcut="4"]').evaluate(el => getComputedStyle(el).color), 'rgb(216, 91, 112)', 'the active tool is drawn in the brand red');
     await page.mouse.move(1, 1);
     assert.equal(await page.locator('.score-hover-ghost').count(), 0);
     await page.mouse.move(previewPoint.x, previewPoint.y);

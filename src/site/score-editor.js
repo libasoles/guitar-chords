@@ -245,7 +245,7 @@
     if (!width) return;
     renderedWidth = width;
     toolkit.setOptions(layoutOptions(width));
-    toolkit.loadData(M.toMusicXml(score, { plainGuitarClef: true }));
+    toolkit.loadData(M.toMusicXml(score));
     meterPopup.hidePopover();
     clefPopup.hidePopover();
     stage.innerHTML = toolkit.renderToSVG(1);
@@ -782,10 +782,10 @@
     const bottom = lines[4].getBBox().y;
     const box = glyph && glyph.getBBox();
     const width = kind === 'clef' ? 1000 : Math.max(800, (box?.width || 0) + 100);
-    const height = kind === 'clef' ? 1450 : Math.max(800, (box?.height || 0) + 100);
+    const height = kind === 'clef' ? 1700 : Math.max(800, (box?.height || 0) + 100);
     const center = box && box.width ? box.x + box.width / 2 : 1350;
     const left = center - width / 2;
-    const middle = kind === 'key' && box?.height ? box.y + box.height / 2 : (staffBox.y + bottom) / 2;
+    const middle = kind === 'key' && box?.height ? box.y + box.height / 2 : (staffBox.y + bottom) / 2 + (kind === 'clef' ? 130 : 0); // deja sitio al 8 bajo la clave de guitarra
     const top = middle - height / 2;
     lines.forEach((line) => {
       const y = line.getBBox().y;
@@ -1086,7 +1086,7 @@
         minLastJustification: 0,
         mnumInterval: 0,
       });
-      pdfToolkit.loadData(M.toMusicXml(score, { plainGuitarClef: true }));
+      pdfToolkit.loadData(M.toMusicXml(score));
       const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
       for (let page = 1; page <= pdfToolkit.getPageCount(); page += 1) {
         const image = await rasterize(withoutMeasureNumbers(pdfToolkit.renderToSVG(page)), 1654, 2339);

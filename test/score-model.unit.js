@@ -298,15 +298,14 @@ test('las alteraciones siguen el tiempo del compas al exportar voces por separad
 });
 
 
-test('la clave de guitarra se dibuja sin el 8 y conserva la posicion de las notas', () => {
+test('la clave de guitarra muestra el 8 y conserva la posicion de las notas', () => {
   const score = M.emptyScore();
   score.rows[0][0] = [{ d: 'q', n: 30 }];
-  const xml = M.toMusicXml(score, { plainGuitarClef: true });
-  assert.match(xml, /<clef><sign>G<\/sign><line>2<\/line><\/clef>/);
-  assert.match(xml, /<step>E<\/step><octave>4<\/octave>/);
-  assert.match(M.toMusicXml(score), /<step>E<\/step><octave>3<\/octave>/);
+  const xml = M.toMusicXml(score);
+  assert.match(xml, /<clef><sign>G<\/sign><line>2<\/line><clef-octave-change>-1<\/clef-octave-change><\/clef>/);
+  assert.match(xml, /<step>E<\/step><octave>3<\/octave>/);
   score.clef = 'treble';
-  assert.equal(M.toMusicXml(score, { plainGuitarClef: true }), M.toMusicXml(score));
+  assert.doesNotMatch(M.toMusicXml(score), /clef-octave-change/);
 });
 
 

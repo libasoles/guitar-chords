@@ -300,7 +300,7 @@
     return result.length ? result : [{ end: 0, groups: [] }];
   }
 
-  function noteXml(ev, id, beams, chord, voice, alter, octaveShift) {
+  function noteXml(ev, id, beams, chord, voice, alter) {
     const dur = length(ev);
     const base = VALUES[ev.d];
     let xml = `<note id="${id}">`;
@@ -309,7 +309,7 @@
       xml += '<rest/>';
     } else {
       xml += `<pitch><step>${STEPS[ev.n % 7]}</step>${alter ? `<alter>${alter}</alter>` : ''}` +
-        `<octave>${Math.floor(ev.n / 7) - 1 + octaveShift}</octave></pitch>`;
+        `<octave>${Math.floor(ev.n / 7) - 1}</octave></pitch>`;
     }
     xml += `<duration>${dur}</duration><voice>${voice}</voice><type>${TYPES[base]}</type>${ev.dot ? '<dot/>' : ''}`;
     if (!ev.rest && ev.acc) xml += `<accidental>${ACCIDENTALS[ev.acc].name}</accidental>`;
@@ -317,11 +317,9 @@
     return xml + '</note>';
   }
 
-  function toMusicXml(score, { plainGuitarClef = false } = {}) {
+  function toMusicXml(score) {
     const all = measures(score);
     const clef = CLEFS[clefOf(score)];
-    // Para dibujar la clave sin el 8, usamos alturas escritas y conservamos el modelo sonoro.
-    const octaveShift = plainGuitarClef && clef.octave ? -clef.octave : 0;
     const [beats, unit] = meterOf(score).split('/');
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<score-partwise version="3.1">' +
       (score.title ? '<work><work-title>' + score.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</work-title></work>' : '') +
@@ -332,7 +330,7 @@
       if (mi === 0) {
         xml += `<attributes><divisions>${DIVISIONS}</divisions><key><fifths>${fifthsOf(score)}</fifths></key>` +
           `<time><beats>${beats}</beats><beat-type>${unit}</beat-type></time>` +
-          `<clef><sign>${clef.sign}</sign><line>${clef.line}</line>${clef.octave && !plainGuitarClef ? `<clef-octave-change>${clef.octave}</clef-octave-change>` : ''}</clef></attributes>`;
+          `<clef><sign>${clef.sign}</sign><line>${clef.line}</line>${clef.octave ? `<clef-octave-change>${clef.octave}</clef-octave-change>` : ''}</clef></attributes>`;
       }
       const bar = score.barlines && score.barlines[mi];
       if (bar && bar.start) xml += '<barline location="left"><repeat direction="forward"/></barline>';
@@ -360,7 +358,7 @@
         voice.groups.forEach((group) => {
           hidden(cursor, group.at);
           group.indices.forEach((i, ci) => {
-            xml += noteXml(measure[i], `e${mi}-${i}`, beams[index++], ci > 0, vi + 1, alters[i], octaveShift);
+            xml += noteXml(measure[i], `e${mi}-${i}`, beams[index++], ci > 0, vi + 1, alters[i]);
           });
           cursor = group.at + group.size;
         });
