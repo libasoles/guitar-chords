@@ -75,6 +75,12 @@ async function checkDrag(page) {
       await page.mouse.click(point.x, point.y);
     }
     await clickMeasure(1);
+    const stageFocus = await page.locator('#scoreStage').evaluate(stage => {
+      const style = getComputedStyle(stage);
+      return { focused: document.activeElement === stage, outline: style.outlineStyle };
+    });
+    assert.equal(stageFocus.focused, true, 'drawing keeps keyboard editing available');
+    assert.equal(stageFocus.outline, 'none', 'drawing must not show a focus line above the staves');
     await clickMeasure(2);
     assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0].slice(1, 3).map(m => m[0].d)), ['e', 'e']);
     const beforeEdit = await page.evaluate(() => ({ ...scoreEditor.score.rows[0][2][0] }));
