@@ -7,6 +7,12 @@ const host = document.createElement('div');
 document.body.appendChild(host);
 const root = createRoot(host);
 
+// Lucide "x".
+const xIcon = () => h('svg', {
+  className: 'lucide', viewBox: '0 0 24 24', width: 16, height: 16, fill: 'none', stroke: 'currentColor',
+  strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true,
+}, h('path', { d: 'M18 6 6 18' }), h('path', { d: 'm6 6 12 12' }));
+
 // Resolves true when the person confirms, false on cancel or Escape.
 function ask({ title, description, confirm, cancel }) {
   return new Promise((resolve) => {
@@ -19,7 +25,7 @@ function ask({ title, description, confirm, cancel }) {
             h(AlertDialog.Title, { className: 'confirm-title' }, title),
             h(AlertDialog.Description, { className: 'confirm-description' }, description),
             h('div', { className: 'confirm-actions' },
-              h(AlertDialog.Cancel, { className: 'confirm-button' }, cancel),
+              h(AlertDialog.Cancel, { className: 'confirm-button confirm-cancel' }, xIcon(), cancel),
               h(AlertDialog.Action, { className: 'confirm-button confirm-danger', onClick: () => finish(true) }, confirm),
             ),
           ),
