@@ -47,6 +47,41 @@ const { serveStatic } = require('../scripts/lib/static-server');
     await page.evaluate(() => document.dispatchEvent(new PointerEvent('pointercancel', { pointerId: 1 })));
     assert.equal(await page.locator('.score-ghost').count(), 0);
     await page.mouse.up();
+    // Numbered tools stay active for repeated clicks and edit the selected figure.
+    await page.reload();
+    await page.waitForSelector('#scoreStage g.measure');
+    assert.deepEqual(await page.locator('.score-palette-key').allTextContents(), ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']);
+    await page.keyboard.press('4');
+    assert.equal(await page.locator('[data-shortcut="4"]').getAttribute('aria-pressed'), 'true');
+    async function clickMeasure(mi) {
+      const point = await page.locator('#scoreStage g.measure').nth(mi).evaluate(node => {
+        const r = node.querySelector('g.staff > path').getBoundingClientRect();
+        return { x: r.left + r.width * 0.5, y: r.top + 10 };
+      });
+      await page.mouse.click(point.x, point.y);
+    }
+    await clickMeasure(1);
+    await clickMeasure(2);
+    assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0].slice(1, 3).map(m => m[0].d)), ['e', 'e']);
+    const beforeEdit = await page.evaluate(() => ({ ...scoreEditor.score.rows[0][2][0] }));
+    await page.keyboard.press('5');
+    assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][2][0]), { ...beforeEdit, d: 's' });
+    await page.keyboard.press('ControlOrMeta+z');
+    assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][2][0]), beforeEdit);
+    await page.keyboard.press('Escape');
+    await page.locator('[data-shortcut="9"]').click();
+    await clickMeasure(3);
+    assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][3][0].rest), true);
+    await page.locator('#scoreTitle').fill('12345');
+    assert.equal(await page.locator('[data-shortcut="9"]').getAttribute('aria-pressed'), 'true');
+    await page.locator('#scoreStage').focus();
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('.score-palette-item[aria-pressed="true"]').count(), 0);
+    await clickMeasure(4);
+    assert.equal(await page.evaluate(() => scoreEditor.score.rows[1][0].length), 0);
+    for (const selector of ['.score-toolbar', '#scoreDownloadToggle']) {
+      assert.equal(await page.locator(selector).evaluate(el => getComputedStyle(el).borderTopWidth), '0px');
+    }
     console.log('Score editor drag: one glyph under the mouse; drop and cancellation clean up.');
   } finally {
     if (browser) await browser.close();

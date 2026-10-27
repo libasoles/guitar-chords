@@ -51,8 +51,7 @@ body.score-body {
   gap: 0.4rem;
   padding: 0.5rem;
   background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: 8px;
+  border: 0;
   font-family: var(--sans);
 }
 
@@ -94,6 +93,10 @@ body.score-body {
 }
 
 .score-palette-item {
+  height: auto;
+  min-height: 3.5rem;
+  flex-direction: column;
+  gap: 0;
   cursor: grab;
   touch-action: none;
   user-select: none;
@@ -102,12 +105,21 @@ body.score-body {
 .score-palette-item:hover,
 .score-tool:hover,
 .score-download:hover {
-  border-color: var(--rule);
   background: #fff;
 }
 
+.score-palette-item[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.score-palette-key {
+  font-size: 0.7rem;
+  line-height: 1rem;
+}
+
 .score-download {
-  border-color: var(--rule);
+  border: 0;
 }
 
 .score-download:disabled {

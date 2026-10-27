@@ -34,6 +34,7 @@
   let toolkit = null;
   let selected = null; // { mi, i }
   let drag = null;
+  let activeItem = null;
   let layout = []; // por compas: { left, right, lines: [y1..y5] } relativo al escenario
   let history = [];
   let renderedWidth = 0;
@@ -123,6 +124,23 @@
         selected = { mi: target.mi, i: M.insertAt(measure, ev, spot.at) };
       });
     }
+  }
+
+  function activateFigure(item) {
+    activeItem = item;
+    palette.querySelectorAll('[aria-pressed]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(button.dataset.shortcut === item.key));
+    });
+    const ev = eventAt(selected);
+    if (!ev || (ev.d === item.d && !!ev.rest === (item.kind === 'rest'))) return;
+    const replacement = Object.assign({}, ev, { d: item.d });
+    if (item.kind === 'rest') { replacement.rest = true; delete replacement.n; delete replacement.acc; }
+    else { delete replacement.rest; replacement.n = ev.rest ? M.BOTTOM_LINE : ev.n; }
+    if (item.d === 'w' || item.d === 's') delete replacement.dot;
+    const measure = M.measures(score)[selected.mi];
+    if (M.onsets(measure)[selected.i] + M.length(replacement) > M.capacity(score)) return say(t.full);
+    change(() => { M.settle(measure); measure[selected.i] = replacement; });
+    say('');
   }
 
   // El puntillo afecta al acorde de igual duracion, sin modificar otras voces.
@@ -369,9 +387,11 @@
     if (!drag.active) {
       if (Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 5) return;
       drag.active = true;
+      if (drag.insert) return;
       drag.ghost = startGhost(drag.glyph, event, drag.kind);
       document.body.classList.add('score-dragging');
     }
+    if (drag.insert) return;
     event.preventDefault();
     moveGhost(drag.ghost, event);
     const modifier = drag.item && (drag.item.kind === 'dot' || drag.item.kind === 'acc');
@@ -394,7 +414,16 @@
     stage.querySelectorAll('.is-target').forEach((n) => n.classList.remove('is-target'));
     showMarker(null);
     if (d.ghost) d.ghost.remove();
-    if (!d.active || cancelled) return;
+    if (cancelled) return;
+    if (!d.active) {
+      if (d.item && d.item.key) activateFigure(d.item);
+      else if (d.insert) {
+        const target = locate(event.clientX, event.clientY);
+        if (target && activeItem) dropNew(activeItem, target);
+      }
+      return;
+    }
+    if (d.insert) return;
     if (d.overTrash) {
       if (d.from) { selected = d.from; removeSelected(); }
       return;
@@ -419,6 +448,8 @@
     if (!match) {
       selected = null;
       markSelected();
+      stage.focus({ preventScroll: true });
+      if (activeItem) beginDrag(event, { insert: true });
       return;
     }
     event.preventDefault();
@@ -439,6 +470,14 @@
 
   document.addEventListener('keydown', (event) => {
     if (event.target.closest('input, textarea, [contenteditable]')) return;
+    if (event.key === 'Escape') {
+      activeItem = null;
+      palette.querySelectorAll('[aria-pressed]').forEach((button) => button.setAttribute('aria-pressed', 'false'));
+    }
+    if (!event.metaKey && !event.ctrlKey && !event.altKey && !meterPopup.matches(':popover-open')) {
+      const item = ITEMS.find((item) => item && item.key === event.key);
+      if (item) { event.preventDefault(); activateFigure(item); return; }
+    }
     if ((event.metaKey || event.ctrlKey) && !event.shiftKey && event.key.toLowerCase() === 'z') {
       event.preventDefault();
       undo();
@@ -562,17 +601,17 @@
   }
 
   const ITEMS = [
-    { kind: 'note', d: 'w', label: t.whole },
-    { kind: 'note', d: 'h', label: t.half },
-    { kind: 'note', d: 'q', label: t.quarter },
-    { kind: 'note', d: 'e', label: t.eighth },
-    { kind: 'note', d: 's', label: t.sixteenth },
+    { kind: 'note', d: 'w', key: '1', label: t.whole },
+    { kind: 'note', d: 'h', key: '2', label: t.half },
+    { kind: 'note', d: 'q', key: '3', label: t.quarter },
+    { kind: 'note', d: 'e', key: '4', label: t.eighth },
+    { kind: 'note', d: 's', key: '5', label: t.sixteenth },
     null,
-    { kind: 'rest', d: 'w', label: t.restWhole },
-    { kind: 'rest', d: 'h', label: t.restHalf },
-    { kind: 'rest', d: 'q', label: t.restQuarter },
-    { kind: 'rest', d: 'e', label: t.restEighth },
-    { kind: 'rest', d: 's', label: t.restSixteenth },
+    { kind: 'rest', d: 'w', key: '6', label: t.restWhole },
+    { kind: 'rest', d: 'h', key: '7', label: t.restHalf },
+    { kind: 'rest', d: 'q', key: '8', label: t.restQuarter },
+    { kind: 'rest', d: 'e', key: '9', label: t.restEighth },
+    { kind: 'rest', d: 's', key: '0', label: t.restSixteenth },
     null,
     { kind: 'dot', label: t.dot },
     { kind: 'acc', acc: '#', label: t.sharp },
@@ -593,6 +632,20 @@
     button.setAttribute('aria-label', item.label);
     button.title = item.label;
     button.appendChild(glyphFor(item));
+    if (item.key) {
+      button.dataset.shortcut = item.key;
+      button.setAttribute('aria-keyshortcuts', item.key);
+      button.setAttribute('aria-pressed', 'false');
+      button.title += ' (' + item.key + ')';
+      const key = document.createElement('span');
+      key.className = 'score-palette-key';
+      key.setAttribute('aria-hidden', 'true');
+      key.textContent = item.key;
+      button.appendChild(key);
+      button.addEventListener('click', (event) => {
+        if (event.detail === 0) activateFigure(item);
+      });
+    }
     button.addEventListener('pointerdown', (event) => {
       event.preventDefault();
       beginDrag(event, { item, kind: item.kind, glyph: glyphFor(item) });
