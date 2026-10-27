@@ -123,15 +123,31 @@
     return true;
   }
 
+  // Compases de la misma fila cubiertos por la cejilla que empieza en `mi`, y compas donde termina.
+  function barreLast(barre, mi) {
+    return mi + (barre.span || 0);
+  }
+
   // Cejilla: va de `at` a `to` (por defecto el final del compas, que no se guarda). Una por compas.
-  function setBarre(score, mi, at, fret, to) {
+  // Con `span` > 0 sigue por `span` compases mas de la misma fila y `to` es el final en el ultimo.
+  function setBarre(score, mi, at, fret, to, span) {
     const end = capacity(score);
+    span = span || 0;
     if (to === undefined) to = end;
     if (!Number.isInteger(mi) || mi < 0 || mi >= measures(score).length || !Number.isInteger(at) || at < 0 || at >= end) return false;
-    if (!Number.isInteger(to) || to <= at || to > end) return false;
+    if (!Number.isInteger(span) || span < 0 || Math.floor((mi + span) / PER_ROW) !== Math.floor(mi / PER_ROW) || mi + span >= measures(score).length) return false;
+    if (!Number.isInteger(to) || to > end || (span === 0 ? to <= at : to <= 0)) return false;
     if (!Number.isInteger(fret) || fret < 1 || fret > MAX_FRET) return false;
+    const taken = Object.keys(score.barres || {}).some((key) => {
+      const other = +key;
+      return other !== mi && other <= mi + span && barreLast(score.barres[key], other) >= mi;
+    });
+    if (taken) return false;
     if (!score.barres) score.barres = {};
-    score.barres[mi] = to < end ? { at, to, fret } : { at, fret };
+    const barre = { at, fret };
+    if (span) barre.span = span;
+    if (to < end) barre.to = to;
+    score.barres[mi] = barre;
     return true;
   }
 
@@ -192,8 +208,7 @@
       const barre = score.barres[mi];
       if (barre.at >= capacity(score)) removeBarre(score, mi);
       else if (barre.to >= capacity(score)) delete barre.to;
-    });
-    return true;
+    });    return true;
   }
 
   function fits(measure, ev, ignore, score) {
@@ -255,9 +270,15 @@
       if (!/^(0|[1-9]\d*)$/.test(index) || +index >= rows.length * PER_ROW || !barre) return;
       const at = barre.at * factor;
       const to = barre.to * factor;
+      const span = barre.span || 0;
       if (!Number.isInteger(at) || at < 0 || at >= capacity({ meter })) return;
       if (!Number.isInteger(barre.fret) || barre.fret < 1 || barre.fret > MAX_FRET) return;
-      barres[index] = Number.isInteger(to) && to > at && to < capacity({ meter }) ? { at, to, fret: barre.fret } : { at, fret: barre.fret };
+      if (!Number.isInteger(span) || span < 0 || Math.floor((+index + span) / PER_ROW) !== Math.floor(+index / PER_ROW) || +index + span >= rows.length * PER_ROW) return;
+      if (Object.keys(barres).some((key) => barreLast(barres[key], +key) >= +index)) return;
+      const result = { at, fret: barre.fret };
+      if (span) result.span = span;
+      if (Number.isInteger(to) && (span ? to > 0 : to > at) && to < capacity({ meter })) result.to = to;
+      barres[index] = result;
     });
     return Object.assign(Object.keys(barlines).length ? { barlines } : {}, Object.keys(barres).length ? { barres } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
   }
@@ -587,13 +608,17 @@
         alters[i] = accidentals.has(ev.n) ? accidentals.get(ev.n) : keyAlter(ev.n, score);
       });
       const barre = score.barres && score.barres[mi];
+      // Una cejilla que viene de compases anteriores solo cierra aqui.
+      const origin = Object.keys(score.barres || {}).map(Number).find((key) => key < mi && barreLast(score.barres[key], key) === mi);
+      const closing = origin === undefined ? null : score.barres[origin];
+      const stop = (time) => ({ t: time, xml: '<direction placement="above"><direction-type><bracket type="stop" number="1" line-end="none"/></direction-type></direction>' });
       const marks = barre ? [
         { t: barre.at, start: true, xml: `<direction placement="above"><direction-type><words>C ${barre.fret}</words></direction-type></direction>` +
           '<direction placement="above"><direction-type><bracket type="start" number="1" line-end="none" line-type="dashed"/></direction-type></direction>' },
-        { t: Number.isInteger(barre.to) ? barre.to : capacity(score), xml: '<direction placement="above"><direction-type><bracket type="stop" number="1" line-end="none"/></direction-type></direction>' },
-      ] : [];
-      const stopXml = marks.length ? marks[1].xml : '';
-      let barreOpen = false;
+        ...(barre.span ? [] : [stop(Number.isInteger(barre.to) ? barre.to : capacity(score))]),
+      ] : closing ? [stop(Number.isInteger(closing.to) ? closing.to : capacity(score))] : [];
+      const stopXml = !barre && closing ? marks[0].xml : marks.length > 1 ? marks[1].xml : '';
+      let barreOpen = !barre && Boolean(closing);
       let barreClosed = false;
       voices(measure).forEach((voice, vi, all) => {
         if (vi > 0) xml += `<backup><duration>${capacity(score)}</duration></backup>`;

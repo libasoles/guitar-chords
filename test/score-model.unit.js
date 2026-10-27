@@ -407,6 +407,23 @@ test('una cejilla puede terminar antes del final del compas y el fin se ajusta a
   assert.deepEqual(score.barres[0], { at: 24, fret: 3 });
 });
 
+test('una cejilla puede seguir por compases de la misma fila y cierra en el ultimo', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ d: 'q', n: 30, at: 0 }, { d: 'q', n: 32, at: 24 }];
+  score.rows[0][1] = [{ d: 'q', n: 34, at: 0 }, { d: 'q', n: 35, at: 24 }];
+  assert.equal(M.setBarre(score, 0, 0, 4, 48, 1), true);
+  assert.deepEqual(score.barres[0], { at: 0, fret: 4, span: 1, to: 48 });
+  assert.equal(M.setBarre(score, 0, 0, 4, 48, 4), false, 'no pasa a la fila siguiente');
+  assert.equal(M.setBarre(score, 1, 0, 2), false, 'no se solapa con otra cejilla');
+  assert.equal(M.setBarre(score, 3, 0, 2, 48, 1), false, 'no cruza de fila');
+  assert.deepEqual(M.sanitize(M.clone(score)).barres, score.barres);
+  const xml = M.toMusicXml(score);
+  const second = xml.split('<measure ')[2];
+  assert.equal((xml.match(/type="start"/g) || []).length, 1);
+  assert.equal((xml.match(/type="stop"/g) || []).length, 1);
+  assert.match(second, /type="stop"/);
+});
+
 test('una cejilla que empieza dentro de una nota larga de otra voz se escribe una vez', () => {
   const score = M.emptyScore();
   score.rows[0][0] = [{ d: 'w', n: 30, at: 0 }, { d: 'q', n: 34, at: 24 }, { d: 'q', n: 35, at: 48 }];
