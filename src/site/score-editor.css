@@ -617,6 +617,13 @@ body.score-dragging {
   opacity: 1;
 }
 
+.score-barre-live {
+  position: absolute;
+  height: 0;
+  border-top: 1.5px dashed var(--ink);
+  pointer-events: none;
+}
+
 .score-barre-preview {
   position: absolute;
   width: 2px;
