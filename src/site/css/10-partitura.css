@@ -659,6 +659,7 @@ html.part-modal-open body { overflow: hidden; }
 }
 
 /* The whole page is plain white so the editor toolbars can go without a background. */
+html:has(.partitura-body),
 .partitura-body {
   --paper: #fff;
   background: #fff;
