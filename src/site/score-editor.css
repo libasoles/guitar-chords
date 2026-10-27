@@ -1018,3 +1018,163 @@ html body[data-scroll-locked] {
 .score-row-tool {
   --tooltip-delay: 1s;
 }
+
+/* Shortcuts and gestures dropdown: figure keys and two looping CSS-only demos
+   (markup: scripts/lib/score-tutorial.js). Reduced motion shows the end state. */
+.score-about .score-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem 2rem;
+  margin-top: 1rem;
+}
+
+.score-keys__group h4 {
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.score-about .score-keys__list {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.score-keys__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  min-width: 2.25rem;
+  color: var(--ink);
+}
+
+.score-keys__item svg {
+  width: 24px;
+  height: auto;
+}
+
+.score-keys__item kbd {
+  padding: 0.05em 0.4em;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: #fff;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+}
+
+.score-about .tab-tutorial__list {
+  margin-top: 1.5rem;
+  padding: 0;
+  gap: 1.75rem 1.5rem;
+}
+
+.score-demo {
+  --demo-lit: #f4ddd6;
+}
+
+.score-demo__stage {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  overflow: visible;
+  color: var(--ink);
+}
+
+.score-demo__line {
+  stroke: var(--rule);
+  stroke-width: 0.8;
+  fill: none;
+}
+
+.score-demo__ring {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.4;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.score-demo__pointer,
+.score-demo__remove {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.score-demo__pointer {
+  transform: translate(110px, 44px);
+}
+
+.score-demo--dot .score-demo__dot { animation: score-demo-dot 6s steps(1, end) infinite; }
+.score-demo--dot .score-demo__pointer { animation: score-demo-pointer 6s ease-in-out infinite; }
+.score-demo--dot .score-demo__ring--a { animation: score-demo-ring 6s ease-out 1.3s infinite; }
+.score-demo--dot .score-demo__ring--b { animation: score-demo-ring 6s ease-out 1.65s infinite; }
+.score-demo--dot .score-demo__ring--c { animation: score-demo-ring 6s ease-out 3.3s infinite; }
+.score-demo--dot .score-demo__ring--d { animation: score-demo-ring 6s ease-out 3.65s infinite; }
+
+.score-demo--bar .score-demo__pointer { animation: score-demo-pointer-bar 6s ease-in-out infinite; }
+.score-demo--bar .score-demo__ring--e { animation: score-demo-ring 6s ease-out 1.2s infinite; }
+.score-demo--bar .score-demo__ring--f { animation: score-demo-ring 6s ease-out 2.6s infinite; }
+.score-demo--bar .score-demo__remove { animation: score-demo-remove 6s steps(1, end) infinite; }
+.score-demo--bar .score-demo__bar--a { animation: score-demo-bar-a 6s steps(1, end) infinite; }
+.score-demo--bar .score-demo__bar--b { animation: score-demo-bar-b 6s steps(1, end) infinite; }
+
+/* Double click: the dot appears, then the second double click removes it. */
+@keyframes score-demo-dot {
+  0%, 23% { opacity: 0; }
+  24%, 56% { opacity: 1; }
+  57%, 100% { opacity: 0; }
+}
+@keyframes score-demo-pointer {
+  0% { transform: translate(110px, 44px); opacity: 0; }
+  8% { opacity: 1; }
+  18%, 88% { transform: translate(74px, 25px); opacity: 1; }
+  94% { transform: translate(74px, 25px); opacity: 0; }
+  94.01%, 100% { transform: translate(110px, 44px); opacity: 0; }
+}
+@keyframes score-demo-ring {
+  0% { opacity: 0.9; transform: scale(0.4); }
+  8% { opacity: 0; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(1.2); }
+}
+
+/* Click a special barline: the x shows over it; clicking the x deletes the bar. */
+@keyframes score-demo-pointer-bar {
+  0% { transform: translate(110px, 44px); opacity: 0; }
+  8% { opacity: 1; }
+  16%, 30% { transform: translate(73px, 25px); opacity: 1; }
+  38%, 60% { transform: translate(73px, -3px); opacity: 1; }
+  68% { transform: translate(73px, -3px); opacity: 0; }
+  68.01%, 100% { transform: translate(110px, 44px); opacity: 0; }
+}
+@keyframes score-demo-remove {
+  0%, 21% { opacity: 0; }
+  22%, 43% { opacity: 1; }
+  44%, 100% { opacity: 0; }
+}
+@keyframes score-demo-bar-a {
+  0%, 19% { stroke: currentColor; }
+  20%, 43% { stroke: var(--accent); }
+  44%, 100% { stroke: currentColor; }
+}
+@keyframes score-demo-bar-b {
+  0%, 19% { stroke: currentColor; opacity: 1; }
+  20%, 43% { stroke: var(--accent); opacity: 1; }
+  44%, 99% { opacity: 0; }
+  100% { stroke: currentColor; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .score-demo__dot,
+  .score-demo__pointer,
+  .score-demo__ring,
+  .score-demo__remove,
+  .score-demo__bar {
+    animation: none !important;
+  }
+}

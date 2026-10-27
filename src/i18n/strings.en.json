@@ -578,6 +578,15 @@
   "scoreH1": "Sheet music",
   "scoreSeoH1": "Free online sheet music editor",
   "scoreAboutLead": "Write your score straight onto the staff: pick a note value, click where the note goes, done. It is free, runs in your browser and needs no account or install.",
+  "scoreShortcutsH2": "Keyboard shortcuts and gestures",
+  "scoreShortcutsIntro": "Press a figure’s key to pick it, then click on the staff to place it. These are the keys:",
+  "scoreShortcutsNotes": "Notes",
+  "scoreShortcutsRests": "Rests",
+  "scoreShortcutsMarks": "Dot and accidentals",
+  "scoreDotTitle": "Dot",
+  "scoreDotBody": "Double-click a note to add its dot; double-click again to remove it.",
+  "scoreBarTitle": "Delete a barline",
+  "scoreBarBody": "Click a double or repeat barline and press the x that appears to delete it.",
   "scoreFeaturesH2": "What you can do with the editor",
   "scoreFeatures": [
     "<strong>Notes and rests:</strong> from whole to thirty-second notes, with dots and accidentals (sharps, flats and naturals).",
@@ -633,7 +642,6 @@
     "deleteMeasure": "Delete measure",
     "addMeasure": "Add measure",
     "noRoomForMeasure": "No room",
-
     "barDouble": "Double barline",
     "barRepeatStart": "Start repeat",
     "barRepeatEnd": "End repeat",

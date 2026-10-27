@@ -21,6 +21,7 @@ const path = require("path");
 const { fingerprintAssets } = require("./lib/fingerprint");
 const { minifyAssets } = require("./lib/minify-assets");
 const { readSiteCss, readPartituraCss } = require("./lib/site-css");
+const { renderScoreTutorial } = require("./lib/score-tutorial");
 const { normalizeScoreDirections } = require("./lib/score-svg");
 const {
   resolveLastmods,
@@ -1189,6 +1190,10 @@ function renderScoreEditorPage(template, strings, locale) {
     .join(escapeHtml(strings.scoreSeoH1 || ""))
     .split("%%scoreAboutLead%%")
     .join(escapeHtml(strings.scoreAboutLead || ""))
+    .split("%%scoreShortcutsH2%%")
+    .join(escapeHtml(strings.scoreShortcutsH2 || ""))
+    .split("%%SCORE_TUTORIAL%%")
+    .join(renderScoreTutorial(strings))
     .split("%%scoreFeaturesH2%%")
     .join(escapeHtml(strings.scoreFeaturesH2 || ""))
     .split("%%scoreHowH2%%")
