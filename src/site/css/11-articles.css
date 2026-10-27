@@ -211,6 +211,14 @@
   grid-template-columns: 1fr;
   gap: 0.4rem;
 }
+/* Editor's favorites page: one group of cards per collection, named by a caption. */
+.favorites-collection + .favorites-collection {
+  margin-top: 1.6rem;
+}
+.favorites-collection-title {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
 .prelude-card {
   position: relative;
   min-width: 0;

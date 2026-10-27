@@ -76,7 +76,7 @@ function createEdition(edition) {
   function card(prelude, locale, strings, sharedGlyphs, all) {
     const name = preludeName(prelude, locale);
     const svg = fs.readFileSync(path.join(PREVIEW_DIR, SCORE_PREFIX + String(prelude.number).padStart(2, '0') + '.svg'), 'utf8');
-    const id = 'prelude-score-' + prelude.number;
+    const id = SCORE_PREFIX + 'score-' + prelude.number;
     const href = ASSETS_URL + encodeURIComponent(prelude.pdf);
     const download = '<a class="example-download" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' + strings.artPreludesDownload + '</a>';
     /* El titulo es el boton que abre la partitura completa en un modal; su ::after cubre toda la tarjeta.
@@ -110,7 +110,7 @@ function createEdition(edition) {
     });
     /* El boton azul de descarga va en un pie fijo, como el de Partitura y tablatura. */
     const keyButton = (target, label) => target
-      ? '<button type="button" class="modal-key" popovertarget="prelude-score-' + target.number + '" popovertargetaction="show">' +
+      ? '<button type="button" class="modal-key" popovertarget="' + SCORE_PREFIX + 'score-' + target.number + '" popovertargetaction="show">' +
         MUSIC_ICON + '<span>' + escapeAttr(preludeName(target, locale)) + '</span><span class="modal-key-label">' + label + '</span></button>'
       : '';
     const relative = relativeOf(prelude, all);
@@ -118,21 +118,28 @@ function createEdition(edition) {
       keyButton(relative, relative && relative.mode === 'Minor' ? strings.artPreludesRelativeMinor : strings.artPreludesRelativeMajor) +
       keyButton(dominantOf(prelude, all), strings.artPreludesDominant) + '</div>';
     return '<div class="modal-pages">' + editorMarks(folder, prelude.number, strings) + pages.join('') + '</div>' +
-      '<div class="modal-footer">' + scoreNavigation(all, prelude, 'prelude-score-', preludeName, locale) + keyButtons + '<a class="modal-download" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' +
+      '<div class="modal-footer">' + scoreNavigation(all, prelude, SCORE_PREFIX + 'score-', preludeName, locale) + keyButtons + '<a class="modal-download" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' +
       DOWNLOAD_ICON + '<span>' + strings.artPreludesDownload + '</span></a></div>';
+  }
+
+  /* Un popover abierto desde dentro de otro queda apilado; el boton de la tonalidad relativa cierra el actual. */
+  const CLOSER = '<script>document.querySelectorAll(".modal-key").forEach(function(b){b.addEventListener("click",function(){' +
+    'b.closest("[popover]").hidePopover();});});</script>';
+
+  function renderGrid(locale, strings, all) {
+    const sharedGlyphs = new Map();
+    const cards = all.map((p) => card(p, locale, strings, sharedGlyphs, all)).join('');
+    return glyphDefs(sharedGlyphs) + '<div class="prelude-grid">' + cards + '</div>' + CLOSER;
   }
 
   function renderBody(locale, strings) {
     const prose = fs.readFileSync(path.join(PREVIEW_DIR, 'body.' + locale + '.html'), 'utf8');
-    const sharedGlyphs = new Map();
-    const all = publishedPreludes();
-    const cards = all.map((p) => card(p, locale, strings, sharedGlyphs, all)).join('');
-    const glyphs = glyphDefs(sharedGlyphs);
-    /* Un popover abierto desde dentro de otro queda apilado; el boton de la tonalidad relativa cierra el actual. */
-    const closer = '<script>document.querySelectorAll(".modal-key").forEach(function(b){b.addEventListener("click",function(){' +
-      'b.closest("[popover]").hidePopover();});});</script>';
-    const grid = glyphs + '<div class="prelude-grid">' + cards + '</div>' + closer;
-    return prose.split('%%PRELUDES%%').join(grid);
+    return prose.split('%%PRELUDES%%').join(renderGrid(locale, strings, publishedPreludes()));
+  }
+
+  /* Solo las tarjetas de los preludios indicados (pagina de favoritas), sin la prosa del articulo. */
+  function renderCards(locale, strings, numbers) {
+    return renderGrid(locale, strings, publishedPreludes().filter((p) => numbers.includes(p.number)));
   }
 
   /* Archivos que el build copia a dist/site/assets/articles/carcassi-preludios/. */
@@ -152,7 +159,7 @@ function createEdition(edition) {
     return { src: path.join(PREVIEW_DIR, name), name, url: ASSETS_URL + name };
   }
 
-  return { publishedPreludes, renderBody, pdfFiles, pageSvgFiles, cardImage, keyName, DOWNLOADS_DIR, PREVIEW_DIR, SCORE_PREFIX };
+  return { publishedPreludes, renderCards, renderBody, pdfFiles, pageSvgFiles, cardImage, keyName, DOWNLOADS_DIR, PREVIEW_DIR, SCORE_PREFIX };
 }
 
 module.exports = { ...createEdition('carcassi'), santisteban: createEdition('santisteban'), waltzes: createEdition('valses') };

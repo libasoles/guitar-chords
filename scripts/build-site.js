@@ -45,6 +45,7 @@ const articleSagreras = require("./lib/article-sagreras");
 const articleSor = require("./lib/article-sor");
 const articleSorEstudios = require("./lib/article-sor-estudios");
 const articleBarrios = require("./lib/article-barrios");
+const articleFavorites = require("./lib/article-favorites");
 const articleGiuliani = require("./lib/article-giuliani");
 const articleGiulianiArpegios = require("./lib/article-giuliani-arpegios");
 const { renderArticleLinks } = require("./lib/article-link");
@@ -439,6 +440,8 @@ const ARTICLE_SAGRERAS_SLUG = "articulo-lecciones-sagreras";
 const ARTICLE_SOR_SLUG = "articulo-lecciones-sor";
 const ARTICLE_SOR_ESTUDIOS_SLUG = "articulo-estudios-sor";
 const ARTICLE_BARRIOS_SLUG = "articulo-partituras-barrios";
+// Hidden page: noindex, not in the sitemap, menu or any link; reached only by its URL.
+const ARTICLE_FAVORITES_SLUG = "articulo-favoritas";
 const ARTICLE_GIULIANI_SLUG = "articulo-estudios-giuliani";
 const ARTICLE_GIULIANI_ARPEGIOS_SLUG = "articulo-arpegios-giuliani";
 // YouTube video the exercise was taken from, embedded below the tabs.
@@ -1632,6 +1635,26 @@ function renderBarriosArticle(strings, locale) {
   );
 }
 
+function renderFavoritesArticle(strings, locale) {
+  const html = renderArticlePage(
+    strings,
+    locale,
+    ARTICLE_FAVORITES_SLUG,
+    {
+      title: "artFavoritesPageTitle",
+      meta: "artFavoritesMetaDescription",
+      h1: "artFavoritesH1",
+      lead: "artFavoritesLead",
+    },
+    articleFavorites.renderBody(locale, strings),
+    "",
+  );
+  return html.replace(
+    '<link rel="canonical"',
+    '<meta name="robots" content="noindex, nofollow" />\n    <link rel="canonical"',
+  );
+}
+
 function renderGiulianiArticle(strings, locale) {
   const back =
     '<p class="article-back"><a href="' +
@@ -1670,6 +1693,7 @@ function writeArticlePages(strings, locale) {
     [ARTICLE_GIULIANI_SLUG, renderGiulianiArticle],
     [ARTICLE_GIULIANI_ARPEGIOS_SLUG, renderGiulianiArpegiosArticle],
     [ARTICLE_ARPEGGIOS_SLUG, renderArpeggiosArticle],
+    [ARTICLE_FAVORITES_SLUG, renderFavoritesArticle],
   ].forEach(function (entry) {
     const outFile = path.join(DIST_SITE, pageFile(entry[0], locale));
     ensureDir(path.dirname(outFile));

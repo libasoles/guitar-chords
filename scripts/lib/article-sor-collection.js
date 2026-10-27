@@ -83,6 +83,14 @@ function createSorCollection({ folder, catalog, prefix, pieceName }) {
       DOWNLOAD_ICON + '<span>' + strings.artPreludesDownload + '</span></a></div>';
   }
 
+  /* Solo las tarjetas de las piezas indicadas (pagina de favoritas), sin la prosa del articulo. */
+  function renderCards(locale, strings, numbers) {
+    const sharedGlyphs = new Map();
+    const pieces = publishedPieces().filter((p) => numbers.includes(p.number));
+    const cards = pieces.map((p) => card(p, locale, strings, sharedGlyphs, pieces)).join('');
+    return glyphDefs(sharedGlyphs) + '<div class="prelude-grid">' + cards + '</div>';
+  }
+
   function renderBody(locale, strings) {
     const prose = fs.readFileSync(path.join(PREVIEW_DIR, 'body.' + locale + '.html'), 'utf8');
     const sharedGlyphs = new Map();
@@ -111,7 +119,7 @@ function createSorCollection({ folder, catalog, prefix, pieceName }) {
     return { src, name, url: ASSETS_URL + name, size: [684, Math.round(684 * height / width)] };
   }
 
-  return { publishedPieces, renderBody, pdfFiles, pageSvgFiles, cardImage, pieceName, DOWNLOADS_DIR, PREVIEW_DIR, SCORE_PREFIX, PIECES, AUTHOR };
+  return { publishedPieces, renderCards, renderBody, pdfFiles, pageSvgFiles, cardImage, pieceName, DOWNLOADS_DIR, PREVIEW_DIR, SCORE_PREFIX, PIECES, AUTHOR };
 }
 
 module.exports = { createSorCollection };
