@@ -40,8 +40,8 @@ PDF_OVERRIDES = {}
 # compases de arpegio de cada una, y los demas quedan como los digita el Viterbi. Vacio: ninguna.
 ARPEGGIO = set()
 # Ajustes de grabado sobre el SVG de Verovio (scripts/sagreras/engraving.py): tresillos sobre las plicas
-# (49, 55; en la 55 tambien el indicador de cejilla) y silencios de dos voces encimados (53, 54).
-ENGRAVING_FIXES = {49: clear_triplets, 55: clear_triplets, 53: separate_rests, 54: separate_rests}
+# (49, 55; en la 55 tambien el indicador de cejilla) y silencios de dos voces encimados (53, 54, 65).
+ENGRAVING_FIXES = {49: clear_triplets, 55: clear_triplets, 53: separate_rests, 54: separate_rests, 65: separate_rests}
 # Pagina virtual mas grande con escala menor (el PDF sigue midiendo lo mismo, como en los preludios
 # largos): el grabado se achica y caben mas compases por sistema y mas sistemas por pagina. Se prueba de menos a mas
 # reduccion y se queda con el primer nivel que ocupa menos paginas.
