@@ -5,16 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>%%PAGE_TITLE%%</title>
     <meta name="description" content="%%PAGE_META_DESCRIPTION%%" />
-    <meta name="robots" content="noindex, nofollow" />
+    <link rel="canonical" href="%%canonicalUrl%%" />
+    <link rel="alternate" hreflang="es" href="%%hreflangEs%%" />
+    <link rel="alternate" hreflang="en" href="%%hreflangEn%%" />
+    <link rel="alternate" hreflang="x-default" href="%%hreflangEs%%" />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="%%ogLocale%%" />
     <meta property="og:title" content="%%PAGE_TITLE%%" />
     <meta property="og:description" content="%%PAGE_META_DESCRIPTION%%" />
     <meta property="og:url" content="%%canonicalUrl%%" />
+    <meta property="og:image" content="%%ogImage%%" />
     <meta property="og:site_name" content="Guitar Chords" />
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="%%PAGE_TITLE%%" />
     <meta name="twitter:description" content="%%PAGE_META_DESCRIPTION%%" />
-    <link rel="canonical" href="%%canonicalUrl%%" />
+    <meta name="twitter:image" content="%%ogImage%%" />
     <link rel="icon" type="image/svg+xml" href="%%ASSETS_PREFIX%%favicon.svg" />
     <link rel="manifest" href="%%MANIFEST_HREF%%" />
     <meta name="theme-color" content="#ffffff" />
@@ -51,7 +56,7 @@
           <p id="scoreStatus" class="score-status" role="status" aria-live="polite"></p>
           <section class="score-sheet" aria-label="%%scoreLabel%%">
             <p class="score-author"><input id="scoreAuthor" type="text" placeholder="%%scoreAuthorPlaceholder%%" aria-label="%%scoreAuthorLabel%%" /></p>
-            <h1 class="score-title"><input id="scoreTitle" type="text" aria-label="%%scoreTitleLabel%%" value="%%PAGE_H1%%" /></h1>
+            <h1 class="score-title"><span class="score-sr-only">%%scoreSeoH1%%</span><input id="scoreTitle" type="text" aria-label="%%scoreTitleLabel%%" value="%%PAGE_H1%%" /></h1>
             <div id="scoreStage" class="score-stage" tabindex="0" aria-label="%%scoreLabel%%"></div>
           </section>
         </div>
@@ -75,6 +80,15 @@
         <button id="scoreAddRow" class="score-tool" type="button" aria-label="%%scoreAddRow%%" title="%%scoreAddRow%%"></button>
         <button id="scoreRemoveRow" class="score-tool" type="button" aria-label="%%scoreRemoveRow%%" title="%%scoreRemoveRow%%" hidden></button>
       </div>
+      <section class="score-about" aria-label="%%scoreSeoH1%%">
+        <p class="score-about-lead">%%scoreAboutLead%%</p>
+        <h2>%%scoreFeaturesH2%%</h2>
+        <ul>%%SCORE_FEATURES%%</ul>
+        <h2>%%scoreHowH2%%</h2>
+        <ol>%%SCORE_HOW%%</ol>
+        <h2>%%scoreFaqH2%%</h2>
+        %%SCORE_FAQ%%
+      </section>
     </main>
 
     <script type="application/json" id="scoreStrings">%%SCORE_STRINGS%%</script>
