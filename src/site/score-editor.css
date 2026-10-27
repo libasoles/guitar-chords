@@ -24,7 +24,7 @@ body.score-body {
   grid-row: 1;
   align-self: start;
   margin-top: 0.5rem;
-  background: var(--paper);
+  background: transparent;
 }
 
 /* Second sidebar: shares the right column with the barlines but stays pinned to the bottom of the viewport. */
@@ -35,7 +35,7 @@ body.score-body {
   bottom: 1rem;
   z-index: 4;
   align-self: end;
-  background: var(--paper);
+  background: transparent;
 }
 
 .score-side-actions {
@@ -116,7 +116,7 @@ body.score-body {
   align-items: center;
   gap: 0.4rem;
   padding: 0.5rem;
-  background: var(--paper);
+  background: transparent;
   border: 0;
   font-family: var(--sans);
 }
