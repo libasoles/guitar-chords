@@ -23,7 +23,7 @@ test('el puntillo suma la mitad y no entra en redonda ni semicorchea', () => {
   assert.ok(!M.canDot([{ d: 'w', n: 30 }], 0));
   assert.ok(!M.canDot([{ d: 's', n: 30 }], 0));
   assert.ok(M.canDot([{ d: 'q', n: 30 }], 0));
-  assert.ok(!M.canDot([{ d: 'h', n: 30 }, { d: 'h', n: 30 }], 0));
+  assert.ok(M.canDot([{ d: 'h', n: 30 }, { d: 'h', n: 30 }], 0));
 });
 
 test('sanitize descarta figuras invalidas y completa los renglones', () => {
@@ -74,19 +74,19 @@ test('una figura soltada en medio de un compas vacio conserva su lugar y el Musi
   assert.match(first, /<rest\/><duration>16<\/duration>[^]*<step>E<\/step>/);
 });
 
-test('soltar sobre la columna de una nota hace un acorde con su duracion', () => {
+test('soltar sobre una nota conserva la duracion elegida y permite acordes de igual duracion', () => {
   const measure = [{ d: 'e', n: 30, at: 8 }];
   const spot = M.placement(measure, { d: 'q', n: 34 }, 8);
-  assert.deepEqual(spot, { at: 8, d: 'e', dot: undefined });
+  assert.deepEqual(spot, { at: 8, d: 'q', dot: undefined });
   assert.equal(M.placement(measure, { d: 'q', n: 30 }, 8), null);
   M.insertAt(measure, { d: 'e', n: 34 }, 8);
   assert.match(M.toMusicXml({ rows: [[measure, [], [], []]] }), /<chord\/>/);
 });
 
-test('una figura que pisa a otra se corre al hueco libre mas cercano', () => {
+test('las figuras superpuestas conservan el tiempo elegido en voces independientes', () => {
   const measure = [{ d: 'h', n: 30, at: 0 }];
-  assert.equal(M.placement(measure, { d: 'q', n: 31 }, 8).at, 16);
-  assert.equal(M.placement([{ d: 'w', n: 30, at: 0 }], { d: 'q', n: 31 }, 8), null);
+  assert.equal(M.placement(measure, { d: 'q', n: 31 }, 8).at, 8);
+  assert.equal(M.placement([{ d: 'w', n: 30, at: 0 }], { d: 'q', n: 31 }, 8).at, 8);
 });
 
 test('los compases convencionales se guardan y exportan con su duracion exacta', () => {
@@ -113,7 +113,7 @@ test('la capacidad del compas elegido limita figuras y puntillos', () => {
   assert.ok(M.fits([{ d: 'q', n: 30 }], { d: 'e', n: 31 }, undefined, score));
   assert.ok(!M.fits([{ d: 'q', n: 30 }], { d: 'q', n: 31 }, undefined, score));
   assert.ok(M.canDot([{ d: 'q', n: 30 }], 0, score));
-  assert.ok(!M.canDot([{ d: 'q', n: 30 }, { d: 'e', n: 31 }], 0, score));
+  assert.ok(M.canDot([{ d: 'q', n: 30 }, { d: 'e', n: 31 }], 0, score));
   assert.ok(M.fits([{ d: 'q', n: 30 }], { d: 'q', n: 31 }, 0, score));
 });
 
@@ -154,4 +154,70 @@ test('el compas elegido limita la colocacion libre y conserva los acordes', () =
   assert.deepEqual(M.sanitize(score), score);
   assert.equal(M.placement([], { d: 'q', n: 30 }, 40, score).at, 40);
   assert.equal(M.setMeter(score, '4/4'), false);
+});
+
+test('la polifonia sobrevive al guardado y exporta tiempos, duraciones y voces independientes', () => {
+  const score = M.emptyScore();
+  const measure = score.rows[0][0];
+  for (const ev of [
+    { d: 'w', n: 24, at: 0 },
+    { d: 'q', n: 34, at: 0 },
+    { d: 'q', n: 36, at: 0 },
+    { d: 'q', n: 35, at: 8 },
+    { d: 'h', n: 33, at: 16 },
+    { d: 'e', rest: true, at: 12 },
+  ]) {
+    const spot = M.placement(measure, ev, ev.at, score);
+    assert.ok(spot);
+    assert.equal(spot.at, ev.at);
+    assert.equal(spot.d, ev.d);
+    M.insertAt(measure, ev, spot.at);
+  }
+  assert.deepEqual(M.sanitize(JSON.parse(JSON.stringify(score))), score);
+  const first = M.toMusicXml(score).split('<measure ')[1];
+  let cursor = 0;
+  let previous = 0;
+  const notes = new Map();
+  for (const match of first.matchAll(/<(note|backup)\b([^>]*)>([^]*?)<\/\1>/g)) {
+    const [, tag, attrs, body] = match;
+    const duration = Number(body.match(/<duration>(\d+)<\/duration>/)[1]);
+    if (tag === 'backup') { cursor -= duration; continue; }
+    const chord = body.includes('<chord/>');
+    const at = chord ? previous : cursor;
+    if (!chord) { previous = cursor; cursor += duration; }
+    const id = attrs.match(/id="e0-(\d+)"/);
+    if (id) notes.set(Number(id[1]), { at, duration, voice: body.match(/<voice>(\d+)<\/voice>/)[1] });
+  }
+  assert.equal(notes.size, measure.length);
+  measure.forEach((ev, i) => {
+    assert.equal(notes.get(i).at, ev.at);
+    assert.equal(notes.get(i).duration, M.length(ev));
+  });
+  assert.notEqual(notes.get(0).voice, notes.get(1).voice);
+  assert.equal(notes.get(1).voice, notes.get(2).voice);
+  assert.equal(cursor, M.capacity(score));
+});
+
+test('un puntillo respeta el limite del compas aunque admita otras voces', () => {
+  assert.equal(M.canDot([{ d: 'h', n: 30, at: 16 }], 0), false);
+});
+
+
+test('las barras de corcheas se calculan dentro de cada voz', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [
+    { d: 'w', n: 24, at: 0 },
+    { d: 'e', n: 34, at: 0 },
+    { d: 'e', n: 35, at: 4 },
+    { d: 'e', n: 36, at: 8 },
+    { d: 'e', n: 37, at: 12 },
+  ];
+  const first = M.toMusicXml(score).split('<measure ')[1];
+  assert.deepEqual([...first.matchAll(/<beam number="1">(\w+)<\/beam>/g)].map((m) => m[1]), ['begin', 'end', 'begin', 'end']);
+});
+
+test('agregar una voz conserva los tiempos de figuras antiguas sin at explicito', () => {
+  const measure = [{ d: 'h', n: 30 }, { d: 'h', n: 31 }];
+  M.insertAt(measure, { d: 'q', n: 34 }, 8);
+  assert.deepEqual(M.onsets(measure), [0, 8, 16]);
 });

@@ -32,7 +32,7 @@
   }
 
   // Inicio de cada figura dentro del compas. Una figura sin `at` sigue a la anterior;
-  // las que comparten `at` forman un acorde.
+  // las que comparten `at` y duracion forman un acorde.
   function onsets(measure) {
     let cursor = 0;
     return measure.map((ev) => {
@@ -54,30 +54,20 @@
     return measure;
   }
 
-  // Donde cae `ev` si se suelta cerca del tiempo `t`, entre las figuras `others` (ya sin `ev`).
-  // Sobre la columna de una nota se vuelve acorde (y toma su duracion); si no, el hueco libre mas cercano.
+  // Cada figura conserva su duracion y tiempo; las superposiciones crean voces al exportar.
   function placement(others, ev, t, score) {
     const limit = capacity(score);
-    const starts = onsets(others);
-    const want = Math.max(0, Math.min(limit - 1, Math.round(t / GRID) * GRID));
-    if (!ev.rest) {
-      const column = others.findIndex((o, i) => !o.rest && starts[i] === want);
-      if (column >= 0) {
-        if (others.some((o, i) => starts[i] === want && !o.rest && o.n === ev.n)) return null;
-        return { at: want, d: others[column].d, dot: others[column].dot };
-      }
-    }
     const size = length(ev);
-    const spans = others.map((o, i) => [starts[i], starts[i] + length(o)]);
-    const free = (c) => c >= 0 && c + size <= limit && spans.every(([a, b]) => c >= b || c + size <= a);
-    const candidates = [want, 0, limit - size];
-    spans.forEach(([a, b]) => candidates.push(b, a - size));
-    const best = candidates.filter(free).sort((x, y) => Math.abs(x - want) - Math.abs(y - want))[0];
-    return best === undefined ? null : { at: best, d: ev.d, dot: ev.dot };
+    if (size > limit) return null;
+    const at = Math.max(0, Math.min(limit - size, Math.round(t / GRID) * GRID));
+    const starts = onsets(others);
+    if (!ev.rest && others.some((o, i) => !o.rest && starts[i] === at && o.n === ev.n && o.acc === ev.acc)) return null;
+    return { at, d: ev.d, dot: ev.dot };
   }
 
   // Inserta `ev` con su `at`, antes de la primera figura que empieza despues.
   function insertAt(measure, ev, at) {
+    settle(measure);
     const starts = onsets(measure);
     let index = starts.findIndex((s) => s > at);
     if (index < 0) index = measure.length;
@@ -133,7 +123,7 @@
     if (ev.dot || ev.d === 'w' || ev.d === 's') return false;
     const starts = onsets(measure);
     const end = starts[index] + VALUES[ev.d] * 1.5;
-    return end <= capacity(score) && starts.every((s) => s <= starts[index] || s >= end);
+    return end <= capacity(score);
   }
 
   // Descarta lo que no sea una partitura valida (por ejemplo, datos viejos o editados a mano).
@@ -225,7 +215,30 @@
     return states;
   }
 
-  function noteXml(ev, id, beams, chord) {
+  // Agrupa acordes de igual inicio y duracion; cada voz contiene figuras sin superposicion.
+  // Se conservan los indices originales para seleccionar las notas en el SVG.
+  function voices(measure) {
+    const starts = onsets(measure);
+    const groups = [];
+    measure.forEach((ev, i) => {
+      let group = !ev.rest && groups.find((g) => !g.rest && g.at === starts[i] && g.size === length(ev));
+      if (!group) {
+        group = { at: starts[i], size: length(ev), rest: !!ev.rest, indices: [] };
+        groups.push(group);
+      }
+      group.indices.push(i);
+    });
+    const result = [];
+    groups.sort((a, b) => a.at - b.at || b.size - a.size).forEach((group) => {
+      let voice = result.find((v) => v.end <= group.at);
+      if (!voice) { voice = { end: 0, groups: [] }; result.push(voice); }
+      voice.groups.push(group);
+      voice.end = group.at + group.size;
+    });
+    return result.length ? result : [{ end: 0, groups: [] }];
+  }
+
+  function noteXml(ev, id, beams, chord, voice) {
     const dur = length(ev);
     const base = VALUES[ev.d];
     let xml = `<note id="${id}">`;
@@ -237,7 +250,7 @@
       xml += `<pitch><step>${STEPS[ev.n % 7]}</step>${acc && acc.alter ? `<alter>${acc.alter}</alter>` : ''}` +
         `<octave>${Math.floor(ev.n / 7) - 1}</octave></pitch>`;
     }
-    xml += `<duration>${dur}</duration><voice>1</voice><type>${TYPES[base]}</type>${ev.dot ? '<dot/>' : ''}`;
+    xml += `<duration>${dur}</duration><voice>${voice}</voice><type>${TYPES[base]}</type>${ev.dot ? '<dot/>' : ''}`;
     if (!ev.rest && ev.acc) xml += `<accidental>${ACCIDENTALS[ev.acc].name}</accidental>`;
     if (beams) Object.keys(beams).forEach((level) => { xml += `<beam number="${level}">${beams[level]}</beam>`; });
     return xml + '</note>';
@@ -256,24 +269,28 @@
           `<time><beats>${beats}</beats><beat-type>${unit}</beat-type></time>` +
           '<clef><sign>G</sign><line>2</line><clef-octave-change>-1</clef-octave-change></clef></attributes>';
       }
-      const beams = beamStates(measure, score);
       const starts = onsets(measure);
-      const hidden = (from, to) => {
-        padding(to - from).forEach((size) => {
-          xml += `<note print-object="no"><rest/><duration>${size}</duration><voice>1</voice><type>${TYPES[size]}</type></note>`;
+      voices(measure).forEach((voice, vi) => {
+        if (vi > 0) xml += `<backup><duration>${capacity(score)}</duration></backup>`;
+        const indices = voice.groups.flatMap((g) => g.indices);
+        const events = indices.map((i) => Object.assign({}, measure[i], { at: starts[i] }));
+        const beams = beamStates(events, score);
+        const hidden = (from, to) => {
+          padding(to - from).forEach((size) => {
+            xml += `<note print-object="no"><rest/><duration>${size}</duration><voice>${vi + 1}</voice><type>${TYPES[size]}</type></note>`;
+          });
+        };
+        let cursor = 0;
+        let index = 0;
+        voice.groups.forEach((group) => {
+          hidden(cursor, group.at);
+          group.indices.forEach((i, ci) => {
+            xml += noteXml(measure[i], `e${mi}-${i}`, beams[index++], ci > 0, vi + 1);
+          });
+          cursor = group.at + group.size;
         });
-      };
-      let cursor = 0;
-      measure.forEach((ev, i) => {
-        const chord = i > 0 && starts[i] === starts[i - 1];
-        if (!chord) {
-          hidden(cursor, starts[i]);
-          cursor = starts[i];
-        }
-        xml += noteXml(ev, `e${mi}-${i}`, beams[i], chord);
-        if (!chord) cursor = starts[i] + length(ev);
+        hidden(cursor, capacity(score));
       });
-      hidden(cursor, capacity(score));
       xml += '</measure>';
     });
     return xml + '</part></score-partwise>\n';

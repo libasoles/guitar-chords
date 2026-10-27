@@ -112,11 +112,11 @@
     }
   }
 
-  // Los miembros de un acorde comparten duracion, asi que el puntillo va a todos.
+  // El puntillo afecta al acorde de igual duracion, sin modificar otras voces.
   function applyModifier(item, hit) {
     const measure = M.measures(score)[hit.mi];
     const ev = measure[hit.i];
-    const column = measure.filter((o) => o.at === ev.at && !o.rest === !ev.rest);
+    const column = measure.filter((o) => o.at === ev.at && o.d === ev.d && !!o.dot === !!ev.dot && !o.rest === !ev.rest);
     if (item.kind === 'dot') {
       if (ev.dot) return change(() => { column.forEach((o) => { delete o.dot; }); });
       if (!M.canDot(measure, hit.i, score)) return say(ev.d === 'w' || ev.d === 's' ? t.noDot : t.full);
