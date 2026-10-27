@@ -364,13 +364,14 @@
     }, extra);
   }
 
-  // The barlines sidebar starts level with the first staff instead of the top of the page.
+  // The barlines sidebar starts level with the top line of the first staff instead of the top of the page.
   function alignBarlinesToFirstStaff() {
     const side = barlines.closest('.score-side');
-    const staff = stage.querySelector('g.staff');
-    if (!side || !staff) return;
+    const line = stage.querySelector('g.staff > path');
+    const glyph = barlines.querySelector('svg');
+    if (!side || !line || !glyph) return;
     side.style.marginTop = '0';
-    const offset = staff.getBoundingClientRect().top - side.getBoundingClientRect().top;
+    const offset = line.getBoundingClientRect().top - glyph.getBoundingClientRect().top;
     side.style.marginTop = Math.max(0, offset) + 'px';
   }
 
