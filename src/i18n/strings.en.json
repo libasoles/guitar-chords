@@ -570,11 +570,15 @@
   "scoreH1": "Sheet music",
   "scoreTitleLabel": "Score title",
   "scoreToolbar": "Notes, rests and accidentals",
-  "scoreDelete": "Delete the selected figure",
+  "scoreBarlines": "Barlines",
   "scoreLabel": "Sheet music",
   "scoreAddRow": "Add a staff row",
   "scoreRemoveRow": "Remove the last row",
   "scoreUiStrings": {
+    "barSingle": "Single barline",
+    "barRepeatStart": "Start repeat",
+    "barRepeatEnd": "End repeat",
+
     "clefAndKey": "Clef and key signature",
     "clef": "Clef",
     "keySignature": "Key signature",

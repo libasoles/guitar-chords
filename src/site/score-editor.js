@@ -14,6 +14,8 @@
   const stage = document.getElementById('scoreStage');
   const status = document.getElementById('scoreStatus');
   const palette = document.getElementById('scorePalette');
+  const barlines = document.getElementById('scoreBarlines');
+  const toolbars = document.querySelector('.score-page');
   const addRow = document.getElementById('scoreAddRow');
   const removeRow = document.getElementById('scoreRemoveRow');
 
@@ -111,6 +113,11 @@
   }
 
   function dropNew(item, target) {
+    if (item.kind === 'bar') {
+      change(() => M.setBarline(score, target.mi, item.bar));
+      say('');
+      return;
+    }
     const measure = M.measures(score)[target.mi];
     if (item.kind === 'note' || item.kind === 'rest') {
       const ev = { d: item.d };
@@ -133,7 +140,7 @@
   function deactivateTool() {
     activeItem = null;
     clearHoverGhost();
-    palette.querySelectorAll('[aria-pressed]').forEach((button) => button.setAttribute('aria-pressed', 'false'));
+    toolbars.querySelectorAll('.score-palette-item[aria-pressed]').forEach((button) => button.setAttribute('aria-pressed', 'false'));
   }
 
   function activateTool(item) {
@@ -141,9 +148,10 @@
     activeItem = item;
     clearHoverGhost();
     updateHoverGhost();
-    palette.querySelectorAll('[aria-pressed]').forEach((button) => {
-      button.setAttribute('aria-pressed', String(button.dataset.shortcut === item.key));
+    toolbars.querySelectorAll('.score-palette-item[aria-pressed]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(item.key ? button.dataset.shortcut === item.key : button.dataset.barline === item.bar));
     });
+    if (item.kind === 'bar') return;
     if (isModifier(item)) {
       if (eventAt(selected)) applyModifier(item, selected);
       return;
@@ -376,7 +384,9 @@
     if (!hit) { marker.hidden = true; return; }
     marker.hidden = false;
     const line = marker.firstChild;
-    line.style.left = hit.x + 'px';
+    const item = drag ? drag.item : activeItem;
+    const x = item && item.kind === 'bar' ? layout[hit.mi][item.bar === 'start' ? 'left' : 'right'] : hit.x;
+    line.style.left = x + 'px';
     line.style.top = hit.top - hit.space * 2 + 'px';
     line.style.height = (hit.bottom - hit.top) + hit.space * 4 + 'px';
   }
@@ -467,7 +477,6 @@
     } else {
       showMarker(locate(event.clientX, event.clientY, drag.from));
     }
-    drag.overTrash = !!document.elementFromPoint(event.clientX, event.clientY)?.closest('#scoreTrash');
   }, { passive: false });
 
   function endDrag(event, cancelled) {
@@ -480,7 +489,7 @@
     if (d.ghost) d.ghost.remove();
     if (cancelled) return;
     if (!d.active) {
-      if (d.item && d.item.key) activateTool(d.item);
+      if (d.item) activateTool(d.item);
       else if (d.from && isModifier(activeItem)) applyModifier(activeItem, d.from);
       else if (d.insert) {
         const target = locate(event.clientX, event.clientY);
@@ -489,10 +498,6 @@
       return;
     }
     if (d.insert) return;
-    if (d.overTrash) {
-      if (d.from) { selected = d.from; removeSelected(); }
-      return;
-    }
     if (isModifier(d.item)) {
       const hit = eventUnder(event.clientX, event.clientY);
       if (hit) applyModifier(d.item, hit);
@@ -512,6 +517,12 @@
 
   stage.addEventListener('pointerdown', (event) => {
     if (event.target.closest('.score-meter-trigger, .score-clef-trigger')) return;
+    if (activeItem && activeItem.kind === 'bar') {
+      event.preventDefault();
+      stage.focus({ preventScroll: true });
+      beginDrag(event, { insert: true });
+      return;
+    }
     const match = eventUnder(event.clientX, event.clientY);
     if (!match) {
       selected = null;
@@ -773,7 +784,6 @@
   const ICONS = {
     plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
     minus: '<path d="M5 12h14"/>',
-    trash: '<path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
     download: '<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
   };
 
@@ -796,6 +806,9 @@
     'rest:q': '<path d="M12 5l7 8-5 5 6 7c-3-1-6.500-.5-6 3" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round"/>',
     'rest:e': '<circle cx="12" cy="11" r="2.4"/><path d="M13 12.500c3 0 5-1.300 6-3.500l-5 20" stroke="currentColor" stroke-width="1.700" fill="none"/>',
     'rest:s': '<circle cx="12" cy="9" r="2.400"/><circle cx="10" cy="17" r="2.400"/><path d="M13 10c3 0 5-1.300 6-3.500l-6.500 22" stroke="currentColor" stroke-width="1.700" fill="none"/>',
+    'bar:single': '<path d="M15 4v24" stroke="currentColor" stroke-width="1.6"/>',
+    'bar:start': '<path d="M9 4v24M14 4v24" stroke="currentColor" stroke-width="1.6"/><path d="M9 4v24" stroke="currentColor" stroke-width="3.5"/><circle cx="21" cy="12" r="1.8"/><circle cx="21" cy="20" r="1.8"/>',
+    'bar:end': '<path d="M16 4v24M21 4v24" stroke="currentColor" stroke-width="1.6"/><path d="M21 4v24" stroke="currentColor" stroke-width="3.5"/><circle cx="9" cy="12" r="1.8"/><circle cx="9" cy="20" r="1.8"/>',
     dot: '<circle cx="15" cy="15" r="3.200"/>',
     'acc:#': '<path d="M11 6v20M18 4v20M7.500 12.500l14-3.500M7.500 21l14-3.500" stroke="currentColor" stroke-width="1.800" fill="none"/>',
     'acc:b': '<path d="M10 4v22c4-2 8-5 8-8.500 0-2.500-2-3.500-4-3.500-1.500 0-3 .800-4 2" stroke="currentColor" stroke-width="1.800" fill="none" stroke-linejoin="round"/>',
@@ -803,6 +816,7 @@
   };
 
   function glyphKey(item) {
+    if (item.kind === 'bar') return 'bar:' + item.bar;
     if (item.kind === 'note' || item.kind === 'rest') return item.kind + ':' + item.d;
     return item.kind === 'dot' ? 'dot' : 'acc:' + item.acc;
   }
@@ -837,7 +851,13 @@
     { kind: 'acc', acc: 'n', key: t.shortcuts.natural, label: t.natural },
   ];
 
-  ITEMS.forEach((item) => {
+  const BARS = [
+    { kind: 'bar', bar: 'single', label: t.barSingle },
+    { kind: 'bar', bar: 'start', label: t.barRepeatStart },
+    { kind: 'bar', bar: 'end', label: t.barRepeatEnd },
+  ];
+
+  ITEMS.concat(BARS).forEach((item) => {
     if (!item) {
       const sep = document.createElement('span');
       sep.className = 'score-palette-sep';
@@ -850,6 +870,13 @@
     button.setAttribute('aria-label', item.label);
     button.title = item.label;
     button.appendChild(glyphFor(item));
+    button.setAttribute('aria-pressed', 'false');
+    if (item.kind === 'bar') {
+      button.dataset.barline = item.bar;
+      button.addEventListener('click', (event) => {
+        if (event.detail === 0) activateTool(item);
+      });
+    }
     if (item.key) {
       button.dataset.shortcut = item.key;
       button.setAttribute('aria-keyshortcuts', item.key);
@@ -868,13 +895,11 @@
       event.preventDefault();
       beginDrag(event, { item, kind: item.kind, glyph: glyphFor(item) });
     });
-    palette.appendChild(button);
+    (item.kind === 'bar' ? barlines : palette).appendChild(button);
   });
 
   // ---- renglones, descargas ----------------------------------------------
 
-  document.getElementById('scoreTrash').innerHTML = lucide('trash');
-  document.getElementById('scoreTrash').addEventListener('click', removeSelected);
   addRow.innerHTML = lucide('plus');
   removeRow.innerHTML = lucide('minus');
   document.querySelectorAll('[data-icon="download"]').forEach((node) => { node.insertAdjacentHTML('afterbegin', lucide('download')); });
@@ -912,6 +937,9 @@
     if (score.rows.length <= M.MIN_ROWS) return false;
     selected = null;
     score.rows.pop();
+    if (score.barlines) Object.keys(score.barlines).forEach((mi) => {
+      if (+mi >= M.measures(score).length) delete score.barlines[mi];
+    });
   }));
 
   function download(blob, name) {

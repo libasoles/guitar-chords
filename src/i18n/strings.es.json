@@ -570,11 +570,15 @@
   "scoreH1": "Partitura",
   "scoreTitleLabel": "Título de la partitura",
   "scoreToolbar": "Notas, silencios y alteraciones",
-  "scoreDelete": "Borrar la figura seleccionada",
+  "scoreBarlines": "Barras de compás",
   "scoreLabel": "Partitura",
   "scoreAddRow": "Agregar un renglón",
   "scoreRemoveRow": "Quitar el último renglón",
   "scoreUiStrings": {
+    "barSingle": "Barra simple",
+    "barRepeatStart": "Inicio de repetición",
+    "barRepeatEnd": "Fin de repetición",
+
     "clefAndKey": "Clave y armadura",
     "clef": "Clave",
     "keySignature": "Armadura",

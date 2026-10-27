@@ -308,3 +308,29 @@ test('la clave de guitarra se dibuja sin el 8 y conserva la posicion de las nota
   score.clef = 'treble';
   assert.equal(M.toMusicXml(score, { plainGuitarClef: true }), M.toMusicXml(score));
 });
+
+
+test('las barras sobreviven al guardado y se exportan en el lado correcto', () => {
+  let score = M.emptyScore();
+  M.setBarline(score, 0, 'start');
+  M.setBarline(score, 3, 'end');
+  M.setBarline(score, 11, 'single');
+  score = M.sanitize(M.clone(score));
+  const xml = M.toMusicXml(score);
+  assert.match(xml.split('<measure ')[1], /<barline location="left"><repeat direction="forward"\/><\/barline>/);
+  assert.match(xml.split('<measure ')[4], /<barline location="right"><repeat direction="backward"\/><\/barline>/);
+  assert.match(xml.split('<measure ')[12], /<bar-style>regular<\/bar-style>/);
+  M.setBarline(score, 0, 'end');
+  assert.deepEqual(score.barlines[0], { start: true, end: true });
+  M.setBarline(score, 0, 'single');
+  assert.deepEqual(score.barlines[0], { single: true });
+  assert.equal(M.setBarline(score, 12, 'end'), false);
+  assert.equal(M.setBarline(score, -1, 'start'), false);
+  assert.equal(M.setBarline(score, 0, 'invalid'), false);
+});
+
+test('sanitize descarta barras invalidas y compases que no existen', () => {
+  const score = M.emptyScore();
+  score.barlines = { '-1': { start: true }, 0: null, 1: { end: 'true' }, 2: { start: true }, 12: { end: true } };
+  assert.deepEqual(M.sanitize(score).barlines, { 2: { start: true, end: false } });
+});
