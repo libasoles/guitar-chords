@@ -191,3 +191,65 @@ body.score-dragging {
     padding: 0 0.75rem;
   }
 }
+
+/* El boton transparente conserva la cifra grabada y amplia su zona de clic. */
+.score-meter-trigger {
+  position: absolute;
+  width: 44px;
+  transform: translate(-50%, -50%);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.score-meter-trigger:hover,
+.score-meter-trigger:focus-visible {
+  border-color: var(--rule);
+  background: rgb(0 0 0 / 4%);
+}
+
+.score-meter-popup {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  padding: 0.75rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgb(0 0 0 / 12%);
+  font-family: var(--sans);
+}
+
+.score-meter-popup p {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+}
+
+.score-meter-options {
+  display: grid;
+  grid-template-columns: repeat(4, 3rem);
+  gap: 0.25rem;
+}
+
+.score-meter-options button {
+  min-height: 44px;
+  padding: 0.25rem;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  color: var(--ink);
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.score-meter-options button:hover {
+  background: #fff;
+}
+
+.score-meter-options button[aria-pressed="true"] {
+  color: var(--paper);
+  background: var(--ink);
+}

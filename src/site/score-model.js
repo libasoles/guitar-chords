@@ -14,7 +14,8 @@
   'use strict';
 
   const DIVISIONS = 8;
-  const MEASURE = 32; // 4/4
+  const MEASURE = 32; // valor por defecto: 4/4
+  const METERS = ['2/4', '3/4', '4/4', '2/2', '3/8', '6/8', '9/8', '12/8'];
   const PER_ROW = 4;
   const MIN_ROWS = 3;
   const BOTTOM_LINE = 30; // E4: linea inferior de la clave de sol
@@ -42,7 +43,7 @@
   }
 
   function emptyScore() {
-    return { rows: Array.from({ length: MIN_ROWS }, emptyRow) };
+    return { meter: '4/4', rows: Array.from({ length: MIN_ROWS }, emptyRow) };
   }
 
   function clone(score) {
@@ -54,19 +55,36 @@
     return score.rows.flat();
   }
 
-  function fits(measure, ev, ignore) {
-    const others = ignore === undefined ? measure : measure.filter((_, i) => i !== ignore);
-    return measureLength(others) + length(ev) <= MEASURE;
+  function meterOf(score) {
+    return score && METERS.includes(score.meter) ? score.meter : '4/4';
   }
 
-  function canDot(measure, index) {
+  function capacity(score) {
+    const [beats, unit] = meterOf(score).split('/').map(Number);
+    return beats * DIVISIONS * 4 / unit;
+  }
+
+  // No borrar ni recortar figuras al cambiar a un compas mas corto.
+  function setMeter(score, meter) {
+    if (!METERS.includes(meter) || measures(score).some((m) => measureLength(m) > capacity({ meter }))) return false;
+    score.meter = meter;
+    return true;
+  }
+
+  function fits(measure, ev, ignore, score) {
+    const others = ignore === undefined ? measure : measure.filter((_, i) => i !== ignore);
+    return measureLength(others) + length(ev) <= capacity(score);
+  }
+
+  function canDot(measure, index, score) {
     const ev = measure[index];
-    return !ev.dot && ev.d !== 'w' && measureLength(measure) + VALUES[ev.d] / 2 <= MEASURE && ev.d !== 's';
+    return !ev.dot && ev.d !== 'w' && measureLength(measure) + VALUES[ev.d] / 2 <= capacity(score) && ev.d !== 's';
   }
 
   // Descarta lo que no sea una partitura valida (por ejemplo, datos viejos o editados a mano).
   function sanitize(data) {
     if (!data || !Array.isArray(data.rows)) return emptyScore();
+    const meter = meterOf(data);
     const rows = data.rows.map((row) => {
       const result = emptyRow();
       (Array.isArray(row) ? row : []).slice(0, PER_ROW).forEach((measure, m) => {
@@ -79,20 +97,20 @@
           else return;
           if (raw.dot && raw.d !== 'w' && raw.d !== 's') ev.dot = true;
           if (!ev.rest && ACCIDENTALS[raw.acc]) ev.acc = raw.acc;
-          if (measureLength(events) + length(ev) <= MEASURE) events.push(ev);
+          if (measureLength(events) + length(ev) <= capacity({ meter })) events.push(ev);
         });
         result[m] = events;
       });
       return result;
     });
     while (rows.length < MIN_ROWS) rows.push(emptyRow());
-    return { rows };
+    return { meter, rows };
   }
 
   // Rellena lo que falta del compas con silencios ocultos para que mida lo mismo que uno completo.
-  function padding(used) {
+  function padding(used, score) {
     const parts = [];
-    let left = MEASURE - used;
+    let left = capacity(score) - used;
     [32, 16, 8, 4, 2, 1].forEach((size) => {
       while (left >= size) {
         parts.push(size);
@@ -103,13 +121,15 @@
   }
 
   // Ligaduras de corchea y semicorchea dentro de cada pulso.
-  function beamStates(measure) {
+  function beamStates(measure, score) {
+    const [beats, unit] = meterOf(score).split('/').map(Number);
+    const beatLength = unit === 8 && beats % 3 === 0 && beats > 3 ? DIVISIONS * 1.5 : DIVISIONS * 4 / unit;
     const states = measure.map(() => null);
     let onset = 0;
     const runs = [];
     let run = null;
     measure.forEach((ev, i) => {
-      const beat = Math.floor(onset / DIVISIONS);
+      const beat = Math.floor(onset / beatLength);
       if (!ev.rest && (ev.d === 'e' || ev.d === 's')) {
         if (run && run.beat === beat) run.items.push(i);
         else runs.push((run = { beat, items: [i] }));
@@ -156,6 +176,7 @@
 
   function toMusicXml(score) {
     const all = measures(score);
+    const [beats, unit] = meterOf(score).split('/');
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<score-partwise version="3.1">' +
       '<part-list><score-part id="P1"><part-name print-object="no">Guitar</part-name></score-part></part-list><part id="P1">';
     all.forEach((measure, mi) => {
@@ -163,12 +184,12 @@
       if (mi % PER_ROW === 0) xml += '<print new-system="yes"/>';
       if (mi === 0) {
         xml += `<attributes><divisions>${DIVISIONS}</divisions><key><fifths>0</fifths></key>` +
-          '<time><beats>4</beats><beat-type>4</beat-type></time>' +
+          `<time><beats>${beats}</beats><beat-type>${unit}</beat-type></time>` +
           '<clef><sign>G</sign><line>2</line><clef-octave-change>-1</clef-octave-change></clef></attributes>';
       }
-      const beams = beamStates(measure);
+      const beams = beamStates(measure, score);
       measure.forEach((ev, i) => { xml += noteXml(ev, `e${mi}-${i}`, beams[i]); });
-      padding(measureLength(measure)).forEach((size) => {
+      padding(measureLength(measure), score).forEach((size) => {
         xml += `<note print-object="no"><rest/><duration>${size}</duration><voice>1</voice><type>${TYPES[size]}</type></note>`;
       });
       xml += '</measure>';
@@ -177,8 +198,8 @@
   }
 
   return {
-    DIVISIONS, MEASURE, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
+    DIVISIONS, MEASURE, METERS, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
     length, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, fits, canDot,
-    sanitize, toMusicXml,
+    meterOf, capacity, setMeter, sanitize, toMusicXml,
   };
 });

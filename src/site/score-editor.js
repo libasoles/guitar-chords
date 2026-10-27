@@ -102,7 +102,7 @@
       const ev = { d: item.d };
       if (item.kind === 'rest') ev.rest = true;
       else ev.n = target.n;
-      if (!M.fits(measure, ev)) return say(t.full);
+      if (!M.fits(measure, ev, undefined, score)) return say(t.full);
       change(() => { measure.splice(target.index, 0, ev); selected = { mi: target.mi, i: target.index }; });
     }
   }
@@ -112,7 +112,7 @@
     const ev = measure[hit.i];
     if (item.kind === 'dot') {
       if (ev.dot) return change(() => { delete ev.dot; });
-      if (!M.canDot(measure, hit.i)) return say(ev.d === 'w' || ev.d === 's' ? t.noDot : t.full);
+      if (!M.canDot(measure, hit.i, score)) return say(ev.d === 'w' || ev.d === 's' ? t.noDot : t.full);
       return change(() => { ev.dot = true; });
     }
     if (ev.rest) return;
@@ -127,7 +127,7 @@
     const ev = all[from.mi][from.i];
     const destination = all[target.mi];
     const same = from.mi === target.mi;
-    if (!M.fits(destination, ev, same ? from.i : undefined)) return say(t.full);
+    if (!M.fits(destination, ev, same ? from.i : undefined, score)) return say(t.full);
     change(() => {
       all[from.mi].splice(from.i, 1);
       let index = target.index;
@@ -180,11 +180,13 @@
     renderedWidth = width;
     toolkit.setOptions(layoutOptions(width));
     toolkit.loadData(M.toMusicXml(score));
+    meterPopup.hidePopover();
     stage.innerHTML = toolkit.renderToSVG(1);
     marker = null;
     const svg = stage.querySelector('svg');
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', t.scoreLabel);
+    mountMeterButton();
     measureLayout();
     markSelected();
     removeRow.hidden = score.rows.length <= M.MIN_ROWS;
@@ -365,6 +367,7 @@
   document.addEventListener('pointercancel', (event) => endDrag(event, true));
 
   stage.addEventListener('pointerdown', (event) => {
+    if (event.target.closest('.score-meter-trigger')) return;
     const match = eventUnder(event.clientX, event.clientY);
     if (!match) {
       selected = null;
@@ -380,6 +383,7 @@
   });
 
   stage.addEventListener('keydown', (event) => {
+    if (event.target !== stage) return;
     if (event.key === 'Delete' || event.key === 'Backspace') { event.preventDefault(); removeSelected(); }
     else if (event.key === 'ArrowUp') { event.preventDefault(); shiftSelected(1); }
     else if (event.key === 'ArrowDown') { event.preventDefault(); shiftSelected(-1); }
@@ -392,6 +396,72 @@
       undo();
     }
   });
+
+  // ---- selector de compas -------------------------------------------------
+
+  const meterPopup = document.createElement('div');
+  meterPopup.id = 'scoreMeterPopup';
+  meterPopup.className = 'score-meter-popup';
+  meterPopup.setAttribute('popover', 'auto');
+  meterPopup.setAttribute('role', 'group');
+  meterPopup.setAttribute('aria-label', t.meter);
+  const meterTitle = document.createElement('p');
+  meterTitle.textContent = t.meter;
+  meterPopup.appendChild(meterTitle);
+  const meterOptions = document.createElement('div');
+  meterOptions.className = 'score-meter-options';
+  meterPopup.appendChild(meterOptions);
+  document.querySelector('.score-page').appendChild(meterPopup);
+
+  M.METERS.forEach((meter) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = meter;
+    button.addEventListener('click', () => {
+      if (meter === M.meterOf(score)) {
+        meterPopup.hidePopover();
+      } else {
+        const changed = change(() => M.setMeter(score, meter));
+        if (!changed) { say(t.meterFull); return; }
+        say('');
+      }
+      stage.querySelector('.score-meter-trigger')?.focus({ preventScroll: true });
+    });
+    meterOptions.appendChild(button);
+  });
+
+  meterPopup.addEventListener('toggle', (event) => {
+    stage.querySelector('.score-meter-trigger')?.setAttribute('aria-expanded', String(event.newState === 'open'));
+  });
+
+  function mountMeterButton() {
+    const meter = stage.querySelector('g.meterSig');
+    if (!meter) return;
+    const box = meter.getBoundingClientRect();
+    const origin = stage.getBoundingClientRect();
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'score-meter-trigger';
+    button.setAttribute('aria-label', t.meter + ': ' + M.meterOf(score));
+    button.setAttribute('aria-controls', meterPopup.id);
+    button.setAttribute('aria-expanded', 'false');
+    button.style.left = (box.left + box.width / 2 - origin.left - stage.clientLeft) + 'px';
+    button.style.top = (box.top + box.height / 2 - origin.top - stage.clientTop) + 'px';
+    button.style.height = Math.max(44, box.height + 12) + 'px';
+    button.addEventListener('click', () => {
+      if (meterPopup.matches(':popover-open')) { meterPopup.hidePopover(); return; }
+      [...meterOptions.children].forEach((option) => {
+        option.setAttribute('aria-pressed', String(option.textContent === M.meterOf(score)));
+      });
+      meterPopup.showPopover();
+      const anchor = button.getBoundingClientRect();
+      const popup = meterPopup.getBoundingClientRect();
+      meterPopup.style.left = Math.max(8, Math.min(anchor.left, window.innerWidth - popup.width - 8)) + 'px';
+      meterPopup.style.top = Math.max(8, Math.min(anchor.bottom + 6, window.innerHeight - popup.height - 8)) + 'px';
+      meterOptions.querySelector('[aria-pressed="true"]').focus({ preventScroll: true });
+    });
+    stage.appendChild(button);
+  }
 
   // ---- paleta -------------------------------------------------------------
 
