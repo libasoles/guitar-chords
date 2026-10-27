@@ -33,6 +33,8 @@ function renderSharedTabEditor(strings, locale, { heading = strings.tabH1, lead 
         lang="%%htmlLang%%"
         theme="light"
         spacing="2"
+        annotations-editable
+        titles-editable
       >
         <ascii-tabs-storage key="tabEditor.tabs"></ascii-tabs-storage>
         <ascii-tabs-hint></ascii-tabs-hint>

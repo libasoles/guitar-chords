@@ -290,7 +290,7 @@
   "tabFaq3Q": "Where can I paste the tab?",
   "tabFaq3A": "Anywhere that takes text: a chat, an email, a document or a guitar forum. Use a monospaced font so the columns line up.",
   "tabTutorialSummary": "How to use the editor: drag, duplicate, fill with zeros and bold",
-  "tabTutorialIntro": "The keys highlighted in colour are the ones to press.",
+  "tabTutorialIntro": "Click above a tab to add its title, or in the strip above a column to annotate it. Enter saves, Escape cancels and Shift+Enter adds a line. Titles and annotations are saved automatically. The keys highlighted in colour are the ones to press.",
   "tabTutorialModifierKey": "Alt / ⌘",
   "tabTutorialDragKey": "Drag",
   "tabDragTitle": "Drag and drop",
