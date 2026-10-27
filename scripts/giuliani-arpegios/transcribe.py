@@ -80,7 +80,8 @@ def read_pdf(path=SOURCE):
             system = P.read_system(lines, glyph, stems, clip(bars), clip(thick), beams)
             M.mark_ties(system, drawings, lines)
             for marks, key in ((fingers, 'finger'), (plucks, 'pluck')):
-                lost = M.attach_fingers(system, marks, lines, key)
+                lost = (attach_plucks_by_onset(system, marks, lines) if key == 'pluck' and current in ONSET_PLUCKS
+                        else M.attach_fingers(system, marks, lines, key))
                 if lost:
                     print(f'  ejercicio {current}: {key} sin nota: {[(round(x), round(y), c) for x, y, c in lost]}', file=sys.stderr)
             for m in system['measures']:
@@ -107,6 +108,29 @@ def read_pdf(path=SOURCE):
     for exercise in exercises.values():
         fix_final_chord_fingers(exercise)
     return exercises
+
+
+ONSET_PLUCKS = {32, 34}  # bajo y arpegio en voces distintas: la letra mas cercana cae en la voz equivocada
+
+
+def attach_plucks_by_onset(system, marks, lines):
+    """Las letras impresas, de izquierda a derecha, van a los ataques sucesivos (columnas de cabezas con la misma x); las
+    letra va a una sola cabeza de la columna (si no, saldria repetida). -> las letras que sobran (para avisar)."""
+    space = (lines[-1] - lines[0]) / 4
+    measures = system['measures']
+    left = min(m['left'] for m in measures)
+    right = max(m['right'] for m in measures)
+    mine = sorted(m for m in marks if lines[0] - 9 * space <= m[1] <= lines[-1] + 5 * space and left <= m[0] <= right)
+    heads = sorted((h for m in measures for h in m['items'] if not h['grace']), key=lambda h: h['x'])
+    columns = []
+    for h in heads:
+        if columns and h['x'] - columns[-1][0]['x'] < 0.5 * space:
+            columns[-1].append(h)
+        else:
+            columns.append([h])
+    for (_, _, letter), column in zip(mine, columns):
+        column[0]['pluck'] = letter
+    return mine[len(columns):]
 
 
 def fix_final_chord_fingers(exercise):

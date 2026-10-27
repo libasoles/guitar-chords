@@ -135,6 +135,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">i</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-4">
         <pitch>
@@ -155,7 +160,7 @@
         <beam number="2">continue</beam>
         <notations>
           <technical>
-            <fingering alternate="no" substitution="no">i</fingering>
+            <fingering alternate="no" substitution="no">m</fingering>
           </technical>
         </notations>
       </note>
@@ -178,7 +183,7 @@
         <beam number="2">end</beam>
         <notations>
           <technical>
-            <fingering alternate="no" substitution="no">m</fingering>
+            <fingering alternate="no" substitution="no">a</fingering>
           </technical>
           <tuplet number="1" type="stop" />
         </notations>
@@ -581,11 +586,6 @@
         <type>quarter</type>
         <stem>down</stem>
         <staff>1</staff>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">a</fingering>
-          </technical>
-        </notations>
       </note>
       <note id="tab-note-26">
         <pitch>
