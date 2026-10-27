@@ -624,6 +624,9 @@
     "selectBarline": "Select barline",
     "deleteBarline": "Delete barline",
     "deleteMeasure": "Delete measure",
+    "addMeasure": "Add measure",
+    "noRoomForMeasure": "No room",
+
     "barDouble": "Double barline",
     "barRepeatStart": "Start repeat",
     "barRepeatEnd": "End repeat",

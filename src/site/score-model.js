@@ -115,6 +115,65 @@
     return score.rows.flat();
   }
 
+  // Indice plano del primer compas de cada renglon; los renglones tienen de 1 a PER_ROW compases.
+  function rowStarts(score) {
+    let start = 0;
+    return score.rows.map((row) => { const first = start; start += row.length; return first; });
+  }
+
+  // Renglon que contiene el compas `mi`: { row, first, last } con indices planos.
+  function rowOf(score, mi) {
+    const starts = rowStarts(score);
+    let row = starts.length - 1;
+    while (row > 0 && starts[row] > mi) row -= 1;
+    return { row, first: starts[row], last: starts[row] + score.rows[row].length - 1 };
+  }
+
+  // Mueve las claves numericas (compases) de un mapa: las >= `from` se corren `by`; las que caen en [from, from - by) al achicar se pierden.
+  function shiftKeys(map, from, by) {
+    if (!map) return undefined;
+    const moved = {};
+    Object.keys(map).forEach((key) => {
+      const mi = +key;
+      if (mi < from) moved[key] = map[key];
+      else if (mi + by >= from) moved[mi + by] = map[key];
+    });
+    return moved;
+  }
+
+  // Agrega un compas vacio al final del renglon `row`, si cabe.
+  function addMeasure(score, row) {
+    if (!Number.isInteger(row) || row < 0 || row >= score.rows.length || score.rows[row].length >= PER_ROW) return false;
+    const at = rowStarts(score)[row] + score.rows[row].length;
+    ['barlines', 'keys', 'barres'].forEach((name) => { if (score[name]) score[name] = shiftKeys(score[name], at, 1); });
+    score.rows[row].push([]);
+    return true;
+  }
+
+  // Quita el ultimo compas del renglon `row` (con sus figuras), salvo que sea el unico.
+  function removeMeasure(score, row) {
+    if (!Number.isInteger(row) || row < 0 || row >= score.rows.length || score.rows[row].length <= 1) return false;
+    const at = rowStarts(score)[row] + score.rows[row].length - 1;
+    if (score.barres) Object.keys(score.barres).forEach((key) => {
+      const barre = score.barres[key];
+      if (+key === at) delete score.barres[key];
+      else if (+key < at && barreLast(barre, +key) >= at) {
+        barre.span -= 1;
+        delete barre.to;
+        if (!barre.span) delete barre.span;
+      }
+    });
+    ['barlines', 'keys', 'barres'].forEach((name) => {
+      if (!score[name]) return;
+      delete score[name][at];
+      score[name] = shiftKeys(score[name], at, -1);
+      if (!Object.keys(score[name]).length) delete score[name];
+    });
+    score.rows[row].pop();
+    pruneKeys(score);
+    return true;
+  }
+
   // Las barras se guardan aparte: JSON no conserva propiedades de los arrays de figuras.
   function setBarline(score, mi, type) {
     if (!Number.isInteger(mi) || mi < 0 || mi >= measures(score).length || !['double', 'start', 'end'].includes(type)) return false;
@@ -142,7 +201,7 @@
     span = span || 0;
     if (to === undefined) to = end;
     if (!Number.isInteger(mi) || mi < 0 || mi >= measures(score).length || !Number.isInteger(at) || at < 0 || at >= end) return false;
-    if (!Number.isInteger(span) || span < 0 || Math.floor((mi + span) / PER_ROW) !== Math.floor(mi / PER_ROW) || mi + span >= measures(score).length) return false;
+    if (!Number.isInteger(span) || span < 0 || mi + span > rowOf(score, mi).last) return false;
     if (!Number.isInteger(to) || to > end || (span === 0 ? to <= at : to <= 0)) return false;
     if (!Number.isInteger(fret) || fret < 1 || fret > MAX_FRET) return false;
     const taken = Object.keys(score.barres || {}).some((key) => {
@@ -268,7 +327,7 @@
     const meter = meterOf(data);
     const factor = DIVISIONS / (scale || DIVISIONS);
     const rows = data.rows.map((row) => {
-      const result = emptyRow();
+      const result = emptyRow().slice(0, Array.isArray(row) && row.length ? Math.min(PER_ROW, row.length) : PER_ROW);
       (Array.isArray(row) ? row : []).slice(0, PER_ROW).forEach((measure, m) => {
         const events = [];
         (Array.isArray(measure) ? measure : []).forEach((raw) => {
@@ -295,28 +354,30 @@
       return result;
     });
     while (rows.length < MIN_ROWS) rows.push(emptyRow());
+    const total = rows.flat().length;
+    const lastOf = (index) => rowOf({ rows }, index).last;
     const barlines = {};
     Object.entries(data.barlines || {}).forEach(([index, bar]) => {
-      if (!/^(0|[1-9]\d*)$/.test(index) || +index >= rows.length * PER_ROW || !bar) return;
+      if (!/^(0|[1-9]\d*)$/.test(index) || +index >= total || !bar) return;
       if (bar.start === true || bar.end === true) barlines[index] = { start: bar.start === true, end: bar.end === true };
       else if (bar.double === true || bar.single === true) barlines[index] = { double: true };
       if (bar.hidden === true && bar.end !== true) barlines[index] = Object.assign(barlines[index] || {}, { hidden: true });
     });
     const keys = {};
     let previousKey = fifthsOf(data);
-    Object.entries(data.keys || {}).filter(([index]) => /^[1-9]\d*$/.test(index) && +index < rows.length * PER_ROW).sort((a, b) => a[0] - b[0]).forEach(([index, value]) => {
+    Object.entries(data.keys || {}).filter(([index]) => /^[1-9]\d*$/.test(index) && +index < total).sort((a, b) => a[0] - b[0]).forEach(([index, value]) => {
       if (!Number.isInteger(value) || Math.abs(value) > 7 || value === previousKey) return;
       keys[index] = previousKey = value;
     });
     const barres = {};
     Object.entries(data.barres || {}).forEach(([index, barre]) => {
-      if (!/^(0|[1-9]\d*)$/.test(index) || +index >= rows.length * PER_ROW || !barre) return;
+      if (!/^(0|[1-9]\d*)$/.test(index) || +index >= total || !barre) return;
       const at = barre.at * factor;
       const to = barre.to * factor;
       const span = barre.span || 0;
       if (!Number.isInteger(at) || at < 0 || at >= capacity({ meter })) return;
       if (!Number.isInteger(barre.fret) || barre.fret < 1 || barre.fret > MAX_FRET) return;
-      if (!Number.isInteger(span) || span < 0 || Math.floor((+index + span) / PER_ROW) !== Math.floor(+index / PER_ROW) || +index + span >= rows.length * PER_ROW) return;
+      if (!Number.isInteger(span) || span < 0 || +index + span > lastOf(+index)) return;
       if (Object.keys(barres).some((key) => barreLast(barres[key], +key) >= +index)) return;
       const result = { at, fret: barre.fret };
       if (span) result.span = span;
@@ -633,9 +694,10 @@
       roleOf(link.from)[link.type].push('start');
       roleOf(link.to)[link.type].push('stop');
     });
+    const rowFirsts = new Set(rowStarts(score));
     all.forEach((measure, mi) => {
       xml += `<measure number="${mi + 1}" id="m${mi}">`;
-      if (mi % PER_ROW === 0) xml += '<print new-system="yes"/>';
+      if (rowFirsts.has(mi)) xml += '<print new-system="yes"/>';
       if (mi === 0) {
         xml += `<attributes><divisions>${DIVISIONS}</divisions><key><fifths>${fifthsOf(score)}</fifths></key>` +
           `<time><beats>${beats}</beats><beat-type>${unit}</beat-type></time>` +
@@ -720,7 +782,7 @@
 
   return {
     DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    length, gridOf, onsets, settle, placement, insertAt, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, fits, canDot,
+    length, gridOf, onsets, settle, placement, insertAt, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot,
     meterOf, clefOf, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };

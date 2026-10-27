@@ -396,7 +396,7 @@
     liftBarreMarks(svg);
     measureLayout();
     mountBarlineButtons();
-    mountLastMeasureRemove();
+    mountRowTools();
     mountBarreInputs();
     markSelected();
     updateHoverGhost();
@@ -540,32 +540,56 @@
     });
   }
 
-  // Al pasar el mouse por el ultimo compas vacio aparece un boton - para borrarlo.
-  function mountLastMeasureRemove() {
-    const last = layout[layout.length - 1];
-    if (!last || score.rows.length <= M.MIN_ROWS || !score.rows[score.rows.length - 1].every((measure) => !measure.length)) return;
-    const remove = document.createElement('button');
-    remove.type = 'button';
-    remove.className = 'score-measure-remove tooltip';
-    remove.setAttribute('aria-label', t.deleteMeasure);
-    remove.dataset.tooltip = t.deleteMeasure;
-    remove.innerHTML = lucide('minus');
-    remove.style.left = ((last.left + last.right) / 2) + 'px';
-    remove.style.top = (last.lines[0] - 4) + 'px';
-    remove.addEventListener('click', () => change(removeLastRow));
-    stage.appendChild(remove);
+  // Al pasar el mouse por el ultimo compas de un renglon aparece una barra flotante con + y - para sumar o quitar compases del renglon.
+  const ROW_TOOLS_WIDTH = 34;
+  function mountRowTools() {
+    M.rowStarts(score).forEach((first, row) => {
+      const size = score.rows[row].length;
+      const last = layout[first + size - 1];
+      if (!last) return;
+      const tools = document.createElement('div');
+      tools.className = 'score-row-tools';
+      tools.dataset.row = row;
+      tools.style.left = (last.right + 4) + 'px';
+      tools.style.top = ((last.lines[0] + last.lines[4]) / 2) + 'px';
+      [['add', 'plus', t.addMeasure, size >= M.PER_ROW, t.noRoomForMeasure],
+        ['remove', 'minus', t.deleteMeasure, size <= 1, t.deleteMeasure]].forEach(([action, icon, label, disabled, blocked]) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'score-row-tool tooltip';
+        button.dataset.action = action;
+        button.dataset.tooltip = disabled ? blocked : label;
+        button.setAttribute('aria-label', label);
+        // aria-disabled (no disabled) para que el boton siga mostrando su tooltip al pasar el mouse.
+        if (disabled) button.setAttribute('aria-disabled', 'true');
+        button.innerHTML = lucide(icon);
+        button.addEventListener('click', () => {
+          if (disabled) return;
+          change(() => {
+            selected = null;
+            return action === 'add' ? M.addMeasure(score, row) : M.removeMeasure(score, row);
+          });
+        });
+        tools.appendChild(button);
+      });
+      stage.appendChild(tools);
+    });
   }
 
   stage.addEventListener('pointermove', (event) => {
-    const remove = stage.querySelector('.score-measure-remove');
-    const last = layout[layout.length - 1];
-    if (!remove || !last) return;
+    if (event.pointerType !== 'mouse') return;
     const box = stage.getBoundingClientRect();
-    remove.classList.toggle('is-visible', event.pointerType === 'mouse'
-      && event.clientX >= box.left + last.left && event.clientX <= box.left + last.right
-      && event.clientY >= box.top + last.lines[0] - 40 && event.clientY <= box.top + last.lines[4] + 40);
+    const x = event.clientX - box.left;
+    const y = event.clientY - box.top;
+    const starts = M.rowStarts(score);
+    stage.querySelectorAll('.score-row-tools').forEach((tools) => {
+      const row = +tools.dataset.row;
+      const last = layout[starts[row] + score.rows[row].length - 1];
+      tools.classList.toggle('is-visible', !!last && x >= last.left && x <= last.right + 4 + ROW_TOOLS_WIDTH
+        && y >= last.lines[0] - 40 && y <= last.lines[4] + 40);
+    });
   });
-  stage.addEventListener('pointerleave', () => stage.querySelector('.score-measure-remove')?.classList.remove('is-visible'));
+  stage.addEventListener('pointerleave', () => stage.querySelectorAll('.score-row-tools').forEach((tools) => tools.classList.remove('is-visible')));
 
   // Tiempo -> x dentro del compas, con las mismas anclas que timeAt.
   function xAtTime(time, m, starts, centers) {
@@ -625,7 +649,7 @@
     const barre = score.barres[mi];
     const end = M.capacity(score);
     const all = M.measures(score);
-    const rowLast = (Math.floor(mi / M.PER_ROW) + 1) * M.PER_ROW - 1;
+    const rowLast = M.rowOf(score, mi).last;
     const times = new Set(side === 'start' ? [0] : []);
     for (let k = mi; k <= Math.min(rowLast, all.length - 1); k += 1) {
       if (k > mi && (score.barres[k] || side === 'start')) break;
@@ -1475,7 +1499,7 @@
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'score-clef-trigger';
-      button.setAttribute('aria-label', t.clefAndKey + ': ' + t.clefs[M.clefOf(score)] + ', ' + t.keys[M.keyAt(score, i * M.PER_ROW) + 7]);
+      button.setAttribute('aria-label', t.clefAndKey + ': ' + t.clefs[M.clefOf(score)] + ', ' + t.keys[M.keyAt(score, M.rowStarts(score)[i]) + 7]);
       button.setAttribute('aria-controls', clefPopup.id);
       button.setAttribute('aria-haspopup', 'dialog');
       button.setAttribute('aria-expanded', 'false');
@@ -1484,7 +1508,7 @@
       button.style.height = Math.max(44, box.height + 8) + 'px';
       button.addEventListener('click', () => {
         if (clefPopup.matches(':popover-open')) { clefPopup.hidePopover(); return; }
-        openClefPopup({ kind: 'clef', index: i }, i * M.PER_ROW);
+        openClefPopup({ kind: 'clef', index: i }, M.rowStarts(score)[i]);
       });
       hoverGlyph(button, clef);
       stage.appendChild(button);
