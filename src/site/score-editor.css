@@ -921,9 +921,49 @@ html body[data-scroll-locked] {
   color: var(--ink-soft);
 }
 
+.score-about-item {
+  margin-top: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.score-about-item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 0;
+  cursor: pointer;
+  list-style: none;
+  color: var(--ink);
+}
+
+.score-about-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.score-about-item summary:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.score-about-chevron {
+  flex: none;
+  transition: transform 0.15s;
+}
+
+.score-about-item[open] .score-about-chevron {
+  transform: rotate(180deg);
+}
+
+.score-about-item[open] > :last-child {
+  margin-bottom: 1rem;
+}
+
 .score-about h2 {
-  margin: 2rem 0 0;
-  font-size: 1.15rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 1.05rem;
   color: var(--ink);
 }
 
