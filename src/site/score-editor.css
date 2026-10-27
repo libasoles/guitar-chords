@@ -45,6 +45,26 @@ body.score-body {
   padding: 0.3rem;
 }
 
+/* The sidebar hugs the right edge, so its tooltips open to the left instead of centered above. */
+.score-side-actions .tooltip::after {
+  right: calc(100% + 0.6rem);
+  bottom: 50%;
+  left: auto;
+  transform: translateY(50%);
+}
+
+.score-side-actions .tooltip::before {
+  right: calc(100% + 0.35rem);
+  bottom: 50%;
+  left: auto;
+  transform: translateY(50%) rotate(45deg);
+}
+
+#scoreDownloadToggle[aria-expanded="true"]::before,
+#scoreDownloadToggle[aria-expanded="true"]::after {
+  display: none;
+}
+
 .score-side-actions .score-download {
   width: 100%;
   min-height: 2.75rem;
@@ -232,6 +252,7 @@ body.score-body {
 }
 
 .score-download-options {
+  font-family: var(--sans);
   position: absolute;
   bottom: 0;
   right: calc(100% + 0.4rem);
@@ -592,6 +613,19 @@ body.score-dragging {
   transform: translate(-50%, -50%);
   background: var(--note-selected);
   pointer-events: none;
+}
+
+/* Radix locks the scroll by zeroing the body margin and padding, which shifts the centered page.
+   Keep the scrollbar gutter reserved and restore the body spacing while the dialog is open. */
+html {
+  scrollbar-gutter: stable;
+}
+
+html body[data-scroll-locked] {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  margin-top: 1.5rem !important;
+  padding: 0 1.5rem !important;
 }
 
 .confirm-overlay {
