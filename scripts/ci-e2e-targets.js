@@ -44,6 +44,13 @@ const SUITES = {
       /^test\/fifths-wheel\./,
     ],
   },
+  'score-editor': {
+    build: 'site',
+    paths: [
+      /^src\/site\/score-(editor|model)\./,
+      /^test\/score-editor\./,
+    ],
+  },
   partitura: {
     build: 'site',
     paths: [
