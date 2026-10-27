@@ -25,6 +25,7 @@
   };
   const PER_ROW = 4;
   const MIN_ROWS = 3;
+  const MAX_FRET = 24;
   const GRID = 2; // semicorchea: la posicion se redondea a esta cuadricula
   const BOTTOM_LINE = 30; // E4: linea inferior de la clave de sol
   const LOWEST = 15;
@@ -116,6 +117,22 @@
       bar[type] = true;
       score.barlines[mi] = bar;
     }
+    return true;
+  }
+
+  // Cejilla: arranca en `at` y llega hasta el final del compas. Una por compas.
+  function setBarre(score, mi, at, fret) {
+    if (!Number.isInteger(mi) || mi < 0 || mi >= measures(score).length || !Number.isInteger(at) || at < 0 || at >= capacity(score)) return false;
+    if (!Number.isInteger(fret) || fret < 1 || fret > MAX_FRET) return false;
+    if (!score.barres) score.barres = {};
+    score.barres[mi] = { at, fret };
+    return true;
+  }
+
+  function removeBarre(score, mi) {
+    if (!score.barres || !score.barres[mi]) return false;
+    delete score.barres[mi];
+    if (!Object.keys(score.barres).length) delete score.barres;
     return true;
   }
 
@@ -216,7 +233,14 @@
       else if (bar.double === true || bar.single === true) barlines[index] = { double: true };
       if (bar.hidden === true && bar.end !== true) barlines[index] = Object.assign(barlines[index] || {}, { hidden: true });
     });
-    return Object.assign(Object.keys(barlines).length ? { barlines } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {});
+    const barres = {};
+    Object.entries(data.barres || {}).forEach(([index, barre]) => {
+      if (!/^(0|[1-9]\d*)$/.test(index) || +index >= rows.length * PER_ROW || !barre) return;
+      if (!Number.isInteger(barre.at) || barre.at < 0 || barre.at >= capacity({ meter })) return;
+      if (!Number.isInteger(barre.fret) || barre.fret < 1 || barre.fret > MAX_FRET) return;
+      barres[index] = { at: barre.at, fret: barre.fret };
+    });
+    return Object.assign(Object.keys(barlines).length ? { barlines } : {}, Object.keys(barres).length ? { barres } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {});
   }
 
   // Rellena huecos con silencios ocultos: el final del compas y el espacio entre figuras sueltas.
@@ -343,15 +367,27 @@
         if (!ev.rest && ev.acc) accidentals.set(ev.n, ACCIDENTALS[ev.acc].alter);
         alters[i] = accidentals.has(ev.n) ? accidentals.get(ev.n) : keyAlter(ev.n, score);
       });
-      voices(measure).forEach((voice, vi) => {
+      const barre = score.barres && score.barres[mi];
+      let barreOpen = false;
+      voices(measure).forEach((voice, vi, all) => {
         if (vi > 0) xml += `<backup><duration>${capacity(score)}</duration></backup>`;
         const indices = voice.groups.flatMap((g) => g.indices);
         const events = indices.map((i) => Object.assign({}, measure[i], { at: starts[i] }));
         const beams = beamStates(events, score);
-        const hidden = (from, to) => {
+        const pad = (from, to) => {
           padding(to - from).forEach((size) => {
             xml += `<note print-object="no"><rest/><duration>${size}</duration><voice>${vi + 1}</voice><type>${TYPES[size]}</type></note>`;
           });
+        };
+        // La cejilla se escribe en la primera voz que tenga un hueco (o un limite) justo en su inicio.
+        const hidden = (from, to) => {
+          if (!barreOpen && barre && barre.at >= from && barre.at <= to) {
+            pad(from, barre.at);
+            xml += `<direction placement="above"><direction-type><words>C ${barre.fret}</words></direction-type></direction>` +
+              '<direction placement="above"><direction-type><bracket type="start" number="1" line-end="none" line-type="dashed"/></direction-type></direction>';
+            barreOpen = true;
+            pad(barre.at, to);
+          } else pad(from, to);
         };
         let cursor = 0;
         let index = 0;
@@ -363,6 +399,7 @@
           cursor = group.at + group.size;
         });
         hidden(cursor, capacity(score));
+        if (barreOpen && vi === all.length - 1) xml += '<direction placement="above"><direction-type><bracket type="stop" number="1" line-end="none"/></direction-type></direction>';
       });
       if (bar && bar.end) xml += '<barline location="right"><repeat direction="backward"/></barline>';
       else if (bar && bar.hidden) xml += '<barline location="right"><bar-style>none</bar-style></barline>';
@@ -375,6 +412,6 @@
   return {
     DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
     length, onsets, settle, placement, insertAt, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, fits, canDot,
-    meterOf, clefOf, fifthsOf, bottomLine, keyAlter, capacity, setMeter, setBarline, removeBarline, sanitize, toMusicXml,
+    meterOf, clefOf, fifthsOf, bottomLine, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, toMusicXml,
   };
 });

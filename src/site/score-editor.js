@@ -40,6 +40,7 @@
   let layout = []; // por compas: { left, right, lines: [y1..y5] } relativo al escenario
   let history = [];
   let renderedWidth = 0;
+  let focusBarre = null; // compas cuya cejilla recien se coloco: su numero queda en foco
 
   function load() {
     try {
@@ -118,6 +119,14 @@
       say('');
       return;
     }
+    if (item.kind === 'barre') {
+      // Sobre una nota que no es la primera arranca ahi; si no, cubre desde el inicio del compas.
+      const existing = score.barres && score.barres[target.mi];
+      focusBarre = target.mi;
+      if (!change(() => M.setBarre(score, target.mi, target.onNote ? target.t : 0, existing ? existing.fret : 1))) focusBarre = null;
+      say('');
+      return;
+    }
     const measure = M.measures(score)[target.mi];
     if (item.kind === 'note' || item.kind === 'rest') {
       const ev = { d: item.d };
@@ -131,6 +140,10 @@
         selected = { mi: target.mi, i: M.insertAt(measure, ev, spot.at) };
       });
     }
+  }
+
+  function isPlacing(item) {
+    return item && (item.kind === 'bar' || item.kind === 'barre');
   }
 
   function isModifier(item) {
@@ -149,9 +162,10 @@
     clearHoverGhost();
     updateHoverGhost();
     toolbars.querySelectorAll('.score-palette-item[aria-pressed]').forEach((button) => {
-      button.setAttribute('aria-pressed', String(item.key ? button.dataset.shortcut === item.key : button.dataset.barline === item.bar));
+      const same = item.key ? button.dataset.shortcut === item.key : item.kind === 'bar' ? button.dataset.barline === item.bar : button.dataset.tool === item.kind;
+      button.setAttribute('aria-pressed', String(same));
     });
-    if (item.kind === 'bar') return;
+    if (isPlacing(item)) return;
     if (isModifier(item)) {
       if (eventAt(selected)) applyModifier(item, selected);
       return;
@@ -257,6 +271,7 @@
     mountClefButtons();
     measureLayout();
     mountBarlineButtons();
+    mountBarreInputs();
     markSelected();
     updateHoverGhost();
     removeRow.hidden = score.rows.length <= M.MIN_ROWS;
@@ -330,6 +345,55 @@
         stage.appendChild(button);
       });
     });
+  }
+
+  // El numero de la cejilla se edita sobre su etiqueta: un campo que tapa el texto dibujado por Verovio.
+  function mountBarreInputs() {
+    const origin = stage.getBoundingClientRect();
+    Object.keys(score.barres || {}).forEach((key) => {
+      const mi = Number(key);
+      const barre = score.barres[mi];
+      const label = stage.querySelector('[id="m' + mi + '"] g.dir');
+      if (!label) return;
+      const box = label.getBoundingClientRect();
+      const field = document.createElement('span');
+      field.className = 'score-barre-field';
+      const letter = document.createElement('span');
+      letter.textContent = 'C';
+      letter.setAttribute('aria-hidden', 'true');
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.inputMode = 'numeric';
+      input.maxLength = 2;
+      input.className = 'score-barre-number';
+      input.value = barre.fret;
+      input.setAttribute('aria-label', t.barreFret);
+      field.style.left = (box.left - origin.left) + 'px';
+      field.style.top = (box.top + box.height / 2 - origin.top) + 'px';
+      const commit = () => {
+        if (!input.isConnected) return;
+        const fret = Number(input.value);
+        if (input.value.trim() === '') change(() => M.removeBarre(score, mi));
+        else if (Number.isInteger(fret) && fret !== barre.fret) {
+          if (!change(() => M.setBarre(score, mi, barre.at, fret))) { input.value = barre.fret; say(t.barreFretRange); }
+          else say('');
+        } else input.value = barre.fret;
+      };
+      input.addEventListener('input', () => { input.value = input.value.replace(/\D/g, ''); });
+      input.addEventListener('keydown', (event) => {
+        event.stopPropagation();
+        if (event.key === 'Enter') { event.preventDefault(); input.blur(); }
+        else if (event.key === 'Escape') { input.value = barre.fret; input.blur(); }
+      });
+      input.addEventListener('blur', commit);
+      field.append(letter, input);
+      stage.appendChild(field);
+      if (focusBarre === mi) {
+        input.focus({ preventScroll: true });
+        input.select();
+      }
+    });
+    focusBarre = null;
   }
 
   function markSelected() {
@@ -408,6 +472,7 @@
     }
     return {
       mi, n, space,
+      onNote: !!near,
       t: at,
       x: markX,
       y: m.lines[4] - (n - M.bottomLine(score)) * half,
@@ -444,7 +509,8 @@
     marker.hidden = false;
     const line = marker.firstChild;
     const item = drag ? drag.item : activeItem;
-    const x = item && item.kind === 'bar' ? layout[hit.mi][item.bar === 'start' ? 'left' : 'right'] : hit.x;
+    const x = item && item.kind === 'bar' ? layout[hit.mi][item.bar === 'start' ? 'left' : 'right']
+      : item && item.kind === 'barre' && !hit.onNote ? layout[hit.mi].left : hit.x;
     line.style.left = x + 'px';
     line.style.top = hit.top - hit.space * 2 + 'px';
     line.style.height = (hit.bottom - hit.top) + hit.space * 4 + 'px';
@@ -482,7 +548,7 @@
   function updateHoverGhost() {
     const point = hoverPoint;
     const over = point && document.elementFromPoint(point.clientX, point.clientY);
-    const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-barline-remove');
+    const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-barline-remove, .score-barre-field');
     const hit = activeItem && !drag && overStage && locate(point.clientX, point.clientY);
     if (!hit) { clearHoverGhost(); return; }
     if (!hoverGhost) {
@@ -576,8 +642,8 @@
   document.addEventListener('pointercancel', (event) => endDrag(event, true));
 
   stage.addEventListener('pointerdown', (event) => {
-    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-barline-trigger, .score-barline-remove')) return;
-    if (activeItem && activeItem.kind === 'bar') {
+    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-barline-trigger, .score-barline-remove, .score-barre-field')) return;
+    if (isPlacing(activeItem)) {
       event.preventDefault();
       stage.focus({ preventScroll: true });
       beginDrag(event, { insert: true });
@@ -882,9 +948,11 @@
     'rest:q': '<path d="M12 5l7 8-5 5 6 7c-3-1-6.500-.5-6 3" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round"/>',
     'rest:e': '<circle cx="12" cy="11" r="2.4"/><path d="M13 12.500c3 0 5-1.300 6-3.500l-5 20" stroke="currentColor" stroke-width="1.700" fill="none"/>',
     'rest:s': '<circle cx="12" cy="9" r="2.400"/><circle cx="10" cy="17" r="2.400"/><path d="M13 10c3 0 5-1.300 6-3.500l-6.500 22" stroke="currentColor" stroke-width="1.700" fill="none"/>',
-    'bar:double': '<path d="M12 4v24M18 4v24" stroke="currentColor" stroke-width="1.6"/>',
-    'bar:start': '<path d="M9 4v24M14 4v24" stroke="currentColor" stroke-width="1.6"/><path d="M9 4v24" stroke="currentColor" stroke-width="3.5"/><circle cx="21" cy="12" r="1.8"/><circle cx="21" cy="20" r="1.8"/>',
-    'bar:end': '<path d="M16 4v24M21 4v24" stroke="currentColor" stroke-width="1.6"/><path d="M21 4v24" stroke="currentColor" stroke-width="3.5"/><circle cx="9" cy="12" r="1.8"/><circle cx="9" cy="20" r="1.8"/>',
+    // Los tres comparten la linea x=15 (la gruesa en las repeticiones) para que apilados se lean como una sola barra.
+    'bar:double': '<path d="M15 4v24M20 4v24" stroke="currentColor" stroke-width="1.6"/>',
+    'bar:start': '<path d="M15 4v24M20 4v24" stroke="currentColor" stroke-width="1.6"/><path d="M15 4v24" stroke="currentColor" stroke-width="3.5"/><circle cx="25" cy="12" r="1.8"/><circle cx="25" cy="20" r="1.8"/>',
+    'bar:end': '<path d="M10 4v24M15 4v24" stroke="currentColor" stroke-width="1.6"/><path d="M15 4v24" stroke="currentColor" stroke-width="3.5"/><circle cx="5" cy="12" r="1.8"/><circle cx="5" cy="20" r="1.8"/>',
+    barre: '<text x="3" y="18" font-size="16" font-weight="700" font-family="serif">C</text><path d="M3 24h24" stroke="currentColor" stroke-width="1.6" stroke-dasharray="3 2.500" fill="none"/>',
     dot: '<circle cx="15" cy="15" r="3.200"/>',
     'acc:#': '<path d="M11 6v20M18 4v20M7.500 12.500l14-3.500M7.500 21l14-3.500" stroke="currentColor" stroke-width="1.800" fill="none"/>',
     'acc:b': '<path d="M10 4v22c4-2 8-5 8-8.500 0-2.500-2-3.500-4-3.500-1.500 0-3 .800-4 2" stroke="currentColor" stroke-width="1.800" fill="none" stroke-linejoin="round"/>',
@@ -893,6 +961,7 @@
 
   function glyphKey(item) {
     if (item.kind === 'bar') return 'bar:' + item.bar;
+    if (item.kind === 'barre') return 'barre';
     if (item.kind === 'note' || item.kind === 'rest') return item.kind + ':' + item.d;
     return item.kind === 'dot' ? 'dot' : 'acc:' + item.acc;
   }
@@ -925,6 +994,8 @@
     { kind: 'acc', acc: '#', key: t.shortcuts.sharp, label: t.sharp },
     { kind: 'acc', acc: 'b', key: t.shortcuts.flat, label: t.flat },
     { kind: 'acc', acc: 'n', key: t.shortcuts.natural, label: t.natural },
+    null,
+    { kind: 'barre', label: t.barre },
   ];
 
   const BARS = [
@@ -949,6 +1020,12 @@
     button.setAttribute('aria-pressed', 'false');
     if (item.kind === 'bar') {
       button.dataset.barline = item.bar;
+      button.addEventListener('click', (event) => {
+        if (event.detail === 0) activateTool(item);
+      });
+    }
+    if (item.kind === 'barre') {
+      button.dataset.tool = item.kind;
       button.addEventListener('click', (event) => {
         if (event.detail === 0) activateTool(item);
       });
@@ -1015,6 +1092,9 @@
     score.rows.pop();
     if (score.barlines) Object.keys(score.barlines).forEach((mi) => {
       if (+mi >= M.measures(score).length) delete score.barlines[mi];
+    });
+    if (score.barres) Object.keys(score.barres).forEach((mi) => {
+      if (+mi >= M.measures(score).length) M.removeBarre(score, +mi);
     });
   }));
 

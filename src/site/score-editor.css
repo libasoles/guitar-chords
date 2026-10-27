@@ -457,3 +457,37 @@ body.score-dragging {
 .score-barline-remove:hover {
   background: #f0eae0;
 }
+
+.score-barre-field {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transform: translateY(-50%);
+  padding: 0 0.125rem;
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--ink);
+  font: italic 700 1.1rem/1.75rem serif;
+}
+
+.score-barre-number {
+  width: 2rem;
+  height: 1.5rem;
+  padding: 0 0.25rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: text;
+}
+
+.score-barre-number:hover {
+  border-color: var(--ink);
+}
+
+.score-barre-number:focus-visible {
+  outline: 2px solid var(--note-selected);
+  outline-offset: 1px;
+}

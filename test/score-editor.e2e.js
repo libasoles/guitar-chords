@@ -32,6 +32,12 @@ async function checkBarlines(page) {
   await page.keyboard.press('ControlOrMeta+z');
   assert.equal(await page.evaluate(() => scoreEditor.score.barlines[0].start), true);
   await page.keyboard.press('Escape');
+  // Las tres barras comparten el eje vertical x=15 para que apiladas no se vean cortadas.
+  const axes = await page.locator('#scoreBarlines button svg').evaluateAll((svgs) => svgs.map((svg) => {
+    const box = svg.getBoundingClientRect();
+    return Math.round((box.left + box.width * 15 / 30) * 2) / 2;
+  }));
+  assert.equal(new Set(axes).size, 1, 'ejes de las barras: ' + axes);
   // Arrastrar una barra tambien la aplica sin insertar figuras.
   const button = await page.locator('[data-barline="end"]').boundingBox();
   const target = await page.locator('#scoreStage g.measure').nth(1).boundingBox();
@@ -93,6 +99,44 @@ async function checkBarlines(page) {
     await selectBar(1, 'end');
     await page.keyboard.press('Escape');
   }
+}
+
+async function checkBarre(page) {
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+  await page.evaluate(() => {
+    scoreEditor.score.rows[0][0] = [{ d: 'q', n: 30, at: 0 }, { d: 'q', n: 32, at: 8 }, { d: 'q', n: 34, at: 16 }, { d: 'q', n: 35, at: 24 }];
+    scoreEditor.render();
+  });
+  async function dropBarre(selector) {
+    const from = await page.locator('[data-tool="barre"]').boundingBox();
+    const point = await page.evaluate((sel) => {
+      const r = document.querySelector(sel).getBoundingClientRect();
+      return { x: (r.left + r.right) / 2, y: r.top - 20 };
+    }, selector);
+    await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(point.x, point.y, { steps: 6 });
+    await page.mouse.up();
+  }
+  // Sobre una nota que no es la primera, la cejilla arranca ahi con un 1 en foco para escribir otro numero.
+  await dropBarre('[id="e0-2"] .notehead');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres), { 0: { at: 16, fret: 1 } });
+  assert.equal(await page.evaluate(() => document.activeElement.className + ':' + document.activeElement.value), 'score-barre-number:1');
+  await page.keyboard.type('7');
+  await page.keyboard.press('Enter');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres), { 0: { at: 16, fret: 7 } });
+  assert.equal(await page.locator('.score-barre-number').inputValue(), '7');
+  // Fuera de una nota (compas vacio) arranca al comienzo del compas.
+  await page.keyboard.press('Escape');
+  await dropBarre('[id="m1"] g.staff');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barres[1]), { at: 0, fret: 1 });
+  // Dejar el campo vacio quita la cejilla.
+  await page.keyboard.press('Backspace');
+  await page.keyboard.press('Enter');
+  assert.equal(await page.evaluate(() => scoreEditor.score.barres[1]), undefined);
+  assert.equal(await page.evaluate(() => scoreEditor.score.barres[0].fret), 7);
 }
 
 async function checkDrag(page) {
@@ -388,6 +432,7 @@ async function run() {
     await dragPage.waitForSelector('#scoreStage g.measure');
     await checkDrag(dragPage);
     await checkBarlines(dragPage);
+    await checkBarre(dragPage);
     await dragPage.close();
     for (const [route, keys] of [
       ['/partitura', ['p', 's', 'b', 'c']],

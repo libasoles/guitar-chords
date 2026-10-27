@@ -581,6 +581,9 @@
     "barDouble": "Barra doble",
     "barRepeatStart": "Inicio de repetición",
     "barRepeatEnd": "Fin de repetición",
+    "barre": "Cejilla",
+    "barreFret": "Traste de la cejilla",
+    "barreFretRange": "El traste de la cejilla debe estar entre 1 y 24",
 
     "clefAndKey": "Clave y armadura",
     "clef": "Clave",

@@ -581,6 +581,9 @@
     "barDouble": "Double barline",
     "barRepeatStart": "Start repeat",
     "barRepeatEnd": "End repeat",
+    "barre": "Barre (cejilla)",
+    "barreFret": "Barre fret",
+    "barreFretRange": "The barre fret must be between 1 and 24",
 
     "clefAndKey": "Clef and key signature",
     "clef": "Clef",

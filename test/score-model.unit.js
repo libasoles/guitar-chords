@@ -359,3 +359,36 @@ test('eliminar barras conserva el otro extremo y sobrevive al guardado', () => {
   assert.equal(M.removeBarline(restored, 12, 'start'), false);
   assert.equal(M.removeBarline(restored, 0, 'invalid'), false);
 });
+
+test('las cejillas se guardan por compas, se sanean y se exportan como C n con linea punteada', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ d: 'q', n: 30, at: 0 }, { d: 'q', n: 32, at: 8 }, { d: 'q', n: 34, at: 16 }];
+  assert.equal(M.setBarre(score, 0, 16, 1), true);
+  assert.deepEqual(score.barres, { 0: { at: 16, fret: 1 } });
+  assert.equal(M.setBarre(score, 0, 32, 1), false, 'no empieza fuera del compas');
+  assert.equal(M.setBarre(score, 0, 0, 0), false);
+  assert.equal(M.setBarre(score, 0, 0, 25), false);
+  assert.equal(M.setBarre(score, 12, 0, 1), false);
+  M.setBarre(score, 0, 16, 7);
+  const restored = M.sanitize(M.clone(score));
+  assert.deepEqual(restored.barres, { 0: { at: 16, fret: 7 } });
+  const xml = M.toMusicXml(restored);
+  assert.match(xml, /<words>C 7<\/words>/);
+  assert.equal((xml.match(/<bracket type="start"/g) || []).length, 1);
+  assert.equal((xml.match(/<bracket type="stop"/g) || []).length, 1);
+  assert.ok(xml.indexOf('<words>') < xml.indexOf('<bracket type="stop"'));
+  const invalid = { rows: [[[], [], [], []]], barres: { 0: { at: -1, fret: 1 }, 1: { at: 0, fret: 99 }, x: { at: 0, fret: 1 } } };
+  assert.equal(M.sanitize(invalid).barres, undefined);
+  assert.equal(M.removeBarre(restored, 0), true);
+  assert.equal(restored.barres, undefined);
+  assert.equal(M.removeBarre(restored, 0), false);
+  assert.doesNotMatch(M.toMusicXml(restored), /<words>/);
+});
+
+test('una cejilla que empieza dentro de una nota larga de otra voz se escribe una vez', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ d: 'w', n: 30, at: 0 }, { d: 'q', n: 34, at: 8 }, { d: 'q', n: 35, at: 16 }];
+  M.setBarre(score, 0, 16, 2);
+  const xml = M.toMusicXml(score);
+  assert.equal((xml.match(/<words>C 2<\/words>/g) || []).length, 1);
+});
