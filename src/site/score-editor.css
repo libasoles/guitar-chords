@@ -319,9 +319,8 @@ body.score-dragging {
 
 .score-clef-popup {
   box-sizing: border-box;
-  width: min(38rem, calc(100vw - 1rem));
-  max-height: calc(100dvh - 1rem);
-  overflow-y: auto;
+  width: min(26rem, calc(100vw - 1rem));
+  overflow: visible;
 }
 
 .score-clef-options,
@@ -337,10 +336,11 @@ body.score-dragging {
 
 .score-signature-option {
   min-width: 0;
+  min-height: 44px;
   padding: 0.25rem;
   color: var(--ink);
   background: transparent;
-  border: 1px solid var(--rule);
+  border: 0;
   border-radius: 6px;
   font: inherit;
   cursor: pointer;
@@ -348,36 +348,31 @@ body.score-dragging {
 
 .score-signature-option:hover {
   background: #fff;
-  border-color: var(--ink);
 }
 
 .score-signature-option[aria-pressed="true"] {
   background: #e9e4db;
-  border: 2px solid var(--ink);
-  padding: calc(0.25rem - 1px);
 }
 
 .score-signature-preview {
   display: block;
   width: 100%;
-  height: 3.75rem;
+  height: 3rem;
   fill: currentColor;
   pointer-events: none;
 }
 
 .score-key-options .score-signature-preview {
-  height: 2.75rem;
+  height: 2.5rem;
 }
 
-.score-key-name {
-  display: block;
-  min-height: 2.4em;
-  font-size: 0.7rem;
-  line-height: 1.2;
+.score-signature-option:nth-child(5n + 1)::after {
+  left: 0;
+  transform: none;
 }
 
-@media (max-width: 540px) {
-  .score-key-options {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+.score-signature-option:nth-child(5n)::after {
+  right: 0;
+  left: auto;
+  transform: none;
 }

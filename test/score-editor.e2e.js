@@ -222,6 +222,10 @@ async function run() {
     assert.equal(await page.locator('.score-clef-options button').count(), 5);
     assert.equal(await page.locator('.score-key-options button').count(), 15);
     assert.equal(await page.locator('.score-clef-options button svg g.clef').count(), 5);
+    assert.equal(await page.locator('.score-key-options .score-key-name, .score-key-options svg > path').count(), 0, 'key options show only accidentals, without labels or staff lines');
+    assert.equal(await page.locator('.score-key-options button').evaluateAll(buttons => buttons.every(button => button.getAttribute('aria-label') && button.dataset.tooltip)), true);
+    assert.equal(await page.locator('.score-signature-option').evaluateAll(buttons => buttons.every(button => getComputedStyle(button).borderWidth === '0px')), true);
+    assert.equal(await page.locator('#scoreClefPopup').evaluate(popup => getComputedStyle(popup).overflow), 'visible', 'tooltips can extend beyond the popup');
     assert.equal(await page.locator('.score-clef-options button').evaluateAll((buttons) => buttons.every((b) => !b.textContent.trim())), true);
     assert.equal(await page.locator('.score-clef-options [aria-pressed="true"]').evaluate((el) => el === document.activeElement), true);
     await page.keyboard.press('Escape');
