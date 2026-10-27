@@ -267,6 +267,12 @@ body.score-body {
 .score-palette-key {
   font-size: 0.7rem;
   line-height: 1rem;
+  visibility: hidden;
+}
+
+.score-palette-item:hover .score-palette-key,
+.score-palette-item:focus-visible .score-palette-key {
+  visibility: visible;
 }
 
 .score-download {
