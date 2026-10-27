@@ -391,6 +391,7 @@
     meterPopup.hidePopover();
     clefPopup.hidePopover();
     stage.innerHTML = toolkit.renderToSVG(1);
+    stage.style.minHeight = '';
     alignBarlinesToFirstStaff();
     marker = null;
     const svg = stage.querySelector('svg');
@@ -660,7 +661,10 @@
         });
       });
       const want = Math.ceil((mounted[0].tabs.getBoundingClientRect().height + TAB_CLEF_CLEARANCE + TAB_GAP) / unit);
-      if (want !== tabSpace) { tabSpace = want; render(); }
+      if (want !== tabSpace) { tabSpace = want; render(); return; }
+      // Los botones de renglones van bajo el escenario: que no tapen la ultima tablatura.
+      const bottom = mounted[mounted.length - 1].tabs.getBoundingClientRect().bottom - stage.getBoundingClientRect().top;
+      stage.style.minHeight = Math.ceil(bottom + 24) + 'px';
     });
   }
 
