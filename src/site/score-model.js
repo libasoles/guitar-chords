@@ -154,7 +154,7 @@
       return result;
     });
     while (rows.length < MIN_ROWS) rows.push(emptyRow());
-    return { meter, rows };
+    return Object.assign({ meter, rows }, typeof data.title === 'string' ? { title: data.title } : {});
   }
 
   // Rellena huecos con silencios ocultos: el final del compas y el espacio entre figuras sueltas.
@@ -260,6 +260,7 @@
     const all = measures(score);
     const [beats, unit] = meterOf(score).split('/');
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<score-partwise version="3.1">' +
+      (score.title ? '<work><work-title>' + score.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</work-title></work>' : '') +
       '<part-list><score-part id="P1"><part-name print-object="no">Guitar</part-name></score-part></part-list><part id="P1">';
     all.forEach((measure, mi) => {
       xml += `<measure number="${mi + 1}" id="m${mi}">`;

@@ -221,3 +221,13 @@ test('agregar una voz conserva los tiempos de figuras antiguas sin at explicito'
   M.insertAt(measure, { d: 'q', n: 34 }, 8);
   assert.deepEqual(M.onsets(measure), [0, 8, 16]);
 });
+
+
+test('el título se conserva al guardar y se escapa al exportar MusicXML', () => {
+  const score = Object.assign(M.emptyScore(), { title: 'Vals <lento> & alegre' });
+  const restored = M.sanitize(JSON.parse(JSON.stringify(score)));
+  assert.equal(restored.title, score.title);
+  assert.match(M.toMusicXml(restored), /<work-title>Vals &lt;lento&gt; &amp; alegre<\/work-title>/);
+  assert.equal(M.sanitize(Object.assign(M.emptyScore(), { title: 42 })).title, undefined);
+  assert.equal(M.sanitize(Object.assign(M.emptyScore(), { title: '' })).title, '');
+});

@@ -568,6 +568,7 @@
   "scorePageTitle": "Sheet music",
   "scoreMetaDescription": "A minimal sheet music editor.",
   "scoreH1": "Sheet music",
+  "scoreTitleLabel": "Score title",
   "scoreToolbar": "Notes, rests and accidentals",
   "scoreDelete": "Delete the selected figure",
   "scoreLabel": "Sheet music",

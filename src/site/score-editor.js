@@ -18,6 +18,19 @@
   const removeRow = document.getElementById('scoreRemoveRow');
 
   let score = load();
+  const title = document.getElementById('scoreTitle');
+  if (typeof score.title !== 'string') score.title = title.value;
+  title.value = score.title;
+  title.addEventListener('input', () => {
+    score.title = title.value;
+    save();
+  });
+  title.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      title.blur();
+    }
+  });
   let toolkit = null;
   let selected = null; // { mi, i }
   let drag = null;
@@ -86,7 +99,7 @@
 
   function undo() {
     if (!history.length) return;
-    score = history.pop();
+    score = Object.assign(history.pop(), { title: score.title });
     selected = null;
     save();
     render();
@@ -427,6 +440,7 @@
   });
 
   document.addEventListener('keydown', (event) => {
+    if (event.target.closest('input, textarea, [contenteditable]')) return;
     if ((event.metaKey || event.ctrlKey) && !event.shiftKey && event.key.toLowerCase() === 'z') {
       event.preventDefault();
       undo();
@@ -693,7 +707,7 @@
         svgViewBox: true,
         pageMarginLeft: 100,
         pageMarginRight: 100,
-        pageMarginTop: 150,
+        pageMarginTop: score.title ? 230 : 150,
         pageMarginBottom: 150,
         justifyVertically: false,
         minLastJustification: 0,
@@ -705,6 +719,12 @@
         const image = await rasterize(withoutMeasureNumbers(pdfToolkit.renderToSVG(page)), 1654, 2339);
         if (page > 1) pdf.addPage();
         pdf.addImage(image, 'JPEG', 0, 0, 210, 297);
+        if (page === 1 && score.title) {
+          pdf.setFont('times', 'bold');
+          pdf.setFontSize(18);
+          pdf.setFontSize(Math.min(18, 18 * 192 / pdf.getTextWidth(score.title)));
+          pdf.text(score.title, 8.75, 15);
+        }
       }
       pdf.save('partitura.pdf');
     } catch (e) {

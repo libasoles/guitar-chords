@@ -7,9 +7,38 @@ body.score-body {
   display: none;
 }
 
+.score-sheet {
+  margin-top: 0.5rem;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
 .score-title {
-  margin: 0 0 1rem;
+  margin: 1.5rem 36px 0;
   font-size: 1.6rem;
+  text-align: left;
+}
+
+.score-title input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.2rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+}
+
+.score-title input:focus {
+  border-bottom-color: var(--ink);
+  box-shadow: 0 1px 0 var(--ink);
 }
 
 .score-toolbar {
@@ -120,10 +149,7 @@ body.score-body {
 .score-stage {
   position: relative;
   min-height: 12rem;
-  margin-top: 0.5rem;
   background: #fff;
-  border: 1px solid var(--rule);
-  border-radius: 4px;
   outline-offset: 2px;
   user-select: none;
   -webkit-user-select: none;
