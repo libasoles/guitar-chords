@@ -1217,7 +1217,7 @@
       deactivateTool();
     }
     if (!event.metaKey && !event.ctrlKey && !event.altKey && !meterPopup.matches(':popover-open') && !clefPopup.matches(':popover-open')) {
-      const item = ITEMS.find((item) => item && item.key === event.key.toLowerCase());
+      const item = ITEMS.find((item) => item && (item.code ? item.code === event.code : item.key === event.key.toLowerCase()));
       if (item) { event.preventDefault(); if (!event.repeat) activateTool(item); return; }
     }
     if ((event.metaKey || event.ctrlKey) && !event.shiftKey && event.key.toLowerCase() === 'z') {
@@ -1609,14 +1609,14 @@
     { kind: 'note', d: 'q', key: '3', label: t.quarter },
     { kind: 'note', d: 'e', key: '4', label: t.eighth },
     { kind: 'note', d: 's', key: '5', label: t.sixteenth },
-    { kind: 'note', d: 'f', key: t.shortcuts.thirtySecond, label: t.thirtySecond },
+    { kind: 'note', d: 'f', key: '6', label: t.thirtySecond },
     null,
-    { kind: 'rest', d: 'w', key: '6', label: t.restWhole },
-    { kind: 'rest', d: 'h', key: '7', label: t.restHalf },
-    { kind: 'rest', d: 'q', key: '8', label: t.restQuarter },
-    { kind: 'rest', d: 'e', key: '9', label: t.restEighth },
-    { kind: 'rest', d: 's', key: '0', label: t.restSixteenth },
-    { kind: 'rest', d: 'f', key: t.shortcuts.restThirtySecond, label: t.restThirtySecond },
+    { kind: 'rest', d: 'w', key: 'q', code: 'KeyQ', label: t.restWhole },
+    { kind: 'rest', d: 'h', key: 'w', code: 'KeyW', label: t.restHalf },
+    { kind: 'rest', d: 'q', key: 'e', code: 'KeyE', label: t.restQuarter },
+    { kind: 'rest', d: 'e', key: 'r', code: 'KeyR', label: t.restEighth },
+    { kind: 'rest', d: 's', key: 't', code: 'KeyT', label: t.restSixteenth },
+    { kind: 'rest', d: 'f', key: 'y', code: 'KeyY', label: t.restThirtySecond },
     null,
     { kind: 'dot', key: t.shortcuts.dot, label: t.dot },
     { kind: 'acc', acc: '#', key: t.shortcuts.sharp, label: t.sharp },
@@ -1661,7 +1661,6 @@
       button.dataset.shortcut = item.key;
       button.setAttribute('aria-keyshortcuts', item.key);
       button.setAttribute('aria-pressed', 'false');
-      button.dataset.tooltip += ' (' + item.key + ')';
       const key = document.createElement('span');
       key.className = 'score-palette-key';
       key.setAttribute('aria-hidden', 'true');
