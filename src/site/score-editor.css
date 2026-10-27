@@ -955,9 +955,9 @@ html body[data-scroll-locked] {
   color: var(--ink);
 }
 
-/* Los tooltips de la pagina aparecen tras 300ms; los de la barra de compases del renglon, tras 1s. */
+/* Los tooltips de la pagina aparecen tras 500ms; los de la barra de compases del renglon, tras 1s. */
 :root {
-  --tooltip-delay: 300ms;
+  --tooltip-delay: 500ms;
 }
 
 .score-row-tool {
