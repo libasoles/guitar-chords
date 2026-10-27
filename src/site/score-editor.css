@@ -504,7 +504,6 @@ body.score-dragging {
   transform: none;
 }
 
-
 .score-barline-trigger {
   position: absolute;
   transform: translateX(-50%);
