@@ -1081,8 +1081,7 @@
       stage.focus({ preventScroll: true });
       if (activeItem) beginDrag(event, { insert: true });
       else {
-        // Tras el pointerdown de document, que limpia la seleccion de barras.
-        setTimeout(() => selectMeasureBars(event), 0);
+        if (!additive) pureClick = { id: event.pointerId, x: event.clientX, y: event.clientY };
         if (event.pointerType !== 'touch') beginMarquee(event, additive);
       }
       return;
@@ -1105,6 +1104,19 @@
   // ---- marco de seleccion ---------------------------------------------------
 
   let marquee = null;
+  // Solo un click limpio (sin arrastre) selecciona el compas; arrastrar es hacer un marco de seleccion.
+  let pureClick = null;
+
+  function endPureClick(event, cancelled) {
+    const c = pureClick;
+    if (!c || event.pointerId !== c.id) return;
+    pureClick = null;
+    if (cancelled || Math.hypot(event.clientX - c.x, event.clientY - c.y) >= 5) return;
+    selectMeasureBars(event);
+  }
+
+  document.addEventListener('pointerup', (event) => endPureClick(event, false));
+  document.addEventListener('pointercancel', (event) => endPureClick(event, true));
 
   function beginMarquee(event, additive) {
     marquee = { x: event.clientX, y: event.clientY, id: event.pointerId, active: false, additive, base: additive ? picks().slice() : [], el: null };
