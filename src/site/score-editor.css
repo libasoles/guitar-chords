@@ -174,14 +174,6 @@ body.score-body {
   opacity: 0.35;
 }
 
-.score-marker-head {
-  position: absolute;
-  background: var(--note-selected);
-  border-radius: 50%;
-  opacity: 0.7;
-  transform: translate(-50%, -50%) rotate(-20deg);
-}
-
 .score-ghost {
   position: fixed;
   top: 0;
@@ -189,6 +181,10 @@ body.score-body {
   z-index: 50;
   color: var(--note-selected);
   pointer-events: none;
+}
+
+.score-ghost svg {
+  display: block;
 }
 
 body.score-dragging {

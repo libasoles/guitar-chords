@@ -315,38 +315,36 @@
   // ---- arrastre -----------------------------------------------------------
 
   let marker = null;
-  function showMarker(hit, ghostKind) {
+  function showMarker(hit) {
     if (!marker) {
       marker = document.createElement('div');
       marker.className = 'score-marker';
-      marker.innerHTML = '<span class="score-marker-line"></span><span class="score-marker-head"></span>';
+      marker.innerHTML = '<span class="score-marker-line"></span>';
       stage.appendChild(marker);
     }
     if (!hit) { marker.hidden = true; return; }
     marker.hidden = false;
     const line = marker.firstChild;
-    const head = marker.lastChild;
     line.style.left = hit.x + 'px';
     line.style.top = hit.top - hit.space * 2 + 'px';
     line.style.height = (hit.bottom - hit.top) + hit.space * 4 + 'px';
-    head.style.display = ghostKind === 'rest' ? 'none' : '';
-    head.style.left = hit.x + 'px';
-    head.style.top = hit.y + 'px';
-    head.style.width = hit.space * 1.3 + 'px';
-    head.style.height = hit.space + 'px';
   }
 
-  function startGhost(source, event) {
+  function startGhost(source, event, kind) {
     const ghost = document.createElement('div');
     ghost.className = 'score-ghost';
     ghost.appendChild(source.cloneNode(true));
     document.body.appendChild(ghost);
+    // Anclar la cabeza de la nota al puntero; los demas simbolos se centran.
+    const glyph = ghost.firstChild;
+    const box = kind === 'note' ? glyph.firstChild.getBBox() : glyph.viewBox.baseVal;
+    glyph.style.transform = 'translate(' + -(box.x + box.width / 2) + 'px,' + -(box.y + box.height / 2) + 'px)';
     moveGhost(ghost, event);
     return ghost;
   }
 
   function moveGhost(ghost, event) {
-    ghost.style.transform = 'translate(' + (event.clientX + 10) + 'px,' + (event.clientY + 10) + 'px)';
+    ghost.style.transform = 'translate(' + event.clientX + 'px,' + event.clientY + 'px)';
   }
 
   function beginDrag(event, info) {
@@ -358,7 +356,7 @@
     if (!drag.active) {
       if (Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 5) return;
       drag.active = true;
-      drag.ghost = startGhost(drag.glyph, event);
+      drag.ghost = startGhost(drag.glyph, event, drag.kind);
       document.body.classList.add('score-dragging');
     }
     event.preventDefault();
@@ -370,7 +368,7 @@
       const hit = eventUnder(event.clientX, event.clientY);
       if (hit) stage.querySelector('[id="e' + hit.mi + '-' + hit.i + '"]').classList.add('is-target');
     } else {
-      showMarker(locate(event.clientX, event.clientY, drag.from), drag.kind);
+      showMarker(locate(event.clientX, event.clientY, drag.from));
     }
     drag.overTrash = !!document.elementFromPoint(event.clientX, event.clientY)?.closest('#scoreTrash');
   }, { passive: false });
