@@ -82,6 +82,14 @@ async function checkBarlines(page) {
   await selectBar(1, 'end');
   await page.locator('#scoreTitle').click();
   assert.equal(await page.locator('.score-barline-remove').count(), 0);
+  // Click en el compas (sin herramienta): la x aparece sobre su barra especial, y pequeña.
+  await page.keyboard.press('Escape');
+  const measureBox = await page.locator('[id="m1"]').boundingBox();
+  await page.mouse.click(measureBox.x + measureBox.width / 2, measureBox.y + measureBox.height / 2);
+  await page.waitForSelector('.score-barline-remove');
+  assert.equal(await page.locator('.score-barline-remove').count(), 1);
+  assert.ok((await page.locator('.score-barline-remove').boundingBox()).width <= 24);
+  await page.locator('#scoreTitle').click();
   await page.locator('#scoreDownloadToggle').click();
   const pendingDownload = page.waitForEvent('download');
   await page.locator('#scoreDownloadXml').click();
