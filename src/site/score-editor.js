@@ -386,7 +386,7 @@
     const width = stage.clientWidth;
     if (!width) return;
     renderedWidth = width;
-    toolkit.setOptions(layoutOptions(width, score.showTabs && tabSpace ? { spacingSystem: 12 + tabSpace, pageMarginBottom: 60 + tabSpace } : undefined));
+    toolkit.setOptions(layoutOptions(width, score.showTabs && tabSpace ? { spacingSystem: Math.min(48, 12 + tabSpace), pageMarginBottom: 60 + tabSpace } : undefined));
     toolkit.loadData(M.toMusicXml(score));
     meterPopup.hidePopover();
     clefPopup.hidePopover();
@@ -550,17 +550,52 @@
 
   // Una tablatura (<ascii-tabs>) bajo cada renglon. Las digitaciones salen solas de las notas (ScoreFingering) y cada
   // columna queda bajo su nota; lo que el usuario corrige se guarda aparte en score.tabs y nunca cambia el pentagrama.
-  const TAB_FONT = 15;
   const TAB_GAP = 8;
   const TAB_CLEF_CLEARANCE = 22; // la clave de guitarra (con su 8) baja por debajo del pentagrama
-  const TAB_MIN_STEP = 22; // separacion minima entre columnas para que no se pisen los trastes de dos cifras
   const sameColumn = (a, b) => a.length === b.length && a.every((fret, s) => fret === b[s]);
+
+  // Como en el visor de partituras: barra de union con el pentagrama, barras de compas y "TAB" en vertical bajo la clave.
+  function decorateTab(tabs, row, start, size, head, font) {
+    const origin = stage.getBoundingClientRect();
+    const ys = [0, 1, 2, 3, 4, 5].map((s) => {
+      const cell = tabs.querySelector('.ascii-tabs-cell[data-s="' + s + '"]');
+      if (!cell) return null;
+      const r = cell.getBoundingClientRect();
+      return (r.top + r.bottom) / 2 - origin.top;
+    });
+    if (ys.some((y) => y === null)) return;
+    const step = (ys[5] - ys[0]) / 5;
+    const bar = (x, top, bottom) => {
+      const node = document.createElement('span');
+      node.className = 'score-tab-bar';
+      node.style.left = (x - 0.75) + 'px';
+      node.style.top = top + 'px';
+      node.style.height = (bottom - top) + 'px';
+      stage.appendChild(node);
+    };
+    bar(head.left, layout[start].lines[0], ys[5]);
+    for (let k = 0; k < size; k += 1) bar(layout[start + k].right, ys[0], ys[5]);
+    const clef = stage.querySelectorAll('g.system')[row] && stage.querySelectorAll('g.system')[row].querySelector('g.clef');
+    const box = clef && clef.getBoundingClientRect();
+    const x = box ? box.left + box.width / 2 - origin.left : head.left + 18;
+    'TAB'.split('').forEach((letter, i) => {
+      const mark = document.createElement('span');
+      mark.className = 'score-tab-clef';
+      mark.textContent = letter;
+      mark.style.fontSize = font * 1.25 + 'px';
+      mark.style.left = x + 'px';
+      mark.style.top = (ys[0] + step * (1.5 + i)) + 'px';
+      stage.appendChild(mark);
+    });
+  }
 
   function mountTabs() {
     if (!score.showTabs) { tabSpace = 0; return; }
     const first = layout[0];
     if (!first || first.lines.length < 5) return;
     const unit = (first.lines[1] - first.lines[0]) / 2; // un staff space = 2 unidades de Verovio
+    const font = Math.min(28, Math.max(15, Math.round(4 * unit))); // como el visor: dos espacios del pentagrama
+    const minStep = Math.round(font * 1.4); // para que no se pisen los trastes de dos cifras
     const origin = stage.getBoundingClientRect();
     const all = M.attacks(score);
     const fingered = window.ScoreFingering.assign(all.map((attack) => attack.midis));
@@ -579,7 +614,7 @@
         const xs = eventNodes(mi).filter((node, i) => !M.measures(score)[mi][i].rest && M.onsets(M.measures(score)[mi])[i] === at)
           .map((node) => centerX(node, origin));
         const x = xs.length ? xs.reduce((sum, value) => sum + value, 0) / xs.length : layout[mi].left;
-        previous = Math.max(x - head.left, previous + TAB_MIN_STEP);
+        previous = Math.max(x - head.left, previous + minStep);
         return previous;
       });
       const width = Math.max(last.right - head.left, (positions.length ? positions[positions.length - 1] : 0) + 12);
@@ -590,7 +625,7 @@
       tabs.setAttribute('theme', 'light');
       tabs.setAttribute('lang', document.documentElement.lang === 'en' ? 'en' : 'es');
       tabs.setAttribute('aria-label', t.tabLabel + ' ' + (row + 1));
-      tabs.style.setProperty('--ascii-tabs-font-size', TAB_FONT + 'px');
+      tabs.style.setProperty('--ascii-tabs-font-size', font + 'px');
       tabs.style.left = head.left + 'px';
       tabs.style.top = (last.lines[4] + TAB_CLEF_CLEARANCE) + 'px';
       tabs.style.width = (last.right - head.left) + 'px';
@@ -598,17 +633,20 @@
       // El componente se redibuja al hacer clic, asi que el escenario ya no puede reconocer el destino: no le llega el evento.
       tabs.addEventListener('pointerdown', (event) => event.stopPropagation());
       stage.appendChild(tabs);
-      mounted.push({ tabs, keys, positions, width });
+      mounted.push({ tabs, keys, positions, width, start, size, head });
     });
     customElements.whenDefined('ascii-tabs').then(() => {
       if (!mounted.length || !mounted[0].tabs.isConnected) return;
-      mounted.forEach(({ tabs, keys, positions, width }) => {
+      mounted.forEach(({ tabs, keys, positions, width, start, size, head }, row) => {
         const value = keys.map((key) => (score.tabs && score.tabs[key]) || auto[key]);
+        // Un renglon sin notas lleva una columna vacia para dibujar las mismas lineas continuas que los demas.
+        if (!keys.length) { value.push(new Array(6).fill(null)); positions.push(width / 2); }
         try {
-          tabs.setDocument({ value: [value], columnLayout: keys.length ? [{ width, positions }] : null });
+          tabs.setDocument({ value: [value], columnLayout: [{ width, positions }] });
         } catch (error) {
           tabs.setDocument({ value: [value] });
         }
+        decorateTab(tabs, row, start, size, head, font);
         tabs.addEventListener('change', (event) => {
           const columns = event.detail.value[0];
           keys.forEach((key, c) => {

@@ -321,6 +321,23 @@ body.score-body {
   position: absolute;
 }
 
+.score-tab-bar {
+  position: absolute;
+  width: 1.5px;
+  background: var(--ink);
+  pointer-events: none;
+}
+
+.score-tab-clef {
+  position: absolute;
+  font-family: var(--sans);
+  font-weight: 700;
+  line-height: 1;
+  color: #8a8a8a;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
 .score-tab-toggle {
   font-family: var(--sans);
   font-size: 0.9rem;
