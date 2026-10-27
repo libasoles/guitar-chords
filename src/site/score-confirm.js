@@ -10,12 +10,9 @@ const root = createRoot(host);
 // Resolves true when the person confirms, false on cancel or Escape.
 function ask({ title, description, confirm, cancel }) {
   return new Promise((resolve) => {
-    const finish = (answer) => {
-      flushSync(() => root.render(null));
-      resolve(answer);
-    };
-    flushSync(() => root.render(
-      h(AlertDialog.Root, { open: true, onOpenChange: (open) => { if (!open) finish(false); } },
+    // Closing re-renders with open: false so Radix keeps the dialog mounted until the fade-out ends.
+    const render = (open) => flushSync(() => root.render(
+      h(AlertDialog.Root, { open, onOpenChange: (next) => { if (!next) finish(false); } },
         h(AlertDialog.Portal, null,
           h(AlertDialog.Overlay, { className: 'confirm-overlay' }),
           h(AlertDialog.Content, { className: 'confirm-content' },
@@ -29,6 +26,11 @@ function ask({ title, description, confirm, cancel }) {
         ),
       ),
     ));
+    const finish = (answer) => {
+      render(false);
+      resolve(answer);
+    };
+    render(true);
   });
 }
 

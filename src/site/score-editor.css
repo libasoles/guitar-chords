@@ -771,6 +771,31 @@ html body[data-scroll-locked] {
   background: #0006;
 }
 
+.confirm-overlay[data-state='open'],
+.confirm-content[data-state='open'] {
+  animation: confirm-fade-in 150ms ease-out;
+}
+
+.confirm-overlay[data-state='closed'],
+.confirm-content[data-state='closed'] {
+  animation: confirm-fade-out 150ms ease-in;
+}
+
+@keyframes confirm-fade-in {
+  from { opacity: 0; }
+}
+
+@keyframes confirm-fade-out {
+  to { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confirm-overlay,
+  .confirm-content {
+    animation: none !important;
+  }
+}
+
 .confirm-content {
   position: fixed;
   top: 50%;
@@ -798,7 +823,7 @@ html body[data-scroll-locked] {
 
 .confirm-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 0.5rem;
 }
 
@@ -815,6 +840,10 @@ html body[data-scroll-locked] {
 
 .confirm-button:hover {
   background: #0000000f;
+}
+
+.confirm-button:not(.confirm-danger) {
+  border-color: transparent;
 }
 
 .confirm-danger {
