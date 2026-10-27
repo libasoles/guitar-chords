@@ -17,6 +17,7 @@ const LIBS = [
   { url: 'https://cdn.jsdelivr.net/npm/fuzzysort@3.1.0/fuzzysort.js', out: path.join(VENDOR, 'fuzzysort.js') },
   { url: 'https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js', out: path.join(VENDOR, 'jspdf.umd.min.js') },
   { url: 'https://cdn.jsdelivr.net/gh/libasoles/ascii-tabs@v0.8.0/ascii-tabs.js', out: path.join(VENDOR, 'ascii-tabs.js') },
+  { url: 'https://cdn.jsdelivr.net/npm/verovio@6.3.0/dist/verovio-toolkit-wasm.js', out: path.join(VENDOR, 'verovio-toolkit-wasm.js') },
 ];
 
 function say(msg) { process.stdout.write('  ' + msg + '\n'); }

@@ -17,6 +17,7 @@ const SLUGS = {
   'partitura-y-tablatura': { es: 'partitura-y-tablatura', en: 'sheet-music-to-tab' },
   'punteo-terceras-sextas-decimas': { es: 'punteo-terceras-sextas-decimas', en: 'picking-thirds-sixths-tenths' },
   'politica-de-privacidad': { es: 'politica-de-privacidad', en: 'privacy-policy' },
+  'partitura': { es: 'partitura', en: 'sheet-music-editor', isNew: true },
   'articulos': { es: 'articulos', en: 'articles', isNew: true },
   'articulo-carcassi': { es: 'articulos/descomposicion-de-acordes-en-carcassi', en: 'articles/chord-decomposition-in-carcassi', isNew: true },
   'articulo-tablaturas-arpegios': { es: 'articulos/tablaturas-para-arpegios', en: 'articles/tabs-for-arpeggios', isNew: true },

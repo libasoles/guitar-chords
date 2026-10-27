@@ -182,6 +182,10 @@ const privacyTemplate = fs.readFileSync(
   path.join(SRC_SITE, "privacy.html"),
   "utf8",
 );
+const scoreEditorTemplate = fs.readFileSync(
+  path.join(SRC_SITE, "score-editor.html"),
+  "utf8",
+);
 const articleTemplate = fs.readFileSync(
   path.join(SRC_SITE, "article.html"),
   "utf8",
@@ -407,6 +411,10 @@ const SIXTHS_SLUG = "ejercicio-de-sextas";
 // and the site-wide privacy policy (src/site/privacy.html).
 const PARTITURA_SLUG = "partitura-y-tablatura";
 const PRIVACY_SLUG = "politica-de-privacidad";
+
+// Editor minimo de partituras (src/site/score-editor.html). Pagina privada: sin
+// enlaces desde el sitio, fuera del sitemap y con noindex; se entra por URL.
+const SCORE_EDITOR_SLUG = "partitura";
 
 // Articles section (src/site/article.html): an index and one article, found
 // only through the sitemap — no link from the home page or the footer.
@@ -1148,6 +1156,25 @@ function linkifyEmails(text) {
     /([\w.+-]+@[\w-]+(?:\.[\w-]+)+)/g,
     '<a href="mailto:$1">$1</a>',
   );
+}
+
+// Render the private score editor page (src/site/score-editor.html).
+function renderScoreEditorPage(template, strings, locale) {
+  let html = fillPageChrome(template, strings, locale, SCORE_EDITOR_SLUG);
+  ["scoreToolbar", "scoreDelete", "scoreLabel", "scoreAddRow", "scoreRemoveRow"].forEach(
+    function (key) {
+      html = html.split("%%" + key + "%%").join(escapeHtml(strings[key] || ""));
+    },
+  );
+  return html
+    .split("%%PAGE_TITLE%%")
+    .join(escapeHtml(strings.scorePageTitle || ""))
+    .split("%%PAGE_META_DESCRIPTION%%")
+    .join(escapeHtml(strings.scoreMetaDescription || ""))
+    .split("%%PAGE_H1%%")
+    .join(escapeHtml(strings.scoreH1 || ""))
+    .split("%%SCORE_STRINGS%%")
+    .join(JSON.stringify(strings.scoreUiStrings).replace(/</g, "\\u003c"));
 }
 
 // Render the bilingual privacy policy (src/site/privacy.html).
@@ -1909,6 +1936,18 @@ copyFile(
   ASCII_TABS,
   path.join(VENDOR_DIST, "ascii-tabs.js"),
 );
+// Private score editor (/partitura): Verovio draws the staff, jsPDF exports it.
+["score-model.js", "score-editor.js", "score-editor.css"].forEach(function (f) {
+  copyFile(path.join(SRC_SITE, f), path.join(ASSETS_DIST, f));
+});
+copyFile(
+  path.join(SRC_SITE, "partitura-loading.svg"),
+  path.join(ASSETS_DIST, "partitura-loading.svg"),
+);
+copyFile(
+  path.join(SRC_VENDOR, "verovio-toolkit-wasm.js"),
+  path.join(VENDOR_DIST, "verovio-toolkit-wasm.js"),
+);
 if (PARTITURA_ENABLED) {
   require("esbuild").buildSync({
     entryPoints: [path.join(SRC_SITE, "toast.js")],
@@ -2177,6 +2216,16 @@ LOCALES.forEach(function (locale) {
 
     writeArticlePages(strings, locale);
 
+    {
+      const scoreOutFile = path.join(DIST_SITE, SCORE_EDITOR_SLUG + ".html");
+      fs.writeFileSync(
+        scoreOutFile,
+        renderScoreEditorPage(scoreEditorTemplate, strings, locale),
+        "utf8",
+      );
+      say(path.relative(ROOT, scoreOutFile));
+    }
+
     if (PARTITURA_ENABLED) {
       const partOutFile = path.join(DIST_SITE, PARTITURA_SLUG + ".html");
       fs.writeFileSync(
@@ -2280,6 +2329,16 @@ LOCALES.forEach(function (locale) {
   }
 
   writeArticlePages(strings, locale);
+
+  {
+    const scoreOutFile = path.join(DIST_SITE, pageFile(SCORE_EDITOR_SLUG, "en"));
+    fs.writeFileSync(
+      scoreOutFile,
+      renderScoreEditorPage(scoreEditorTemplate, strings, locale),
+      "utf8",
+    );
+    say(path.relative(ROOT, scoreOutFile));
+  }
 
   if (PARTITURA_ENABLED) {
     const partOutFile = path.join(DIST_SITE, pageFile(PARTITURA_SLUG, "en"));
