@@ -4,14 +4,34 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const M = require('../src/site/score-model');
 
-test('sanitize conserva la tablatura por renglon y descarta datos invalidos', () => {
+test('sanitize conserva las correcciones de tablatura y descarta datos invalidos', () => {
   const base = M.emptyScore();
-  const tabs = { 0: [[3, null, null, null, null, null], [null, 99, 'x', null, 0, null]], 1: [[null, null, null, null, null, null]], 7: [[1, 1, 1, 1, 1, 1]] };
+  const tabs = { '0:0': [3, null, null, null, null, null], '1:24': [null, 99, 'x', null, 0, null], '99:0': [1, 1, 1, 1, 1, 1], malo: [1], '2:0': 'x' };
   const clean = M.sanitize({ ...base, showTabs: true, tabs });
   assert.equal(clean.showTabs, true);
-  assert.deepEqual(clean.tabs, { 0: [[3, null, null, null, null, null], [null, null, null, null, 0, null]] });
+  assert.deepEqual(clean.tabs, { '0:0': [3, null, null, null, null, null], '1:24': [null, null, null, null, 0, null] });
   assert.equal(M.sanitize({ ...base, showTabs: 'si' }).showTabs, undefined);
+  assert.equal(M.sanitize({ ...base, tabs: [[3]] }).tabs, undefined);
   assert.equal(M.toMusicXml(clean), M.toMusicXml(M.sanitize(base)));
+});
+
+test('attacks da el tono real, junta los acordes y no repite las notas ligadas', () => {
+  const score = M.emptyScore();
+  // E4 escrito suena E3 (52) con la clave de guitarra; un sostenido sube un semitono hasta el fin del compas.
+  score.rows[0][0] = [{ n: 37, d: 'q', at: 0 }, { n: 37, d: 'q', at: 24, acc: '#' }, { n: 37, d: 'q', at: 48 }, { n: 30, d: 'q', at: 48 }];
+  assert.deepEqual(M.attacks(score).map((a) => [a.key, a.midis]), [['0:0', [52]], ['0:24', [53]], ['0:48', [53, 40]]]);
+  score.rows[0][0] = [{ n: 37, d: 'q', at: 0, tie: true }, { n: 37, d: 'q', at: 24 }, { n: 39, d: 'q', at: 48 }];
+  assert.deepEqual(M.attacks(score).map((a) => a.key), ['0:0', '0:48']);
+});
+
+test('la digitacion automatica usa cuerdas distintas para notas distintas seguidas', () => {
+  const F = require('../src/site/score-fingering');
+  assert.deepEqual(F.assign([[52]]), [[[3, 2]]]);
+  const cells = F.assign([[64], [67], [64]]).map((option) => option[0]);
+  assert.notEqual(cells[0][0], cells[1][0]);
+  assert.deepEqual(F.assign([[64, 59, 55]]).map((option) => option.map((cell) => cell[1])), [[0, 0, 0]]);
+  assert.deepEqual(F.assign([[], [900]]), [[], []]);
+  assert.deepEqual(F.toColumn([[3, 2], [5, 0]]), [null, null, null, 2, null, 0]);
 });
 
 test('la partitura nueva tiene tres renglones de cuatro compases vacios', () => {

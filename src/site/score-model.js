@@ -350,20 +350,48 @@
     return end <= capacity(score);
   }
 
-  // Tablatura de un renglon: columnas de 6 cuerdas (de la 1a a la 6a) con un traste o null. No depende de las notas del pentagrama.
+  // La tablatura sale sola de las notas; `tabs` guarda solo lo que el usuario corrigio a mano: { 'compas:inicio': [6 trastes] },
+  // con la cuerda 1 primero y null donde no suena nada. Corregirla no cambia las notas del pentagrama.
   const TAB_STRINGS = 6;
-  const TAB_MAX_COLUMNS = 400;
-  function sanitizeTabs(tabs, rowCount) {
+  function sanitizeTabs(tabs, measureCount) {
     const result = {};
-    if (!tabs || typeof tabs !== 'object') return result;
-    Object.keys(tabs).forEach((row) => {
-      const columns = tabs[row];
-      if (!Number.isInteger(+row) || +row < 0 || +row >= rowCount || !Array.isArray(columns)) return;
-      const clean = columns.slice(0, TAB_MAX_COLUMNS).map((column) => Array.from({ length: TAB_STRINGS }, (_, s) => {
-        const fret = Array.isArray(column) ? column[s] : null;
-        return Number.isInteger(fret) && fret >= 0 && fret <= MAX_FRET ? fret : null;
-      }));
-      if (clean.some((column) => column.some((fret) => fret !== null))) result[row] = clean;
+    if (!tabs || typeof tabs !== 'object' || Array.isArray(tabs)) return result;
+    Object.keys(tabs).forEach((key) => {
+      const column = tabs[key];
+      if (!/^\d+:\d+$/.test(key) || +key.split(':')[0] >= measureCount || !Array.isArray(column)) return;
+      result[key] = Array.from({ length: TAB_STRINGS }, (_, s) => (
+        Number.isInteger(column[s]) && column[s] >= 0 && column[s] <= MAX_FRET ? column[s] : null));
+    });
+    return result;
+  }
+
+  const SEMITONES = [0, 2, 4, 5, 7, 9, 11];
+
+  // Cada momento en que suena algo, en orden de lectura: { mi, at, key, midis } con el tono real (la clave de guitarra
+  // suena una octava mas grave que la escrita). Las notas ligadas a la anterior no se vuelven a tocar.
+  function attacks(score) {
+    const result = [];
+    let tied = new Set();
+    measures(score).forEach((measure, mi) => {
+      const clef = CLEFS[clefAt(score, mi)];
+      const starts = onsets(measure);
+      const accidentals = new Map();
+      const moments = new Map();
+      measure.map((ev, i) => i).sort((a, b) => starts[a] - starts[b]).forEach((i) => {
+        const ev = measure[i];
+        if (ev.rest) return;
+        if (ev.acc) accidentals.set(ev.n, ACCIDENTALS[ev.acc].alter);
+        const alter = accidentals.has(ev.n) ? accidentals.get(ev.n) : keyAlter(ev.n, score, mi);
+        const midi = 12 * Math.floor(ev.n / 7) + SEMITONES[ev.n % 7] + alter + 12 * (clef.octave || 0);
+        if (!moments.has(starts[i])) moments.set(starts[i], []);
+        moments.get(starts[i]).push({ n: ev.n, midi, tie: !!ev.tie });
+      });
+      [...moments.keys()].sort((a, b) => a - b).forEach((at) => {
+        const all = moments.get(at);
+        const notes = all.filter((note) => !tied.has(note.n));
+        all.forEach((note) => { if (note.tie) tied.add(note.n); else tied.delete(note.n); });
+        if (notes.length) result.push({ mi, at, key: mi + ':' + at, midis: notes.map((note) => note.midi) });
+      });
     });
     return result;
   }
@@ -438,7 +466,7 @@
       if (Number.isInteger(to) && (span ? to > 0 : to > at) && to < capacity({ meter })) result.to = to;
       barres[index] = result;
     });
-    const tabs = sanitizeTabs(data.tabs, rows.length);
+    const tabs = sanitizeTabs(data.tabs, rows.reduce((sum, row) => sum + row.length, 0));
     return Object.assign(Object.keys(barlines).length ? { barlines } : {}, Object.keys(keys).length ? { keys } : {}, Object.keys(clefs).length ? { clefs } : {}, Object.keys(barres).length ? { barres } : {}, data.showTabs === true ? { showTabs: true } : {}, Object.keys(tabs).length ? { tabs } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
   }
 
@@ -842,7 +870,7 @@
   return {
     DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
     length, gridOf, onsets, settle, placement, insertAt, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot,
-    meterOf, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, toMusicXml,
+    meterOf, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };
 });
