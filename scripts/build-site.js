@@ -1287,6 +1287,11 @@ const MODAL_HASH_SCRIPT =
   // The prev/next chevrons live inside the open modal: close it so the target replaces it instead of nesting.
   "document.querySelectorAll('.modal-step[popovertarget]').forEach(function(b){b.addEventListener('click',function(){" +
   "var m=b.closest('.modal-full');if(m)m.hidePopover();});});" +
+  // Lazy score pages can take a while: flag each one until it loads so the CSS shows the loading animation.
+  "document.querySelectorAll('.modal-page').forEach(function(img){if(img.complete)return;" +
+  "img.setAttribute('data-loading','');" +
+  "function done(){img.removeAttribute('data-loading');}" +
+  "img.addEventListener('load',done);img.addEventListener('error',done);});" +
   "modals.forEach(function(m){m.addEventListener('toggle',function(e){" +
   "if(e.newState==='open')sync(m.id);else if(location.hash==='#'+m.id)sync('');});});" +
   "var target=location.hash&&document.getElementById(location.hash.slice(1));" +

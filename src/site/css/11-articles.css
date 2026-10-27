@@ -393,6 +393,11 @@
   height: auto;
   margin: 0 auto 1.4rem;
 }
+/* Lazy pages show the loading animation until they arrive (the script in build-site.js sets data-loading). */
+.modal-page[data-loading] {
+  min-height: 12rem;
+  background: url("partitura-loading.svg") center / 5rem no-repeat;
+}
 .modal-footer {
   align-items: center;
   gap: 1rem;
