@@ -689,8 +689,6 @@
     "restSixteenth": "Sixteenth rest",
     "restThirtySecond": "Thirty-second rest",
     "shortcuts": {
-      "thirtySecond": "t",
-      "restThirtySecond": "r",
       "dot": "d",
       "sharp": "s",
       "flat": "f",
