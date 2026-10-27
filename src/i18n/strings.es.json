@@ -333,6 +333,13 @@
       ]
     },
     {
+      "h": "Partitura: tus notas quedan en tu navegador",
+      "p": [
+        "El editor de la página Partitura guarda tus notas únicamente en el almacenamiento local de tu navegador (localStorage). No se envían ni se guardan en nuestros servidores, y no se pueden recuperar desde otro dispositivo o navegador.",
+        "Podés borrarlas en cualquier momento limpiando los datos del sitio en tu navegador. Si lo hacés, las notas se pierden."
+      ]
+    },
+    {
       "h": "Partitura y tablatura: archivos subidos",
       "p": [
         "Si usás la herramienta Partitura y tablatura, tu archivo (PDF o MusicXML) se guarda en un almacenamiento privado, solo para procesarlo y generar los resultados (PDF, MusicXML y JSON).",

@@ -333,6 +333,13 @@
       ]
     },
     {
+      "h": "Score editor: your notes stay in your browser",
+      "p": [
+        "The editor on the Score page keeps your notes only in your browser's local storage (localStorage). They are not sent to or stored on our servers, and cannot be recovered from another device or browser.",
+        "You can delete them at any time by clearing the site data in your browser. If you do, the notes are lost."
+      ]
+    },
+    {
       "h": "Score to tab: uploaded files",
       "p": [
         "If you use the Score to tab tool, your file (PDF or MusicXML) is stored in private storage, only to process it and produce the results (PDF, MusicXML and JSON).",
