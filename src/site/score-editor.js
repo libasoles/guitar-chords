@@ -380,6 +380,7 @@
     svg.setAttribute('aria-label', t.scoreLabel);
     mountMeterButton();
     mountClefButtons();
+    mountKeyButtons();
     liftBarreMarks(svg);
     measureLayout();
     mountBarlineButtons();
@@ -953,7 +954,7 @@
   document.addEventListener('pointercancel', (event) => endDrag(event, true));
 
   stage.addEventListener('pointerdown', (event) => {
-    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span, .score-selection-menu')) return;
+    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-key-trigger, .score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span, .score-selection-menu')) return;
     if (isPlacing(activeItem)) {
       event.preventDefault();
       stage.focus({ preventScroll: true });
@@ -1091,7 +1092,8 @@
   M.METERS.forEach((meter) => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.textContent = meter;
+    button.dataset.meter = meter;
+    button.setAttribute('aria-label', meter);
     button.addEventListener('click', () => {
       if (meter === M.meterOf(score)) {
         meterPopup.hidePopover();
@@ -1126,15 +1128,19 @@
     button.addEventListener('click', () => {
       if (meterPopup.matches(':popover-open')) { meterPopup.hidePopover(); return; }
       [...meterOptions.children].forEach((option) => {
-        option.setAttribute('aria-pressed', String(option.textContent === M.meterOf(score)));
+        option.setAttribute('aria-pressed', String(option.dataset.meter === M.meterOf(score)));
       });
       meterPopup.showPopover();
+      [...meterOptions.children].forEach((option) => {
+        if (!option.querySelector('svg')) signaturePreview(option, M.clefOf(score), 0, 'meter', option.dataset.meter);
+      });
       const anchor = button.getBoundingClientRect();
       const popup = meterPopup.getBoundingClientRect();
       meterPopup.style.left = Math.max(8, Math.min(anchor.left, window.innerWidth - popup.width - 8)) + 'px';
       meterPopup.style.top = Math.max(8, Math.min(anchor.bottom + 6, window.innerHeight - popup.height - 8)) + 'px';
       meterOptions.querySelector('[aria-pressed="true"]').focus({ preventScroll: true });
     });
+    hoverGlyph(button, meter);
     stage.appendChild(button);
   }
 
@@ -1202,9 +1208,9 @@
   });
 
   // El mismo grabador de la partitura dibuja las muestras: posiciones de clave y armadura reales.
-  function signaturePreview(button, clef, fifths, kind) {
+  function signaturePreview(button, clef, fifths, kind, meter) {
     if (!previewToolkit) previewToolkit = newToolkit();
-    const sample = { clef, fifths, rows: [[[]]] };
+    const sample = { clef, fifths, meter, rows: [[[]]] };
     previewToolkit.setOptions(layoutOptions(300));
     previewToolkit.loadData(M.toMusicXml(sample));
     const doc = new DOMParser().parseFromString(previewToolkit.renderToSVG(1), 'image/svg+xml');
@@ -1218,7 +1224,7 @@
       svg.appendChild(line);
       return line;
     });
-    const symbol = staff.querySelector(kind === 'clef' ? 'g.clef' : 'g.keySig');
+    const symbol = staff.querySelector(kind === 'clef' ? 'g.clef' : kind === 'meter' ? 'g.meterSig' : 'g.keySig');
     const glyph = symbol && document.importNode(symbol, true);
     if (glyph) svg.appendChild(glyph);
     button.prepend(svg);
@@ -1229,20 +1235,21 @@
     const height = kind === 'clef' ? 1700 : Math.max(800, (box?.height || 0) + 100);
     const center = box && box.width ? box.x + box.width / 2 : 1350;
     const left = center - width / 2;
-    const middle = kind === 'key' && box?.height ? box.y + box.height / 2 : (staffBox.y + bottom) / 2 + (kind === 'clef' ? 130 : 0); // deja sitio al 8 bajo la clave de guitarra
+    const middle = kind !== 'clef' && box?.height ? box.y + box.height / 2 : (staffBox.y + bottom) / 2 + (kind === 'clef' ? 130 : 0); // deja sitio al 8 bajo la clave de guitarra
     const top = middle - height / 2;
     lines.forEach((line) => {
       const y = line.getBBox().y;
       line.setAttribute('d', `M${left} ${y} L${left + width} ${y}`);
       line.setAttribute('stroke', 'currentColor');
     });
-    if (kind === 'key') {
+    if (kind !== 'clef') {
       lines.forEach((line) => line.remove());
     }
     svg.setAttribute('viewBox', `${left} ${top} ${width} ${height}`);
   }
 
   function anchorButtonOf(anchor) {
+    if (anchor.kind === 'key') return stage.querySelector('.score-key-trigger[data-measure="' + anchor.mi + '"]');
     return anchor.kind === 'clef'
       ? stage.querySelectorAll('.score-clef-trigger')[anchor.index]
       : stage.querySelector('.score-barline-trigger[data-measure="' + anchor.mi + '"][data-side="' + anchor.side + '"]');
@@ -1281,10 +1288,51 @@
     stage.querySelectorAll('.score-clef-trigger').forEach((button, i) => {
       button.setAttribute('aria-expanded', String(event.newState === 'open' && clefAnchor.kind === 'clef' && i === clefAnchor.index));
     });
+    stage.querySelectorAll('.score-key-trigger').forEach((button) => {
+      button.setAttribute('aria-expanded', String(event.newState === 'open' && clefAnchor.kind === 'key' && Number(button.dataset.measure) === clefAnchor.mi));
+    });
     stage.querySelectorAll('.score-barline-trigger').forEach((button) => {
       button.setAttribute('aria-expanded', String(event.newState === 'open' && clefAnchor.kind === 'bar' && Number(button.dataset.measure) === clefAnchor.mi && button.dataset.side === clefAnchor.side));
     });
   });
+
+  // La armadura abre el mismo popup que la clave, para el compas donde se dibuja.
+  // El simbolo grabado se tiñe de azul mientras el cursor o el foco estan sobre su boton.
+  function hoverGlyph(button, glyph) {
+    const on = () => glyph.classList.add('is-hovered');
+    const off = () => glyph.classList.remove('is-hovered');
+    button.addEventListener('mouseenter', on);
+    button.addEventListener('mouseleave', off);
+    button.addEventListener('focus', on);
+    button.addEventListener('blur', off);
+  }
+
+  function mountKeyButtons() {
+    const origin = stage.getBoundingClientRect();
+    stage.querySelectorAll('g.keySig').forEach((key) => {
+      const box = key.getBoundingClientRect();
+      if (!box.width) return;
+      const mi = Number(key.closest('g.measure').id.slice(1));
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'score-key-trigger';
+      button.dataset.measure = mi;
+      button.setAttribute('aria-label', t.keySignature + ': ' + t.keys[M.keyAt(score, mi) + 7]);
+      button.setAttribute('aria-controls', clefPopup.id);
+      button.setAttribute('aria-haspopup', 'dialog');
+      button.setAttribute('aria-expanded', 'false');
+      button.style.left = (box.left + box.width / 2 - origin.left - stage.clientLeft) + 'px';
+      button.style.top = (box.top + box.height / 2 - origin.top - stage.clientTop) + 'px';
+      button.style.width = Math.max(20, box.width + 8) + 'px';
+      button.style.height = Math.max(44, box.height + 8) + 'px';
+      button.addEventListener('click', () => {
+        if (clefPopup.matches(':popover-open')) { clefPopup.hidePopover(); return; }
+        openClefPopup({ kind: 'key', mi }, mi);
+      });
+      hoverGlyph(button, key);
+      stage.appendChild(button);
+    });
+  }
 
   function mountClefButtons() {
     stage.querySelectorAll('g.clef').forEach((clef, i) => {
@@ -1304,6 +1352,7 @@
         if (clefPopup.matches(':popover-open')) { clefPopup.hidePopover(); return; }
         openClefPopup({ kind: 'clef', index: i }, i * M.PER_ROW);
       });
+      hoverGlyph(button, clef);
       stage.appendChild(button);
     });
   }

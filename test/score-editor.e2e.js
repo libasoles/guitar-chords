@@ -549,6 +549,16 @@ async function run() {
     assert.equal(await page.locator('#scoreMeterPopup').isVisible(), true);
     await page.getByRole('button', { name: '12/8', exact: true }).click();
     assert.equal(await page.evaluate(() => scoreEditor.score.meter), '12/8');
+    assert.equal(await page.locator('#scoreMeterPopup button svg').count(), 8);
+
+    // Clicking the accidentals opens the same clef and key popup.
+    await page.keyboard.press('Escape');
+    await page.locator('.score-clef-trigger').first().click();
+    await page.locator('.score-key-options [data-fifths="2"]').click();
+    await page.keyboard.press('Escape');
+    await page.locator('.score-key-trigger').first().click();
+    assert.equal(await page.locator('#scoreClefPopup').isVisible(), true);
+    await page.keyboard.press('Escape');
     await page.goto('http://localhost:' + server.address().port + '/en/sheet-music-editor');
     await page.waitForSelector('.score-clef-trigger');
     await page.locator('.score-clef-trigger').first().click();

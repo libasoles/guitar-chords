@@ -370,12 +370,13 @@ body.score-dragging {
 
 /* El boton transparente conserva la cifra grabada y amplia su zona de clic. */
 .score-meter-trigger,
-.score-clef-trigger {
+.score-clef-trigger,
+.score-key-trigger {
   position: absolute;
   width: 44px;
   transform: translate(-50%, -50%);
   padding: 0;
-  border: 1px solid transparent;
+  border: 0;
   border-radius: 6px;
   background: transparent;
   cursor: pointer;
@@ -384,9 +385,17 @@ body.score-dragging {
 .score-meter-trigger:hover,
 .score-meter-trigger:focus-visible,
 .score-clef-trigger:hover,
-.score-clef-trigger:focus-visible {
+.score-clef-trigger:focus-visible,
+.score-key-trigger:hover,
+.score-key-trigger:focus-visible {
   color: var(--blue-france);
-  border-color: var(--blue-france);
+}
+
+.score-body g.meterSig.is-hovered,
+.score-body g.clef.is-hovered,
+.score-body g.keySig.is-hovered {
+  fill: var(--blue-france);
+  color: var(--blue-france);
 }
 
 .score-meter-popup {
@@ -416,7 +425,7 @@ body.score-dragging {
 .score-meter-options button {
   min-height: 44px;
   padding: 0.25rem;
-  border: 1px solid var(--rule);
+  border: 0;
   border-radius: 6px;
   color: var(--ink);
   background: transparent;
@@ -426,12 +435,14 @@ body.score-dragging {
 
 .score-meter-options button:hover {
   color: var(--blue-france);
-  border-color: var(--blue-france);
 }
 
 .score-meter-options button[aria-pressed="true"] {
   color: var(--accent-brand);
-  border-color: var(--accent-brand);
+}
+
+.score-meter-options .score-signature-preview {
+  height: 3.5rem;
 }
 
 .score-clef-popup {
