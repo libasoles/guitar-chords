@@ -4,6 +4,7 @@
      favorite   — estrella negra rellena («favorita del editor»)
      insightful — cuadrado con estrella («insightful»)
      effort     — cuadrado con pulso («effort»)
+     bookmark   — marcador («marcador»)
      pending    — hoja con signo de exclamacion («revision pendiente»): la transcripcion no paso el control automatico
    Para marcar otra pieza, agregar su numero a la lista de su coleccion (ver AGENTS.md). */
 
@@ -20,6 +21,10 @@ const MARKS = {
     labelKey: 'artEditorEffort',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M17 12h-2l-2 5-2-10-2 5H7"/></svg>',
   },
+  bookmark: {
+    labelKey: 'artEditorBookmark',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"/></svg>',
+  },
   pending: {
     labelKey: 'artEditorPending',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
@@ -32,7 +37,7 @@ const PIECES = {
   'carcassi-progresivas': { favorite: [1, 12] },
   'carcassi-valses': { favorite: [10] },
   'santisteban-preludios': { favorite: [2, 3, 4] },
-  sagreras: { favorite: [36, 40, 42, 49, 59, 62, 70, 73, 75], insightful: [16, 61], effort: [38, 43], pending: [76, 78, 81, 84] },
+  sagreras: { favorite: [36, 40, 42, 49, 59, 62, 70, 73, 75], insightful: [16, 61], effort: [38, 43], bookmark: [2, 9, 17, 25, 31], pending: [76, 78, 81, 84] },
   aguado: { pending: Object.keys(require('../aguado/pieces.json')).map(Number) },
   barrios: { pending: Array.from({ length: 18 }, (_, i) => i + 1) },
   giuliani: { pending: Array.from({ length: 24 }, (_, i) => i + 1) },
