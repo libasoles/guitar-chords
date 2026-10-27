@@ -113,22 +113,27 @@ async function run() {
     await page.waitForSelector('.score-clef-trigger');
     assert.equal(await page.locator('.score-clef-trigger').count(), 3);
 
-    // Click the printed clef itself; Escape discards the draft and restores focus.
+    // All options are visible; choosing one applies it immediately without closing the gallery.
     const box = await page.locator('#scoreStage g.clef').first().boundingBox();
     await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
     assert.equal(await page.locator('#scoreClefPopup').isVisible(), true);
-    assert.equal(await page.locator('#scoreClef').evaluate((el) => el === document.activeElement), true);
-    await page.selectOption('#scoreClef', 'bass');
+    assert.equal(await page.locator('#scoreClefPopup select').count(), 0);
+    assert.equal(await page.locator('.score-clef-options button').count(), 5);
+    assert.equal(await page.locator('.score-key-options button').count(), 15);
+    assert.equal(await page.locator('.score-clef-options button svg g.clef').count(), 5);
+    assert.equal(await page.locator('.score-clef-options button').evaluateAll((buttons) => buttons.every((b) => !b.textContent.trim())), true);
+    assert.equal(await page.locator('.score-clef-options [aria-pressed="true"]').evaluate((el) => el === document.activeElement), true);
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#scoreClefPopup').isVisible(), false);
-    assert.equal(await page.evaluate(() => scoreEditor.score.clef), 'guitar');
     await page.locator('.score-clef-trigger').first().focus();
     await page.keyboard.press('Enter');
-    assert.equal(await page.inputValue('#scoreClef'), 'guitar');
-    await page.selectOption('#scoreClef', 'bass');
-    await page.selectOption('#scoreKey', '-3');
-    await page.getByRole('button', { name: 'Aplicar', exact: true }).click();
-    assert.equal(await page.locator('#scoreClefPopup').isVisible(), false);
+    await page.locator('.score-clef-options [data-clef="bass"]').click();
+    assert.equal(await page.locator('#scoreClefPopup').isVisible(), true);
+    assert.equal(await page.evaluate(() => scoreEditor.score.clef), 'bass');
+    assert.equal(await page.locator('.score-clef-options [data-clef="bass"]').getAttribute('aria-pressed'), 'true');
+    await page.locator('.score-key-options [data-fifths="-3"]').click();
+    assert.equal(await page.locator('.score-key-options [data-fifths="-3"]').getAttribute('aria-pressed'), 'true');
+    await page.keyboard.press('Escape');
     assert.deepEqual(await page.evaluate(() => [scoreEditor.score.clef, scoreEditor.score.fifths]), ['bass', -3]);
     assert.equal(await page.locator('#scoreStage g.keySig').count(), 3);
 
@@ -143,10 +148,11 @@ async function run() {
     assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].n), 25);
     const before = await page.evaluate(() => structuredClone(scoreEditor.score.rows));
     await page.locator('.score-clef-trigger').nth(1).click();
-    await page.selectOption('#scoreClef', 'alto');
-    await page.selectOption('#scoreKey', '2');
-    await page.getByRole('button', { name: 'Aplicar', exact: true }).click();
+    await page.locator('.score-clef-options [data-clef="alto"]').click();
+    await page.locator('.score-key-options [data-fifths="2"]').click();
+    await page.keyboard.press('Escape');
     assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows), before);
+    await page.keyboard.press('ControlOrMeta+z');
     await page.keyboard.press('ControlOrMeta+z');
     assert.deepEqual(await page.evaluate(() => [scoreEditor.score.clef, scoreEditor.score.fifths]), ['bass', -3]);
     await page.reload();
@@ -181,7 +187,7 @@ async function run() {
     await page.waitForSelector('.score-clef-trigger');
     await page.locator('.score-clef-trigger').first().click();
     assert.equal(await page.getByRole('dialog', { name: 'Clef and key signature', exact: true }).isVisible(), true);
-    assert.equal(await page.getByLabel('Key signature', { exact: true }).locator('option').count(), 15);
+    assert.equal(await page.getByRole('group', { name: 'Key signature', exact: true }).locator('button').count(), 15);
     assert.deepEqual(errors, []);
     const dragPage = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     await dragPage.goto(url);

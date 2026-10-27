@@ -597,47 +597,118 @@
 
   // ---- clave y armadura ---------------------------------------------------
 
-  const clefPopup = document.createElement('form');
+  const clefPopup = document.createElement('div');
   clefPopup.id = 'scoreClefPopup';
   clefPopup.className = 'score-meter-popup score-clef-popup';
   clefPopup.setAttribute('popover', 'auto');
   clefPopup.setAttribute('role', 'dialog');
   clefPopup.setAttribute('aria-label', t.clefAndKey);
   document.querySelector('.score-page').appendChild(clefPopup);
+  let clefAnchor = 0;
+  let previewToolkit = null;
+  let galleryClef = null;
 
-  function popupSelect(id, title, options) {
-    const label = document.createElement('label');
-    label.htmlFor = id;
-    label.textContent = title;
-    const select = document.createElement('select');
-    select.id = id;
-    options.forEach(([value, text]) => {
-      const option = document.createElement('option');
-      option.value = value;
-      option.textContent = text;
-      select.appendChild(option);
-    });
-    clefPopup.append(label, select);
-    return select;
+  function signatureGroup(title, className) {
+    const heading = document.createElement('p');
+    heading.textContent = title;
+    const group = document.createElement('div');
+    group.className = className;
+    group.setAttribute('role', 'group');
+    group.setAttribute('aria-label', title);
+    clefPopup.append(heading, group);
+    return group;
   }
 
-  const clefSelect = popupSelect('scoreClef', t.clef, Object.keys(M.CLEFS).map((key) => [key, t.clefs[key]]));
-  const keySelect = popupSelect('scoreKey', t.keySignature, t.keys.map((label, i) => [i - 7, label]));
-  const applyClef = document.createElement('button');
-  applyClef.type = 'submit';
-  applyClef.textContent = t.apply;
-  clefPopup.appendChild(applyClef);
-  let clefAnchor = 0;
+  function signatureButton(group, field, value, label) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'score-signature-option tooltip';
+    button.dataset[field] = value;
+    button.dataset.tooltip = label;
+    button.setAttribute('aria-label', label);
+    button.addEventListener('click', () => {
+      const current = field === 'clef' ? M.clefOf(score) : M.fifthsOf(score);
+      if (current !== value) change(() => { score[field] = value; });
+      openClefPopup(clefAnchor, button);
+    });
+    group.appendChild(button);
+    return button;
+  }
 
-  clefPopup.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const clef = clefSelect.value;
-    const fifths = Number(keySelect.value);
-    if (clef !== M.clefOf(score) || fifths !== M.fifthsOf(score)) {
-      change(() => { score.clef = clef; score.fifths = fifths; });
-    } else clefPopup.hidePopover();
-    stage.querySelectorAll('.score-clef-trigger')[clefAnchor]?.focus({ preventScroll: true });
+  const clefOptions = signatureGroup(t.clef, 'score-clef-options');
+  Object.keys(M.CLEFS).forEach((clef) => signatureButton(clefOptions, 'clef', clef, t.clefs[clef]));
+  const keyOptions = signatureGroup(t.keySignature, 'score-key-options');
+  t.keys.forEach((label, i) => {
+    const button = signatureButton(keyOptions, 'fifths', i - 7, label);
+    const name = document.createElement('span');
+    name.className = 'score-key-name';
+    name.textContent = label.split(' · ')[0];
+    button.appendChild(name);
   });
+
+  // El mismo grabador de la partitura dibuja las muestras: posiciones de clave y armadura reales.
+  function signaturePreview(button, clef, fifths, kind) {
+    if (!previewToolkit) previewToolkit = newToolkit();
+    const sample = { clef, fifths, rows: [[[]]] };
+    previewToolkit.setOptions(layoutOptions(300));
+    previewToolkit.loadData(M.toMusicXml(sample));
+    const doc = new DOMParser().parseFromString(previewToolkit.renderToSVG(1), 'image/svg+xml');
+    const staff = doc.querySelector('g.staff');
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.classList.add('score-signature-preview');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.appendChild(document.importNode(doc.querySelector('defs'), true));
+    const lines = [...staff.querySelectorAll(':scope > path')].slice(0, 5).map((path) => {
+      const line = document.importNode(path, true);
+      svg.appendChild(line);
+      return line;
+    });
+    const symbol = staff.querySelector(kind === 'clef' ? 'g.clef' : 'g.keySig');
+    const glyph = symbol && document.importNode(symbol, true);
+    if (glyph) svg.appendChild(glyph);
+    button.prepend(svg);
+    const staffBox = lines[0].getBBox();
+    const bottom = lines[4].getBBox().y;
+    const box = glyph && glyph.getBBox();
+    const width = kind === 'clef' ? 1100 : 2700;
+    const height = 1800;
+    const center = box && box.width ? box.x + box.width / 2 : 1350;
+    const left = center - width / 2;
+    const top = (staffBox.y + bottom) / 2 - height / 2;
+    lines.forEach((line) => {
+      const y = line.getBBox().y;
+      line.setAttribute('d', `M${left} ${y} L${left + width} ${y}`);
+      line.setAttribute('stroke', 'currentColor');
+    });
+    svg.setAttribute('viewBox', `${left} ${top} ${width} ${height}`);
+  }
+
+  function openClefPopup(index, focusButton) {
+    clefAnchor = index;
+    const anchorButton = stage.querySelectorAll('.score-clef-trigger')[index];
+    clefOptions.querySelectorAll('button').forEach((button) => {
+      button.setAttribute('aria-pressed', String(button.dataset.clef === M.clefOf(score)));
+    });
+    keyOptions.querySelectorAll('button').forEach((button) => {
+      button.setAttribute('aria-pressed', String(Number(button.dataset.fifths) === M.fifthsOf(score)));
+    });
+    if (!clefPopup.matches(':popover-open')) clefPopup.showPopover();
+    clefOptions.querySelectorAll('button').forEach((button) => {
+      if (!button.querySelector('svg')) signaturePreview(button, button.dataset.clef, 0, 'clef');
+    });
+    if (galleryClef !== M.clefOf(score)) {
+      keyOptions.querySelectorAll('button').forEach((button) => {
+        button.querySelector('svg')?.remove();
+        signaturePreview(button, M.clefOf(score), Number(button.dataset.fifths), 'key');
+      });
+      galleryClef = M.clefOf(score);
+    }
+    const anchor = anchorButton.getBoundingClientRect();
+    const popup = clefPopup.getBoundingClientRect();
+    clefPopup.style.left = Math.max(8, Math.min(anchor.left, window.innerWidth - popup.width - 8)) + 'px';
+    clefPopup.style.top = Math.max(8, Math.min(anchor.bottom + 6, window.innerHeight - popup.height - 8)) + 'px';
+    (focusButton || clefOptions.querySelector('[aria-pressed="true"]')).focus({ preventScroll: true });
+  }
 
   clefPopup.addEventListener('toggle', (event) => {
     stage.querySelectorAll('.score-clef-trigger').forEach((button, i) => {
@@ -661,15 +732,7 @@
       button.style.height = Math.max(44, box.height + 8) + 'px';
       button.addEventListener('click', () => {
         if (clefPopup.matches(':popover-open')) { clefPopup.hidePopover(); return; }
-        clefAnchor = i;
-        clefSelect.value = M.clefOf(score);
-        keySelect.value = M.fifthsOf(score);
-        clefPopup.showPopover();
-        const anchor = button.getBoundingClientRect();
-        const popup = clefPopup.getBoundingClientRect();
-        clefPopup.style.left = Math.max(8, Math.min(anchor.left, window.innerWidth - popup.width - 8)) + 'px';
-        clefPopup.style.top = Math.max(8, Math.min(anchor.bottom + 6, window.innerHeight - popup.height - 8)) + 'px';
-        clefSelect.focus({ preventScroll: true });
+        openClefPopup(i);
       });
       stage.appendChild(button);
     });
