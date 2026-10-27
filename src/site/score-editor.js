@@ -433,6 +433,43 @@
     if (!event.target.closest('.score-barline-trigger, .score-barline-remove')) clearBarSelection();
   });
 
+  function showBarRemove(mi, side, x, y, button) {
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'score-barline-remove tooltip';
+    remove.setAttribute('aria-label', t.deleteBarline);
+    remove.dataset.tooltip = t.deleteBarline;
+    remove.innerHTML = lucide('x');
+    remove.style.left = x + 'px';
+    remove.style.top = (y - 4) + 'px';
+    remove.addEventListener('click', () => change(() => M.removeBarline(score, mi, side)));
+    remove.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') { clearBarSelection(); button.focus(); }
+    });
+    stage.appendChild(remove);
+  }
+
+  // Click en un compas sin herramienta: la x aparece sobre sus barras especiales (doble, inicio, fin).
+  function selectMeasureBars(event) {
+    const hit = [...stage.querySelectorAll('g.measure')].find((node) => {
+      const r = node.getBoundingClientRect();
+      return event.clientX >= r.left && event.clientX <= r.right && event.clientY >= r.top && event.clientY <= r.bottom;
+    });
+    if (!hit) return;
+    const mi = Number(hit.id.slice(1));
+    const bar = score.barlines && score.barlines[mi];
+    if (!bar) return;
+    const origin = stage.getBoundingClientRect();
+    clearBarSelection();
+    ['start', 'end'].forEach((side) => {
+      if (!(side === 'start' ? bar.start : bar.double || bar.end)) return;
+      const button = stage.querySelector('.score-barline-trigger[data-measure="' + mi + '"][data-side="' + side + '"]');
+      if (!button) return;
+      const box = button.getBoundingClientRect();
+      showBarRemove(mi, side, box.left + box.width / 2 - origin.left, box.top - origin.top, button);
+    });
+  }
+
   function mountBarlineButtons() {
     const origin = stage.getBoundingClientRect();
     stage.querySelectorAll('g.measure').forEach((measure) => {
@@ -464,19 +501,7 @@
           markSelected();
           node.classList.add('is-bar-selected');
           button.setAttribute('aria-pressed', 'true');
-          const remove = document.createElement('button');
-          remove.type = 'button';
-          remove.className = 'score-barline-remove tooltip';
-          remove.setAttribute('aria-label', t.deleteBarline);
-          remove.dataset.tooltip = t.deleteBarline;
-          remove.innerHTML = lucide('x');
-          remove.style.left = x + 'px';
-          remove.style.top = (y - 4) + 'px';
-          remove.addEventListener('click', () => change(() => M.removeBarline(score, mi, side)));
-          remove.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') { clearBarSelection(); button.focus(); }
-          });
-          stage.appendChild(remove);
+          showBarRemove(mi, side, x, y, button);
           // La armadura rige desde el compas siguiente si la barra cierra el compas, o desde este si la abre.
           const target = side === 'start' ? mi : mi + 1;
           if (target < M.measures(score).length) {
@@ -1002,7 +1027,11 @@
       if (!additive) setPicks([]);
       stage.focus({ preventScroll: true });
       if (activeItem) beginDrag(event, { insert: true });
-      else if (event.pointerType !== 'touch') beginMarquee(event, additive);
+      else {
+        // Tras el pointerdown de document, que limpia la seleccion de barras.
+        setTimeout(() => selectMeasureBars(event), 0);
+        if (event.pointerType !== 'touch') beginMarquee(event, additive);
+      }
       return;
     }
     event.preventDefault();

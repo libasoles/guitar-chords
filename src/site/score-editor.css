@@ -555,8 +555,8 @@ body.score-dragging {
   position: absolute;
   display: grid;
   place-items: center;
-  width: 2rem;
-  height: 2rem;
+  width: 1.25rem;
+  height: 1.25rem;
   transform: translate(-50%, -100%);
   padding: 0;
   border: 0;
@@ -564,6 +564,11 @@ body.score-dragging {
   background: var(--paper);
   color: var(--ink);
   cursor: pointer;
+}
+
+.score-barline-remove .lucide {
+  width: 0.75rem;
+  height: 0.75rem;
 }
 
 .score-barline-remove.tooltip {
