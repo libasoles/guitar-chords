@@ -27,8 +27,8 @@ async function checkBarlines(page) {
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
   assert.equal(await page.evaluate(() => scoreEditor.score.barlines[0].start), true);
-  await apply('single', 0);
-  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barlines[0]), { single: true });
+  await apply('double', 0);
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barlines[0]), { double: true });
   await page.keyboard.press('ControlOrMeta+z');
   assert.equal(await page.evaluate(() => scoreEditor.score.barlines[0].start), true);
   await page.keyboard.press('Escape');
