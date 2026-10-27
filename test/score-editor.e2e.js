@@ -43,7 +43,7 @@ async function checkDrag(page) {
     // Numbered tools stay active for repeated clicks and edit the selected figure.
     await page.reload();
     await page.waitForSelector('#scoreStage g.measure');
-    assert.deepEqual(await page.locator('.score-palette-key').allTextContents(), ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']);
+    assert.deepEqual(await page.locator('.score-palette-key').allTextContents(), ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'p', 's', 'b', 'c']);
     await page.keyboard.press('4');
     assert.equal(await page.locator('[data-shortcut="4"]').getAttribute('aria-pressed'), 'true');
     const previewPoint = await page.locator('#scoreStage g.measure').nth(1).evaluate(node => {
@@ -98,6 +98,72 @@ async function checkDrag(page) {
       assert.equal(await page.locator(selector).evaluate(el => getComputedStyle(el).borderTopWidth), '0px');
     }
     console.log('Score editor drag: one glyph under the mouse; drop and cancellation clean up.');
+}
+
+async function checkModifiers(page, url, keys) {
+  await page.goto(url);
+  await page.waitForSelector('#scoreStage g.measure');
+  assert.deepEqual((await page.locator('.score-palette-key').allTextContents()).slice(-4), keys);
+  // Clicking a figure activates the same persistent tool as its keyboard shortcut.
+  await page.locator('[data-shortcut="3"]').click();
+  await page.locator('[data-shortcut="3"]').click();
+  assert.equal(await page.locator('.score-palette-item[aria-pressed="true"]').count(), 0);
+  await page.keyboard.press('3');
+  await page.keyboard.press('3');
+  assert.equal(await page.locator('.score-palette-item[aria-pressed="true"]').count(), 0);
+  await page.locator('[data-shortcut="3"]').click();
+  assert.equal(await page.locator('[data-shortcut="3"]').getAttribute('aria-pressed'), 'true');
+  for (const mi of [1, 2]) {
+    const point = await page.locator('#scoreStage g.measure').nth(mi).evaluate(node => {
+      const r = node.querySelector('g.staff > path').getBoundingClientRect();
+      return { x: r.left + r.width * 0.25, y: r.top + 10 };
+    });
+    await page.mouse.click(point.x, point.y);
+  }
+  await page.keyboard.press('Escape');
+  await page.locator('[data-shortcut="' + keys[0] + '"]').click();
+  assert.equal(await page.locator('[data-shortcut="' + keys[0] + '"]').getAttribute('aria-pressed'), 'true');
+  async function clickNote(mi) {
+    const head = await page.locator('[id="e' + mi + '-0"] .notehead').boundingBox();
+    await page.mouse.move(head.x + head.width / 2, head.y + head.height / 2);
+    assert.equal(await page.locator('.score-hover-ghost').count(), 1);
+    assert.equal(await page.locator('[id="e' + mi + '-0"]').evaluate(el => el.classList.contains('is-target')), true);
+    await page.mouse.click(head.x + head.width / 2, head.y + head.height / 2);
+  }
+  await clickNote(1);
+  await clickNote(2);
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0].slice(1, 3).map(m => m[0].dot)), [true, true]);
+  await page.keyboard.press(keys[0]);
+  assert.equal(await page.locator('.score-palette-item[aria-pressed="true"]').count(), 0);
+  assert.equal(await page.locator('.score-hover-ghost').count(), 0);
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][2][0].dot), true, 'deactivation does not edit the selected note');
+  await page.keyboard.press(keys[0]);
+  assert.equal(await page.evaluate(() => !!scoreEditor.score.rows[0][2][0].dot), false);
+  await page.keyboard.press('Shift+' + keys[1]);
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][2][0].acc), '#');
+  await page.keyboard.down(keys[2]);
+  await page.keyboard.down(keys[2]);
+  await page.keyboard.up(keys[2]);
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][2][0].acc), 'b', 'holding the shortcut does not repeatedly toggle it');
+  await page.keyboard.press(keys[3]);
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][2][0].acc), 'n');
+  await page.keyboard.press('ControlOrMeta+z');
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][2][0].acc), 'b');
+  await page.keyboard.press('Escape');
+  await page.locator('[id="e2-0"] .notehead').click();
+  await page.locator('[data-shortcut="4"]').click();
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][2][0].d), 'e');
+  await page.locator('[data-shortcut="' + keys[0] + '"]').focus();
+  await page.keyboard.press('Enter');
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][2][0].dot), true, 'keyboard activation applies once');
+  await page.locator('[data-shortcut="' + keys[0] + '"]').click();
+  assert.equal(await page.locator('.score-palette-item[aria-pressed="true"]').count(), 0);
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][2][0].dot), true);
+  await page.locator('#scoreTitle').fill(keys.join(''));
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][2][0].acc), 'b');
+  await page.locator('#scoreStage').focus();
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('.score-palette-item[aria-pressed="true"]').count(), 0);
 }
 
 async function run() {
@@ -188,6 +254,14 @@ async function run() {
     await dragPage.waitForSelector('#scoreStage g.measure');
     await checkDrag(dragPage);
     await dragPage.close();
+    for (const [route, keys] of [
+      ['/partitura', ['p', 's', 'b', 'c']],
+      ['/en/sheet-music-editor', ['d', 's', 'f', 'n']],
+    ]) {
+      const modifierPage = await browser.newPage();
+      await checkModifiers(modifierPage, 'http://localhost:' + server.address().port + route, keys);
+      await modifierPage.close();
+    }
     console.log('score-editor e2e: OK');
   } finally {
     if (browser) await browser.close();
