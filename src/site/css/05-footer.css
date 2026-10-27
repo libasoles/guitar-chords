@@ -22,6 +22,9 @@ footer {
   background: url("guitar-player-cubist-left-head.svg") center / contain
     no-repeat;
 }
+.extension-cta-tabs .ext-icon {
+  background: none;
+}
 .extension-cta .ext-icon > * {
   display: none;
 }

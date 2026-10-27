@@ -267,6 +267,18 @@ function decoderRows(strings) {
   }).join("\n    ");
 }
 
+function tabsExtensionStoreUrl() {
+  return "https://chromewebstore.google.com/detail/guitar-tabs/ikhfhclkbcienaofdjjjnaalcigehkhk?authuser=0&hl=es-419";
+}
+
+function tabsExtensionFooter(strings) {
+  return '<footer><div class="extension-cta extension-cta-tabs">' +
+    '<img class="ext-icon" src="/assets/guitar-tabs.svg" alt="" width="64" height="64">' +
+    '<div class="ext-body"><p class="ext-heading">' + escapeHtml(strings.tabsExtensionHeading) +
+    '</p><p class="ext-desc">' + escapeHtml(strings.menuTabsExtensionDescription) + '</p>' +
+    ctaButton(strings, tabsExtensionStoreUrl()) + '</div></div></footer>';
+}
+
 // Build the extension CTA button.
 function extensionStoreUrl() {
   return (
@@ -275,10 +287,10 @@ function extensionStoreUrl() {
   );
 }
 
-function ctaButton(strings) {
+function ctaButton(strings, storeUrl = extensionStoreUrl()) {
   return (
     '<a class="ext-btn" href="' +
-    extensionStoreUrl() +
+    escapeHtml(storeUrl) +
     '" target="_blank" rel="noopener">' +
     strings.extensionAddButton +
     "</a>"
@@ -993,6 +1005,7 @@ function renderTabEditorPage(template, strings, locale) {
   html = html.split("%%PAGE_H1%%").join(strings.tabH1 || "");
   html = html.split("%%PAGE_LEAD%%").join(strings.tabLead || "");
   html = html.split("%%TAB_EDITOR%%").join(renderSharedTabEditor(strings, locale));
+  html = html.split("%%EXTENSION_FOOTER%%").join(tabsExtensionFooter(strings));
   html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
   html = html.split("%%homeHref%%").join(homeHref(locale));
   html = html
@@ -1202,6 +1215,9 @@ function renderArticlePage(strings, locale, slug, keys, bodyHtml, backHtml, head
     .split("%%MANIFEST_HREF%%")
     .join("/assets/manifest." + locale + ".webmanifest");
   html = fillPageChrome(html, strings, locale, slug);
+  html = html.split("%%EXTENSION_FOOTER%%").join(
+    slug === ARTICLE_ARPEGGIOS_SLUG ? tabsExtensionFooter(strings) : "",
+  );
   html = html
     .split("%%PAGE_TITLE%%")
     .join(strings[keys.title])
@@ -2371,7 +2387,8 @@ function siteMenu(strings, locale) {
     "</strong><small>" +
     escapeHtml(strings.extensionDescription) +
     '</small></span><img src="/assets/guitar-player-cubist-left-head.svg" alt="" width="48" height="48"></a>' +
-    '<a class="site-menu-ext" href="https://chromewebstore.google.com/detail/guitar-tabs/ikhfhclkbcienaofdjjjnaalcigehkhk?authuser=0&amp;hl=es-419" target="_blank" rel="noopener"><span><strong>Guitar Tabs</strong><small>' +
+    '<a class="site-menu-ext" href="' + escapeHtml(tabsExtensionStoreUrl()) +
+    '" target="_blank" rel="noopener"><span><strong>Guitar Tabs</strong><small>' +
     escapeHtml(strings.menuTabsExtensionDescription) +
     '</small></span><img src="/assets/guitar-tabs.svg" alt="" width="48" height="48"></a></div></nav></details>' +
     SITE_MENU_SCRIPT
