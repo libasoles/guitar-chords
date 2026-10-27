@@ -26,11 +26,11 @@
   const PER_ROW = 4;
   const MIN_ROWS = 3;
   const MAX_FRET = 24;
-  const GRID = 6; // semicorchea: la posicion se redondea a esta cuadricula (2 dentro de un tresillo)
+  const GRID = 6; // semicorchea: la posicion se redondea a esta cuadricula (2 dentro de un tresillo, 3 con fusas)
   const BOTTOM_LINE = 30; // E4: linea inferior de la clave de sol
   const LOWEST = 15;
   const HIGHEST = 51;
-  const VALUES = { w: 96, h: 48, q: 24, e: 12, s: 6 };
+  const VALUES = { w: 96, h: 48, q: 24, e: 12, s: 6, f: 3 };
   const TYPES = { 96: 'whole', 48: 'half', 24: 'quarter', 12: 'eighth', 6: '16th', 3: '32nd' };
   const TRIPLETABLE = ['q', 'e', 's'];
   const STEPS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
@@ -39,6 +39,13 @@
   // Un tresillo ocupa dos tercios de su valor; no admite puntillo.
   function length(ev) {
     return ev.tp ? VALUES[ev.d] * 2 / 3 : ev.dot ? VALUES[ev.d] * 1.5 : VALUES[ev.d];
+  }
+
+  // Cuadricula de posicion para estas figuras: la mas fina que necesiten (un tresillo y una fusa juntos, 1).
+  function gridOf(events) {
+    const triplet = events.some((ev) => ev.tp);
+    const thirtySecond = events.some((ev) => ev.d === 'f');
+    return triplet ? (thirtySecond ? 1 : 2) : thirtySecond ? 3 : GRID;
   }
 
   // Inicio de cada figura dentro del compas. Una figura sin `at` sigue a la anterior;
@@ -69,7 +76,7 @@
     const limit = capacity(score);
     const size = length(ev);
     if (size > limit) return null;
-    const grid = ev.tp ? 2 : GRID;
+    const grid = gridOf([ev]);
     const at = Math.max(0, Math.min(limit - size, Math.round(t / grid) * grid));
     const starts = onsets(others);
     if (!ev.rest && others.some((o, i) => !o.rest && starts[i] === at && o.n === ev.n && o.acc === ev.acc)) return null;
@@ -203,7 +210,7 @@
 
   function canDot(measure, index, score) {
     const ev = measure[index];
-    if (ev.dot || ev.tp || ev.d === 'w' || ev.d === 's') return false;
+    if (ev.dot || ev.tp || ev.d === 'w' || ev.d === 's' || ev.d === 'f') return false;
     const starts = onsets(measure);
     const end = starts[index] + VALUES[ev.d] * 1.5;
     return end <= capacity(score);
@@ -226,7 +233,7 @@
           else if (Number.isInteger(raw.n)) ev.n = clampPitch(raw.n);
           else return;
           if (Number.isInteger(raw.tp) && raw.tp > 0 && TRIPLETABLE.includes(raw.d)) ev.tp = raw.tp;
-          else if (raw.dot && raw.d !== 'w' && raw.d !== 's') ev.dot = true;
+          else if (raw.dot && raw.d !== 'w' && raw.d !== 's' && raw.d !== 'f') ev.dot = true;
           if (!ev.rest && ACCIDENTALS[raw.acc]) ev.acc = raw.acc;
           if (!ev.rest && raw.tie === true) ev.tie = true;
           else if (!ev.rest && raw.slur === true) ev.slur = true;
@@ -286,7 +293,7 @@
   }
 
   function isBeamable(ev) {
-    return !ev.rest && (ev.d === 'e' || ev.d === 's');
+    return !ev.rest && (ev.d === 'e' || ev.d === 's' || ev.d === 'f');
   }
 
   // Columnas de una voz (acordes) en orden, con el inicio de cada una.
@@ -328,14 +335,16 @@
         const first = k === 0;
         const last = k === r.items.length - 1;
         const state = { 1: first ? 'begin' : last ? 'end' : 'continue' };
-        if (measure[col[0]].d === 's') {
-          const prevSixteenth = k > 0 && measure[r.items[k - 1][0]].d === 's';
-          const nextSixteenth = !last && measure[r.items[k + 1][0]].d === 's';
-          if (prevSixteenth && nextSixteenth) state[2] = 'continue';
-          else if (prevSixteenth) state[2] = 'end';
-          else if (nextSixteenth) state[2] = 'begin';
-          else state[2] = first ? 'forward hook' : 'backward hook';
-        }
+        // Nivel 2 para semicorcheas y fusas, nivel 3 solo para fusas.
+        [['s', 'f'], ['f']].forEach((ds, level) => {
+          if (!ds.includes(measure[col[0]].d)) return;
+          const prevShort = k > 0 && ds.includes(measure[r.items[k - 1][0]].d);
+          const nextShort = !last && ds.includes(measure[r.items[k + 1][0]].d);
+          if (prevShort && nextShort) state[level + 2] = 'continue';
+          else if (prevShort) state[level + 2] = 'end';
+          else if (nextShort) state[level + 2] = 'begin';
+          else state[level + 2] = first ? 'forward hook' : 'backward hook';
+        });
         col.forEach((i) => { states[i] = state; });
       });
     });
@@ -649,7 +658,7 @@
 
   return {
     DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    length, onsets, settle, placement, insertAt, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, fits, canDot,
+    length, gridOf, onsets, settle, placement, insertAt, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, fits, canDot,
     meterOf, clefOf, fifthsOf, bottomLine, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };

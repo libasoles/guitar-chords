@@ -540,3 +540,23 @@ test('sequence ordena las figuras por lectura', () => {
   score.rows[0][1] = [{ d: 'q', n: 30, at: 0 }];
   assert.deepEqual(M.sequence(score), [{ mi: 0, i: 0 }, { mi: 0, i: 1 }, { mi: 1, i: 0 }]);
 });
+
+test('la fusa dura 3 divisiones, no admite puntillo, se coloca de a 3 y se escribe como 32nd', () => {
+  assert.equal(M.length({ d: 'f', n: 30 }), 3);
+  assert.ok(!M.canDot([{ d: 'f', n: 30 }], 0));
+  assert.equal(M.gridOf([{ d: 'f' }]), 3);
+  assert.equal(M.gridOf([{ d: 'f' }, { d: 'e', tp: 1 }]), 1);
+  assert.equal(M.gridOf([{ d: 'q' }]), M.GRID);
+  const measure = [{ d: 'f', n: 30 }, { d: 'f', n: 31 }, { d: 'f', rest: true }, { d: 'f', n: 32 }];
+  const xml = M.toMusicXml({ rows: [[measure, [], [], []]] });
+  assert.equal([...xml.matchAll(/<type>32nd<\/type>/g)].length, 4);
+  assert.equal(M.sanitize({ rows: [[[{ d: 'f', n: 30, dot: true }]]] }).rows[0][0][0].dot, undefined);
+});
+
+test('las fusas se unen con una tercera barra', () => {
+  const measure = [{ d: 'f', n: 30 }, { d: 'f', n: 31 }, { d: 's', n: 32 }, { d: 's', n: 33 }, { d: 'e', n: 34 }];
+  const first = M.toMusicXml({ rows: [[measure, [], [], []]] }).split('<measure ')[1];
+  const level = (n) => [...first.matchAll(new RegExp(`<beam number="${n}">([\\w ]+)</beam>`, 'g'))].map((m) => m[1]);
+  assert.deepEqual(level(3), ['begin', 'end']);
+  assert.deepEqual(level(2), ['begin', 'continue', 'continue', 'end']);
+});
