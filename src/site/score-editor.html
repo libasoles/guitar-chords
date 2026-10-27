@@ -35,15 +35,18 @@
     </header>
 
     <main class="score-page">
-      <div class="score-toolbar" role="toolbar" aria-label="%%scoreToolbar%%">
-        <div id="scorePalette" class="score-palette"></div>
-      </div>
       <div class="score-workspace">
-        <section class="score-sheet" aria-label="%%scoreLabel%%">
-          <p class="score-author"><input id="scoreAuthor" type="text" placeholder="%%scoreAuthorPlaceholder%%" aria-label="%%scoreAuthorLabel%%" /></p>
-          <h1 class="score-title"><input id="scoreTitle" type="text" aria-label="%%scoreTitleLabel%%" value="%%PAGE_H1%%" /></h1>
-          <div id="scoreStage" class="score-stage" tabindex="0" aria-label="%%scoreLabel%%"></div>
-        </section>
+        <div class="score-main">
+          <div class="score-toolbar" role="toolbar" aria-label="%%scoreToolbar%%">
+            <div id="scorePalette" class="score-palette"></div>
+          </div>
+          <p id="scoreStatus" class="score-status" role="status" aria-live="polite"></p>
+          <section class="score-sheet" aria-label="%%scoreLabel%%">
+            <p class="score-author"><input id="scoreAuthor" type="text" placeholder="%%scoreAuthorPlaceholder%%" aria-label="%%scoreAuthorLabel%%" /></p>
+            <h1 class="score-title"><input id="scoreTitle" type="text" aria-label="%%scoreTitleLabel%%" value="%%PAGE_H1%%" /></h1>
+            <div id="scoreStage" class="score-stage" tabindex="0" aria-label="%%scoreLabel%%"></div>
+          </section>
+        </div>
         <aside class="score-side">
           <div id="scoreBarlines" class="score-barlines" role="toolbar" aria-label="%%scoreBarlines%%" aria-orientation="vertical"></div>
         </aside>
