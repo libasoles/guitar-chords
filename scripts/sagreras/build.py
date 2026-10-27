@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.join(ROOT, 'scripts', 'carcassi-preludios'))
 sys.path.insert(0, os.path.join(ROOT, 'backend', 'engine'))
 
 import extract  # noqa: E402  (rutinas de grabado compartidas con los preludios)
-from engraving import clear_triplets
+from engraving import clear_triplets, separate_rests
 
 AUTHOR = 'Julio Salvador Sagreras'
 # Atribucion que exige la licencia de la edicion de origen (CC BY-NC 4.0): pie gris en sans, a la izquierda de cada pagina.
@@ -39,6 +39,9 @@ PDF_OVERRIDES = {}
 # Piezas a las que se aplican las reglas de arpegio del motor (backend/engine/fingering.py): el motor detecta los
 # compases de arpegio de cada una, y los demas quedan como los digita el Viterbi. Vacio: ninguna.
 ARPEGGIO = set()
+# Ajustes de grabado sobre el SVG de Verovio (scripts/sagreras/engraving.py): tresillos sobre las plicas
+# (49, 55; en la 55 tambien el indicador de cejilla) y silencios de dos voces encimados (53, 54).
+ENGRAVING_FIXES = {49: clear_triplets, 55: clear_triplets, 53: separate_rests, 54: separate_rests}
 # Pagina virtual mas grande con escala menor (el PDF sigue midiendo lo mismo, como en los preludios
 # largos): el grabado se achica y caben mas compases por sistema y mas sistemas por pagina. Se prueba de menos a mas
 # reduccion y se queda con el primer nivel que ocupa menos paginas.
@@ -129,9 +132,10 @@ def build(number):
     tabify.KEEP_TEXT = True  # tempo, Fine y D.C. se imprimen
     with tempfile.TemporaryDirectory() as tmp:
         extract.patch_engine(tabify)
-        if number == 55:
-            original_drop_brace = tabify.drop_brace
-            tabify.drop_brace = lambda svg: clear_triplets(original_drop_brace(svg))
+        original_drop_brace = tabify.drop_brace
+        if number in ENGRAVING_FIXES:
+            fix = ENGRAVING_FIXES[number]
+            tabify.drop_brace = lambda svg: fix(original_drop_brace(svg))
         prepared = os.path.join(tmp, 'prepared')
         result = tabify.prepare(source, 'musicxml', 'standard', prepared, per_row=PER_ROW.get(number, 4), arpeggio='auto' if number in ARPEGGIO else False)
         if result['dropped']:
@@ -173,8 +177,7 @@ def build(number):
             writer._info.get_object().pop(NameObject(key), None)
         with open(base + '.pdf', 'wb') as f:
             writer.write(f)
-    if number == 55:
-        tabify.drop_brace = original_drop_brace
+    tabify.drop_brace = original_drop_brace
     print('salida:', base + '.pdf')
 
 
