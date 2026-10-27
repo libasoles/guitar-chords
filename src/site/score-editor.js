@@ -1054,8 +1054,10 @@
     document.body.appendChild(ghost);
     // Anclar la cabeza de la nota al puntero; los demas simbolos se centran.
     const glyph = ghost.firstChild;
-    const box = kind === 'note' ? glyph.firstChild.getBBox() : glyph.viewBox.baseVal;
-    glyph.style.transform = 'translate(' + -(box.x + box.width / 2) + 'px,' + -(box.y + box.height / 2) + 'px)';
+    const viewBox = glyph.viewBox.baseVal;
+    const box = kind === 'note' ? glyph.firstChild.getBBox() : viewBox;
+    // El origen del viewBox puede ser negativo para dar espacio a las plicas.
+    glyph.style.transform = 'translate(' + -(box.x - viewBox.x + box.width / 2) + 'px,' + -(box.y - viewBox.y + box.height / 2) + 'px)';
     moveGhost(ghost, event);
     return ghost;
   }

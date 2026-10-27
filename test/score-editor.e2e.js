@@ -11,7 +11,8 @@ async function checkBarlines(page) {
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
   assert.equal(await page.locator('#scoreTrash').count(), 0);
-  assert.equal(await page.locator('#scoreBarlines button').count(), 4);
+  assert.equal(await page.locator('#scoreBarlines button:not(#scoreTabToggle)').count(), 4);
+  assert.equal(await page.locator('#scoreBarlines #scoreTabToggle').count(), 1);
   async function apply(type, mi) {
     await page.locator('[data-barline="' + type + '"]').click();
     const point = await page.locator('#scoreStage g.measure').nth(mi).evaluate(node => {
@@ -514,7 +515,7 @@ async function checkClear(page) {
   assert.ok(download.x > (await page.locator('#scoreStage').boundingBox()).x + 300, 'both live in the side menu');
   for (const id of ['#scoreClear', '#scoreDownloadToggle']) {
     await page.locator(id).hover();
-    await page.waitForTimeout(250);
+    await page.waitForFunction(selector => getComputedStyle(document.querySelector(selector), '::after').opacity === '1', id);
     const tip = await page.locator(id).evaluate(el => ({ text: el.dataset.tooltip, opacity: getComputedStyle(el, '::after').opacity }));
     assert.ok(tip.text, id + ' has tooltip text');
     assert.equal(tip.opacity, '1', id + ' shows its tooltip on hover');
