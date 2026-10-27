@@ -5,7 +5,7 @@
 
   const M = window.ScoreModel;
   const STORAGE_KEY = 'scoreEditor.v1';
-  const SCALE = 45;
+  const SCALE = 60;
   const HISTORY_LIMIT = 100;
   const SVG_NS = 'http://www.w3.org/2000/svg';
   const script = document.currentScript;
@@ -178,6 +178,7 @@
       pageMarginBottom: 60,
       minLastJustification: 0,
       justifyVertically: false,
+      spacingSystem: 12,
       mnumInterval: 0,
     }, extra);
   }
