@@ -636,8 +636,12 @@
   "scoreLabel": "Partitura",
   "scoreAddRow": "Agregar un renglón",
   "scoreRemoveRow": "Quitar el último renglón",
+  "scoreTabs": "Partituras abiertas",
+  "scoreNewTab": "Nueva partitura",
   "scoreClear": "Borrar la partitura",
   "scoreUiStrings": {
+    "titleLabel": "Título de la partitura",
+    "untitledScore": "Sin título {n}",
     "clearTitle": "¿Borrar la partitura?",
     "clearDescription": "Se quitarán todas las notas y barras.",
     "clearConfirm": "Borrar",

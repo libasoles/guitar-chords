@@ -5,6 +5,7 @@
 
   const M = window.ScoreModel;
   const STORAGE_KEY = 'scoreEditor.v2';
+  const TABS_KEY = 'scoreEditor.tabs.v1'; // varias partituras: { active, scores: [...] }
   const LEGACY_KEY = 'scoreEditor.v1'; // guardada con 8 divisiones por negra
   const SCALE = 60;
   const HISTORY_LIMIT = 100;
@@ -19,20 +20,15 @@
   const addRow = document.getElementById('scoreAddRow');
   const removeRow = document.getElementById('scoreRemoveRow');
 
-  let score = load();
-  const title = document.getElementById('scoreTitle');
-  if (typeof score.title !== 'string') score.title = title.value;
-  title.value = score.title;
-  title.addEventListener('input', () => {
-    score.title = title.value;
-    save();
-  });
-  title.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      title.blur();
-    }
-  });
+  const tabsBar = document.getElementById('scoreTabs');
+  const stored = loadAll();
+  const docs = stored.scores; // una partitura por pestana
+  const histories = docs.map(() => []);
+  let active = stored.active;
+  let score = docs[active];
+  const defaultTitle = tabsBar.dataset.defaultTitle;
+  if (typeof score.title !== 'string') score.title = defaultTitle;
+  let title = null; // el input de la pestana activa
   const author = document.getElementById('scoreAuthor');
   author.value = score.author || '';
   author.addEventListener('input', () => {
@@ -57,7 +53,7 @@
   let tabSpace = 0; // unidades de Verovio que se reservan bajo cada renglon para su tablatura
   let focusBarre = null; // compas cuya cejilla recien se coloco: su numero queda en foco
 
-  function load() {
+  function loadOne() {
     try {
       const current = localStorage.getItem(STORAGE_KEY);
       if (current) return M.sanitize(JSON.parse(current));
@@ -67,9 +63,23 @@
     }
   }
 
-  function save() {
+  function loadAll() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(score));
+      const data = JSON.parse(localStorage.getItem(TABS_KEY));
+      if (data && Array.isArray(data.scores) && data.scores.length) {
+        const scores = data.scores.map((one) => M.sanitize(one));
+        return { scores, active: Math.min(Math.max(data.active | 0, 0), scores.length - 1) };
+      }
+    } catch (e) {
+      // Sin datos validos se parte de la partitura de antes, o de una vacia.
+    }
+    return { scores: [loadOne()], active: 0 };
+  }
+
+  function save() {
+    docs[active] = score;
+    try {
+      localStorage.setItem(TABS_KEY, JSON.stringify({ active, scores: docs }));
     } catch (e) {
       // Sin almacenamiento la partitura sigue funcionando, solo que no se recuerda.
     }
@@ -105,6 +115,76 @@
       else window.verovio.module.onRuntimeInitialized = resolve;
     });
     toolkit = newToolkit();
+  }
+
+  // ---- pestanas -----------------------------------------------------------
+
+  function tabLabel(one, index) {
+    return one.title || t.untitledScore.replace('{n}', index + 1);
+  }
+
+  function renderTabs() {
+    tabsBar.querySelectorAll('.score-doc-tab').forEach((node) => node.remove());
+    const add = document.getElementById('scoreNewTab');
+    docs.forEach((one, index) => {
+      if (index === active) {
+        const wrap = document.createElement('div');
+        wrap.className = 'score-doc-tab score-title is-active';
+        wrap.setAttribute('role', 'tab');
+        wrap.setAttribute('aria-selected', 'true');
+        title = document.createElement('input');
+        title.id = 'scoreTitle';
+        title.type = 'text';
+        title.setAttribute('aria-label', t.titleLabel);
+        title.value = score.title;
+        title.addEventListener('input', () => {
+          score.title = title.value;
+          save();
+        });
+        title.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            title.blur();
+          }
+        });
+        wrap.appendChild(title);
+        tabsBar.insertBefore(wrap, add);
+      } else {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'score-doc-tab';
+        button.setAttribute('role', 'tab');
+        button.setAttribute('aria-selected', 'false');
+        button.textContent = tabLabel(one, index);
+        button.addEventListener('click', () => switchTo(index));
+        tabsBar.insertBefore(button, add);
+      }
+    });
+  }
+
+  function switchTo(index) {
+    if (index === active || !docs[index]) return;
+    docs[active] = score;
+    histories[active] = history;
+    active = index;
+    score = docs[active];
+    history = histories[active];
+    if (typeof score.title !== 'string') score.title = '';
+    selected = null;
+    group = [];
+    save();
+    renderTabs();
+    render();
+  }
+
+  function newTab() {
+    docs[active] = score;
+    histories[active] = history;
+    docs.push(Object.assign(M.emptyScore(), { title: defaultTitle }));
+    histories.push([]);
+    switchTo(docs.length - 1);
+    title.focus();
+    title.select();
   }
 
   // ---- edicion ------------------------------------------------------------
@@ -1827,6 +1907,8 @@
   addRow.innerHTML = lucide('plus');
   removeRow.innerHTML = lucide('minus');
   document.querySelectorAll('[data-icon]').forEach((node) => { node.insertAdjacentHTML('afterbegin', lucide(node.dataset.icon)); });
+  document.getElementById('scoreNewTab').addEventListener('click', newTab);
+  renderTabs();
 
   document.getElementById('scoreClear').addEventListener('click', async (event) => {
     const button = event.currentTarget;

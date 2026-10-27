@@ -1214,7 +1214,7 @@ function renderScoreEditorPage(template, strings, locale) {
   Object.keys(strings).forEach(function (key) {
     if (key.indexOf("toast") === 0) toastStrings[key] = strings[key];
   });
-  ["scoreTitleLabel", "scoreAuthorLabel", "scoreAuthorPlaceholder", "scoreToolbar", "scoreBarlines", "scoreLabel", "scoreAddRow", "scoreRemoveRow", "scoreClear", "partDownloadsHeading"].forEach(
+  ["scoreTitleLabel", "scoreAuthorLabel", "scoreAuthorPlaceholder", "scoreToolbar", "scoreBarlines", "scoreLabel", "scoreAddRow", "scoreRemoveRow", "scoreTabs", "scoreNewTab", "scoreClear", "partDownloadsHeading"].forEach(
     function (key) {
       html = html.split("%%" + key + "%%").join(escapeHtml(strings[key] || ""));
     },

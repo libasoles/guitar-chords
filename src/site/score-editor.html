@@ -51,13 +51,16 @@
     <main class="score-page">
       <div class="score-workspace">
         <div class="score-main">
+          <h1 class="score-sr-only">%%scoreSeoH1%%</h1>
+          <div id="scoreTabs" class="score-doc-tabs" role="tablist" aria-label="%%scoreTabs%%" data-default-title="%%PAGE_H1%%">
+            <button id="scoreNewTab" class="score-new-tab tooltip" type="button" data-icon="plus" aria-label="%%scoreNewTab%%" data-tooltip="%%scoreNewTab%%"></button>
+          </div>
           <div class="score-toolbar" role="toolbar" aria-label="%%scoreToolbar%%">
             <div id="scorePalette" class="score-palette"></div>
           </div>
           <p id="scoreStatus" class="score-status" role="status" aria-live="polite"></p>
           <section class="score-sheet" aria-label="%%scoreLabel%%">
             <p class="score-author"><input id="scoreAuthor" type="text" placeholder="%%scoreAuthorPlaceholder%%" aria-label="%%scoreAuthorLabel%%" /></p>
-            <h1 class="score-title"><span class="score-sr-only">%%scoreSeoH1%%</span><input id="scoreTitle" type="text" aria-label="%%scoreTitleLabel%%" value="%%PAGE_H1%%" /></h1>
             <div id="scoreStage" class="score-stage" tabindex="0" aria-label="%%scoreLabel%%"></div>
           </section>
         </div>

@@ -499,6 +499,25 @@ async function checkDoubleClick(page) {
   assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].dot), true, 'dot is saved');
 }
 
+// Varias partituras: el titulo es la pestana activa y el + abre una partitura independiente.
+async function checkTabs(page) {
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+  assert.ok(await page.evaluate(() => document.querySelector('.score-doc-tabs').compareDocumentPosition(document.querySelector('.score-toolbar')) & Node.DOCUMENT_POSITION_FOLLOWING), 'las pestanas van antes de la barra de herramientas');
+  await page.locator('#scoreTitle').fill('Uno');
+  await page.locator('#scoreNewTab').click();
+  assert.equal(await page.locator('.score-doc-tab').count(), 2);
+  await page.locator('#scoreTitle').fill('Dos');
+  assert.equal(await page.locator('button.score-doc-tab').textContent(), 'Uno');
+  await page.locator('button.score-doc-tab').click();
+  assert.equal(await page.locator('#scoreTitle').inputValue(), 'Uno');
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+  assert.equal(await page.locator('#scoreTitle').inputValue(), 'Uno');
+  assert.equal(await page.locator('button.score-doc-tab').textContent(), 'Dos');
+}
+
 async function checkClear(page) {
   await page.locator('[data-shortcut="3"]').click();
   const point = await page.locator('#scoreStage g.measure').first().evaluate(node => {
@@ -677,6 +696,11 @@ async function run() {
     await clearPage.waitForSelector('#scoreStage g.measure');
     await checkClear(clearPage);
     await clearPage.close();
+    const tabsPage = await browser.newPage();
+    await tabsPage.goto(url);
+    await tabsPage.waitForSelector('#scoreStage g.measure');
+    await checkTabs(tabsPage);
+    await tabsPage.close();
     console.log('score-editor e2e: OK');
   } finally {
     if (browser) await browser.close();

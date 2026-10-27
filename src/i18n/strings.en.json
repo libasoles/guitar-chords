@@ -636,8 +636,12 @@
   "scoreLabel": "Sheet music",
   "scoreAddRow": "Add a staff row",
   "scoreRemoveRow": "Remove the last row",
+  "scoreTabs": "Open scores",
+  "scoreNewTab": "New score",
   "scoreClear": "Clear the score",
   "scoreUiStrings": {
+    "titleLabel": "Score title",
+    "untitledScore": "Untitled {n}",
     "clearTitle": "Clear the score?",
     "clearDescription": "All notes and barlines will be removed.",
     "clearConfirm": "Clear",
