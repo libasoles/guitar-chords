@@ -1997,7 +1997,7 @@ copyFile(
   path.join(VENDOR_DIST, "ascii-tabs.js"),
 );
 // Private score editor (/partitura): Verovio draws the staff, jsPDF exports it.
-["score-model.js", "score-editor.js", "score-editor.css"].forEach(function (f) {
+["score-model.js", "score-fingering.js", "score-editor.js", "score-editor.css"].forEach(function (f) {
   copyFile(path.join(SRC_SITE, f), path.join(ASSETS_DIST, f));
 });
 require("esbuild").buildSync({

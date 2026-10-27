@@ -323,8 +323,8 @@ body.score-body {
 
 .score-tab-toggle {
   font-family: var(--sans);
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
 }
 

@@ -546,20 +546,41 @@
     });
   }
 
-  // Una tablatura (<ascii-tabs>) bajo cada renglon, con su propio texto: editarla no cambia las notas del pentagrama.
+  // Una tablatura (<ascii-tabs>) bajo cada renglon. Las digitaciones salen solas de las notas (ScoreFingering) y cada
+  // columna queda bajo su nota; lo que el usuario corrige se guarda aparte en score.tabs y nunca cambia el pentagrama.
   const TAB_FONT = 15;
   const TAB_GAP = 8;
   const TAB_CLEF_CLEARANCE = 22; // la clave de guitarra (con su 8) baja por debajo del pentagrama
+  const TAB_MIN_STEP = 22; // separacion minima entre columnas para que no se pisen los trastes de dos cifras
+  const sameColumn = (a, b) => a.length === b.length && a.every((fret, s) => fret === b[s]);
+
   function mountTabs() {
     if (!score.showTabs) { tabSpace = 0; return; }
     const first = layout[0];
     if (!first || first.lines.length < 5) return;
     const unit = (first.lines[1] - first.lines[0]) / 2; // un staff space = 2 unidades de Verovio
+    const origin = stage.getBoundingClientRect();
+    const all = M.attacks(score);
+    const fingered = window.ScoreFingering.assign(all.map((attack) => attack.midis));
+    const auto = {};
+    all.forEach((attack, i) => { auto[attack.key] = window.ScoreFingering.toColumn(fingered[i]); });
     const mounted = [];
     M.rowStarts(score).forEach((start, row) => {
+      const size = score.rows[row].length;
       const head = layout[start];
-      const last = layout[start + score.rows[row].length - 1];
+      const last = layout[start + size - 1];
       if (!head || !last) return;
+      const keys = all.filter((attack) => attack.mi >= start && attack.mi < start + size).map((attack) => attack.key);
+      let previous = -Infinity;
+      const positions = keys.map((key) => {
+        const [mi, at] = key.split(':').map(Number);
+        const xs = eventNodes(mi).filter((node, i) => !M.measures(score)[mi][i].rest && M.onsets(M.measures(score)[mi])[i] === at)
+          .map((node) => centerX(node, origin));
+        const x = xs.length ? xs.reduce((sum, value) => sum + value, 0) / xs.length : layout[mi].left;
+        previous = Math.max(x - head.left, previous + TAB_MIN_STEP);
+        return previous;
+      });
+      const width = Math.max(last.right - head.left, (positions.length ? positions[positions.length - 1] : 0) + 12);
       const tabs = document.createElement('ascii-tabs');
       tabs.className = 'score-tab';
       tabs.setAttribute('labels', 'none');
@@ -575,17 +596,26 @@
       // El componente se redibuja al hacer clic, asi que el escenario ya no puede reconocer el destino: no le llega el evento.
       tabs.addEventListener('pointerdown', (event) => event.stopPropagation());
       stage.appendChild(tabs);
-      mounted.push({ tabs, row });
+      mounted.push({ tabs, keys, positions, width });
     });
     customElements.whenDefined('ascii-tabs').then(() => {
       if (!mounted.length || !mounted[0].tabs.isConnected) return;
-      mounted.forEach(({ tabs, row }) => {
-        if (score.tabs && score.tabs[row]) tabs.value = [score.tabs[row]];
+      mounted.forEach(({ tabs, keys, positions, width }) => {
+        const value = keys.map((key) => (score.tabs && score.tabs[key]) || auto[key]);
+        try {
+          tabs.setDocument({ value: [value], columnLayout: keys.length ? [{ width, positions }] : null });
+        } catch (error) {
+          tabs.setDocument({ value: [value] });
+        }
         tabs.addEventListener('change', (event) => {
-          const columns = M.sanitizeTabs({ 0: event.detail.value[0] }, 1)[0];
-          score.tabs = score.tabs || {};
-          if (columns) score.tabs[row] = columns; else delete score.tabs[row];
-          if (!Object.keys(score.tabs).length) delete score.tabs;
+          const columns = event.detail.value[0];
+          keys.forEach((key, c) => {
+            const column = (columns[c] || []).map((fret) => (Number.isInteger(fret) ? fret : null));
+            const edited = M.sanitizeTabs({ [key]: column }, Infinity)[key];
+            if (edited && !sameColumn(edited, auto[key])) { score.tabs = score.tabs || {}; score.tabs[key] = edited; }
+            else if (score.tabs) delete score.tabs[key];
+          });
+          if (score.tabs && !Object.keys(score.tabs).length) delete score.tabs;
           save();
         });
       });
