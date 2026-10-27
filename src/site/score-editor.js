@@ -1289,9 +1289,25 @@
       : stage.querySelector('.score-barline-trigger[data-measure="' + anchor.mi + '"][data-side="' + anchor.side + '"]');
   }
 
+  // Que secciones muestra el popup: clave y armadura juntas solo si se abre desde la clave y no hay armadura.
+  // Se fija al abrir, para que elegir una armadura no cambie el popup que ya esta abierto.
+  let popupSections = 'both';
+
+  function showSections(sections) {
+    popupSections = sections;
+    [[clefOptions, 'clef'], [keyOptions, 'key']].forEach(([group, name]) => {
+      const display = sections === 'both' || sections === name ? '' : 'none';
+      group.style.display = display;
+      group.previousElementSibling.style.display = display;
+    });
+  }
+
   function openClefPopup(origin, measure, focusButton) {
     clefAnchor = origin;
     keyMeasure = measure;
+    if (!clefPopup.matches(':popover-open')) {
+      showSections(origin.kind === 'key' ? 'key' : origin.kind === 'clef' && M.keyAt(score, measure) !== 0 ? 'clef' : 'both');
+    }
     const anchorButton = anchorButtonOf(origin);
     clefOptions.querySelectorAll('button').forEach((button) => {
       button.setAttribute('aria-pressed', String(button.dataset.clef === M.clefOf(score)));
@@ -1315,7 +1331,8 @@
     const popup = clefPopup.getBoundingClientRect();
     clefPopup.style.left = Math.max(8, Math.min(anchor.left, window.innerWidth - popup.width - 8)) + 'px';
     clefPopup.style.top = Math.max(8, Math.min(anchor.bottom + 6, window.innerHeight - popup.height - 8)) + 'px';
-    (focusButton || clefOptions.querySelector('[aria-pressed="true"]')).focus({ preventScroll: true });
+    const focusGroup = popupSections === 'key' ? keyOptions : clefOptions;
+    (focusButton || focusGroup.querySelector('[aria-pressed="true"]')).focus({ preventScroll: true });
   }
 
   clefPopup.addEventListener('toggle', (event) => {

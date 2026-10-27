@@ -514,7 +514,12 @@ async function run() {
     assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].n), 25);
     const before = await page.evaluate(() => structuredClone(scoreEditor.score.rows));
     await page.locator('.score-clef-trigger').nth(1).click();
+    // With a key signature the clef popup offers only clefs; the key signature has its own popup.
+    assert.equal(await page.locator('.score-key-options').isVisible(), false);
     await page.locator('.score-clef-options [data-clef="alto"]').click();
+    await page.keyboard.press('Escape');
+    await page.locator('.score-key-trigger').nth(1).click();
+    assert.equal(await page.locator('.score-clef-options').isVisible(), false);
     await page.locator('.score-key-options [data-fifths="2"]').click();
     await page.keyboard.press('Escape');
     assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows), before);
@@ -553,7 +558,7 @@ async function run() {
 
     // Clicking the accidentals opens the same clef and key popup.
     await page.keyboard.press('Escape');
-    await page.locator('.score-clef-trigger').first().click();
+    await page.locator('.score-key-trigger').first().click();
     await page.locator('.score-key-options [data-fifths="2"]').click();
     await page.keyboard.press('Escape');
     await page.locator('.score-key-trigger').first().click();
@@ -563,6 +568,8 @@ async function run() {
     await page.waitForSelector('.score-clef-trigger');
     await page.locator('.score-clef-trigger').first().click();
     assert.equal(await page.getByRole('dialog', { name: 'Clef and key signature', exact: true }).isVisible(), true);
+    await page.keyboard.press('Escape');
+    await page.locator('.score-key-trigger').first().click();
     assert.equal(await page.getByRole('group', { name: 'Key signature', exact: true }).locator('button').count(), 15);
     assert.deepEqual(errors, []);
     const dragPage = await browser.newPage({ viewport: { width: 1280, height: 900 } });
