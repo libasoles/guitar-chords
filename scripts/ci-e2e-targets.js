@@ -4,6 +4,33 @@
    `--all`, prints every suite. A file matched by SHARED, or claimed by no
    suite, runs all of them; docs, backend and unit tests run none. */
 
+/* The article suites (test/articles-<name>.e2e.js) share the page template, the
+   score renderers and the harness, so those fan out to all of them; a score or
+   a collection-specific renderer runs only its own suite. */
+const ARTICLE_COMMON = [
+  /^src\/site\/(article\.html|score-fingering\.js)$/,
+  /^src\/shared\//,
+  /^scripts\/lib\/(score-|editor-marks|chord-forms|structured-data|lastmod|fingerprint|article-(link|carcassi)\.js)/,
+  /^scripts\/og-articles/,
+  /^test\/articles-harness\./,
+];
+const articleSuite = (...specific) => ({ build: 'site', paths: [...specific, ...ARTICLE_COMMON] });
+const ARTICLE_SUITES = {
+  'articles-carcassi': articleSuite(/^src\/site\/(articles\/carcassi\/|og-score-carcassi\.)/, /^scripts\/articles\/carcassi\//, /^test\/articles-carcassi\./),
+  'articles-arpeggios': articleSuite(/^src\/site\/(articles\/arpeggios\/|og-score-arpeggios\.)/, /^scripts\/lib\/article-arpeggio/, /^test\/(articles-arpeggios|arpeggio-layout)\./),
+  'articles-preludios': articleSuite(/^src\/site\/(articles\/(carcassi|santisteban)-preludios\/|og-score-preludes\.)/, /^scripts\/carcassi-preludios\//, /^scripts\/lib\/article-carcassi-preludes\.js$/, /^test\/articles-preludios\./),
+  'articles-progresivas': articleSuite(/^src\/site\/articles\/carcassi-progresivas\//, /^scripts\/carcassi-progresivas\//, /^scripts\/lib\/article-carcassi-progressive\.js$/, /^test\/articles-progresivas\./),
+  'articles-valses': articleSuite(/^src\/site\/articles\/carcassi-valses\//, /^scripts\/carcassi-valses\//, /^test\/articles-valses\./),
+  'articles-aguado': articleSuite(/^src\/site\/articles\/aguado\//, /^scripts\/aguado\//, /^scripts\/lib\/article-aguado\.js$/, /^test\/articles-aguado\./),
+  'articles-sagreras': articleSuite(/^src\/site\/articles\/sagreras-lecciones\//, /^scripts\/sagreras\//, /^scripts\/lib\/article-sagreras\.js$/, /^test\/articles-sagreras\./),
+  'articles-sor': articleSuite(/^src\/site\/articles\/sor\//, /^scripts\/sor\//, /^scripts\/lib\/article-sor(-collection)?\.js$/, /^test\/articles-sor\./),
+  'articles-sor-estudios': articleSuite(/^src\/site\/articles\/sor-estudios\//, /^scripts\/sor\//, /^scripts\/lib\/article-sor(-collection|-estudios)\.js$/, /^test\/articles-sor-estudios\./),
+  'articles-barrios': articleSuite(/^src\/site\/articles\/barrios\//, /^scripts\/barrios\//, /^scripts\/lib\/article-barrios\.js$/, /^test\/articles-barrios\./),
+  'articles-giuliani': articleSuite(/^src\/site\/articles\/giuliani\//, /^scripts\/giuliani\//, /^scripts\/lib\/article-giuliani\.js$/, /^test\/articles-giuliani\./),
+  'articles-giuliani-arpegios': articleSuite(/^src\/site\/articles\/giuliani-arpegios\//, /^scripts\/giuliani-arpegios\//, /^scripts\/lib\/article-giuliani-arpegios\.js$/, /^test\/articles-giuliani-arpegios\./),
+  'articles-site': articleSuite(/^test\/articles-site\./),
+};
+
 const SUITES = {
   'chord-finder': {
     build: false,
@@ -60,16 +87,6 @@ const SUITES = {
       /^test\/partitura\./,
     ],
   },
-  articles: {
-    build: 'site',
-    paths: [
-      /^src\/site\/(article\.html|articles\/)/,
-      /^src\/shared\//,
-      /^scripts\/(articles|aguado|barrios|giuliani|giuliani-arpegios|sagreras|sor|carcassi-[^/]+)\//,
-      /^scripts\/(lib\/(article-|score-|editor-marks|chord-forms|structured-data|lastmod|fingerprint)|og-articles)/,
-      /^test\/(articles|arpeggio-layout)\./,
-    ],
-  },
   extensions: {
     build: 'ext',
     paths: [
@@ -80,6 +97,7 @@ const SUITES = {
       /^test\/extensions\./,
     ],
   },
+  ...ARTICLE_SUITES,
 };
 
 /* Touching any of these can affect every page or every suite. */

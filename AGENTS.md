@@ -26,7 +26,7 @@ Playwright and Lighthouse are dev dependencies, so `npm ci` is the only install 
 
 ## Tests
 
-- Avoid running the full test suite (`npm test`) or the e2e suite (`npm run test:e2e`) locally; e2e tests take ~10 minutes. Run unit tests (`npm run test:unit`) or target the specific test file (`node --test test/<file>.unit.js`). Only run e2e tests when adding a new e2e test or when diagnosing a suspected breakage, and then run only that specific test file (e.g. `node test/<file>.e2e.js`), never the full suite.
+- Avoid running the full test suite (`npm test`) or the e2e suite (`npm run test:e2e`) locally; e2e tests take ~10 minutes. Run unit tests (`npm run test:unit`) or target the specific test file (`node --test test/<file>.unit.js`). Only run e2e tests when adding a new e2e test or when diagnosing a suspected breakage, and then run only that specific test file (e.g. `node test/<file>.e2e.js`), never the full suite. Articles are split into one suite per article (`test/articles-<name>.e2e.js`); run only the one you touched, or `node scripts/run-e2e.js articles` for all of them in parallel.
 - Keep manual review screenshots in a separate, untracked script or invocation. Commit screenshots in tests only when an assertion consumes them or CI explicitly collects them.
 - Resolve test fixtures from the repository. For temporary artifacts, use `os.tmpdir()` with `fs.mkdtemp()` and create output directories before writing; never assume a developer's absolute path exists on the Linux CI runner.
 - Before committing test changes, inspect their file reads and writes for machine-specific paths and leftover review artifacts. Local test success alone does not verify filesystem portability; check the pushed CI result before reporting CI as passing.
