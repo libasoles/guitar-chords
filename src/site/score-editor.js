@@ -128,6 +128,8 @@
 
   function activateFigure(item) {
     activeItem = item;
+    clearHoverGhost();
+    updateHoverGhost();
     palette.querySelectorAll('[aria-pressed]').forEach((button) => {
       button.setAttribute('aria-pressed', String(button.dataset.shortcut === item.key));
     });
@@ -232,6 +234,7 @@
     mountClefButtons();
     measureLayout();
     markSelected();
+    updateHoverGhost();
     removeRow.hidden = score.rows.length <= M.MIN_ROWS;
   }
 
@@ -380,7 +383,43 @@
     ghost.style.transform = 'translate(' + event.clientX + 'px,' + event.clientY + 'px)';
   }
 
+  let hoverPoint = null;
+  let hoverGhost = null;
+
+  function clearHoverGhost() {
+    if (hoverGhost) hoverGhost.remove();
+    hoverGhost = null;
+    if (!drag) showMarker(null);
+  }
+
+  function updateHoverGhost() {
+    const point = hoverPoint;
+    const overStage = point && stage.contains(document.elementFromPoint(point.clientX, point.clientY));
+    const hit = activeItem && !drag && overStage && locate(point.clientX, point.clientY);
+    if (!hit) { clearHoverGhost(); return; }
+    if (!hoverGhost) {
+      hoverGhost = startGhost(glyphFor(activeItem), point, activeItem.kind);
+      hoverGhost.classList.add('score-hover-ghost');
+    } else moveGhost(hoverGhost, point);
+    showMarker(hit);
+  }
+
+  stage.addEventListener('pointermove', (event) => {
+    if (event.pointerType !== 'mouse') return;
+    hoverPoint = { clientX: event.clientX, clientY: event.clientY };
+    updateHoverGhost();
+  });
+  stage.addEventListener('pointerleave', () => {
+    hoverPoint = null;
+    clearHoverGhost();
+  });
+  window.addEventListener('blur', () => {
+    hoverPoint = null;
+    clearHoverGhost();
+  });
+
   function beginDrag(event, info) {
+    clearHoverGhost();
     drag = Object.assign({ x: event.clientX, y: event.clientY, id: event.pointerId, active: false }, info);
   }
 
@@ -441,7 +480,10 @@
     else dropNew(d.item, target);
   }
 
-  document.addEventListener('pointerup', (event) => endDrag(event, false));
+  document.addEventListener('pointerup', (event) => {
+    endDrag(event, false);
+    updateHoverGhost();
+  });
   document.addEventListener('pointercancel', (event) => endDrag(event, true));
 
   stage.addEventListener('pointerdown', (event) => {
@@ -474,6 +516,7 @@
     if (event.target.closest('input, textarea, select, [contenteditable]')) return;
     if (event.key === 'Escape') {
       activeItem = null;
+      clearHoverGhost();
       palette.querySelectorAll('[aria-pressed]').forEach((button) => button.setAttribute('aria-pressed', 'false'));
     }
     if (!event.metaKey && !event.ctrlKey && !event.altKey && !meterPopup.matches(':popover-open') && !clefPopup.matches(':popover-open')) {

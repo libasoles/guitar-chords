@@ -112,8 +112,8 @@ body.score-body {
 }
 
 .score-palette-item[aria-pressed="true"] {
-  background: var(--ink);
-  color: var(--paper);
+  background: #f6c85f;
+  color: var(--ink);
 }
 
 .score-palette-key {

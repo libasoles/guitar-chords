@@ -46,6 +46,27 @@ async function checkDrag(page) {
     assert.deepEqual(await page.locator('.score-palette-key').allTextContents(), ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']);
     await page.keyboard.press('4');
     assert.equal(await page.locator('[data-shortcut="4"]').getAttribute('aria-pressed'), 'true');
+    const previewPoint = await page.locator('#scoreStage g.measure').nth(1).evaluate(node => {
+      const r = node.querySelector('g.staff > path').getBoundingClientRect();
+      return { x: r.left + r.width * 0.5, y: r.top + 10 };
+    });
+    const beforeHover = await page.evaluate(() => structuredClone(scoreEditor.score));
+    await page.mouse.move(previewPoint.x, previewPoint.y);
+    assert.equal(await page.locator('.score-hover-ghost').count(), 1);
+    const previewHead = await page.locator('.score-hover-ghost svg path').first().boundingBox();
+    assert.ok(Math.abs(previewHead.x + previewHead.width / 2 - previewPoint.x) < 1);
+    assert.ok(Math.abs(previewHead.y + previewHead.height / 2 - previewPoint.y) < 1);
+    const eighthGlyph = await page.locator('.score-hover-ghost svg').innerHTML();
+    await page.keyboard.press('5');
+    assert.notEqual(await page.locator('.score-hover-ghost svg').innerHTML(), eighthGlyph);
+    assert.equal(await page.locator('.score-ghost').count(), 1, 'changing tools replaces the hover glyph');
+    await page.keyboard.press('4');
+    assert.deepEqual(await page.evaluate(() => scoreEditor.score), beforeHover, 'hover does not edit the score');
+    assert.equal(await page.locator('[data-shortcut="4"]').evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(246, 200, 95)');
+    await page.mouse.move(1, 1);
+    assert.equal(await page.locator('.score-hover-ghost').count(), 0);
+    await page.mouse.move(previewPoint.x, previewPoint.y);
+    assert.equal(await page.locator('.score-hover-ghost').count(), 1);
     async function clickMeasure(mi) {
       const point = await page.locator('#scoreStage g.measure').nth(mi).evaluate(node => {
         const r = node.querySelector('g.staff > path').getBoundingClientRect();
@@ -70,6 +91,7 @@ async function checkDrag(page) {
     await page.locator('#scoreStage').focus();
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('.score-palette-item[aria-pressed="true"]').count(), 0);
+    assert.equal(await page.locator('.score-hover-ghost').count(), 0);
     await clickMeasure(4);
     assert.equal(await page.evaluate(() => scoreEditor.score.rows[1][0].length), 0);
     for (const selector of ['.score-toolbar', '#scoreDownloadToggle']) {
