@@ -842,7 +842,11 @@ html body[data-scroll-locked] {
   background: #0000000f;
 }
 
-.confirm-button:not(.confirm-danger) {
+.confirm-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-left: 0;
   border-color: transparent;
 }
 
