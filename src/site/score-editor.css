@@ -949,6 +949,7 @@ html body[data-scroll-locked] {
 
 .confirm-title {
   margin: 0 0 0.5rem;
+  padding-right: 1.5rem;
   font-size: 1.1rem;
 }
 
@@ -980,11 +981,26 @@ html body[data-scroll-locked] {
 }
 
 .confirm-cancel {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding-left: 0;
-  border-color: transparent;
+  border-width: 1px;
+}
+
+.confirm-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.confirm-close:hover {
+  background: #0000000f;
 }
 
 .confirm-danger {
