@@ -152,6 +152,7 @@
         tabTitle.setAttribute('aria-label', t.titleLabel);
         tabTitle.value = score.title;
         title.value = score.title;
+        author.value = score.author || '';
         tabTitle.addEventListener('input', () => {
           score.title = tabTitle.value;
           title.value = score.title;
@@ -1928,13 +1929,30 @@
 
   document.getElementById('scoreClear').addEventListener('click', async (event) => {
     const button = event.currentTarget;
+    const isFirst = active === 0;
     const confirmed = await window.ScoreConfirm.ask({
-      title: t.clearTitle, description: t.clearDescription, confirm: t.clearConfirm, cancel: t.clearCancel,
+      title: t.clearTitle, description: isFirst ? t.clearDescription : t.clearDescriptionTab, confirm: t.clearConfirm, cancel: t.clearCancel,
     });
-    if (confirmed) change(() => {
+    if (confirmed && isFirst) {
+      // La primera pestana no se quita: vuelve a una partitura nueva, sin notas, titulo ni autor.
+      change(() => {
+        selected = null;
+        group = [];
+        score = Object.assign(M.emptyScore(), { title: defaultTitle });
+      });
+      renderTabs();
+    } else if (confirmed) {
+      docs.splice(active, 1);
+      histories.splice(active, 1);
+      active -= 1;
+      score = docs[active];
+      history = histories[active];
       selected = null;
-      score = Object.assign(M.emptyScore(), { title: score.title }, score.author ? { author: score.author } : {});
-    });
+      group = [];
+      save();
+      renderTabs();
+      render();
+    }
     button.focus();
   });
 
