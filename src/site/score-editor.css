@@ -165,7 +165,7 @@ body.score-body {
   position: relative;
   min-height: 12rem;
   background: #fff;
-  outline-offset: 2px;
+  outline: none;
   user-select: none;
   -webkit-user-select: none;
 }
