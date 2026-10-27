@@ -5,7 +5,7 @@
    Duraciones en divisiones de negra = 8 (la semicorchea con puntillo, 3, entra
    exacta). Las alturas se guardan como numero diatonico escrito (C4 = 28, E4 =
    30, la linea inferior de la clave de sol); el MusicXML las baja una octava
-   porque la guitarra suena asi y la clave lleva el 8 debajo. */
+   para conservar la altura sonora al cambiar de clave (sol de guitarra por defecto). */
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -16,12 +16,19 @@
   const DIVISIONS = 8;
   const MEASURE = 32; // valor por defecto: 4/4
   const METERS = ['2/4', '3/4', '4/4', '2/2', '3/8', '6/8', '9/8', '12/8'];
+  const CLEFS = {
+    guitar: { sign: 'G', line: 2, octave: -1, bottom: 30 },
+    treble: { sign: 'G', line: 2, bottom: 37 },
+    bass: { sign: 'F', line: 4, bottom: 25 },
+    alto: { sign: 'C', line: 3, bottom: 31 },
+    tenor: { sign: 'C', line: 4, bottom: 29 },
+  };
   const PER_ROW = 4;
   const MIN_ROWS = 3;
   const GRID = 2; // semicorchea: la posicion se redondea a esta cuadricula
   const BOTTOM_LINE = 30; // E4: linea inferior de la clave de sol
-  const LOWEST = 20;
-  const HIGHEST = 44;
+  const LOWEST = 15;
+  const HIGHEST = 51;
   const VALUES = { w: 32, h: 16, q: 8, e: 4, s: 2 };
   const TYPES = { 32: 'whole', 16: 'half', 8: 'quarter', 4: 'eighth', 2: '16th', 1: '32nd' };
   const STEPS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
@@ -95,7 +102,7 @@
   }
 
   function emptyScore() {
-    return { meter: '4/4', rows: Array.from({ length: MIN_ROWS }, emptyRow) };
+    return { meter: '4/4', clef: 'guitar', fifths: 0, rows: Array.from({ length: MIN_ROWS }, emptyRow) };
   }
 
   function clone(score) {
@@ -109,6 +116,24 @@
 
   function meterOf(score) {
     return score && METERS.includes(score.meter) ? score.meter : '4/4';
+  }
+
+  function clefOf(score) {
+    return score && Object.hasOwn(CLEFS, score.clef) ? score.clef : 'guitar';
+  }
+
+  function fifthsOf(score) {
+    return score && Number.isInteger(score.fifths) && Math.abs(score.fifths) <= 7 ? score.fifths : 0;
+  }
+
+  function bottomLine(score) {
+    return CLEFS[clefOf(score)].bottom;
+  }
+
+  function keyAlter(n, score) {
+    const fifths = fifthsOf(score);
+    const order = fifths > 0 ? ['F', 'C', 'G', 'D', 'A', 'E', 'B'] : ['B', 'E', 'A', 'D', 'G', 'C', 'F'];
+    return order.slice(0, Math.abs(fifths)).includes(STEPS[n % 7]) ? Math.sign(fifths) : 0;
   }
 
   function capacity(score) {
@@ -164,7 +189,7 @@
       return result;
     });
     while (rows.length < MIN_ROWS) rows.push(emptyRow());
-    return { meter, rows };
+    return { meter, clef: clefOf(data), fifths: fifthsOf(data), rows };
   }
 
   // Rellena huecos con silencios ocultos: el final del compas y el espacio entre figuras sueltas.
@@ -225,7 +250,7 @@
     return states;
   }
 
-  function noteXml(ev, id, beams, chord) {
+  function noteXml(ev, id, beams, chord, alter) {
     const dur = length(ev);
     const base = VALUES[ev.d];
     let xml = `<note id="${id}">`;
@@ -233,8 +258,7 @@
     if (ev.rest) {
       xml += '<rest/>';
     } else {
-      const acc = ev.acc && ACCIDENTALS[ev.acc];
-      xml += `<pitch><step>${STEPS[ev.n % 7]}</step>${acc && acc.alter ? `<alter>${acc.alter}</alter>` : ''}` +
+      xml += `<pitch><step>${STEPS[ev.n % 7]}</step>${alter ? `<alter>${alter}</alter>` : ''}` +
         `<octave>${Math.floor(ev.n / 7) - 1}</octave></pitch>`;
     }
     xml += `<duration>${dur}</duration><voice>1</voice><type>${TYPES[base]}</type>${ev.dot ? '<dot/>' : ''}`;
@@ -245,6 +269,7 @@
 
   function toMusicXml(score) {
     const all = measures(score);
+    const clef = CLEFS[clefOf(score)];
     const [beats, unit] = meterOf(score).split('/');
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<score-partwise version="3.1">' +
       '<part-list><score-part id="P1"><part-name print-object="no">Guitar</part-name></score-part></part-list><part id="P1">';
@@ -252,9 +277,9 @@
       xml += `<measure number="${mi + 1}" id="m${mi}">`;
       if (mi % PER_ROW === 0) xml += '<print new-system="yes"/>';
       if (mi === 0) {
-        xml += `<attributes><divisions>${DIVISIONS}</divisions><key><fifths>0</fifths></key>` +
+        xml += `<attributes><divisions>${DIVISIONS}</divisions><key><fifths>${fifthsOf(score)}</fifths></key>` +
           `<time><beats>${beats}</beats><beat-type>${unit}</beat-type></time>` +
-          '<clef><sign>G</sign><line>2</line><clef-octave-change>-1</clef-octave-change></clef></attributes>';
+          `<clef><sign>${clef.sign}</sign><line>${clef.line}</line>${clef.octave ? `<clef-octave-change>${clef.octave}</clef-octave-change>` : ''}</clef></attributes>`;
       }
       const beams = beamStates(measure, score);
       const starts = onsets(measure);
@@ -264,13 +289,16 @@
         });
       };
       let cursor = 0;
+      const accidentals = new Map();
       measure.forEach((ev, i) => {
         const chord = i > 0 && starts[i] === starts[i - 1];
         if (!chord) {
           hidden(cursor, starts[i]);
           cursor = starts[i];
         }
-        xml += noteXml(ev, `e${mi}-${i}`, beams[i], chord);
+        if (!ev.rest && ev.acc) accidentals.set(ev.n, ACCIDENTALS[ev.acc].alter);
+        const alter = accidentals.has(ev.n) ? accidentals.get(ev.n) : keyAlter(ev.n, score);
+        xml += noteXml(ev, `e${mi}-${i}`, beams[i], chord, alter);
         if (!chord) cursor = starts[i] + length(ev);
       });
       hidden(cursor, capacity(score));
@@ -280,8 +308,8 @@
   }
 
   return {
-    DIVISIONS, MEASURE, METERS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
+    DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
     length, onsets, settle, placement, insertAt, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, fits, canDot,
-    meterOf, capacity, setMeter, sanitize, toMusicXml,
+    meterOf, clefOf, fifthsOf, bottomLine, keyAlter, capacity, setMeter, sanitize, toMusicXml,
   };
 });

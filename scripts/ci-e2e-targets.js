@@ -53,6 +53,13 @@ const SUITES = {
       /^test\/partitura\./,
     ],
   },
+  'score-editor': {
+    build: 'site',
+    paths: [
+      /^src\/site\/score-(editor|model)\./,
+      /^test\/score-editor\./,
+    ],
+  },
   articles: {
     build: 'site',
     paths: [

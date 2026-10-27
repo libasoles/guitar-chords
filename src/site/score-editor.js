@@ -191,12 +191,14 @@
     toolkit.setOptions(layoutOptions(width));
     toolkit.loadData(M.toMusicXml(score));
     meterPopup.hidePopover();
+    clefPopup.hidePopover();
     stage.innerHTML = toolkit.renderToSVG(1);
     marker = null;
     const svg = stage.querySelector('svg');
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', t.scoreLabel);
     mountMeterButton();
+    mountClefButtons();
     measureLayout();
     markSelected();
     removeRow.hidden = score.rows.length <= M.MIN_ROWS;
@@ -272,7 +274,7 @@
     if (!best) return null;
     const { mi, m, space } = best;
     const half = space / 2;
-    const n = M.clampPitch(M.BOTTOM_LINE + Math.round((m.lines[4] - y) / half));
+    const n = M.clampPitch(M.bottomLine(score) + Math.round((m.lines[4] - y) / half));
     const measure = M.measures(score)[mi];
     const starts = M.onsets(measure);
     const centers = eventNodes(mi).map((node) => centerX(node, origin));
@@ -292,7 +294,7 @@
       mi, n, space,
       t: at,
       x: markX,
-      y: m.lines[4] - (n - M.BOTTOM_LINE) * half,
+      y: m.lines[4] - (n - M.bottomLine(score)) * half,
       top: m.lines[0],
       bottom: m.lines[4],
     };
@@ -403,7 +405,7 @@
   document.addEventListener('pointercancel', (event) => endDrag(event, true));
 
   stage.addEventListener('pointerdown', (event) => {
-    if (event.target.closest('.score-meter-trigger')) return;
+    if (event.target.closest('.score-meter-trigger, .score-clef-trigger')) return;
     const match = eventUnder(event.clientX, event.clientY);
     if (!match) {
       selected = null;
@@ -497,6 +499,86 @@
       meterOptions.querySelector('[aria-pressed="true"]').focus({ preventScroll: true });
     });
     stage.appendChild(button);
+  }
+
+  // ---- clave y armadura ---------------------------------------------------
+
+  const clefPopup = document.createElement('form');
+  clefPopup.id = 'scoreClefPopup';
+  clefPopup.className = 'score-meter-popup score-clef-popup';
+  clefPopup.setAttribute('popover', 'auto');
+  clefPopup.setAttribute('role', 'dialog');
+  clefPopup.setAttribute('aria-label', t.clefAndKey);
+  document.querySelector('.score-page').appendChild(clefPopup);
+
+  function popupSelect(id, title, options) {
+    const label = document.createElement('label');
+    label.htmlFor = id;
+    label.textContent = title;
+    const select = document.createElement('select');
+    select.id = id;
+    options.forEach(([value, text]) => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = text;
+      select.appendChild(option);
+    });
+    clefPopup.append(label, select);
+    return select;
+  }
+
+  const clefSelect = popupSelect('scoreClef', t.clef, Object.keys(M.CLEFS).map((key) => [key, t.clefs[key]]));
+  const keySelect = popupSelect('scoreKey', t.keySignature, t.keys.map((label, i) => [i - 7, label]));
+  const applyClef = document.createElement('button');
+  applyClef.type = 'submit';
+  applyClef.textContent = t.apply;
+  clefPopup.appendChild(applyClef);
+  let clefAnchor = 0;
+
+  clefPopup.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const clef = clefSelect.value;
+    const fifths = Number(keySelect.value);
+    if (clef !== M.clefOf(score) || fifths !== M.fifthsOf(score)) {
+      change(() => { score.clef = clef; score.fifths = fifths; });
+    } else clefPopup.hidePopover();
+    stage.querySelectorAll('.score-clef-trigger')[clefAnchor]?.focus({ preventScroll: true });
+  });
+
+  clefPopup.addEventListener('toggle', (event) => {
+    stage.querySelectorAll('.score-clef-trigger').forEach((button, i) => {
+      button.setAttribute('aria-expanded', String(event.newState === 'open' && i === clefAnchor));
+    });
+  });
+
+  function mountClefButtons() {
+    stage.querySelectorAll('g.clef').forEach((clef, i) => {
+      const box = clef.getBoundingClientRect();
+      const origin = stage.getBoundingClientRect();
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'score-clef-trigger';
+      button.setAttribute('aria-label', t.clefAndKey + ': ' + t.clefs[M.clefOf(score)] + ', ' + t.keys[M.fifthsOf(score) + 7]);
+      button.setAttribute('aria-controls', clefPopup.id);
+      button.setAttribute('aria-haspopup', 'dialog');
+      button.setAttribute('aria-expanded', 'false');
+      button.style.left = (box.left + box.width / 2 - origin.left - stage.clientLeft) + 'px';
+      button.style.top = (box.top + box.height / 2 - origin.top - stage.clientTop) + 'px';
+      button.style.height = Math.max(44, box.height + 8) + 'px';
+      button.addEventListener('click', () => {
+        if (clefPopup.matches(':popover-open')) { clefPopup.hidePopover(); return; }
+        clefAnchor = i;
+        clefSelect.value = M.clefOf(score);
+        keySelect.value = M.fifthsOf(score);
+        clefPopup.showPopover();
+        const anchor = button.getBoundingClientRect();
+        const popup = clefPopup.getBoundingClientRect();
+        clefPopup.style.left = Math.max(8, Math.min(anchor.left, window.innerWidth - popup.width - 8)) + 'px';
+        clefPopup.style.top = Math.max(8, Math.min(anchor.bottom + 6, window.innerHeight - popup.height - 8)) + 'px';
+        clefSelect.focus({ preventScroll: true });
+      });
+      stage.appendChild(button);
+    });
   }
 
   // ---- paleta -------------------------------------------------------------
