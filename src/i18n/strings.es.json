@@ -578,6 +578,15 @@
   "scoreH1": "Partitura",
   "scoreSeoH1": "Editor de partituras online gratis",
   "scoreAboutLead": "Escribí tu partitura directamente en el pentagrama: elegí la figura, hacé clic donde va la nota y listo. Es gratis, funciona en el navegador y no pide crear usuario ni instalar nada.",
+  "scoreShortcutsH2": "Atajos de teclado y gestos",
+  "scoreShortcutsIntro": "Apretá la tecla de una figura para elegirla y hacé clic en el pentagrama para colocarla. Estas son las teclas de cada una:",
+  "scoreShortcutsNotes": "Notas",
+  "scoreShortcutsRests": "Silencios",
+  "scoreShortcutsMarks": "Puntillo y alteraciones",
+  "scoreDotTitle": "Puntillo",
+  "scoreDotBody": "Hacé doble clic sobre una nota para ponerle el puntillo; otro doble clic se lo saca.",
+  "scoreBarTitle": "Borrar una barra",
+  "scoreBarBody": "Hacé clic en una barra doble o de repetición y apretá la x que aparece para borrarla.",
   "scoreFeaturesH2": "Qué podés hacer con el editor",
   "scoreFeatures": [
     "<strong>Notas y silencios:</strong> desde la redonda hasta la fusa, con puntillo y alteraciones (sostenidos, bemoles y becuadros).",
@@ -633,7 +642,6 @@
     "deleteMeasure": "Eliminar compás",
     "addMeasure": "Agregar compás",
     "noRoomForMeasure": "No hay espacio",
-
     "barDouble": "Barra doble",
     "barRepeatStart": "Inicio de repetición",
     "barRepeatEnd": "Fin de repetición",
