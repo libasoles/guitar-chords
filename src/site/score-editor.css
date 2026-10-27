@@ -599,7 +599,6 @@ body.score-dragging {
   transform: translateY(-50%);
   border-radius: 1rem;
   background: var(--paper);
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
   opacity: 0;
   pointer-events: none;
 }
@@ -632,10 +631,17 @@ body.score-dragging {
   color: var(--blue-france);
 }
 
+/* Solo el icono se atenua: con opacity en el boton el tooltip (::after) tambien se veria apagado. */
 .score-row-tool[aria-disabled="true"] {
-  color: var(--ink-soft);
-  opacity: 0.45;
   cursor: not-allowed;
+}
+
+.score-row-tool[aria-disabled="true"] .lucide {
+  opacity: 0.35;
+}
+
+.score-row-tool[aria-disabled="true"]:hover {
+  color: var(--ink);
 }
 
 /* El tooltip va a la izquierda de la barra: a la derecha no hay margen en el renglon. */
