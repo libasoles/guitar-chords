@@ -128,6 +128,12 @@ async function checkKeyChanges(page) {
   assert.equal(await page.locator('#scoreClefPopup').isVisible(), false);
   assert.equal(await page.locator('.score-barline-remove').count(), 1);
   await page.keyboard.press('Escape');
+  // Una barra doble al final del renglon no tiene compas siguiente: solo ofrece eliminarla.
+  await page.evaluate(() => { scoreEditor.score.barlines = { 3: { double: true } }; scoreEditor.render(); });
+  await page.locator('.score-barline-trigger[data-measure="3"][data-side="end"]').click();
+  assert.equal(await page.locator('#scoreClefPopup').isVisible(), false);
+  assert.equal(await page.locator('.score-barline-remove').count(), 1);
+  await page.keyboard.press('Escape');
   // La barra de cierre de un compas (aqui doble) cambia la armadura del compas siguiente.
   await page.evaluate(() => { scoreEditor.score.barlines = { 1: { double: true } }; scoreEditor.render(); });
   await page.locator('.score-barline-trigger[data-measure="1"][data-side="end"]').click();

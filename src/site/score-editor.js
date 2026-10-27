@@ -491,7 +491,7 @@
         button.dataset.side = side;
         button.setAttribute('aria-label', t.selectBarline);
         button.setAttribute('aria-pressed', 'false');
-        if (!simple) {
+        if (!simple && !(side === 'end' && (mi + 1) % M.PER_ROW === 0)) {
           button.setAttribute('aria-haspopup', 'dialog');
           button.setAttribute('aria-expanded', 'false');
         }
@@ -509,7 +509,9 @@
           showBarRemove(mi, side, x, y, button);
           // La armadura rige desde el compas siguiente si la barra cierra el compas, o desde este si la abre.
           const target = side === 'start' ? mi : mi + 1;
-          if (!simple && target < M.measures(score).length) {
+          // Si la barra es la ultima del renglon, no hay a que compas siguiente aplicar clave ni armadura.
+          const endsRow = side === 'end' && target % M.PER_ROW === 0;
+          if (!simple && !endsRow && target < M.measures(score).length) {
             if (clefPopup.matches(':popover-open')) clefPopup.hidePopover();
             else openClefPopup({ kind: 'bar', mi, side }, target);
           }
