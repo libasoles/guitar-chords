@@ -505,10 +505,12 @@ async function checkTabs(page) {
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
   assert.ok(await page.evaluate(() => document.querySelector('.score-doc-tabs').compareDocumentPosition(document.querySelector('.score-toolbar')) & Node.DOCUMENT_POSITION_FOLLOWING), 'las pestanas van antes de la barra de herramientas');
-  await page.locator('#scoreTitle').fill('Uno');
+  await page.locator('.score-doc-tab-input').fill('Uno');
+  assert.equal(await page.locator('#scoreTitle').inputValue(), 'Uno');
   await page.locator('#scoreNewTab').click();
   assert.equal(await page.locator('.score-doc-tab').count(), 2);
   await page.locator('#scoreTitle').fill('Dos');
+  assert.equal(await page.locator('.score-doc-tab-input').inputValue(), 'Dos');
   assert.equal(await page.locator('button.score-doc-tab').textContent(), 'Uno');
   await page.locator('button.score-doc-tab').click();
   assert.equal(await page.locator('#scoreTitle').inputValue(), 'Uno');
