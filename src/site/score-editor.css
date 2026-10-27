@@ -351,7 +351,7 @@ body.score-dragging {
 
 .score-clef-popup {
   box-sizing: border-box;
-  width: min(26rem, calc(100vw - 1rem));
+  width: min(36rem, calc(100vw - 1rem));
   overflow: visible;
 }
 
@@ -360,6 +360,14 @@ body.score-dragging {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.35rem;
+}
+
+.score-key-options {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.score-key-none {
+  font-size: 1.15rem;
 }
 
 .score-clef-options {
@@ -389,21 +397,23 @@ body.score-dragging {
 .score-signature-preview {
   display: block;
   width: 100%;
-  height: 3rem;
+  height: 4.5rem;
   fill: currentColor;
   pointer-events: none;
 }
 
 .score-key-options .score-signature-preview {
-  height: 2.5rem;
+  height: 3.5rem;
 }
 
-.score-signature-option:nth-child(5n + 1)::after {
+.score-clef-options .score-signature-option:nth-child(5n + 1)::after,
+.score-key-options .first-column::after {
   left: 0;
   transform: none;
 }
 
-.score-signature-option:nth-child(5n)::after {
+.score-clef-options .score-signature-option:nth-child(5n)::after,
+.score-key-options .last-column::after {
   right: 0;
   left: auto;
   transform: none;

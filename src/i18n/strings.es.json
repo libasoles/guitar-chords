@@ -582,6 +582,7 @@
     "clefAndKey": "Clave y armadura",
     "clef": "Clave",
     "keySignature": "Armadura",
+    "keyNone": "Sin",
     "apply": "Aplicar",
     "clefs": {
       "guitar": "Sol (guitarra, octava baja)",

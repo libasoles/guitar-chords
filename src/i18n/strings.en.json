@@ -582,6 +582,7 @@
     "clefAndKey": "Clef and key signature",
     "clef": "Clef",
     "keySignature": "Key signature",
+    "keyNone": "None",
     "apply": "Apply",
     "clefs": {
       "guitar": "Treble (guitar, octave below)",

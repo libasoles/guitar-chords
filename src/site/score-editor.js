@@ -679,7 +679,22 @@
   const clefOptions = signatureGroup(t.clef, 'score-clef-options');
   Object.keys(M.CLEFS).forEach((clef) => signatureButton(clefOptions, 'clef', clef, t.clefs[clef]));
   const keyOptions = signatureGroup(t.keySignature, 'score-key-options');
-  t.keys.forEach((label, i) => signatureButton(keyOptions, 'fifths', i - 7, label));
+  // Tres renglones, de menos a más alteraciones: sin armadura, bemoles (1 a 7), sostenidos (1 a 7).
+  const keyOrder = [0, ...[1, 2, 3, 4, 5, 6, 7].map((n) => -n), ...[1, 2, 3, 4, 5, 6, 7]];
+  keyOrder.forEach((fifths, i) => {
+    const button = signatureButton(keyOptions, 'fifths', fifths, t.keys[fifths + 7]);
+    const column = fifths === 0 ? 1 : Math.abs(fifths);
+    button.style.gridRow = fifths === 0 ? 1 : fifths < 0 ? 2 : 3;
+    button.style.gridColumn = column;
+    if (column === 1) button.classList.add('first-column');
+    if (column === 7) button.classList.add('last-column');
+    if (fifths === 0) {
+      const none = document.createElement('span');
+      none.className = 'score-key-none';
+      none.textContent = t.keyNone;
+      button.appendChild(none);
+    }
+  });
 
   // El mismo grabador de la partitura dibuja las muestras: posiciones de clave y armadura reales.
   function signaturePreview(button, clef, fifths, kind) {
@@ -705,8 +720,8 @@
     const staffBox = lines[0].getBBox();
     const bottom = lines[4].getBBox().y;
     const box = glyph && glyph.getBBox();
-    const width = kind === 'clef' ? 1100 : Math.max(1100, (box?.width || 0) + 200);
-    const height = kind === 'clef' ? 1800 : Math.max(1100, (box?.height || 0) + 200);
+    const width = kind === 'clef' ? 1000 : Math.max(800, (box?.width || 0) + 100);
+    const height = kind === 'clef' ? 1450 : Math.max(800, (box?.height || 0) + 100);
     const center = box && box.width ? box.x + box.width / 2 : 1350;
     const left = center - width / 2;
     const middle = kind === 'key' && box?.height ? box.y + box.height / 2 : (staffBox.y + bottom) / 2;
@@ -718,16 +733,6 @@
     });
     if (kind === 'key') {
       lines.forEach((line) => line.remove());
-      if (!glyph || !box.width) {
-        const empty = document.createElementNS(SVG_NS, 'text');
-        empty.setAttribute('x', center);
-        empty.setAttribute('y', top + height / 2);
-        empty.setAttribute('text-anchor', 'middle');
-        empty.setAttribute('dominant-baseline', 'central');
-        empty.setAttribute('font-size', '650');
-        empty.textContent = '—';
-        svg.appendChild(empty);
-      }
     }
     svg.setAttribute('viewBox', `${left} ${top} ${width} ${height}`);
   }
@@ -747,6 +752,7 @@
     });
     if (galleryClef !== M.clefOf(score)) {
       keyOptions.querySelectorAll('button').forEach((button) => {
+        if (!Number(button.dataset.fifths)) return;
         button.querySelector('svg')?.remove();
         signaturePreview(button, M.clefOf(score), Number(button.dataset.fifths), 'key');
       });
