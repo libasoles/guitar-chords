@@ -189,7 +189,7 @@ body.score-body {
   /* 36px is the score's side margin: the whole note and the natural sit over the staff's first and last edges,
      the 9px being the blank space left of each glyph inside its button. */
   padding: 0.5rem calc(36px - 9px);
-  background: transparent;
+  background: #fff;
   border: 0;
   font-family: var(--sans);
 }
