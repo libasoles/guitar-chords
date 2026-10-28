@@ -1270,8 +1270,8 @@ html body[data-scroll-locked] {
 .score-demo--bar .score-demo__ring--e { animation: score-demo-ring 6s ease-out 1.2s infinite; }
 .score-demo--bar .score-demo__ring--f { animation: score-demo-ring 6s ease-out 2.6s infinite; }
 .score-demo--bar .score-demo__remove { animation: score-demo-remove 6s steps(1, end) infinite; }
-.score-demo--bar .score-demo__bar--a { animation: score-demo-bar-a 6s steps(1, end) infinite; }
-.score-demo--bar .score-demo__bar--b { animation: score-demo-bar-b 6s steps(1, end) infinite; }
+.score-demo--bar .score-demo__bar--a,
+.score-demo--bar .score-demo__bar--b { animation: score-demo-bar 6s steps(1, end) infinite; }
 
 /* Double click: the dot appears, then the second double click removes it. */
 @keyframes score-demo-dot {
@@ -1306,12 +1306,7 @@ html body[data-scroll-locked] {
   22%, 43% { opacity: 1; }
   44%, 100% { opacity: 0; }
 }
-@keyframes score-demo-bar-a {
-  0%, 19% { stroke: currentColor; }
-  20%, 43% { stroke: var(--accent); }
-  44%, 100% { stroke: currentColor; }
-}
-@keyframes score-demo-bar-b {
+@keyframes score-demo-bar {
   0%, 19% { stroke: currentColor; opacity: 1; }
   20%, 43% { stroke: var(--accent); opacity: 1; }
   44%, 99% { opacity: 0; }
