@@ -823,6 +823,12 @@ body:has(.modal-full:popover-open) {
 .arpeggio-group .article-tab {
   min-height: calc((10.2em + 66px) * var(--tab-staves, 1) - 24px);
 }
+/* Scale cells together with their padding to keep chord columns aligned. */
+.arpeggio-group .article-tab .ascii-tabs-cell,
+.arpeggio-results .article-tab .ascii-tabs-cell {
+  font-size: 0.9em;
+  height: calc(1.5em / 0.9);
+}
 /* Use the preview's 80% solfege size. Scale whole cells so their padding
    characters keep chord columns aligned, while string spacing stays unchanged. */
 .arpeggio-group .article-tab[notation="solfege"] .ascii-tabs-cell {
