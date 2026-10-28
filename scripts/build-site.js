@@ -2490,10 +2490,10 @@ const SITE_MENU_SCRIPT =
   "})()</script>";
 
 function siteMenu(strings, locale) {
-  const link = function (href, label, beta = false) {
+  const link = function (href, label, beta = false, desktopOnly = false) {
     const externalLabel =
       label + " — " + (locale === "en" ? "Open in a new tab" : "Abrir en otra pestaña");
-    return '<div class="site-menu-row"><a href="' + href + '">' + escapeHtml(label) +
+    return '<div class="site-menu-row' + (desktopOnly ? ' desktop-only' : '') + '"><a href="' + href + '">' + escapeHtml(label) +
       (beta ? ' <span class="beta-badge">Beta</span>' : '') +
       '</a><a class="site-menu-external" href="' + href +
       '" target="_blank" rel="noopener" aria-label="' + escapeHtml(externalLabel) +
@@ -2505,7 +2505,7 @@ function siteMenu(strings, locale) {
     link(pagePath(TAB_EDITOR_SLUG, locale), strings.menuCreateTabs),
     link(pagePath("identificar-acordes-por-notas", locale), strings.menuIdentifyChords),
   ];
-  items.push(link(pagePath(SCORE_EDITOR_SLUG, locale), strings.menuScoreEditor, true));
+  items.push(link(pagePath(SCORE_EDITOR_SLUG, locale), strings.menuScoreEditor, true, true));
   if (PARTITURA_ENABLED)
     items.push(link(pagePath(PARTITURA_SLUG, locale), strings.menuAddTabs));
   items.push(link(pagePath("circulo-de-quintas", locale), strings.menuFifths));

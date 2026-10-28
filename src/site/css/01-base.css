@@ -170,6 +170,11 @@ body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 2.75rem;
 }
+@media (max-width: 767px) {
+  .site-menu-row.desktop-only {
+    display: none;
+  }
+}
 .site-menu-row > a {
   display: flex;
   align-items: center;
