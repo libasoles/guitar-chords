@@ -12,9 +12,9 @@ const root = path.join(__dirname, '..');
 const read = (...parts) => fs.readFileSync(path.join(root, ...parts), 'utf8');
 const MARK = /<words>(½?C \d+)<\/words>/g;
 
-/* Cejillas de cada leccion de Sagreras (lo que imprime Marieh: lecciones 55, 74, 76 y 79 a 86). */
-const SAGRERAS = { 55: ['C 3'], 74: ['C 5', 'C 5'], 76: ['C 2', 'C 2'], 79: ['C 2'], 80: ['C 2'], 81: ['C 2', 'C 3', 'C 2', 'C 3'],
-  82: ['C 4', 'C 4'], 83: ['C 2', 'C 2', 'C 2'], 84: ['C 5', 'C 4'], 85: ['C 2'], 86: ['C 2', 'C 7', 'C 2', 'C 2', 'C 5'] };
+/* Cejillas de cada leccion de Sagreras, con el alcance parcial confirmado en las fuentes curadas. */
+const SAGRERAS = { 55: ['C 3'], 74: ['C 5', 'C 5'], 76: ['½C 2', '½C 2'], 79: ['½C 2'], 80: ['½C 2'], 81: ['C 2', 'C 3', 'C 2', 'C 3'],
+  82: ['C 4', 'C 4'], 83: ['½C 2', '½C 2', '½C 2'], 84: ['C 5', 'C 4'], 85: ['C 2'], 86: ['½C 2', 'C 7', '½C 2', '½C 2', 'C 5'] };
 
 function marks(xml) {
   return [...xml.matchAll(MARK)].map((m) => m[1]).sort();
