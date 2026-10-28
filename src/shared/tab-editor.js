@@ -32,6 +32,19 @@ for (const event of ['change', 'annotationchange', 'titlechange']) {
   editor.addEventListener(event, saveDocument);
 }
 
+// The slot underline invites writing in an empty column; a column that already
+// has an annotation shows no such hint. Slots are rebuilt on every render.
+function markAnnotatedSlots() {
+  editor.annotations.forEach((entries, t) => {
+    const columns = new Set(entries.map((entry) => entry.column));
+    for (const slot of editor.querySelectorAll(`.ascii-tabs-annotation-slot[data-t="${t}"]`)) {
+      slot.toggleAttribute('data-annotated', columns.has(+slot.dataset.c));
+    }
+  });
+}
+new MutationObserver(markAnnotatedSlots).observe(editor, { childList: true, subtree: true });
+markAnnotatedSlots();
+
 const noteNames = document.getElementById('tabNoteNames');
 const letterLabels = document.getElementById('tabLetterLabels');
 const LETTER_LABELS_KEY = 'tabLetterLabels';

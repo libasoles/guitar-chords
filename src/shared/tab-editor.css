@@ -42,6 +42,9 @@ ascii-tabs.ascii-tabs-selecting .ascii-tabs-cur .ascii-tabs-fret::after {
 .tab-editor .ascii-tabs-annotation {
   z-index: 1;
 }
+.tab-editor .ascii-tabs-annotation-slot[data-annotated]::after {
+  display: none;
+}
 
 /* The editor underline measures only the text, with no card-coloured fill. */
 .tab-editor .ascii-tabs-text-editor {
