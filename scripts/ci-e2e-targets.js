@@ -17,7 +17,8 @@ const ARTICLE_COMMON = [
 const articleSuite = (...specific) => ({ build: 'site', paths: [...specific, ...ARTICLE_COMMON] });
 const ARTICLE_SUITES = {
   'articles-carcassi': articleSuite(/^src\/site\/(articles\/carcassi\/|og-score-carcassi\.)/, /^scripts\/articles\/carcassi\//, /^test\/articles-carcassi\./),
-  'articles-arpeggios': articleSuite(/^src\/site\/(articles\/arpeggios\/|og-score-arpeggios\.)/, /^scripts\/lib\/article-arpeggio/, /^test\/(articles-arpeggios|arpeggio-layout)\./),
+  'articles-arpeggios': articleSuite(/^src\/site\/(articles\/arpeggios\/|og-score-arpeggios\.)/, /^scripts\/lib\/article-arpeggio/, /^test\/articles-arpeggios\./),
+  'articles-arpeggio-layout': articleSuite(/^src\/site\/(articles\/arpeggios\/|og-score-arpeggios\.)/, /^scripts\/lib\/article-arpeggio/, /^test\/articles-arpeggio-layout\./),
   'articles-preludios': articleSuite(/^src\/site\/(articles\/(carcassi|santisteban)-preludios\/|og-score-preludes\.)/, /^scripts\/carcassi-preludios\//, /^scripts\/lib\/article-carcassi-preludes\.js$/, /^test\/articles-preludios\./),
   'articles-progresivas': articleSuite(/^src\/site\/articles\/carcassi-progresivas\//, /^scripts\/carcassi-progresivas\//, /^scripts\/lib\/article-carcassi-progressive\.js$/, /^test\/articles-progresivas\./),
   'articles-valses': articleSuite(/^src\/site\/articles\/carcassi-valses\//, /^scripts\/carcassi-valses\//, /^test\/articles-valses\./),

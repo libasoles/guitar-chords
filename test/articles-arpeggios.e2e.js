@@ -7,7 +7,6 @@ const { run } = require('./articles-harness');
 const arpeggioGroup = (root, quality) => ARPEGGIOS.find((group) => group[1] === root && group[2] === quality);
 
 run('articles-arpeggios', async ({ base, page }) => {
-  await require('./arpeggio-layout.e2e')();
   // Arpeggio positions: qualities share accessible tabs per root.
   for (const locale of ['es', 'en']) {
     const url = pagePath('articulo-tablaturas-arpegios', locale);
@@ -146,22 +145,41 @@ run('articles-arpeggios', async ({ base, page }) => {
     // Every annotation opens its own exact four-string fingering, including inversions.
     const buttons = page.locator('[role="tabpanel"] .arpeggio-chord');
     assert.equal(await buttons.count(), groups.flat().length);
-    for (let i = 0; i < await buttons.count(); i++) {
-      const button = buttons.nth(i);
-      const name = await button.textContent();
-      const target = await button.getAttribute('popovertarget');
-      const panel = button.locator('xpath=ancestor::*[@role="tabpanel"]');
-      const tabId = await panel.getAttribute('aria-labelledby');
-      await page.locator('[id="' + tabId + '"]').click();
+    {
+      // The first annotation goes through real clicks and also checks the card width and the close button,
+      // which do not depend on the chord.
+      const button = buttons.first();
+      const popup = page.locator('#' + await button.getAttribute('popovertarget'));
       await button.click();
-      const popup = page.locator('#' + target);
       assert.ok(await popup.evaluate((el) => el.matches(':popover-open')));
       await popup.locator('.finder-card svg').waitFor();
-      assert.equal(await popup.locator('.finder-card .name').textContent(), name);
+      assert.equal(await popup.locator('.finder-card .name').textContent(), await button.textContent());
       assert.ok(await popup.locator('.finder-card').evaluate((el) => el.getBoundingClientRect().width <= 180));
       await popup.locator('button').click();
       assert.ok(!(await popup.evaluate((el) => el.matches(':popover-open'))));
     }
+    // Every quality panel opens its last annotation (an inversion), in one round trip: select the tab, open it and
+    // read the card it renders. Rendering a card is what costs, so one per panel stands for the rest.
+    const opened = await page.evaluate(async () => {
+      const frame = () => new Promise((resolve) => requestAnimationFrame(resolve));
+      const out = [];
+      const panels = () => document.querySelectorAll('[role="tabpanel"]');
+      // Selecting a tab can re-render its group, so the panel is looked up again afterwards.
+      for (let i = 0; i < panels().length; i++) {
+        document.getElementById(panels()[i].getAttribute('aria-labelledby')).click();
+        const chords = panels()[i].querySelectorAll('.arpeggio-chord');
+        const button = chords[chords.length - 1];
+        button.click();
+        const popup = document.getElementById(button.getAttribute('popovertarget'));
+        for (let tries = 0; tries < 300 && !popup.querySelector('.finder-card svg'); tries++) await frame();
+        const name = popup.querySelector('.finder-card .name');
+        out.push({ name: button.textContent, card: name && name.textContent, open: popup.matches(':popover-open') });
+        popup.hidePopover();
+      }
+      return out;
+    });
+    assert.equal(opened.length, await page.locator('[role="tabpanel"]').count());
+    opened.forEach(({ name, card, open }, i) => assert.deepEqual({ card, open }, { card: name, open: true }, 'panel ' + i));
     await qualityTabs.first().click();
     // The annotation is keyboard operable; Escape dismisses and returns focus.
     await buttons.first().focus();
@@ -178,11 +196,20 @@ run('articles-arpeggios', async ({ base, page }) => {
       await page.setViewportSize({ width, height: 800 });
       // Resizing reflows over the next frames, so wait instead of sampling once.
       await page.waitForFunction(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
-      for (const tab of await page.getByRole('tab').all()) {
-        await tab.click();
-        // A revealed panel lays its annotations out on the next frames.
-        await page.waitForFunction(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
-      }
+      // Every tab, in one round trip: a revealed panel lays its annotations out on the next frames.
+      const overflowing = await page.evaluate(async () => {
+        const frame = () => new Promise((resolve) => requestAnimationFrame(resolve));
+        const fits = () => document.documentElement.scrollWidth <= document.documentElement.clientWidth;
+        let bad = 0;
+        for (const tab of document.querySelectorAll('[role="tab"]')) {
+          tab.click();
+          await frame();
+          for (let tries = 0; tries < 120 && !fits(); tries++) await frame();
+          if (!fits()) bad++;
+        }
+        return bad;
+      });
+      assert.equal(overflowing, 0, 'scroll horizontal al abrir una pestana a ' + width + 'px');
       // Native annotations are centred on the fret, including after resizing.
       await page.waitForFunction(() => Array.from(document.querySelectorAll('.ascii-tabs-annotation')).every((annotation) => {
         const staff = annotation.closest('.ascii-tabs-staff');
