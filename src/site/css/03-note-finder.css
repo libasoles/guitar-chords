@@ -396,6 +396,7 @@ code {
 .decoder-table {
   width: 100%;
   border-collapse: collapse;
+  font-family: var(--sans);
   font-size: 0.98rem;
 }
 .decoder-table th,
@@ -410,6 +411,7 @@ code {
   font-weight: 600;
 }
 .decoder-table code {
+  font-family: inherit;
   background: transparent;
   padding: 0;
 }
