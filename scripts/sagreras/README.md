@@ -78,12 +78,21 @@ Marieh imprime la cejilla como «₵N» (fuente FreeSerif) seguida de una línea
 las lee de la página y `transcribe.barre_spans` las pasa a compás y posición con el eje `x → inicio` que expone
 `convert_measure`: empieza en la primera nota a la derecha de la marca y termina en la última que alcanza la línea (sin línea,
 dura el compás). `backend/engine/barres.py` las escribe en el MusicXML como `C 2` más una línea punteada, y `tabify` las lee
-de vuelta: bajo una cejilla ninguna de las seis cuerdas queda al aire ni por debajo de su traste. Están marcadas las
+de vuelta: ninguna cuerda cubierta queda al aire ni por debajo de su traste. Una cejilla completa cubre seis cuerdas;
+`½C 2` cubre las tres primeras y permite los bajos al aire. Están marcadas las
 lecciones 55, 74, 76 y 79 a 86.
 
 Algunas fuentes se curaron a mano después de leerlas del PDF (55, 76, 79 y 84 ya no coinciden con lo que regenera `transcribe.py`),
 así que **no se regeneran para añadir cejillas**: `transcribe.py barres [N ...]` borra las marcas de cada `sources/NN.musicxml` y
 escribe las del PDF sin tocar sus notas. Una lección nueva las recibe sola al convertirse.
+
+Las fuentes curadas 76 (compases 3 y 7), 79 (12), 80 (3), 83 (3, 10 y 14) y 86 (1, 5 y 8) usan `½C 2`: la marca
+«₵2» se había importado como cejilla completa, forzando el La de quinta al aire a sexta, traste 5.
+No reponer esas marcas con `transcribe.py barres` sin conservar su alcance parcial: el lector del PDF
+no distingue por sí solo cuántas cuerdas cubren. El motor ya admite medias cejillas; no se cambia su costo.
+En la 79, compás 15, el Fa♯ lleva dedo 2 junto al Si con dedo 1, ambos en traste 2 (primera y quinta cuerdas).
+El dedo 4 anterior hacía incompatibles esas posiciones y obligaba al motor a buscar los trastes 11 y 7.
+`test_fingering.py` comprueba estas digitaciones ejecutando el motor sobre las fuentes curadas.
 
 ## Reproducir
 

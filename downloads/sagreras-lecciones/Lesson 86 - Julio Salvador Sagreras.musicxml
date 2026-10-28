@@ -44,7 +44,7 @@
       </attributes>
       <direction placement="above">
         <direction-type>
-          <words>C 2</words>
+          <words>½C 2</words>
         </direction-type>
         <offset>20160</offset>
         <staff>1</staff>
@@ -450,7 +450,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>6</string><fret>5</fret>
+            <string>5</string><fret>0</fret>
           </technical>
         </notations>
       </note>
@@ -2479,7 +2479,7 @@
     <measure implicit="no" number="5">
       <direction placement="above">
         <direction-type>
-          <words>C 2</words>
+          <words>½C 2</words>
         </direction-type>
         <offset>20160</offset>
         <staff>1</staff>
@@ -2875,7 +2875,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>6</string><fret>5</fret>
+            <string>5</string><fret>0</fret>
           </technical>
         </notations>
       </note>
@@ -4383,7 +4383,7 @@
     <measure implicit="no" number="8">
       <direction placement="above">
         <direction-type>
-          <words>C 2</words>
+          <words>½C 2</words>
         </direction-type>
         <staff>1</staff>
       </direction>
@@ -4641,7 +4641,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>6</string><fret>5</fret>
+            <string>5</string><fret>0</fret>
           </technical>
         </notations>
       </note>
@@ -4673,7 +4673,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>6</string><fret>5</fret>
+            <string>5</string><fret>0</fret>
           </technical>
         </notations>
       </note>

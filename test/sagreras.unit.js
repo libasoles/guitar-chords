@@ -310,3 +310,34 @@ test('leccion 53: el ultimo grupo conserva sus tres semicorcheas en la misma voz
     }
   }
 });
+
+/* Las medias cejillas permiten el La bajo al aire; comprobar tambien la descarga, no solo la fuente. */
+test('cejillas parciales: los bajos La quedan en quinta al aire en las descargas', () => {
+  for (const [number, bars] of [[76, [3, 7]], [79, [12]], [80, [3]], [83, [3, 10, 14]], [86, [1, 5, 8]]]) {
+    const xml = fs.readFileSync(path.join(DOWNLOADS_DIR,
+      `Lesson ${number} - Julio Salvador Sagreras.musicxml`), 'utf8');
+    for (const bar of bars) {
+      const measure = xml.match(new RegExp(`<measure\\b[^>]*number="${bar}"[^>]*>([\\s\\S]*?)</measure>`))[1];
+      const notes = [...measure.matchAll(/<note\b[^>]*>([\s\S]*?)<\/note>/g)].map((m) => m[1]);
+      const bass = notes.filter((n) => /<staff>2<\/staff>/.test(n)
+        && /<step>A<\/step>\s*<octave>2<\/octave>/.test(n));
+      assert.ok(bass.length, `leccion ${number}, compas ${bar}: bajo La`);
+      for (const note of bass) {
+        assert.match(note, /<string>5<\/string>/);
+        assert.match(note, /<fret>0<\/fret>/);
+      }
+    }
+  }
+});
+
+test('leccion 79: el compas 15 publicado abre en primera y quinta, traste 2', () => {
+  const xml = fs.readFileSync(path.join(DOWNLOADS_DIR, 'Lesson 79 - Julio Salvador Sagreras.musicxml'), 'utf8');
+  const measure = xml.match(/<measure\b[^>]*number="15"[^>]*>([\s\S]*?)<\/measure>/)[1];
+  const notes = [...measure.matchAll(/<note\b[^>]*>([\s\S]*?)<\/note>/g)].map((m) => m[1])
+    .filter((n) => /<staff>2<\/staff>/.test(n));
+  for (const [step, string] of [['F', 1], ['B', 5]]) {
+    const note = notes.find((n) => n.includes(`<step>${step}</step>`) && n.includes(`<string>${string}</string>`));
+    assert.ok(note, `${step} en cuerda ${string}`);
+    assert.match(note, /<fret>2<\/fret>/);
+  }
+});
