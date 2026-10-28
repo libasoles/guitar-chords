@@ -87,6 +87,9 @@ async function checkArpeggioLayout() {
       await rootToggle.focus();
       await page.keyboard.press('Space');
       assert.equal(await rootToggle.getAttribute('aria-pressed'), 'false');
+      // A hidden tab keeps its last layout and redraws when it is shown again.
+      await first.getByRole('tab', { name: 'mayor', exact: true }).click();
+      await page.waitForFunction(([el, text]) => el.textContent === text, [await firstTab.elementHandle(), fretText]);
       assert.equal(await firstTab.textContent(), fretText, 'toggle restores the original fret digits');
       await first.getByRole('tab', { name: 'mayor', exact: true }).click();
       const viewSwitch = first.getByRole('switch');

@@ -24,7 +24,7 @@ run('articles-arpeggios', async ({ base, page }) => {
     }
     const groups = await page.locator('.arpeggio-group ascii-tabs').evaluateAll((els) => els.map((el) => el.value.flat().filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
     // Include every staff: long groups wrap after six forms.
-    const groupIds = await page.locator('.arpeggio-group ascii-tabs').evaluateAll((els) => els.map((el) => Number(el.querySelector('.arpeggio-chord').getAttribute('popovertarget').match(/^arpeggio-chord-(\d+)-/)[1])));
+    const groupIds = await page.locator('.arpeggio-group ascii-tabs').evaluateAll((els) => els.map((el) => Number(el.closest('figure').nextElementSibling.dataset.chords.match(/^arpeggio-chord-(\d+)-/)[1])));
     assert.deepEqual(groups, groupIds.map((id) => ARPEGGIOS[id][4]));
     groups.flat().forEach((form) => assert.equal(form.filter((f) => f !== null).length, 4));
     assert.deepEqual(await page.locator('#arpeggio-E-panel-2 ascii-tabs').first().evaluate((el) => el.value.flat().filter((column) => column.some((note) => note !== null)).map((column) => column.map((note) => note === null ? null : note.fret))), arpeggioGroup('E', 'Seventh')[4]);
@@ -41,6 +41,8 @@ run('articles-arpeggios', async ({ base, page }) => {
     weights.forEach(({ bass, weight }) => assert.equal(weight, bass ? '700' : '400'));
     if (locale === 'es') assert.match(await page.locator('.lead a').textContent(), /^descomposición/);
     // The names are annotation buttons above the strings, without underline.
+    // A hidden panel draws nothing until it is shown.
+    await page.locator('#arpeggio-D-tab-2').click();
     assert.deepEqual(await page.locator('#arpeggio-D-panel-2 ascii-tabs').first().locator('.ascii-tabs-annotations .arpeggio-chord').allTextContents(), arpeggioGroup('D', 'Seventh')[3]);
     // The white paper starts below the names.
     const [nameBottom, paperTop] = await page.locator('.arpeggio-group ascii-tabs').first().evaluate((el) => [
@@ -140,7 +142,7 @@ run('articles-arpeggios', async ({ base, page }) => {
     assert.equal(await qualityTabs.first().getAttribute('aria-selected'), 'true');
     // Every annotation opens its own exact four-string fingering, including inversions.
     const buttons = page.locator('[role="tabpanel"] .arpeggio-chord');
-    assert.equal(await buttons.count(), groups.flat().length);
+    assert.equal(await page.locator('[role="tabpanel"]:visible .arpeggio-chord').count(), await page.locator('[role="tabpanel"]:visible ascii-tabs').evaluateAll((els) => els.reduce((sum, el) => sum + el.value.flat().filter((column) => column.some((note) => note !== null)).length, 0)));
     {
       // The first annotation goes through real clicks and also checks the card width and the close button,
       // which do not depend on the chord.

@@ -909,8 +909,12 @@ const SEARCH_LOADER = `<script>
   // Focus is given by replaying a press on the first cell, which has no real pointer to capture.
   input.setPointerCapture = function() {};
 
+  // A hidden ascii-tabs draws its cells only once it is shown and measured, a few frames after the popup opens.
+  var focusRetries = 0;
   function focusFirstCell() {
     var cell = input.querySelector('.ascii-tabs-cell');
+    if (!cell && focusRetries++ < 10) return requestAnimationFrame(focusFirstCell);
+    focusRetries = 0;
     if (cell) cell.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerType: 'touch' }));
     document.dispatchEvent(new PointerEvent('pointerup', { pointerType: 'touch' }));
   }
