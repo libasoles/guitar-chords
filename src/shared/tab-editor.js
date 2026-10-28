@@ -65,38 +65,67 @@ function escapeHtml(text) {
 
 let chordPopover = null;
 let chordSource = null;
+let chordOrigin = null;
 function openChord(button) {
   const chord = findChord(button.textContent);
   if (!chord) return;
   if (!chordPopover) {
     chordPopover = document.createElement('div');
-    chordPopover.className = 'modal chord-popover';
+    chordPopover.className = 'modal chord-popover tab-chord-popover';
     chordPopover.setAttribute('popover', '');
     chordPopover.setAttribute('role', 'dialog');
     chordPopover.innerHTML =
       '<button type="button" class="modal-close" aria-label="' + escapeHtml(editor.dataset.chordClose || '') + '">×</button>' +
-      '<div class="chord-popover-slot"></div>' +
-      '<button type="button" class="chord-popover-edit">' + escapeHtml(editor.dataset.chordEdit || '') + '</button>';
+      '<div class="chord-popover-slot"></div>';
     chordPopover.querySelector('.modal-close').addEventListener('click', () => chordPopover.hidePopover());
-    chordPopover.querySelector('.chord-popover-edit').addEventListener('click', () => {
-      chordPopover.hidePopover();
-      // The annotation owns the text editor: a click on it (not on the button) opens it.
-      chordSource?.closest('.ascii-tabs-annotation')?.click();
+    chordPopover.addEventListener('toggle', (event) => {
+      // Native focus restoration cannot find an invoker replaced by tab reflow.
+      if (event.newState === 'closed' && chordSource?.isConnected && document.activeElement === document.body) {
+        chordSource.focus({ preventScroll: true });
+      }
     });
     document.body.append(chordPopover);
   }
   chordSource = button;
+  const annotation = button.closest('.ascii-tabs-annotation');
+  chordOrigin = { t: annotation.dataset.t, c: annotation.dataset.c };
   const label = (editor.dataset.chordLabel || '') + ' ' + chord.name;
   chordPopover.setAttribute('aria-label', label);
   const card = document.createElement('div');
   card.setAttribute('data-chord-card', '');
-  card.dataset.chord = JSON.stringify({ name: chord.name, fingers: chord.fingers, barres: chord.barres || [], position: chord.position || 1 });
+  const activeStrings = Object.keys(window.NoteMatch.soundingFrets(chord.fingers, chord.barres)).map(Number).sort((a, b) => b - a);
+  const notes = window.NoteMatch.voicingNotes(chord, chord);
+  const stringNotes = Array(6).fill('');
+  activeStrings.forEach((string, i) => { stringNotes[string - 1] = notes[i].note; });
+  card.dataset.chord = JSON.stringify({ name: chord.name, fingers: chord.fingers, barres: chord.barres || [], position: chord.position || 1, stringNotes });
   card.setAttribute('role', 'img');
   card.setAttribute('aria-label', label);
   chordPopover.querySelector('.chord-popover-slot').replaceChildren(card);
-  chordPopover.showPopover();
+  button.focus({ preventScroll: true });
+  chordPopover.showPopover({ source: button });
   window.ChordCard.render(card);
+  window.ChordCard.positionPopover(chordPopover, chordSource);
 }
+function repositionChord() {
+  if (!chordPopover?.matches(':popover-open')) return;
+  // Reflow can replace every annotation node while the popup stays open.
+  if (!chordSource?.isConnected) {
+    chordSource = editor.querySelector(`.ascii-tabs-annotation[data-t="${chordOrigin.t}"][data-c="${chordOrigin.c}"] .tab-chord`);
+  }
+  if (!chordSource) return chordPopover.hidePopover();
+  window.ChordCard.positionPopover(chordPopover, chordSource);
+}
+window.addEventListener('resize', repositionChord);
+document.addEventListener('scroll', repositionChord, true);
+new ResizeObserver(repositionChord).observe(editor);
+// Keep annotation editing available directly on its text, without a popup action.
+editor.addEventListener('dblclick', (event) => {
+  const button = event.target.closest('.tab-chord');
+  if (!button) return;
+  event.stopPropagation();
+  chordPopover?.hidePopover();
+  button.closest('.ascii-tabs-annotation').click();
+}, true);
 // Captured on the editor so the annotation's own click (which edits it) never sees these.
 editor.addEventListener('click', (event) => {
   const button = event.target.closest('.tab-chord');

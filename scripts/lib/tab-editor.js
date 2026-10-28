@@ -38,7 +38,6 @@ function renderSharedTabEditor(strings, locale, { heading = strings.tabH1, lead 
         data-chord-label="%%artChordDiagramLabel%%"
         data-chord-show="%%artArpeggiosShowFingering%%"
         data-chord-close="%%artArpeggiosClose%%"
-        data-chord-edit="%%tabChordEdit%%"
       >
         <ascii-tabs-storage key="tabEditor.tabs"></ascii-tabs-storage>
         <ascii-tabs-hint></ascii-tabs-hint>

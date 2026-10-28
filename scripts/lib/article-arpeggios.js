@@ -707,18 +707,6 @@ function viewSwitch(title, strings) {
 const POPOVER_LOADER = `<script>
 (function() {
   var trigger;
-  function position(popup) {
-    if (!trigger || !trigger.isConnected) return;
-    var rect = trigger.getBoundingClientRect();
-    var box = popup.getBoundingClientRect();
-    var padding = 16;
-    var gap = 10;
-    var left = rect.left + (rect.width - box.width) / 2;
-    var top = rect.bottom + gap;
-    if (top + box.height > innerHeight - padding) top = rect.top - gap - box.height;
-    popup.style.left = Math.max(padding, Math.min(left, innerWidth - box.width - padding)) + 'px';
-    popup.style.top = Math.max(padding, Math.min(top, innerHeight - box.height - padding)) + 'px';
-  }
   document.addEventListener('click', function(event) {
     var button = event.target.closest('.arpeggio-chord');
     if (button) trigger = button;
@@ -727,12 +715,12 @@ const POPOVER_LOADER = `<script>
     popup.addEventListener('toggle', function(event) {
       if (event.newState !== 'open') return;
       window.ChordCard.renderAll(popup);
-      position(popup);
+      window.ChordCard.positionPopover(popup, trigger);
     });
   });
   function reposition() {
     var popup = document.querySelector('.arpeggio-popover:popover-open');
-    if (popup) position(popup);
+    if (popup) window.ChordCard.positionPopover(popup, trigger);
   }
   window.addEventListener('resize', reposition);
   document.addEventListener('scroll', reposition, true);

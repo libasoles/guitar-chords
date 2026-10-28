@@ -82,7 +82,25 @@ async function run() {
     await page.waitForFunction(() => document.querySelector('.chord-popover:popover-open [data-rendered]'));
     assert.strictEqual(await page.locator('.chord-popover:popover-open .name').textContent(), 'Am');
     assert.strictEqual(await textEditor.count(), 0);
-    await page.locator('.chord-popover-edit').click();
+    assert.strictEqual(await page.locator('.chord-popover-edit').count(), 0);
+    assert.deepStrictEqual(await page.locator('.chord-popover .tuning').allTextContents(), ['', 'A', 'E', 'A', 'C', 'E']);
+    for (const width of [1280, 390]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.waitForFunction(() => {
+        const anchor = document.querySelector('.tab-chord').getBoundingClientRect();
+        const popup = document.querySelector('.chord-popover:popover-open').getBoundingClientRect();
+        return Math.abs(popup.y - (anchor.bottom + 10)) < 1;
+      });
+      const anchor = await chordButton.boundingBox();
+      const popup = await page.locator('.chord-popover:popover-open').boundingBox();
+      assert.ok(popup.x >= 15 && popup.x + popup.width <= width - 15, 'popup stays within the viewport');
+      assert.ok(Math.abs(popup.y - (anchor.y + anchor.height + 10)) < 1, 'popup anchors below its trigger');
+      assert.ok(await page.locator('.chord-popover .finder-card').evaluate(el => el.getBoundingClientRect().width <= 180));
+    }
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => document.querySelector('.tab-chord') === document.activeElement);
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await chordButton.dblclick();
     assert.strictEqual(await textEditor.inputValue(), 'Am');
     await textEditor.press('Escape');
     assert.deepStrictEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('tabEditor.document')).annotations[0]), [{ column: 1, text: 'Am' }]);
@@ -94,10 +112,11 @@ async function run() {
 
     // Chord recognition accepts the case variants used by the finder while
     // retaining the distinction between major- and minor-seventh aliases.
-    for (const [typed, canonical] of [
+    for (const [typed, canonical, stringNotes] of [
       ['A7', 'A7'], ['Dmaj7', 'Dmaj7'], ['DMaj7', 'Dmaj7'],
       ['E7', 'E7'], ['A', 'A'], ['dMAJ7', 'Dmaj7'],
       ['DM7', 'Dmaj7'], ['Dm7', 'Dm7'], ['dm7', 'Dm7'],
+      ['F', 'F', ['F', 'C', 'F', 'A', 'C', 'F']],
     ]) {
       await page.locator('.ascii-tabs-annotation-slot[data-t="0"][data-c="1"]').click();
       await textEditor.fill(typed);
@@ -108,7 +127,9 @@ async function run() {
       await button.click();
       await page.waitForFunction(() => document.querySelector('.chord-popover:popover-open [data-rendered]'));
       assert.strictEqual(await page.locator('.chord-popover:popover-open .name').textContent(), canonical);
-      await page.locator('.chord-popover-edit').click();
+      if (stringNotes) assert.deepStrictEqual(await page.locator('.chord-popover .tuning').allTextContents(), stringNotes);
+      await page.keyboard.press('Escape');
+      await button.dblclick();
       assert.strictEqual(await textEditor.inputValue(), typed);
       await textEditor.fill('');
       await textEditor.press('Enter');
@@ -142,7 +163,8 @@ async function run() {
     const [annotationLine, firstString] = copiedAnnotation.split('\n');
     assert.ok(annotationLine.indexOf('Ddim7') + 'Ddim7'.length < firstString.lastIndexOf('0'), 'ASCII copy preserves the annotation spacing');
     await page.locator('.tab-chord').click();
-    await page.locator('.chord-popover-edit').click();
+    await page.keyboard.press('Escape');
+    await page.locator('.tab-chord').dblclick();
     await textEditor.fill('Anotación larga');
     await textEditor.press('Enter');
     const widerColumn = await columnTwo.boundingBox();

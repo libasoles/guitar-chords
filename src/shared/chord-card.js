@@ -39,5 +39,19 @@
     if (!el.closest('[popover]')) render(el);
   });
 
-  window.ChordCard = { render: render, renderAll: renderAll };
+  // Both the editor and the arpeggio page use the same anchored card layout.
+  function positionPopover(popup, trigger) {
+    if (!trigger || !trigger.isConnected) return;
+    var rect = trigger.getBoundingClientRect();
+    var box = popup.getBoundingClientRect();
+    var padding = 16;
+    var gap = 10;
+    var left = rect.left + (rect.width - box.width) / 2;
+    var top = rect.bottom + gap;
+    if (top + box.height > innerHeight - padding) top = rect.top - gap - box.height;
+    popup.style.left = Math.max(padding, Math.min(left, innerWidth - box.width - padding)) + 'px';
+    popup.style.top = Math.max(padding, Math.min(top, innerHeight - box.height - padding)) + 'px';
+  }
+
+  window.ChordCard = { render: render, renderAll: renderAll, positionPopover: positionPopover };
 })();
