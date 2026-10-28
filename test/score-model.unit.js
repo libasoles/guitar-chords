@@ -773,3 +773,16 @@ test('una barra doble en el borde sigue cambiando la barra sin dividir', () => {
   assert.equal(score.measureDurations, undefined);
   assert.deepEqual(score.barlines, { 0: { double: true } });
 });
+
+
+test('los anchos visuales se conservan al guardar, dividir y desplazar compases', () => {
+  const score = M.emptyScore();
+  score.measureWidths = { 0: 0.4, 1: 0.2, 2: 0.2, 3: 0.2 };
+  assert.deepEqual(M.sanitize(score).measureWidths, score.measureWidths);
+  M.setBarline(score, 0, 'double', 24);
+  assert.ok(Math.abs(score.measureWidths[0] - 0.1) < 1e-12);
+  assert.deepEqual({ ...score.measureWidths, 0: 0.1 }, { 0: 0.1, 1: 0.3, 2: 0.2, 3: 0.2, 4: 0.2 });
+  assert.deepEqual(M.sanitize(score).measureWidths, score.measureWidths);
+  const clean = M.sanitize({ ...score, measureWidths: { 0: -1, 1: Infinity, 2: '0.2', 3: 0, 4: 0.4, 99: 0.3 } });
+  assert.deepEqual(clean.measureWidths, { 4: 0.4 });
+});

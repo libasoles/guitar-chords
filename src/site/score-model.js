@@ -145,7 +145,7 @@
   function addMeasure(score, row) {
     if (!Number.isInteger(row) || row < 0 || row >= score.rows.length || score.rows[row].length >= PER_ROW) return false;
     const at = rowStarts(score)[row] + score.rows[row].length;
-    ['barlines', 'keys', 'clefs', 'barres', 'measureDurations'].forEach((name) => { if (score[name]) score[name] = shiftKeys(score[name], at, 1); });
+    ['barlines', 'keys', 'clefs', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => { if (score[name]) score[name] = shiftKeys(score[name], at, 1); });
     score.rows[row].push([]);
     return true;
   }
@@ -163,7 +163,7 @@
         if (!barre.span) delete barre.span;
       }
     });
-    ['barlines', 'keys', 'clefs', 'barres', 'measureDurations'].forEach((name) => {
+    ['barlines', 'keys', 'clefs', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => {
       if (!score[name]) return;
       delete score[name][at];
       score[name] = shiftKeys(score[name], at, -1);
@@ -233,6 +233,7 @@
       else if (!fragment(ev, start, at - start, true, left) || !fragment(continuation, 0, stop - at, false, right)) return false;
     }
     const oldBar = score.barlines && score.barlines[mi];
+    const oldWidth = score.measureWidths && score.measureWidths[mi];
     const tabs = {};
     Object.entries(score.tabs || {}).forEach(([key, column]) => {
       let [m, t] = key.split(':').map(Number);
@@ -255,10 +256,14 @@
         }
       }
     });
-    ['barlines', 'keys', 'clefs', 'barres', 'measureDurations'].forEach((name) => {
+    ['barlines', 'keys', 'clefs', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => {
       if (score[name]) score[name] = shiftKeys(score[name], mi + 1, 1);
     });
     if (movedBarre) score.barres[mi + 1] = movedBarre;
+    if (oldWidth) {
+      score.measureWidths[mi] = oldWidth * at / end;
+      score.measureWidths[mi + 1] = oldWidth * (end - at) / end;
+    }
     score.measureDurations = Object.assign(score.measureDurations || {}, { [mi]: at, [mi + 1]: end - at });
     score.barlines = score.barlines || {};
     score.barlines[mi] = Object.assign({ double: true }, oldBar && oldBar.start ? { start: true, end: false } : {});
@@ -584,8 +589,12 @@
       const size = duration * factor;
       if (/^(0|[1-9]\d*)$/.test(index) && +index < total && Number.isInteger(size) && size > 0 && size < capacity({ meter }) && measureLength(rows.flat()[+index]) <= size) measureDurations[index] = size;
     });
+    const measureWidths = {};
+    Object.entries(data.measureWidths || {}).forEach(([index, width]) => {
+      if (/^(0|[1-9]\d*)$/.test(index) && +index < total && Number.isFinite(width) && width > 0 && width <= 1) measureWidths[index] = width;
+    });
     const tabs = sanitizeTabs(data.tabs, rows.reduce((sum, row) => sum + row.length, 0));
-    return Object.assign(Object.keys(measureDurations).length ? { measureDurations } : {}, Object.keys(barlines).length ? { barlines } : {}, Object.keys(keys).length ? { keys } : {}, Object.keys(clefs).length ? { clefs } : {}, Object.keys(barres).length ? { barres } : {}, data.showTabs === true ? { showTabs: true } : {}, Object.keys(tabs).length ? { tabs } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
+    return Object.assign(Object.keys(measureWidths).length ? { measureWidths } : {}, Object.keys(measureDurations).length ? { measureDurations } : {}, Object.keys(barlines).length ? { barlines } : {}, Object.keys(keys).length ? { keys } : {}, Object.keys(clefs).length ? { clefs } : {}, Object.keys(barres).length ? { barres } : {}, data.showTabs === true ? { showTabs: true } : {}, Object.keys(tabs).length ? { tabs } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
   }
 
   // Rellena huecos con silencios ocultos: el final del compas y el espacio entre figuras sueltas.
