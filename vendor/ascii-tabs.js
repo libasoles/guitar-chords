@@ -64,12 +64,12 @@ const lastUsed = tab => {
 const lastContent = (tab, annotations = []) => Math.max(lastUsed(tab), ...annotations.map(a => a.column));
 
 // Character offsets share the same Column widths as the six Strings.
-function columnOffsets(tab, start, end, spacing, notation, tuning) {
+function columnOffsets(tab, start, end, spacing, notation, tuning, columnSizes = []) {
   const offsets = [];
   let used = 0;
   for (let c = start; c < end; c++) {
     offsets.push(used + leadingDashes(spacing));
-    used += columnWidth(tab[c], spacing, notation, tuning);
+    used += spacing + (columnSizes[c] ?? columnDigits(tab[c], notation, tuning));
   }
   return offsets;
 }
@@ -109,18 +109,17 @@ function annotationText(entry) {
 
 // Size every String in a Column using its longest displayed Fret or note name.
 const columnDigits = (column, notation, tuning) => Math.max(1, ...column.map((v, s) => fretText(v, s, notation, tuning).length));
-const columnWidth = (column, spacing, notation, tuning) => spacing + columnDigits(column, notation, tuning);
 const leadingDashes = spacing => Math.ceil(spacing / 2);
 const visualDashes = count =>
   count ? `<span class="ascii-tabs-string" aria-hidden="true">${'-'.repeat(count)}</span>` : '';
 
 // Split Columns into Staves: [start, end) ranges that fit `capacity` characters
-function layout(tab, spacing, capacity, notation, tuning) {
+function layout(tab, spacing, capacity, notation, tuning, columnSizes = []) {
   const staves = [];
   let start = 0;
   let used = 0;
   for (let c = 0; c < tab.length; c++) {
-    const width = columnWidth(tab[c], spacing, notation, tuning);
+    const width = spacing + (columnSizes[c] ?? columnDigits(tab[c], notation, tuning));
     if (c > start && used + width > capacity) {
       staves.push([start, c]);
       start = c;
@@ -133,7 +132,7 @@ function layout(tab, spacing, capacity, notation, tuning) {
 }
 
 // One Tab as plain ASCII, every Staff cut right after its last Column
-function format(tab, { spacing = DEFAULT_SPACING, labels = 'numbers', notation = 'frets', tuning = STANDARD_TUNING, width = Infinity, annotations = [] } = {}) {
+function format(tab, { spacing = DEFAULT_SPACING, labels = 'numbers', notation = 'frets', tuning = STANDARD_TUNING, width = Infinity, annotations = [], columnSizes = [] } = {}) {
   tuning = normalizeTuning(tuning);
   annotations = normalizeAnnotations([annotations], [tab])[0] ?? [];
   const names = stringLabels(labels, tuning);
@@ -141,14 +140,14 @@ function format(tab, { spacing = DEFAULT_SPACING, labels = 'numbers', notation =
   if (!columns.length) return '';
   const lead = '-'.repeat(leadingDashes(spacing));
   const trail = '-'.repeat(spacing - lead.length);
-  return layout(columns, spacing, width - labelWidth(labels, tuning), notation, tuning)
+  return layout(columns, spacing, width - labelWidth(labels, tuning), notation, tuning, columnSizes)
     .map(([start, end]) => {
-      const offsets = columnOffsets(columns, start, end, spacing, notation, tuning);
+      const offsets = columnOffsets(columns, start, end, spacing, notation, tuning, columnSizes);
       const lines = annotationLines(annotations, start, end, offsets, labelWidth(labels, tuning));
       for (let s = 0; s < STRING_COUNT; s++) {
         let line = names[s];
         for (let c = start; c < end; c++) {
-          const digits = columnDigits(columns[c], notation, tuning);
+          const digits = columnSizes[c] ?? columnDigits(columns[c], notation, tuning);
           const fret = fretText(columns[c][s], s, notation, tuning);
           line += lead + fret.padEnd(digits, '-') + trail;
         }
@@ -1070,24 +1069,38 @@ class AsciiTabs extends Base {
     }
   }
 
+  #columnSizes(t) {
+    const sizes = [];
+    if (this.#columnLayout || !this.annotationsEditable || this.readonly) return sizes;
+    for (const entry of this.#annotations[t] ?? []) {
+      // Editable annotations use the tab's monospace font. Reserve their
+      // longest line plus a gap, capped at one Staff so long prose can wrap.
+      const length = Math.max(...annotationText(entry).split('\n').map(line => Array.from(line).length));
+      const digits = Math.min(length + 1, this.#capacity) - this.#spacing;
+      sizes[entry.column] = Math.max(sizes[entry.column] ?? 1, digits,
+        columnDigits(this.#tabs[t][entry.column], this.notation, this.tuning));
+    }
+    return sizes;
+  }
+
   // Always leave room after the last Fret; a new Staff appears when you write past the end
-  #fit(t) {
+  #fit(t, columnSizes) {
     const tab = this.#tabs[t];
     if (this.#columnLayout) return (this.#staves[t] = [[0, tab.length]]);
     const need = Math.max(lastContent(tab, this.#annotations[t]) + (this.readonly ? 1 : 2), this.#cur && this.#cur.t === t ? this.#cur.c + 1 : 0, this.#textEditor?.t === t && this.#textEditor.kind === 'annotation' ? this.#textEditor.c + 1 : 0, 1);
     while (tab.length < need) tab.push(emptyColumn());
     tab.length = need;
-    let staves = layout(tab, this.#spacing, this.#capacity, this.notation, this.tuning);
+    let staves = layout(tab, this.#spacing, this.#capacity, this.notation, this.tuning, columnSizes);
     // Fill the last Staff with empty Columns, so every Staff spans the Sheet and, when editable,
     // every slot can be clicked. `value` and copy trim them.
     const [start] = staves[staves.length - 1];
     let used = 0;
-    for (let c = start; c < tab.length; c++) used += columnWidth(tab[c], this.#spacing, this.notation, this.tuning);
+    for (let c = start; c < tab.length; c++) used += this.#spacing + (columnSizes[c] ?? columnDigits(tab[c], this.notation, this.tuning));
     while (used + this.#spacing + 1 <= this.#capacity) {
       tab.push(emptyColumn());
       used += this.#spacing + 1;
     }
-    staves = layout(tab, this.#spacing, this.#capacity, this.notation, this.tuning);
+    staves = layout(tab, this.#spacing, this.#capacity, this.notation, this.tuning, columnSizes);
     this.#staves[t] = staves;
     return staves;
   }
@@ -1115,9 +1128,10 @@ class AsciiTabs extends Base {
       const lead = '-'.repeat(leadingDashes(this.#spacing));
       const trail = '-'.repeat(this.#spacing - lead.length);
       let html = '';
-      for (const [start, end] of this.#fit(t)) {
+      const columnSizes = this.#columnSizes(t);
+      for (const [start, end] of this.#fit(t, columnSizes)) {
         // Dashes after the last Column, so every Staff ends flush with the Sheet
-        const widths = tab.slice(start, end).map(column => columnDigits(column, notation, tuning));
+        const widths = tab.slice(start, end).map((column, i) => columnSizes[start + i] ?? columnDigits(column, notation, tuning));
         const used = widths.reduce((sum, digits) => sum + this.#spacing + digits, 0);
         const fill = geometry ? '' : visualDashes(this.#capacity - used);
         html += '<div class="ascii-tabs-staff">';
@@ -1905,7 +1919,7 @@ class AsciiTabs extends Base {
   async copy(index = 0) {
     const tab = this.#tabs[index];
     if (!tab) return;
-    await copyText(this.#selection.length && this.#selection[0].t === index ? this.#selectionText() : format(tab, { spacing: this.#spacing, labels: this.labels, notation: this.notation, tuning: this.tuning, width: this.#capacity + labelWidth(this.labels, this.tuning), annotations: this.#annotations[index] }));
+    await copyText(this.#selection.length && this.#selection[0].t === index ? this.#selectionText() : format(tab, { spacing: this.#spacing, labels: this.labels, notation: this.notation, tuning: this.tuning, width: this.#capacity + labelWidth(this.labels, this.tuning), annotations: this.#annotations[index], columnSizes: this.#columnSizes(index) }));
     const button = this.#sheetEls[index]?.querySelector('.ascii-tabs-copy');
     if (!button) return;
     this.#flashCopied(button);

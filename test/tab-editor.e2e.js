@@ -114,6 +114,68 @@ async function run() {
       await textEditor.press('Enter');
     }
 
+    // An annotation reserves horizontal space in its column, even when the
+    // next column has notes without an annotation of its own.
+    await page.locator('ascii-tabs').evaluate(el => {
+      el.setDocument({ value: [[[0, 2, 2, 2, 0, null], [2, 1, 2, 1, null, null], [0, 0, 1, 0, 2, 0]]], annotations: [[]] });
+    });
+    const columnTwo = page.locator('.ascii-tabs-cell[data-t="0"][data-c="2"][data-s="0"]');
+    const originalColumn = await columnTwo.boundingBox();
+    await page.locator('.ascii-tabs-annotation-slot[data-t="0"][data-c="1"]').click();
+    await textEditor.fill('Ddim7');
+    await textEditor.press('Enter');
+    const columnSpace = await page.evaluate(() => {
+      const annotation = document.querySelector('.ascii-tabs-annotation').getBoundingClientRect();
+      const next = document.querySelector('.ascii-tabs-cell[data-t="0"][data-c="2"][data-s="0"] .ascii-tabs-fret').getBoundingClientRect();
+      return { right: annotation.right, next: next.left };
+    });
+    assert.ok(columnSpace.right < columnSpace.next, 'Ddim7 fits before the next column');
+    const copiedAnnotation = await page.evaluate(async () => {
+      const clipboard = navigator.clipboard;
+      const original = clipboard.writeText;
+      let copied;
+      clipboard.writeText = async text => { copied = text; };
+      try { await document.querySelector('ascii-tabs').copy(0); }
+      finally { clipboard.writeText = original; }
+      return copied;
+    });
+    const [annotationLine, firstString] = copiedAnnotation.split('\n');
+    assert.ok(annotationLine.indexOf('Ddim7') + 'Ddim7'.length < firstString.lastIndexOf('0'), 'ASCII copy preserves the annotation spacing');
+    await page.locator('.tab-chord').click();
+    await page.locator('.chord-popover-edit').click();
+    await textEditor.fill('Anotación larga');
+    await textEditor.press('Enter');
+    const widerColumn = await columnTwo.boundingBox();
+    assert.ok(widerColumn.x > columnSpace.next, 'plain text also widens its column');
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector('.ascii-tabs-annotation')?.textContent === 'Anotación larga');
+    assert.ok(Math.abs((await columnTwo.boundingBox()).x - widerColumn.x) < 1, 'spacing survives reload');
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.locator('.ascii-tabs-annotation').click();
+    await textEditor.fill('Una anotación muy larga que debe ajustarse al ancho disponible sin desbordar la tablatura');
+    await textEditor.press('Enter');
+    const mobile = await page.evaluate(() => {
+      const annotation = document.querySelector('.ascii-tabs-annotation');
+      const band = annotation.closest('.ascii-tabs-annotations');
+      const first = document.querySelector('.ascii-tabs-cell[data-c="1"][data-s="0"]');
+      const next = document.querySelector('.ascii-tabs-cell[data-c="2"][data-s="0"]');
+      return {
+        right: annotation.getBoundingClientRect().right,
+        limit: band.getBoundingClientRect().right,
+        wraps: first.closest('.ascii-tabs-staff') !== next.closest('.ascii-tabs-staff'),
+      };
+    });
+    assert.ok(mobile.right <= mobile.limit + 1, 'long annotation stays within the staff');
+    assert.ok(mobile.wraps, 'expanded columns wrap onto another staff');
+    await page.locator('.ascii-tabs-annotation').click();
+    await textEditor.fill('');
+    await textEditor.press('Enter');
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.waitForFunction(x => Math.abs(document.querySelector('.ascii-tabs-cell[data-c="2"][data-s="0"]').getBoundingClientRect().x - x) < 1, originalColumn.x);
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
+
     // The reusable editor also works under an extension-style policy that
     // permits only local scripts: defaults, display controls and tutorial
     // opening cannot depend on inline executable scripts.
