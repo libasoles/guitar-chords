@@ -6,6 +6,29 @@ const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
 const { serveStatic } = require('../scripts/lib/static-server');
 
+async function checkInteriorDoubleBar(page) {
+  await page.locator('[data-barline="double"]').click();
+  const staff = await page.locator('#scoreStage g.measure').first().locator('g.staff > path').first().boundingBox();
+  const x = staff.x + staff.width * 0.55, y = staff.y + 10;
+  await page.mouse.move(x, y);
+  const marker = await page.locator('.score-marker-line').boundingBox();
+  assert.ok(Math.abs(marker.x - x) < 3, 'la guia sigue el punto interior');
+  await page.mouse.click(x, y);
+  const split = await page.evaluate(() => ({ durations: scoreEditor.score.measureDurations, rows: scoreEditor.score.rows, bars: scoreEditor.score.barlines }));
+  assert.equal(split.rows.flat().length, 13, 'el clic interior divide el compas');
+  assert.ok(split.durations[0] > 0 && split.durations[0] < 96);
+  assert.equal(split.durations[0] + split.durations[1], 96);
+  assert.deepEqual(split.bars[0], { double: true });
+  await page.keyboard.press('ControlOrMeta+z');
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows.flat().length), 12);
+  await page.mouse.click(x, y);
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows.flat().length), 13);
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.measureDurations), split.durations);
+  assert.equal(await page.locator('#scoreStage g.measure').count(), 13);
+}
+
 async function checkBarlines(page) {
   await page.evaluate(() => localStorage.clear());
   await page.reload();
@@ -15,10 +38,10 @@ async function checkBarlines(page) {
   assert.equal(await page.locator('#scoreBarlines #scoreTabToggle').count(), 1);
   async function apply(type, mi) {
     await page.locator('[data-barline="' + type + '"]').click();
-    const point = await page.locator('#scoreStage g.measure').nth(mi).evaluate(node => {
+    const point = await page.locator('#scoreStage g.measure').nth(mi).evaluate((node, type) => {
       const r = node.querySelector('g.staff > path').getBoundingClientRect();
-      return { x: r.left + r.width / 2, y: r.top + 10 };
-    });
+      return { x: type === 'double' ? r.right - 1 : r.left + r.width / 2, y: type === 'double' ? r.top - 15 : r.top + 10 };
+    }, type);
     await page.mouse.click(point.x, point.y);
   }
   await apply('start', 0);
@@ -671,6 +694,11 @@ async function run() {
     await page.locator('.score-key-trigger').first().click();
     assert.equal(await page.getByRole('group', { name: 'Key signature', exact: true }).locator('button').count(), 15);
     assert.deepEqual(errors, []);
+    const splitPage = await browser.newPage({ reducedMotion: 'reduce' });
+    await splitPage.goto(url);
+    await splitPage.waitForSelector('#scoreStage g.measure');
+    await checkInteriorDoubleBar(splitPage);
+    await splitPage.close();
     const dragPage = await browser.newPage({ reducedMotion: 'reduce', viewport: { width: 1280, height: 900 } });
     await dragPage.goto(url);
     await dragPage.waitForSelector('#scoreStage g.measure');

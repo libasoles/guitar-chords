@@ -714,3 +714,62 @@ test('sanear conserva el largo de cada renglon y el exportado empieza un sistema
   assert.equal(M.toMusicXml(clean).split('new-system').length - 1, 3);
   assert.deepEqual(M.sanitize({ rows: [[], [[]]] }).rows.map((row) => row.length), [4, 1, 4]);
 });
+
+
+test('doble barra interior divide el compas en el tiempo indicado y conserva la duracion', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ n: 30, d: 'q', at: 0 }, { n: 32, d: 'q', at: 24 }];
+  assert.equal(M.setBarline(score, 0, 'double', 24), true);
+  assert.equal(M.measures(score).length, 13);
+  assert.deepEqual(M.measures(score).slice(0, 2), [[{ n: 30, d: 'q', at: 0 }], [{ n: 32, d: 'q', at: 0 }]]);
+  assert.equal(M.capacity(score, 0), 24);
+  assert.equal(M.capacity(score, 1), 72);
+  assert.equal(M.capacity(score, 2), 96);
+  assert.deepEqual(M.sanitize(score), score);
+  const xml = M.toMusicXml(score);
+  const first = xml.match(/<measure[^>]*>[\s\S]*?<\/measure>/)[0];
+  assert.ok(first.includes('implicit="yes"'));
+  assert.ok(!first.includes('print-object="no"><rest'), 'no rellena el compas corto hasta 4/4');
+});
+
+
+test('el corte liga una nota que lo atraviesa y conserva las alteraciones y las voces', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ n: 30, d: 'h', at: 0, acc: '#' }, { n: 32, d: 'q', at: 24 }];
+  M.setBarline(score, 0, 'double', 12);
+  assert.equal(M.capacity(score, 0), 12);
+  assert.equal(M.capacity(score, 1), 84);
+  assert.deepEqual(M.measures(score)[0], [{ n: 30, d: 'e', at: 0, acc: '#', tie: true }]);
+  assert.deepEqual(M.measures(score)[1], [{ n: 30, d: 'q', dot: true, at: 0, acc: '#' }, { n: 32, d: 'q', at: 12 }]);
+  assert.equal(M.attacks(score).length, 2, 'la nota ligada no se vuelve a atacar');
+  assert.ok(M.toMusicXml(score).includes('<backup><duration>84</duration></backup>'));
+  assert.deepEqual(M.sanitize(score), score);
+  assert.equal(M.placement([], { n: 35, d: 'q' }, 0, score, 0), null, 'no cabe una negra en el compas de corchea');
+});
+
+test('el corte desplaza marcas, tablaturas y duraciones, y se puede repetir', () => {
+  const score = M.emptyScore();
+  score.barlines = { 0: { end: true }, 2: { double: true } };
+  score.keys = { 2: 2 };
+  score.clefs = { 2: 'bass' };
+  score.tabs = { '0:48': [1, null, null, null, null, null], '2:0': [2, null, null, null, null, null] };
+  score.barres = { 0: { at: 48, fret: 3 } };
+  M.setBarline(score, 0, 'double', 24);
+  assert.deepEqual(score.barlines, { 0: { double: true }, 1: { end: true }, 3: { double: true } });
+  assert.deepEqual(score.keys, { 3: 2 });
+  assert.deepEqual(score.clefs, { 3: 'bass' });
+  assert.deepEqual(Object.keys(score.tabs), ['1:24', '3:0']);
+  assert.deepEqual(score.barres, { 1: { at: 24, fret: 3 } });
+  M.setBarline(score, 1, 'double', 24);
+  assert.deepEqual(score.measureDurations, { 0: 24, 1: 24, 2: 48 });
+  assert.equal(M.measures(score).length, 14);
+  assert.deepEqual(M.sanitize(score).measureDurations, score.measureDurations);
+});
+
+test('una barra doble en el borde sigue cambiando la barra sin dividir', () => {
+  const score = M.emptyScore();
+  M.setBarline(score, 0, 'double', 96);
+  assert.equal(M.measures(score).length, 12);
+  assert.equal(score.measureDurations, undefined);
+  assert.deepEqual(score.barlines, { 0: { double: true } });
+});

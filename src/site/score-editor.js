@@ -265,7 +265,11 @@
 
   function dropNew(item, target) {
     if (item.kind === 'bar') {
-      change(() => M.setBarline(score, target.mi, item.bar));
+      change(() => {
+        const changed = M.setBarline(score, target.mi, item.bar, target.t);
+        if (changed) { selected = null; group = []; }
+        return changed;
+      });
       say('');
       return;
     }
@@ -283,7 +287,7 @@
       const ev = { d: item.d };
       if (item.kind === 'rest') ev.rest = true;
       else ev.n = target.n;
-      const spot = M.placement(measure, ev, target.t, score);
+      const spot = M.placement(measure, ev, target.t, score, target.mi);
       if (!spot) return say(t.full);
       change(() => {
         ev.d = spot.d;
@@ -332,7 +336,7 @@
     else { delete replacement.rest; replacement.n = ev.rest ? M.bottomLine(score, selected.mi) : ev.n; }
     if (item.d === 'w' || item.d === 's' || item.d === 'f') delete replacement.dot;
     const measure = M.measures(score)[selected.mi];
-    if (M.onsets(measure)[selected.i] + M.length(replacement) > M.capacity(score)) return say(t.full);
+    if (M.onsets(measure)[selected.i] + M.length(replacement) > M.capacity(score, selected.mi)) return say(t.full);
     change(() => { M.settle(measure); measure[selected.i] = replacement; });
     say('');
   }
@@ -362,7 +366,7 @@
     const moved = Object.assign({}, ev);
     ['tp', 'tie', 'slur', 'beam'].forEach((key) => { delete moved[key]; });
     if (!ev.rest) moved.n = target.n;
-    const spot = M.placement(others, moved, target.t, score);
+    const spot = M.placement(others, moved, target.t, score, target.mi);
     if (!spot) return say(t.full);
     change(() => {
       all[from.mi].splice(from.i, 1);
@@ -394,7 +398,7 @@
     const clash = (p) => {
       const rest = all[p.to] && all[p.to].filter((o) => !moving.has(o));
       const starts = rest && M.onsets(rest);
-      return !rest || p.at < 0 || p.at + M.length(p.ev) > M.capacity(score) ||
+      return !rest || p.at < 0 || p.at + M.length(p.ev) > M.capacity(score, p.to) ||
         (!p.ev.rest && rest.some((o, i) => !o.rest && starts[i] === p.at && o.n === p.ev.n + dn && o.acc === p.ev.acc));
     };
     if (plan.some(clash)) return say(t.full);
@@ -569,7 +573,7 @@
     // Izquierda: la apertura del compas o el cierre del anterior en la misma fila; derecha: su cierre.
     const sides = [];
     if (special(bars[mi], 'start')) sides.push([mi, 'start']);
-    else if (mi % M.PER_ROW && special(bars[mi - 1], 'end')) sides.push([mi - 1, 'end']);
+    else if (mi > M.rowOf(score, mi).first && special(bars[mi - 1], 'end')) sides.push([mi - 1, 'end']);
     if (special(bars[mi], 'end')) sides.push([mi, 'end']);
     if (!sides.length) return;
     const origin = stage.getBoundingClientRect();
@@ -602,7 +606,7 @@
         button.dataset.side = side;
         button.setAttribute('aria-label', t.selectBarline);
         button.setAttribute('aria-pressed', 'false');
-        if (!simple && !(side === 'end' && (mi + 1) % M.PER_ROW === 0)) {
+        if (!simple && !(side === 'end' && mi === M.rowOf(score, mi).last)) {
           button.setAttribute('aria-haspopup', 'dialog');
           button.setAttribute('aria-expanded', 'false');
         }
@@ -621,7 +625,7 @@
           // La armadura rige desde el compas siguiente si la barra cierra el compas, o desde este si la abre.
           const target = side === 'start' ? mi : mi + 1;
           // Si la barra es la ultima del renglon, no hay a que compas siguiente aplicar clave ni armadura.
-          const endsRow = side === 'end' && target % M.PER_ROW === 0;
+          const endsRow = side === 'end' && mi === M.rowOf(score, mi).last;
           if (!simple && !endsRow && target < M.measures(score).length) {
             if (clefPopup.matches(':popover-open')) clefPopup.hidePopover();
             else openClefPopup({ kind: 'bar', mi, side }, target);
@@ -818,7 +822,7 @@
 
   // Tiempo -> x dentro del compas, con las mismas anclas que timeAt.
   function xAtTime(time, m, starts, centers) {
-    const anchors = [{ x: m.left, t: 0 }, { x: m.right, t: M.capacity(score) }];
+    const anchors = [{ x: m.left, t: 0 }, { x: m.right, t: M.capacity(score, layout.indexOf(m)) }];
     centers.forEach((c, i) => anchors.push({ x: c, t: starts[i] }));
     anchors.sort((p, q) => p.t - q.t || p.x - q.x);
     for (let k = 1; k < anchors.length; k += 1) {
@@ -852,7 +856,7 @@
         if (!step) return;
         event.preventDefault();
         const times = barreTimes(mi, side);
-        const current = side === 'start' ? barre.at : barreEnd(barre);
+        const current = side === 'start' ? barre.at : barreEnd(barre, mi);
         const next = times[times.indexOf(current) + step];
         if (next === undefined) return;
         resizeBarre(mi, side, next);
@@ -864,38 +868,50 @@
   }
 
   // Final de la cejilla como tiempo absoluto desde el inicio de su compas (puede pasar a compases siguientes).
-  function barreEnd(barre) {
-    return (barre.span || 0) * M.capacity(score) + (barre.to || M.capacity(score));
+  function measureOffset(mi, last) {
+    let time = 0;
+    for (let k = mi; k < last; k += 1) time += M.capacity(score, k);
+    return time;
+  }
+
+  function barrePoint(mi, time) {
+    let k = mi;
+    while (time > M.capacity(score, k)) { time -= M.capacity(score, k); k += 1; }
+    return { mi: k, at: time };
+  }
+
+  function barreEnd(barre, mi) {
+    const last = mi + (barre.span || 0);
+    return measureOffset(mi, last) + (barre.to || M.capacity(score, last));
   }
 
   // Tiempos validos para un extremo: inicios de nota (comienzo) o finales de nota (fin), mas los bordes del compas.
   // El fin tambien puede caer en compases siguientes de la misma fila, hasta el proximo con otra cejilla.
   function barreTimes(mi, side) {
     const barre = score.barres[mi];
-    const end = M.capacity(score);
+    const end = M.capacity(score, mi);
     const all = M.measures(score);
     const rowLast = M.rowOf(score, mi).last;
     const times = new Set(side === 'start' ? [0] : []);
     for (let k = mi; k <= Math.min(rowLast, all.length - 1); k += 1) {
       if (k > mi && (score.barres[k] || side === 'start')) break;
       const starts = M.onsets(all[k]);
-      if (side === 'end') times.add((k - mi + 1) * end);
+      if (side === 'end') times.add(measureOffset(mi, k + 1));
       all[k].forEach((ev, i) => {
         if (ev.rest) return;
-        times.add((k - mi) * end + (side === 'start' ? starts[i] : Math.min(end, starts[i] + M.length(ev))));
+        times.add(measureOffset(mi, k) + (side === 'start' ? starts[i] : Math.min(M.capacity(score, k), starts[i] + M.length(ev))));
       });
     }
-    return [...times].filter((time) => (side === 'start' ? time < Math.min(end, barreEnd(barre)) : time > barre.at)).sort((a, b) => a - b);
+    return [...times].filter((time) => (side === 'start' ? time < Math.min(end, barreEnd(barre, mi)) : time > barre.at)).sort((a, b) => a - b);
   }
 
   function resizeBarre(mi, side, time) {
     const barre = score.barres[mi];
-    const end = M.capacity(score);
     const at = side === 'start' ? time : barre.at;
-    const last = side === 'end' ? time : barreEnd(barre);
-    if (at === barre.at && last === barreEnd(barre)) return;
-    const span = Math.ceil(last / end) - 1;
-    change(() => M.setBarre(score, mi, at, barre.fret, last - span * end, span));
+    const last = side === 'end' ? time : barreEnd(barre, mi);
+    if (at === barre.at && last === barreEnd(barre, mi)) return;
+    const point = barrePoint(mi, last);
+    change(() => M.setBarre(score, mi, at, barre.fret, point.at, point.mi - mi));
   }
 
   let barreResize = null;
@@ -903,15 +919,15 @@
     event.preventDefault();
     event.stopPropagation();
     clearHoverGhost();
-    const end = M.capacity(score);
     const origin = stage.getBoundingClientRect();
     const anchors = new Map();
     // Tiempo absoluto de la cejilla -> x, usando el compas donde cae.
     const xAt = (time) => {
-      const k = mi + (time > 0 ? Math.ceil(time / end) - 1 : 0);
+      const point = barrePoint(mi, time);
+      const k = point.mi;
       if (!anchors.has(k)) anchors.set(k, { starts: M.onsets(M.measures(score)[k]), centers: eventNodes(k).map((node) => centerX(node, origin)) });
       const { starts, centers } = anchors.get(k);
-      return xAtTime(time - (k - mi) * end, layout[k], starts, centers);
+      return xAtTime(point.at, layout[k], starts, centers);
     };
     const path = stage.querySelector('[id="m' + mi + '"] g.bracketSpan path');
     const line = path.getBoundingClientRect();
@@ -1094,7 +1110,7 @@
 
   // Tiempo (en divisiones) que le corresponde a una x dentro del compas, interpolando entre las figuras ya dibujadas.
   function timeAt(x, m, starts, centers) {
-    const anchors = [{ x: m.left, t: 0 }, { x: m.right, t: M.capacity(score) }];
+    const anchors = [{ x: m.left, t: 0 }, { x: m.right, t: M.capacity(score, layout.indexOf(m)) }];
     centers.forEach((c, i) => anchors.push({ x: c, t: starts[i] }));
     anchors.sort((p, q) => p.x - q.x || p.t - q.t);
     for (let k = 1; k < anchors.length; k += 1) {
@@ -1102,7 +1118,7 @@
       const b = anchors[k];
       if (x <= b.x && b.x > a.x) return a.t + ((x - a.x) / (b.x - a.x)) * (b.t - a.t);
     }
-    return M.capacity(score);
+    return M.capacity(score, layout.indexOf(m));
   }
 
   // Donde queda lo que se suelta en (clientX, clientY): el compas mas cercano, el tono por la altura y el
@@ -1179,7 +1195,7 @@
     marker.hidden = false;
     const line = marker.firstChild;
     const item = drag ? drag.item : activeItem;
-    const x = item && item.kind === 'bar' ? layout[hit.mi][item.bar === 'start' ? 'left' : 'right']
+    const x = item && item.kind === 'bar' && item.bar !== 'double' ? layout[hit.mi][item.bar === 'start' ? 'left' : 'right']
       : item && item.kind === 'barre' && !hit.onNote ? layout[hit.mi].left : hit.x;
     line.style.left = x + 'px';
     line.style.top = hit.top - hit.space * 2 + 'px';
