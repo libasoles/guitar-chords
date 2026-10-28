@@ -311,7 +311,6 @@
     '  margin: 1rem 0 1.5rem; padding: 0.8rem 1rem 2.1rem;',
     '  background: var(--paper, #fdfaf5);',
     '  border: 1px solid var(--accent-brand, #d85b70);',
-    '  border-left: 3px solid var(--accent-brand, #d85b70);',
     '  border-radius: 6px;',
     '}',
     '.pinned-strip[hidden] { display: none; }',
