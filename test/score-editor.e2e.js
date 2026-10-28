@@ -74,6 +74,30 @@ async function checkSplitKeepsRows(page) {
   await check();
 }
 
+async function checkBarResizeConstraints(page) {
+  await page.evaluate(() => { scoreEditor.score.barlines = { 0: { double: true } }; scoreEditor.render(); });
+  for (const direction of [1, -1]) {
+    await page.locator('[data-barline="double"]').click();
+    const bar = await page.locator('.score-barline-trigger[data-measure="0"][data-side="end"]').boundingBox();
+    const adjacent = await page.locator('#m' + (direction > 0 ? 1 : 0) + ' > g.staff > path').first().boundingBox();
+    const x = bar.x + bar.width / 2, y = bar.y + bar.height / 2;
+    const beyond = direction > 0 ? adjacent.x + adjacent.width + 30 : adjacent.x - 20;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(beyond, y, { steps: 5 });
+    const guide = await page.locator('.score-width-guide').boundingBox();
+    assert.ok(direction > 0 ? guide.x < adjacent.x + adjacent.width : guide.x > adjacent.x, 'la guia se detiene antes de cruzar la barra vecina');
+    const phantom = await page.locator('.score-hover-ghost').count();
+    assert.equal(phantom, 0, 'al ajustar el ancho no queda un phantom de insercion siguiendo al puntero fuera del limite');
+    await page.mouse.move(beyond + direction * 25, y);
+    assert.ok(Math.abs((await page.locator('.score-width-guide').boundingBox()).x - guide.x) < 1, 'la vista previa permanece en el limite');
+    await page.mouse.up();
+    const result = await page.locator('#m0 > g.staff > path').first().boundingBox();
+    assert.ok(Math.abs(result.x + result.width - guide.x) < 2, 'el drop coincide con la vista previa limitada');
+    await page.keyboard.press('ControlOrMeta+z');
+  }
+}
+
 async function checkMeasureWidths(page) {
   await page.evaluate(() => {
     scoreEditor.score.rows[0][0] = [{ n: 30, d: 'e', at: 0 }, { n: 32, d: 'e', at: 12 }, { n: 30, d: 'e', at: 84, tie: true }];
@@ -819,6 +843,7 @@ async function run() {
     await widthsPage.goto(url);
     await widthsPage.waitForSelector('#scoreStage g.measure');
     await checkMeasureWidths(widthsPage);
+    await checkBarResizeConstraints(widthsPage);
     await widthsPage.close();
     const dragPage = await browser.newPage({ reducedMotion: 'reduce', viewport: { width: 1280, height: 900 } });
     await dragPage.goto(url);

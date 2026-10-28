@@ -623,6 +623,7 @@
       const move = (e) => {
         if (e.pointerId !== event.pointerId) return;
         if (Math.abs(e.clientX - start) < 4 && !moved) return;
+        if (!moved) deactivateTool(); // El ajuste usa su guia limitada, no el phantom de insercion.
         moved = true;
         delta = Math.max(left.left + minLeft - left.right, Math.min((right ? right.right - minRight : rowRight) - left.right, e.clientX - start));
         preview.style.left = left.right + delta + 'px';
