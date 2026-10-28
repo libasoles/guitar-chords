@@ -459,10 +459,6 @@ body.score-body {
   cursor: pointer;
 }
 
-.score-stage[aria-busy="true"] {
-  background: #fff url("partitura-loading.svg") center / 3rem no-repeat;
-}
-
 .score-stage svg {
   display: block;
   width: 100%;
