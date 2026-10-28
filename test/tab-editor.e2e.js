@@ -92,6 +92,28 @@ async function run() {
     await page.reload();
     await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
 
+    // Chord recognition accepts the case variants used by the finder while
+    // retaining the distinction between major- and minor-seventh aliases.
+    for (const [typed, canonical] of [
+      ['A7', 'A7'], ['Dmaj7', 'Dmaj7'], ['DMaj7', 'Dmaj7'],
+      ['E7', 'E7'], ['A', 'A'], ['dMAJ7', 'Dmaj7'],
+      ['DM7', 'Dmaj7'], ['Dm7', 'Dm7'], ['dm7', 'Dm7'],
+    ]) {
+      await page.locator('.ascii-tabs-annotation-slot[data-t="0"][data-c="1"]').click();
+      await textEditor.fill(typed);
+      await textEditor.press('Enter');
+      const button = page.locator('.ascii-tabs-annotation .tab-chord');
+      assert.strictEqual(await button.count(), 1, typed + ' is recognized as a chord');
+      assert.strictEqual(await button.textContent(), typed);
+      await button.click();
+      await page.waitForFunction(() => document.querySelector('.chord-popover:popover-open [data-rendered]'));
+      assert.strictEqual(await page.locator('.chord-popover:popover-open .name').textContent(), canonical);
+      await page.locator('.chord-popover-edit').click();
+      assert.strictEqual(await textEditor.inputValue(), typed);
+      await textEditor.fill('');
+      await textEditor.press('Enter');
+    }
+
     // The reusable editor also works under an extension-style policy that
     // permits only local scripts: defaults, display controls and tutorial
     // opening cannot depend on inline executable scripts.

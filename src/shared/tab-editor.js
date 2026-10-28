@@ -38,14 +38,26 @@ for (const event of ['change', 'annotationchange', 'titlechange']) {
 // Pages without the chord scripts (the extension) keep plain annotations.
 const chordDb = window.CHORDS && window.ChordCard ? window.CHORDS : null;
 const chordByName = new Map();
+const chordByLowerName = new Map();
 function chordKey(text) {
   return text.trim().replace(/♭/g, 'b').replace(/♯/g, '#').replace(/\s+/g, '');
+}
+for (const chord of chordDb || []) {
+  // Canonical names take precedence over case-folded aliases: DM7 is an
+  // alias of Dmaj7, but dm7 must still resolve to the canonical Dm7.
+  chordByLowerName.set(chordKey(chord.name).toLowerCase(), chord);
 }
 for (const chord of chordDb || []) {
   for (const name of [chord.name, ...(chord.aliases || [])]) {
     const key = chordKey(name);
     if (!chordByName.has(key)) chordByName.set(key, chord);
+    const lowerKey = key.toLowerCase();
+    if (!chordByLowerName.has(lowerKey)) chordByLowerName.set(lowerKey, chord);
   }
+}
+function findChord(text) {
+  const key = chordKey(text);
+  return chordByName.get(key) || chordByLowerName.get(key.toLowerCase());
 }
 function escapeHtml(text) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -54,7 +66,7 @@ function escapeHtml(text) {
 let chordPopover = null;
 let chordSource = null;
 function openChord(button) {
-  const chord = chordByName.get(chordKey(button.textContent));
+  const chord = findChord(button.textContent);
   if (!chord) return;
   if (!chordPopover) {
     chordPopover = document.createElement('div');
@@ -105,7 +117,7 @@ function linkChords() {
   const current = editor.annotations;
   const linked = current.map((entries) => entries.map(({ column, text }) => {
     const entry = { column, text };
-    if (text && chordByName.has(chordKey(text))) {
+    if (text && findChord(text)) {
       const name = escapeHtml(text.trim());
       entry.html = '<button type="button" class="arpeggio-chord tab-chord" aria-label="' +
         escapeHtml(editor.dataset.chordShow || '') + ' ' + name + '">' + name + '</button>';
