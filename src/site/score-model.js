@@ -382,7 +382,7 @@
         if (ev.rest) return;
         if (ev.acc) accidentals.set(ev.n, ACCIDENTALS[ev.acc].alter);
         const alter = accidentals.has(ev.n) ? accidentals.get(ev.n) : keyAlter(ev.n, score, mi);
-        const midi = 12 * Math.floor(ev.n / 7) + SEMITONES[ev.n % 7] + alter + 12 * (clef.octave || 0);
+        const midi = 12 * (Math.floor(ev.n / 7) + 1) + SEMITONES[ev.n % 7] + alter + 12 * (clef.octave || 0);
         if (!moments.has(starts[i])) moments.set(starts[i], []);
         moments.get(starts[i]).push({ n: ev.n, midi, tie: !!ev.tie });
       });
