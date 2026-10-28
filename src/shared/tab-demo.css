@@ -439,3 +439,45 @@
     color: var(--accent);
   }
 }
+
+/* Titles and annotations: the text appears in the strip above the tab once
+   the cursor clicks it and Enter confirms. */
+.tab-demo__stage--labeled {
+  margin-top: 2em;
+}
+.tab-demo__label {
+  position: absolute;
+  left: calc(var(--c) * var(--demo-cw));
+  top: -1.8em;
+  height: 1.5em;
+  line-height: 1.5em;
+  font-family: var(--sans);
+  font-size: 0.85em;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--accent);
+  animation: tab-demo-label 6s steps(1, end) infinite;
+}
+.tab-demo__cursor--strip {
+  left: calc(var(--c) * var(--demo-cw));
+  top: -1.8em;
+  animation: tab-demo-edit-cursor 6s ease-in-out infinite;
+}
+.tab-demo__key--enter {
+  animation: tab-demo-edit-key 6s steps(1, end) infinite;
+}
+@keyframes tab-demo-label {
+  0%,
+  35% {
+    opacity: 0;
+  }
+  36%,
+  100% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tab-demo__label {
+    animation: none !important;
+  }
+}

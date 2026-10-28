@@ -71,6 +71,27 @@ async function run() {
     await page.reload();
     await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
 
+    // A chord name in a column annotation becomes a button that opens that
+    // chord's fingering; the typed text is what gets stored and edited.
+    await page.locator('.ascii-tabs-annotation-slot[data-t="0"][data-c="1"]').click();
+    await textEditor.fill('Am');
+    await textEditor.press('Enter');
+    const chordButton = page.locator('.ascii-tabs-annotation .tab-chord');
+    assert.strictEqual(await chordButton.textContent(), 'Am');
+    await chordButton.click();
+    await page.waitForFunction(() => document.querySelector('.chord-popover:popover-open [data-rendered]'));
+    assert.strictEqual(await page.locator('.chord-popover:popover-open .name').textContent(), 'Am');
+    assert.strictEqual(await textEditor.count(), 0);
+    await page.locator('.chord-popover-edit').click();
+    assert.strictEqual(await textEditor.inputValue(), 'Am');
+    await textEditor.press('Escape');
+    assert.deepStrictEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('tabEditor.document')).annotations[0]), [{ column: 1, text: 'Am' }]);
+    await page.reload();
+    await page.waitForFunction(() => document.querySelector('.ascii-tabs-annotation .tab-chord'));
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
+
     // The reusable editor also works under an extension-style policy that
     // permits only local scripts: defaults, display controls and tutorial
     // opening cannot depend on inline executable scripts.
@@ -167,9 +188,9 @@ async function run() {
       };
     });
     assert.strictEqual(tutorial.open, false);
-    assert.strictEqual(tutorial.demos, 4);
-    assert.strictEqual(tutorial.keys, 6);
-    assert.deepStrictEqual(tutorial.titles, ['Arrastrar y soltar', 'Duplicar una columna', 'Agregar ceros', 'Negritas']);
+    assert.strictEqual(tutorial.demos, 6);
+    assert.strictEqual(tutorial.keys, 8);
+    assert.deepStrictEqual(tutorial.titles, ['Arrastrar y soltar', 'Duplicar una columna', 'Agregar ceros', 'Negritas', 'Título de la tablatura', 'Anotar una columna']);
 
     // The editor has one shared spacing slider. It changes every current Tab
     // and remains the setting for Tabs added afterwards.

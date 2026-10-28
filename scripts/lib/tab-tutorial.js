@@ -22,10 +22,10 @@ function key(label, cls) {
   return '<kbd class="tab-demo__key ' + cls + '">' + label + '</kbd>';
 }
 
-function stage(notes) {
+function stage(notes, labeled) {
   const strings = '<span class="tab-demo__string"></span>'.repeat(STRING_COUNT);
   return (
-    '<div class="tab-demo__stage" aria-hidden="true" style="--cols:' + COLUMN_COUNT + '">' +
+    '<div class="tab-demo__stage' + (labeled ? ' tab-demo__stage--labeled' : '') + '" aria-hidden="true" style="--cols:' + COLUMN_COUNT + '">' +
     strings + notes.join('') + '</div>'
   );
 }
@@ -34,7 +34,7 @@ function stage(notes) {
 function demo(opts) {
   const caption = '<figcaption><h3>' + opts.title + '</h3><p>' + opts.body + '</p></figcaption>';
   const media =
-    stage(opts.notes) +
+    stage(opts.notes, opts.labeled) +
     '<div class="tab-demo__keys" aria-hidden="true">' + opts.keys.join('<span class="tab-demo__plus">+</span>') + '</div>';
   return (
     '<li><figure class="tab-demo ' + opts.cls + (opts.captionFirst ? ' tab-demo--caption-first' : '') + '">' +
@@ -106,11 +106,35 @@ function renderTabTutorial(strings) {
     body: s('tabBoldBody'),
   });
 
+  // The text lands in the strip above the tab (title) or above a column (annotation).
+  const label = function (c, text) {
+    return '<span class="tab-demo__label" style="--c:' + c + '">' + text + '</span>' +
+      '<span class="tab-demo__cursor tab-demo__cursor--strip" style="--c:' + c + '"></span>';
+  };
+
+  const title = demo({
+    cls: 'tab-demo--title',
+    labeled: true,
+    notes: [label(0, s('tabTitleDemoText')), note(1, 1, 1), note(1, 3, 2), note(2, 2, 0)],
+    keys: [key('Enter', 'tab-demo__key--enter')],
+    title: s('tabTitleTitle'),
+    body: s('tabTitleBody'),
+  });
+
+  const annotation = demo({
+    cls: 'tab-demo--annotation',
+    labeled: true,
+    notes: [label(1, 'Am'), note(1, 1, 1), note(1, 2, 2), note(1, 3, 2), note(3, 2, 0)],
+    keys: [key('Enter', 'tab-demo__key--enter')],
+    title: s('tabAnnotationTitle'),
+    body: s('tabAnnotationBody'),
+  });
+
   return (
     '<details class="tab-tutorial">' +
     '<summary>' + s('tabTutorialSummary') + '</summary>' +
     '<p class="tab-tutorial__intro">' + s('tabTutorialIntro') + '</p>' +
-    '<ul class="tab-tutorial__list">' + drag + duplicate + zeros + bold + '</ul>' +
+    '<ul class="tab-tutorial__list">' + drag + duplicate + zeros + bold + title + annotation + '</ul>' +
     '</details>'
   );
 }

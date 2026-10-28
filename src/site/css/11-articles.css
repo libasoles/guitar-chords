@@ -606,6 +606,23 @@ body:has(.modal-full:popover-open) {
 .chord-popover .finder-card {
   box-shadow: 0 8px 32px #0003;
 }
+/* Tab editor: the popover offers to edit the annotation the chord came from. */
+.chord-popover-edit {
+  display: block;
+  margin: 0.6rem auto 0;
+  padding: 0.3rem 0.9rem;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  font: 0.85rem var(--sans);
+  box-shadow: 0 2px 8px #0003;
+  cursor: pointer;
+}
+.chord-popover-edit:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
 .modal-close {
   position: absolute;
   top: -0.7rem;
