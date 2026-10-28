@@ -28,13 +28,17 @@ test('each article asset, source and test runs only its own suite', () => {
     'articles-preludios': ['src/site/articles/santisteban-preludios/x.svg', 'src/site/og-score-preludes.png', 'scripts/carcassi-preludios/corrected/prelude-01.musicxml'],
     'articles-giuliani': ['src/site/articles/giuliani/body.es.html', 'scripts/lib/article-giuliani.js'],
     'articles-giuliani-arpegios': ['src/site/articles/giuliani-arpegios/x.svg', 'scripts/giuliani-arpegios/build.py'],
-    'articles-arpeggios': ['src/site/articles/arpeggios/preview.svg', 'scripts/lib/article-arpeggio-positions.js', 'test/arpeggio-layout.e2e.js'],
+    'articles-arpeggios': ['test/articles-arpeggios.e2e.js'],
+    'articles-arpeggio-layout': ['test/articles-arpeggio-layout.e2e.js'],
     'articles-site': ['test/articles-site.e2e.js'],
   };
   for (const [suite, files] of Object.entries(cases)) {
     for (const file of files) assert.deepEqual(targets([file]), [suite], file);
   }
   assert.deepEqual(targets(['scripts/sor/pieces.json']).sort(), ['articles-sor', 'articles-sor-estudios']);
+  for (const file of ['src/site/articles/arpeggios/preview.svg', 'scripts/lib/article-arpeggio-positions.js']) {
+    assert.deepEqual(targets([file]).sort(), ['articles-arpeggio-layout', 'articles-arpeggios'], file);
+  }
 });
 
 test('the shared article template and harness run every article suite', () => {
