@@ -829,6 +829,13 @@ body:has(.modal-full:popover-open) {
   font-size: 0.9em;
   height: calc(1.5em / 0.9);
 }
+/* With spacing="3", the library anchors names two full-size dashes from
+   the cell edge. At 90%, the fret centre is (2 + .5) * .6 * .9em from
+   that edge: compensate by .15em, or .1875em at the name's 80% size. */
+.arpeggio-group .article-tab:not([notation="solfege"]) .ascii-tabs-annotation,
+.arpeggio-results .article-tab:not([notation="solfege"]) .ascii-tabs-annotation {
+  transform: translateX(calc(-50% + .1875em));
+}
 /* Use the preview's 80% solfege size. Scale whole cells so their padding
    characters keep chord columns aligned, while string spacing stays unchanged. */
 .arpeggio-group .article-tab[notation="solfege"] .ascii-tabs-cell {
