@@ -296,6 +296,11 @@ body.score-body {
   gap: 0.2rem;
 }
 
+/* The script fills the palette; until then keep the row it will occupy on one line. */
+.score-palette:empty {
+  min-height: 3rem;
+}
+
 .score-palette-sep {
   width: 0.8rem;
 }
@@ -409,6 +414,11 @@ body.score-body {
   outline: none;
   user-select: none;
   -webkit-user-select: none;
+}
+
+/* While Verovio loads, hold the height of the default score (staff plus tab) so nothing below shifts. */
+.score-stage[aria-busy="true"] {
+  min-height: 33rem;
 }
 
 .score-tab {
@@ -1189,11 +1199,10 @@ html body[data-scroll-locked] {
 }
 
 .score-about .tab-tutorial__list {
-  margin-top: 1.5rem;
+  margin-top: 3rem;
   padding: 0;
   gap: 1.75rem 1.5rem;
 }
-
 .score-demo {
   --demo-lit: #f4ddd6;
 }

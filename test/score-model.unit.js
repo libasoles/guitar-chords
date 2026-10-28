@@ -17,9 +17,15 @@ test('sanitize conserva las correcciones de tablatura y descarta datos invalidos
 
 test('attacks da el tono real, junta los acordes y no repite las notas ligadas', () => {
   const score = M.emptyScore();
-  // E4 escrito suena E3 (52) con la clave de guitarra; un sostenido sube un semitono hasta el fin del compas.
+  // E5 escrito (n = 37) suena E4 (64) con la clave de guitarra; un sostenido sube un semitono hasta el fin del compas.
   score.rows[0][0] = [{ n: 37, d: 'q', at: 0 }, { n: 37, d: 'q', at: 24, acc: '#' }, { n: 37, d: 'q', at: 48 }, { n: 30, d: 'q', at: 48 }];
-  assert.deepEqual(M.attacks(score).map((a) => [a.key, a.midis]), [['0:0', [52]], ['0:24', [53]], ['0:48', [53, 40]]]);
+  assert.deepEqual(M.attacks(score).map((a) => [a.key, a.midis]), [['0:0', [64]], ['0:24', [65]], ['0:48', [65, 52]]]);
+  // Un do escrito en el tercer espacio (n = 35) suena C4: segunda cuerda, traste 1; con el do grave, un acorde con digitacion.
+  score.rows[0][0] = [{ n: 35, d: 'q', at: 0 }, { n: 28, d: 'q', at: 0 }];
+  const F = require('../src/site/score-fingering');
+  const midis = M.attacks(score).map((a) => a.midis);
+  assert.deepEqual(midis, [[60, 48]]);
+  assert.deepEqual(F.assign(midis)[0].map((cell) => cell.join(':')).sort(), ['1:1', '4:3']);
   score.rows[0][0] = [{ n: 37, d: 'q', at: 0, tie: true }, { n: 37, d: 'q', at: 24 }, { n: 39, d: 'q', at: 48 }];
   assert.deepEqual(M.attacks(score).map((a) => a.key), ['0:0', '0:48']);
 });

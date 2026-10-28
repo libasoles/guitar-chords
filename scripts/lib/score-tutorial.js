@@ -146,7 +146,8 @@ function renderScoreTutorial(strings) {
     keyGroup(s('scoreShortcutsRests'), rests) +
     keyGroup(s('scoreShortcutsMarks'), marks) +
     '</div>' +
-    '<ul class="tab-tutorial__list">' + dotDemo(s) + barDemo(s) + tabEditDemo(s) + tabMoveDemo(s) + '</ul>'
+    '<ul class="tab-tutorial__list">' + dotDemo(s) + barDemo(s) + '</ul>' +
+    '<ul class="tab-tutorial__list">' + tabEditDemo(s) + tabMoveDemo(s) + '</ul>'
   );
 }
 
