@@ -102,7 +102,9 @@ jobs:
     name: e2e (${{ matrix.name }})
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      # A failure on a push blocks the deploy, and the cancelled suites are not
+      # green, so the next push reruns them. PRs still show every failure.
+      fail-fast: ${{ github.event_name == 'push' }}
       matrix: ${{ fromJSON(needs.changes.outputs.matrix) }}
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}-e2e-${{ matrix.name }}
