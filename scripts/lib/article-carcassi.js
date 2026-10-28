@@ -103,7 +103,7 @@ function asciiTab(forms, locale, annotations, formsPerStaff = forms.length) {
     staves.push(formsColumns(forms.slice(start, start + formsPerStaff)));
     if (annotations) annotationRows.push(annotations.slice(start, start + formsPerStaff).map((entry) => ({ ...entry, column: entry.column - start * 2 })));
   }
-  return '<ascii-tabs class="article-tab" readonly theme="light" labels="notes" spacing="3" lang="' + locale + '"' +
+  return '<ascii-tabs class="article-tab" readonly theme="light" labels="notes" spacing="3" annotation-fit="overflow" lang="' + locale + '"' +
     (annotations ? ' variant="flat" data-annotations="' + escapeAttr(JSON.stringify(annotationRows)) + '"' : '') +
     ' data-value=\'' + JSON.stringify(staves) + '\'><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>';
 }

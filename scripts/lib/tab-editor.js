@@ -34,6 +34,7 @@ function renderSharedTabEditor(strings, locale, { heading = strings.tabH1, lead 
         theme="light"
         spacing="2"
         annotations-editable
+        annotation-fit="widen"
         titles-editable
         data-chord-label="%%artChordDiagramLabel%%"
         data-chord-show="%%artArpeggiosShowFingering%%"

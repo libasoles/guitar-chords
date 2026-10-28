@@ -854,7 +854,7 @@ const SEARCH_LOADER = `<script>
       if (!results && on) {
         results = document.createElement('figure');
         results.className = 'form tab-figure arpeggio-results';
-        results.innerHTML = '<ascii-tabs class="article-tab" readonly theme="light" labels="notes" spacing="3" variant="flat" lang="' + data.locale + '"><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>';
+        results.innerHTML = '<ascii-tabs class="article-tab" readonly theme="light" labels="notes" spacing="3" annotation-fit="overflow" variant="flat" lang="' + data.locale + '"><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>';
         section.appendChild(results);
       }
       if (!on || !matches.length) {
