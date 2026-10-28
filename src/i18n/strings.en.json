@@ -423,7 +423,6 @@
   "partElapsed": "Elapsed time: {s} s",
   "partDurationHint": "This can take several minutes",
   "partResumeHint": "You can close this page and come back with the same link: the job is kept for 24 hours.",
-  "partLoadingAlt": "Processing",
   "partNewJob": "Start a new job",
   "partPreviewDialog": "Score preview",
   "partPreviewClose": "Close preview",

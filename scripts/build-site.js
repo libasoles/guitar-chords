@@ -1758,7 +1758,6 @@ function renderPartituraPage(template, strings, locale) {
     "partSubmit",
     "partDurationHint",
     "partResumeHint",
-    "partLoadingAlt",
     "partPrivacySummary",
     "partPrivacyBody",
     "partPrivacyLink",
@@ -2068,10 +2067,6 @@ if (PARTITURA_ENABLED) {
     path.join(ASSETS_DIST, "partitura.css"),
     readPartituraCss(),
     "utf8",
-  );
-  copyFile(
-    path.join(SRC_SITE, "partitura-loading.svg"),
-    path.join(ASSETS_DIST, "partitura-loading.svg"),
   );
   copyFile(
     path.join(SRC_SITE, "partitura-banner.webp"),
