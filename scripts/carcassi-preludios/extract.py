@@ -222,8 +222,8 @@ def name_of_published(number):
 
 
 SANS = "Helvetica, Arial, DejaVu Sans, sans-serif"
-STAFF = re.compile(r'<g id="[^"]*" class="staff">')
-TUPLET_MARKS = re.compile(r'<g id="[^"]*" class="tuplet(?:Num|Bracket)">.*?</g>', re.S)
+STAFF = re.compile(r'<g\b[^>]* class="staff"[^>]*>')
+TUPLET_MARKS = re.compile(r'<g\b[^>]* class="tuplet(?:Num|Bracket)"[^>]*>.*?</g>', re.S)
 
 
 def drop_tab_tuplets(svg):

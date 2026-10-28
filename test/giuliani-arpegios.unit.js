@@ -88,3 +88,38 @@ for (const piece of pieces) {
     assert.doesNotMatch(xml, /<encoding>|<software>|<rights>|<source>|<encoding-date>/);
   });
 }
+
+/* Las voces inferiores comparten el tiempo del seisillo; no deben imprimir otras cifras dentro del pentagrama. */
+test('ejercicio 34: solo ocho cifras de seisillo, sin cifras adicionales del acompanamiento', () => {
+  for (const relative of ['arpeggio-34.svg', 'full/arpeggio-34-p1.svg']) {
+    const svg = fs.readFileSync(path.join(PREVIEW_DIR, relative), 'utf8');
+    assert.equal((svg.match(/\sclass="tupletNum"/g) || []).length, relative.startsWith('full/') ? 8 : 4, relative);
+  }
+  for (const file of [path.join(__dirname, '../scripts/giuliani-arpegios/sources/034.musicxml'),
+    path.join(DOWNLOADS_DIR, 'Arpeggio Exercise 034 - Mauro Giuliani.musicxml')]) {
+    const xml = fs.readFileSync(file, 'utf8');
+    const notes = [...xml.matchAll(/<note\b[^>]*>([\s\S]*?)<\/note>/g)].map((m) => m[1]);
+    const lower = notes.filter((note) => /<voice>[23]<\/voice>/.test(note) && !/<staff>2<\/staff>/.test(note));
+    assert.ok(lower.some((note) => /<time-modification>/.test(note)), 'conservar las duraciones irregulares');
+    for (const note of lower) {
+      for (const [tuplet] of note.matchAll(/<tuplet\b[^>]*>/g)) {
+        if (!/type="start"/.test(tuplet)) continue;
+        assert.match(tuplet, /show-number="none"/, file);
+        assert.match(tuplet, /bracket="no"/, file);
+      }
+    }
+  }
+});
+
+test('ejercicio 36: p-m, i, p, i quedan en el primer grupo de semicorcheas', () => {
+  for (const file of [path.join(__dirname, '../scripts/giuliani-arpegios/sources/036.musicxml'),
+    path.join(DOWNLOADS_DIR, 'Arpeggio Exercise 036 - Mauro Giuliani.musicxml')]) {
+    const xml = fs.readFileSync(file, 'utf8');
+    const measure = xml.match(/<measure\b[^>]*number="1"[^>]*>([\s\S]*?)<\/measure>/)[1];
+    const notes = [...measure.matchAll(/<note\b[^>]*>([\s\S]*?)<\/note>/g)].map((m) => m[1])
+      .filter((n) => !/<staff>2<\/staff>/.test(n));
+    const marked = notes.flatMap((n, index) => [...n.matchAll(/<fingering[^>]*>([pima])<\/fingering>/g)]
+      .map((m) => [index, m[1]]));
+    assert.deepEqual(marked, [[0, 'p'], [1, 'm'], [2, 'i'], [3, 'p'], [4, 'i']], file);
+  }
+});

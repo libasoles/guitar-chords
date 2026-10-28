@@ -49,3 +49,11 @@ Descarga sin captcha: `https://s9.imslp.org/files/imglnks/usimg/c/ca/IMSLP660049
 
 CC0 no exige atribución; el pie del PDF la da igualmente («Con modificaciones a partir de» / «Marieh (2020) · CC0 1.0»,
 con enlaces).
+
+El ejercicio 34 conserva las duraciones irregulares del acompanamiento, pero sus marcas de grupo
+se ocultan en la fuente curada (`show-number="none"`, `bracket="no"`): las ocho cifras de seisillo
+de la voz superior ya indican la subdivision. Las otras voces imprimian cifras adicionales dentro del pentagrama.
+
+En el 36, las letras de la mano derecha se limitan al primer grupo de cuatro semicorcheas:
+`p` en el bajo y `m` en la nota aguda simultanea, despues `i p i`. La proximidad geometrica
+habia intercambiado los dedos del ataque inicial y desplazado las ultimas dos letras al grupo siguiente.

@@ -615,7 +615,7 @@
           <technical>
             <fingering alternate="no" substitution="no">p</fingering>
           </technical>
-          <tuplet bracket="yes" number="1" placement="above" type="start">
+          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -682,7 +682,7 @@
         <stem>down</stem>
         <staff>1</staff>
         <notations>
-          <tuplet bracket="yes" number="1" placement="above" type="start">
+          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -742,7 +742,7 @@
           <technical>
             <fingering alternate="no" substitution="no">p</fingering>
           </technical>
-          <tuplet bracket="yes" number="1" placement="above" type="start">
+          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
               <tuplet-type>quarter</tuplet-type>
@@ -1377,7 +1377,7 @@
         </time-modification>
         <staff>2</staff>
         <notations>
-          <tuplet bracket="yes" number="1" placement="above" type="start">
+          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -1427,7 +1427,7 @@
         </time-modification>
         <staff>2</staff>
         <notations>
-          <tuplet bracket="yes" number="1" placement="above" type="start">
+          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -1476,7 +1476,7 @@
         </time-modification>
         <staff>2</staff>
         <notations>
-          <tuplet bracket="yes" number="1" placement="above" type="start">
+          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
               <tuplet-type>quarter</tuplet-type>
@@ -2056,7 +2056,7 @@
         <stem>down</stem>
         <staff>1</staff>
         <notations>
-          <tuplet bracket="yes" number="1" placement="above" type="start">
+          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2118,7 +2118,7 @@
         <stem>down</stem>
         <staff>1</staff>
         <notations>
-          <tuplet bracket="yes" number="1" placement="above" type="start">
+          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2175,7 +2175,7 @@
         <stem>down</stem>
         <staff>1</staff>
         <notations>
-          <tuplet bracket="yes" number="1" placement="above" type="start">
+          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
               <tuplet-type>quarter</tuplet-type>
@@ -2807,7 +2807,7 @@
         </time-modification>
         <staff>2</staff>
         <notations>
-          <tuplet bracket="yes" number="1" placement="above" type="start">
+          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2857,7 +2857,7 @@
         </time-modification>
         <staff>2</staff>
         <notations>
-          <tuplet bracket="yes" number="1" placement="above" type="start">
+          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2906,7 +2906,7 @@
         </time-modification>
         <staff>2</staff>
         <notations>
-          <tuplet bracket="yes" number="1" placement="above" type="start">
+          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
               <tuplet-type>quarter</tuplet-type>
