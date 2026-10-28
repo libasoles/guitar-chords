@@ -9,7 +9,7 @@ const { serveStatic } = require('../scripts/lib/static-server');
 async function checkInteriorDoubleBar(page) {
   await page.locator('[data-barline="double"]').click();
   const staff = await page.locator('#scoreStage g.measure').first().locator('g.staff > path').first().boundingBox();
-  const x = staff.x + staff.width * 0.55, y = staff.y + 10;
+  const x = staff.x + staff.width * 0.31, y = staff.y + 10;
   await page.mouse.move(x, y);
   const marker = await page.locator('.score-marker-line').boundingBox();
   assert.ok(Math.abs(marker.x - x) < 3, 'la guia sigue el punto interior');
@@ -19,6 +19,8 @@ async function checkInteriorDoubleBar(page) {
   assert.ok(split.durations[0] > 0 && split.durations[0] < 96);
   assert.equal(split.durations[0] + split.durations[1], 96);
   assert.deepEqual(split.bars[0], { double: true });
+  const divided = await page.locator('#m0 > g.staff > path').first().boundingBox();
+  assert.ok(Math.abs(divided.x + divided.width - x) < 2, 'la barra queda en la x del clic, no en el centro ni en la distribucion automatica');
   await page.keyboard.press('ControlOrMeta+z');
   assert.equal(await page.evaluate(() => scoreEditor.score.rows.flat().length), 12);
   await page.mouse.click(x, y);
@@ -27,6 +29,56 @@ async function checkInteriorDoubleBar(page) {
   await page.waitForSelector('#scoreStage g.measure');
   assert.deepEqual(await page.evaluate(() => scoreEditor.score.measureDurations), split.durations);
   assert.equal(await page.locator('#scoreStage g.measure').count(), 13);
+}
+
+async function checkMeasureWidths(page) {
+  await page.evaluate(() => {
+    scoreEditor.score.rows[0][0] = [{ n: 30, d: 'e', at: 0 }, { n: 32, d: 'e', at: 12 }, { n: 30, d: 'e', at: 84, tie: true }];
+    scoreEditor.score.rows[0][1] = [{ n: 30, d: 'q', at: 0 }];
+    scoreEditor.render();
+  });
+  const staff = (mi) => page.locator('#m' + mi + ' > g.staff > path').first().boundingBox();
+  const before = await staff(0), nextBefore = await staff(1);
+  const headBefore = await page.locator('#e0-0 .notehead').boundingBox();
+  const music = await page.evaluate(() => JSON.stringify(scoreEditor.score.rows));
+  const tieGap = async () => {
+    const tie = await page.locator('#m0 g.tie path').first().boundingBox();
+    const head = await page.locator('#e1-0 .notehead').boundingBox();
+    return head.x - tie.x - tie.width;
+  };
+  const gapBefore = await tieGap();
+  const trigger = page.locator('.score-barline-trigger[data-measure="0"][data-side="end"]');
+  const bar = await trigger.boundingBox();
+  const x = bar.x + bar.width / 2, y = bar.y + bar.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + 45, y, { steps: 5 });
+  await page.mouse.up();
+  const after = await staff(0), nextAfter = await staff(1);
+  assert.ok(Math.abs(after.width - before.width - 45) < 2, 'el compas izquierdo gana el ancho arrastrado');
+  assert.ok(Math.abs(nextBefore.width - nextAfter.width - 45) < 2, 'el compas vecino cede ese espacio');
+  assert.ok(Math.abs(nextBefore.x + nextBefore.width - nextAfter.x - nextAfter.width) < 2, 'las otras barras permanecen en su lugar');
+  assert.equal(await page.locator('.score-barline-remove').count(), 0, 'arrastrar no abre el menu de la barra');
+  const headAfter = await page.locator('#e0-0 .notehead').boundingBox();
+  assert.ok(Math.abs(headBefore.width - headAfter.width) < 0.2, 'las cabezas no se estiran');
+  assert.equal(await page.evaluate(() => JSON.stringify(scoreEditor.score.rows)), music, 'el ancho no cambia la musica');
+  assert.ok(Math.abs(await tieGap() - gapBefore) < 3, 'la ligadura sigue llegando a la nota del compas vecino');
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+  assert.ok(Math.abs((await staff(0)).width - after.width) < 2, 'el ancho se conserva al recargar');
+  const current = await trigger.boundingBox();
+  await page.mouse.move(current.x + current.width / 2, current.y + 10);
+  await page.mouse.down();
+  await page.mouse.move(current.x + current.width / 2 - 35, current.y + 10, { steps: 5 });
+  await page.keyboard.press('Escape');
+  await page.mouse.up();
+  assert.ok(Math.abs((await staff(0)).width - after.width) < 2, 'Escape cancela el ajuste');
+  await page.mouse.move(current.x + current.width / 2, current.y + 10);
+  await page.mouse.down();
+  await page.mouse.move(current.x + current.width / 2 - 25, current.y + 10, { steps: 5 });
+  await page.mouse.up();
+  await page.keyboard.press('ControlOrMeta+z');
+  assert.ok(Math.abs((await staff(0)).width - after.width) < 2, 'deshacer restaura los anchos');
 }
 
 async function checkBarlines(page) {
@@ -719,6 +771,11 @@ async function run() {
     await splitPage.waitForSelector('#scoreStage g.measure');
     await checkInteriorDoubleBar(splitPage);
     await splitPage.close();
+    const widthsPage = await browser.newPage({ reducedMotion: 'reduce' });
+    await widthsPage.goto(url);
+    await widthsPage.waitForSelector('#scoreStage g.measure');
+    await checkMeasureWidths(widthsPage);
+    await widthsPage.close();
     const dragPage = await browser.newPage({ reducedMotion: 'reduce', viewport: { width: 1280, height: 900 } });
     await dragPage.goto(url);
     await dragPage.waitForSelector('#scoreStage g.measure');

@@ -1327,3 +1327,15 @@ html body[data-scroll-locked] {
     animation: none !important;
   }
 }
+
+.score-barline-trigger.is-resizable {
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.score-width-guide {
+  position: absolute;
+  width: 2px;
+  background: var(--note-selected);
+  pointer-events: none;
+}

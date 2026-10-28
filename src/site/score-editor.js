@@ -266,7 +266,21 @@
   function dropNew(item, target) {
     if (item.kind === 'bar') {
       change(() => {
-        const changed = M.setBarline(score, target.mi, item.bar, target.t);
+        const widths = currentMeasureWidths();
+        const oldCount = M.measures(score).length;
+        const bounds = layout[target.mi];
+        const fraction = Math.max(0, Math.min(1, ((target.rawX ?? target.x) - bounds.left) / (bounds.right - bounds.left)));
+        const previousWidths = score.measureWidths;
+        if (item.bar === 'double') score.measureWidths = widths;
+        const changed = M.setBarline(score, target.mi, item.bar, target.rawT ?? target.t);
+        if (!changed) {
+          if (previousWidths) score.measureWidths = previousWidths;
+          else delete score.measureWidths;
+        }
+        if (changed && M.measures(score).length > oldCount) {
+          score.measureWidths[target.mi] = widths[target.mi] * fraction;
+          score.measureWidths[target.mi + 1] = widths[target.mi] * (1 - fraction);
+        }
         if (changed) { selected = null; group = []; }
         return changed;
       });
@@ -492,6 +506,7 @@
     meterPopup.hidePopover();
     clefPopup.hidePopover();
     stage.innerHTML = toolkit.renderToSVG(1);
+    applyMeasureWidths();
     stage.style.minHeight = '';
     alignBarlinesToFirstStaff();
     marker = null;
@@ -513,12 +528,137 @@
     removeRow.hidden = score.rows.length <= M.MIN_ROWS;
   }
 
+  // El espaciado se aplica al SVG; las figuras conservan su tamano y las plicas anclan los haces.
+  let naturalLayout = [];
+  function applyMeasureWidths() {
+    const nodes = [...stage.querySelectorAll('g.measure')];
+    naturalLayout = nodes.map((node) => {
+      const staff = node.querySelector(':scope > g.staff > path');
+      const box = staff.getBBox();
+      return { left: box.x, width: box.width, pixels: staff.getBoundingClientRect().width };
+    });
+    M.rowStarts(score).forEach((first, row) => {
+      const count = score.rows[row].length;
+      const original = naturalLayout.slice(first, first + count);
+      const total = original.reduce((sum, m) => sum + m.width, 0);
+      const weights = original.map((m, i) => score.measureWidths?.[first + i]);
+      const assigned = weights.reduce((sum, w) => sum + (w || 0), 0);
+      const free = original.reduce((sum, m, i) => sum + (weights[i] ? 0 : m.width), 0);
+      const desired = original.map((m, i) => weights[i] ? weights[i] * total : m.width * Math.max(0.1, 1 - assigned) * total / (free || total));
+      const sum = desired.reduce((a, b) => a + b, 0);
+      const fit = sum > total ? total / sum : 1;
+      let left = original[0].left;
+      const positions = desired.map((width) => {
+        const position = { left, width: width * fit };
+        left += position.width;
+        return position;
+      });
+      const mapX = (x) => {
+        let index = original.findIndex((m) => x <= m.left + m.width);
+        if (index < 0) index = original.length - 1;
+        return positions[index].left + (x - original[index].left) * positions[index].width / original[index].width;
+      };
+      original.forEach((m, i) => {
+        const node = nodes[first + i];
+        const width = positions[i].width;
+        const left = positions[i].left;
+        const scale = width / m.width;
+        if (Math.abs(scale - 1) > 0.00001 || Math.abs(left - m.left) > 0.01) {
+          node.setAttribute('transform', `translate(${left - scale * m.left} 0) scale(${scale} 1)`);
+          node.querySelectorAll('g.chord, g.note, g.rest, g.clef, g.keySig, g.meterSig, g.barLine, g.accid, g.dots, text').forEach((glyph) => {
+            if (glyph.parentElement.closest('.chord, .note, .rest, .clef, .keySig, .meterSig, .barLine, .accid, .dots, text')) return;
+            const stem = glyph.querySelector('.stem path');
+            const box = glyph.getBBox();
+            const x = stem ? stem.getBBox().x : box.x;
+            const transform = glyph.getAttribute('transform') || '';
+            glyph.setAttribute('transform', `translate(${x} 0) scale(${1 / scale} 1) translate(${-x} 0) ${transform}`);
+          });
+        }
+        // Las ligaduras y cejillas pueden terminar en otro compas, con una escala diferente.
+        node.querySelectorAll('g.tie, g.slur, g.bracketSpan').forEach((span) => {
+          span.setAttribute('transform', `translate(${(scale * m.left - left) / scale} 0) scale(${1 / scale} 1)`);
+          span.querySelectorAll('path').forEach((path) => {
+            const d = path.getAttribute('d');
+            if (!d || (d.match(/[a-z]/gi) || []).some((command) => !['M', 'L', 'C', 'Q', 'Z'].includes(command))) return;
+            let coordinate = 0;
+            path.setAttribute('d', d.replace(/-?\d*\.?\d+(?:e[-+]?\d+)?/gi, (number) => coordinate++ % 2 ? number : mapX(Number(number))));
+          });
+        });
+      });
+    });
+  }
+
+  function currentMeasureWidths() {
+    const widths = {};
+    M.rowStarts(score).forEach((first, row) => {
+      const count = score.rows[row].length;
+      const total = naturalLayout.slice(first, first + count).reduce((sum, m) => sum + m.pixels, 0);
+      for (let i = first; i < first + count; i += 1) widths[i] = Math.min(1, (layout[i].right - layout[i].left) / total);
+    });
+    return widths;
+  }
+
+  function mountBarResize(button, mi, side) {
+    const boundary = side === 'start' ? mi - 1 : mi;
+    if (boundary < M.rowOf(score, mi).first) return;
+    button.classList.add('is-resizable');
+    button.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const start = event.clientX;
+      const row = M.rowOf(score, boundary);
+      const left = layout[boundary];
+      const right = boundary < row.last ? layout[boundary + 1] : null;
+      const widths = currentMeasureWidths();
+      const total = naturalLayout.slice(row.first, row.last + 1).reduce((sum, m) => sum + m.pixels, 0);
+      const minLeft = Math.min(left.right - left.left, boundary === row.first ? 100 : 48);
+      const minRight = right ? Math.min(right.right - right.left, 48) : 0;
+      const rowRight = layout[row.first].left + total;
+      let delta = 0, moved = false, cancelled = false;
+      const preview = document.createElement('div');
+      preview.className = 'score-width-guide';
+      preview.style.top = left.lines[0] - 16 + 'px';
+      preview.style.height = left.lines[4] - left.lines[0] + 32 + 'px';
+      const move = (e) => {
+        if (e.pointerId !== event.pointerId) return;
+        if (Math.abs(e.clientX - start) < 4 && !moved) return;
+        moved = true;
+        delta = Math.max(left.left + minLeft - left.right, Math.min((right ? right.right - minRight : rowRight) - left.right, e.clientX - start));
+        preview.style.left = left.right + delta + 'px';
+        if (!preview.isConnected) stage.appendChild(preview);
+      };
+      const finish = (e) => {
+        if (e.pointerId !== event.pointerId) return;
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', finish);
+        window.removeEventListener('pointercancel', cancel);
+        window.removeEventListener('keydown', escape);
+        preview.remove();
+        if (moved) {
+          button.addEventListener('click', (click) => { click.preventDefault(); click.stopImmediatePropagation(); }, { once: true, capture: true });
+          if (!cancelled && Math.abs(delta) > 0.01) change(() => {
+            widths[boundary] += delta / total;
+            if (right) widths[boundary + 1] -= delta / total;
+            score.measureWidths = widths;
+          });
+        }
+      };
+      const cancel = (e) => { cancelled = true; finish(e); };
+      const escape = (e) => { if (e.key === 'Escape') cancel({ pointerId: event.pointerId }); };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', finish);
+      window.addEventListener('pointercancel', cancel);
+      window.addEventListener('keydown', escape);
+    });
+  }
+
   // Verovio pega la cejilla (letra y linea) al pentagrama; se sube un poco para que respire.
   const BARRE_LIFT = 10;
   function liftBarreMarks(svg) {
     svg.querySelectorAll('g.measure g.dir, g.measure g.bracketSpan').forEach((node) => {
       const scale = node.getScreenCTM() && node.getScreenCTM().a;
-      if (scale) node.setAttribute('transform', 'translate(0 ' + (-BARRE_LIFT / scale) + ')');
+      if (scale) node.setAttribute('transform', 'translate(0 ' + (-BARRE_LIFT / scale) + ') ' + (node.getAttribute('transform') || ''));
     });
   }
 
@@ -614,6 +754,7 @@
         button.style.top = y + 'px';
         button.style.width = Math.max(20, box.width + 12) + 'px';
         button.style.height = Math.max(44, box.height) + 'px';
+        mountBarResize(button, mi, side);
         button.addEventListener('click', () => {
           clearBarSelection();
           deactivateTool();
@@ -1146,6 +1287,7 @@
     const centers = eventNodes(mi).map((node) => centerX(node, origin));
     let at = timeAt(Math.max(m.left, Math.min(m.right, x)), m, starts, centers);
     let markX = Math.max(m.left, Math.min(m.right, x));
+    const rawT = at, rawX = markX;
     let near = null;
     centers.forEach((c, i) => {
       const own = skip && [].concat(skip).some((s) => s.mi === mi && s.i === i);
@@ -1157,7 +1299,7 @@
       markX = near.c;
     }
     return {
-      mi, n, space,
+      mi, n, space, rawT, rawX,
       onNote: !!near,
       t: at,
       x: markX,
@@ -1196,6 +1338,7 @@
     const line = marker.firstChild;
     const item = drag ? drag.item : activeItem;
     const x = item && item.kind === 'bar' && item.bar !== 'double' ? layout[hit.mi][item.bar === 'start' ? 'left' : 'right']
+      : item && item.kind === 'bar' && item.bar === 'double' ? hit.rawX
       : item && item.kind === 'barre' && !hit.onNote ? layout[hit.mi].left : hit.x;
     line.style.left = x + 'px';
     line.style.top = hit.top - hit.space * 2 + 'px';
