@@ -12,8 +12,14 @@ jobs:
   # Picks the e2e suites a PR needs from its changed files (see
   # scripts/ci-e2e-targets.js). Pushes to main diff against the previous tip;
   # a new branch or a force-push whose old tip is gone runs every suite.
+  # Pushes to main diff each suite against the last main commit where it passed
+  # (scripts/ci-e2e-last-green.js), so a suite skipped or still running on an
+  # earlier push is not skipped now: what deploys has every suite green.
   changes:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
     outputs:
       matrix: ${{ steps.targets.outputs.matrix }}
       any: ${{ steps.targets.outputs.any }}
@@ -31,12 +37,15 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
           BASE_REF: ${{ github.base_ref }}
-          BEFORE: ${{ github.event.before }}
+          REF: ${{ github.ref }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           if [ "$EVENT" = "pull_request" ]; then
             git diff --name-only "origin/$BASE_REF...HEAD" | node scripts/ci-e2e-targets.js > matrix.json
-          elif git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
-            git diff --name-only "$BEFORE" HEAD | node scripts/ci-e2e-targets.js > matrix.json
+          elif [ "$REF" = "refs/heads/main" ]; then
+            node scripts/ci-e2e-last-green.js > green.json
+            cat green.json
+            node scripts/ci-e2e-targets.js --since-green green.json > matrix.json
           else
             node scripts/ci-e2e-targets.js --all < /dev/null > matrix.json
           fi

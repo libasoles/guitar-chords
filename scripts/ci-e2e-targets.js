@@ -2,7 +2,10 @@
 /* Decides which e2e suites a change needs. Reads changed file paths (one per
    line) from stdin and prints the CI matrix as JSON. With no input, or with
    `--all`, prints every suite. A file matched by SHARED, or claimed by no
-   suite, runs all of them; docs, backend and unit tests run none. */
+   suite, runs all of them; docs, backend and unit tests run none. With
+   `--since-green <file>` (pushes to main) each suite is diffed against the last
+   commit where it passed, read from a JSON map {suite: sha|null}, so a suite
+   skipped or still running on earlier pushes is not skipped now. */
 
 /* The article suites (test/articles-<name>.e2e.js) share the page template, the
    score renderers and the harness, so those fan out to all of them; a score or
@@ -130,14 +133,40 @@ function targets(files) {
   return names.filter((n) => relevant.some((f) => claimedBy(f).includes(n)));
 }
 
+/* `green` maps each suite to the last main commit where it passed (null if
+   unknown); `changedSince(sha)` lists the files changed from that commit to
+   HEAD, or null when it cannot (commit gone). Such a suite runs. */
+function targetsSinceGreen(green, changedSince) {
+  const cache = new Map();
+  const changed = (sha) => {
+    if (!cache.has(sha)) cache.set(sha, changedSince(sha));
+    return cache.get(sha);
+  };
+  return Object.keys(SUITES).filter((name) => {
+    const files = green[name] && changed(green[name]);
+    return !files || targets(files).includes(name);
+  });
+}
+
 function matrix(names) {
   return { include: names.map((name) => ({ name, build: SUITES[name].build })) };
 }
 
-if (require.main === module) {
+function gitChangedSince(sha) {
+  try {
+    return require('node:child_process').execFileSync('git', ['diff', '--name-only', sha, 'HEAD'], { encoding: 'utf8' }).split('\n').filter(Boolean);
+  } catch {
+    return null;
+  }
+}
+
+if (require.main === module && process.argv.includes('--since-green')) {
+  const green = JSON.parse(require('node:fs').readFileSync(process.argv[process.argv.indexOf('--since-green') + 1], 'utf8'));
+  process.stdout.write(JSON.stringify(matrix(targetsSinceGreen(green, gitChangedSince))) + '\n');
+} else if (require.main === module) {
   const input = require('node:fs').readFileSync(0, 'utf8').split('\n').map((l) => l.trim()).filter(Boolean);
   const all = process.argv.includes('--all') || !input.length;
   process.stdout.write(JSON.stringify(matrix(all ? Object.keys(SUITES) : targets(input))) + '\n');
 }
 
-module.exports = { SUITES, targets, matrix };
+module.exports = { SUITES, targets, targetsSinceGreen, matrix };

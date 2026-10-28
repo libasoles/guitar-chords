@@ -63,6 +63,29 @@ test('an unclaimed source file runs everything', () => {
   assert.deepEqual(targets(['src/site/something-new.js']), ALL);
 });
 
+test('on main each suite is diffed against its own last green commit', () => {
+  const { targetsSinceGreen } = require('../scripts/ci-e2e-targets');
+  const changes = { aaa: ['src/site/picking-render.js', 'src/site/note-finder.js'], bbb: ['README.md'] };
+  const changedSince = (sha) => changes[sha] ?? null;
+  const green = Object.fromEntries(ALL.map((n) => [n, 'bbb']));
+  assert.deepEqual(targetsSinceGreen(green, changedSince), []);
+  assert.deepEqual(targetsSinceGreen({ ...green, 'picking-intervals': 'aaa' }, changedSince), ['picking-intervals']);
+  // never green, or its commit is gone: run it.
+  assert.deepEqual(targetsSinceGreen({ ...green, 'note-finder': null, partitura: 'zzz' }, changedSince), ['note-finder', 'partitura']);
+});
+
+test('last green takes the newest successful run of each suite', async () => {
+  const { lastGreen } = require('../scripts/ci-e2e-last-green');
+  const jobs = {
+    r3: [{ name: 'e2e (a)', conclusion: 'cancelled' }, { name: 'ci-ok', conclusion: 'success' }],
+    r2: [{ name: 'e2e (a)', conclusion: 'success' }, { name: 'e2e (b)', conclusion: 'failure' }],
+    r1: [{ name: 'e2e (b)', conclusion: 'success' }, { name: 'e2e (a)', conclusion: 'success' }],
+  };
+  const runs = ['r3', 'r2', 'r1'].map((id) => ({ id, head_sha: `sha-${id}` }));
+  const green = await lastGreen(['a', 'b', 'c'], runs, async (run) => jobs[run.id]);
+  assert.deepEqual(green, { a: 'sha-r2', b: 'sha-r1', c: null });
+});
+
 test('every suite has an e2e test file', () => {
   for (const name of ALL) assert.ok(fs.existsSync(path.join(__dirname, name + '.e2e.js')), name);
 });
