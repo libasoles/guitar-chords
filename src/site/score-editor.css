@@ -168,6 +168,8 @@ body.score-body {
   gap: 0.25rem;
   margin-bottom: 1.25rem;
   padding: 0.5rem calc(36px - 9px) 0;
+  background: linear-gradient(var(--rule), var(--rule))
+    27px bottom / calc(100% - 27px) 1px no-repeat;
   font-family: var(--sans);
 }
 
