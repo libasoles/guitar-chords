@@ -221,7 +221,7 @@ async function displayOptions(page, language) {
   const tutorial = page.locator('details.tab-tutorial');
   assert.equal(await tutorial.getAttribute('open'), null);
   await tutorial.locator('summary').click();
-  assert.equal(await tutorial.locator('.tab-demo').count(), 4);
+  assert.equal(await tutorial.locator('.tab-demo').count(), 6);
   assert.ok(await tutorial.locator('.tab-demo').first().isVisible());
   await tutorial.locator('summary').click();
 }
