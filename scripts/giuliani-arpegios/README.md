@@ -42,8 +42,8 @@ Descarga sin captcha: `https://s9.imslp.org/files/imglnks/usimg/c/ca/IMSLP660049
 - **Ejercicios 96, 100 y 110**: las reglas de arpegio del motor mandan el mi5 repetido a la 2.ª cuerda (traste 5). Su fuente
   lleva las casillas impresas como `<string>`/`<fret>` y `build.py` no aplica las reglas (`PRINTED_TAB`). Con eso la TAB
   publicada coincide con la edición en las 5890 casillas de los 120 ejercicios.
-- **Revisión pendiente**: los ejercicios 11 a 120 llevan la marca (`scripts/lib/editor-marks.js`) hasta cotejarlos con el
-  libro; el 1 al 10 ya están revisados. Los 116 a 119 (polifonía con fusas y silencios) pasan el control de alturas y compases, pero son los que más lo necesitan.
+- **Revisión pendiente**: los ejercicios 34, 36 y 40 a 120 llevan la marca (`scripts/lib/editor-marks.js`) hasta cotejarlos con el
+  libro; el 1 al 33, el 35 y el 37 al 39 ya están revisados. Los 116 a 119 (polifonía con fusas y silencios) pasan el control de alturas y compases, pero son los que más lo necesitan.
 
 ## Licencia y crédito
 
@@ -57,3 +57,6 @@ de la voz superior ya indican la subdivision. Las otras voces imprimian cifras a
 En el 36, las letras de la mano derecha se limitan al primer grupo de cuatro semicorcheas:
 `p` en el bajo y `m` en la nota aguda simultanea, despues `i p i`. La proximidad geometrica
 habia intercambiado los dedos del ataque inicial y desplazado las ultimas dos letras al grupo siguiente.
+
+En el 40, el primer grupo lleva `p+m`, `i+m`, `p`, `i`. Se corrigen en la fuente curada
+los dedos intercambiados de las dos parejas y la ultima letra desplazada al grupo siguiente.

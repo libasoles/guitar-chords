@@ -123,3 +123,16 @@ test('ejercicio 36: p-m, i, p, i quedan en el primer grupo de semicorcheas', () 
     assert.deepEqual(marked, [[0, 'p'], [1, 'm'], [2, 'i'], [3, 'p'], [4, 'i']], file);
   }
 });
+
+test('ejercicio 40: p-m, i-m, p, i quedan en el primer grupo de semicorcheas', () => {
+  for (const file of [path.join(__dirname, '../scripts/giuliani-arpegios/sources/040.musicxml'),
+    path.join(DOWNLOADS_DIR, 'Arpeggio Exercise 040 - Mauro Giuliani.musicxml')]) {
+    const xml = fs.readFileSync(file, 'utf8');
+    const measure = xml.match(/<measure\b[^>]*number="1"[^>]*>([\s\S]*?)<\/measure>/)[1];
+    const notes = [...measure.matchAll(/<note\b[^>]*>([\s\S]*?)<\/note>/g)].map((m) => m[1])
+      .filter((n) => !/<staff>2<\/staff>/.test(n));
+    const marked = notes.flatMap((n, index) => [...n.matchAll(/<fingering[^>]*>([pima])<\/fingering>/g)]
+      .map((m) => [index, m[1]]));
+    assert.deepEqual(marked, [[0, 'p'], [1, 'm'], [2, 'i'], [3, 'm'], [4, 'p'], [5, 'i']], file);
+  }
+});
