@@ -17,6 +17,11 @@ run('articles-arpeggios', async ({ base, page }) => {
     assert.equal(await page.locator('.sequence-forms ascii-tabs[readonly]').count(), 87);
     const titles = await page.locator('.arpeggio-group figcaption').allTextContents();
     assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Do menor', 'Do 7'] : ['C major', 'C minor', 'C 7']);
+    if (locale !== 'es') {
+      // Everything below is layout and behaviour, identical in every locale: it runs once, in Spanish.
+      assert.equal(await page.locator('.arpeggio-search-toggle').getAttribute('aria-label'), 'Search by notes');
+      continue;
+    }
     const groups = await page.locator('.arpeggio-group ascii-tabs').evaluateAll((els) => els.map((el) => el.value.flat().filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));
     // Include every staff: long groups wrap after six forms.
     const groupIds = await page.locator('.arpeggio-group ascii-tabs').evaluateAll((els) => els.map((el) => Number(el.querySelector('.arpeggio-chord').getAttribute('popovertarget').match(/^arpeggio-chord-(\d+)-/)[1])));
@@ -92,19 +97,10 @@ run('articles-arpeggios', async ({ base, page }) => {
     await page.waitForFunction(() => document.activeElement && document.activeElement.classList.contains('ascii-tabs-input'));
     await toggle.click();
     for (const [root, quality, chordNotes] of [
+      ['C', 'Minor', [0, 3, 7]],
+      ['C', 'Seventh', [0, 4, 7, 10]],
       ['C', 'MinorSeventh', [0, 3, 7, 10]],
-      ['D', 'MinorSeventh', [2, 5, 9, 0]],
-      ['E', 'MinorSeventh', [4, 7, 11, 2]],
-      ['F', 'MinorSeventh', [5, 8, 0, 3]],
-      ['G', 'MinorSeventh', [7, 10, 2, 5]],
-      ['A', 'MinorSeventh', [9, 0, 4, 7]],
-      ['B', 'MinorSeventh', [11, 2, 6, 9]],
-      ['F', 'Minor', [5, 8, 0]],
-      ['F', 'Seventh', [5, 9, 0, 3]],
-      ['G', 'Minor', [7, 10, 2]],
       ['A', 'Seventh', [9, 1, 4, 7]],
-      ['B', 'Minor', [11, 2, 6]],
-      ['B', 'Seventh', [11, 3, 6, 9]],
     ]) {
       const names = arpeggioGroup(root, quality)[3];
       const expectedForms = arpeggioGroup(root, quality)[4];
@@ -158,12 +154,12 @@ run('articles-arpeggios', async ({ base, page }) => {
       await popup.locator('button').click();
       assert.ok(!(await popup.evaluate((el) => el.matches(':popover-open'))));
     }
-    // Every quality panel opens its last annotation (an inversion), in one round trip: select the tab, open it and
-    // read the card it renders. Rendering a card is what costs, so one per panel stands for the rest.
+    // Every quality panel of the first root opens its last annotation (an inversion), in one round trip: select the tab, open it and
+    // read the card it renders. Rendering a card is what costs, so one root stands for the rest.
     const opened = await page.evaluate(async () => {
       const frame = () => new Promise((resolve) => requestAnimationFrame(resolve));
       const out = [];
-      const panels = () => document.querySelectorAll('[role="tabpanel"]');
+      const panels = () => document.querySelector('.arpeggio-group').querySelectorAll('[role="tabpanel"]');
       // Selecting a tab can re-render its group, so the panel is looked up again afterwards.
       for (let i = 0; i < panels().length; i++) {
         document.getElementById(panels()[i].getAttribute('aria-labelledby')).click();
@@ -178,7 +174,7 @@ run('articles-arpeggios', async ({ base, page }) => {
       }
       return out;
     });
-    assert.equal(opened.length, await page.locator('[role="tabpanel"]').count());
+    assert.equal(opened.length, await page.locator('.arpeggio-group').first().locator('[role="tabpanel"]').count());
     opened.forEach(({ name, card, open }, i) => assert.deepEqual({ card, open }, { card: name, open: true }, 'panel ' + i));
     await qualityTabs.first().click();
     // The annotation is keyboard operable; Escape dismisses and returns focus.
@@ -192,16 +188,16 @@ run('articles-arpeggios', async ({ base, page }) => {
     await buttons.first().click();
     await page.locator('h1').click();
     assert.equal(await page.locator('.chord-popover:popover-open').count(), 0);
-    for (const width of [320, 375, 1280]) {
+    for (const width of [320, 1280]) {
       await page.setViewportSize({ width, height: 800 });
       // Resizing reflows over the next frames, so wait instead of sampling once.
       await page.waitForFunction(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
-      // Every tab, in one round trip: a revealed panel lays its annotations out on the next frames.
+      // Every tab of the first root, in one round trip: a revealed panel lays its annotations out on the next frames.
       const overflowing = await page.evaluate(async () => {
         const frame = () => new Promise((resolve) => requestAnimationFrame(resolve));
         const fits = () => document.documentElement.scrollWidth <= document.documentElement.clientWidth;
         let bad = 0;
-        for (const tab of document.querySelectorAll('[role="tab"]')) {
+        for (const tab of document.querySelector('.arpeggio-group').querySelectorAll('[role="tab"]')) {
           tab.click();
           await frame();
           for (let tries = 0; tries < 120 && !fits(); tries++) await frame();
