@@ -786,3 +786,19 @@ test('los anchos visuales se conservan al guardar, dividir y desplazar compases'
   const clean = M.sanitize({ ...score, measureWidths: { 0: -1, 1: Infinity, 2: '0.2', 3: 0, 4: 0.4, 99: 0.3 } });
   assert.deepEqual(clean.measureWidths, { 4: 0.4 });
 });
+
+test('dividir un compas conserva su continuacion y los compases vecinos en el mismo renglon', () => {
+  const score = M.emptyScore();
+  score.rows[2] = [[], []];
+  score.rows[0][3] = [{ n: 30, d: 'h', at: 0 }, { n: 32, d: 'q', at: 72 }];
+  score.rows[1][0] = [{ n: 35, d: 'q', at: 0 }];
+  const following = M.clone(score).rows.slice(1);
+  M.setBarline(score, 3, 'double', 48);
+  assert.deepEqual(score.rows.map(row => row.length), [5, 4, 2]);
+  assert.deepEqual(score.rows.slice(1), following);
+  assert.deepEqual(score.rows[0][4], [{ n: 32, d: 'q', at: 24 }]);
+  assert.deepEqual(M.sanitize(M.clone(score)), score, 'recargar no trunca el quinto compas');
+  M.setBarline(score, 4, 'double', 24);
+  assert.deepEqual(score.rows.map(row => row.length), [6, 4, 2]);
+  assert.deepEqual(M.sanitize(M.clone(score)), score, 'se conservan divisiones repetidas');
+});

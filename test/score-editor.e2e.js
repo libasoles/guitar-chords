@@ -31,6 +31,49 @@ async function checkInteriorDoubleBar(page) {
   assert.equal(await page.locator('#scoreStage g.measure').count(), 13);
 }
 
+async function checkSplitKeepsRows(page) {
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+  await page.evaluate(() => {
+    scoreEditor.score.rows[2] = [[], []];
+    scoreEditor.score.rows[0][3] = [{ n: 30, d: 'q', at: 0 }, { n: 32, d: 'q', at: 72 }];
+    scoreEditor.score.rows[1][0] = [{ n: 35, d: 'q', at: 0 }];
+    scoreEditor.render();
+    return document.fonts.ready;
+  });
+  await page.waitForTimeout(200); // El ResizeObserver completa el dibujo inicial antes de medir.
+  const rowWidths = () => page.evaluate(() => {
+    let first = 0;
+    return scoreEditor.score.rows.map((row) => {
+      const head = document.querySelector('#m' + first + ' > g.staff > path').getBoundingClientRect();
+      const last = document.querySelector('#m' + (first + row.length - 1) + ' > g.staff > path').getBoundingClientRect();
+      first += row.length;
+      return last.right - head.left;
+    });
+  });
+  const before = await rowWidths();
+  await page.locator('[data-barline="double"]').click();
+  const box = await page.locator('#m3 > g.staff > path').first().boundingBox();
+  const x = box.x + box.width * 0.6;
+  await page.mouse.click(x, box.y + 10);
+  const check = async () => {
+    assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows.map(row => row.length)), [5, 4, 2], 'el corte conserva la continuacion en su renglon');
+    assert.equal(await page.locator('#scoreStage g.measure').count(), 11);
+    const after = await rowWidths();
+    after.forEach((width, row) => assert.ok(Math.abs(width - before[row]) < 2, 'el renglon ' + row + ' no se acorta'));
+    const continuation = await page.locator('#m4 > g.staff > path').first().boundingBox();
+    assert.ok(continuation.width > 20, 'el compas posterior sigue visible');
+    assert.ok(Math.abs(continuation.x - x) < 2, 'el compas posterior empieza en el corte');
+    assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][4][0].n), 32, 'se conserva la nota posterior al corte');
+    assert.equal(await page.evaluate(() => scoreEditor.score.rows[1][0][0].n), 35, 'el renglon siguiente conserva sus notas');
+  };
+  await check();
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+  await check();
+}
+
 async function checkMeasureWidths(page) {
   await page.evaluate(() => {
     scoreEditor.score.rows[0][0] = [{ n: 30, d: 'e', at: 0 }, { n: 32, d: 'e', at: 12 }, { n: 30, d: 'e', at: 84, tie: true }];
@@ -770,6 +813,7 @@ async function run() {
     await splitPage.goto(url);
     await splitPage.waitForSelector('#scoreStage g.measure');
     await checkInteriorDoubleBar(splitPage);
+    await checkSplitKeepsRows(splitPage);
     await splitPage.close();
     const widthsPage = await browser.newPage({ reducedMotion: 'reduce' });
     await widthsPage.goto(url);

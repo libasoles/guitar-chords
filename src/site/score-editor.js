@@ -777,7 +777,7 @@
     });
   }
 
-  // Los renglones tienen siempre cuatro compases: el ultimo compas, si todo el ultimo renglon esta vacio, se quita con el renglon.
+  // Quitar un renglon elimina todos sus compases, incluidas las divisiones creadas con barras.
   function removeLastRow() {
     if (score.rows.length <= M.MIN_ROWS) return false;
     selected = null;

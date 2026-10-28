@@ -115,7 +115,7 @@
     return score.rows.flat();
   }
 
-  // Indice plano del primer compas de cada renglon; los renglones tienen de 1 a PER_ROW compases.
+  // Indice plano del primer compas de cada renglon; dividir compases puede superar PER_ROW.
   function rowStarts(score) {
     let start = 0;
     return score.rows.map((row) => { const first = start; start += row.length; return first; });
@@ -275,27 +275,6 @@
     if (score.tabs) score.tabs = tabs;
     const row = rowOf(score, mi);
     score.rows[row.row].splice(mi - row.first, 1, left, right);
-    for (let r = row.row; r < score.rows.length; r += 1) {
-      if (score.rows[r].length <= PER_ROW) continue;
-      const overflow = score.rows[r].splice(PER_ROW);
-      if (!score.rows[r + 1]) score.rows.push([]);
-      score.rows[r + 1].unshift(...overflow);
-    }
-    // Al redistribuir los renglones una cejilla larga continua en el renglon siguiente.
-    const barres = {};
-    Object.entries(score.barres || {}).forEach(([key, barre]) => {
-      let first = +key;
-      const last = barreLast(barre, first);
-      while (first <= last) {
-        const stop = Math.min(last, rowOf(score, first).last);
-        const part = { at: first === +key ? barre.at : 0, fret: barre.fret };
-        if (stop > first) part.span = stop - first;
-        if (stop === last && Number.isInteger(barre.to)) part.to = barre.to;
-        barres[first] = part;
-        first = stop + 1;
-      }
-    });
-    if (score.barres) score.barres = barres;
     return true;
   }
 
@@ -518,8 +497,9 @@
     const meter = meterOf(data);
     const factor = DIVISIONS / (scale || DIVISIONS);
     const rows = data.rows.map((row) => {
-      const result = emptyRow().slice(0, Array.isArray(row) && row.length ? Math.min(PER_ROW, row.length) : PER_ROW);
-      (Array.isArray(row) ? row : []).slice(0, PER_ROW).forEach((measure, m) => {
+      const count = Array.isArray(row) && row.length ? row.length : PER_ROW;
+      const result = Array.from({ length: count }, () => []);
+      (Array.isArray(row) ? row : []).forEach((measure, m) => {
         const events = [];
         (Array.isArray(measure) ? measure : []).forEach((raw) => {
           if (!raw || !VALUES[raw.d]) return;
