@@ -343,7 +343,7 @@ async function checkDrag(page) {
       assert.ok(Math.abs(head.y + head.height / 2 - target.y) < 1, 'notehead follows mouse vertically');
     }
 
-    const button = await page.locator('.score-palette-item').nth(2).boundingBox();
+    const button = await page.locator('[data-shortcut="4"]').boundingBox();
     await page.mouse.move(button.x + button.width / 2, button.y + button.height / 2);
     await page.mouse.down();
     await page.mouse.move(target.x, target.y, { steps: 5 });
@@ -365,8 +365,8 @@ async function checkDrag(page) {
     await page.reload();
     await page.waitForSelector('#scoreStage g.measure');
     assert.deepEqual(await page.locator('.score-palette-key').allTextContents(), ['1', '2', '3', '4', '5', '6', 'q', 'w', 'e', 'r', 't', 'y', 'p', 's', 'b', 'c']);
-    await page.keyboard.press('4');
-    assert.equal(await page.locator('[data-shortcut="4"]').getAttribute('aria-pressed'), 'true');
+    await page.keyboard.press('3');
+    assert.equal(await page.locator('[data-shortcut="3"]').getAttribute('aria-pressed'), 'true');
     const previewPoint = await page.locator('#scoreStage g.measure').nth(1).evaluate(node => {
       const r = node.querySelector('g.staff > path').getBoundingClientRect();
       return { x: r.left + r.width * 0.5, y: r.top + 10 };
@@ -378,12 +378,12 @@ async function checkDrag(page) {
     assert.ok(Math.abs(previewHead.x + previewHead.width / 2 - previewPoint.x) < 1);
     assert.ok(Math.abs(previewHead.y + previewHead.height / 2 - previewPoint.y) < 1);
     const eighthGlyph = await page.locator('.score-hover-ghost svg').innerHTML();
-    await page.keyboard.press('5');
+    await page.keyboard.press('2');
     assert.notEqual(await page.locator('.score-hover-ghost svg').innerHTML(), eighthGlyph);
     assert.equal(await page.locator('.score-ghost').count(), 1, 'changing tools replaces the hover glyph');
-    await page.keyboard.press('4');
+    await page.keyboard.press('3');
     assert.deepEqual(await page.evaluate(() => scoreEditor.score), beforeHover, 'hover does not edit the score');
-    assert.equal(await page.locator('[data-shortcut="4"]').evaluate(el => getComputedStyle(el).color), 'rgb(216, 91, 112)', 'the active tool is drawn in the brand red');
+    assert.equal(await page.locator('[data-shortcut="3"]').evaluate(el => getComputedStyle(el).color), 'rgb(216, 91, 112)', 'the active tool is drawn in the brand red');
     await page.mouse.move(1, 1);
     assert.equal(await page.locator('.score-hover-ghost').count(), 0);
     await page.mouse.move(previewPoint.x, previewPoint.y);
@@ -405,16 +405,16 @@ async function checkDrag(page) {
     await clickMeasure(2);
     assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0].slice(1, 3).map(m => m[0].d)), ['e', 'e']);
     const beforeEdit = await page.evaluate(() => ({ ...scoreEditor.score.rows[0][2][0] }));
-    await page.keyboard.press('5');
+    await page.keyboard.press('2');
     assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][2][0]), { ...beforeEdit, d: 's' });
     await page.keyboard.press('ControlOrMeta+z');
     assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][2][0]), beforeEdit);
     await page.keyboard.press('Escape');
-    await page.locator('[data-shortcut="r"]').click();
+    await page.locator('[data-shortcut="e"]').click();
     await clickMeasure(3);
     assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][3][0].rest), true);
     await page.locator('#scoreTitle').fill('12345');
-    assert.equal(await page.locator('[data-shortcut="r"]').getAttribute('aria-pressed'), 'true');
+    assert.equal(await page.locator('[data-shortcut="e"]').getAttribute('aria-pressed'), 'true');
     await page.locator('#scoreStage').focus();
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('.score-palette-item[aria-pressed="true"]').count(), 0);
@@ -431,15 +431,35 @@ async function checkModifiers(page, url, keys) {
   await page.goto(url);
   await page.waitForSelector('#scoreStage g.measure');
   assert.deepEqual((await page.locator('.score-palette-key').allTextContents()).slice(-4), keys);
+  const durations = ['f', 's', 'e', 'q', 'h', 'w'];
+  const labels = keys[0] === 'p'
+    ? ['Fusa', 'Semicorchea', 'Corchea', 'Negra', 'Blanca', 'Redonda', 'Silencio de fusa', 'Silencio de semicorchea', 'Silencio de corchea', 'Silencio de negra', 'Silencio de blanca', 'Silencio de redonda']
+    : ['Thirty-second note', 'Sixteenth note', 'Eighth note', 'Quarter note', 'Half note', 'Whole note', 'Thirty-second rest', 'Sixteenth rest', 'Eighth rest', 'Quarter rest', 'Half rest', 'Whole rest'];
+  assert.deepEqual(await page.locator('#scorePalette button').evaluateAll(buttons => buttons.slice(0, 12).map(button => button.getAttribute('aria-label'))), labels);
+  const point = await page.locator('#scoreStage g.measure').first().evaluate(node => {
+    const r = node.querySelector('g.staff > path').getBoundingClientRect();
+    return { x: r.left + r.width * 0.25, y: r.top + 10 };
+  });
+  for (const [rest, shortcuts] of [[false, ['1', '2', '3', '4', '5', '6']], [true, ['q', 'w', 'e', 'r', 't', 'y']]]) {
+    for (const [index, shortcut] of shortcuts.entries()) {
+      await page.keyboard.press(shortcut);
+      await page.mouse.click(point.x, point.y);
+      const figure = await page.evaluate(() => scoreEditor.score.rows[0][0][0]);
+      assert.equal(figure.d, durations[index], 'duration for ' + shortcut);
+      assert.equal(!!figure.rest, rest, 'note/rest for ' + shortcut);
+      await page.keyboard.press('Escape');
+      await page.keyboard.press('ControlOrMeta+z');
+    }
+  }
   // Clicking a figure activates the same persistent tool as its keyboard shortcut.
-  await page.locator('[data-shortcut="3"]').click();
-  await page.locator('[data-shortcut="3"]').click();
+  await page.locator('[data-shortcut="4"]').click();
+  await page.locator('[data-shortcut="4"]').click();
   assert.equal(await page.locator('.score-palette-item[aria-pressed="true"]').count(), 0);
-  await page.keyboard.press('3');
-  await page.keyboard.press('3');
+  await page.keyboard.press('4');
+  await page.keyboard.press('4');
   assert.equal(await page.locator('.score-palette-item[aria-pressed="true"]').count(), 0);
-  await page.locator('[data-shortcut="3"]').click();
-  assert.equal(await page.locator('[data-shortcut="3"]').getAttribute('aria-pressed'), 'true');
+  await page.locator('[data-shortcut="4"]').click();
+  assert.equal(await page.locator('[data-shortcut="4"]').getAttribute('aria-pressed'), 'true');
   for (const mi of [1, 2]) {
     const point = await page.locator('#scoreStage g.measure').nth(mi).evaluate(node => {
       const r = node.querySelector('g.staff > path').getBoundingClientRect();
@@ -478,7 +498,7 @@ async function checkModifiers(page, url, keys) {
   assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][2][0].acc), 'b');
   await page.keyboard.press('Escape');
   await page.locator('[id="e2-0"] .notehead').click();
-  await page.locator('[data-shortcut="4"]').click();
+  await page.locator('[data-shortcut="3"]').click();
   assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][2][0].d), 'e');
   await page.locator('[data-shortcut="' + keys[0] + '"]').focus();
   await page.keyboard.press('Enter');
@@ -544,7 +564,7 @@ async function checkTabs(page) {
 }
 
 async function checkClear(page) {
-  await page.locator('[data-shortcut="3"]').click();
+  await page.locator('[data-shortcut="4"]').click();
   const point = await page.locator('#scoreStage g.measure').first().evaluate(node => {
     const r = node.querySelector('g.staff > path').getBoundingClientRect();
     return { x: r.left + r.width * 0.5, y: r.top + 10 };
