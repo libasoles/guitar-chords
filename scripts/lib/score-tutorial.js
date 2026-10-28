@@ -15,21 +15,21 @@ const STEM = 'stroke="currentColor" stroke-width="1.6" fill="none"';
 const LINE = 'stroke="currentColor" stroke-width="1.7" fill="none"';
 
 const NOTES = [
-  ['1', '<path d="' + HOLLOW_HEAD + '" fill-rule="evenodd"/>'],
-  ['2', '<path d="' + HOLLOW_HEAD + '" fill-rule="evenodd"/><path d="M19.6 24.2V-1" ' + STEM + '/>'],
-  ['3', '<path d="' + HEAD + '"/><path d="M19.6 24.2V-1" ' + STEM + '/>'],
-  ['4', '<path d="' + HEAD + '"/><path d="M19.6 24.2V-1c0 4 5 5.5 5 11" ' + STEM + '/>'],
-  ['5', '<path d="' + HEAD + '"/><path d="M19.6 24.2V-2m0 0c0 4 5 5.5 5 11m-5-6c0 4 5 5.5 5 11" ' + STEM + '/>'],
-  ['6', '<path d="' + HEAD + '"/><path d="M19.6 24.2V-3m0 0c0 4 5 5.5 5 11m-5-6c0 4 5 5.5 5 11m-5-6c0 4 5 5.5 5 11" ' + STEM + '/>'],
+  ['1', '<path d="' + HEAD + '"/><path d="M19.6 24.2V-3m0 0c0 4 5 5.5 5 11m-5-6c0 4 5 5.5 5 11m-5-6c0 4 5 5.5 5 11" ' + STEM + '/>'],
+  ['2', '<path d="' + HEAD + '"/><path d="M19.6 24.2V-2m0 0c0 4 5 5.5 5 11m-5-6c0 4 5 5.5 5 11" ' + STEM + '/>'],
+  ['3', '<path d="' + HEAD + '"/><path d="M19.6 24.2V-1c0 4 5 5.5 5 11" ' + STEM + '/>'],
+  ['4', '<path d="' + HEAD + '"/><path d="M19.6 24.2V-1" ' + STEM + '/>'],
+  ['5', '<path d="' + HOLLOW_HEAD + '" fill-rule="evenodd"/><path d="M19.6 24.2V-1" ' + STEM + '/>'],
+  ['6', '<path d="' + HOLLOW_HEAD + '" fill-rule="evenodd"/>'],
 ];
 
 const RESTS = [
-  ['q', '<path d="M5 12h20" stroke="currentColor" stroke-width="1.4"/><path d="M9 12h12v6H9z"/>'],
-  ['w', '<path d="M5 18h20" stroke="currentColor" stroke-width="1.4"/><path d="M9 12h12v6H9z"/>'],
-  ['e', '<path d="M12 5l7 8-5 5 6 7c-3-1-6.5-.5-6 3" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round"/>'],
-  ['r', '<circle cx="12" cy="11" r="2.4"/><path d="M13 12.5c3 0 5-1.3 6-3.5l-5 20" ' + LINE + '/>'],
-  ['t', '<circle cx="12" cy="9" r="2.4"/><circle cx="10" cy="17" r="2.4"/><path d="M13 10c3 0 5-1.3 6-3.5l-6.5 22" ' + LINE + '/>'],
-  ['y', '<circle cx="12" cy="5" r="2.2"/><circle cx="10" cy="12" r="2.2"/><circle cx="8" cy="19" r="2.2"/><path d="M13 6c3 0 5-1.3 6-3.5l-8 26" ' + LINE + '/>'],
+  ['q', '<circle cx="12" cy="5" r="2.2"/><circle cx="10" cy="12" r="2.2"/><circle cx="8" cy="19" r="2.2"/><path d="M13 6c3 0 5-1.3 6-3.5l-8 26" ' + LINE + '/>'],
+  ['w', '<circle cx="12" cy="9" r="2.4"/><circle cx="10" cy="17" r="2.4"/><path d="M13 10c3 0 5-1.3 6-3.5l-6.5 22" ' + LINE + '/>'],
+  ['e', '<circle cx="12" cy="11" r="2.4"/><path d="M13 12.5c3 0 5-1.3 6-3.5l-5 20" ' + LINE + '/>'],
+  ['r', '<path d="M12 5l7 8-5 5 6 7c-3-1-6.5-.5-6 3" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round"/>'],
+  ['t', '<path d="M5 18h20" stroke="currentColor" stroke-width="1.4"/><path d="M9 12h12v6H9z"/>'],
+  ['y', '<path d="M5 12h20" stroke="currentColor" stroke-width="1.4"/><path d="M9 12h12v6H9z"/>'],
 ];
 
 const MARKS = [
