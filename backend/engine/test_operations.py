@@ -83,6 +83,15 @@ class PrepareTests(Base):
         for note_id in ids[:3]:
             self.assertIn(f'data-id="{note_id}"', svg)
 
+    def test_a_measure_whose_rhythm_does_not_add_up_is_listed(self):
+        self.assertEqual(self.load(self.prepare()["suggestion"])["uneven_measures"], [])
+        broken = self.path("broken.musicxml")
+        with open(broken, "w", encoding="utf-8") as f:
+            f.write(SCORE.replace("</measure></part>", '<note><pitch><step>E</step><octave>4</octave></pitch>'
+                                  '<duration>8</duration><type>half</type></note></measure></part>'))
+        res = tabify.prepare(broken, "musicxml", "standard", self.path("broken"))
+        self.assertEqual(self.load(res["suggestion"])["uneven_measures"], [1])
+
     def test_forced_dropd_and_dropped_notes(self):
         out = self.prepare("dropd")
         self.assertEqual(out["tuning"], "dropd")

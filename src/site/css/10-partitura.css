@@ -572,6 +572,18 @@ html.part-modal-open body { overflow: hidden; }
   top: 0;
   display: block;
 }
+.part-measure-tab.is-uneven {
+  outline: 1.5px dashed #b45309;
+  outline-offset: 2px;
+}
+.part-uneven-badge {
+  position: absolute;
+  top: -1.1rem;
+  display: inline-flex;
+  margin-left: 2px;
+  color: #b45309;
+  z-index: 2;
+}
 .part-example-names {
   position: absolute;
   inset: 0;

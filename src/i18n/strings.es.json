@@ -434,6 +434,7 @@
   "partExporting": "Exportando…",
   "partPdfDownloaded": "PDF descargado.",
   "partLowQualityScan": "La lectura de este escaneo puede tener errores. Convendría buscar una partitura de mejor calidad.",
+  "partUnevenMeasure": "El ritmo de este compás no suma; revisa las notas.",
   "partDropped": "Notas descartadas (no hay posición posible en la guitarra):",
   "partDroppedItem": "compás {m}: {p}",
   "partNoteTabEdit": "Editar la tablatura no corrige errores de la notación. Si la partitura tiene errores de reconocimiento, descargá el MusicXML intermedio, corregilo en un editor de partituras y subilo de nuevo.",

@@ -76,7 +76,7 @@ def _quality(files, log):
         return dict(measure_quality(files), out_of_key=out_of_key_ratio(files))
     except Exception as exc:  # noqa: BLE001 - an unreadable result is just a bad one
         log(f"cannot assess result: {exc}")
-        return {"measures": 0, "consistent": 0, "notes": 0, "out_of_key": 0.0}
+        return {"measures": 0, "consistent": 0, "notes": 0, "broken": [], "out_of_key": 0.0}
 
 
 def _is_suspect(q):
@@ -100,7 +100,7 @@ def recognize(pdf, work, deadline, heap_mb, log=log, info=None):
 
     `deadline` is a time.monotonic() value shared by every attempt. If `info` is a dict it is filled with
     what the caller may tell the user: the engine, whether the PDF is a scan, whether the reading is still
-    doubtful, and its measures / consistent / out_of_key figures.
+    doubtful, and its measures / consistent / out_of_key figures and the indices of the measures whose rhythm does not add up.
     """
     def audiveris():
         straight_dir = os.path.join(work, "deskew")
@@ -142,7 +142,8 @@ def recognize(pdf, work, deadline, heap_mb, log=log, info=None):
         if info is not None:
             q = best["quality"]
             info.update(engine=best["name"], scan=scan, suspect=_is_suspect(q), measures=q["measures"],
-                        consistent=q["consistent"], out_of_key=q["out_of_key"])
+                        consistent=q["consistent"], out_of_key=q["out_of_key"],
+                        broken_measures=q.get("broken", []))
     return best["files"] if best else []
 
 
