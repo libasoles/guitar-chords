@@ -353,6 +353,8 @@ body.score-body {
 
 .score-palette-item[aria-pressed="true"] {
   color: var(--accent-brand);
+  background: color-mix(in srgb, var(--accent-brand) 14%, transparent);
+  border-color: color-mix(in srgb, var(--accent-brand) 40%, transparent);
 }
 
 .score-palette .score-palette-item svg {

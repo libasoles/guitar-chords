@@ -1617,6 +1617,13 @@
     } else if (event.key === 'Escape') setPicks([]);
   });
 
+  // Un click en un lugar neutro (fuera de la partitura, las paletas y los menus) suelta la herramienta.
+  document.addEventListener('pointerdown', (event) => {
+    if (!activeItem || !(event.target instanceof Element)) return;
+    if (event.target.closest('.score-stage, .score-palette, .score-toolbar, .score-side-actions, .score-doc-tab, [popover], button, a, input, select, textarea')) return;
+    deactivateTool();
+  });
+
   document.addEventListener('keydown', (event) => {
     if (event.target.closest('input, textarea, select, [contenteditable], ascii-tabs')) return;
     if (event.key === 'Escape') {
