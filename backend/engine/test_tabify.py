@@ -21,6 +21,23 @@ def note(duration, kind="half", extra=""):
 
 
 class ScoreImportTests(unittest.TestCase):
+    def test_slur_between_ledger_notes_goes_below_whatever_the_ocr_said(self):
+        def low(step, octave, slur):
+            return (f'<note><pitch><step>{step}</step><octave>{octave}</octave></pitch><duration>1</duration>'
+                    f'<type>quarter</type><notations>{slur}</notations></note>')
+        xml = score_xml('<measure number="1"><attributes><divisions>1</divisions><clef><sign>G</sign>'
+                        '<line>2</line><clef-octave-change>-1</clef-octave-change></clef></attributes>'
+                        + low("E", 2, '<slur number="1" type="start" placement="above"/>')
+                        + low("F", 2, '<slur number="1" type="stop"/>')
+                        + low("E", 3, '<slur number="2" type="start" placement="above"/>')
+                        + low("F", 3, '<slur number="2" type="stop"/>') + '</measure>')
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "s.musicxml"
+            path.write_text(xml)
+            _, part = tabify.load_score([str(path)])
+        slurs = list(part.recurse().getElementsByClass(tabify.m21.spanner.Slur))
+        self.assertEqual([s.placement for s in slurs], ["below", "above"])
+
     def test_footer_text_filed_as_lyrics_is_dropped(self):
         lyric = '<lyric><text>EJEMPLAR</text></lyric>'
         xml = score_xml('<measure number="1"><attributes><divisions>1</divisions></attributes>'

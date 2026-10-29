@@ -31,6 +31,7 @@ from xml.sax.saxutils import escape
 import music21 as m21
 import verovio
 
+import engraving
 import fingering
 
 verovio.enableLog(False)
@@ -148,6 +149,24 @@ def read_score(path):
     return m21.converter.parse(path)
 
 
+def fix_slur_placement(score):
+    """Audiveris writes slur `placement` from the curve's control point, which often puts a
+    slur above notes that hang below the staff. A slur whose two heads are both outside
+    the staff goes on the side they hang: below for ledger notes under it (stems down, the
+    beam side), above for those over it. Slurs that touch the staff keep the OCR's choice."""
+    for slur in score.recurse().getElementsByClass(m21.spanner.Slur):
+        first, last = slur.getFirst(), slur.getLast()
+        clef = first.getContextByClass(m21.clef.Clef)
+        if clef is None or not hasattr(clef, "lowestLine") or not first.pitches or not last.pitches:
+            continue
+        low = min(p.diatonicNoteNum for n in (first, last) for p in n.pitches)
+        high = max(p.diatonicNoteNum for n in (first, last) for p in n.pitches)
+        if high < clef.lowestLine:
+            slur.placement = "below"
+        elif low > clef.lowestLine + 8:
+            slur.placement = "above"
+
+
 def load_score(paths):
     """First part of the first movement; later movements are appended.
 
@@ -160,6 +179,7 @@ def load_score(paths):
         # a guitar score has none, so drop them or they print under the staff.
         for n in score.recurse().getElementsByClass(m21.note.GeneralNote):
             n.lyrics = []
+        fix_slur_placement(score)
         # The same text can arrive as free text directions (<words>); only the
         # header credits are kept, so drop every other printed text.
         # Curated scores (the site's Carcassi collections) set KEEP_TEXT to print their tempo and D.C. marks.
@@ -643,7 +663,7 @@ def preview_rows(part, measures_per_row, measures=None):
                 if end == count - 1 and end - start + 1 < measures_per_row and (
                         measures is None or preview_tab_spacing(natural, measures[start:end + 1]) <= 1):
                     svg = natural
-                packed.append({"first": start, "last": end, "svg": svg})
+                packed.append({"first": start, "last": end, "svg": engraving.engrave(svg)})
                 break
             end -= 1
         start = end + 1
@@ -950,7 +970,7 @@ def build_output(score, part, measures, tuning, title, out_base, header=None):
     with tempfile.TemporaryDirectory() as tmp:
         pages = []
         for page in range(1, toolkit.getPageCount() + 1):
-            svg = toolkit.renderToSVG(page)
+            svg = engraving.engrave(toolkit.renderToSVG(page))
             if page == 1:
                 svg = add_string_names(svg, string_names(tuning))
                 svg = style_header(svg)
