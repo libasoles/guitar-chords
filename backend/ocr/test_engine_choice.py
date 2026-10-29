@@ -157,7 +157,7 @@ def test_the_result_tells_whether_the_reading_is_a_scan_and_still_suspect(engine
     state["audiveris"] = (["a.mxl"], IMPLAUSIBLE)
     info = {}
     recognize(tmp_path, info=info)
-    assert info == {"engine": "homr", "scan": True, "suspect": True, "measures": 10, "consistent": 9, "out_of_key": 0.25}
+    assert info == {"engine": "homr", "scan": True, "suspect": True, "measures": 10, "consistent": 9, "out_of_key": 0.25, "broken_measures": []}
 
 
 def test_a_good_reading_is_not_suspect_and_a_vector_pdf_is_not_a_scan(engines, tmp_path):
