@@ -8,7 +8,8 @@ beat ends, so notes sounding together land in different columns:
     tuplet that was never one (the lengths only fit the measure once both are undone);
   * a voice is two voices glued together (the bass followed by its arpeggio);
   * a bass note lost its dot, leaving a hole in its stem lane before the next bass note;
-  * a voice opens inside the note of the voice it continues (a <forward> that is too short).
+  * a voice opens inside the note of the voice it continues (a <forward> that is too short);
+  * two notes of one voice drawn at the same x (Audiveris' default-x): one stem, a chord read as two onsets.
 
 Each rule only edits a measure when the result is clearly better: the voice then adds up to the
 measure, or the lane closes. Anything ambiguous (several ways to fit, or none) is left as it was.
@@ -182,6 +183,26 @@ def _stack(events, event, previous):
     events.remove(event)
 
 
+def _gaps(own):
+    """The distance that separates each event of a voice from the end of the one before it."""
+    return {id(after): after.start - before.end for before, after in zip(own, own[1:])}
+
+
+def _stack_all(events, own, stacked, gaps):
+    """Makes each event of `stacked` (a subset of the voice `own`) a chord member of the one before it, and lays the voice's remaining
+    events out again one after another with the `gaps` they had (taken before any length changed)."""
+    for event in stacked:
+        previous = own[own.index(event) - 1]
+        while previous in stacked:
+            previous = own[own.index(previous) - 1]
+        _stack(events, event, previous)
+    cursor = None
+    for event in (e for e in own if e not in stacked):
+        cursor = event.start if cursor is None else cursor + gaps[id(event)]
+        event.start = cursor
+        cursor = event.end
+
+
 def _fit_overrun(events, voice, whole, divisions):
     """Undoes tuplets and stacks notes so the voice ends exactly at the barline. Needs one way only."""
     own = _by_voice(events)[voice]
@@ -203,23 +224,13 @@ def _fit_overrun(events, voice, whole, divisions):
             break
     if len(solutions) != 1:
         return False
-    # The voice keeps the distance that separated each of its onsets from the one before.
-    gaps = {id(after): after.start - before.end for before, after in zip(own, own[1:])}
+    gaps = _gaps(own)
     stacked = [target for kind, target in solutions[0] if kind == "stack"]
     for kind, target in solutions[0]:
         if kind == "tuplet":
             for event in target:
                 _strip_tuplet(event, divisions)
-    for event in stacked:
-        previous = own[own.index(event) - 1]
-        while previous in stacked:
-            previous = own[own.index(previous) - 1]
-        _stack(events, event, previous)
-    cursor = None
-    for event in (e for e in own if e not in stacked):
-        cursor = event.start if cursor is None else cursor + gaps[id(event)]
-        event.start = cursor
-        cursor = event.end
+    _stack_all(events, own, stacked, gaps)
     return True
 
 
@@ -266,6 +277,10 @@ def _redot(events, whole):
         following = min((e for e in lane if e.start >= event.end), key=lambda e: e.start, default=None)
         if following is None or following.start - event.end != event.duration / (2 if dots == 0 else 6):
             continue
+        # The hole has to be free in the note's own voice too: a voice that goes on with a note of another stem direction is not
+        # missing a dot, and lengthening the note would push it past its own next note.
+        if any(e.voice == event.voice and e is not event and e.start < following.start and e.end > event.end for e in events):
+            continue
         gap = following.start - event.end
         for note in event.members:
             note.insert(list(note).index(note.find("type")) + 1 + dots, ET.Element("dot"))
@@ -302,6 +317,30 @@ def _snap_overlaps(events, whole):
         for moved in own:
             moved.start += shift
         changed = True
+    return changed
+
+
+# --- Rule 5: one stem, two onsets ----------------------------------------------
+
+SAME_X = 3.0  # tenths of a staff height (10 per staff space): heads this close are on one stem; a head is about 11 wide
+
+
+def _same_stem(previous, event):
+    """Two notes of one voice, one after the other in the file but drawn at the same x: sequential notes of a voice never overlap on
+    the page, so they are one chord whose heads OMR gave separate onsets. Everything a stem fixes must agree (length, direction)."""
+    ax, bx = previous.base.get("default-x"), event.base.get("default-x")
+    return ax is not None and bx is not None and abs(float(ax) - float(bx)) <= SAME_X and _stackable(previous, event)
+
+
+def _stack_same_x(events):
+    """Chord heads read as consecutive notes at one x. Not done for heads displaced to the other side of the stem (a second): their
+    x differs by one head and a stepwise run of 16ths is spaced the same, only the stem tells them apart (see docs/heuristicas-plaques.md)."""
+    changed = False
+    for own in list(_by_voice(events).values()):
+        stacked = [e for p, e in zip(own, own[1:]) if _same_stem(p, e)]
+        if stacked:
+            _stack_all(events, own, stacked, _gaps(own))
+            changed = True
     return changed
 
 
@@ -351,7 +390,7 @@ def repair_voices(root):
         events = _events(measure)
         if not events:
             continue
-        edited = False
+        edited = _stack_same_x(events)
         for voice in list(_by_voice(events)):
             for rule in (lambda: _fit_overrun(events, voice, whole, divisions), lambda: _split_glued(events, voice, whole)):
                 if _by_voice(events)[voice][-1].end > whole:

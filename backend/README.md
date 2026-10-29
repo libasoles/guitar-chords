@@ -28,7 +28,10 @@ limita las casillas de esa nota y descarta las combinaciones de dedos imposibles
 
 `prepare` también repara el ritmo por voces (`engine/rhythm.py`, solo en subidas: `tabify.REPAIR_VOICES` está apagado
 para las colecciones): una voz que pasa del compás por un acorde leído como dos notas o un tresillo falso, dos voces
-pegadas (bajo + arpegio), un puntillo perdido en el bajo y una voz que arranca dentro de la nota anterior de su carril.
+pegadas (bajo + arpegio), un puntillo perdido en el bajo, una voz que arranca dentro de la nota anterior de su carril y dos notas de una
+misma voz dibujadas en la misma x (`default-x` de Audiveris: un acorde, ver `docs/heuristicas-plaques.md`).
+También marca los armónicos naturales (rombo, `<harmonic>` o «Hr. 12»: traste 12 de la cuerda una octava más grave, `<12>` en el PDF)
+y, con `tabify.SUSTAIN`, el Viterbi cuenta las notas que siguen sonando (`fingering.ringing_cost`).
 Cada regla actúa solo si el resultado es claramente mejor; si hay varias formas de cuadrar el compás, lo deja tal cual.
 El resultado queda en `normalized.musicxml`, por eso `export` no necesita la regla.
 

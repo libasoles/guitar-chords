@@ -12,8 +12,8 @@ import tabify
 WHOLE = 24
 
 
-def n(step, octave, duration, kind, voice=1, stem="up", dots=0, tuplet=False, chord=False):
-    return ("<note>" + ("<chord/>" if chord else "") + f"<pitch><step>{step}</step><octave>{octave}</octave></pitch>"
+def n(step, octave, duration, kind, voice=1, stem="up", dots=0, tuplet=False, chord=False, x=None):
+    return ("<note" + (f' default-x="{x}"' if x is not None else "") + ">" + ("<chord/>" if chord else "") + f"<pitch><step>{step}</step><octave>{octave}</octave></pitch>"
             f"<duration>{duration}</duration><voice>{voice}</voice><type>{kind}</type>" + "<dot/>" * dots
             + ("<time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification>" if tuplet else "")
             + f"<stem>{stem}</stem></note>")
@@ -84,6 +84,37 @@ class OverrunTests(unittest.TestCase):
         self.assertEqual(rhythm.repair_voices(root), [])
 
 
+class SameStemTests(unittest.TestCase):
+    """Two onsets of one voice drawn at one x are a chord (Audiveris' default-x, in tenths)."""
+
+    def test_notes_of_one_voice_at_the_same_x_become_a_chord_and_the_rest_moves_up(self):
+        root = measure(n("C", 4, 12, "quarter", x=100) + n("A", 3, 12, "quarter", x=101)  # same stem
+                       + n("D", 4, 12, "quarter", x=130)
+                       + back(36) + n("A", 2, 24, "half", 2, "down", x=100))
+        self.assertEqual(rhythm.repair_voices(root), ["1"])
+        top = onsets(root)["1"]
+        self.assertEqual([(s, len(p)) for s, _, p in top], [(0, 2), (12, 1)])
+        # The bass still meets the melody at the barline: its <backup> was re-derived.
+        self.assertEqual(onsets(root)["2"][0][:2], (0.0, 24.0))
+        self.assertEqual(len(root.findall(".//chord")), 1)
+
+    def test_a_displaced_head_is_not_enough(self):
+        """A second on the other side of the stem sits one head away: the same spacing as a stepwise run of 16ths."""
+        root = measure(n("C", 4, 12, "quarter", x=100) + n("D", 4, 12, "quarter", x=112))
+        self.assertEqual(rhythm.repair_voices(root), [])
+
+    def test_other_voices_and_other_lengths_at_the_same_x_stay_apart(self):
+        root = measure(n("C", 4, 24, "half", x=100) + back(24) + n("A", 3, 24, "half", 2, "down", x=100))
+        self.assertEqual(rhythm.repair_voices(root), [])
+        root = measure(n("C", 4, 12, "quarter", x=100) + n("A", 3, 6, "eighth", x=100))
+        self.assertEqual(rhythm.repair_voices(root), [])
+
+    def test_without_coordinates_nothing_is_guessed(self):
+        """homr writes no default-x."""
+        root = measure(n("C", 4, 12, "quarter") + n("A", 3, 12, "quarter"))
+        self.assertEqual(rhythm.repair_voices(root), [])
+
+
 class LaneTests(unittest.TestCase):
     def test_bass_note_with_a_lost_dot_is_dotted(self):
         """Milonga 43: the bass eighth should be dotted, the next bass notes come 3 units later."""
@@ -99,6 +130,14 @@ class LaneTests(unittest.TestCase):
         root = measure(n("G", 3, 24, "half", 1) + back(24) + n("G", 2, 6, "eighth", 2, "down")
                        + fwd(12, 2) + n("E", 2, 6, "eighth", 2, "down"))
         self.assertEqual(rhythm.repair_voices(root), [])
+
+    def test_a_voice_that_continues_with_another_stem_direction_is_not_missing_a_dot(self):
+        """The eighth is followed in its own voice by a note stemmed up; a bass note of another voice comes 3 units after it ends.
+        Dotting would push the voice past its next note (quality.py then counts the measure as broken)."""
+        root = measure(n("G", 3, 24, "half", 1) + back(24) + n("G", 2, 6, "eighth", 2, "down")
+                       + n("B", 3, 18, "quarter", 2, "up", dots=1) + back(18) + fwd(9, 3) + n("E", 2, 6, "eighth", 3, "down"))
+        self.assertEqual(rhythm.repair_voices(root), [])
+        self.assertEqual(len(root.findall(".//note/dot")), 1)
 
     def test_voice_that_opens_inside_the_previous_note_of_its_lane_moves_to_its_end(self):
         """Milonga 18: the bass E should come after the dotted-eighth bass A, not inside it."""

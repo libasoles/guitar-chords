@@ -58,3 +58,41 @@ plica hacia arriba y hacia abajo, voces superpuestas, cabeza sin plica, ruido e 
 Un plaqué reconocido se digita como una forma de mano conjunta; las reglas de arpegio (`backend/engine/fingering.py`,
 issue #42) solo actúan sobre columnas de una sola nota, así que no tratan las notas internas del acorde como
 sucesivas.
+
+## Conexión con el flujo de subidas (voces y acordes del MusicXML)
+
+`chord_groups.py` trabaja sobre la **imagen** (cabezas, plicas, barras). El flujo de subidas solo tiene el MusicXML del motor
+OCR, y ese no trae lo que `chord_groups` necesita. Lo que sí trae se usa en `backend/engine/rhythm.py` (regla 5, solo en
+`prepare`, junto con el resto de la reparación por voces):
+
+- **Se conecta**: dos notas consecutivas de **una misma voz** dibujadas en la misma x (`default-x` de Audiveris, ±3 décimas), con
+  la misma duración, plica y altura distinta, son un acorde cuyas cabezas el OCR separó en dos ataques. En una misma voz las
+  notas sucesivas nunca se superponen, así que es la regla 1 de arriba (plica compartida) leída con la x en lugar de los píxeles.
+  El segundo ataque pasa a `<chord/>` y los `<backup>`/`<forward>` se recalculan.
+- **No se conecta**: las cabezas desplazadas a ambos lados de la plica (la segunda). Su x difiere en una cabeza (~11 décimas),
+  igual que una escala por grados en semicorcheas apretadas; solo la plica las distingue (regla 4: «no agrupar solo por cercanía»).
+
+Medido con `backend/ocr/quality.py` (compases con ritmo coherente) sobre siete lecturas reales (la Milonga de Buscaglia y las
+del muestrario), junto con la reparación por voces: 249 en crudo, 252 con la reparación de tresillos que ya había, **256**
+con las reglas nuevas, y ningún compás que estuviera bien dejó de estarlo. La regla de la misma x **no se disparó en
+ninguna** de esas lecturas: Audiveris y homr ya agrupan bien los acordes (como medía este documento con el preludio 9), así
+que hoy es una red de seguridad, no una mejora medida.
+
+### Lo que falta para usar `chord_groups.py` tal cual
+
+1. **homr no escribe geometría**: ninguna de las 323 notas del escaneo de prueba lleva `default-x`. Solo ofrece
+   `--write-staff-positions` (cajas de pentagramas), no posiciones de notas.
+2. **Audiveris** escribe `default-x` por nota (décimas desde el inicio del compás), el ancho de cada compás
+   y los márgenes del sistema, pero **no** `default-y` de las notas, ni dónde está cada pentagrama (solo `top-system-distance`), ni
+   la x de la plica. Sin eso no se puede recortar la imagen del pentagrama ni decir qué nota del XML es qué cabeza detectada.
+3. `chord_groups.read_chords` necesita además una máscara binaria de la página, `top`, `bottom` y el espaciado de **cada**
+   pentagrama; el buscador de pentagramas de `detect_notes.py` no es robusto con escaneos (ver «Límites medidos»).
+
+### Alternativas, en orden
+
+- Pedirle a Audiveris el proyecto `.omr` (sus glifos y pentagramas con cajas en píxeles) además del MusicXML y agrupar ahí; **sin
+  verificar** que el lote lo deje disponible en el contenedor.
+- Para escaneos (homr): `--write-staff-positions` da los pentagramas; falta la posición de cada nota. Opción: usar
+  `chord_groups` solo como **control de calidad por pentagrama** (nº de plicas con ≥2 cabezas contra nº de `<chord/>` en el XML),
+  sin asignar nota por nota, y avisar en la revisión.
+- Para las cabezas desplazadas: la plica es la señal; hasta tener su x, lo correcto es no adivinar.
