@@ -523,7 +523,7 @@ body.score-body {
 }
 
 body.score-dragging {
-  cursor: grabbing;
+  cursor: default;
   touch-action: none;
 }
 

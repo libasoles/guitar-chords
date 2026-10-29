@@ -1393,8 +1393,17 @@
     return ghost;
   }
 
+  // La figura va arriba a la izquierda del puntero para que este no la tape;
+  // el punto de soltado es el centro de la figura, no la punta del puntero.
+  let ghostOffset = 18;
+
+  function aimed(event) {
+    return { clientX: event.clientX - ghostOffset, clientY: event.clientY - ghostOffset };
+  }
+
   function moveGhost(ghost, event) {
-    ghost.style.transform = 'translate(' + event.clientX + 'px,' + event.clientY + 'px)';
+    const at = aimed(event);
+    ghost.style.transform = 'translate(' + at.clientX + 'px,' + at.clientY + 'px)';
   }
 
   let hoverPoint = null;
@@ -1410,15 +1419,16 @@
   }
 
   function updateHoverGhost() {
-    const point = hoverPoint;
+    const raw = hoverPoint;
+    const point = raw && aimed(raw);
     const over = point && document.elementFromPoint(point.clientX, point.clientY);
     const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span, .score-selection-menu');
     const hit = activeItem && !drag && overStage && locate(point.clientX, point.clientY);
     if (!hit) { clearHoverGhost(); return; }
     if (!hoverGhost) {
-      hoverGhost = startGhost(glyphFor(activeItem), point, activeItem.kind);
+      hoverGhost = startGhost(glyphFor(activeItem), raw, activeItem.kind);
       hoverGhost.classList.add('score-hover-ghost');
-    } else moveGhost(hoverGhost, point);
+    } else moveGhost(hoverGhost, raw);
     stage.querySelectorAll('.is-target').forEach((node) => node.classList.remove('is-target'));
     if (isModifier(activeItem)) {
       showMarker(null);
@@ -1463,10 +1473,12 @@
     if (modifier) {
       showMarker(null);
       stage.querySelectorAll('.is-target').forEach((n) => n.classList.remove('is-target'));
-      const hit = eventUnder(event.clientX, event.clientY);
+      const at = aimed(event);
+      const hit = eventUnder(at.clientX, at.clientY);
       if (hit) stage.querySelector('[id="e' + hit.mi + '-' + hit.i + '"]').classList.add('is-target');
     } else {
-      showMarker(locate(event.clientX, event.clientY, drag.group || drag.from));
+      const at = aimed(event);
+      showMarker(locate(at.clientX, at.clientY, drag.group || drag.from));
     }
   }, { passive: false });
 
@@ -1484,18 +1496,21 @@
       if (d.item) activateTool(d.item);
       else if (d.from && isModifier(activeItem)) applyModifier(activeItem, d.from);
       else if (d.insert) {
-        const target = locate(event.clientX, event.clientY);
+        const at = aimed(event);
+        const target = locate(at.clientX, at.clientY);
         if (target && activeItem) dropNew(activeItem, target);
       }
       return;
     }
     if (d.insert) return;
     if (isModifier(d.item)) {
-      const hit = eventUnder(event.clientX, event.clientY);
+      const at = aimed(event);
+      const hit = eventUnder(at.clientX, at.clientY);
       if (hit) applyModifier(d.item, hit);
       return;
     }
-    const target = locate(event.clientX, event.clientY, d.group || d.from);
+    const at = aimed(event);
+    const target = locate(at.clientX, at.clientY, d.group || d.from);
     if (!target) { markSelected(); return; }
     if (d.group) moveGroup(d.group, d.from, target);
     else if (d.from) moveEvent(d.from, target);
@@ -2299,5 +2314,5 @@
     say(t.loadError);
   });
 
-  window.scoreEditor = { get score() { return score; }, render };
+  window.scoreEditor = { get score() { return score; }, render, get ghostOffset() { return ghostOffset; }, set ghostOffset(value) { ghostOffset = value; } };
 })();
