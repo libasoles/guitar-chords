@@ -932,3 +932,11 @@ test('la segunda negra se corre pegada a la primera para llevar puntillo en 6/8'
   const measure = [{ d: 'q', n: 31, dot: true, at: 0 }, { d: 'q', n: 30, at: 48 }];
   assert.equal(M.dotStart(measure, 1, score), 36);
 });
+
+test('el MusicXML con varias voces manda las plicas agudas hacia arriba y la mas grave hacia abajo', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ d: 'q', n: 37, at: 0, v: 1 }, { d: 'q', n: 28, at: 0, v: 2 }];
+  assert.deepEqual(M.toMusicXml(score).match(/<stem>\w+<\/stem>/g), ['<stem>up</stem>', '<stem>down</stem>']);
+  score.rows[0][0] = [{ d: 'q', n: 37, at: 0 }];
+  assert.doesNotMatch(M.toMusicXml(score), /<stem>/);
+});

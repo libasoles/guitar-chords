@@ -972,7 +972,7 @@
   }
 
   // `roles`: { tie: ['start'|'stop'], slur: [...], tuplet: 'start'|'stop'|'both' } de los extremos de esta nota.
-  function noteXml(ev, id, beams, chord, voice, alter, roles) {
+  function noteXml(ev, id, beams, chord, voice, alter, roles, stem) {
     const dur = length(ev);
     const base = VALUES[ev.d];
     const ties = (roles && roles.tie) || [];
@@ -990,12 +990,16 @@
       `<voice>${voice}</voice><type>${TYPES[base]}</type>${ev.dot ? '<dot/>' : ''}`;
     if (!ev.rest && ev.acc) xml += `<accidental>${ACCIDENTALS[ev.acc].name}</accidental>`;
     if (ev.tp) xml += '<time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification>';
+    if (!ev.rest && stem) xml += `<stem>${stem}</stem>`;
     if (beams) Object.keys(beams).forEach((level) => { xml += `<beam number="${level}">${beams[level]}</beam>`; });
     const marks = ties.map((type) => `<tied type="${type}"/>`).concat(slurs.map((type) => `<slur type="${type}" number="1"/>`));
     if (tuplet) (tuplet === 'both' ? ['start', 'stop'] : [tuplet]).forEach((type) => { marks.push(`<tuplet type="${type}"/>`); });
     if (marks.length) xml += `<notations>${marks.join('')}</notations>`;
     return xml + '</note>';
   }
+
+  // Con varias voces las plicas se separan por convencion: las agudas hacia arriba y la mas grave hacia abajo.
+  const stemOf = (voice, count) => (count < 2 ? null : voice < count - 1 ? 'up' : 'down');
 
   function toMusicXml(score) {
     const all = measures(score);
@@ -1090,7 +1094,7 @@
           group.indices.forEach((i, ci) => {
             const own = roles.get(mi + '-' + i) || {};
             const tuplet = ci === 0 && span && (span.first === span.last ? 'both' : gi === span.first ? 'start' : gi === span.last ? 'stop' : undefined);
-            xml += noteXml(measure[i], `e${mi}-${i}`, beams[index++], ci > 0, vi + 1, alters[i], Object.assign({}, own, { tuplet }));
+            xml += noteXml(measure[i], `e${mi}-${i}`, beams[index++], ci > 0, vi + 1, alters[i], Object.assign({}, own, { tuplet }), stemOf(vi, all.length));
           });
           cursor = group.at + group.size;
         });
