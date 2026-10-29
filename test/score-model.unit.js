@@ -958,11 +958,12 @@ test('el MusicXML con varias voces manda las plicas agudas hacia arriba y la mas
   assert.doesNotMatch(M.toMusicXml(score), /<stem>/);
 });
 
-test("voicesText nombra las figuras de cada compas por voz", () => {
+test('voicesText nombra las figuras de cada compas por voz', () => {
   const score = M.emptyScore();
-  score.rows[0][0] = [{ n: 37, d: "q" }, { n: 37, d: "q" }, { n: 37, d: "h", dot: true, at: 48 }];
-  score.rows[0][1] = [{ n: 37, d: "s", at: 0 }, { n: 37, d: "e", tp: 1 }, { rest: true, d: "q", n: 35, at: 24 }];
-  const lines = M.voicesText(score).split("\n");
-  assert.match(lines[0], /^voz 1: negra, negra, blanca con puntillo \| doble corchea, tresillo de corcheas, silencio de negra/);
-  assert.equal(M.voicesText(M.emptyScore()), "");
+  score.rows[0][0] = [{ n: 37, d: 'q' }, { n: 37, d: 'q' }, { n: 37, d: 'h', at: 48 }];
+  score.rows[0][1] = [{ n: 37, d: 'e' }, { n: 37, d: 'e' }, { n: 37, d: 'e' }, { n: 37, d: 'e' }, { n: 37, d: 'h', at: 48 }];
+  score.rows[0][2] = [0, 8, 16].map((at) => ({ n: 37, d: 'e', tp: 1, at })).concat([24, 32, 40].map((at) => ({ n: 37, d: 'e', tp: 2, at })), [{ n: 37, d: 's', at: 48 }, { n: 37, d: 'f', at: 72 }]);
+  score.rows[0][3] = [{ n: 37, d: 'e', beam: 'join' }, { n: 37, d: 'e', beam: 'join' }, { n: 37, d: 'e' }, { rest: true, d: 'e', n: 35, at: 36 }, { n: 37, d: 'h', at: 48 }];
+  assert.equal(M.voicesText(score), 'voz 1: negra, negra, blanca | doble corchea, doble corchea, blanca | tresillo de corcheas, tresillo de corcheas, semicorchea, fusa | triple corchea, silencio de corchea, blanca');
+  assert.equal(M.voicesText(M.emptyScore()), '');
 });

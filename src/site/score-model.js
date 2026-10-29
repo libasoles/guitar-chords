@@ -1125,21 +1125,56 @@
   // Nombre de cada figura para el comando `voces` de la consola del navegador.
   const FIGURES = {
     w: ['redonda', 'redondas'], h: ['blanca', 'blancas'], q: ['negra', 'negras'], e: ['corchea', 'corcheas'],
-    s: ['doble corchea', 'dobles corcheas'], f: ['triple corchea', 'triples corcheas'],
+    s: ['semicorchea', 'semicorcheas'], f: ['fusa', 'fusas'],
   };
+  const MULTIPLES = { 2: 'doble ', 3: 'triple ' };
 
   function figureName(ev) {
-    const [one, many] = FIGURES[ev.d];
-    const name = ev.tp ? 'tresillo de ' + many : one + (ev.dot ? ' con puntillo' : '');
+    const name = FIGURES[ev.d][0] + (ev.dot ? ' con puntillo' : '');
     return ev.rest ? 'silencio de ' + name : name;
+  }
+
+  // Figuras unidas por una barra: "doble corchea" (dos), "triple corchea" (tres), "4 corcheas unidas"; si no son
+  // todas iguales, cada una por su nombre.
+  function beamedName(evs) {
+    const first = evs[0];
+    if (!evs.every((ev) => ev.d === first.d && !!ev.dot === !!first.dot)) return evs.map(figureName).join(' + ');
+    const [one, many] = FIGURES[first.d];
+    const dotted = first.dot ? ' con puntillo' : '';
+    return MULTIPLES[evs.length] ? MULTIPLES[evs.length] + one + dotted : evs.length + ' ' + many + dotted + ' unidas';
+  }
+
+  // Figuras de una voz en orden: un tresillo o una barra cuentan como una sola.
+  function voiceFigures(measure, voice, score) {
+    const starts = onsets(measure);
+    const indices = voice.groups.flatMap((g) => g.indices);
+    const beams = beamStates(indices.map((i) => Object.assign({}, measure[i], { at: starts[i] })), score);
+    const items = voice.groups.map((g) => ({ ev: measure[g.indices[0]], beam: beams[indices.indexOf(g.indices[0])] }));
+    const names = [];
+    for (let k = 0; k < items.length; k += 1) {
+      const { ev, beam } = items[k];
+      let end = k;
+      if (ev.tp) {
+        while (end + 1 < items.length && items[end + 1].ev.tp === ev.tp) end += 1;
+        names.push('tresillo de ' + FIGURES[ev.d][1]);
+      } else if (beam && beam[1] === 'begin') {
+        while (end + 1 < items.length && items[end].beam[1] !== 'end') end += 1;
+        names.push(beamedName(items.slice(k, end + 1).map((item) => item.ev)));
+      } else {
+        names.push(figureName(ev));
+      }
+      k = end;
+    }
+    return names;
   }
 
   // Una linea por voz con las figuras de cada compas separadas por comas y los compases por " | ".
   function voicesText(score) {
     const bars = measures(score).map((measure) => ({ measure, lanes: voices(measure).filter((voice) => voice.groups.length) }));
+    while (bars.length && !bars[bars.length - 1].lanes.length) bars.pop(); // sin los compases vacios del final
     const count = Math.max(0, ...bars.map((bar) => bar.lanes.length));
     return Array.from({ length: count }, (_, k) => 'voz ' + (k + 1) + ': ' + bars.map(({ measure, lanes }) => (
-      lanes[k] ? lanes[k].groups.map((g) => figureName(measure[g.indices[0]])).join(', ') : '-'
+      lanes[k] ? voiceFigures(measure, lanes[k], score).join(', ') : '-'
     )).join(' | ')).join('\n');
   }
 
