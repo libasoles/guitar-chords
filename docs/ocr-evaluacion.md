@@ -81,5 +81,7 @@ notas, por encima de 0,13. Con el umbral en 0,12 se separan los 4 casos (el del 
 
 - Probar con escaneos reales de partituras con dedos (no hay ninguno en el repositorio).
 - Los bajos duplicados de Audiveris (blanca + corchea unidas a la barra) podrían unificarse al normalizar.
-- El borrado de dedos y letras (`scripts/carcassi-preludios/annotations.py`) podría ayudar cuando `homr` sea
-  el único motor viable (escaneos de baja resolución); sin evaluar ahí todavía.
+- El borrado de dedos y letras (`backend/ocr/annotations.py`) se probó en un escaneo real con dedos (Bosch, «Lamento»,
+  `homr`): fuera de tonalidad bajó de 6 % a 4 %, pero los compases de ritmo coherente cayeron de 26/32 a 19/32. Por eso
+  no es el camino por defecto: `run.py` lo usa como última lectura (`homr` sobre imágenes sin anotaciones) solo si las
+  otras dos siguen siendo dudosas, y gana únicamente si puntúa claramente mejor.

@@ -45,7 +45,7 @@ con la imagen antes de citar páginas. Arpegios y plaqués tienen su propio docu
 | M2 | **Sostener las notas**: los bajos y las demás voces suenan mientras dura su valor (*let ring*). | Carcassi, antes de los *Preludes*; Aguado, lección 9 §87 | **No implementada** como regla de duración. Se aproxima con M3 y M8 en los compases de arpegio. |
 | M3 | **Dedos quietos entre acordes** de un arpegio: los dedos de las notas ya pisadas no se mueven. | Carcassi, *Arpeggios with three and four fingers* («must remain unmoved») | **Parcial**: `fingering._one_cell_per_pitch` fuerza una sola casilla por altura en el compás (economía de dedos). No hay `lift_cost` por dedo levantado con la nota viva. |
 | M4 | **Dedo fijo mientras dura la nota** («el dedo 3.º permanece quieto»). | Aguado, lección 10; §87 | **No implementada** (misma limitación que M2). |
-| M5 | **Ligados en la misma cuerda**: ascendente, el dedo cae sobre la nota aguda; descendente, se tira hacia un lado. | Carcassi, «Of the Slur»; Aguado §226 | **No implementada.** El motor no lee las ligaduras de expresión para forzar cuerda. |
+| M5 | **Ligados en la misma cuerda**: ascendente, el dedo cae sobre la nota aguda; descendente, se tira hacia un lado. | Carcassi, «Of the Slur»; Aguado §226 | **Implementada** (blanda): `tabify.mark_slurred_columns` marca la columna que alcanza una ligadura de dos notas sueltas contiguas a ≤ 4 semitonos, y el Viterbi suma `SLUR_OFF_STRING` si cambia de cuerda. Las ligaduras largas son fraseo y no se tocan. En un compás de arpegio, `avoid_repeated_strings` puede deshacerlo. |
 | M6 | **Evitar la cuerda al aire** cuando su vibración choca con la nota que sigue (disonancia) o ensucia. | Aguado, lecciones 17, 21 y 27 | **No implementada.** Solo existe la regla del acorde en posición (A4, abajo). |
 | M7 | **Equísonos**: la misma nota en varias cuerdas; elegir por el timbre o por lo que sigue. | Aguado, lección 3 y §6 | **Parcial**: `tabify.candidates` genera todas las casillas posibles; elegir por timbre no tiene peso (la regla 21 de `criterios-de-digitacion.md` quedó **[no verificado]**: no hay cifra). |
 | M8 | **Dos voces simultáneas**: primero el lugar de la nota aguda; la grave va a otra cuerda, más grave. | Aguado §105 (lección 16); Carcassi | **Parcial**: se cumple por construcción de `candidates` (cuerdas distintas), sin orden forzado entre la voz aguda y la grave. |
@@ -104,7 +104,7 @@ Las pendientes tienen su ticket en GitHub («Heurísticas de digitación pendien
 1. `lift_cost`: costo por levantar un dedo cuya nota aún suena (M2, M3, M4). Requiere llevar la duración de cada nota al
    estado del Viterbi.
 2. Mano derecha (F7, A6, A7, N11): asignar cuerdas a `p i m a` y exigir cuerdas contiguas en arpegios.
-3. Ligados en la misma cuerda (M5) y cuerdas al aire disonantes (M6).
+3. Cuerdas al aire disonantes (M6).
 4. Continuidad de posición y el resto de eliminaciones por dedos (N7–N10).
 5. Medir falsos positivos de la detección de arpegios con criterio musical (hoy solo hay conteo de infracciones).
 

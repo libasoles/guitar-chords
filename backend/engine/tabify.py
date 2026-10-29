@@ -326,6 +326,41 @@ def repair_slurs(score):
             site.insert(0, fixed)
 
 
+KEY_MIN_NOTES = 12  # with fewer notes the key says nothing
+KEY_WRONG_SHARE = 0.12  # share of notes outside the written key that marks it as misread
+KEY_FIT_SHARE = 0.04  # ...and the share another key must stay under to replace it
+MAJOR_SCALE = (0, 2, 4, 5, 7, 9, 11)
+
+
+def _out_of_key(pitch_classes, fifths):
+    scale = {(p + 7 * fifths) % 12 for p in MAJOR_SCALE}
+    return sum(1 for pc in pitch_classes if pc not in scale) / len(pitch_classes)
+
+
+def fix_key_signature(part):
+    """Replace a key signature the OMR misread when the notes plainly belong to another one.
+
+    Notes carry their own pitches in MusicXML, so a wrong signature only changes which
+    accidentals get printed. When the written key leaves more than KEY_WRONG_SHARE of the notes
+    outside its scale and a different signature leaves under KEY_FIT_SHARE, the signature is
+    replaced and the accidentals are recomputed. Only parts with a single signature are
+    touched: with key changes the notes of each section would have to be judged apart."""
+    keys = list(part.recurse().getElementsByClass(m21.key.KeySignature))
+    notes = [p for n in part.recurse().notes if not n.duration.isGrace for p in n.pitches]
+    if len(keys) != 1 or len(notes) < KEY_MIN_NOTES:
+        return False
+    classes = [p.pitchClass for p in notes]
+    written = keys[0].sharps
+    if _out_of_key(classes, written) < KEY_WRONG_SHARE:
+        return False
+    best = min(range(-7, 8), key=lambda f: (_out_of_key(classes, f), abs(f)))
+    if best == written or _out_of_key(classes, best) > KEY_FIT_SHARE:
+        return False
+    keys[0].sharps = best
+    part.makeAccidentals(inPlace=True, overrideStatus=True)
+    return True
+
+
 def fix_slur_placement(score):
     """Audiveris writes slur `placement` from the curve's control point, which often puts a
     slur above notes that hang below the staff. A slur whose two heads are both outside
@@ -357,6 +392,7 @@ def load_score(paths):
         for n in score.recurse().getElementsByClass(m21.note.GeneralNote):
             n.lyrics = []
         repair_slurs(score)
+        fix_key_signature(score.parts[0])
         fix_slur_placement(score)
         # The same text can arrive as free text directions (<words>); only the
         # header credits are kept, so drop every other printed text.
@@ -453,8 +489,32 @@ def build_columns(part, shifts=None, merge_unisons=None):
             column["barre"] = next((b["barre"] for b in barres if b["start"] - 1e-6 <= start + column["offset"] <= b["end"] + 1e-6),
                                    None)
         measures.append({"number": measure.number, "measure": measure, "columns": columns})
+    mark_slurred_columns(part, measures)
     # Reported shift: the one most measures use.
     return measures, max(set(shifts), key=shifts.count, default=0)
+
+
+SLUR_OFF_STRING = 8  # cost of leaving the string at a hammer-on/pull-off: far above any position move
+SLUR_MAX_STEP = 4  # semitones a finger can hammer on or pull off along one string
+
+
+def mark_slurred_columns(part, measures):
+    """Flags (`slurred`) the Column that a two-note slur reaches from the previous one.
+
+    A slur between two neighbouring single notes a few semitones apart is a hammer-on or
+    pull-off, and both notes sound on one string (Carcassi, «Of the Slur»; M5 in
+    docs/catalogo-de-heuristicas-de-digitacion.md). Longer slurs are phrasing and say
+    nothing about strings."""
+    flat = [col for m in measures for col in m["columns"]]
+    owner = {id(note): col for col in flat for note, _ in col["notes"]}
+    for slur in part.recurse().getElementsByClass(m21.spanner.Slur):
+        first, last = slur.getFirst(), slur.getLast()
+        a, b = owner.get(id(first)), owner.get(id(last))
+        if a is None or b is None or a is b or len(a["notes"]) != 1 or len(b["notes"]) != 1:
+            continue
+        i = next(k for k, col in enumerate(flat) if col is a)
+        if i + 1 < len(flat) and flat[i + 1] is b and 0 < abs(a["notes"][0][1] - b["notes"][0][1]) <= SLUR_MAX_STEP:
+            b["slurred"] = True
 
 
 def barre_spans(part):
@@ -601,11 +661,14 @@ def assign_frets(measures, tuning=STANDARD_TUNING, arpeggio=False):
     best = [[(cost, None, hand(c)) for c, cost in layers[0]]] if layers else []
     for i in range(1, len(layers)):
         row = []
+        slurred = flat[i].get("slurred")
         for combo, cost in layers[i]:
             h = hand(combo)
             choice = None
             for j, (prev_cost, _, prev_hand) in enumerate(best[i - 1]):
                 move = abs(h - prev_hand) * 0.6 if h is not None and prev_hand is not None else 0
+                if slurred and combo and layers[i - 1][j][0] and combo[0][0] != layers[i - 1][j][0][0][0]:
+                    move += SLUR_OFF_STRING
                 total = prev_cost + cost + move
                 if choice is None or total < choice[0]:
                     choice = (total, j, h if h is not None else prev_hand)

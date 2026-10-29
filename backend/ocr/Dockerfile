@@ -45,7 +45,7 @@ RUN mkdir -p /opt/tessdata \
     && curl -fsSL https://github.com/tesseract-ocr/tessdata/raw/4.1.0/eng.traineddata -o /opt/tessdata/eng.traineddata \
     && curl -fsSL https://github.com/tesseract-ocr/tessdata/raw/4.1.0/spa.traineddata -o /opt/tessdata/spa.traineddata
 
-COPY run.py deskew.py homr_engine.py quality.py /opt/ocr/
+COPY run.py deskew.py homr_engine.py annotations.py quality.py /opt/ocr/
 
 # Unprivileged user; Audiveris writes its config/cache under HOME.
 RUN useradd --create-home --uid 10001 ocr

@@ -21,6 +21,43 @@ def note(duration, kind="half", extra=""):
 
 
 class ScoreImportTests(unittest.TestCase):
+    def test_misread_key_signature_is_replaced_by_the_one_the_notes_fit(self):
+        def note(step, octave, alter=""):
+            return (f'<note><pitch><step>{step}</step>{alter}<octave>{octave}</octave></pitch>'
+                    '<duration>1</duration><type>quarter</type></note>')
+        steps = [("G", 3), ("A", 3), ("B", 3), ("C", 4), ("D", 4), ("E", 4), ("F", 4), ("G", 4)] * 2
+        def piece(fifths):
+            body = ''.join(note(s, o, '<alter>1</alter>' if s == "F" else "") for s, o in steps)
+            return score_xml('<measure number="1"><attributes><divisions>1</divisions><key><fifths>%d</fifths></key>'
+                             '<time><beats>16</beats><beat-type>4</beat-type></time></attributes>%s</measure>' % (fifths, body))
+        for fifths, expected in ((4, 1), (1, 1)):
+            with tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / "s.musicxml"
+                path.write_text(piece(fifths))
+                _, part = tabify.load_score([str(path)])
+            key = part.recurse().getElementsByClass(tabify.m21.key.KeySignature).first()
+            self.assertEqual(key.sharps, expected)
+
+    def test_two_note_slur_keeps_both_notes_on_one_string(self):
+        m21 = tabify.m21
+
+        def cells(slurred):
+            part = m21.stream.Part()
+            measure = m21.stream.Measure(number=1)
+            first, second = m21.note.Note('A3', quarterLength=1), m21.note.Note('C4', quarterLength=1)
+            measure.append([first, second])
+            part.append(measure)
+            if slurred:
+                part.insert(0, m21.spanner.Slur([first, second]))
+            measures, _ = tabify.build_columns(part, [0])
+            tabify.assign_frets(measures, tabify.STANDARD_TUNING, False)
+            return [c["cells"] for c in measures[0]["columns"]]
+
+        def strings(tab):
+            return [next(i for i, f in enumerate(c) if f is not None) for c in tab]
+        self.assertNotEqual(*strings(cells(False)))
+        self.assertEqual(len(set(strings(cells(True)))), 1)
+
     def _slurs(self, xml_body):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "s.musicxml"

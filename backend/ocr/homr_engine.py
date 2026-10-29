@@ -35,11 +35,30 @@ def _to_mxl(xml_path, mxl_path):
         z.write(xml_path, "score.xml")
 
 
-def run_homr(pdf_path, out_dir, deadline, log):
+def _erase_annotations(png, log):
+    """Wipe fingerings and p-i-m-a letters from the page image: homr reads them as notes and accidentals.
+
+    Best effort: a page the eraser cannot handle goes to homr untouched."""
+    try:
+        from PIL import Image
+
+        from annotations import erase_annotations
+        with Image.open(png) as image:
+            image.load()
+            cleaned = erase_annotations(image)
+        if cleaned is not image:
+            cleaned.save(png)
+    except Exception as exc:  # noqa: BLE001
+        log(f"homr: annotations not erased on {os.path.basename(png)}: {exc}")
+
+
+def run_homr(pdf_path, out_dir, deadline, log, erase=False):
     """Paths of `homr-NN.mxl`, one per page with notes, in page order.
 
     Stops at `deadline` (time.monotonic()); pages already read are kept, a page cut
     off midway is dropped. Never raises: failures are logged and give fewer files.
+    `erase` wipes fingerings and p-i-m-a letters from each page first: it lifts recall on
+    scores full of them but costs rhythm on others, so it is a second opinion, not the default.
     """
     os.makedirs(out_dir, exist_ok=True)
     try:
@@ -55,6 +74,8 @@ def run_homr(pdf_path, out_dir, deadline, log):
         if remaining < 5:
             log(f"homr: out of time, page {page} and later skipped")
             break
+        if erase:
+            _erase_annotations(png, log)
         try:
             proc = subprocess.run(["homr", "--no-title", png], capture_output=True, text=True, timeout=remaining)
         except subprocess.TimeoutExpired:

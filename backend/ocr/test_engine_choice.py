@@ -16,9 +16,9 @@ def engines(monkeypatch):
     state = {"scan": True, "homr": (["h.mxl"], GOOD), "audiveris": (["a.mxl"], GOOD)}
     quality_of = {}
 
-    def fake_homr(pdf, out_dir, deadline, log):
-        calls.append("homr")
-        files, q = state["homr"]
+    def fake_homr(pdf, out_dir, deadline, log, erase=False):
+        calls.append("homr-clean" if erase else "homr")
+        files, q = state.get("homr_clean", ([], None)) if erase else state["homr"]
         quality_of.update({f: q for f in files})
         return files
 
@@ -85,7 +85,7 @@ def test_both_engines_failing_gives_nothing(engines, tmp_path):
     state["homr"] = ([], None)
     state["audiveris"] = ([], None)
     assert recognize(tmp_path) == []
-    assert calls == ["homr", "audiveris"]
+    assert calls == ["homr", "audiveris", "homr-clean"]
 
 
 def test_no_second_opinion_when_time_is_nearly_up(engines, tmp_path):
@@ -176,3 +176,20 @@ def test_a_reading_whose_rhythm_does_not_add_up_is_suspect(engines, tmp_path):
     info = {}
     recognize(tmp_path, info=info)
     assert info["suspect"] is True
+
+
+def test_homr_without_annotations_is_the_last_resort_and_wins_when_clearly_better(engines, tmp_path):
+    calls, state = engines
+    state["homr"] = (["h.mxl"], POOR)
+    state["audiveris"] = (["a.mxl"], POOR)
+    state["homr_clean"] = (["c.mxl"], GOOD)
+    assert recognize(tmp_path) == ["c.mxl"]
+    assert calls == ["homr", "audiveris", "homr-clean"]
+
+
+def test_homr_without_annotations_is_not_tried_when_a_reading_is_trusted(engines, tmp_path):
+    calls, state = engines
+    state["homr"] = (["h.mxl"], POOR)
+    state["audiveris"] = (["a.mxl"], GOOD)
+    assert recognize(tmp_path) == ["a.mxl"]
+    assert calls == ["homr", "audiveris"]

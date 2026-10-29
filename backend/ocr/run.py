@@ -7,7 +7,8 @@ Environment (set by the Step Functions task overrides):
   OMR_MAX_HEAP_MB        JVM -Xmx, default 5120 (for the 8 GB task)
   OMR_TIMEOUT_SECONDS    total budget for all OMR attempts, default 780
 
-Two engines, tried in turn within that budget. Scans (every page one raster image)
+Two engines, tried in turn within that budget (and homr again on images without fingerings
+and letters if both readings are still doubtful). Scans (every page one raster image)
 go to homr first: on old or blurred scans Audiveris loses clefs, time signatures
 and whole voices. Vector PDFs go to Audiveris first. If the first reading is poor
 (few measures whose rhythm adds up, or many notes outside the key: fingerings and
@@ -111,8 +112,13 @@ def recognize(pdf, work, deadline, heap_mb, log=log, info=None):
     def homr():
         return run_homr(pdf, os.path.join(work, "homr"), deadline, log)
 
+    def homr_clean():
+        # Fingerings and p-i-m-a letters read as notes: the last resort when both engines doubt themselves.
+        return run_homr(pdf, os.path.join(work, "homr-clean"), deadline, log, erase=True)
+
     scan = is_scan(pdf)
     order = [("homr", homr), ("audiveris", audiveris)] if scan else [("audiveris", audiveris), ("homr", homr)]
+    order.append(("homr without annotations", homr_clean))
     log("engine order: " + " then ".join(name for name, _ in order))
     best = None
     for name, run in order:
