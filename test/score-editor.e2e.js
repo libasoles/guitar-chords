@@ -724,6 +724,14 @@ async function checkClear(page) {
   await page.locator('#scoreClear').click();
   await page.locator('.confirm-danger').click();
   assert.equal(await filled(), 0);
+  // Con mas de una partitura, borrar la primera la elimina por completo.
+  await page.locator('#scoreNewTab').click();
+  assert.equal(await page.locator('.score-doc-tab').count(), 2);
+  await page.locator('button.score-doc-tab').first().click();
+  await page.locator('#scoreClear').click();
+  await page.locator('.confirm-danger').click();
+  await page.locator('.confirm-content').waitFor({ state: 'detached' });
+  assert.equal(await page.locator('.score-doc-tab').count(), 1, 'borrar la primera con otras presentes la elimina');
   console.log('Score editor clear: Radix confirm guards the delete.');
 }
 
