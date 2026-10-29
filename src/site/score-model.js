@@ -444,6 +444,18 @@
     return end <= capacity(score, score && score.rows ? measures(score).indexOf(measure) : undefined);
   }
 
+  // Si la figura esta sola en el compas (un acorde cuenta como una), el puntillo no depende de donde cayo al ponerla:
+  // devuelve donde debe empezar para que quepa (el inicio del compas), o null si hay otras figuras que lo impiden.
+  function dotStart(measure, index, score) {
+    const ev = measure[index];
+    if (ev.dot || ev.tp || ev.d === 'w' || ev.d === 's' || ev.d === 'f') return null;
+    const starts = onsets(measure);
+    if (canDot(measure, index, score)) return starts[index];
+    const alone = measure.every((o, i) => starts[i] === starts[index] && o.d === ev.d && !!o.dot === !!ev.dot && !o.rest === !ev.rest);
+    const limit = capacity(score, score && score.rows ? measures(score).indexOf(measure) : undefined);
+    return alone && VALUES[ev.d] * 1.5 <= limit ? 0 : null;
+  }
+
   // La tablatura sale sola de las notas; `tabs` guarda solo lo que el usuario corrigio a mano: { 'compas:inicio': [6 trastes] },
   // con la cuerda 1 primero y null donde no suena nada. Corregirla no cambia las notas del pentagrama.
   const TAB_STRINGS = 6;
@@ -1061,7 +1073,7 @@
 
   return {
     DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    length, gridOf, onsets, settle, placement, insertAt, placeRest, insertNote, restPitch, settleVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot,
+    length, gridOf, onsets, settle, placement, insertAt, placeRest, insertNote, restPitch, settleVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot, dotStart,
     meterOf, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };

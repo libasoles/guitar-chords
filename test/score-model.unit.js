@@ -908,3 +908,10 @@ test('un acorde de cinco notas es una sola voz y no se parte al agregar un silen
   assert.equal(lanes[0].groups[0].indices.length, 5);
 });
 
+
+test('una blanca sola en el compas admite puntillo aunque haya caido en el tiempo 3', () => {
+  assert.equal(M.dotStart([{ d: 'h', n: 30, at: 48 }], 0), 0);
+  assert.equal(M.dotStart([{ d: 'h', n: 30, at: 48 }, { d: 'h', n: 33, at: 48 }], 0), 0);
+  assert.equal(M.dotStart([{ d: 'h', n: 30, at: 24 }], 0), 24);
+  assert.equal(M.dotStart([{ d: 'q', n: 31, at: 0 }, { d: 'h', n: 30, at: 48 }], 1), null);
+});
