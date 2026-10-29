@@ -80,12 +80,17 @@ def out_of_key_ratio(paths):
 
 
 def measure_quality(paths):
-    """{'measures', 'consistent', 'notes'} summed over the MusicXML files of one result."""
+    """{'measures', 'consistent', 'notes', 'broken'} summed over the MusicXML files of one result.
+
+    `broken` lists the 0-based indices (across all the files, in order) of the measures whose rhythm does
+    not add up: some voice is longer than the usual measure or none reaches it. Empty measures are not broken.
+    """
     measures = []
     for path in paths:
         measures += _measures(_score_xml(path))
     lengths = [round(max(v.values()), 3) for _, v in measures if v]
     mode = collections.Counter(lengths).most_common(1)[0][0] if lengths else 0
-    consistent = sum(1 for _, v in measures
-                     if v and round(max(v.values()), 3) == mode and all(round(x, 3) <= mode for x in v.values()))
-    return {"measures": len(measures), "consistent": consistent, "notes": sum(n for n, _ in measures)}
+    broken = [i for i, (_, v) in enumerate(measures)
+              if v and not (round(max(v.values()), 3) == mode and all(round(x, 3) <= mode for x in v.values()))]
+    return {"measures": len(measures), "consistent": sum(1 for _, v in measures if v) - len(broken),
+            "notes": sum(n for n, _ in measures), "broken": broken}

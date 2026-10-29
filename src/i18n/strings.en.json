@@ -434,6 +434,7 @@
   "partExporting": "Exporting…",
   "partPdfDownloaded": "PDF downloaded.",
   "partLowQualityScan": "This scan may have been misread. It would be best to look for a better-quality score.",
+  "partUnevenMeasure": "This measure's rhythm doesn't add up; check the notes.",
   "partDropped": "Dropped notes (no possible position on the guitar):",
   "partDroppedItem": "measure {m}: {p}",
   "partNoteTabEdit": "Editing the tab does not fix errors in the notation. If the score has recognition errors, download the intermediate MusicXML, fix it in a notation editor and upload it again.",

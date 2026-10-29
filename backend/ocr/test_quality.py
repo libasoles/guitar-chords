@@ -35,13 +35,26 @@ BAR = [("1", 6, "")]  # 3 quarter notes at divisions=2
 
 def test_all_bars_of_one_length_are_consistent(tmp_path):
     path = write(tmp_path, "a.musicxml", musicxml([BAR, BAR, BAR]))
-    assert quality.measure_quality([path]) == {"measures": 3, "consistent": 3, "notes": 3}
+    assert quality.measure_quality([path]) == {"measures": 3, "consistent": 3, "notes": 3, "broken": []}
 
 
 def test_a_bar_of_another_length_is_not_consistent(tmp_path):
     short = [("1", 4, "")]
     path = write(tmp_path, "a.musicxml", musicxml([BAR, BAR, short]))
     assert quality.measure_quality([path])["consistent"] == 2
+
+
+def test_broken_lists_the_measures_whose_rhythm_does_not_add_up(tmp_path):
+    short = [("1", 4, "")]
+    overfull = [("1", 6, ""), ("2", 8, "")]
+    path = write(tmp_path, "a.musicxml", musicxml([BAR, short, BAR, BAR, overfull, []]))
+    assert quality.measure_quality([path])["broken"] == [1, 4]
+
+
+def test_broken_indices_run_across_several_files(tmp_path):
+    one = write(tmp_path, "a.mxl", musicxml([BAR, BAR]), zipped=True)
+    two = write(tmp_path, "b.mxl", musicxml([BAR, [("1", 4, "")], BAR]), zipped=True)
+    assert quality.measure_quality([one, two])["broken"] == [3]
 
 
 def test_a_voice_longer_than_the_bar_is_not_consistent(tmp_path):
@@ -53,29 +66,29 @@ def test_a_voice_longer_than_the_bar_is_not_consistent(tmp_path):
 def test_chord_members_and_grace_notes_take_no_time(tmp_path):
     bar = [("1", 6, ""), ("1", 6, "chord"), ("1", 1, "grace")]
     path = write(tmp_path, "a.musicxml", musicxml([bar, bar]))
-    assert quality.measure_quality([path]) == {"measures": 2, "consistent": 2, "notes": 6}
+    assert quality.measure_quality([path]) == {"measures": 2, "consistent": 2, "notes": 6, "broken": []}
 
 
 def test_rests_do_not_count_as_notes_but_fill_the_bar(tmp_path):
     bar = [("1", 2, "rest"), ("1", 4, "")]
     path = write(tmp_path, "a.musicxml", musicxml([bar, bar]))
-    assert quality.measure_quality([path]) == {"measures": 2, "consistent": 2, "notes": 2}
+    assert quality.measure_quality([path]) == {"measures": 2, "consistent": 2, "notes": 2, "broken": []}
 
 
 def test_empty_measures_are_never_consistent(tmp_path):
     path = write(tmp_path, "a.musicxml", musicxml([BAR, BAR, []]))
-    assert quality.measure_quality([path]) == {"measures": 3, "consistent": 2, "notes": 2}
+    assert quality.measure_quality([path]) == {"measures": 3, "consistent": 2, "notes": 2, "broken": []}
 
 
 def test_compressed_mxl_and_several_files_are_summed(tmp_path):
     one = write(tmp_path, "a.mxl", musicxml([BAR, BAR]), zipped=True)
     two = write(tmp_path, "b.mxl", musicxml([BAR]), zipped=True)
-    assert quality.measure_quality([one, two]) == {"measures": 3, "consistent": 3, "notes": 3}
+    assert quality.measure_quality([one, two]) == {"measures": 3, "consistent": 3, "notes": 3, "broken": []}
 
 
 def test_a_score_without_a_part_has_no_measures(tmp_path):
     path = write(tmp_path, "a.musicxml", '<?xml version="1.0"?><score-partwise/>')
-    assert quality.measure_quality([path]) == {"measures": 0, "consistent": 0, "notes": 0}
+    assert quality.measure_quality([path]) == {"measures": 0, "consistent": 0, "notes": 0, "broken": []}
 
 
 def test_unreadable_file_raises(tmp_path):

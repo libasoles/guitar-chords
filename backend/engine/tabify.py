@@ -34,6 +34,7 @@ import verovio
 import engraving
 import fingering
 import rhythm
+from uneven import uneven_measures
 
 verovio.enableLog(False)
 # The wrapper only finds its fonts by itself on the main thread; the web app
@@ -1401,7 +1402,7 @@ def _write_json(path, payload):
         json.dump(payload, f, ensure_ascii=False)
 
 
-def _suggestion(measures, tuning, shifts, title, subtitles):
+def _suggestion(measures, tuning, shifts, title, subtitles, uneven=()):
     return {
         "version": SUGGESTION_VERSION,
         "tuning": tuning_key(tuning),
@@ -1423,6 +1424,8 @@ def _suggestion(measures, tuning, shifts, title, subtitles):
                     for m in measures],
         "dropped": [{"measure": n, "pitch": p} for n, p in dropped_notes(measures)],
         "arpeggio_measures": [m["number"] for m in measures if m.get("arpeggio")],
+        # 0-based indices (into `tabs`) of the measures whose rhythm does not add up: the preview flags them.
+        "uneven_measures": list(uneven),
         # One ascii-tabs Tab (Column[]) per measure: the Digitación sugerida.
         "tabs": [[c["cells"] for c in m["columns"]] for m in measures],
         # Per measure, per Column: the barre (fret, strings) written over it, or null (`fingering.parse_barre`).
@@ -1465,7 +1468,7 @@ def prepare(input_path, kind, tuning, out_dir, per_row=4, arpeggio="auto"):
         raise NoNotesError("No se reconocieron notas en la partitura.")
     resolved = TUNINGS.get(tuning) or guess_tuning(measures)
     assign_frets(measures, resolved, arpeggio, sustain=True)
-    suggestion = _suggestion(measures, resolved, shifts, title, subtitles)
+    suggestion = _suggestion(measures, resolved, shifts, title, subtitles, uneven_measures(xml_path))
     suggestion_path = os.path.join(out_dir, SUGGESTION_NAME)
     _write_json(suggestion_path, suggestion)
 

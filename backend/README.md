@@ -55,6 +55,7 @@ El resultado queda en `normalized.musicxml`, por eso `export` no necesita la reg
   "columns": [[{"offset": 0.0, "note_ids": ["tab-note-0"], "midis": [52]}]],
   "tabs": [[[null, 0, null, 2, null, null]]],
   "dropped": [{"measure": 3, "pitch": "D2"}],
+  "uneven_measures": [2],
   "preview_columns": [[{"note_ids": ["tab-note-0"], "bass_strings": [5]}]]
 }
 ```
@@ -62,6 +63,9 @@ El resultado queda en `normalized.musicxml`, por eso `export` no necesita la reg
 - `tabs`: **la Digitación sugerida**, un Tab (`Column[]`) por compás; cada Column son 6
   `number|null`, cuerda 1 (aguda) primero. Es el valor inicial del editor y la forma exacta
   de `tabs` en export.
+- `uneven_measures`: índices base 0 (en `tabs`) de los compases cuyo ritmo no suma: alguna voz dura más que el
+  compás habitual (la duración más común, sin mirar el compás escrito) o ninguna llega a ella. La anacrusa (primer compás)
+  y el compás final pueden ser cortos. La vista previa los marca con un aviso; es `[]` si todo suma (`uneven.py`).
 - `preview_columns[m][c].note_ids`: ids que aparecen como `data-id` de cada nota en los SVG
   (`tab-note-<n>`, deterministas por orden de documento del MusicXML normalizado).
   El frontend calcula `columnLayout` con ellos, nunca por orden del DOM.
@@ -194,7 +198,8 @@ Variables de entorno (container overrides de `ecs:RunTask`):
 | `OMR_TIMEOUT_SECONDS` | no | Presupuesto total de los motores OCR; pasado ese tiempo se corta (default 780, bajo el corte de 15 min del Trabajo) |
 
 Salida: `OUTPUT_PREFIX + omr-01.mxl` (más `omr-02.mxl`, ... un archivo por movimiento de Audiveris o por página con música de homr)
-y `OUTPUT_PREFIX + omr-meta.json` con `{engine, scan, suspect, measures, consistent, out_of_key}`: el Lambda del motor
+y `OUTPUT_PREFIX + omr-meta.json` con `{engine, scan, suspect, measures, consistent, out_of_key, broken_measures}` (`broken_measures`: índices base 0
+de los compases de la lectura cuyo ritmo no suma, `quality.py`): el Lambda del motor
 reenvía `scan` y `suspect` al Job, que la API expone como `lowQualityScan` (escaneo de lectura dudosa).
 `omr-01.mxl` es el **MusicXML intermedio** descargable. Después, `prepare` con
 `input_prefix = OUTPUT_PREFIX` y `kind = "pdf-ocr-output"`.

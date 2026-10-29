@@ -561,10 +561,24 @@
           tuning: (suggestion.tuning || job.tuning) === 'dropd' ? 'E B G D A D' : 'E B G D A E',
           title: typeof suggestion.title === 'string' ? suggestion.title : '',
           author: Array.isArray(suggestion.subtitles) ? suggestion.subtitles.join(' · ') : '',
+          uneven: Array.isArray(suggestion.uneven_measures) ? suggestion.uneven_measures : [],
           suggestionTabs: tabs.map(function (tab) { return (tab || []).map(normalizeAttack); }),
         };
       });
     });
+  }
+
+  var ALERT_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
+
+  // Lucide triangle-alert over a measure whose rhythm does not add up, with the shared black tooltip.
+  function unevenBadge() {
+    var badge = el('span', 'part-uneven-badge tooltip');
+    badge.tabIndex = 0;
+    badge.setAttribute('role', 'img');
+    badge.setAttribute('aria-label', t('partUnevenMeasure'));
+    badge.dataset.tooltip = t('partUnevenMeasure');
+    badge.innerHTML = ALERT_ICON;
+    return badge;
   }
 
   function onReady(job) {
@@ -1148,7 +1162,15 @@
             tabsLine.appendChild(tabsEl);
             if (k === 0) tabsLine.appendChild(names);
             elements.push(tabsEl);
+            var badge = null;
+            if ((preview.uneven || []).indexOf(index) !== -1) {
+              // The measure's rhythm does not add up (a misread duration or a lost voice): flag it.
+              tabsEl.classList.add('is-uneven');
+              badge = unevenBadge();
+              tabsLine.appendChild(badge);
+            }
             var measureView = {
+              badge: badge,
               index: index,
               k: k,
               attacks: attacks,
@@ -1196,6 +1218,7 @@
               layouts[m.index] = spaced;
               var left = node ? node.getBoundingClientRect().left - rowLeft : 0;
               m.el.style.left = left + 'px';
+              if (m.badge) m.badge.style.left = left + 'px';
               // Each system's first measure can extend left of its staff;
               // keep its TAB lines flush with the joining barline.
               var staffLine = m.k === 0 && v.svg && v.svg.querySelector('g.staff path');

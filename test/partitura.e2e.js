@@ -100,7 +100,7 @@ async function mockApi(page, options) {
     const url = route.request().url();
     if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: CORS });
     if (url.endsWith('/preview.json')) return json(route, options.preview || PREVIEW);
-    if (url.endsWith('/suggestion.json')) return json(route, SUGGESTION);
+    if (url.endsWith('/suggestion.json')) return json(route, options.suggestion || SUGGESTION);
     if (url.endsWith('/preview-01.svg')) {
       return route.fulfill({ contentType: 'image/svg+xml', headers: CORS, body: options.svg || SVG });
     }
@@ -761,6 +761,28 @@ async function fillForm(page, name) {
           assert.equal(await page.locator('.toast').count(), 0, 'no advice for a good reading');
         }
         await page.close();
+      }
+
+      // A measure whose rhythm does not add up is flagged with an explained warning; the others are not.
+      {
+        const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+        await mockApi(page, { jobs: [READY], suggestion: Object.assign({}, SUGGESTION, { uneven_measures: [1] }) });
+        await page.goto(toolUrl);
+        await fillForm(page, 'score.pdf');
+        await page.waitForSelector('#partRows .part-row');
+        assert.equal(await page.locator('.part-uneven-badge').count(), 1);
+        assert.equal(await page.locator('.part-measure-tab.is-uneven').count(), 1);
+        assert.equal(await page.locator('.part-measure-tab.is-uneven').getAttribute('data-measure'), '1');
+        assert.equal(await page.locator('.part-uneven-badge').getAttribute('data-tooltip'), S.partUnevenMeasure);
+        await page.close();
+
+        const clean = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+        await mockApi(clean, { jobs: [READY] });
+        await clean.goto(toolUrl);
+        await fillForm(clean, 'score.pdf');
+        await clean.waitForSelector('#partRows .part-row');
+        assert.equal(await clean.locator('.part-uneven-badge').count(), 0);
+        await clean.close();
       }
 
       // Every error code is translated, on creation and when a job fails.
