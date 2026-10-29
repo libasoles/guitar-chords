@@ -523,6 +523,10 @@ async function checkDrag(page) {
     assert.equal(stageFocus.outline, 'none', 'drawing must not show a focus line above the staves');
     await clickMeasure(2);
     assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0].slice(1, 3).map(m => m[0].d)), ['e', 'e']);
+    assert.equal(await page.locator('#scoreStage .is-selected').count(), 0, 'a note placed with a tool active is not selected');
+    await page.keyboard.press('Escape');
+    const head = await page.locator('#scoreStage g.measure').nth(2).locator('g.note .notehead').first().boundingBox();
+    await page.mouse.click(head.x + head.width / 2, head.y + head.height / 2);
     const beforeEdit = await page.evaluate(() => ({ ...scoreEditor.score.rows[0][2][0] }));
     await page.keyboard.press('2');
     assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][2][0]), { ...beforeEdit, d: 's' });

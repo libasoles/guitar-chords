@@ -310,13 +310,15 @@
         if (!placed.measure) return say(fullVoice(placed.voice));
         change(() => {
           measure.splice(0, measure.length, ...placed.measure);
-          selected = { mi: target.mi, i: placed.index };
+          selected = activeItem ? null : { mi: target.mi, i: placed.index };
           group = [];
         });
         return;
       }
       change(() => {
-        selected = { mi: target.mi, i: M.insertNote(measure, ev, spot.at) };
+        const index = M.insertNote(measure, ev, spot.at);
+        // Con una herramienta activa la figura nueva no queda seleccionada: seleccion y herramienta no conviven.
+        selected = activeItem ? null : { mi: target.mi, i: index };
         group = [];
       });
     }
