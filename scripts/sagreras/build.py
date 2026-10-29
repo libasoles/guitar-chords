@@ -48,7 +48,7 @@ ENGRAVING_FIXES = {49: clear_triplets, 55: clear_triplets, 53: separate_rests, 5
 # Pagina virtual mas grande con escala menor (el PDF sigue midiendo lo mismo, como en los preludios
 # largos): el grabado se achica y caben mas compases por sistema y mas sistemas por pagina. Se prueba de menos a mas
 # reduccion y se queda con el primer nivel que ocupa menos paginas.
-SCALES = [45, 41, 38, 35, 32, 30]  # la escala de Verovio es entera; 45 es la del motor
+SCALES = [45, 41, 38, 35]  # la escala de Verovio es entera; 45 es la del motor; con menos de 35 lo impreso es ilegible
 
 def zoom_options(scale):
     return {'scale': scale, 'pageWidth': round(2100 * 45 / scale), 'pageHeight': round(2970 * 45 / scale)}

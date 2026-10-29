@@ -41,7 +41,7 @@ PRINTED_TAB = {96, 100, 110}
 ARPEGGIO = set(range(1, COUNT + 1)) - PRINTED_TAB
 # Pagina virtual mas grande con escala menor, como en las demas colecciones: se prueba de menos a mas reduccion y se
 # queda con el primer nivel que ocupa menos paginas.
-SCALES = [45, 41, 38, 35, 32, 30]
+SCALES = [45, 41, 38, 35]
 
 
 def zoom_options(scale):

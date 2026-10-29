@@ -38,7 +38,7 @@ PIECES = {
 }
 PER_ROW = {}
 ARPEGGIO = set()
-SCALES = [45, 41, 38, 35, 32, 30]  # la escala de Verovio es entera; 45 es la del motor
+SCALES = [45, 41, 38, 35]  # la escala de Verovio es entera; 45 es la del motor; con menos de 35 lo impreso es ilegible
 
 
 def out_dir():

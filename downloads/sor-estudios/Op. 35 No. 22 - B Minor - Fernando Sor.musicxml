@@ -178,7 +178,7 @@
         <stem>down</stem>
         <staff>1</staff>
         <notations>
-          <tied type="start" />
+          <tied orientation="under" placement="below" type="start" />
         </notations>
       </note>
       <backup>

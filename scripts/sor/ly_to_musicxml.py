@@ -138,7 +138,7 @@ FUNCTION = re.compile(r'(\w+)\s*=\s*#\(define-music-function\s*\([^)]*\)\s*\(([^
 
 
 class Parser:
-    def __init__(self, text):
+    def __init__(self, text, tie_dirs=False):
         global GERMAN
         GERMAN = '\\include "deutsch.ly"' in text
         text = strip_comments(text)
@@ -160,6 +160,8 @@ class Parser:
         self.stray = []  # controles sueltos dentro de un contexto (`\\GuitarStaff = \\context Staff << \\time ... >>`)
         self.fixed = None  # octava base de `\fixed`
         self.stem = None  # 'up', 'down' o None (automatica) segun \voiceOne, \stemDown...
+        self.tie_dir = None  # 'under' si la voz lleva \tieDown y la pieza lo pide (`tie_dirs`); None: la ligadura automatica
+        self.tie_dirs = tie_dirs
 
     # -- lectura de tokens -----------------------------------------------------------------------
     def peek(self, offset=0):
@@ -196,7 +198,7 @@ class Parser:
             elif kind == 'word' and self.peek(1)[1] == '=':
                 name = self.take()[1]
                 self.take()
-                self.stem = None
+                self.stem = self.tie_dir = None
                 self.variables[name] = self.music()
             elif kind == 'command' and text == '\\include':
                 self.take()
@@ -491,6 +493,8 @@ class Parser:
             self.take()
             self.expect('=')
             self.take()
+        elif name in ('tieUp', 'tieDown', 'tieNeutral'):
+            self.tie_dir = 'under' if name == 'tieDown' and self.tie_dirs else None
         elif name in ('stemUp', 'voiceOne', 'voiceThree', 'stemDown', 'voiceTwo', 'voiceFour', 'stemNeutral', 'oneVoice'):
             self.stem = 'up' if name in ('stemUp', 'voiceOne', 'voiceThree') else \
                 'down' if name in ('stemDown', 'voiceTwo', 'voiceFour') else None
@@ -622,7 +626,7 @@ class Parser:
             self.last_duration = duration_of(self.take()[1], None)
         event = {'kind': 'chord' if pitches else ('space' if text == 's' else 'rest'), 'dur': self.last_duration,
                  'pitches': pitches, 'tie': False, 'slur_start': 0, 'slur_stop': 0, 'words': [], 'segno': False,
-                 'stem': self.stem}
+                 'stem': self.stem, 'tie_dir': self.tie_dir}
         while True:
             kind, nxt = self.peek()
             if kind == 'finger':
@@ -1032,7 +1036,7 @@ class Writer:
             if p.get('tied_from'):
                 notations += '<tied type="stop"/>'
             if p.get('tie'):
-                notations += '<tied type="start"/>'
+                notations += '<tied type="start"%s/>' % (' orientation="%s"' % e['tie_dir'] if e.get('tie_dir') else '')
             if i == 0:
                 if tuplet and e.get('tuplet_start'):
                     notations += '<tuplet type="start" bracket="no"/>'
@@ -1104,16 +1108,17 @@ def pitch_key(p):
     return (p['step'], p['alter'], p['octave'])
 
 
-def convert(path, title, composer, words=None, patches=()):
+def convert(path, title, composer, words=None, patches=(), tie_dirs=False):
     """`patches`: pares [texto, reemplazo] sobre el `.ly` (erratas de la edicion de Mutopia). Cada texto debe aparecer
-    una sola vez: si el archivo cambia, la correccion falla en vez de aplicarse donde no toca."""
+    una sola vez: si el archivo cambia, la correccion falla en vez de aplicarse donde no toca.
+    `tie_dirs`: respeta `\tieDown` (ligadura por debajo); solo en las piezas cuya ligadura solapa otras notas."""
     with open(path, encoding='utf-8') as f:
         text = f.read()
     for old, new in patches:
         if text.count(old) != 1:
             raise LyError('la correccion %r aparece %d veces en %s' % (old, text.count(old), os.path.basename(path)))
         text = text.replace(old, new)
-    parser = Parser(text)
+    parser = Parser(text, tie_dirs)
     voices = parser.parse_file()
     mark_ties(voices)
     # Con clave de sol normal el archivo da la altura escrita de la guitarra (suena una octava mas grave); con

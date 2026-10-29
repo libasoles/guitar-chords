@@ -38,7 +38,7 @@ PDF_OVERRIDES = {}
 ARPEGGIO = set()
 # Pagina virtual mas grande con escala menor: se prueba de menos a mas reduccion y se queda con el primer nivel que
 # ocupa menos paginas (como en Sagreras y Aguado).
-SCALES = [45, 41, 38, 35, 32, 30]  # la escala de Verovio es entera; 45 es la del motor
+SCALES = [45, 41, 38, 35]  # la escala de Verovio es entera; 45 es la del motor; con menos de 35 lo impreso es ilegible
 
 
 def zoom_options(scale):

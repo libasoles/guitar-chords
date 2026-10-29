@@ -66,7 +66,7 @@ use('lecciones')
 PER_ROW = {}
 ARPEGGIO = set()
 PDF_OVERRIDES = {}
-SCALES = [45, 41, 38, 35, 32, 30]  # la escala de Verovio es entera; 45 es la del motor
+SCALES = [45, 41, 38, 35]  # la escala de Verovio es entera; 45 es la del motor; con menos de 35 lo impreso es ilegible
 
 
 def zoom_options(scale):
@@ -103,7 +103,7 @@ def file_base(number):
 def convert(number):
     piece = PIECES[number]
     source = os.path.join(SOURCES, piece['source'])
-    xml = ly_to_musicxml.convert(source, title_of(number), AUTHOR, words=piece.get('words'), patches=piece.get('patches', ()))
+    xml = ly_to_musicxml.convert(source, title_of(number), AUTHOR, words=piece.get('words'), patches=piece.get('patches', ()), tie_dirs=piece.get('tie_dirs', False))
     target = os.path.join(SOURCES, f'{number:02d}.musicxml')
     with open(target, 'w', encoding='utf-8') as f:
         f.write(xml)
@@ -132,8 +132,9 @@ def build(number):
             suggestion = json.load(f)
         tabs = suggestion['tabs']
         # El primer nivel (el menos compacto) con el que el PDF ocupa menos paginas.
+        # `min_scale` del catalogo corta la busqueda: antes que encoger el grabado hasta que sea ilegible, mas paginas.
         best = None
-        for level in ([PDF_OVERRIDES[number]] if number in PDF_OVERRIDES else [zoom_options(sc) for sc in SCALES]):
+        for level in ([PDF_OVERRIDES[number]] if number in PDF_OVERRIDES else [zoom_options(sc) for sc in SCALES if sc >= PIECES[number].get('min_scale', 0)]):
             tabify.PDF_OPTIONS = {**base_options, **level}
             exported = os.path.join(tmp, f"export-{level['scale']}")
             tabify.export(os.path.join(prepared, tabify.NORMALIZED_NAME), os.path.join(prepared, tabify.SUGGESTION_NAME),
