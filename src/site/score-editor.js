@@ -209,6 +209,8 @@
   function change(mutate) {
     const before = M.clone(score);
     if (mutate() === false) return false;
+    // `at` queda siempre igual al tiempo que se ve (sin huecos): asi los clics y arrastres siguientes se ubican en el orden.
+    M.measures(score).forEach(M.settle);
     history.push(before);
     if (history.length > HISTORY_LIMIT) history.shift();
     save();
@@ -307,7 +309,7 @@
       if (spot.dot) ev.dot = true;
       if (item.kind === 'rest') {
         const placed = M.placeRest(measure, ev, spot.at, target.n, score, target.mi);
-        if (!placed.measure) return say(fullVoice(placed.voice));
+        if (!placed.measure) return say(placed.full ? t.full : fullVoice(placed.voice));
         change(() => {
           measure.splice(0, measure.length, ...placed.measure);
           selected = activeItem ? null : { mi: target.mi, i: placed.index };
@@ -372,7 +374,10 @@
     else { delete replacement.rest; replacement.n = ev.rest ? M.bottomLine(score, selected.mi) : ev.n; }
     if (item.d === 'w' || item.d === 's' || item.d === 'f') delete replacement.dot;
     const measure = M.measures(score)[selected.mi];
-    if (M.onsets(measure)[selected.i] + M.length(replacement) > M.capacity(score, selected.mi)) return say(t.full);
+    // Se cuenta en orden: lo que sigue en su voz se corre, y la voz tiene que seguir entrando en el compas.
+    const trial = M.settle(M.clone(measure));
+    trial[selected.i] = Object.assign(replacement, { at: trial[selected.i].at }, Number.isInteger(trial[selected.i].v) ? { v: trial[selected.i].v } : {});
+    if (M.measureLength(trial) > M.capacity(score, selected.mi)) return say(t.full);
     change(() => { M.settle(measure); measure[selected.i] = replacement; });
     say('');
   }
@@ -386,7 +391,7 @@
       const plan = M.dotPlan(measure, hit.i, score);
       if (!plan) return say(ev.d === 'w' || ev.d === 's' || ev.d === 'f' || ev.tp ? t.noDot : t.full);
       const moves = plan.moves.map(([i, at]) => [measure[i], at]);
-      return change(() => { ev.dot = true; moves.forEach(([o, at]) => { o.at = at; }); });
+      return change(() => { M.settle(measure); ev.dot = true; moves.forEach(([o, at]) => { o.at = at; }); });
     }
     if (ev.rest) return;
     change(() => {
@@ -411,7 +416,7 @@
     if (ev.rest) {
       // Un silencio se acomoda segun las notas que suenan a la vez: arrastrarlo arriba o abajo cambia su voz y su altura.
       const placed = M.placeRest(others, moved, spot.at, target.n, score, target.mi);
-      if (!placed.measure) return say(fullVoice(placed.voice));
+      if (!placed.measure) return say(placed.full ? t.full : fullVoice(placed.voice));
       // Solo, el silencio queda a la altura donde se soltó: se puede bajar para escribir una nota en el centro.
       const landed = placed.measure[placed.index];
       if (!Number.isInteger(landed.n)) landed.n = M.clampPitch(target.n);
@@ -449,16 +454,28 @@
     const plan = items.map((x) => Object.assign({}, x, { to: x.mi + dmi, at: x.at + dt }));
     const clash = (p) => {
       const rest = all[p.to] && all[p.to].filter((o) => !moving.has(o));
-      const starts = rest && M.onsets(rest);
+      const starts = rest && M.hints(rest); // el lugar de cada una antes de sacar las que se mueven
       return !rest || p.at < 0 || p.at + M.length(p.ev) > M.capacity(score, p.to) ||
         (!p.ev.rest && rest.some((o, i) => !o.rest && starts[i] === p.at && o.n === p.ev.n + dn && o.acc === p.ev.acc));
     };
     if (plan.some(clash)) return say(t.full);
+    // Contado en orden, cada compas de destino tiene que seguir entrando.
+    const trial = all.map((measure) => measure.filter((o) => !moving.has(o)).map((o) => Object.assign({}, o)));
+    const trialInserts = new Map();
+    plan.slice().sort((a, b) => a.at - b.at).forEach((p) => {
+      const ev = Object.assign({}, p.ev);
+      if (!ev.rest) ev.n += dn;
+      if (!trialInserts.has(p.to)) trialInserts.set(p.to, []);
+      trialInserts.get(p.to).push([ev, p.at]);
+    });
+    trialInserts.forEach((list, mi) => { M.insertMany(trial[mi], list); });
+    if (plan.some((p) => M.measureLength(trial[p.to]) > M.capacity(score, p.to))) return say(t.full);
     change(() => {
       all.forEach((measure) => {
         for (let i = measure.length - 1; i >= 0; i -= 1) if (moving.has(measure[i])) measure.splice(i, 1);
       });
       const ids = new Map();
+      const inserts = new Map();
       plan.sort((a, b) => a.at - b.at).forEach((p) => {
         const destination = all[p.to];
         if (!p.ev.rest) p.ev.n += dn;
@@ -469,8 +486,11 @@
           if (!ids.has(key)) ids.set(key, Math.max(0, ...destination.map((o) => o.tp || 0)) + 1);
           p.ev.tp = ids.get(key);
         }
-        M.insertAt(destination, p.ev, p.at);
+        if (!inserts.has(p.to)) inserts.set(p.to, []);
+        inserts.get(p.to).push([p.ev, p.at]);
       });
+      // Todas juntas por compas: las que quedan conservan su lugar en el orden hasta que entran las movidas.
+      inserts.forEach((list, mi) => { M.insertMany(all[mi], list); });
       const refsAfter = plan.map((p) => ({ mi: p.to, i: all[p.to].indexOf(p.ev) }));
       selected = refsAfter[refsAfter.length - 1];
       group = refsAfter.length > 1 ? refsAfter : [];

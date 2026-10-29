@@ -16,6 +16,7 @@ async function seed(page, measures) {
   await page.waitForSelector('#scoreStage g.note');
   await page.locator('#scoreStage').focus();
   await page.keyboard.press('Escape');
+  await page.waitForTimeout(300); // El ResizeObserver completa el dibujo antes de clickear las notas.
 }
 
 async function center(page, id) {
@@ -47,14 +48,14 @@ async function run() {
     await page.goto(url);
     await page.waitForSelector('#scoreStage g.measure');
 
-    // Partituras guardadas con 8 divisiones por negra se reescalan.
+    // Partituras guardadas con 8 divisiones por negra se reescalan; el hueco antes de la primera figura no cuenta.
     await page.evaluate(() => {
       localStorage.clear();
-      localStorage.setItem('scoreEditor.v1', JSON.stringify({ rows: [[[{ d: 'q', n: 30, at: 8 }], [], [], []]] }));
+      localStorage.setItem('scoreEditor.v1', JSON.stringify({ rows: [[[], [], [{ d: 'q', n: 30, at: 0 }, { d: 'e', n: 31, at: 8 }], []]] }));
     });
     await page.reload();
     await page.waitForSelector('#scoreStage g.note');
-    assert.equal((await events(page, 0))[0].at, 24);
+    assert.equal((await events(page, 2))[1].at, 24);
 
     // Tres corcheas seguidas: tresillo.
     await seed(page, [[
@@ -119,8 +120,9 @@ async function run() {
     assert.equal(await page.locator('#scoreStage .is-selected').count(), 2);
     assert.deepEqual(await actions(page), ['unbeam']);
     // Dos corcheas de pulsos distintos: barrar; despues, separar.
-    await seed(page, [[{ d: 'e', n: 30, at: 12 }, { d: 'e', n: 31, at: 24 }], []]);
-    await shiftSelect(page, ['e0-0', 'e0-1']);
+    // El silencio de corchea las corre al contratiempo: sin el empezarian en 0, en el mismo pulso.
+    await seed(page, [[{ d: 'e', rest: true, at: 0 }, { d: 'e', n: 30, at: 12 }, { d: 'e', n: 31, at: 24 }], []]);
+    await shiftSelect(page, ['e0-1', 'e0-2']);
     assert.deepEqual(await actions(page), ['beam']);
     await page.locator('[data-action="beam"]').click();
     assert.ok(await page.locator('#scoreStage g.beam').count());

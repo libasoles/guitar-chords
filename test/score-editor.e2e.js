@@ -37,7 +37,7 @@ async function checkSplitKeepsRows(page) {
   await page.waitForSelector('#scoreStage g.measure');
   await page.evaluate(() => {
     scoreEditor.score.rows[2] = [[], []];
-    scoreEditor.score.rows[0][3] = [{ n: 30, d: 'q', at: 0 }, { n: 32, d: 'q', at: 72 }];
+    scoreEditor.score.rows[0][3] = [{ n: 30, d: 'q', at: 0 }, { d: 'h', rest: true, at: 24 }, { n: 32, d: 'q', at: 72 }];
     scoreEditor.score.rows[1][0] = [{ n: 35, d: 'q', at: 0 }];
     scoreEditor.render();
     return document.fonts.ready;
@@ -65,7 +65,7 @@ async function checkSplitKeepsRows(page) {
     const continuation = await page.locator('#m4 > g.staff > path').first().boundingBox();
     assert.ok(continuation.width > 20, 'el compas posterior sigue visible');
     assert.ok(Math.abs(continuation.x - x) < 2, 'el compas posterior empieza en el corte');
-    assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][4][0].n), 32, 'se conserva la nota posterior al corte');
+    assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][4].some((e) => e.n === 32)), true, 'se conserva la nota posterior al corte');
     assert.equal(await page.evaluate(() => scoreEditor.score.rows[1][0][0].n), 35, 'el renglon siguiente conserva sus notas');
   };
   await check();
@@ -100,7 +100,7 @@ async function checkBarResizeConstraints(page) {
 
 async function checkMeasureWidths(page) {
   await page.evaluate(() => {
-    scoreEditor.score.rows[0][0] = [{ n: 30, d: 'e', at: 0 }, { n: 32, d: 'e', at: 12 }, { n: 30, d: 'e', at: 84, tie: true }];
+    scoreEditor.score.rows[0][0] = [{ n: 30, d: 'e', at: 0 }, { n: 32, d: 'e', at: 12 }, { d: 'h', rest: true, at: 24 }, { d: 'e', rest: true, at: 72 }, { n: 30, d: 'e', at: 84, tie: true }];
     scoreEditor.score.rows[0][1] = [{ n: 30, d: 'q', at: 0 }];
     scoreEditor.render();
   });
@@ -663,8 +663,8 @@ async function checkDoubleClick(page) {
   await page.reload();
   await page.waitForSelector('#scoreStage g.note');
   assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].dot), true, 'dot is saved');
-  // 6/8: bajo en blanca con una voz superior (negra con puntillo y negra). Al puntillar el bajo, lo que empieza con el se alinea
-  // al inicio del compas, y quitar y volver a poner el puntillo sigue cabiendo porque las voces quedaron fijas.
+  // 6/8: bajo en blanca con una voz superior (negra con puntillo y negra). Las voces salen del registro y se cuentan en orden:
+  // el bajo puntillado sigue en 0, la negra sigue a la negra con puntillo (36) y las voces quedan fijas al puntillar.
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
@@ -676,26 +676,26 @@ async function checkDoubleClick(page) {
   const bass = page.locator('#e0-0 .notehead');
   const state = () => page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => [!!ev.dot, ev.at]));
   await bass.dblclick({ force: true });
-  assert.deepEqual(await state(), [[true, 0], [true, 0], [false, 48]], 'the dotted half moves to the bar start with the figures that started with it');
-  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => ev.v)), [undefined, undefined, undefined], 'dotting does not invent voices');
+  assert.deepEqual(await state(), [[true, 0], [true, 0], [false, 36]], 'the dotted half stays at the bar start; the upper voice is counted in order');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => ev.v)), [2, 1, 1], 'the voices come from the register and stay pinned');
   await bass.dblclick({ force: true });
   assert.deepEqual((await state())[0], [false, 0]);
   await bass.dblclick({ force: true });
   assert.deepEqual((await state())[0], [true, 0], 'the dot fits again: the upper quarter stays in its own voice');
-  // Con la negra de arriba guardada en la misma voz que la blanca, el puntillo tambien entra: la negra pasa a otra voz.
+  // Con la negra de arriba guardada en la misma voz que la blanca, la voz ya suma el compas: el puntillo no entra.
   await page.evaluate(() => {
     scoreEditor.score.rows[0][0].splice(0, 3, { d: 'h', n: 25, at: 0, v: 1 }, { d: 'q', n: 35, dot: true, at: 24, v: 2 }, { d: 'q', n: 37, at: 48, v: 1 });
     scoreEditor.render();
   });
   await bass.dblclick({ force: true });
-  assert.deepEqual((await state())[0], [true, 0], 'the dot fits even when an upper figure shares its voice');
-  // Una negra guardada en una tercera voz va despues de la negra con puntillo que ya sono, no encima de ella.
+  assert.deepEqual((await state())[0], [false, 0], 'the dot does not fit when the voice already fills the bar');
+  // Una negra guardada sola en una tercera voz empieza en 0: no hay hueco antes de ella, y con puntillo entra.
   await page.evaluate(() => {
     scoreEditor.score.rows[0][0].splice(0, 3, { d: 'h', n: 29, at: 0, v: 1, dot: true }, { d: 'q', n: 35, dot: true, at: 0, v: 2 }, { d: 'q', n: 38, at: 48, v: 3 });
     scoreEditor.render();
   });
   await page.locator('#e0-2 .notehead').dblclick({ force: true });
-  assert.deepEqual((await state())[2], [true, 36], 'the dotted quarter lands after the figure that already sounded');
+  assert.deepEqual((await state())[2], [true, 0], 'the lone quarter of its voice starts at the bar start');
   // Voz desalineada (blanca y negra con puntillo en el segundo tiempo): la segunda negra con puntillo va despues de la primera.
   await page.evaluate(() => {
     scoreEditor.score.rows[0][0].splice(0, 3, { d: 'h', n: 25, at: 24 }, { d: 'q', n: 34, dot: true, at: 24 }, { d: 'q', n: 37, at: 48 });
@@ -810,7 +810,8 @@ async function checkAppendAfterLast(page) {
     return document.fonts.ready;
   });
   await page.waitForTimeout(300);
-  const heads = await page.evaluate(() => [...document.querySelectorAll('#m0 .notehead')].map((n) => { const r = n.getBoundingClientRect(); return [(r.left + r.right) / 2, (r.top + r.bottom) / 2]; }));
+  // Por id de figura (e0-i): el orden en el SVG sigue las voces, no el de las figuras.
+  const heads = await page.evaluate(() => [0, 1, 2, 3].map((i) => { const r = document.querySelector('[id="e0-' + i + '"] .notehead').getBoundingClientRect(); return [(r.left + r.right) / 2, (r.top + r.bottom) / 2]; }));
   await page.mouse.move(heads[2][0], heads[2][1]);
   await page.mouse.down();
   await page.mouse.move(heads[2][0] + 5, heads[2][1], { steps: 3 });
