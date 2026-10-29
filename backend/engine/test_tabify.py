@@ -21,6 +21,38 @@ def note(duration, kind="half", extra=""):
 
 
 class ScoreImportTests(unittest.TestCase):
+    def _slurs(self, xml_body):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "s.musicxml"
+            path.write_text(score_xml(xml_body))
+            _, part = tabify.load_score([str(path)])
+        return part, list(part.recurse().getElementsByClass(tabify.m21.spanner.Slur))
+
+    def test_slur_opened_in_a_lower_voice_is_paired_in_time_order(self):
+        def n(step, kind, voice, slur=""):
+            return (f'<note><pitch><step>{step}</step><octave>4</octave></pitch><duration>1</duration>'
+                    f'<voice>{voice}</voice><type>{kind}</type><notations>{slur}</notations></note>')
+        # The stop (voice 1, beat 2) comes before the start (voice 2, beat 1) in the document.
+        body = ('<measure number="1"><attributes><divisions>1</divisions></attributes>'
+                + n("C", "quarter", 1) + n("D", "quarter", 1, '<slur number="1" type="stop"/>')
+                + '<backup><duration>2</duration></backup>'
+                + n("E", "quarter", 2, '<slur number="1" type="start"/>') + n("F", "quarter", 2) + '</measure>')
+        part, slurs = self._slurs(body)
+        self.assertEqual(len(slurs), 1)
+        first, last = slurs[0].getFirst(), slurs[0].getLast()
+        self.assertLess(first.getOffsetInHierarchy(part), last.getOffsetInHierarchy(part))
+
+    def test_slur_left_open_does_not_reach_a_stop_many_measures_later(self):
+        def n(slur=""):
+            return ('<note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration>'
+                    f'<type>whole</type><notations>{slur}</notations></note>')
+        measures = ''.join(f'<measure number="{i + 1}">'
+                           + ('<attributes><divisions>1</divisions></attributes>' if i == 0 else '')
+                           + n('<slur number="1" type="start"/>' if i == 0 else
+                               '<slur number="1" type="stop"/>' if i == 5 else '') + '</measure>' for i in range(6))
+        _, slurs = self._slurs(measures)
+        self.assertEqual(slurs, [])
+
     def test_lone_tuplet_note_is_repaired_and_voices_realign(self):
         """Audiveris read one 16th as a lone tuplet member and closed it in another voice."""
         def n(step, octave, duration, kind, voice, tuplet=False):

@@ -51,8 +51,9 @@ GUITAR_LOWEST = 38  # D2, the 6th string in Drop D
 IN_SOUND_SHARE = 0.05
 KEEP_TEXT = False  # keep <words> directions; off for uploads, where they are OCR noise
 # Two voices sounding the same pitch at the same instant (a melody note over the bass note it shares) are one note on
-# the guitar: only the first gets a string and fret, as engravers merge their heads. Off by default: uploads keep
-# every note; curated collections whose source marks such unisons (Sor, from LilyPond) turn it on.
+# the guitar: only the first gets a string and fret, as engravers merge their heads. Off by default for the curated
+# collections (their output is published); `prepare` turns it on for uploads, where OMR often reads one note in
+# two voices and the second would pull its Column away from the first.
 MERGE_UNISONS = False
 
 PREVIEW_OPTIONS = {
@@ -201,6 +202,34 @@ def _repair_measure(measure, divisions, beats, beat_type):
     return True
 
 
+def order_slurs(root):
+    """Give each slur its `start` on the note that comes first in the document.
+
+    A slur that begins in a lower voice (after a <backup>) and ends on the upper voice's
+    earlier note lists its `stop` before its `start`. music21 then loses the start, and
+    Verovio pairs by document order too. Both ends stay on the same two notes; only their
+    start/stop roles are swapped. Returns whether anything changed."""
+    changed = False
+    for part in root.findall("part"):
+        stray = {}  # slur number -> a `stop` seen with no open start
+        open_numbers = set()
+        for slur in part.iter("slur"):
+            number, kind = slur.get("number", "1"), slur.get("type")
+            if kind == "start":
+                if number in stray:
+                    stray.pop(number).set("type", "start")
+                    slur.set("type", "stop")
+                    changed = True
+                else:
+                    open_numbers.add(number)
+            elif kind == "stop":
+                if number in open_numbers:
+                    open_numbers.discard(number)
+                else:
+                    stray[number] = slur
+    return changed
+
+
 def read_score(path):
     """Repair zero divisions from OMR using the written note lengths.
 
@@ -259,9 +288,42 @@ def read_score(path):
                 duration.text = str(int(Fraction(duration.text) * factor))
             repaired = True
     repaired = repair_orphan_tuplets(root) or repaired
+    repaired = order_slurs(root) or repaired
     if repaired:
         return m21.converter.parseData(ET.tostring(root, encoding="unicode"), format="musicxml")
     return m21.converter.parse(path)
+
+
+MAX_SLUR_MEASURES = 2  # a guitar slur (hammer-on, pull-off, short phrase) never reaches further
+
+
+def repair_slurs(score):
+    """Make every slur a pair of distinct notes, earliest first, within a short reach.
+
+    OMR leaves slurs it could not close, and the numbers of a slur it did close are reused
+    every system, so music21 pairs a start with a stop many measures later and Verovio
+    draws one giant curve. A slur opened in a lower voice (after a <backup>) is also listed
+    after the stop that closes it in the upper voice. Such pairs are put in time order;
+    those on one note (or two notes sounding together) or longer than MAX_SLUR_MEASURES are dropped."""
+    for slur in list(score.recurse().getElementsByClass(m21.spanner.Slur)):
+        notes = [n for n in slur.getSpannedElements() if isinstance(n, m21.note.GeneralNote)]
+        site = slur.activeSite
+        keep = None
+        if len(notes) >= 2 and site is not None:
+            ordered = sorted(notes, key=lambda n: n.getOffsetInHierarchy(score))
+            first, last = ordered[0], ordered[-1]
+            reach = (last.measureNumber or 0) - (first.measureNumber or 0)
+            same_instant = first.getOffsetInHierarchy(score) == last.getOffsetInHierarchy(score)
+            if first is not last and not same_instant and reach <= MAX_SLUR_MEASURES:
+                keep = (first, last)
+        if keep is None:
+            if site is not None:
+                site.remove(slur)
+        elif keep != (notes[0], notes[-1]):
+            site.remove(slur)
+            fixed = m21.spanner.Slur(list(keep))
+            fixed.placement = slur.placement
+            site.insert(0, fixed)
 
 
 def fix_slur_placement(score):
@@ -294,6 +356,7 @@ def load_score(paths):
         # a guitar score has none, so drop them or they print under the staff.
         for n in score.recurse().getElementsByClass(m21.note.GeneralNote):
             n.lyrics = []
+        repair_slurs(score)
         fix_slur_placement(score)
         # The same text can arrive as free text directions (<words>); only the
         # header credits are kept, so drop every other printed text.
@@ -345,7 +408,7 @@ def octave_shifts(measures):
     return [0 if octave else plain for octave in octave_clef]
 
 
-def build_columns(part, shifts=None):
+def build_columns(part, shifts=None, merge_unisons=None):
     """Per measure, the list of Columns: {offset, notes: [(note, midi)]}.
 
     `note` is the music21 Note (a chord's component for chords). Every note of
@@ -380,7 +443,7 @@ def build_columns(part, shifts=None):
                 if tie is not None and tie.type in ("stop", "continue"):
                     continue
                 column = by_offset.setdefault(offset, [])
-                if MERGE_UNISONS and any(m == note.pitch.midi + shift for _, m in column):
+                if (MERGE_UNISONS if merge_unisons is None else merge_unisons) and any(m == note.pitch.midi + shift for _, m in column):
                     continue
                 column.append((note, note.pitch.midi + shift))
         columns = [{"offset": o, "notes": by_offset[o]} for o in sorted(by_offset)]
@@ -1136,6 +1199,8 @@ def _suggestion(measures, tuning, shifts, title, subtitles):
         "string_names": string_names(tuning),
         "title": title,
         "subtitles": subtitles,
+        # Uploads merge a pitch sounding in two voices at once into one note; export must rebuild the same columns.
+        "merge_unisons": True,
         "octave_shifts": shifts,
         "octave_shift": max(set(shifts), key=shifts.count, default=0),
         "measure_numbers": [m["number"] for m in measures],
@@ -1181,7 +1246,7 @@ def prepare(input_path, kind, tuning, out_dir, per_row=4, arpeggio="auto"):
     # Everything downstream reads the persisted artifact, exactly like export,
     # so the deterministic note ids are the same in both operations.
     part = _read_normalized(xml_path)
-    measures, _ = build_columns(part, shifts)
+    measures, _ = build_columns(part, shifts, merge_unisons=True)
     if not any(m["columns"] for m in measures):
         raise NoNotesError("No se reconocieron notas en la partitura.")
     resolved = TUNINGS.get(tuning) or guess_tuning(measures)
@@ -1225,7 +1290,7 @@ def export(musicxml_path, suggestion_path, tabs, tuning, out_dir, title=None, su
     with open(suggestion_path, encoding="utf-8") as f:
         suggestion = json.load(f)
     part = _read_normalized(musicxml_path)
-    measures, _ = build_columns(part, suggestion["octave_shifts"])
+    measures, _ = build_columns(part, suggestion["octave_shifts"], suggestion.get("merge_unisons", False))
     if [[[n.id for n, _ in c["notes"]] for c in m["columns"]] for m in measures] != \
             [[c["note_ids"] for c in m] for m in suggestion["columns"]]:
         raise ValueError("El MusicXML no coincide con la sugerencia guardada.")
