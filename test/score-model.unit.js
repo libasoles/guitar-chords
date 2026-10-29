@@ -881,6 +881,15 @@ test('con las 4 voces ocupadas en ese tiempo un silencio avisa de la voz del cli
   assert.equal(JSON.stringify(measure), before);
 });
 
+test('un silencio cabe aunque las figuras guarden una voz vieja con carriles vacios', () => {
+  const { score, measure } = threeFour();
+  // Dos corcheas en la voz 4 (quedo de arrastres anteriores): en realidad solo hay una voz con notas.
+  measure.push({ d: 'e', n: 30, at: 0, v: 4 }, { d: 'e', n: 30, at: 12, v: 4 });
+  const placed = M.placeRest(measure, { d: 'q', rest: true }, 0, 20, score, 0);
+  assert.ok(placed.measure, 'no deberia avisar voz completa');
+  assert.ok(placed.measure.every((o) => o.v <= 2));
+});
+
 test('una nota agregada a un acorde toma la voz del acorde', () => {
   const { measure } = threeFour();
   measure.push({ d: 'q', n: 30, at: 0, v: 2 });

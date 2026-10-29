@@ -704,7 +704,8 @@
 
   // Fija `v` en todas las figuras segun la voz en la que hoy se dibujan, para que agregar otra no las reparta distinto.
   function settleVoices(measure) {
-    voices(measure).forEach((voice, k) => voice.groups.forEach((g) => g.indices.forEach((i) => { measure[i].v = k + 1; })));
+    // Los carriles vacios (una `v` vieja sin figuras) no cuentan: se descartan para que no llenen las MAX_VOICE voces.
+    voices(measure).filter((voice) => voice.groups.length).forEach((voice, k) => voice.groups.forEach((g) => g.indices.forEach((i) => { measure[i].v = k + 1; })));
     return measure;
   }
 
