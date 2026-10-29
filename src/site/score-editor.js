@@ -382,8 +382,9 @@
     const column = measure.filter((o) => o.at === ev.at && o.d === ev.d && !!o.dot === !!ev.dot && !o.rest === !ev.rest);
     if (item.kind === 'dot') {
       if (ev.dot) return change(() => { column.forEach((o) => { delete o.dot; }); });
-      if (!M.canDot(measure, hit.i, score)) return say(ev.d === 'w' || ev.d === 's' || ev.d === 'f' || ev.tp ? t.noDot : t.full);
-      return change(() => { column.forEach((o) => { o.dot = true; }); });
+      const start = M.dotStart(measure, hit.i, score);
+      if (start === null) return say(ev.d === 'w' || ev.d === 's' || ev.d === 'f' || ev.tp ? t.noDot : t.full);
+      return change(() => { column.forEach((o) => { o.dot = true; o.at = start; }); });
     }
     if (ev.rest) return;
     change(() => {
