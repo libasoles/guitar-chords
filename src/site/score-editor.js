@@ -303,19 +303,28 @@
       else ev.n = target.n;
       const spot = M.placement(measure, ev, target.t, score, target.mi);
       if (!spot) return say(noRoom(ev, target.mi));
-      const voice = M.voiceFor(measure, Object.assign({}, ev, { d: spot.d, dot: spot.dot }), spot.at, target.n, score, target.mi);
-      if (voice && item.kind === 'rest') ev.n = M.restPitch(measure, Object.assign({}, ev, { d: spot.d, dot: spot.dot }), spot.at, target.n);
-      if (voice && item.kind === 'rest') {
-        const trial = measure.map((o) => Object.assign({}, o));
-        if (M.insertInVoice(trial, Object.assign({}, ev, { d: spot.d, dot: spot.dot }), spot.at, voice) < 0) return say(t.fullVoices);
+      ev.d = spot.d;
+      if (spot.dot) ev.dot = true;
+      if (item.kind === 'rest') {
+        const placed = M.placeRest(measure, ev, spot.at, target.n, score, target.mi);
+        if (!placed.measure) return say(fullVoice(placed.voice));
+        change(() => {
+          measure.splice(0, measure.length, ...placed.measure);
+          selected = { mi: target.mi, i: placed.index };
+          group = [];
+        });
+        return;
       }
       change(() => {
-        ev.d = spot.d;
-        if (spot.dot) ev.dot = true;
-        selected = { mi: target.mi, i: voice && item.kind === 'rest' ? M.insertInVoice(measure, ev, spot.at, voice) : M.insertAt(measure, ev, spot.at) };
+        selected = { mi: target.mi, i: M.insertNote(measure, ev, spot.at) };
         group = [];
       });
     }
+  }
+
+  // Las voces se cuentan de arriba abajo; `n` es la voz del click.
+  function fullVoice(n) {
+    return t.fullVoice.replace('{n}', n);
   }
 
   // Sin lugar para una figura: o es mas larga que el compas, o repite una nota que ya suena en ese tiempo.
@@ -396,18 +405,21 @@
     moved.d = spot.d;
     if (spot.dot) moved.dot = true;
     else delete moved.dot;
-    // Un silencio no tiene altura propia: arrastrarlo arriba o abajo lo cambia de voz.
-    const voice = ev.rest ? M.voiceFor(others, moved, spot.at, target.n, score, target.mi) : null;
     if (ev.rest) {
-      delete moved.v;
-      // Superpuesto con otras figuras, el silencio se dibuja a la altura donde se suelta; solo, vuelve a su lugar por defecto.
-      if (voice) moved.n = M.restPitch(others, moved, spot.at, target.n);
-      else delete moved.n;
+      // Un silencio se acomoda segun las notas que suenan a la vez: arrastrarlo arriba o abajo cambia su voz y su altura.
+      const placed = M.placeRest(others, moved, spot.at, target.n, score, target.mi);
+      if (!placed.measure) return say(fullVoice(placed.voice));
+      change(() => {
+        all[from.mi].splice(from.i, 1);
+        destination.splice(0, destination.length, ...placed.measure);
+        selected = { mi: target.mi, i: placed.index };
+        group = [];
+      });
+      return;
     }
-    if (voice && M.insertInVoice(others.map((o) => Object.assign({}, o)), moved, spot.at, voice) < 0) return say(t.fullVoices);
     change(() => {
       all[from.mi].splice(from.i, 1);
-      selected = { mi: target.mi, i: voice ? M.insertInVoice(destination, moved, spot.at, voice) : M.insertAt(destination, moved, spot.at) };
+      selected = { mi: target.mi, i: M.insertNote(destination, moved, spot.at) };
       group = [];
     });
   }
