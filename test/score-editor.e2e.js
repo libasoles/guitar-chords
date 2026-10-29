@@ -723,6 +723,22 @@ async function checkClear(page) {
   console.log('Score editor clear: Radix confirm guards the delete.');
 }
 
+async function checkAppendAfterLast(page) {
+  await page.evaluate(() => {
+    scoreEditor.score.meter = '3/4';
+    scoreEditor.score.rows[0][0] = [{ n: 34, d: 'e', at: 0 }, { n: 35, d: 'q', at: 12 }, { n: 34, d: 'e', at: 36 }];
+    scoreEditor.render();
+    return document.fonts.ready;
+  });
+  await page.waitForTimeout(300);
+  const box = await page.locator('#m0 > g.staff > path').first().boundingBox();
+  await page.keyboard.press('4');
+  await page.mouse.click(box.x + box.width * 0.85, box.y + 20);
+  const placed = await page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => ev.d + '@' + ev.at));
+  assert.deepEqual(placed, ['e@0', 'q@12', 'e@36', 'q@48'], 'un clic a la derecha de la ultima figura la agrega despues, sin encimarla');
+  await page.keyboard.press('Escape');
+}
+
 async function run() {
   const server = await serveStatic(path.join(__dirname, '..', 'dist', 'site'), 0);
   let browser;
@@ -895,6 +911,11 @@ async function run() {
     await tabsPage.waitForSelector('#scoreStage g.measure');
     await checkTabs(tabsPage);
     await tabsPage.close();
+    const appendPage = await newPage({ reducedMotion: 'reduce' });
+    await appendPage.goto(url);
+    await appendPage.waitForSelector('#scoreStage g.measure');
+    await checkAppendAfterLast(appendPage);
+    await appendPage.close();
     console.log('score-editor e2e: OK');
   } finally {
     if (browser) await browser.close();

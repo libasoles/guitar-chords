@@ -1321,6 +1321,11 @@
     let at = timeAt(Math.max(m.left, Math.min(m.right, x)), m, starts, centers);
     let markX = Math.max(m.left, Math.min(m.right, x));
     const rawT = at, rawX = markX;
+    // A la derecha de la ultima columna el tiempo interpolado cae dentro de esa figura: la nueva empieza donde termina.
+    if (centers.length && x > Math.max(...centers)) {
+      const last = Math.max(...starts);
+      at = Math.max(at, ...measure.map((o, i) => starts[i] === last ? last + M.length(o) : 0));
+    }
     let near = null;
     centers.forEach((c, i) => {
       const own = skip && [].concat(skip).some((s) => s.mi === mi && s.i === i);
