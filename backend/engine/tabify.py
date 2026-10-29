@@ -60,6 +60,9 @@ MERGE_UNISONS = False
 # so it is off for the curated collections and `prepare` turns it on for uploads; its result is persisted in
 # normalized.musicxml, which is why `export` does not need it.
 REPAIR_VOICES = False
+# Natural harmonics (fingering.parse_harmonic): a diamond head, <harmonic> or a «Hr. 12» mark pins the note to fret 12 of the
+# string an octave below it. Off for the collections (their harmonics are fingered by hand); `prepare` turns it on.
+HARMONICS = False
 
 PREVIEW_OPTIONS = {
     "pageWidth": 2100, "pageHeight": 60000, "scale": 40, "adjustPageHeight": True,
@@ -382,7 +385,7 @@ def fix_slur_placement(score):
             slur.placement = "above"
 
 
-def load_score(paths, repair_voices=None):
+def load_score(paths, repair_voices=None, harmonics=None):
     """First part of the first movement; later movements are appended.
 
     The first measure of each movement gets `editorial.movementStart`: clefs do
@@ -395,6 +398,8 @@ def load_score(paths, repair_voices=None):
         for n in score.recurse().getElementsByClass(m21.note.GeneralNote):
             n.lyrics = []
         repair_slurs(score)
+        if HARMONICS if harmonics is None else harmonics:
+            mark_harmonics(score.parts[0])  # before the OCR's text directions are dropped below
         fix_key_signature(score.parts[0])
         fix_slur_placement(score)
         # The same text can arrive as free text directions (<words>); only the
@@ -447,7 +452,7 @@ def octave_shifts(measures):
     return [0 if octave else plain for octave in octave_clef]
 
 
-def build_columns(part, shifts=None, merge_unisons=None):
+def build_columns(part, shifts=None, merge_unisons=None, harmonics=None):
     """Per measure, the list of Columns: {offset, notes: [(note, midi)]}.
 
     `note` is the music21 Note (a chord's component for chords). Every note of
@@ -474,6 +479,7 @@ def build_columns(part, shifts=None, merge_unisons=None):
                 note.editorial.tabKey = key
                 # String IDs survive deepcopy -> MusicXML -> Verovio data-id.
                 note.id = f"tab-note-{key}"
+                note.editorial.tabHarmonic = (HARMONICS if harmonics is None else harmonics) and is_harmonic(note, general)
                 note.editorial.tabBass = (note.stemDirection if note.stemDirection in ("up", "down")
                                           else general.stemDirection) == "down"
                 key += 1
@@ -520,20 +526,20 @@ def mark_slurred_columns(part, measures):
             b["slurred"] = True
 
 
-def barre_spans(part):
-    """The barres written in the part: [{start, end, barre: (fret, strings)}] with offsets in quarter lengths from the
-    start of the part (both ends included). A barre is a text such as «C 7» (see `fingering.parse_barre`) and the
-    dashed line that follows it, which ends with the last note it covers (that note's whole length); without a line it lasts to the end of its
-    measure."""
+def text_spans(part, parse):
+    """The passages marked by a text direction `parse` recognises: [{start, end, value}] with offsets in quarter lengths from the
+    start of the part (both ends included). `parse(text)` is falsy for any other text. A mark is followed by the dashed line
+    that shows how far it lasts, which ends with the last note it covers (that note's whole length); without a line it lasts to the
+    end of its measure."""
     lines = sorted((float(line.getFirst().getOffsetInHierarchy(part)),
                     float(line.getLast().getOffsetInHierarchy(part) + line.getLast().duration.quarterLength) - 1e-3)
                    for line in part.recurse().getElementsByClass(m21.spanner.Line)
                    if line.lineType == "dashed" and line.getFirst() is not None and line.getLast() is not None)
-    marks = sorted((float(text.getOffsetInHierarchy(part)), fingering.parse_barre(text.content), text)
-                   for text in part.recurse().getElementsByClass(m21.expressions.TextExpression)
-                   if fingering.parse_barre(text.content))
+    marks = sorted(((float(text.getOffsetInHierarchy(part)), parse(text.content), text)
+                    for text in part.recurse().getElementsByClass(m21.expressions.TextExpression)
+                    if parse(text.content)), key=lambda mark: mark[0])
     spans = []
-    for start, barre, text in marks:
+    for start, value, text in marks:
         line = next((l for l in lines if l[0] >= start - 1e-6), None)
         if line is not None:
             lines.remove(line)
@@ -541,8 +547,31 @@ def barre_spans(part):
         else:
             measure = text.getContextByClass(m21.stream.Measure)
             end = float(measure.getOffsetInHierarchy(part) + measure.duration.quarterLength) - 1e-3 if measure else start
-        spans.append({"start": start, "end": end, "barre": barre})
+        spans.append({"start": start, "end": end, "value": value})
     return spans
+
+
+def barre_spans(part):
+    """The barres written in the part: [{start, end, barre: (fret, strings)}] (see `text_spans` and `fingering.parse_barre`)."""
+    return [{"start": s["start"], "end": s["end"], "barre": s["value"]} for s in text_spans(part, fingering.parse_barre)]
+
+
+def mark_harmonics(part):
+    """Gives a diamond head to the notes under a harmonic mark («Hr. 12», «Harm.»), so the mark survives in the normalized
+    MusicXML after the text itself is dropped. Only notes on a pitch class an open string can sound an octave up are marked;
+    which string, if any, is decided with the tuning (`assign_frets`)."""
+    for span in text_spans(part, fingering.parse_harmonic):
+        for general in part.recurse().notes:
+            if span["start"] - 1e-6 <= float(general.getOffsetInHierarchy(part)) <= span["end"] + 1e-6:
+                for note in (general.notes if isinstance(general, m21.chord.Chord) else [general]):
+                    if note.pitch.pitchClass in fingering.HARMONIC_PITCH_CLASSES:
+                        note.notehead = "diamond"
+
+
+def is_harmonic(note, general):
+    """A diamond head or <harmonic> on the note (or on the chord that holds it)."""
+    return any(n.notehead == "diamond" or any(isinstance(a, m21.articulations.StringHarmonic) for a in n.articulations)
+               for n in (note, general))
 
 
 def midi_key(note, shift):
@@ -650,6 +679,8 @@ def assign_frets(measures, tuning=STANDARD_TUNING, arpeggio=False):
     opens = open_midis(tuning)
     flat = [col for m in measures for col in m["columns"]]
     layers = []
+    for col in flat:
+        pin_harmonics(col, opens)
     for measure in measures:
         fingering.mark_fretted({m: h for col in measure["columns"] for m, h in col.get("hints", {}).items()}, opens, MAX_FRET)
     for col in flat:
@@ -686,6 +717,20 @@ def assign_frets(measures, tuning=STANDARD_TUNING, arpeggio=False):
     apply_arpeggio_rules(measures, opens, arpeggio)
 
 
+def pin_harmonics(col, opens):
+    """`col["harmonics"]`: {midi: string} for the notes of the Column that are natural harmonics, each narrowed (in the Column's
+    hints) to fret 12 of its string. A marked note no open string sounds an octave up stays an ordinary note."""
+    hints = col.get("hints") or {}
+    col["harmonics"] = {}
+    for note, midi in col["notes"]:
+        string = fingering.harmonic_string(midi, opens, hints.get(midi)) if getattr(note.editorial, "tabHarmonic", False) else None
+        if string is not None:
+            col["harmonics"][midi] = string
+    if col["harmonics"]:
+        col["hints"] = {**hints, **{m: {**hints.get(m, {}), "string": s, "fret": fingering.HARMONIC_FRET}
+                                    for m, s in col["harmonics"].items()}}
+
+
 def apply_arpeggio_rules(measures, opens, arpeggio):
     """Re-chooses the single notes of arpeggio measures (see `assign_frets`)."""
     if arpeggio == "auto":
@@ -700,6 +745,7 @@ def apply_arpeggio_rules(measures, opens, arpeggio):
     tabs = [[list(c["cells"]) for c in m["columns"]] for m in measures]
     fingering.avoid_repeated_strings(tabs, opens, measures=active, economy=True,
                                      barres=[[c.get("barre") for c in m["columns"]] for m in measures],
+                                     pinned=[[bool(c.get("harmonics")) for c in m["columns"]] for m in measures],
                                      groups=[beam_groups(m["columns"]) for m in measures])
     for m, tab in zip(measures, tabs):
         for col, cells in zip(m["columns"], tab):
@@ -769,6 +815,7 @@ def apply_edits(measures, edited, tuning=STANDARD_TUNING):
         for i, col in enumerate(m["columns"]):
             raw = tab[i] if i < len(tab) else [None] * 6
             cells = [v if isinstance(v, int) and 0 <= v <= 24 else None for v in (raw + [None] * 6)[:6]]
+            pin_harmonics(col, opens)
             col["cells"] = cells
             col["fingering"] = fingering_from_cells(col, cells, opens)
 
@@ -924,12 +971,15 @@ def build_tab_staff(part, measures, tuning):
     note gets <technical><string/><fret/>; rests, tie continuations and
     unplayable notes become invisible rests that keep the rhythm."""
     opens = open_midis(tuning)
-    frets, extras = {}, {}
+    frets, extras, harmonics = {}, {}, set()
     for m in measures:
         for col in m["columns"]:
-            for note, _ in col["notes"]:
+            for note, midi in col["notes"]:
                 if id(note) in col["fingering"]:
                     frets[note.editorial.tabKey] = col["fingering"][id(note)]
+                    # Still a harmonic only while the edited cell is the string's twelfth fret.
+                    if col.get("harmonics", {}).get(midi) is not None and frets[note.editorial.tabKey] == (col["harmonics"][midi], fingering.HARMONIC_FRET):
+                        harmonics.add(note.editorial.tabKey)
             if col.get("extra") and col["notes"]:
                 extras[col["notes"][0][0].editorial.tabKey] = col["extra"]
 
@@ -944,8 +994,10 @@ def build_tab_staff(part, measures, tuning):
         first.insert(0, m21.clef.TabClef())
         first.insert(0, m21.layout.StaffLayout(staffLines=6))
 
-    def fretted(s, f, length):
+    def fretted(s, f, length, key=None):
         n = m21.note.Note(midi=opens[s] + f, quarterLength=length)
+        if key in harmonics:
+            n.id = f"{HARMONIC_ID}{key}"  # engraved as <12>: see `mark_harmonic_frets`
         # music21 only exports a chord's articulations on its first note, except
         # fingerings, which go one per note: carry "string/fret" in a fingering
         # and let fix_technical() rewrite it as <string>/<fret>.
@@ -959,14 +1011,16 @@ def build_tab_staff(part, measures, tuning):
             continue
         members = [] if general.isRest else (
             general.notes if isinstance(general, m21.chord.Chord) else [general])
-        tones = []
+        tones, harmonic_tones = [], {}
         for note in members:
             key = getattr(note.editorial, "tabKey", None)
             if key in frets:
                 tones.append(frets[key])
+                if key in harmonics:
+                    harmonic_tones[frets[key]] = key
             tones.extend(extras.get(key, []))
         if tones:
-            notes = [fretted(s, f, length) for s, f in sorted(set(tones))]
+            notes = [fretted(s, f, length, harmonic_tones.get((s, f))) for s, f in sorted(set(tones))]
             if len(notes) == 1:
                 new = notes[0]
             else:
@@ -1094,6 +1148,13 @@ def draw_tab_clef(svg):
     return re.sub(r'<g [^>]*class="staff"[^>]*>.*?(?=<g [^>]*class="staff"|</svg>|\Z)', staff, svg, flags=re.S)
 
 
+def mark_harmonic_frets(svg):
+    """Natural harmonics are written between angle brackets on the TAB: <12>. Verovio draws the fret as a plain number, so the
+    notes `build_tab_staff` gave a HARMONIC_ID get their number wrapped."""
+    return re.sub(r'(<g [^>]*id="%s\d+"[^>]*>\s*<text[^>]*>\s*<tspan[^>]*>)(\d+)(</tspan>)' % HARMONIC_ID,
+                  lambda m: f"{m.group(1)}&lt;{m.group(2)}&gt;{m.group(3)}", svg)
+
+
 def drop_tab_meter(svg):
     """The meter belongs to the notation staff: remove it from every TAB staff
     (the second staff of each measure), where Verovio repeats it."""
@@ -1218,7 +1279,7 @@ def build_output(score, part, measures, tuning, title, out_base, header=None):
             if page == 1:
                 svg = add_string_names(svg, string_names(tuning))
                 svg = style_header(svg)
-            svg = drop_brace(draw_tab_clef(drop_tab_meter(svg)))
+            svg = mark_harmonic_frets(drop_brace(draw_tab_clef(drop_tab_meter(svg))))
             svg = svg.replace("</svg>", HIDE_TAB_RHYTHM + "</svg>", 1)
             path = os.path.join(tmp, f"page-{page:03d}.svg")
             with open(path, "w", encoding="utf-8") as f:
@@ -1233,6 +1294,7 @@ def build_output(score, part, measures, tuning, title, out_base, header=None):
 
 TUNINGS = {"standard": STANDARD_TUNING, "dropd": DROP_D_TUNING}
 SUGGESTION_VERSION = 1
+HARMONIC_ID = "tab-harmonic-"
 NORMALIZED_NAME = "normalized.musicxml"
 SUGGESTION_NAME = "suggestion.json"
 PREVIEW_NAME = "preview.json"
@@ -1267,6 +1329,8 @@ def _suggestion(measures, tuning, shifts, title, subtitles):
         "subtitles": subtitles,
         # Uploads merge a pitch sounding in two voices at once into one note; export must rebuild the same columns.
         "merge_unisons": True,
+        # Notes under a diamond head / <harmonic> are natural harmonics (fret 12 of their string, `harmonic_cells`).
+        "harmonics": True,
         "octave_shifts": shifts,
         "octave_shift": max(set(shifts), key=shifts.count, default=0),
         "measure_numbers": [m["number"] for m in measures],
@@ -1282,6 +1346,8 @@ def _suggestion(measures, tuning, shifts, title, subtitles):
         # Per measure, per Column: the barre (fret, strings) written over it, or null (`fingering.parse_barre`).
         "barres": [[c.get("barre") for c in m["columns"]] for m in measures],
         "preview_columns": [preview_columns(m) for m in measures],
+        # Per measure, per Column: the strings (0 = highest) whose cell is a natural harmonic, drawn <12> in the PDF.
+        "harmonic_cells": [[sorted(c["harmonics"].values()) for c in m["columns"]] for m in measures],
     }
 
 
@@ -1302,7 +1368,7 @@ def prepare(input_path, kind, tuning, out_dir, per_row=4, arpeggio="auto"):
     paths = [input_path] if isinstance(input_path, (str, os.PathLike)) else list(input_path)
     os.makedirs(out_dir, exist_ok=True)
 
-    score, part = load_score([str(p) for p in paths], repair_voices=True)
+    score, part = load_score([str(p) for p in paths], repair_voices=True, harmonics=True)
     shifts = octave_shifts(list(part.getElementsByClass(m21.stream.Measure)))
     title, subtitles = extract_header(score)
     xml_path = os.path.join(out_dir, NORMALIZED_NAME)
@@ -1312,7 +1378,7 @@ def prepare(input_path, kind, tuning, out_dir, per_row=4, arpeggio="auto"):
     # Everything downstream reads the persisted artifact, exactly like export,
     # so the deterministic note ids are the same in both operations.
     part = _read_normalized(xml_path)
-    measures, _ = build_columns(part, shifts, merge_unisons=True)
+    measures, _ = build_columns(part, shifts, merge_unisons=True, harmonics=True)
     if not any(m["columns"] for m in measures):
         raise NoNotesError("No se reconocieron notas en la partitura.")
     resolved = TUNINGS.get(tuning) or guess_tuning(measures)
@@ -1356,7 +1422,8 @@ def export(musicxml_path, suggestion_path, tabs, tuning, out_dir, title=None, su
     with open(suggestion_path, encoding="utf-8") as f:
         suggestion = json.load(f)
     part = _read_normalized(musicxml_path)
-    measures, _ = build_columns(part, suggestion["octave_shifts"], suggestion.get("merge_unisons", False))
+    measures, _ = build_columns(part, suggestion["octave_shifts"], suggestion.get("merge_unisons", False),
+                                suggestion.get("harmonics", False))
     if [[[n.id for n, _ in c["notes"]] for c in m["columns"]] for m in measures] != \
             [[c["note_ids"] for c in m] for m in suggestion["columns"]]:
         raise ValueError("El MusicXML no coincide con la sugerencia guardada.")

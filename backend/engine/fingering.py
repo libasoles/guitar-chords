@@ -156,21 +156,24 @@ def _one_cell_per_pitch(layers, owner, chosen, opens, active, groups=None):
     return restricted
 
 
-def avoid_repeated_strings(tabs, opens, max_fret=9, open_reach=6, measures=None, economy=False, barres=None, groups=None):
+def avoid_repeated_strings(tabs, opens, max_fret=9, open_reach=6, measures=None, economy=False, barres=None, groups=None,
+                           pinned=None):
     """Apply the module's rules to `tabs` (one list of columns per measure, cells string 1 first) in place.
     `opens`: open-string MIDI, string 1 first. `measures`: indexes of the measures to treat as arpeggios
     (default all). `economy` adds rule 3 (off for the published collections, which predate it). Single-note columns of those measures are re-chosen over the whole piece (see `solve`);
     chords and the other measures keep their cells. `barres`: per measure, per column, the barre `(fret, strings)` in
     force or None; a single note keeps to the cells the barre allows. `groups`: per measure, per column, the id of the beamed group
-    the column belongs to or None (rule 4; only groups of up to `MAX_GROUP` columns count)."""
+    the column belongs to or None (rule 4; only groups of up to `MAX_GROUP` columns count). `pinned`: per measure, per column,
+    whether it must keep its cells (a natural harmonic can only be played at its string's twelfth fret)."""
     active = set(range(len(tabs))) if measures is None else set(measures)
     flat = [col for measure in tabs for col in measure]
     owner = [m for m, measure in enumerate(tabs) for _ in measure]
     layers = []
     held = [b for measure in (barres or [[None] * len(m) for m in tabs]) for b in measure]
-    for m, col, barre in zip(owner, flat, held):
+    fixed = [p for measure in (pinned or [[False] * len(m) for m in tabs]) for p in measure]
+    for m, col, barre, keep in zip(owner, flat, held, fixed):
         cells = tuple((s, f) for s, f in enumerate(col) if f is not None)
-        if len(cells) != 1 or m not in active:
+        if len(cells) != 1 or m not in active or keep:
             layers.append(([cells], cells))
             continue
         pitch = opens[cells[0][0]] + cells[0][1]
@@ -254,6 +257,31 @@ def parse_barre(text):
 def barre_text(fret, strings=6):
     """The mark a score prints for a barre (the inverse of `parse_barre`)."""
     return ("" if strings >= 6 else "½") + f"C {fret}"
+
+
+# --- Natural harmonics --------------------------------------------------------------------------------------
+# «Hr. 12», «Harm.», «Arm. XII» over a passage, a diamond head, or <harmonic> on a note: the note is the natural
+# harmonic of the string whose open pitch is an octave below it, touched (not pressed) over the twelfth fret.
+# It sounds where the fretted twelfth fret would, so the pitch alone cannot tell it from an ordinary note there.
+
+HARMONIC_FRET = 12
+HARMONIC_TEXT = re.compile(r"^\s*(?:harm(?:onics?|[oó]nicos?)?|hr|har|arm(?:[oó]nicos?)?|flag(?:eolet)?)\.?\s*(?:(?:12|XII)\.?)?\s*$",
+                           re.I)
+HARMONIC_PITCH_CLASSES = (2, 4, 7, 9, 11)  # D E G A B: the open strings of standard tuning and Drop D
+
+
+def parse_harmonic(text):
+    """Whether `text` is a harmonic mark (octave harmonic, fret XII). «Hr. 7» and «Hr. 5» name other nodes: None."""
+    return bool(HARMONIC_TEXT.match(text or ""))
+
+
+def harmonic_string(midi, opens, hint=None):
+    """The string (0 = highest) whose octave harmonic sounds `midi`, or None. A written string number is kept when it
+    is one of them."""
+    strings = [s for s, o in enumerate(opens) if o + HARMONIC_FRET == midi]
+    if hint and hint.get("string") in strings:
+        return hint["string"]
+    return strings[0] if strings else None
 
 
 def under_barre(cells, barre):

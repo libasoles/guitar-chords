@@ -343,3 +343,37 @@ class GroupTests(unittest.TestCase):
         fingering.avoid_repeated_strings(tabs, OPENS, groups=[[1, 1, 1, 1]])
         strings = [s for s, _ in played(tabs)[0]]
         self.assertEqual(len(set(strings)), 1)
+
+
+class HarmonicTests(unittest.TestCase):
+    def test_marks_that_name_the_octave_harmonic(self):
+        for text in ("Hr. 12", "Hr.12", "Harm.", "harm. XII", "Arm. 12", "Armónicos", "Flag."):
+            self.assertTrue(fingering.parse_harmonic(text), text)
+
+    def test_other_text_and_other_nodes_are_not_harmonic_marks(self):
+        for text in ("Hr. 7", "Hr. 5", "rit.", "Harmony in C", "C 7", "XII", "", None):
+            self.assertFalse(fingering.parse_harmonic(text), text)
+
+    def test_the_string_is_the_one_an_octave_below_the_pitch(self):
+        self.assertEqual(fingering.harmonic_string(62, OPENS), 3)  # D4 over the open D3
+        self.assertEqual(fingering.harmonic_string(76, OPENS), 0)  # E5 over the open E4
+        self.assertIsNone(fingering.harmonic_string(60, OPENS))  # C4: no open string an octave below
+
+    def test_a_written_string_is_kept_when_it_is_one_of_them(self):
+        self.assertEqual(fingering.harmonic_string(64, [52, 52]), 0)
+        self.assertEqual(fingering.harmonic_string(64, [52, 52], {"string": 1}), 1)
+        self.assertEqual(fingering.harmonic_string(64, [52, 52], {"string": 5}), 0)
+
+    def test_a_pinned_column_keeps_its_cell_in_an_arpeggio(self):
+        """D4 as the harmonic at fret 12 of the D string: the string rules would re-choose it as fret 3 of the B string."""
+        def tabs():
+            result = tab_of([45, 50, 62, 50])
+            result[0][2] = [None, None, None, 12, None, None]
+            return result
+
+        free = tabs()
+        fingering.avoid_repeated_strings(free, OPENS)
+        self.assertNotEqual(free[0][2], [None, None, None, 12, None, None])
+        kept = tabs()
+        fingering.avoid_repeated_strings(kept, OPENS, pinned=[[False, False, True, False]])
+        self.assertEqual(kept[0][2], [None, None, None, 12, None, None])

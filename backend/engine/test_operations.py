@@ -213,5 +213,83 @@ class ExportTests(Base):
                       self.read(out["musicxml"]))
 
 
+def harmonic_score(first_measure_extra="", second=""):
+    """E3 G3 D4 B3 with the D marked: a diamond head, <harmonic>, or the first measure's «Hr. 12»."""
+    return (
+        '<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>G</part-name></score-part></part-list>'
+        '<part id="P1"><measure number="1"><attributes><divisions>4</divisions>'
+        '<time><beats>4</beats><beat-type>4</beat-type></time>'
+        '<clef><sign>G</sign><line>2</line><clef-octave-change>-1</clef-octave-change></clef></attributes>'
+        + first_measure_extra + '</measure>' + second + '</part></score-partwise>')
+
+
+class HarmonicsTests(Base):
+    """The note of a harmonic mark is pinned to fret 12 of the string an octave below it and drawn <12>."""
+
+    def setUp(self):
+        super().setUp()
+        diamond = note("E", 3) + note("G", 3) + note("D", 4).replace("</note>", "<notehead>diamond</notehead></note>") + note("B", 3)
+        self.write(harmonic_score(diamond))
+
+    def write(self, xml):
+        with open(self.input, "w", encoding="utf-8") as f:
+            f.write(xml)
+
+    def read(self, path):
+        with open(path, encoding="utf-8") as f:
+            return f.read()
+
+    def cells(self, prep):
+        return self.load(prep["suggestion"])["tabs"][0]
+
+    def test_diamond_head_goes_to_fret_12_of_the_string_an_octave_below(self):
+        suggestion = self.load(self.prepare("standard")["suggestion"])
+        self.assertEqual(suggestion["tabs"][0][2], [None, None, None, 12, None, None])  # D on the 4th string
+        self.assertEqual(suggestion["harmonic_cells"][0], [[], [], [3], []])
+        self.assertTrue(suggestion["harmonics"])
+
+    def test_harmonic_element_and_text_mark_are_read_too(self):
+        marked = ('<note><pitch><step>D</step><octave>4</octave></pitch><duration>4</duration><type>quarter</type>'
+                  '<notations><technical><harmonic><natural/></harmonic></technical></notations></note>')
+        self.write(harmonic_score(note("E", 3) + marked))
+        self.assertEqual(self.cells(self.prepare("standard"))[1], [None, None, None, 12, None, None])
+        mark = '<direction placement="above"><direction-type><words>Hr. 12</words></direction-type></direction>'
+        self.write(harmonic_score(mark + note("E", 3) + note("D", 4)))
+        prep = self.prepare("standard")
+        self.assertEqual(self.cells(prep)[1], [None, None, None, 12, None, None])
+        # The text is gone from the normalized MusicXML, the diamond head carries the mark.
+        normalized = self.read(prep["musicxml"])
+        self.assertNotIn("Hr. 12", normalized)
+        self.assertIn("diamond", normalized)
+
+    def test_a_note_no_open_string_can_sound_stays_an_ordinary_note(self):
+        self.write(harmonic_score(note("E", 3) + note("C", 4).replace("</note>", "<notehead>diamond</notehead></note>")))
+        self.assertNotIn(12, [f for f in self.cells(self.prepare("standard"))[1] if f is not None])
+
+    def test_pdf_writes_the_harmonic_between_angle_brackets(self):
+        prep = self.prepare("standard")
+        tabs = self.load(prep["suggestion"])["tabs"]
+        out = tabify.export(prep["musicxml"], prep["suggestion"], tabs, "standard", self.path("o"))
+        self.assertTrue(os.path.getsize(out["pdf"]) > 0)
+        self.assertEqual(len(re.findall(r'id="tab-harmonic-\d+"', self.read(out["musicxml"]))), 1)
+        self.assertEqual(tabify.mark_harmonic_frets(
+            '<g id="tab-harmonic-2" class="note"><text x="1"><tspan font-size="324px">12</tspan></text></g>'
+            '<g id="x" class="note"><text x="1"><tspan font-size="324px">12</tspan></text></g>').count("&lt;12&gt;"), 1)
+
+    def test_an_edited_cell_is_no_longer_a_harmonic(self):
+        prep = self.prepare("standard")
+        tabs = self.load(prep["suggestion"])["tabs"]
+        tabs[0][2] = [None, 3, None, None, None, None]  # the same D, now fretted on the B string
+        out = tabify.export(prep["musicxml"], prep["suggestion"], tabs, "standard", self.path("o"))
+        self.assertNotIn("tab-harmonic", self.read(out["musicxml"]))
+
+    def test_collections_do_not_read_harmonics_unless_asked(self):
+        _, part = tabify.load_score([self.input])
+        measures, _ = tabify.build_columns(part)
+        tabify.assign_frets(measures)
+        self.assertNotIn(12, [f for col in measures[0]["columns"] for f in col["cells"] if f is not None])
+        self.assertFalse(tabify.HARMONICS)
+
+
 if __name__ == "__main__":
     unittest.main()
