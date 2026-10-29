@@ -737,6 +737,21 @@ async function checkAppendAfterLast(page) {
   const placed = await page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => ev.d + '@' + ev.at));
   assert.deepEqual(placed, ['e@0', 'q@12', 'e@36', 'q@48'], 'un clic a la derecha de la ultima figura la agrega despues, sin encimarla');
   await page.keyboard.press('Escape');
+  // Una negra y una corchea en la misma columna: arrastrar la negra a la derecha de la corchea la pone despues.
+  await page.evaluate(() => {
+    scoreEditor.score.rows[0][0] = [{ n: 34, d: 'e', at: 0 }, { n: 36, d: 'q', at: 12 }, { n: 38, d: 'q', at: 36 }, { n: 34, d: 'e', at: 36 }];
+    scoreEditor.render();
+    return document.fonts.ready;
+  });
+  await page.waitForTimeout(300);
+  const heads = await page.evaluate(() => [...document.querySelectorAll('#m0 .notehead')].map((n) => { const r = n.getBoundingClientRect(); return [(r.left + r.right) / 2, (r.top + r.bottom) / 2]; }));
+  await page.mouse.move(heads[2][0], heads[2][1]);
+  await page.mouse.down();
+  await page.mouse.move(heads[2][0] + 5, heads[2][1], { steps: 3 });
+  await page.mouse.move(heads[3][0] + 25, heads[2][1], { steps: 8 });
+  await page.mouse.up();
+  const dragged = await page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => ev.d + ev.n + '@' + ev.at).sort());
+  assert.deepEqual(dragged, ['e34@0', 'e34@36', 'q36@12', 'q38@48'], 'arrastrar la negra a la derecha de la corchea la pone despues');
 }
 
 async function run() {

@@ -1321,15 +1321,17 @@
     let at = timeAt(Math.max(m.left, Math.min(m.right, x)), m, starts, centers);
     let markX = Math.max(m.left, Math.min(m.right, x));
     const rawT = at, rawX = markX;
+    const isOwn = (i) => skip && [].concat(skip).some((s) => s.mi === mi && s.i === i);
     // A la derecha de la ultima columna el tiempo interpolado cae dentro de esa figura: la nueva empieza donde termina.
-    if (centers.length && x > Math.max(...centers)) {
-      const last = Math.max(...starts);
-      at = Math.max(at, ...measure.map((o, i) => starts[i] === last ? last + M.length(o) : 0));
+    const others = measure.map((o, i) => i).filter((i) => !isOwn(i));
+    if (others.length && x > Math.max(...others.map((i) => centers[i]))) {
+      const last = Math.max(...others.map((i) => starts[i]));
+      at = Math.max(at, ...others.map((i) => starts[i] === last ? last + M.length(measure[i]) : 0));
     }
+    // Solo sobre la cabeza de una nota (no a un espacio de distancia) la figura se apila en su columna.
     let near = null;
     centers.forEach((c, i) => {
-      const own = skip && [].concat(skip).some((s) => s.mi === mi && s.i === i);
-      if (own || measure[i].rest || Math.abs(c - x) > space * 1.5) return;
+      if (isOwn(i) || measure[i].rest || Math.abs(c - x) > space * 0.8) return;
       if (!near || Math.abs(c - x) < Math.abs(near.c - x)) near = { c, i };
     });
     if (near) {
