@@ -661,6 +661,7 @@
   }
 
   const MAX_VOICE = 4;
+  const REST_CLEARANCE = 6; // pasos diatonicos entre una nota y un silencio que suenan a la vez
 
   // Agrupa acordes de igual inicio, duracion y voz; cada voz contiene figuras sin superposicion.
   // Una figura con `v` (1 = la mas aguda) va a esa voz; las demas ocupan la primera voz libre.
@@ -707,60 +708,61 @@
     return measure;
   }
 
-  // Voz a la que va una figura nueva en `at` (con la duracion de `ev`) clickeada a la altura `n`:
-  // mas aguda que lo que suena ahi es una voz por encima; mas grave, por debajo. Sin nada ahi, no se fija (null).
-  function voiceFor(measure, ev, at, n, score, mi) {
-    const starts = onsets(measure);
-    const end = at + length(ev);
-    const lanes = voices(measure);
-    const clash = [];
-    measure.forEach((o, i) => {
-      if (starts[i] < end && at < starts[i] + length(o)) clash.push(i);
-    });
-    if (!clash.length) return null;
-    const laneOf = (i) => lanes.findIndex((v) => v.groups.some((g) => g.indices.includes(i)));
-    const pitched = clash.filter((i) => !measure[i].rest);
-    const ref = pitched.length ? pitched.reduce((a, b) => Math.abs(measure[a].n - n) <= Math.abs(measure[b].n - n) ? a : b) : clash[0];
-    const middle = bottomLine(score, mi) + 4;
-    const above = pitched.length ? n > measure[ref].n : n >= middle;
-    const own = laneOf(ref);
-    return Math.max(1, own + (above ? 0 : 2));
-  }
-
   // Altura con la que se dibuja un silencio puesto en `n` sobre otras figuras: nunca encima de las notas que suenan ahi.
   function restPitch(measure, ev, at, n) {
     const starts = onsets(measure);
     const end = at + length(ev);
     let result = n;
     measure.forEach((o, i) => {
-      if (o.rest || starts[i] >= end || at >= starts[i] + length(o) || Math.abs(o.n - result) >= 4) return;
-      result = result >= o.n ? o.n + 4 : o.n - 4;
+      if (o.rest || starts[i] >= end || at >= starts[i] + length(o) || Math.abs(o.n - result) >= REST_CLEARANCE) return;
+      result = result >= o.n ? o.n + REST_CLEARANCE : o.n - REST_CLEARANCE;
     });
     return clampPitch(result);
   }
 
-  // Inserta `ev` en la voz `v`: lo que la ocupa en ese tiempo baja a la voz siguiente.
-  // Devuelve el indice, o -1 (sin tocar el compas) si no queda voz para todos.
-  function insertInVoice(measure, ev, at, v) {
-    const trial = measure.map((o) => Object.assign({}, o));
-    settleVoices(trial);
-    const index = insertAt(trial, Object.assign({}, ev), at);
-    trial[index].v = v;
-    const clashes = (a, b) => {
-      const sa = onsets(trial);
-      return sa[a] < sa[b] + length(trial[b]) && sa[b] < sa[a] + length(trial[a]);
-    };
-    const queue = [index];
-    while (queue.length) {
-      const pushed = queue.shift();
-      trial.forEach((o, j) => {
-        if (j === pushed || o.v !== trial[pushed].v || !clashes(pushed, j)) return;
-        o.v += 1;
-        queue.push(j);
-      });
+  // Pone el silencio `ev` en `at`, clickeado a la altura `n`, sin tocar `measure`.
+  // Las voces se ordenan de arriba (1) a abajo: sobre una nota el silencio queda en una voz mas aguda, bajo ella en una mas grave.
+  // Usa la voz libre mas cercana en ese sentido; si no hay, abre una nueva y las voces desde ahi bajan un lugar.
+  // Devuelve { measure, index }, o { voice } (la voz del click) si las MAX_VOICE voces estan ocupadas en ese tiempo.
+  function placeRest(measure, ev, at, n, score, mi) {
+    const others = settleVoices(settle(measure.map((o) => Object.assign({}, o))));
+    const rest = Object.assign({}, ev);
+    delete rest.v;
+    delete rest.n;
+    const end = at + length(ev);
+    const overlaps = (o) => o.at < end && at < o.at + length(o);
+    const clash = others.filter(overlaps);
+    if (clash.length) {
+      const pitched = clash.filter((o) => !o.rest);
+      const ref = pitched.length ? pitched.reduce((a, b) => Math.abs(a.n - n) <= Math.abs(b.n - n) ? a : b) : clash[0];
+      const above = pitched.length ? n > ref.n : n >= bottomLine(score, mi) + 4;
+      const lanes = Math.max(...others.map((o) => o.v));
+      const free = (k) => others.every((o) => o.v - 1 !== k || !overlaps(o));
+      let target = -1;
+      for (let k = ref.v - 1 + (above ? -1 : 1); k >= 0 && k < lanes; k += above ? -1 : 1) {
+        if (free(k)) { target = k; break; }
+      }
+      if (target < 0) {
+        if (lanes >= MAX_VOICE) return { voice: ref.v };
+        target = above ? ref.v - 1 : ref.v;
+        others.forEach((o) => { if (o.v - 1 >= target) o.v += 1; });
+      }
+      rest.v = target + 1;
+      rest.n = restPitch(others, rest, at, n);
     }
-    if (trial.some((o) => o.v > MAX_VOICE)) return -1;
-    measure.splice(0, measure.length, ...trial);
+    const index = insertAt(others, rest, at);
+    if (!clash.length) settleVoices(others);
+    return { measure: others, index };
+  }
+
+  // Inserta una nota; si cae en un acorde existente (mismo inicio y duracion) toma su voz.
+  function insertNote(measure, ev, at) {
+    const index = insertAt(measure, ev, at);
+    const chord = measure.find((o, j) => j !== index && !o.rest && o.at === at && length(o) === length(ev));
+    if (chord) {
+      if (Number.isInteger(chord.v)) ev.v = chord.v;
+      else delete ev.v;
+    }
     return index;
   }
 
@@ -1058,7 +1060,7 @@
 
   return {
     DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    length, gridOf, onsets, settle, placement, insertAt, insertInVoice, voiceFor, restPitch, settleVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot,
+    length, gridOf, onsets, settle, placement, insertAt, placeRest, insertNote, restPitch, settleVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot,
     meterOf, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };

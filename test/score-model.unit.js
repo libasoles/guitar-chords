@@ -803,52 +803,99 @@ test('dividir un compas conserva su continuacion y los compases vecinos en el mi
   assert.deepEqual(M.sanitize(M.clone(score)), score, 'se conservan divisiones repetidas');
 });
 
-test('cada voz tiene su propio silencio y su propia longitud en un compas de 3/4', () => {
+// Las voces se numeran de arriba (1) a abajo; un silencio se acomoda segun las notas que suenan a la vez.
+function threeFour() {
   const score = M.emptyScore();
   score.meter = '3/4';
-  const measure = M.measures(score)[0];
+  return { score, measure: M.measures(score)[0] };
+}
+
+function putRest(score, measure, d, at, n) {
+  const placed = M.placeRest(measure, { d, rest: true }, at, n, score, 0);
+  if (placed.measure) measure.splice(0, measure.length, ...placed.measure);
+  return placed;
+}
+
+test('cada voz tiene su propio silencio y su propia longitud en un compas de 3/4', () => {
+  const { score, measure } = threeFour();
   // Voz grave: corchea y silencio de negra, dos veces.
   [[0, 'e', false], [12, 'q', true], [36, 'e', false], [48, 'q', true]].forEach(([at, d, rest]) => {
-    measure.push(rest ? { d, rest: true, at, v: 2 } : { d, n: 30, at, v: 2 });
+    measure.push(rest ? { d, rest: true, at, v: 1 } : { d, n: 30, at, v: 1 });
   });
   // Voz aguda: silencios de corchea y negra, dos veces, clickeados arriba de la voz grave.
   [[0, 'e'], [12, 'q'], [36, 'e'], [48, 'q']].forEach(([at, d]) => {
-    const ev = { d, rest: true };
-    const v = M.voiceFor(measure, ev, at, 40, score, 0);
-    assert.equal(v, 1);
-    assert.ok(M.insertInVoice(measure, ev, at, v) >= 0);
+    assert.ok(putRest(score, measure, d, at, 40).measure);
   });
   assert.equal(measure.length, 8);
   assert.equal(M.measureLength(measure), M.capacity(score, 0));
   const lanes = M.voices(measure);
   assert.equal(lanes.length, 2);
   assert.ok(lanes.every((lane) => lane.groups.length === 4));
-  assert.ok(lanes[0].groups.every((g) => g.rest));
+  assert.ok(lanes[0].groups.every((g) => g.rest), 'los silencios agudos son la voz 1');
+  assert.ok(measure.filter((o) => !o.rest).every((o) => o.v === 2), 'las notas bajan a la voz 2');
   assert.deepEqual(M.sanitize(score).rows[0][0].map((e) => e.v), measure.map((e) => e.v));
 });
 
-test('un silencio clickeado abajo de la nota va a la voz de abajo y la nota queda arriba', () => {
-  const score = M.emptyScore();
-  const measure = M.measures(score)[0];
-  measure.push({ d: 'q', n: 34, at: 0 });
-  const ev = { d: 'q', rest: true };
-  const v = M.voiceFor(measure, ev, 0, 28, score, 0);
-  M.insertInVoice(measure, ev, 0, v);
+test('un silencio clickeado abajo de la nota abre una voz mas grave y la nota no cambia', () => {
+  const { score, measure } = threeFour();
+  measure.push({ d: 'q', n: 34, at: 0, v: 1 });
+  putRest(score, measure, 'q', 0, 28);
   assert.equal(M.voices(measure).length, 2);
   assert.equal(measure.find((o) => !o.rest).v, 1);
   assert.equal(measure.find((o) => o.rest).v, 2);
 });
 
-test('un silencio con altura propia se dibuja ahi y nunca encima de las notas que suenan a la vez', () => {
-  const score = M.emptyScore();
-  const measure = M.measures(score)[0];
-  measure.push({ d: 'q', n: 32, at: 0 });
-  const ev = { d: 'q', rest: true };
-  assert.equal(M.restPitch(measure, ev, 0, 33), 36, 'clickeado sobre la nota se corre arriba');
-  assert.equal(M.restPitch(measure, ev, 0, 31), 28, 'clickeado bajo la nota se corre abajo');
-  assert.equal(M.restPitch(measure, ev, 24, 32), 32, 'sin nada a la vez queda donde se puso');
-  measure.push({ d: 'q', rest: true, n: 25, at: 0, v: 2 });
-  const xml = M.toMusicXml(score);
-  assert.match(xml, /<rest><display-step>G<\/display-step><display-octave>2<\/display-octave><\/rest>/);
-  assert.equal(M.sanitize(M.clone(score)).rows[0][0][1].n, 25, 'la altura del silencio se conserva');
+test('un silencio usa la voz libre mas cercana antes de abrir otra', () => {
+  const { score, measure } = threeFour();
+  measure.push({ d: 'q', n: 34, at: 0, v: 2 }, { d: 'q', rest: true, at: 24, v: 1 });
+  // En el tiempo 0 la voz 1 esta libre: un silencio arriba de la nota la usa y la nota sigue en la 2.
+  putRest(score, measure, 'q', 0, 40);
+  assert.equal(measure.find((o) => o.rest && o.at === 0).v, 1);
+  assert.equal(measure.find((o) => !o.rest).v, 2);
+  assert.equal(M.voices(measure).length, 2);
 });
+
+test('un silencio nunca queda a la altura de una nota que suena a la vez', () => {
+  const { score, measure } = threeFour();
+  measure.push({ d: 'q', n: 32, at: 0, v: 1 });
+  assert.equal(putRest(score, measure, 'q', 0, 33).measure.find((o) => o.rest).n, 38);
+  const second = threeFour();
+  second.measure.push({ d: 'q', n: 32, at: 0, v: 1 });
+  assert.equal(putRest(second.score, second.measure, 'q', 0, 31).measure ? second.measure.find((o) => o.rest).n : 0, 26);
+});
+
+test('el silencio con altura propia se exporta con display-step y se conserva al guardar', () => {
+  const { score, measure } = threeFour();
+  measure.push({ d: 'q', n: 32, at: 0, v: 1 }, { d: 'q', rest: true, n: 25, at: 0, v: 2 });
+  assert.match(M.toMusicXml(score), /<rest><display-step>G<\/display-step><display-octave>2<\/display-octave><\/rest>/);
+  assert.equal(M.sanitize(M.clone(score)).rows[0][0][1].n, 25);
+});
+
+test('con las 4 voces ocupadas en ese tiempo un silencio avisa de la voz del click y no toca el compas', () => {
+  const { score, measure } = threeFour();
+  [1, 2, 3, 4].forEach((v) => measure.push({ d: 'q', n: 40 - v * 3, at: 0, v }));
+  const before = JSON.stringify(measure);
+  const placed = M.placeRest(measure, { d: 'q', rest: true }, 0, 20, score, 0);
+  assert.equal(placed.measure, undefined);
+  assert.equal(placed.voice, 4);
+  assert.equal(JSON.stringify(measure), before);
+});
+
+test('una nota agregada a un acorde toma la voz del acorde', () => {
+  const { measure } = threeFour();
+  measure.push({ d: 'q', n: 30, at: 0, v: 2 });
+  M.insertNote(measure, { d: 'q', n: 33 }, 0);
+  assert.deepEqual(measure.map((o) => o.v), [2, 2]);
+  assert.equal(M.voices(measure).filter((lane) => lane.groups.length).length, 1);
+});
+
+test('un acorde de cinco notas es una sola voz y no se parte al agregar un silencio', () => {
+  const { score, measure } = threeFour();
+  [28, 30, 32, 34, 36].forEach((n) => measure.push({ d: 'q', n, at: 0, v: 1 }));
+  putRest(score, measure, 'q', 0, 20);
+  const lanes = M.voices(measure);
+  assert.equal(lanes.length, 2);
+  assert.equal(measure.filter((o) => !o.rest).every((o) => o.v === 1), true);
+  assert.equal(lanes[0].groups[0].indices.length, 5);
+});
+

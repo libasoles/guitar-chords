@@ -706,7 +706,7 @@
     "meterFull": "Las figuras existentes no caben en ese compás. Quitá o mové algunas antes de cambiarlo.",
     "scoreLabel": "Partitura",
     "full": "La figura no cabe en lo que queda del compás.",
-    "fullVoices": "Esa figura no entra en ninguna voz sin pisar a otra en ese tiempo.",
+    "fullVoice": "La {n}.ª voz está completa.",
     "duplicate": "Esa nota ya suena en ese tiempo.",
     "noDot": "Esa figura no admite puntillo.",
     "whole": "Redonda",
