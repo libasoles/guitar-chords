@@ -418,8 +418,35 @@
   }
 
   // No borrar ni recortar figuras al cambiar a un compas mas corto.
+  // Las figuras que caen pasado el final del nuevo compas se corren hacia atras mientras cada una siga cabiendo.
+  function fitInto(measure, limit) {
+    const end = measureLength(measure);
+    if (end <= limit) return null;
+    settle(measure);
+    const shift = end - limit;
+    const rigid = measure.every((ev) => ev.at >= shift);
+    const moved = {};
+    measure.forEach((ev) => {
+      const at = rigid ? ev.at - shift : Math.min(ev.at, limit - length(ev));
+      if (at !== ev.at) moved[ev.at] = at;
+      ev.at = at;
+    });
+    return moved;
+  }
+
   function setMeter(score, meter) {
-    if (!METERS.includes(meter) || measures(score).some((m) => measureLength(m) > capacity({ meter }))) return false;
+    const limit = capacity({ meter });
+    if (!METERS.includes(meter) || measures(score).some((m) => m.some((ev) => length(ev) > limit))) return false;
+    measures(score).forEach((measure, mi) => {
+      const moved = fitInto(measure, limit);
+      if (!moved || !score.tabs) return;
+      const tabs = {};
+      Object.keys(score.tabs).forEach((key) => {
+        const [bar, at] = key.split(':').map(Number);
+        tabs[bar === mi && at in moved ? bar + ':' + moved[at] : key] = score.tabs[key];
+      });
+      score.tabs = tabs;
+    });
     score.meter = meter;
     Object.keys(score.measureDurations || {}).forEach((mi) => {
       if (score.measureDurations[mi] >= capacity({ meter })) delete score.measureDurations[mi];

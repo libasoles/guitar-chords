@@ -375,16 +375,16 @@
     say('');
   }
 
-  // El puntillo afecta al acorde de igual duracion, sin modificar otras voces.
+  // El puntillo afecta solo a la nota tocada; si hay que correrla al inicio del compas, el acorde la acompana.
   function applyModifier(item, hit) {
     const measure = M.measures(score)[hit.mi];
     const ev = measure[hit.i];
     const column = measure.filter((o) => o.at === ev.at && o.d === ev.d && !!o.dot === !!ev.dot && !o.rest === !ev.rest);
     if (item.kind === 'dot') {
-      if (ev.dot) return change(() => { column.forEach((o) => { delete o.dot; }); });
+      if (ev.dot) return change(() => { delete ev.dot; });
       const start = M.dotStart(measure, hit.i, score);
       if (start === null) return say(ev.d === 'w' || ev.d === 's' || ev.d === 'f' || ev.tp ? t.noDot : t.full);
-      return change(() => { column.forEach((o) => { o.dot = true; o.at = start; }); });
+      return change(() => { ev.dot = true; column.forEach((o) => { o.at = start; }); });
     }
     if (ev.rest) return;
     change(() => {

@@ -191,7 +191,16 @@ test('el compas elegido limita la colocacion libre y conserva los acordes', () =
   score.rows[0][0] = chord;
   assert.deepEqual(M.sanitize(score), score);
   assert.equal(M.placement([], { d: 'q', n: 30 }, 120, score).at, 120);
-  assert.equal(M.setMeter(score, '4/4'), false);
+  assert.equal(M.setMeter(score, '4/4'), true);
+  assert.deepEqual(score.rows[0][0].map((o) => o.at), [84, 84]);
+});
+
+test('cambiar a un compas mas corto corre hacia atras las figuras que se pasan, si cada una cabe', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ d: 'q', dot: true, n: 34, at: 48 }, { d: 'h', n: 30, at: 48 }];
+  assert.equal(M.setMeter(score, '6/8'), true);
+  assert.deepEqual(score.rows[0][0].map((o) => o.at), [24, 24]);
+  assert.ok(M.measureLength(score.rows[0][0]) <= 72);
 });
 
 test('la polifonia sobrevive al guardado y exporta tiempos, duraciones y voces independientes', () => {
