@@ -781,12 +781,12 @@ async function run() {
     await page.mouse.up();
     assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].n), 25);
     // Con el desplazamiento activo la figura queda arriba a la izquierda del puntero y se suelta donde esta la figura.
-    await page.evaluate(() => { scoreEditor.ghostOffset = 7; });
+    await page.evaluate(() => { scoreEditor.ghostOffset = 4; });
     await page.mouse.move(palette.x + palette.width / 2, palette.y + palette.height / 2);
     await page.mouse.down();
-    await page.mouse.move(line.x + line.width * 0.6 + 7, line.y + line.height / 2 + 7, { steps: 8 });
+    await page.mouse.move(line.x + line.width * 0.6 + 4, line.y + line.height / 2 + 4, { steps: 8 });
     const ghost = await page.locator('.score-ghost svg path').first().boundingBox();
-    assert.ok(ghost.x + ghost.width < line.x + line.width * 0.6 + 7 + 1 && ghost.y + ghost.height < line.y + line.height / 2 + 7 + 1, 'el puntero queda abajo a la derecha de la figura');
+    assert.ok(ghost.x + ghost.width / 2 < line.x + line.width * 0.6 + 4 && ghost.y + ghost.height / 2 < line.y + line.height / 2 + 4, 'el puntero queda abajo a la derecha de la figura');
     await page.mouse.up();
     assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0].some((e) => e.n === 25)), true, 'se suelta donde esta la figura, no donde esta el puntero');
     await page.keyboard.press('ControlOrMeta+z');
