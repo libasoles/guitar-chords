@@ -1402,7 +1402,7 @@
 
   // La figura va arriba a la izquierda del puntero para que este no la tape;
   // el punto de soltado es el centro de la figura, no la punta del puntero.
-  let ghostOffset = 4;
+  let ghostOffset = 2;
 
   function aimed(event) {
     return { clientX: event.clientX - ghostOffset, clientY: event.clientY - ghostOffset };
