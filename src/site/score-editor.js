@@ -387,12 +387,16 @@
     if (!ev.rest) moved.n = target.n;
     const spot = M.placement(others, moved, target.t, score, target.mi);
     if (!spot) return say(t.full);
+    moved.d = spot.d;
+    if (spot.dot) moved.dot = true;
+    else delete moved.dot;
+    // Un silencio no tiene altura propia: arrastrarlo arriba o abajo lo cambia de voz.
+    const voice = ev.rest ? M.voiceFor(others, moved, spot.at, target.n, score, target.mi) : null;
+    if (ev.rest) delete moved.v;
+    if (voice && M.insertInVoice(others.map((o) => Object.assign({}, o)), moved, spot.at, voice) < 0) return say(t.full);
     change(() => {
       all[from.mi].splice(from.i, 1);
-      moved.d = spot.d;
-      if (spot.dot) moved.dot = true;
-      else delete moved.dot;
-      selected = { mi: target.mi, i: M.insertAt(destination, moved, spot.at) };
+      selected = { mi: target.mi, i: voice ? M.insertInVoice(destination, moved, spot.at, voice) : M.insertAt(destination, moved, spot.at) };
       group = [];
     });
   }
