@@ -462,8 +462,8 @@
   appearance: none;
 }
 .part-header-input:focus { border-bottom-color: var(--ink); }
-.part-header-title { font-size: 1.6rem; }
-.part-header-author { font-size: 1.05rem; }
+.part-header-title { font-size: 1.6rem; text-align: left; }
+.part-header-author { font-size: 1.05rem; text-align: right; }
 .part-result-modal .part-toolbar,
 .part-result-modal > .part-header-row,
 .part-result-modal .part-rows {
