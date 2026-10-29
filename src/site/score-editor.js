@@ -2007,11 +2007,11 @@
   const HOLLOW_HEAD = 'M14.4 19.8c3.5 0 5.6 1.5 5.6 3.8 0 3-3.7 5.7-7.2 5.7-3.4 0-5.8-1.6-5.8-3.9 0-3 3.9-5.6 7.4-5.6zm-.4 1.9c-2.7 1.2-5 3.3-5 4.7 0 .9.9 1.4 2.2 1.4 2.4-.9 4.9-3.2 4.9-4.7 0-.8-.8-1.5-2.1-1.4z';
   const GLYPHS = {
     'note:w': '<path d="' + HOLLOW_HEAD + '" fill-rule="evenodd"/>',
-    'note:h': '<path d="' + HOLLOW_HEAD + '" fill-rule="evenodd"/><path d="M19.6 24.2V-1" stroke="currentColor" stroke-width="1.6" fill="none"/>',
-    'note:q': '<path d="' + HEAD + '"/><path d="M19.6 24.2V-1" stroke="currentColor" stroke-width="1.6" fill="none"/>',
-    'note:e': '<path d="' + HEAD + '"/><path d="M19.6 24.2V-1c0 4 5 5.5 5 11" stroke="currentColor" stroke-width="1.6" fill="none"/>',
-    'note:s': '<path d="' + HEAD + '"/><path d="M19.6 24.2V-2m0 0c0 4 5 5.5 5 11m-5-6c0 4 5 5.5 5 11" stroke="currentColor" stroke-width="1.6" fill="none"/>',
-    'note:f': '<path d="' + HEAD + '"/><path d="M19.6 24.2V-3m0 0c0 4 5 5.5 5 11m-5-6c0 4 5 5.5 5 11m-5-6c0 4 5 5.5 5 11" stroke="currentColor" stroke-width="1.6" fill="none"/>',
+    'note:h': '<path d="' + HOLLOW_HEAD + '" fill-rule="evenodd"/><path d="M19.6 24.2V-7" stroke="currentColor" stroke-width="1.6" fill="none"/>',
+    'note:q': '<path d="' + HEAD + '"/><path d="M19.6 24.2V-7" stroke="currentColor" stroke-width="1.6" fill="none"/>',
+    'note:e': '<path d="' + HEAD + '"/><path d="M19.6 24.2V-7c0 4 5 5.5 5 11" stroke="currentColor" stroke-width="1.6" fill="none"/>',
+    'note:s': '<path d="' + HEAD + '"/><path d="M19.6 24.2V-8m0 0c0 4 5 5.5 5 11m-5-6c0 4 5 5.5 5 11" stroke="currentColor" stroke-width="1.6" fill="none"/>',
+    'note:f': '<path d="' + HEAD + '"/><path d="M19.6 24.2V-9m0 0c0 4 5 5.5 5 11m-5-6c0 4 5 5.5 5 11m-5-6c0 4 5 5.5 5 11" stroke="currentColor" stroke-width="1.6" fill="none"/>',
     'rest:w':'<path d="M5 12h20" stroke="currentColor" stroke-width="1.4"/><path d="M9 12h12v6H9z"/>',
     'rest:h': '<path d="M5 18h20" stroke="currentColor" stroke-width="1.4"/><path d="M9 12h12v6H9z"/>',
     'rest:q': '<path d="M12 5l7 8-5 5 6 7c-3-1-6.500-.5-6 3" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linejoin="round"/>',
@@ -2040,9 +2040,9 @@
     const svg = document.createElementNS(SVG_NS, 'svg');
     // Las plicas suben por encima de los 32px de los demas glifos, asi que las notas ganan altura arriba.
     const tall = item.kind === 'note' && item.d !== 'w';
-    svg.setAttribute('viewBox', tall ? '0 -6 30 38' : '0 0 30 32');
+    svg.setAttribute('viewBox', tall ? '0 -12 30 44' : '0 0 30 32');
     svg.setAttribute('width', '30');
-    svg.setAttribute('height', tall ? '38' : '32');
+    svg.setAttribute('height', tall ? '44' : '32');
     svg.setAttribute('fill', 'currentColor');
     svg.setAttribute('aria-hidden', 'true');
     svg.innerHTML = GLYPHS[glyphKey(item)];
