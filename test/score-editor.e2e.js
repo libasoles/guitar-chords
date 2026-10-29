@@ -841,6 +841,52 @@ async function checkStartAndLedgers(page) {
   await page.keyboard.press('Escape');
 }
 
+async function checkRestWithTool(page) {
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+  await page.evaluate(() => {
+    scoreEditor.score.rows[0][0] = [{ rest: true, d: 'q', at: 0 }];
+    scoreEditor.render();
+    return document.fonts.ready;
+  });
+  await page.waitForTimeout(200);
+  const rest = () => page.locator('#e0-0').boundingBox();
+  const box = await rest();
+  // Con la corchea activa, un click sobre el silencio escribe la nota en vez de seleccionarlo.
+  await page.keyboard.press('3');
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  const placed = await page.evaluate(() => scoreEditor.score.rows[0][0]);
+  assert.equal(placed.filter((e) => !e.rest && e.d === 'e').length, 1, 'la corchea se escribe sobre el silencio');
+  assert.equal(await page.evaluate(() => document.querySelector('.score-stage').classList.contains('has-tool')), true);
+  assert.equal(await page.locator('#scoreStage .is-selected').count(), 0, 'el silencio no queda seleccionado');
+  await page.keyboard.press('Escape');
+  // Un silencio solo se puede bajar: conserva la altura donde se suelta.
+  await page.evaluate(() => {
+    scoreEditor.score.rows[0][0] = [{ rest: true, d: 'q', at: 0 }];
+    scoreEditor.render();
+  });
+  await page.waitForTimeout(200);
+  const start = await rest();
+  const x = start.x + start.width / 2, y = start.y + start.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x, y + 30, { steps: 5 });
+  await page.mouse.up();
+  const lowered = await page.evaluate(() => scoreEditor.score.rows[0][0][0]);
+  assert.ok(lowered.rest && Number.isInteger(lowered.n), 'el silencio guarda su altura');
+  const end = await rest();
+  assert.ok(end.y > start.y + 15, 'el silencio se dibuja mas abajo');
+  // Con las flechas tambien.
+  await page.keyboard.press('ArrowUp');
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].n), lowered.n + 1);
+  // Un click en el lienzo lejos de los compases suelta la herramienta.
+  await page.keyboard.press('3');
+  const stage = await page.locator('#scoreStage').boundingBox();
+  await page.mouse.click(stage.x + stage.width / 2, stage.y + stage.height - 3);
+  assert.equal(await page.evaluate(() => document.querySelector('.score-stage').classList.contains('has-tool')), false, 'el lienzo vacio suelta la herramienta');
+}
+
 async function run() {
   const server = await serveStatic(path.join(__dirname, '..', 'dist', 'site'), 0);
   let browser;
@@ -1023,6 +1069,11 @@ async function run() {
     await ledgerPage.waitForSelector('#scoreStage g.measure');
     await checkStartAndLedgers(ledgerPage);
     await ledgerPage.close();
+    const restPage = await newPage({ reducedMotion: 'reduce' });
+    await restPage.goto(url);
+    await restPage.waitForSelector('#scoreStage g.measure');
+    await checkRestWithTool(restPage);
+    await restPage.close();
     console.log('score-editor e2e: OK');
   } finally {
     if (browser) await browser.close();
