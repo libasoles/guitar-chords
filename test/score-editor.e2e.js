@@ -648,10 +648,10 @@ async function checkDoubleClick(page) {
   await note.click();
   assert.equal(await page.evaluate(() => !!scoreEditor.score.rows[0][0][0].dot), false, 'single click only selects');
   await note.dblclick();
-  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map(ev => !!ev.dot)), [true, true], 'double click dots the chord');
-  assert.ok(await page.locator('#scoreStage g.dots').count(), 'dots are rendered');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map(ev => !!ev.dot)), [true, false], 'double click dots only the clicked note');
+  assert.ok(await page.locator('#scoreStage g.dots').count(), 'dot is rendered');
   await note.dblclick();
-  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map(ev => !!ev.dot)), [false, false], 'double click removes the dots');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map(ev => !!ev.dot)), [false, false], 'double click removes the dot');
   assert.equal(await page.locator('#scoreStage g.dots').count(), 0);
   await page.keyboard.press('ControlOrMeta+z');
   assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].dot), true, 'dot toggle can be undone');
@@ -659,7 +659,7 @@ async function checkDoubleClick(page) {
   await page.locator('#e1-0 .notehead').dblclick({ force: true });
   assert.equal(await page.evaluate(() => !!scoreEditor.score.rows[0][1][0].dot), false, 'whole notes cannot be dotted');
   await page.locator('#e2-0 .notehead').dblclick({ force: true });
-  assert.equal(await page.evaluate(() => !!scoreEditor.score.rows[0][2][0].dot), false, 'dot cannot overflow the measure');
+  assert.deepEqual(await page.evaluate(() => { const ev = scoreEditor.score.rows[0][2][0]; return [!!ev.dot, ev.at]; }), [true, 0], 'a lone figure is moved to the measure start to fit its dot');
   await page.reload();
   await page.waitForSelector('#scoreStage g.note');
   assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].dot), true, 'dot is saved');
