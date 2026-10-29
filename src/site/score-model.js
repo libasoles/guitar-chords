@@ -471,16 +471,23 @@
     return end <= capacity(score, score && score.rows ? measures(score).indexOf(measure) : undefined);
   }
 
-  // Si la figura esta sola en el compas (un acorde cuenta como una), el puntillo no depende de donde cayo al ponerla:
-  // devuelve donde debe empezar para que quepa (el inicio del compas), o null si hay otras figuras que lo impiden.
+  // Si el puntillo no cabe donde cayo la figura, devuelve donde debe empezar: pegada al final de lo que suena antes
+  // (el inicio del compas si no hay nada), siempre que no pise lo que viene despues; null si no hay lugar.
   function dotStart(measure, index, score) {
     const ev = measure[index];
     if (ev.dot || ev.tp || ev.d === 'w' || ev.d === 's' || ev.d === 'f') return null;
     const starts = onsets(measure);
     if (canDot(measure, index, score)) return starts[index];
-    const alone = measure.every((o, i) => starts[i] === starts[index] && o.d === ev.d && !!o.dot === !!ev.dot && !o.rest === !ev.rest);
+    const inColumn = (o, i) => starts[i] === starts[index] && o.d === ev.d && !!o.dot === !!ev.dot && !o.rest === !ev.rest;
     const limit = capacity(score, score && score.rows ? measures(score).indexOf(measure) : undefined);
-    return alone && VALUES[ev.d] * 1.5 <= limit ? 0 : null;
+    const size = VALUES[ev.d] * 1.5;
+    let start = 0;
+    measure.forEach((o, i) => {
+      if (!inColumn(o, i) && starts[i] < starts[index]) start = Math.max(start, starts[i] + length(o));
+    });
+    if (start >= starts[index] || start + size > limit) return null;
+    const blocked = measure.some((o, i) => !inColumn(o, i) && starts[i] >= starts[index] && starts[i] < start + size);
+    return blocked ? null : start;
   }
 
   // La tablatura sale sola de las notas; `tabs` guarda solo lo que el usuario corrigio a mano: { 'compas:inicio': [6 trastes] },
