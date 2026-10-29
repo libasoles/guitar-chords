@@ -489,6 +489,21 @@
     return start + size <= after ? start : null;
   }
 
+  // Al correr una figura para que lleve puntillo, lo que empezaba junto con ella (el acorde y las figuras de otras voces)
+  // la acompana para seguir alineado, salvo lo que pisaria a otra figura de su propia voz en el nuevo lugar.
+  function dotMovers(measure, index, start) {
+    const starts = onsets(measure);
+    const lanes = voices(measure);
+    const groupOf = (i) => { for (const lane of lanes) { const g = lane.groups.find((x) => x.indices.includes(i)); if (g) return [lane, g]; } return []; };
+    const [, mine] = groupOf(index);
+    return measure.map((_, i) => i).filter((i) => {
+      const [lane, group] = groupOf(i);
+      if (group === mine) return true;
+      if (starts[i] !== starts[index]) return false;
+      return lane.groups.every((g) => g === group || g.at + g.size <= start || start + group.size <= g.at);
+    });
+  }
+
   // La tablatura sale sola de las notas; `tabs` guarda solo lo que el usuario corrigio a mano: { 'compas:inicio': [6 trastes] },
   // con la cuerda 1 primero y null donde no suena nada. Corregirla no cambia las notas del pentagrama.
   const TAB_STRINGS = 6;
@@ -1110,7 +1125,7 @@
 
   return {
     DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    length, gridOf, onsets, settle, placement, insertAt, placeRest, insertNote, restPitch, settleVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot, dotStart,
+    length, gridOf, onsets, settle, placement, insertAt, placeRest, insertNote, restPitch, settleVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot, dotStart, dotMovers,
     meterOf, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };

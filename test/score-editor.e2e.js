@@ -663,6 +663,24 @@ async function checkDoubleClick(page) {
   await page.reload();
   await page.waitForSelector('#scoreStage g.note');
   assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].dot), true, 'dot is saved');
+  // 6/8: bajo en blanca con una voz superior (negra con puntillo y negra). Al puntillar el bajo, lo que empieza con el se alinea
+  // al inicio del compas, y quitar y volver a poner el puntillo sigue cabiendo porque las voces quedaron fijas.
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+  await page.evaluate(() => {
+    ScoreModel.setMeter(scoreEditor.score, '6/8');
+    scoreEditor.score.rows[0][0].splice(0, 3, { d: 'h', n: 25, at: 18 }, { d: 'q', n: 35, dot: true, at: 18 }, { d: 'q', n: 37, at: 48 });
+    scoreEditor.render();
+  });
+  const bass = page.locator('#e0-0 .notehead');
+  const state = () => page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => [!!ev.dot, ev.at]));
+  await bass.dblclick({ force: true });
+  assert.deepEqual(await state(), [[true, 0], [true, 0], [false, 48]], 'the dotted half moves to the bar start with the figures that started with it');
+  await bass.dblclick({ force: true });
+  assert.deepEqual((await state())[0], [false, 0]);
+  await bass.dblclick({ force: true });
+  assert.deepEqual((await state())[0], [true, 0], 'the dot fits again: the upper quarter stays in its own voice');
 }
 
 // Varias partituras: el titulo es la pestana activa y el + abre una partitura independiente.
