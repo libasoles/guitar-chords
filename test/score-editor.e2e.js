@@ -728,13 +728,20 @@ async function run() {
   let browser;
   try {
     browser = await chromium.launch({ executablePath: playwrightExecutablePath() });
-    const page = await browser.newPage({ reducedMotion: 'reduce' });
+    // El resto de pruebas sueltan justo bajo el puntero; el desplazamiento se prueba aparte.
+    const newPage = async (options) => {
+      const created = await browser.newPage(options);
+      created.on('load', () => created.evaluate(() => { scoreEditor.ghostOffset = 0; }).catch(() => {}));
+      return created;
+    };
+    const page = await newPage({ reducedMotion: 'reduce' });
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
     const url = 'http://localhost:' + server.address().port + '/partitura';
     await page.goto(url);
     await page.waitForSelector('.score-clef-trigger');
     assert.equal(await page.locator('.score-clef-trigger').count(), 3);
+    await page.evaluate(() => { scoreEditor.ghostOffset = 0; });
 
     // All options are visible; choosing one applies it immediately without closing the gallery.
     const box = await page.locator('#scoreStage g.clef').first().boundingBox();
@@ -773,6 +780,17 @@ async function run() {
     await page.mouse.move(line.x + line.width * 0.6, line.y + line.height / 2, { steps: 8 });
     await page.mouse.up();
     assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].n), 25);
+    // Con el desplazamiento activo la figura queda arriba a la izquierda del puntero y se suelta donde esta la figura.
+    await page.evaluate(() => { scoreEditor.ghostOffset = 18; });
+    await page.mouse.move(palette.x + palette.width / 2, palette.y + palette.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(line.x + line.width * 0.6 + 18, line.y + line.height / 2 + 18, { steps: 8 });
+    const ghost = await page.locator('.score-ghost svg').boundingBox();
+    assert.ok(ghost.x + ghost.width < line.x + line.width * 0.6 + 18 + 1 && ghost.y + ghost.height < line.y + line.height / 2 + 18 + 1, 'el puntero queda abajo a la derecha de la figura');
+    await page.mouse.up();
+    assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0].some((e) => e.n === 25)), true, 'se suelta donde esta la figura, no donde esta el puntero');
+    await page.keyboard.press('ControlOrMeta+z');
+    await page.evaluate(() => { scoreEditor.ghostOffset = 0; });
     const before = await page.evaluate(() => structuredClone(scoreEditor.score.rows));
     await page.locator('.score-clef-trigger').nth(1).click();
     // With a key signature the clef popup offers only clefs; the key signature has its own popup.
@@ -833,19 +851,19 @@ async function run() {
     await page.locator('.score-key-trigger').first().click();
     assert.equal(await page.getByRole('group', { name: 'Key signature', exact: true }).locator('button').count(), 15);
     assert.deepEqual(errors, []);
-    const splitPage = await browser.newPage({ reducedMotion: 'reduce' });
+    const splitPage = await newPage({ reducedMotion: 'reduce' });
     await splitPage.goto(url);
     await splitPage.waitForSelector('#scoreStage g.measure');
     await checkInteriorDoubleBar(splitPage);
     await checkSplitKeepsRows(splitPage);
     await splitPage.close();
-    const widthsPage = await browser.newPage({ reducedMotion: 'reduce' });
+    const widthsPage = await newPage({ reducedMotion: 'reduce' });
     await widthsPage.goto(url);
     await widthsPage.waitForSelector('#scoreStage g.measure');
     await checkMeasureWidths(widthsPage);
     await checkBarResizeConstraints(widthsPage);
     await widthsPage.close();
-    const dragPage = await browser.newPage({ reducedMotion: 'reduce', viewport: { width: 1280, height: 900 } });
+    const dragPage = await newPage({ reducedMotion: 'reduce', viewport: { width: 1280, height: 900 } });
     await dragPage.goto(url);
     await dragPage.waitForSelector('#scoreStage g.measure');
     await checkDrag(dragPage);
@@ -858,21 +876,21 @@ async function run() {
       ['/partitura', ['p', 's', 'b', 'c']],
       ['/en/sheet-music-editor', ['d', 's', 'f', 'n']],
     ]) {
-      const modifierPage = await browser.newPage({ reducedMotion: 'reduce' });
+      const modifierPage = await newPage({ reducedMotion: 'reduce' });
       await checkModifiers(modifierPage, 'http://localhost:' + server.address().port + route, keys);
       await modifierPage.close();
     }
-    const doubleClickPage = await browser.newPage({ reducedMotion: 'reduce' });
+    const doubleClickPage = await newPage({ reducedMotion: 'reduce' });
     await doubleClickPage.goto(url);
     await doubleClickPage.waitForSelector('#scoreStage g.measure');
     await checkDoubleClick(doubleClickPage);
     await doubleClickPage.close();
-    const clearPage = await browser.newPage({ reducedMotion: 'reduce' });
+    const clearPage = await newPage({ reducedMotion: 'reduce' });
     await clearPage.goto(url);
     await clearPage.waitForSelector('#scoreStage g.measure');
     await checkClear(clearPage);
     await clearPage.close();
-    const tabsPage = await browser.newPage({ reducedMotion: 'reduce' });
+    const tabsPage = await newPage({ reducedMotion: 'reduce' });
     await tabsPage.goto(url);
     await tabsPage.waitForSelector('#scoreStage g.measure');
     await checkTabs(tabsPage);
