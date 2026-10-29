@@ -303,10 +303,15 @@
       else ev.n = target.n;
       const spot = M.placement(measure, ev, target.t, score, target.mi);
       if (!spot) return say(t.full);
+      const voice = M.voiceFor(measure, Object.assign({}, ev, { d: spot.d, dot: spot.dot }), spot.at, target.n, score, target.mi);
+      if (voice && item.kind === 'rest') {
+        const trial = measure.map((o) => Object.assign({}, o));
+        if (M.insertInVoice(trial, Object.assign({}, ev, { d: spot.d, dot: spot.dot }), spot.at, voice) < 0) return say(t.full);
+      }
       change(() => {
         ev.d = spot.d;
         if (spot.dot) ev.dot = true;
-        selected = { mi: target.mi, i: M.insertAt(measure, ev, spot.at) };
+        selected = { mi: target.mi, i: voice && item.kind === 'rest' ? M.insertInVoice(measure, ev, spot.at, voice) : M.insertAt(measure, ev, spot.at) };
         group = [];
       });
     }

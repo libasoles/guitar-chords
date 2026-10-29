@@ -512,6 +512,7 @@
           if (!ev.rest && ACCIDENTALS[raw.acc]) ev.acc = raw.acc;
           if (!ev.rest && raw.tie === true) ev.tie = true;
           else if (!ev.rest && raw.slur === true) ev.slur = true;
+          if (Number.isInteger(raw.v) && raw.v >= 1 && raw.v <= MAX_VOICE) ev.v = raw.v;
           if (raw.beam === 'join' || raw.beam === 'break') ev.beam = raw.beam;
           if (Number.isInteger(raw.at) && raw.at >= 0) ev.at = raw.at * factor;
           const at = Number.isInteger(ev.at) ? ev.at : measureLength(events);
@@ -659,27 +660,96 @@
     return states;
   }
 
-  // Agrupa acordes de igual inicio y duracion; cada voz contiene figuras sin superposicion.
+  const MAX_VOICE = 4;
+
+  // Agrupa acordes de igual inicio, duracion y voz; cada voz contiene figuras sin superposicion.
+  // Una figura con `v` (1 = la mas aguda) va a esa voz; las demas ocupan la primera voz libre.
   // Se conservan los indices originales para seleccionar las notas en el SVG.
   function voices(measure) {
     const starts = onsets(measure);
     const groups = [];
     measure.forEach((ev, i) => {
-      let group = !ev.rest && groups.find((g) => !g.rest && g.at === starts[i] && g.size === length(ev));
+      let group = !ev.rest && groups.find((g) => !g.rest && g.at === starts[i] && g.size === length(ev) && g.v === ev.v);
       if (!group) {
-        group = { at: starts[i], size: length(ev), rest: !!ev.rest, indices: [] };
+        group = { at: starts[i], size: length(ev), rest: !!ev.rest, v: ev.v, indices: [] };
         groups.push(group);
       }
       group.indices.push(i);
     });
     const result = [];
-    groups.sort((a, b) => a.at - b.at || b.size - a.size).forEach((group) => {
-      let voice = result.find((v) => v.end <= group.at);
-      if (!voice) { voice = { end: 0, groups: [] }; result.push(voice); }
+    const lane = (k) => {
+      while (result.length <= k) result.push({ end: 0, groups: [] });
+      return result[k];
+    };
+    const free = (voice, group) => voice.groups.every((g) => g.at + g.size <= group.at || group.at + group.size <= g.at);
+    const place = (voice, group) => {
       voice.groups.push(group);
-      voice.end = group.at + group.size;
+      voice.groups.sort((a, b) => a.at - b.at);
+      voice.end = Math.max(voice.end, group.at + group.size);
+    };
+    const order = (a, b) => a.at - b.at || b.size - a.size;
+    const loose = [];
+    groups.sort(order).forEach((group) => {
+      if (Number.isInteger(group.v) && free(lane(group.v - 1), group)) place(lane(group.v - 1), group);
+      else loose.push(group);
+    });
+    loose.forEach((group) => {
+      let k = 0;
+      while (k < result.length && !free(result[k], group)) k += 1;
+      place(lane(k), group);
     });
     return result.length ? result : [{ end: 0, groups: [] }];
+  }
+
+  // Fija `v` en todas las figuras segun la voz en la que hoy se dibujan, para que agregar otra no las reparta distinto.
+  function settleVoices(measure) {
+    voices(measure).forEach((voice, k) => voice.groups.forEach((g) => g.indices.forEach((i) => { measure[i].v = k + 1; })));
+    return measure;
+  }
+
+  // Voz a la que va una figura nueva en `at` (con la duracion de `ev`) clickeada a la altura `n`:
+  // mas aguda que lo que suena ahi es una voz por encima; mas grave, por debajo. Sin nada ahi, no se fija (null).
+  function voiceFor(measure, ev, at, n, score, mi) {
+    const starts = onsets(measure);
+    const end = at + length(ev);
+    const lanes = voices(measure);
+    const clash = [];
+    measure.forEach((o, i) => {
+      if (starts[i] < end && at < starts[i] + length(o)) clash.push(i);
+    });
+    if (!clash.length) return null;
+    const laneOf = (i) => lanes.findIndex((v) => v.groups.some((g) => g.indices.includes(i)));
+    const pitched = clash.filter((i) => !measure[i].rest);
+    const ref = pitched.length ? pitched.reduce((a, b) => Math.abs(measure[a].n - n) <= Math.abs(measure[b].n - n) ? a : b) : clash[0];
+    const middle = bottomLine(score, mi) + 4;
+    const above = pitched.length ? n > measure[ref].n : n >= middle;
+    const own = laneOf(ref);
+    return Math.max(1, own + (above ? 0 : 2));
+  }
+
+  // Inserta `ev` en la voz `v`: lo que la ocupa en ese tiempo baja a la voz siguiente.
+  // Devuelve el indice, o -1 (sin tocar el compas) si no queda voz para todos.
+  function insertInVoice(measure, ev, at, v) {
+    const trial = measure.map((o) => Object.assign({}, o));
+    settleVoices(trial);
+    const index = insertAt(trial, Object.assign({}, ev), at);
+    trial[index].v = v;
+    const clashes = (a, b) => {
+      const sa = onsets(trial);
+      return sa[a] < sa[b] + length(trial[b]) && sa[b] < sa[a] + length(trial[a]);
+    };
+    const queue = [index];
+    while (queue.length) {
+      const pushed = queue.shift();
+      trial.forEach((o, j) => {
+        if (j === pushed || o.v !== trial[pushed].v || !clashes(pushed, j)) return;
+        o.v += 1;
+        queue.push(j);
+      });
+    }
+    if (trial.some((o) => o.v > MAX_VOICE)) return -1;
+    measure.splice(0, measure.length, ...trial);
+    return index;
   }
 
   // ---- seleccion: tresillos, ligaduras y barrado -------------------------
@@ -976,7 +1046,7 @@
 
   return {
     DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    length, gridOf, onsets, settle, placement, insertAt, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot,
+    length, gridOf, onsets, settle, placement, insertAt, insertInVoice, voiceFor, settleVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot,
     meterOf, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };

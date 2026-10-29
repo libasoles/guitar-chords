@@ -802,3 +802,39 @@ test('dividir un compas conserva su continuacion y los compases vecinos en el mi
   assert.deepEqual(score.rows.map(row => row.length), [6, 4, 2]);
   assert.deepEqual(M.sanitize(M.clone(score)), score, 'se conservan divisiones repetidas');
 });
+
+test('cada voz tiene su propio silencio y su propia longitud en un compas de 3/4', () => {
+  const score = M.emptyScore();
+  score.meter = '3/4';
+  const measure = M.measures(score)[0];
+  // Voz grave: corchea y silencio de negra, dos veces.
+  [[0, 'e', false], [12, 'q', true], [36, 'e', false], [48, 'q', true]].forEach(([at, d, rest]) => {
+    measure.push(rest ? { d, rest: true, at, v: 2 } : { d, n: 30, at, v: 2 });
+  });
+  // Voz aguda: silencios de corchea y negra, dos veces, clickeados arriba de la voz grave.
+  [[0, 'e'], [12, 'q'], [36, 'e'], [48, 'q']].forEach(([at, d]) => {
+    const ev = { d, rest: true };
+    const v = M.voiceFor(measure, ev, at, 40, score, 0);
+    assert.equal(v, 1);
+    assert.ok(M.insertInVoice(measure, ev, at, v) >= 0);
+  });
+  assert.equal(measure.length, 8);
+  assert.equal(M.measureLength(measure), M.capacity(score, 0));
+  const lanes = M.voices(measure);
+  assert.equal(lanes.length, 2);
+  assert.ok(lanes.every((lane) => lane.groups.length === 4));
+  assert.ok(lanes[0].groups.every((g) => g.rest));
+  assert.deepEqual(M.sanitize(score).rows[0][0].map((e) => e.v), measure.map((e) => e.v));
+});
+
+test('un silencio clickeado abajo de la nota va a la voz de abajo y la nota queda arriba', () => {
+  const score = M.emptyScore();
+  const measure = M.measures(score)[0];
+  measure.push({ d: 'q', n: 34, at: 0 });
+  const ev = { d: 'q', rest: true };
+  const v = M.voiceFor(measure, ev, 0, 28, score, 0);
+  M.insertInVoice(measure, ev, 0, v);
+  assert.equal(M.voices(measure).length, 2);
+  assert.equal(measure.find((o) => !o.rest).v, 1);
+  assert.equal(measure.find((o) => o.rest).v, 2);
+});
