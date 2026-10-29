@@ -2346,5 +2346,12 @@
   // Consola del navegador: `voces()` lista las figuras de cada compas, por voz.
   window.voces = () => console.log(M.voicesText(score));
 
-  window.scoreEditor = { get score() { return score; }, render, get ghostOffset() { return ghostOffset; }, set ghostOffset(value) { ghostOffset = value; } };
+  // Para la consola: descarta las voces guardadas de la partitura activa y las recalcula (la 1 es la aguda). Se puede deshacer.
+  function fix() {
+    const before = JSON.stringify(score.rows);
+    change(() => { M.measures(score).forEach((measure) => { measure.forEach((ev) => { delete ev.v; }); M.settleVoices(measure); }); });
+    return before !== JSON.stringify(score.rows);
+  }
+
+  window.scoreEditor = { get score() { return score; }, render, fix, get ghostOffset() { return ghostOffset; }, set ghostOffset(value) { ghostOffset = value; } };
 })();

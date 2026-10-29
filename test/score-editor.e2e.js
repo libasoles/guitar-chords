@@ -703,6 +703,13 @@ async function checkDoubleClick(page) {
   });
   await page.locator('#e0-2 .notehead').dblclick({ force: true });
   assert.deepEqual(await state(), [[false, 0], [true, 0], [true, 36]], 'the misaligned voice is packed in order');
+  // fix() recalcula las voces guardadas: la 1 es la aguda.
+  await page.evaluate(() => {
+    scoreEditor.score.rows[0][0].splice(0, 3, { d: 'h', n: 25, at: 0, v: 1 }, { d: 'q', n: 35, dot: true, at: 0, v: 2 }, { d: 'q', n: 38, at: 48, v: 3 });
+    scoreEditor.render();
+  });
+  assert.equal(await page.evaluate(() => scoreEditor.fix()), true);
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => ev.v)), [2, 1, 1], 'fix recomputes voices, treble first');
 }
 
 // Varias partituras: el titulo es la pestana activa y el + abre una partitura independiente.

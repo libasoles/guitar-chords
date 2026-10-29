@@ -754,7 +754,9 @@
       voice.groups.sort((a, b) => a.at - b.at);
       voice.end = Math.max(voice.end, group.at + group.size);
     };
-    const order = (a, b) => a.at - b.at || b.size - a.size;
+    // La voz 1 es la aguda: a igual inicio va primero la figura mas aguda (un silencio, que no tiene altura, al final).
+    const top = (g) => (measure[g.indices[0]].rest ? -Infinity : Math.max(...g.indices.map((i) => measure[i].n)));
+    const order = (a, b) => a.at - b.at || (top(a) === top(b) ? 0 : top(b) > top(a) ? 1 : -1) || b.size - a.size;
     const loose = [];
     groups.sort(order).forEach((group) => {
       if (Number.isInteger(group.v) && free(lane(group.v - 1), group)) place(lane(group.v - 1), group);
