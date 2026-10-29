@@ -936,6 +936,13 @@ test('una blanca puede llevar puntillo aunque otra figura de su voz quede encima
   assert.equal(M.dotStart(pinned, 0, score), 0);
 });
 
+test('una negra en otra voz que no cabe con puntillo va despues de lo que ya termino, no encima', () => {
+  const score = M.emptyScore();
+  M.setMeter(score, '6/8');
+  const measure = [{ d: 'h', n: 29, at: 0, v: 1, dot: true }, { d: 'q', n: 35, dot: true, at: 0, v: 2 }, { d: 'q', n: 38, at: 48, v: 3 }];
+  assert.equal(M.dotStart(measure, 2, score), 36);
+});
+
 test('la segunda negra se corre pegada a la primera para llevar puntillo en 6/8', () => {
   const score = M.emptyScore();
   M.setMeter(score, '6/8');

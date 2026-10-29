@@ -473,7 +473,7 @@
 
   // El puntillo cabe si la figura entra en el compas despues de lo que suena antes en su propia voz (notas y silencios
   // reales, no el lugar donde cayo). La posicion solo decide donde queda: donde esta si entra ahi, y si no, pegada al
-  // final de lo anterior de su voz. Lo que se solape despues pasa a otra voz; null si no hay lugar.
+  // final de lo que ya sono antes. Lo que se solape despues pasa a otra voz; null si no hay lugar.
   function dotStart(measure, index, score) {
     const ev = measure[index];
     if (ev.dot || ev.tp || ev.d === 'w' || ev.d === 's' || ev.d === 'f') return null;
@@ -481,7 +481,9 @@
     const size = VALUES[ev.d] * 1.5;
     const lane = voices(measure).find((voice) => voice.groups.some((g) => g.indices.includes(index)));
     const mine = lane.groups.find((g) => g.indices.includes(index));
-    const before = Math.max(0, ...lane.groups.filter((g) => g.at < mine.at).map((g) => g.at + g.size));
+    // Lo anterior: lo de su voz, y lo de cualquier voz que ya termino antes de que ella empiece (no se salta figuras ya sonadas).
+    const everyone = voices(measure).flatMap((voice) => voice.groups);
+    const before = Math.max(0, ...everyone.filter((g) => g !== mine && g.at < mine.at && (lane.groups.includes(g) || g.at + g.size <= mine.at)).map((g) => g.at + g.size));
     const start = mine.at + size <= limit ? mine.at : before;
     return start + size <= limit ? start : null;
   }

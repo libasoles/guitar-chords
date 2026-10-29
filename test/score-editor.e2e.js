@@ -688,6 +688,13 @@ async function checkDoubleClick(page) {
   });
   await bass.dblclick({ force: true });
   assert.deepEqual((await state())[0], [true, 0], 'the dot fits even when an upper figure shares its voice');
+  // Una negra guardada en una tercera voz va despues de la negra con puntillo que ya sono, no encima de ella.
+  await page.evaluate(() => {
+    scoreEditor.score.rows[0][0].splice(0, 3, { d: 'h', n: 29, at: 0, v: 1, dot: true }, { d: 'q', n: 35, dot: true, at: 0, v: 2 }, { d: 'q', n: 38, at: 48, v: 3 });
+    scoreEditor.render();
+  });
+  await page.locator('#e0-2 .notehead').dblclick({ force: true });
+  assert.deepEqual((await state())[2], [true, 36], 'the dotted quarter lands after the figure that already sounded');
 }
 
 // Varias partituras: el titulo es la pestana activa y el + abre una partitura independiente.
