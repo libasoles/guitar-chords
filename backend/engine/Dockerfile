@@ -28,6 +28,6 @@ RUN mkdir -p /usr/share/fonts/playfair \
 # Lambda's filesystem is read-only except /tmp; music21 and fontconfig write caches.
 ENV HOME=/tmp XDG_CACHE_HOME=/tmp PYTHONUNBUFFERED=1
 
-COPY tabify.py engraving.py fingering.py lambda_handler.py test_tabify.py test_fingering.py test_operations.py test_lambda_handler.py ${LAMBDA_TASK_ROOT}/
+COPY tabify.py engraving.py fingering.py rhythm.py lambda_handler.py test_tabify.py test_fingering.py test_rhythm.py test_operations.py test_lambda_handler.py ${LAMBDA_TASK_ROOT}/
 
 CMD ["lambda_handler.handler"]

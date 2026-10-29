@@ -26,6 +26,12 @@ notas distintas seguidas en una cuerda, nota repetida en su cuerda, una casilla 
 limita las casillas de esa nota y descarta las combinaciones de dedos imposibles de sostener. Criterios y fuentes:
 `docs/criterios-de-digitacion.md`.
 
+`prepare` también repara el ritmo por voces (`engine/rhythm.py`, solo en subidas: `tabify.REPAIR_VOICES` está apagado
+para las colecciones): una voz que pasa del compás por un acorde leído como dos notas o un tresillo falso, dos voces
+pegadas (bajo + arpegio), un puntillo perdido en el bajo y una voz que arranca dentro de la nota anterior de su carril.
+Cada regla actúa solo si el resultado es claramente mejor; si hay varias formas de cuadrar el compás, lo deja tal cual.
+El resultado queda en `normalized.musicxml`, por eso `export` no necesita la regla.
+
 **prepare** escribe en `out_dir`:
 
 | Archivo | Contenido |

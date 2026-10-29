@@ -33,6 +33,7 @@ import verovio
 
 import engraving
 import fingering
+import rhythm
 
 verovio.enableLog(False)
 # The wrapper only finds its fonts by itself on the main thread; the web app
@@ -55,6 +56,10 @@ KEEP_TEXT = False  # keep <words> directions; off for uploads, where they are OC
 # collections (their output is published); `prepare` turns it on for uploads, where OMR often reads one note in
 # two voices and the second would pull its Column away from the first.
 MERGE_UNISONS = False
+# Per-voice rhythm repair (rhythm.py): voices that run past the barline, glued voices, lost dots. It rewrites OMR rhythm,
+# so it is off for the curated collections and `prepare` turns it on for uploads; its result is persisted in
+# normalized.musicxml, which is why `export` does not need it.
+REPAIR_VOICES = False
 
 PREVIEW_OPTIONS = {
     "pageWidth": 2100, "pageHeight": 60000, "scale": 40, "adjustPageHeight": True,
@@ -88,11 +93,7 @@ def string_names(tuning):
     return [m21.pitch.Pitch(p).name.replace("-", "♭") for p in reversed(tuning.split(","))]
 
 
-def _nominal(note, divisions):
-    """Written length of a note in `divisions` units, ignoring any tuplet."""
-    written = m21.duration.Duration(type=note.findtext("type"))
-    written.dots = len(note.findall("dot"))
-    return Fraction(written.quarterLength) * divisions
+_nominal = rhythm.nominal
 
 
 def repair_orphan_tuplets(root):
@@ -230,7 +231,7 @@ def order_slurs(root):
     return changed
 
 
-def read_score(path):
+def read_score(path, repair_voices=None):
     """Repair zero divisions from OMR using the written note lengths.
 
     Audiveris can export a half note with duration 1 and divisions 0 (the
@@ -288,6 +289,8 @@ def read_score(path):
                 duration.text = str(int(Fraction(duration.text) * factor))
             repaired = True
     repaired = repair_orphan_tuplets(root) or repaired
+    if REPAIR_VOICES if repair_voices is None else repair_voices:
+        repaired = bool(rhythm.repair_voices(root)) or repaired
     repaired = order_slurs(root) or repaired
     if repaired:
         return m21.converter.parseData(ET.tostring(root, encoding="unicode"), format="musicxml")
@@ -379,13 +382,13 @@ def fix_slur_placement(score):
             slur.placement = "above"
 
 
-def load_score(paths):
+def load_score(paths, repair_voices=None):
     """First part of the first movement; later movements are appended.
 
     The first measure of each movement gets `editorial.movementStart`: clefs do
     not carry over between Audiveris movements (see `octave_shifts`).
     """
-    scores = [read_score(p) for p in paths]
+    scores = [read_score(p, repair_voices) for p in paths]
     for score in scores:
         # Audiveris files footer and publisher text as lyrics on nearby notes;
         # a guitar score has none, so drop them or they print under the staff.
@@ -1299,7 +1302,7 @@ def prepare(input_path, kind, tuning, out_dir, per_row=4, arpeggio="auto"):
     paths = [input_path] if isinstance(input_path, (str, os.PathLike)) else list(input_path)
     os.makedirs(out_dir, exist_ok=True)
 
-    score, part = load_score([str(p) for p in paths])
+    score, part = load_score([str(p) for p in paths], repair_voices=True)
     shifts = octave_shifts(list(part.getElementsByClass(m21.stream.Measure)))
     title, subtitles = extract_header(score)
     xml_path = os.path.join(out_dir, NORMALIZED_NAME)
