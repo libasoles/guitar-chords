@@ -504,7 +504,7 @@
         (Array.isArray(measure) ? measure : []).forEach((raw) => {
           if (!raw || !VALUES[raw.d]) return;
           const ev = { d: raw.d };
-          if (raw.rest) ev.rest = true;
+          if (raw.rest) { ev.rest = true; if (Number.isInteger(raw.n)) ev.n = clampPitch(raw.n); }
           else if (Number.isInteger(raw.n)) ev.n = clampPitch(raw.n);
           else return;
           if (Number.isInteger(raw.tp) && raw.tp > 0 && TRIPLETABLE.includes(raw.d)) ev.tp = raw.tp;
@@ -727,6 +727,18 @@
     return Math.max(1, own + (above ? 0 : 2));
   }
 
+  // Altura con la que se dibuja un silencio puesto en `n` sobre otras figuras: nunca encima de las notas que suenan ahi.
+  function restPitch(measure, ev, at, n) {
+    const starts = onsets(measure);
+    const end = at + length(ev);
+    let result = n;
+    measure.forEach((o, i) => {
+      if (o.rest || starts[i] >= end || at >= starts[i] + length(o) || Math.abs(o.n - result) >= 4) return;
+      result = result >= o.n ? o.n + 4 : o.n - 4;
+    });
+    return clampPitch(result);
+  }
+
   // Inserta `ev` en la voz `v`: lo que la ocupa en ese tiempo baja a la voz siguiente.
   // Devuelve el indice, o -1 (sin tocar el compas) si no queda voz para todos.
   function insertInVoice(measure, ev, at, v) {
@@ -920,7 +932,7 @@
     let xml = `<note id="${id}">`;
     if (chord) xml += '<chord/>';
     if (ev.rest) {
-      xml += '<rest/>';
+      xml += Number.isInteger(ev.n) ? `<rest><display-step>${STEPS[ev.n % 7]}</display-step><display-octave>${Math.floor(ev.n / 7) - 1}</display-octave></rest>` : '<rest/>';
     } else {
       xml += `<pitch><step>${STEPS[ev.n % 7]}</step>${alter ? `<alter>${alter}</alter>` : ''}` +
         `<octave>${Math.floor(ev.n / 7) - 1}</octave></pitch>`;
@@ -1046,7 +1058,7 @@
 
   return {
     DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    length, gridOf, onsets, settle, placement, insertAt, insertInVoice, voiceFor, settleVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot,
+    length, gridOf, onsets, settle, placement, insertAt, insertInVoice, voiceFor, restPitch, settleVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot,
     meterOf, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };

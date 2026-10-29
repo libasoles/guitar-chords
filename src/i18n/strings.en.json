@@ -706,7 +706,7 @@
     "meterFull": "The existing notes do not fit in that time signature. Remove or move some before changing it.",
     "scoreLabel": "Sheet music",
     "full": "The figure does not fit in the rest of the measure.",
-    "fullVoices": "A measure holds up to 4 voices; none is free at that time.",
+    "fullVoices": "That figure does not fit in any voice at that time without overlapping another.",
     "duplicate": "That note already sounds at that time.",
     "noDot": "That figure cannot be dotted.",
     "whole": "Whole note",

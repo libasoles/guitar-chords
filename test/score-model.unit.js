@@ -838,3 +838,17 @@ test('un silencio clickeado abajo de la nota va a la voz de abajo y la nota qued
   assert.equal(measure.find((o) => !o.rest).v, 1);
   assert.equal(measure.find((o) => o.rest).v, 2);
 });
+
+test('un silencio con altura propia se dibuja ahi y nunca encima de las notas que suenan a la vez', () => {
+  const score = M.emptyScore();
+  const measure = M.measures(score)[0];
+  measure.push({ d: 'q', n: 32, at: 0 });
+  const ev = { d: 'q', rest: true };
+  assert.equal(M.restPitch(measure, ev, 0, 33), 36, 'clickeado sobre la nota se corre arriba');
+  assert.equal(M.restPitch(measure, ev, 0, 31), 28, 'clickeado bajo la nota se corre abajo');
+  assert.equal(M.restPitch(measure, ev, 24, 32), 32, 'sin nada a la vez queda donde se puso');
+  measure.push({ d: 'q', rest: true, n: 25, at: 0, v: 2 });
+  const xml = M.toMusicXml(score);
+  assert.match(xml, /<rest><display-step>G<\/display-step><display-octave>2<\/display-octave><\/rest>/);
+  assert.equal(M.sanitize(M.clone(score)).rows[0][0][1].n, 25, 'la altura del silencio se conserva');
+});

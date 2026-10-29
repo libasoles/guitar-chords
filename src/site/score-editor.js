@@ -304,6 +304,7 @@
       const spot = M.placement(measure, ev, target.t, score, target.mi);
       if (!spot) return say(noRoom(ev, target.mi));
       const voice = M.voiceFor(measure, Object.assign({}, ev, { d: spot.d, dot: spot.dot }), spot.at, target.n, score, target.mi);
+      if (voice && item.kind === 'rest') ev.n = M.restPitch(measure, Object.assign({}, ev, { d: spot.d, dot: spot.dot }), spot.at, target.n);
       if (voice && item.kind === 'rest') {
         const trial = measure.map((o) => Object.assign({}, o));
         if (M.insertInVoice(trial, Object.assign({}, ev, { d: spot.d, dot: spot.dot }), spot.at, voice) < 0) return say(t.fullVoices);
@@ -397,7 +398,12 @@
     else delete moved.dot;
     // Un silencio no tiene altura propia: arrastrarlo arriba o abajo lo cambia de voz.
     const voice = ev.rest ? M.voiceFor(others, moved, spot.at, target.n, score, target.mi) : null;
-    if (ev.rest) delete moved.v;
+    if (ev.rest) {
+      delete moved.v;
+      // Superpuesto con otras figuras, el silencio se dibuja a la altura donde se suelta; solo, vuelve a su lugar por defecto.
+      if (voice) moved.n = M.restPitch(others, moved, spot.at, target.n);
+      else delete moved.n;
+    }
     if (voice && M.insertInVoice(others.map((o) => Object.assign({}, o)), moved, spot.at, voice) < 0) return say(t.fullVoices);
     change(() => {
       all[from.mi].splice(from.i, 1);
