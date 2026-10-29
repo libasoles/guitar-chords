@@ -822,13 +822,21 @@
     var known = 0;
     for (var c = 0; c < count; c++) {
       var ids = attacks[c].noteIds || [];
-      var sum = 0;
-      var n = 0;
+      // A Column's notes can be engraved far apart when the OCR gave two voices
+      // different rhythms (the same pitch read twice): the earliest one wins, an
+      // average would land between the notes and under neither.
+      var x0 = null;
       for (var i = 0; i < ids.length; i++) {
         var x = noteCenter(svg, ids[i]);
-        if (x !== null) { sum += x; n++; }
+        if (x !== null && (x0 === null || x < x0)) x0 = x;
       }
-      if (n) { positions.push(sum / n - left); known++; } else positions.push(null);
+      if (x0 !== null) { positions.push(x0 - left); known++; } else positions.push(null);
+    }
+    // Columns follow time, so a position can never precede the previous one.
+    for (var q = 1; q < count; q++) {
+      if (positions[q] !== null && positions[q - 1] !== null && positions[q] < positions[q - 1]) {
+        positions[q] = positions[q - 1];
+      }
     }
     if (!known || !measureNode) {
       // No usable note positions: spread the Columns evenly.

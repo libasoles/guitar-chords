@@ -28,7 +28,9 @@ const SVG = [
   '<svg xmlns="http://www.w3.org/2000/svg" width="800px" height="200px">',
   '<g class="measure" id="x-m1"><path d="M0 60H400" stroke="#000" fill="none"/>',
   '<g class="note" id="x-n2" data-id="tab-note-1"><g class="notehead"><ellipse cx="250" cy="80" rx="8" ry="6"/></g></g>',
-  '<g class="note" id="x-n1" data-id="tab-note-0"><g class="notehead"><ellipse cx="100" cy="80" rx="8" ry="6"/></g></g></g>',
+  '<g class="note" id="x-n1" data-id="tab-note-0"><g class="notehead"><ellipse cx="100" cy="80" rx="8" ry="6"/></g></g>',
+  // Same Column as tab-note-1 but engraved far to its right (OCR read the pitch in two voices).
+  '<g class="note" id="x-n5" data-id="tab-note-4"><g class="notehead"><ellipse cx="380" cy="100" rx="8" ry="6"/></g></g></g>',
   '<g class="measure" id="x-m2"><path d="M400 60H800" stroke="#000" fill="none"/>',
   '<g class="note" id="x-n4" data-id="tab-note-3"><g class="notehead"><ellipse cx="560" cy="80" rx="8" ry="6"/></g></g>',
   '<g class="note" id="x-n3" data-id="tab-note-2"><g class="notehead"><ellipse cx="460" cy="80" rx="8" ry="6"/></g></g></g>',
@@ -43,7 +45,7 @@ const SUGGESTION = {
     [[null, 1, null, null, null, null], [12, null, null, null, null, 5]],
   ],
   preview_columns: [
-    [{ note_ids: ['tab-note-0'], bass_strings: [3] }, { note_ids: ['tab-note-1'], bass_strings: [5] }],
+    [{ note_ids: ['tab-note-0'], bass_strings: [3] }, { note_ids: ['tab-note-1', 'tab-note-4'], bass_strings: [5] }],
     [{ note_ids: ['tab-note-2'], bass_strings: [] }, { note_ids: ['tab-note-3'], bass_strings: [5] }],
   ],
   dropped: [{ measure: 2, pitch: 'C#2' }],
