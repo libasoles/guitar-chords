@@ -483,16 +483,28 @@ body.score-body {
   cursor: default;
 }
 
-.score-stage .is-selected,
 .score-stage .is-target {
   fill: var(--note-selected);
   color: var(--note-selected);
 }
 
-.score-stage .is-selected *,
 .score-stage .is-target * {
   fill: var(--note-selected);
   stroke: var(--note-selected);
+}
+
+/* Logo yellow is too pale on paper alone: a dark halo keeps it readable. */
+.score-stage .is-selected {
+  fill: var(--brand-yellow);
+  color: var(--brand-yellow);
+  filter: drop-shadow(0 0 0.6px var(--brand-blue-dark))
+    drop-shadow(0 0 0.6px var(--brand-blue-dark))
+    drop-shadow(0 0 3px var(--brand-yellow));
+}
+
+.score-stage .is-selected * {
+  fill: var(--brand-yellow);
+  stroke: var(--brand-yellow);
 }
 
 .score-marker {
