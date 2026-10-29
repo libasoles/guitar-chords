@@ -230,6 +230,54 @@ def allowed_cells(midi, opens, hint, max_fret, barre=None):
     return under_barre(narrowed or cells, barre)
 
 
+# --- Notes that ring on (M2-M4, N7, N9) ------------------------------------------------------------------------
+# A plucked note sounds for its whole value. While it does, the finger that presses it stays (the books: «the fingers must
+# remain unmoved», Carcassi; «el dedo 3.º permanece quieto», Aguado), so the next notes must be playable around it. `tabify`
+# carries the ringing notes in its Viterbi state and asks `ringing_cost` what each candidate does to them.
+
+LIFT_COST = 1.5         # a finger that must leave a note still ringing: the new position is out of its reach
+CUT_COST = 4.0          # a new note on the string of a pressed note still ringing: it is cut
+SAME_FINGER_COST = 6.0  # N9: one written finger asked to hold two ringing notes (a barre excepted)
+POSITION_JUMP = 1.2     # N7: per fret the written fingers' position moves beyond one stretch between columns
+
+
+def written_position(combo, fingers):
+    """The hand position the written left-hand fingers imply for `combo` (finger `d` on fret `f`: `f - (d - 1)`), the lowest one if
+    several; None when no pressed note has a finger."""
+    positions = [f - (d - 1) for (_, f), d in zip(combo, fingers) if d and f > 0]
+    return min(positions) if positions else None
+
+
+def ringing_cost(held, combo, fingers, reach):
+    """What playing `combo` costs the notes still ringing from earlier columns. `held`: (string, fret, end, finger) of
+    pressed notes. Returns (cost, the notes that keep ringing).
+
+    * M2/M4: a ringing note whose string the new notes use is cut (`CUT_COST`), unless it is the same cell again;
+    * M3: a finger must not leave a ringing note, so the new fretted notes have to stay within `reach` frets of it (`LIFT_COST` per
+      note they do not);
+    * N9: one written finger cannot hold two different ringing notes (the first finger on one fret is a barre)."""
+    cost, kept = 0.0, []
+    fretted = [f for _, f in combo if f > 0]
+    for cell in held:
+        string, fret, _, finger = cell
+        if (string, fret) in combo:
+            continue  # played again: it re-enters the held notes below
+        if any(s == string for s, _ in combo):
+            cost += CUT_COST
+        elif fretted and max(max(fretted), fret) - min(min(fretted), fret) > reach:
+            cost += LIFT_COST
+        elif finger and any(d == finger and not (d == 1 and f == fret) for (_, f), d in zip(combo, fingers) if f > 0):
+            cost += SAME_FINGER_COST
+        else:
+            kept.append(cell)
+    return cost, kept
+
+
+def position_jump(position, previous):
+    """N7: the cost of the position the written fingers imply moving from `previous` to `position` (frets beyond one stretch)."""
+    return POSITION_JUMP * max(0, abs(position - previous) - EXTENSION)
+
+
 # --- Barre ("cejilla") ------------------------------------------------------------------------------------
 # The first finger lies across several strings at one fret for a stretch of the piece. Scores write it as «C 7»
 # (full barre at fret VII) or «½C 7» (half barre) over a dashed line that lasts as long as the barre. While it

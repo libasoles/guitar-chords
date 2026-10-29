@@ -42,9 +42,9 @@ con la imagen antes de citar páginas. Arpegios y plaqués tienen su propio docu
 | # | Heurística | Fuente | Estado en el código |
 |---|---|---|---|
 | M1 | **Preferir posiciones bajas** y los tonos que evitan la cejilla; las tonalidades difíciles vienen después. | Carcassi, primera parte (Do, Sol, Re, La, Mi, Fa) | **Parcial**: lo cubren los costos de traste alto (C4); no hay noción de tonalidad. |
-| M2 | **Sostener las notas**: los bajos y las demás voces suenan mientras dura su valor (*let ring*). | Carcassi, antes de los *Preludes*; Aguado, lección 9 §87 | **No implementada** como regla de duración. Se aproxima con M3 y M8 en los compases de arpegio. |
-| M3 | **Dedos quietos entre acordes** de un arpegio: los dedos de las notas ya pisadas no se mueven. | Carcassi, *Arpeggios with three and four fingers* («must remain unmoved») | **Parcial**: `fingering._one_cell_per_pitch` fuerza una sola casilla por altura en el compás (economía de dedos). No hay `lift_cost` por dedo levantado con la nota viva. |
-| M4 | **Dedo fijo mientras dura la nota** («el dedo 3.º permanece quieto»). | Aguado, lección 10; §87 | **No implementada** (misma limitación que M2). |
+| M2 | **Sostener las notas**: los bajos y las demás voces suenan mientras dura su valor (*let ring*). | Carcassi, antes de los *Preludes*; Aguado, lección 9 §87 | **Implementada** (suave): `tabify.sustained_path` (solo con `tabify.SUSTAIN`, que `prepare` activa en las subidas; las colecciones siguen con el Viterbi simple). El estado del Viterbi lleva las notas pisadas que aún suenan (`(cuerda, traste, fin, dedo)`; el fin sale de `build_columns`: `column["time"]`, `column["until"]`, ligaduras de unión incluidas) y `fingering.ringing_cost` cobra al candidato de cada columna: `CUT_COST = 4,0` por nota nueva en la cuerda de una nota pisada que aún suena (se corta). Las cuerdas al aire que suenan no cuestan. |
+| M3 | **Dedos quietos entre acordes** de un arpegio: los dedos de las notas ya pisadas no se mueven. | Carcassi, *Arpeggios with three and four fingers* («must remain unmoved») | **Implementada**: `tabify.sustained_path` (solo con `tabify.SUSTAIN`, que `prepare` activa en las subidas; las colecciones siguen con el Viterbi simple). El estado del Viterbi lleva las notas pisadas que aún suenan (`(cuerda, traste, fin, dedo)`; el fin sale de `build_columns`: `column["time"]`, `column["until"]`, ligaduras de unión incluidas) y `fingering.ringing_cost` cobra al candidato de cada columna: `LIFT_COST = 1,5` por nota pisada que suena y queda a más de `MAX_SPAN = 4` trastes de las notas nuevas (el dedo tendría que levantarse). Se suma a `fingering._one_cell_per_pitch` (A3). Hasta `MAX_STATES = 64` estados por columna. |
+| M4 | **Dedo fijo mientras dura la nota** («el dedo 3.º permanece quieto»). | Aguado, lección 10; §87 | **Implementada** (misma regla que M2 y M3, pagada una sola vez: la nota levantada o cortada deja de contar como sostenida). |
 | M5 | **Ligados en la misma cuerda**: ascendente, el dedo cae sobre la nota aguda; descendente, se tira hacia un lado. | Carcassi, «Of the Slur»; Aguado §226 | **Implementada** (blanda): `tabify.mark_slurred_columns` marca la columna que alcanza una ligadura de dos notas sueltas contiguas a ≤ 4 semitonos, y el Viterbi suma `SLUR_OFF_STRING` si cambia de cuerda. Las ligaduras largas son fraseo y no se tocan. En un compás de arpegio, `avoid_repeated_strings` puede deshacerlo. |
 | M6 | **Evitar la cuerda al aire** cuando su vibración choca con la nota que sigue (disonancia) o ensucia. | Aguado, lecciones 17, 21 y 27 | **No implementada.** Solo existe la regla del acorde en posición (A4, abajo). |
 | M7 | **Equísonos**: la misma nota en varias cuerdas; elegir por el timbre o por lo que sigue. | Aguado, lección 3 y §6 | **Parcial**: `tabify.candidates` genera todas las casillas posibles; elegir por timbre no tiene peso (la regla 21 de `criterios-de-digitacion.md` quedó **[no verificado]**: no hay cifra). |
@@ -66,9 +66,9 @@ Un MusicXML con `<fingering>`, `<string>` o `<fret>` limita dónde puede ir una 
 | N4 | A mayor traste, mayor número de dedo; los cruces se descartan. | **Implementada**. |
 | N5 | Las posiciones implícitas (`traste − (dedo−1)`) no difieren en más de una extensión. | **Implementada** (`EXTENSION = 1`). |
 | N6 | Si la anotación contradice la altura o no deja ninguna combinación, **gana la altura** y la anotación se ignora para esa columna. | **Implementada**: una nota nunca se pierde por una anotación mal leída. |
-| N7 | Continuidad de la posición entre columnas anotadas. | **No implementada.** |
+| N7 | Continuidad de la posición entre columnas anotadas. | **Implementada**: `fingering.written_position` (el traste menos el dedo menos uno, el más bajo del acorde) y `fingering.position_jump`: `POSITION_JUMP = 1,2` por traste que la posición escrita se mueve más allá de una extensión (`EXTENSION = 1`) entre dos columnas con dedos; se suma al costo normal de mano (0,6 por traste). Solo con `SUSTAIN`. |
 | N8 | Más trastes distintos que dedos, salvo cejilla. | **Implementada**: con dedos anotados la cubre N3 (cinco trastes obligan a repetir dedo); sin anotaciones, F8. |
-| N9 | Mismo dedo en dos notas simultáneas sostenidas (Al Kasimi 2007, piano). | **No implementada.** |
+| N9 | Mismo dedo en dos notas simultáneas sostenidas (Al Kasimi 2007, piano). | **Implementada**: `fingering.ringing_cost`: `SAME_FINGER_COST = 6,0` cuando el dedo escrito de una nota nueva es el de una nota pisada que aún suena en otra casilla (el dedo 1 en un mismo traste es cejilla y no cuenta). Solo con `SUSTAIN` y dedos escritos. |
 | N10 | Marcas de posición escritas («II», «C. V») como centro de la mano. | **No implementada.** |
 | N11 | Dedos de la mano derecha (`p i m a`) para fijar las cuerdas de un arpegio. | **No implementada** (ver F7). |
 
@@ -101,11 +101,10 @@ normal.
 
 Las pendientes tienen su ticket en GitHub («Heurísticas de digitación pendientes»).
 
-1. `lift_cost`: costo por levantar un dedo cuya nota aún suena (M2, M3, M4). Requiere llevar la duración de cada nota al
-   estado del Viterbi.
+1. ~~`lift_cost`~~ hecho (M2, M3, M4; `fingering.ringing_cost`). Pendiente: el costo de las cuerdas al aire que suenan (M6) y calibrar los pesos con digitaciones impresas de métodos con dedos (Sagreras no los trae: no mueve las pruebas de `compare_positions.py`).
 2. Mano derecha (F7, A6, A7, N11): asignar cuerdas a `p i m a` y exigir cuerdas contiguas en arpegios.
 3. Cuerdas al aire disonantes (M6).
-4. Continuidad de posición y el resto de eliminaciones por dedos (N7–N10).
+4. ~~Continuidad de posición~~ hecho (N7, N9). Quedan N10 y el resto de eliminaciones por dedos.
 5. Medir falsos positivos de la detección de arpegios con criterio musical (hoy solo hay conteo de infracciones).
 
 Cada una necesita pruebas con un compás real y su digitación esperada **antes** de tocar los pesos; los pesos de este

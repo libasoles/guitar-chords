@@ -377,3 +377,49 @@ class HarmonicTests(unittest.TestCase):
         kept = tabs()
         fingering.avoid_repeated_strings(kept, OPENS, pinned=[[False, False, True, False]])
         self.assertEqual(kept[0][2], [None, None, None, 12, None, None])
+
+
+class RingingNotesTests(unittest.TestCase):
+    """M2-M4 and N9: a pressed note that rings on constrains what comes next."""
+    HELD = (4, 2, 4.0, None)  # B on the 5th string, fret 2, ringing until beat 4
+
+    def cost(self, combo, held=None, fingers=None):
+        return fingering.ringing_cost([held or self.HELD], combo, fingers or [None] * len(combo), 4)
+
+    def test_a_note_within_reach_costs_nothing_and_keeps_ringing(self):
+        cost, kept = self.cost(((1, 4),))
+        self.assertEqual((cost, kept), (0.0, [self.HELD]))
+
+    def test_a_note_beyond_a_hands_span_lifts_the_finger(self):
+        cost, kept = self.cost(((1, 7),))  # fret 7 is five frets from fret 2
+        self.assertEqual((cost, kept), (fingering.LIFT_COST, []))
+
+    def test_open_strings_never_ask_a_finger_to_lift(self):
+        self.assertEqual(self.cost(((0, 0), (2, 0)))[0], 0.0)
+
+    def test_a_new_note_on_the_string_of_a_ringing_one_cuts_it(self):
+        cost, kept = self.cost(((4, 5),))
+        self.assertEqual((cost, kept), (fingering.CUT_COST, []))
+
+    def test_playing_the_same_cell_again_is_free(self):
+        self.assertEqual(self.cost(((4, 2),)), (0.0, []))
+
+    def test_one_finger_cannot_hold_two_ringing_notes(self):
+        held = (4, 2, 4.0, 2)
+        self.assertEqual(self.cost(((1, 4),), held, [2])[0], fingering.SAME_FINGER_COST)
+        self.assertEqual(self.cost(((1, 4),), held, [3])[0], 0.0)
+
+    def test_the_first_finger_may_hold_several_strings_at_one_fret(self):
+        held = (4, 2, 4.0, 1)
+        self.assertEqual(self.cost(((1, 2),), held, [1])[0], 0.0)  # a barre
+        self.assertEqual(self.cost(((1, 3),), held, [1])[0], fingering.SAME_FINGER_COST)
+
+    def test_written_position_is_the_fret_under_the_first_finger(self):
+        self.assertEqual(fingering.written_position(((1, 5), (2, 4)), [3, 2]), 3)
+        self.assertEqual(fingering.written_position(((1, 5),), [None]), None)
+        self.assertEqual(fingering.written_position(((1, 0),), [1]), None)  # an open string has no position
+
+    def test_position_jump_is_free_within_one_stretch(self):
+        self.assertEqual(fingering.position_jump(5, 4), 0)
+        self.assertAlmostEqual(fingering.position_jump(5, 3), fingering.POSITION_JUMP)
+        self.assertAlmostEqual(fingering.position_jump(9, 4), 4 * fingering.POSITION_JUMP)

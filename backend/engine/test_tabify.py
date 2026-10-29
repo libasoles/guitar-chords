@@ -445,6 +445,61 @@ if __name__ == '__main__':
     unittest.main()
 
 
+class SustainTests(unittest.TestCase):
+    """Notes that ring on (tabify.sustained_path, M2-M4 and N7)."""
+    OPENS = [64, 59, 55, 50, 45, 40]
+
+    def path(self, *specs):
+        """specs: (time, until, midi, [(cell, cost), ...], finger) per column, one note each; returns the cell chosen in each
+        column by `sustained_path`, and by the plain per-column minimum for comparison."""
+        flat = [{"time": time, "until": {midi: until}, "midis": [midi], "hints": {midi: {"finger": finger}} if finger else {}}
+                for time, until, midi, _, finger in specs]
+        layers = [[((cell,), cost) for cell, cost in options] for *_, options, _ in specs]
+        chosen = tabify.sustained_path(flat, layers, self.OPENS)
+        return [layers[i][k][0][0] for i, k in enumerate(chosen)]
+
+    def test_a_ringing_fretted_bass_keeps_the_next_notes_within_reach(self):
+        """B2 rings on the 5th string at fret 2 for the bar. G4 is cheaper at fret 8 of the B string, but the hand holding fret 2
+        cannot reach it: it goes to fret 3 of the first string."""
+        specs = [(0, 4, 47, [((4, 2), 0.0)], None),
+                 (1, 2, 64, [((0, 0), 0.0)], None),
+                 (2, 3, 67, [((1, 8), 0.0), ((0, 3), 3.5)], None)]
+        self.assertEqual(self.path(*specs)[2], (0, 3))
+        # The same notes with the bass already over (its value ends before the third column): the cheaper cell wins.
+        released = [(0, 1, 47, [((4, 2), 0.0)], None)] + specs[1:]
+        self.assertEqual(self.path(*released)[2], (1, 8))
+
+    def test_written_fingers_keep_the_position_between_columns(self):
+        """N7: finger 1 at fret 3, then finger 1 again for B4. Fret 12 of the second string is the cheaper cell, but it moves the
+        position nine frets; fret 7 of the first string moves it four."""
+        options = [((0, 7), 5.0), ((1, 12), 0.0)]
+        with_fingers = [(0, 1, 62, [((1, 3), 0.0)], 1), (1, 2, 71, options, 1)]
+        self.assertEqual(self.path(*with_fingers)[1], (0, 7))
+        without = [(0, 1, 62, [((1, 3), 0.0)], None), (1, 2, 71, options, None)]
+        self.assertEqual(self.path(*without)[1], (1, 12))
+
+    def test_columns_know_when_their_notes_stop_sounding_including_ties(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "s.musicxml"
+            tied = lambda step, tie: (f'<note><pitch><step>{step}</step><octave>3</octave></pitch><duration>4</duration>'
+                                      f'<tie type="{tie}"/><type>whole</type></note>')
+            plain = ('<note><pitch><step>G</step><octave>3</octave></pitch><duration>2</duration><type>half</type></note>'
+                     '<note><pitch><step>B</step><octave>3</octave></pitch><duration>2</duration><type>half</type></note>')
+            path.write_text(score_xml('<measure number="1"><attributes><divisions>1</divisions>'
+                                      '<time><beats>4</beats><beat-type>4</beat-type></time></attributes>'
+                                      + tied("E", "start") + '</measure><measure number="2">' + tied("E", "stop")
+                                      + '</measure><measure number="3">' + plain + '</measure>'), encoding="utf-8")
+            _, part = tabify.load_score([str(path)])
+            measures, _ = tabify.build_columns(part, [0, 0, 0])
+        first = measures[0]["columns"][0]
+        self.assertEqual((first["time"], first["until"]), (0.0, {first["notes"][0][1]: 8.0}))  # held across the barline
+        self.assertEqual([c["time"] for c in measures[2]["columns"]], [8.0, 10.0])
+        self.assertEqual([list(c["until"].values()) for c in measures[2]["columns"]], [[10.0], [12.0]])
+
+    def test_collections_keep_the_plain_viterbi_unless_asked(self):
+        self.assertFalse(tabify.SUSTAIN)
+
+
 class TuningTests(unittest.TestCase):
     def part(self, pitches, clef):
         m21 = tabify.m21

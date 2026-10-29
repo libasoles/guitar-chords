@@ -63,6 +63,11 @@ REPAIR_VOICES = False
 # Natural harmonics (fingering.parse_harmonic): a diamond head, <harmonic> or a «Hr. 12» mark pins the note to fret 12 of the
 # string an octave below it. Off for the collections (their harmonics are fingered by hand); `prepare` turns it on.
 HARMONICS = False
+# Sustained notes in the Viterbi (M2-M4, N7, N9 of docs/catalogo-de-heuristicas-de-digitacion.md): the cost of lifting a finger whose
+# note still rings, of cutting a ringing note with a new one on its string, of two notes held by the same finger and of
+# breaking the position the written fingers imply. It changes the engine's choices, so the collections keep it off and
+# `prepare` turns it on for uploads (their suggestion is persisted, so `export` does not need it).
+SUSTAIN = False
 
 PREVIEW_OPTIONS = {
     "pageWidth": 2100, "pageHeight": 60000, "scale": 40, "adjustPageHeight": True,
@@ -467,13 +472,16 @@ def build_columns(part, shifts=None, merge_unisons=None, harmonics=None):
     measures = []
     key = 0
     barres = barre_spans(part)
+    ends, tie_root = {}, {}  # when each plucked note stops sounding (ties included), by note key / by tied pitch
     for measure, shift in zip(source, shifts):
         by_offset = {}
         hints = {}
+        start = float(measure.getOffsetInHierarchy(part))
         for general in measure.recurse().notes:
             if general.duration.isGrace:
                 continue
             offset = float(general.getOffsetInHierarchy(measure))
+            stops = round(start + offset + float(general.duration.quarterLength), 4)
             members = general.notes if isinstance(general, m21.chord.Chord) else [general]
             for note in members:
                 note.editorial.tabKey = key
@@ -486,23 +494,35 @@ def build_columns(part, shifts=None, merge_unisons=None, harmonics=None):
                 hints[midi_key(note, shift)] = merge_hints(hints.get(midi_key(note, shift)), note_hints(note))
                 tie = note.tie or general.tie
                 if tie is not None and tie.type in ("stop", "continue"):
+                    root = tie_root.get(midi_key(note, shift))
+                    if root is not None:
+                        ends[root] = stops
+                        if tie.type == "stop":
+                            del tie_root[midi_key(note, shift)]
                     continue
                 column = by_offset.setdefault(offset, [])
                 if (MERGE_UNISONS if merge_unisons is None else merge_unisons) and any(m == note.pitch.midi + shift for _, m in column):
                     continue
                 column.append((note, note.pitch.midi + shift))
+                ends[note.editorial.tabKey] = stops
+                if tie is not None and tie.type == "start":
+                    tie_root[midi_key(note, shift)] = note.editorial.tabKey
         columns = [{"offset": o, "notes": by_offset[o]} for o in sorted(by_offset)]
-        start = float(measure.getOffsetInHierarchy(part))
         for column in columns:
+            column["time"] = round(start + column["offset"], 4)
             column["hints"] = {m: hints[m] for _, m in column["notes"] if hints.get(m)}
             column["barre"] = next((b["barre"] for b in barres if b["start"] - 1e-6 <= start + column["offset"] <= b["end"] + 1e-6),
                                    None)
         measures.append({"number": measure.number, "measure": measure, "columns": columns})
+    for measure in measures:
+        for column in measure["columns"]:
+            column["until"] = {m: ends[note.editorial.tabKey] for note, m in column["notes"]}
     mark_slurred_columns(part, measures)
     # Reported shift: the one most measures use.
     return measures, max(set(shifts), key=shifts.count, default=0)
 
 
+MAX_STATES = 64  # sustained states kept per column in the Viterbi
 SLUR_OFF_STRING = 8  # cost of leaving the string at a hammer-on/pull-off: far above any position move
 SLUR_MAX_STEP = 4  # semitones a finger can hammer on or pull off along one string
 
@@ -669,13 +689,14 @@ def playable_subset(midis, opens, hints=None, barre=None):
     return midis
 
 
-def assign_frets(measures, tuning=STANDARD_TUNING, arpeggio=False):
+def assign_frets(measures, tuning=STANDARD_TUNING, arpeggio=False, sustain=None):
     """Fills `cells` (ascii-tabs Column) and `fingering` {id(note): (string, fret)}
     on every Column, via Viterbi over the whole piece.
 
     `arpeggio` applies the string rules of `fingering` (no two different notes in a row on one string, a repeated
     note keeps its string, one cell per pitch in a measure): False never, True to every measure, "auto" to the
-    measures `fingering.detect_arpeggios` reads as arpeggios. Each measure's `arpeggio` flag records the outcome."""
+    measures `fingering.detect_arpeggios` reads as arpeggios. Each measure's `arpeggio` flag records the outcome.
+    `sustain` adds the costs of notes that ring on (see `SUSTAIN` and `sustained_path`): None follows the module flag."""
     opens = open_midis(tuning)
     flat = [col for m in measures for col in m["columns"]]
     layers = []
@@ -690,6 +711,12 @@ def assign_frets(measures, tuning=STANDARD_TUNING, arpeggio=False):
         combos = candidates(midis, opens, col.get("hints"), col.get("barre")) or [()]
         combos.sort(key=local_cost)
         layers.append([(c, local_cost(c)) for c in combos[:CANDIDATES_PER_COLUMN]])
+
+    if (SUSTAIN if sustain is None else sustain) and layers and all("time" in col and "until" in col for col in flat):
+        for i, k in enumerate(sustained_path(flat, layers, opens)):
+            set_column(flat[i], layers[i][k][0], opens)
+        apply_arpeggio_rules(measures, opens, arpeggio)
+        return
 
     # Viterbi; the state is the candidate plus the last known hand position.
     best = [[(cost, None, hand(c)) for c, cost in layers[0]]] if layers else []
@@ -715,6 +742,61 @@ def assign_frets(measures, tuning=STANDARD_TUNING, arpeggio=False):
             set_column(flat[i], layers[i][k][0], opens)
             k = best[i][k][1]
     apply_arpeggio_rules(measures, opens, arpeggio)
+
+
+def sustained_path(flat, layers, opens):
+    """Viterbi over the columns where the state also carries the pressed notes still ringing (M2-M4, N9) and the position the
+    written fingers imply (N7). `layers[i]` are the (combo, cost) candidates of `flat[i]`; returns the index chosen in each.
+
+    A ringing note outlives its own column, so what it costs to play column i depends on columns well before it: a bass held
+    through four melody notes constrains all of them. The state is (candidate, held notes); the cheapest path per state is kept,
+    at most `MAX_STATES` per column."""
+    fingers = [[col.get("hints", {}).get(m, {}).get("finger") for m in col["midis"]] for col in flat]
+    # row[i]: {(candidate, held): (cost, previous key, hand, written position)}
+    rows = []
+    first = {}
+    for k, (combo, cost) in enumerate(layers[0]):
+        held = _held_after(flat, 0, combo, [], opens)
+        first[(k, held)] = (cost, None, hand(combo), fingering.written_position(combo, fingers[0]))
+    rows.append(first)
+    for i in range(1, len(layers)):
+        slurred = flat[i].get("slurred")
+        row = {}
+        for key, (prev_cost, _, prev_hand, prev_position) in rows[i - 1].items():
+            prev_combo = layers[i - 1][key[0]][0]
+            alive = [cell for cell in key[1] if cell[2] > flat[i]["time"] + 1e-6]
+            for k, (combo, cost) in enumerate(layers[i]):
+                h = hand(combo)
+                move = abs(h - prev_hand) * 0.6 if h is not None and prev_hand is not None else 0
+                if slurred and combo and prev_combo and combo[0][0] != prev_combo[0][0]:
+                    move += SLUR_OFF_STRING
+                position = fingering.written_position(combo, fingers[i])
+                if position is not None and prev_position is not None:
+                    move += fingering.position_jump(position, prev_position)
+                ringing, kept = fingering.ringing_cost(alive, combo, fingers[i], MAX_SPAN)
+                total = prev_cost + cost + move + ringing
+                new_key = (k, _held_after(flat, i, combo, kept, opens))
+                if new_key not in row or total < row[new_key][0]:
+                    row[new_key] = (total, key, h if h is not None else prev_hand,
+                                    position if position is not None else prev_position)
+        if len(row) > MAX_STATES:
+            row = dict(sorted(row.items(), key=lambda item: (item[1][0], item[0][0]))[:MAX_STATES])
+        rows.append(row)
+    key = min(rows[-1], key=lambda k: (rows[-1][k][0], k[0]))
+    path = [0] * len(layers)
+    for i in range(len(layers) - 1, -1, -1):
+        path[i] = key[0]
+        key = rows[i][key][1]
+    return path
+
+
+def _held_after(flat, i, combo, kept, opens):
+    """The pressed notes ringing after column i plays `combo`: those it left ringing plus its own that outlast the next onset."""
+    following = flat[i + 1]["time"] if i + 1 < len(flat) else None
+    fingers = [flat[i].get("hints", {}).get(m, {}).get("finger") for m in flat[i]["midis"]]
+    own = [(s, f, flat[i]["until"].get(opens[s] + f, flat[i]["time"]), d) for (s, f), d in zip(combo, fingers) if f > 0]
+    ringing = kept + [cell for cell in own if following is not None and cell[2] > following + 1e-6]
+    return tuple(sorted(ringing, key=lambda cell: (cell[0], cell[1], cell[2], cell[3] or 0)))
 
 
 def pin_harmonics(col, opens):
@@ -1382,7 +1464,7 @@ def prepare(input_path, kind, tuning, out_dir, per_row=4, arpeggio="auto"):
     if not any(m["columns"] for m in measures):
         raise NoNotesError("No se reconocieron notas en la partitura.")
     resolved = TUNINGS.get(tuning) or guess_tuning(measures)
-    assign_frets(measures, resolved, arpeggio)
+    assign_frets(measures, resolved, arpeggio, sustain=True)
     suggestion = _suggestion(measures, resolved, shifts, title, subtitles)
     suggestion_path = os.path.join(out_dir, SUGGESTION_NAME)
     _write_json(suggestion_path, suggestion)
