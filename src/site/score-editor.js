@@ -2172,12 +2172,12 @@
 
   document.getElementById('scoreClear').addEventListener('click', async (event) => {
     const button = event.currentTarget;
-    const isFirst = active === 0;
+    const isOnly = docs.length === 1;
     const confirmed = await window.ScoreConfirm.ask({
-      title: t.clearTitle, description: isFirst ? t.clearDescription : t.clearDescriptionTab, confirm: t.clearConfirm, cancel: t.clearCancel,
+      title: t.clearTitle, description: isOnly ? t.clearDescription : t.clearDescriptionTab, confirm: t.clearConfirm, cancel: t.clearCancel,
     });
-    if (confirmed && isFirst) {
-      // La primera pestana no se quita: vuelve a una partitura nueva, sin notas, titulo ni autor.
+    if (confirmed && isOnly) {
+      // La unica pestana no se quita: vuelve a una partitura nueva, sin notas, titulo ni autor.
       change(() => {
         selected = null;
         group = [];
@@ -2187,7 +2187,7 @@
     } else if (confirmed) {
       docs.splice(active, 1);
       histories.splice(active, 1);
-      active -= 1;
+      active = Math.max(active - 1, 0);
       score = docs[active];
       history = histories[active];
       selected = null;
