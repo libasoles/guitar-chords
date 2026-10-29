@@ -710,6 +710,13 @@ async function checkDoubleClick(page) {
   });
   assert.equal(await page.evaluate(() => scoreEditor.fix()), true);
   assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => ev.v)), [2, 1, 1], 'fix recomputes voices, treble first');
+  // Con posiciones desalineadas que fabrican una tercera voz, fix() la une y acomoda la voz en orden.
+  await page.evaluate(() => {
+    scoreEditor.score.rows[0][0].splice(0, 3, { d: 'h', n: 25, at: 24 }, { d: 'q', n: 34, dot: true, at: 24 }, { d: 'q', n: 37, at: 48 });
+    scoreEditor.render();
+  });
+  assert.equal(await page.evaluate(() => scoreEditor.fix()), true);
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => [ev.at, ev.v])), [[0, 2], [0, 1], [36, 1]], 'fix merges the extra voice');
 }
 
 // Varias partituras: el titulo es la pestana activa y el + abre una partitura independiente.

@@ -771,6 +771,38 @@
   }
 
   // Fija `v` en todas las figuras segun la voz en la que hoy se dibujan, para que agregar otra no las reparta distinto.
+  // Reordena las voces de un compas descartando las `v` guardadas: si salen mas de 2, la voz sobrante (una figura que
+  // solo pisa a otra por una posicion desalineada) se une a la voz mas cercana en altura, y las voces de un compas
+  // que tuvo que unirse se acomodan en orden desde el inicio, sin huecos ni solapes. Si no cabe, el compas queda igual.
+  function mergeVoices(measure, limit) {
+    const saved = measure.map((ev) => Object.assign({}, ev));
+    measure.forEach((ev) => { delete ev.v; });
+    const lanes = voices(measure).filter((voice) => voice.groups.length).map((voice) => voice.groups.slice());
+    const high = (groups) => Math.max(-Infinity, ...groups.flatMap((g) => g.indices.map((i) => (measure[i].rest ? -Infinity : measure[i].n))));
+    const merged = lanes.length > 2;
+    while (lanes.length > 2) {
+      const extra = lanes.pop();
+      const target = lanes.map((lane, k) => [Math.abs(high(lane) - high(extra)), k]).sort((a, b) => a[0] - b[0])[0][1];
+      lanes[target] = lanes[target].concat(extra);
+    }
+    if (merged) {
+      for (const lane of lanes) {
+        let cursor = 0;
+        lane.sort((a, b) => a.at - b.at);
+        for (const group of lane) {
+          group.indices.forEach((i) => { measure[i].at = cursor; });
+          cursor += group.size;
+        }
+        if (cursor > limit) {
+          measure.forEach((ev, i) => { Object.keys(ev).forEach((key) => delete ev[key]); Object.assign(ev, saved[i]); });
+          return false;
+        }
+      }
+    }
+    settleVoices(measure);
+    return merged;
+  }
+
   function settleVoices(measure) {
     // Los carriles vacios (una `v` vieja sin figuras) no cuentan: se descartan para que no llenen las MAX_VOICE voces.
     voices(measure).filter((voice) => voice.groups.length).forEach((voice, k) => voice.groups.forEach((g) => g.indices.forEach((i) => { measure[i].v = k + 1; })));
@@ -1189,7 +1221,7 @@
 
   return {
     voicesText, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    length, gridOf, onsets, settle, placement, insertAt, placeRest, insertNote, restPitch, settleVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
+    length, gridOf, onsets, settle, placement, insertAt, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
     meterOf, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };

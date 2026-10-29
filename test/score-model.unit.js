@@ -952,6 +952,23 @@ test('la segunda negra con puntillo de una voz desalineada acomoda la voz en ord
   assert.deepEqual(plan.moves.sort((a, b) => a[0] - b[0]), [[0, 0], [1, 0], [2, 36]]);
 });
 
+test('mergeVoices une la tercera voz que solo existe por posiciones desalineadas y deja la 1 aguda', () => {
+  const dotted = (n, at, x = {}) => Object.assign({ d: 'q', n, at, dot: true }, x);
+  const first = [{ d: 'h', n: 25, at: 0, dot: true }, dotted(37, 0), dotted(35, 18)];
+  assert.equal(M.mergeVoices(first, 72), true);
+  assert.deepEqual(first.map((ev) => [ev.at, ev.v]), [[0, 2], [0, 1], [36, 1]]);
+  const shifted = [{ d: 'h', n: 25, at: 24 }, dotted(34, 24), { d: 'q', n: 37, at: 48 }];
+  assert.equal(M.mergeVoices(shifted, 72), true);
+  assert.deepEqual(shifted.map((ev) => [ev.at, ev.v]), [[0, 2], [0, 1], [36, 1]]);
+  const pinned = [dotted(35, 0, { v: 2 }), { d: 'h', n: 29, at: 0, v: 1, dot: true }, dotted(38, 36, { v: 3 })];
+  M.mergeVoices(pinned, 72);
+  assert.deepEqual(pinned.map((ev) => ev.v), [1, 2, 1]);
+  const full = [{ d: 'h', n: 25, at: 0, dot: true }, { d: 'q', n: 37, at: 0 }, { d: 'q', n: 35, at: 12 }, { d: 'q', n: 36, at: 30 }, { d: 'q', n: 34, at: 48 }];
+  const copy = JSON.parse(JSON.stringify(full));
+  assert.equal(M.mergeVoices(full, 72), false, 'si la voz unida no cabe en el compas, no se toca');
+  assert.deepEqual(full, copy);
+});
+
 test('la segunda negra se corre pegada a la primera para llevar puntillo en 6/8', () => {
   const score = M.emptyScore();
   M.setMeter(score, '6/8');
