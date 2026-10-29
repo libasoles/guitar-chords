@@ -302,11 +302,11 @@
       if (item.kind === 'rest') ev.rest = true;
       else ev.n = target.n;
       const spot = M.placement(measure, ev, target.t, score, target.mi);
-      if (!spot) return say(t.full);
+      if (!spot) return say(noRoom(ev, target.mi));
       const voice = M.voiceFor(measure, Object.assign({}, ev, { d: spot.d, dot: spot.dot }), spot.at, target.n, score, target.mi);
       if (voice && item.kind === 'rest') {
         const trial = measure.map((o) => Object.assign({}, o));
-        if (M.insertInVoice(trial, Object.assign({}, ev, { d: spot.d, dot: spot.dot }), spot.at, voice) < 0) return say(t.full);
+        if (M.insertInVoice(trial, Object.assign({}, ev, { d: spot.d, dot: spot.dot }), spot.at, voice) < 0) return say(t.fullVoices);
       }
       change(() => {
         ev.d = spot.d;
@@ -315,6 +315,11 @@
         group = [];
       });
     }
+  }
+
+  // Sin lugar para una figura: o es mas larga que el compas, o repite una nota que ya suena en ese tiempo.
+  function noRoom(ev, mi) {
+    return M.length(ev) > M.capacity(score, mi) ? t.full : t.duplicate;
   }
 
   function isPlacing(item) {
@@ -386,14 +391,14 @@
     ['tp', 'tie', 'slur', 'beam'].forEach((key) => { delete moved[key]; });
     if (!ev.rest) moved.n = target.n;
     const spot = M.placement(others, moved, target.t, score, target.mi);
-    if (!spot) return say(t.full);
+    if (!spot) return say(noRoom(moved, target.mi));
     moved.d = spot.d;
     if (spot.dot) moved.dot = true;
     else delete moved.dot;
     // Un silencio no tiene altura propia: arrastrarlo arriba o abajo lo cambia de voz.
     const voice = ev.rest ? M.voiceFor(others, moved, spot.at, target.n, score, target.mi) : null;
     if (ev.rest) delete moved.v;
-    if (voice && M.insertInVoice(others.map((o) => Object.assign({}, o)), moved, spot.at, voice) < 0) return say(t.full);
+    if (voice && M.insertInVoice(others.map((o) => Object.assign({}, o)), moved, spot.at, voice) < 0) return say(t.fullVoices);
     change(() => {
       all[from.mi].splice(from.i, 1);
       selected = { mi: target.mi, i: voice ? M.insertInVoice(destination, moved, spot.at, voice) : M.insertAt(destination, moved, spot.at) };
