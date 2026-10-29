@@ -703,7 +703,10 @@
         return (r.top + r.bottom) / 2 - origin.top;
       });
       const box = node.querySelector(':scope > g.staff > path').getBoundingClientRect();
-      return { left: box.left - origin.left, right: box.right - origin.left, lines };
+      // Donde empieza la musica: pasada la clave, la armadura y el compas que preceden a la primera figura.
+      const start = Math.max(box.left, ...[...node.querySelectorAll('g.clef, g.keySig, g.meterSig')].map((g) => g.getBoundingClientRect().right));
+      // La primera figura se dibuja un espacio mas alla de la barra o de la armadura.
+      return { left: box.left - origin.left, start: start - origin.left + (lines[4] - lines[0]) / 4, right: box.right - origin.left, lines };
     });
   }
 
@@ -996,7 +999,7 @@
 
   // Tiempo -> x dentro del compas, con las mismas anclas que timeAt.
   function xAtTime(time, m, starts, centers) {
-    const anchors = [{ x: m.left, t: 0 }, { x: m.right, t: M.capacity(score, layout.indexOf(m)) }];
+    const anchors = [{ x: m.start, t: 0 }, { x: m.right, t: M.capacity(score, layout.indexOf(m)) }];
     centers.forEach((c, i) => anchors.push({ x: c, t: starts[i] }));
     anchors.sort((p, q) => p.t - q.t || p.x - q.x);
     for (let k = 1; k < anchors.length; k += 1) {
@@ -1284,12 +1287,13 @@
 
   // Tiempo (en divisiones) que le corresponde a una x dentro del compas, interpolando entre las figuras ya dibujadas.
   function timeAt(x, m, starts, centers) {
-    const anchors = [{ x: m.left, t: 0 }, { x: m.right, t: M.capacity(score, layout.indexOf(m)) }];
+    const anchors = [{ x: m.start, t: 0 }, { x: m.right, t: M.capacity(score, layout.indexOf(m)) }];
     centers.forEach((c, i) => anchors.push({ x: c, t: starts[i] }));
     anchors.sort((p, q) => p.x - q.x || p.t - q.t);
     for (let k = 1; k < anchors.length; k += 1) {
       const a = anchors[k - 1];
       const b = anchors[k];
+      if (x <= a.x && a.t === 0) return 0;
       if (x <= b.x && b.x > a.x) return a.t + ((x - a.x) / (b.x - a.x)) * (b.t - a.t);
     }
     return M.capacity(score, layout.indexOf(m));
@@ -1373,6 +1377,7 @@
       marker.innerHTML = '<span class="score-marker-line"></span>';
       stage.appendChild(marker);
     }
+    marker.querySelectorAll('.score-marker-ledger').forEach((node) => node.remove());
     if (!hit) { marker.hidden = true; return; }
     marker.hidden = false;
     const line = marker.firstChild;
@@ -1383,6 +1388,20 @@
     line.style.left = x + 'px';
     line.style.top = hit.top - hit.space * 2 + 'px';
     line.style.height = (hit.bottom - hit.top) + hit.space * 4 + 'px';
+    // Una nota fuera del pentagrama muestra las lineas adicionales que le tocarian, una por cada espacio hasta su cabeza.
+    if ((drag && drag.kind || activeItem && activeItem.kind) !== 'note') return;
+    const beyond = (edge, sign) => {
+      for (let k = 1; sign * (hit.y - edge) >= k * hit.space - 1; k += 1) {
+        const ledger = document.createElement('span');
+        ledger.className = 'score-marker-ledger';
+        ledger.style.left = hit.x - hit.space * 1.1 + 'px';
+        ledger.style.width = hit.space * 2.2 + 'px';
+        ledger.style.top = edge + sign * k * hit.space - 1 + 'px';
+        marker.appendChild(ledger);
+      }
+    };
+    beyond(hit.top, -1);
+    beyond(hit.bottom, 1);
   }
 
   function startGhost(source, event, kind) {

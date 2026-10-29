@@ -754,6 +754,27 @@ async function checkAppendAfterLast(page) {
   assert.deepEqual(dragged, ['e34@0', 'e34@36', 'q36@12', 'q38@48'], 'arrastrar la negra a la derecha de la corchea la pone despues');
 }
 
+async function checkStartAndLedgers(page) {
+  await page.evaluate(() => { scoreEditor.score.rows[0][0] = []; scoreEditor.render(); return document.fonts.ready; });
+  await page.waitForTimeout(300);
+  const staff = await page.locator('#m0 > g.staff > path').first().boundingBox();
+  const content = await page.evaluate(() => Math.max(...[...document.querySelectorAll('#m0 g.clef, #m0 g.meterSig, #m0 g.keySig, .score-meter-trigger, .score-key-trigger')].map((g) => g.getBoundingClientRect().right)));
+  await page.keyboard.press('5');
+  // Apuntar apenas pasada la clave y el compas: la nota empieza con el compas, no corrida a la derecha.
+  await page.mouse.click(content + 1, staff.y + 10);
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].at), 0, 'apuntar al inicio del compas coloca la nota en el tiempo 0');
+  await page.keyboard.press('ControlOrMeta+z');
+  // Fuera del pentagrama el marcador muestra las lineas adicionales que se irian sumando.
+  const hover = async (dy) => { await page.mouse.move(content + 80, staff.y + dy); return page.locator('.score-marker-ledger').count(); };
+  const space = await page.evaluate(() => { const l = [...document.querySelectorAll('#m0 > g.staff > path')].map((p) => p.getBoundingClientRect().top); return (l[4] - l[0]) / 4; });
+  assert.equal(await hover(space * 2), 0, 'dentro del pentagrama no hay lineas adicionales');
+  const below = await hover(space * 4 + space * 2);
+  assert.ok(below >= 1, 'bajo el pentagrama aparecen lineas adicionales');
+  assert.ok((await hover(space * 4 + space * 4)) > below, 'cuanto mas grave, mas lineas');
+  assert.ok((await hover(-space * 3)) >= 1, 'sobre el pentagrama tambien');
+  await page.keyboard.press('Escape');
+}
+
 async function run() {
   const server = await serveStatic(path.join(__dirname, '..', 'dist', 'site'), 0);
   let browser;
@@ -931,6 +952,11 @@ async function run() {
     await appendPage.waitForSelector('#scoreStage g.measure');
     await checkAppendAfterLast(appendPage);
     await appendPage.close();
+    const ledgerPage = await newPage({ reducedMotion: 'reduce' });
+    await ledgerPage.goto(url);
+    await ledgerPage.waitForSelector('#scoreStage g.measure');
+    await checkStartAndLedgers(ledgerPage);
+    await ledgerPage.close();
     console.log('score-editor e2e: OK');
   } finally {
     if (browser) await browser.close();
