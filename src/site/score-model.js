@@ -471,23 +471,22 @@
     return end <= capacity(score, score && score.rows ? measures(score).indexOf(measure) : undefined);
   }
 
-  // Si el puntillo no cabe donde cayo la figura, devuelve donde debe empezar: pegada al final de lo que suena antes
-  // (el inicio del compas si no hay nada), siempre que no pise lo que viene despues; null si no hay lugar.
+  // La capacidad la deciden las figuras reales de su voz (notas y silencios), no el lugar donde cayo la figura:
+  // el puntillo cabe si la suma de duraciones de la voz no pasa el compas. La posicion solo decide donde queda:
+  // donde esta si entra ahi, y si no, pegada al final de lo que suena antes en su voz. Devuelve null si no hay lugar.
   function dotStart(measure, index, score) {
     const ev = measure[index];
     if (ev.dot || ev.tp || ev.d === 'w' || ev.d === 's' || ev.d === 'f') return null;
-    const starts = onsets(measure);
-    if (canDot(measure, index, score)) return starts[index];
-    const inColumn = (o, i) => starts[i] === starts[index] && o.d === ev.d && !!o.dot === !!ev.dot && !o.rest === !ev.rest;
     const limit = capacity(score, score && score.rows ? measures(score).indexOf(measure) : undefined);
     const size = VALUES[ev.d] * 1.5;
-    let start = 0;
-    measure.forEach((o, i) => {
-      if (!inColumn(o, i) && starts[i] < starts[index]) start = Math.max(start, starts[i] + length(o));
-    });
-    if (start >= starts[index] || start + size > limit) return null;
-    const blocked = measure.some((o, i) => !inColumn(o, i) && starts[i] >= starts[index] && starts[i] < start + size);
-    return blocked ? null : start;
+    const lane = voices(measure).find((voice) => voice.groups.some((g) => g.indices.includes(index)));
+    const mine = lane.groups.find((g) => g.indices.includes(index));
+    const others = lane.groups.filter((g) => g !== mine);
+    if (others.reduce((sum, g) => sum + g.size, 0) + size > limit) return null;
+    const before = Math.max(0, ...others.filter((g) => g.at < mine.at).map((g) => g.at + g.size));
+    const after = Math.min(limit, ...others.filter((g) => g.at > mine.at).map((g) => g.at));
+    const start = mine.at + size <= after ? mine.at : before;
+    return start + size <= after ? start : null;
   }
 
   // La tablatura sale sola de las notas; `tabs` guarda solo lo que el usuario corrigio a mano: { 'compas:inicio': [6 trastes] },

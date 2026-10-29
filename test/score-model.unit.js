@@ -923,7 +923,8 @@ test('una blanca sola en el compas admite puntillo aunque haya caido en el tiemp
   assert.equal(M.dotStart([{ d: 'h', n: 30, at: 48 }, { d: 'h', n: 33, at: 48 }], 0), 0);
   assert.equal(M.dotStart([{ d: 'h', n: 30, at: 24 }], 0), 24);
   assert.equal(M.dotStart([{ d: 'q', n: 31, at: 0 }, { d: 'h', n: 30, at: 48 }], 1), 24);
-  assert.equal(M.dotStart([{ d: 'q', n: 31, at: 0 }, { d: 'h', n: 30, at: 48 }, { d: 'q', n: 30, at: 72 }], 1), null);
+  assert.equal(M.dotStart([{ d: 'q', n: 31, at: 0 }, { d: 'h', n: 30, at: 48 }, { d: 'q', n: 30, at: 72, v: 2 }], 1), 24);
+  assert.equal(M.dotStart([{ d: 'q', n: 31, at: 0 }, { d: 'q', n: 31, at: 24 }, { d: 'h', n: 30, at: 48 }], 2), null);
 });
 
 test('la segunda negra se corre pegada a la primera para llevar puntillo en 6/8', () => {
