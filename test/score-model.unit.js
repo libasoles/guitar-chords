@@ -927,6 +927,15 @@ test('una blanca sola en el compas admite puntillo aunque haya caido en el tiemp
   assert.equal(M.dotStart([{ d: 'q', n: 31, at: 0 }, { d: 'q', n: 31, at: 24 }, { d: 'h', n: 30, at: 48 }], 2), null);
 });
 
+test('una blanca puede llevar puntillo aunque otra figura de su voz quede encima: pasa a otra voz', () => {
+  const score = M.emptyScore();
+  M.setMeter(score, '6/8');
+  const measure = [{ d: 'h', n: 25, at: 24, v: 1 }, { d: 'q', n: 34, dot: true, at: 24, v: 2 }, { d: 'q', n: 37, at: 48, v: 1 }];
+  assert.equal(M.dotStart(measure, 0, score), 0);
+  const pinned = [{ d: 'h', n: 25, at: 0, v: 1 }, { d: 'q', n: 34, dot: true, at: 24, v: 2 }, { d: 'q', n: 37, at: 48, v: 1 }];
+  assert.equal(M.dotStart(pinned, 0, score), 0);
+});
+
 test('la segunda negra se corre pegada a la primera para llevar puntillo en 6/8', () => {
   const score = M.emptyScore();
   M.setMeter(score, '6/8');

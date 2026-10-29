@@ -471,9 +471,9 @@
     return end <= capacity(score, score && score.rows ? measures(score).indexOf(measure) : undefined);
   }
 
-  // La capacidad la deciden las figuras reales de su voz (notas y silencios), no el lugar donde cayo la figura:
-  // el puntillo cabe si la suma de duraciones de la voz no pasa el compas. La posicion solo decide donde queda:
-  // donde esta si entra ahi, y si no, pegada al final de lo que suena antes en su voz. Devuelve null si no hay lugar.
+  // El puntillo cabe si la figura entra en el compas despues de lo que suena antes en su propia voz (notas y silencios
+  // reales, no el lugar donde cayo). La posicion solo decide donde queda: donde esta si entra ahi, y si no, pegada al
+  // final de lo anterior de su voz. Lo que se solape despues pasa a otra voz; null si no hay lugar.
   function dotStart(measure, index, score) {
     const ev = measure[index];
     if (ev.dot || ev.tp || ev.d === 'w' || ev.d === 's' || ev.d === 'f') return null;
@@ -481,12 +481,9 @@
     const size = VALUES[ev.d] * 1.5;
     const lane = voices(measure).find((voice) => voice.groups.some((g) => g.indices.includes(index)));
     const mine = lane.groups.find((g) => g.indices.includes(index));
-    const others = lane.groups.filter((g) => g !== mine);
-    if (others.reduce((sum, g) => sum + g.size, 0) + size > limit) return null;
-    const before = Math.max(0, ...others.filter((g) => g.at < mine.at).map((g) => g.at + g.size));
-    const after = Math.min(limit, ...others.filter((g) => g.at > mine.at).map((g) => g.at));
-    const start = mine.at + size <= after ? mine.at : before;
-    return start + size <= after ? start : null;
+    const before = Math.max(0, ...lane.groups.filter((g) => g.at < mine.at).map((g) => g.at + g.size));
+    const start = mine.at + size <= limit ? mine.at : before;
+    return start + size <= limit ? start : null;
   }
 
   // Al correr una figura para que lleve puntillo, lo que empezaba junto con ella (el acorde y las figuras de otras voces)

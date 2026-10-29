@@ -681,6 +681,13 @@ async function checkDoubleClick(page) {
   assert.deepEqual((await state())[0], [false, 0]);
   await bass.dblclick({ force: true });
   assert.deepEqual((await state())[0], [true, 0], 'the dot fits again: the upper quarter stays in its own voice');
+  // Con la negra de arriba guardada en la misma voz que la blanca, el puntillo tambien entra: la negra pasa a otra voz.
+  await page.evaluate(() => {
+    scoreEditor.score.rows[0][0].splice(0, 3, { d: 'h', n: 25, at: 0, v: 1 }, { d: 'q', n: 35, dot: true, at: 24, v: 2 }, { d: 'q', n: 37, at: 48, v: 1 });
+    scoreEditor.render();
+  });
+  await bass.dblclick({ force: true });
+  assert.deepEqual((await state())[0], [true, 0], 'the dot fits even when an upper figure shares its voice');
 }
 
 // Varias partituras: el titulo es la pestana activa y el + abre una partitura independiente.
