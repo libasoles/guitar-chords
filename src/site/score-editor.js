@@ -412,6 +412,9 @@
       // Un silencio se acomoda segun las notas que suenan a la vez: arrastrarlo arriba o abajo cambia su voz y su altura.
       const placed = M.placeRest(others, moved, spot.at, target.n, score, target.mi);
       if (!placed.measure) return say(fullVoice(placed.voice));
+      // Solo, el silencio queda a la altura donde se soltó: se puede bajar para escribir una nota en el centro.
+      const landed = placed.measure[placed.index];
+      if (!Number.isInteger(landed.n)) landed.n = M.clampPitch(target.n);
       change(() => {
         all[from.mi].splice(from.i, 1);
         destination.splice(0, destination.length, ...placed.measure);
@@ -485,9 +488,10 @@
   }
 
   function shiftSelected(delta) {
-    const notes = picks().map(eventAt).filter((ev) => ev && !ev.rest);
-    if (!notes.length) return;
-    change(() => { notes.forEach((ev) => { ev.n = M.clampPitch(ev.n + delta); }); });
+    const list = picks().filter((p) => eventAt(p));
+    if (!list.length) return;
+    // Un silencio sin altura propia esta en el centro del pentagrama.
+    change(() => { list.forEach((p) => { const ev = eventAt(p); ev.n = M.clampPitch((Number.isInteger(ev.n) ? ev.n : M.bottomLine(score, p.mi) + 4) + delta); }); });
   }
 
   function applyAction(action) {
@@ -1527,7 +1531,9 @@
       else if (d.insert) {
         const at = aimed(event);
         const target = locate(at.clientX, at.clientY);
-        if (target && activeItem) dropNew(activeItem, target);
+        // El lienzo lejos de todo compas es un lugar neutro: suelta la herramienta como un click fuera de la partitura.
+        if (!target) deactivateTool();
+        else if (activeItem) dropNew(activeItem, target);
       }
       return;
     }
@@ -1561,7 +1567,9 @@
       beginDrag(event, { insert: true });
       return;
     }
-    const match = eventUnder(event.clientX, event.clientY);
+    let match = eventUnder(event.clientX, event.clientY);
+    // Con una nota o un silencio en mano, un click sobre un silencio coloca la figura nueva en vez de seleccionarlo.
+    if (match && activeItem && !isModifier(activeItem) && eventAt(match).rest) match = null;
     const additive = event.shiftKey || event.ctrlKey || event.metaKey;
     if (!match) {
       if (!additive) setPicks([]);
