@@ -2504,7 +2504,7 @@ function siteMenu(strings, locale) {
   ];
   items.push(link(pagePath(SCORE_EDITOR_SLUG, locale), strings.menuScoreEditor, true, true));
   if (PARTITURA_ENABLED)
-    items.push(link(pagePath(PARTITURA_SLUG, locale), strings.menuAddTabs));
+    items.push(link(pagePath(PARTITURA_SLUG, locale), strings.menuAddTabs, true));
   items.push(link(pagePath("circulo-de-quintas", locale), strings.menuFifths));
   items.push(link(pagePath(ARTICLE_ARPEGGIOS_SLUG, locale), strings.artArpeggiosH1));
   const articles = [
