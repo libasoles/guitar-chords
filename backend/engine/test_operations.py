@@ -87,8 +87,9 @@ class PrepareTests(Base):
         self.assertEqual(self.load(self.prepare()["suggestion"])["uneven_measures"], [])
         broken = self.path("broken.musicxml")
         with open(broken, "w", encoding="utf-8") as f:
-            f.write(SCORE.replace("</measure></part>", '<note><pitch><step>E</step><octave>4</octave></pitch>'
-                                  '<duration>8</duration><type>half</type></note></measure></part>'))
+            # A short measure in the middle: the voice repair trims overruns, it cannot invent missing beats.
+            f.write(SCORE.replace('</measure><measure number="2">', '</measure><measure number="2">' + note("D", 3) + note("F", 4)
+                                  + '</measure><measure number="3">'))
         res = tabify.prepare(broken, "musicxml", "standard", self.path("broken"))
         self.assertEqual(self.load(res["suggestion"])["uneven_measures"], [1])
 
