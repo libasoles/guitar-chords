@@ -950,3 +950,12 @@ test('el MusicXML con varias voces manda las plicas agudas hacia arriba y la mas
   score.rows[0][0] = [{ d: 'q', n: 37, at: 0 }];
   assert.doesNotMatch(M.toMusicXml(score), /<stem>/);
 });
+
+test("voicesText nombra las figuras de cada compas por voz", () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ n: 37, d: "q" }, { n: 37, d: "q" }, { n: 37, d: "h", dot: true, at: 48 }];
+  score.rows[0][1] = [{ n: 37, d: "s", at: 0 }, { n: 37, d: "e", tp: 1 }, { rest: true, d: "q", n: 35, at: 24 }];
+  const lines = M.voicesText(score).split("\n");
+  assert.match(lines[0], /^voz 1: negra, negra, blanca con puntillo \| doble corchea, tresillo de corcheas, silencio de negra/);
+  assert.equal(M.voicesText(M.emptyScore()), "");
+});

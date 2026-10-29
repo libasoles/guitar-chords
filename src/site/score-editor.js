@@ -2343,5 +2343,8 @@
     say(t.loadError);
   });
 
+  // Consola del navegador: `voces()` lista las figuras de cada compas, por voz.
+  window.voces = () => console.log(M.voicesText(score));
+
   window.scoreEditor = { get score() { return score; }, render, get ghostOffset() { return ghostOffset; }, set ghostOffset(value) { ghostOffset = value; } };
 })();

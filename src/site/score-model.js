@@ -1120,8 +1120,29 @@
     return xml + '</part></score-partwise>\n';
   }
 
+  // Nombre de cada figura para el comando `voces` de la consola del navegador.
+  const FIGURES = {
+    w: ['redonda', 'redondas'], h: ['blanca', 'blancas'], q: ['negra', 'negras'], e: ['corchea', 'corcheas'],
+    s: ['doble corchea', 'dobles corcheas'], f: ['triple corchea', 'triples corcheas'],
+  };
+
+  function figureName(ev) {
+    const [one, many] = FIGURES[ev.d];
+    const name = ev.tp ? 'tresillo de ' + many : one + (ev.dot ? ' con puntillo' : '');
+    return ev.rest ? 'silencio de ' + name : name;
+  }
+
+  // Una linea por voz con las figuras de cada compas separadas por comas y los compases por " | ".
+  function voicesText(score) {
+    const bars = measures(score).map((measure) => ({ measure, lanes: voices(measure).filter((voice) => voice.groups.length) }));
+    const count = Math.max(0, ...bars.map((bar) => bar.lanes.length));
+    return Array.from({ length: count }, (_, k) => 'voz ' + (k + 1) + ': ' + bars.map(({ measure, lanes }) => (
+      lanes[k] ? lanes[k].groups.map((g) => figureName(measure[g.indices[0]])).join(', ') : '-'
+    )).join(' | ')).join('\n');
+  }
+
   return {
-    DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
+    voicesText, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
     length, gridOf, onsets, settle, placement, insertAt, placeRest, insertNote, restPitch, settleVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot, dotStart, dotMovers,
     meterOf, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
