@@ -677,6 +677,7 @@ async function checkDoubleClick(page) {
   const state = () => page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => [!!ev.dot, ev.at]));
   await bass.dblclick({ force: true });
   assert.deepEqual(await state(), [[true, 0], [true, 0], [false, 48]], 'the dotted half moves to the bar start with the figures that started with it');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => ev.v)), [undefined, undefined, undefined], 'dotting does not invent voices');
   await bass.dblclick({ force: true });
   assert.deepEqual((await state())[0], [false, 0]);
   await bass.dblclick({ force: true });

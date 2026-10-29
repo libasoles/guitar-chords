@@ -386,7 +386,7 @@
       const start = M.dotStart(measure, hit.i, score);
       if (start === null) return say(ev.d === 'w' || ev.d === 's' || ev.d === 'f' || ev.tp ? t.noDot : t.full);
       const movers = M.dotMovers(measure, hit.i, start).map((i) => measure[i]);
-      return change(() => { M.settleVoices(measure); ev.dot = true; movers.forEach((o) => { o.at = start; }); });
+      return change(() => { ev.dot = true; movers.forEach((o) => { o.at = start; }); });
     }
     if (ev.rest) return;
     change(() => {
