@@ -471,36 +471,43 @@
     return end <= capacity(score, score && score.rows ? measures(score).indexOf(measure) : undefined);
   }
 
-  // El puntillo cabe si la figura entra en el compas despues de lo que suena antes en su propia voz (notas y silencios
-  // reales, no el lugar donde cayo). La posicion solo decide donde queda: donde esta si entra ahi, y si no, pegada al
-  // final de lo que ya sono antes. Lo que se solape despues pasa a otra voz; null si no hay lugar.
-  function dotStart(measure, index, score) {
+  // Plan para ponerle puntillo a la figura `index`: { start, moves: [[indice, at], ...] } o null si no hay lugar.
+  // Cabe si entra en el compas despues de lo que suena antes (notas y silencios reales, no el lugar donde cayo): donde
+  // esta si entra ahi; si no, pegada al final de la figura anterior de su voz (la mas cercana en altura). Si esa sigue
+  // sonando cuando ella empieza, se acomoda primero y la figura va despues, sin saltarla. Lo que empezaba junto con una figura corrida la acompana para seguir alineado.
+  function dotPlan(measure, index, score) {
     const ev = measure[index];
     if (ev.dot || ev.tp || ev.d === 'w' || ev.d === 's' || ev.d === 'f') return null;
     const limit = capacity(score, score && score.rows ? measures(score).indexOf(measure) : undefined);
     const size = VALUES[ev.d] * 1.5;
-    const lane = voices(measure).find((voice) => voice.groups.some((g) => g.indices.includes(index)));
-    const mine = lane.groups.find((g) => g.indices.includes(index));
-    // Lo anterior: lo de su voz, y lo de cualquier voz que ya termino antes de que ella empiece (no se salta figuras ya sonadas).
-    const everyone = voices(measure).flatMap((voice) => voice.groups);
-    const before = Math.max(0, ...everyone.filter((g) => g !== mine && g.at < mine.at && (lane.groups.includes(g) || g.at + g.size <= mine.at)).map((g) => g.at + g.size));
-    const start = mine.at + size <= limit ? mine.at : before;
-    return start + size <= limit ? start : null;
+    const lanes = voices(measure);
+    const everyone = lanes.flatMap((voice) => voice.groups);
+    const mine = everyone.find((g) => g.indices.includes(index));
+    const laneOf = (g) => lanes.find((voice) => voice.groups.includes(g));
+    const endBefore = (t, skip) => Math.max(0, ...everyone.filter((g) => !skip.includes(g) && g.at < t && g.at + g.size <= t).map((g) => g.at + g.size));
+    // Mueve el grupo y lo que empieza junto con el a `to`, salvo lo que pisaria a otra figura de su propia voz.
+    const together = (group, to) => everyone.filter((g) => g === group || (g.at === group.at && laneOf(g).groups.every((o) => o === g || o.at + o.size <= to || to + g.size <= o.at)))
+      .flatMap((g) => g.indices.map((i) => [i, to]));
+    if (mine.at + size <= limit) return { start: mine.at, moves: [] };
+    // Su voz es la de la figura anterior mas cercana en altura (las voces graves y agudas no se mezclan).
+    const pitch = (g) => (measure[g.indices[0]].rest ? Infinity : Math.abs(Math.max(...g.indices.map((i) => measure[i].n)) - ev.n));
+    const earlier = everyone.filter((g) => g !== mine && g.at < mine.at);
+    const near = earlier.slice().sort((a, b) => (pitch(a) === pitch(b) ? b.at - a.at : pitch(a) < pitch(b) ? -1 : 1))[0];
+    let start = 0;
+    let moves = [];
+    if (near && near.at + near.size <= mine.at) start = near.at + near.size;
+    else if (near) {
+      const first = endBefore(near.at, [near, mine]);
+      start = first + near.size;
+      moves = together(near, first);
+    }
+    if (start + size > limit) return null;
+    return { start, moves: moves.concat(together(mine, start)) };
   }
 
-  // Al correr una figura para que lleve puntillo, lo que empezaba junto con ella (el acorde y las figuras de otras voces)
-  // la acompana para seguir alineado, salvo lo que pisaria a otra figura de su propia voz en el nuevo lugar.
-  function dotMovers(measure, index, start) {
-    const starts = onsets(measure);
-    const lanes = voices(measure);
-    const groupOf = (i) => { for (const lane of lanes) { const g = lane.groups.find((x) => x.indices.includes(i)); if (g) return [lane, g]; } return []; };
-    const [, mine] = groupOf(index);
-    return measure.map((_, i) => i).filter((i) => {
-      const [lane, group] = groupOf(i);
-      if (group === mine) return true;
-      if (starts[i] !== starts[index]) return false;
-      return lane.groups.every((g) => g === group || g.at + g.size <= start || start + group.size <= g.at);
-    });
+  function dotStart(measure, index, score) {
+    const plan = dotPlan(measure, index, score);
+    return plan ? plan.start : null;
   }
 
   // La tablatura sale sola de las notas; `tabs` guarda solo lo que el usuario corrigio a mano: { 'compas:inicio': [6 trastes] },
@@ -1180,7 +1187,7 @@
 
   return {
     voicesText, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    length, gridOf, onsets, settle, placement, insertAt, placeRest, insertNote, restPitch, settleVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot, dotStart, dotMovers,
+    length, gridOf, onsets, settle, placement, insertAt, placeRest, insertNote, restPitch, settleVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
     meterOf, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };

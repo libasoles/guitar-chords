@@ -943,6 +943,15 @@ test('una negra en otra voz que no cabe con puntillo va despues de lo que ya ter
   assert.equal(M.dotStart(measure, 2, score), 36);
 });
 
+test('la segunda negra con puntillo de una voz desalineada acomoda la voz en orden', () => {
+  const score = M.emptyScore();
+  M.setMeter(score, '6/8');
+  const measure = [{ d: 'h', n: 25, at: 24 }, { d: 'q', n: 34, dot: true, at: 24 }, { d: 'q', n: 37, at: 48 }];
+  const plan = M.dotPlan(measure, 2, score);
+  assert.equal(plan.start, 36);
+  assert.deepEqual(plan.moves.sort((a, b) => a[0] - b[0]), [[0, 0], [1, 0], [2, 36]]);
+});
+
 test('la segunda negra se corre pegada a la primera para llevar puntillo en 6/8', () => {
   const score = M.emptyScore();
   M.setMeter(score, '6/8');

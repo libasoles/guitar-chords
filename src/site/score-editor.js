@@ -383,10 +383,10 @@
     const ev = measure[hit.i];
     if (item.kind === 'dot') {
       if (ev.dot) return change(() => { delete ev.dot; });
-      const start = M.dotStart(measure, hit.i, score);
-      if (start === null) return say(ev.d === 'w' || ev.d === 's' || ev.d === 'f' || ev.tp ? t.noDot : t.full);
-      const movers = M.dotMovers(measure, hit.i, start).map((i) => measure[i]);
-      return change(() => { ev.dot = true; movers.forEach((o) => { o.at = start; }); });
+      const plan = M.dotPlan(measure, hit.i, score);
+      if (!plan) return say(ev.d === 'w' || ev.d === 's' || ev.d === 'f' || ev.tp ? t.noDot : t.full);
+      const moves = plan.moves.map(([i, at]) => [measure[i], at]);
+      return change(() => { ev.dot = true; moves.forEach(([o, at]) => { o.at = at; }); });
     }
     if (ev.rest) return;
     change(() => {

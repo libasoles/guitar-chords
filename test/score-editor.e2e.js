@@ -696,6 +696,13 @@ async function checkDoubleClick(page) {
   });
   await page.locator('#e0-2 .notehead').dblclick({ force: true });
   assert.deepEqual((await state())[2], [true, 36], 'the dotted quarter lands after the figure that already sounded');
+  // Voz desalineada (blanca y negra con puntillo en el segundo tiempo): la segunda negra con puntillo va despues de la primera.
+  await page.evaluate(() => {
+    scoreEditor.score.rows[0][0].splice(0, 3, { d: 'h', n: 25, at: 24 }, { d: 'q', n: 34, dot: true, at: 24 }, { d: 'q', n: 37, at: 48 });
+    scoreEditor.render();
+  });
+  await page.locator('#e0-2 .notehead').dblclick({ force: true });
+  assert.deepEqual(await state(), [[false, 0], [true, 0], [true, 36]], 'the misaligned voice is packed in order');
 }
 
 // Varias partituras: el titulo es la pestana activa y el + abre una partitura independiente.
