@@ -522,6 +522,13 @@ body.score-body {
   opacity: 0.35;
 }
 
+.score-marker-ledger {
+  position: absolute;
+  height: 2px;
+  background: var(--note-selected);
+  opacity: 0.6;
+}
+
 .score-ghost {
   position: fixed;
   top: 0;
