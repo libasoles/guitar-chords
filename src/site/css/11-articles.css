@@ -404,8 +404,21 @@
 /* Lazy pages show the loading animation until they arrive (the script in build-site.js sets data-loading). */
 .modal-page[data-loading] {
   min-height: 16rem;
-  /* Pages are taller than the viewport, so the animation is pinned to the viewport's center (the page clips it). */
-  background: url("partitura-loading.svg") center / 8rem no-repeat fixed;
+  /* Same spinning circle as the partitura tool. Pages are taller than the viewport, so it is pinned to the viewport's
+     center (the page clips it); the paper-colored layer cuts the conic gradient into a ring. */
+  background:
+    radial-gradient(circle closest-side, var(--paper) 0 85%, transparent 86% 99%, var(--paper) 100%) center / 8rem 8rem no-repeat fixed,
+    conic-gradient(from var(--spin-angle), #333 0 25%, #e3e3e3 0 100%) center / 8rem 8rem no-repeat fixed;
+  animation: modal-page-spin 0.9s linear infinite;
+}
+@property --spin-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes modal-page-spin { to { --spin-angle: 360deg; } }
+@media (prefers-reduced-motion: reduce) {
+  .modal-page[data-loading] { animation-duration: 2.4s; }
 }
 .modal-footer {
   align-items: center;

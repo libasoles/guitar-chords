@@ -2051,10 +2051,6 @@ require("esbuild").buildSync({
   define: { "process.env.NODE_ENV": '"production"' },
 });
 copyFile(
-  path.join(SRC_SITE, "partitura-loading.svg"),
-  path.join(ASSETS_DIST, "partitura-loading.svg"),
-);
-copyFile(
   path.join(SRC_VENDOR, "verovio-toolkit-wasm.js"),
   path.join(VENDOR_DIST, "verovio-toolkit-wasm.js"),
 );
@@ -2068,10 +2064,6 @@ if (PARTITURA_ENABLED) {
     path.join(ASSETS_DIST, "partitura.css"),
     readPartituraCss(),
     "utf8",
-  );
-  copyFile(
-    path.join(SRC_SITE, "partitura-loading.svg"),
-    path.join(ASSETS_DIST, "partitura-loading.svg"),
   );
   copyFile(
     path.join(SRC_SITE, "partitura-banner.webp"),
