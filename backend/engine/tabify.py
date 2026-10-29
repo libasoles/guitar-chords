@@ -87,6 +87,120 @@ def string_names(tuning):
     return [m21.pitch.Pitch(p).name.replace("-", "♭") for p in reversed(tuning.split(","))]
 
 
+def _nominal(note, divisions):
+    """Written length of a note in `divisions` units, ignoring any tuplet."""
+    written = m21.duration.Duration(type=note.findtext("type"))
+    written.dots = len(note.findall("dot"))
+    return Fraction(written.quarterLength) * divisions
+
+
+def repair_orphan_tuplets(root):
+    """Strip tuplets the OMR left unfinished and realign the voices that followed them.
+
+    Audiveris sometimes reads one note as a lone tuplet member (a 16th lasting 2/3), or
+    opens a tuplet in one voice and closes it in another. The voices then disagree about
+    where the beat ends, so the same bass note is engraved far from the melody note it
+    sounds with and loses its column. A tuplet is kept only when each run of tuplet
+    notes in a voice is a whole number of groups. Otherwise its notes go back to their
+    written lengths and every <forward>/<backup> is re-derived so the voices still meet
+    at the same instants. Returns whether anything changed."""
+    changed = False
+    for part in root.findall("part"):
+        divisions = beats = beat_type = None
+        for measure in part.findall("measure"):
+            for attributes in measure.findall("attributes"):
+                if attributes.findtext("divisions") is not None:
+                    divisions = Fraction(attributes.findtext("divisions"))
+                if attributes.findtext("time/beats") is not None:
+                    beats = attributes.findtext("time/beats")
+                    beat_type = attributes.findtext("time/beat-type")
+            if not divisions or divisions <= 0:
+                continue
+            changed = _repair_measure(measure, divisions, beats, beat_type) or changed
+    return changed
+
+
+def _repair_measure(measure, divisions, beats, beat_type):
+    """`repair_orphan_tuplets` for one measure."""
+    # Document order of notes per voice, to find runs of tuplet notes.
+    runs, voice_run = [], {}
+    voices = {}
+    notes = [n for n in measure.findall("note") if n.find("chord") is None and n.find("grace") is None]
+    for note in notes:
+        voice = note.findtext("voice")
+        voices.setdefault(voice, []).append(note)
+        if note.find("time-modification") is None:
+            voice_run.pop(voice, None)
+            continue
+        run = voice_run.get(voice)
+        if run is None:
+            run = voice_run[voice] = []
+            runs.append(run)
+        run.append(note)
+    orphans = [n for run in runs for n in run
+               if len(run) % int(run[0].find("time-modification").findtext("actual-notes")) != 0]
+    # A voice that fills the measure only once its tuplets are written at face value
+    # was misread, even when the tuplet groups look whole.
+    try:
+        whole = Fraction(4) * divisions * int(beats) / int(beat_type)
+    except (TypeError, ValueError, ZeroDivisionError):
+        whole = None
+    for voice_notes in voices.values():
+        tupleted = [n for n in voice_notes if n.find("time-modification") is not None]
+        if not tupleted or whole is None:
+            continue
+        actual = sum(Fraction(n.findtext("duration")) for n in voice_notes)
+        nominal = sum(_nominal(n, divisions) if n in tupleted else Fraction(n.findtext("duration"))
+                      for n in voice_notes)
+        if actual != whole and nominal == whole:
+            orphans.extend(n for n in tupleted if n not in orphans)
+    if not orphans:
+        return False
+    # Walk the measure once in the old clock, collecting where each orphan ended.
+    position, deltas = Fraction(0), []
+    for element in measure:
+        duration = element.findtext("duration")
+        if element.tag == "note" and element.find("chord") is None and element.find("grace") is None:
+            if element in orphans:
+                deltas.append((position + Fraction(duration), _nominal(element, divisions) - Fraction(duration)))
+            position += Fraction(duration)
+        elif element.tag == "forward":
+            position += Fraction(duration)
+        elif element.tag == "backup":
+            position -= Fraction(duration)
+
+    def remap(instant):
+        return instant + sum((delta for end, delta in deltas if end <= instant), Fraction(0))
+
+    old, new = Fraction(0), Fraction(0)
+    for element in list(measure):
+        duration = element.findtext("duration")
+        if element.tag == "note" and element.find("chord") is None and element.find("grace") is None:
+            length = Fraction(duration)
+            if element in orphans:
+                length = _nominal(element, divisions)
+                element.find("duration").text = str(int(length))
+                element.remove(element.find("time-modification"))
+                for notations in element.findall("notations"):
+                    for tuplet in notations.findall("tuplet"):
+                        notations.remove(tuplet)
+                    if len(notations) == 0:
+                        element.remove(notations)
+            old += Fraction(duration)
+            new += length
+        elif element.tag == "forward":
+            old += Fraction(duration)
+            length = remap(old) - new
+            element.find("duration").text = str(int(length))
+            new += length
+        elif element.tag == "backup":
+            old -= Fraction(duration)
+            length = new - remap(old)
+            element.find("duration").text = str(int(length))
+            new -= length
+    return True
+
+
 def read_score(path):
     """Repair zero divisions from OMR using the written note lengths.
 
@@ -144,6 +258,7 @@ def read_score(path):
             for duration in section["durations"]:
                 duration.text = str(int(Fraction(duration.text) * factor))
             repaired = True
+    repaired = repair_orphan_tuplets(root) or repaired
     if repaired:
         return m21.converter.parseData(ET.tostring(root, encoding="unicode"), format="musicxml")
     return m21.converter.parse(path)

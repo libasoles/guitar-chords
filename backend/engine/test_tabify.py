@@ -21,6 +21,30 @@ def note(duration, kind="half", extra=""):
 
 
 class ScoreImportTests(unittest.TestCase):
+    def test_lone_tuplet_note_is_repaired_and_voices_realign(self):
+        """Audiveris read one 16th as a lone tuplet member and closed it in another voice."""
+        def n(step, octave, duration, kind, voice, tuplet=False):
+            tm = ('<time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes>'
+                  '</time-modification>') if tuplet else ''
+            return (f'<note><pitch><step>{step}</step><octave>{octave}</octave></pitch><duration>{duration}</duration>'
+                    f'<voice>{voice}</voice><type>{kind}</type>{tm}</note>')
+        top = ''.join(n(s, o, 3, '16th', 1) for s, o in (("E", 3), ("B", 3), ("G", 3), ("E", 3), ("B", 3)))
+        top += n("G", 3, 2, '16th', 1, tuplet=True) + n("B", 2, 3, '16th', 1) + n("G", 3, 3, '16th', 1)
+        xml = score_xml('<measure number="1"><attributes><divisions>12</divisions><time><beats>2</beats>'
+                        '<beat-type>4</beat-type></time></attributes>' + top
+                        + '<backup><duration>23</duration></backup>' + n("E", 3, 9, 'eighth', 2) + n("E", 3, 9, 'eighth', 2)
+                        + '<backup><duration>18</duration></backup><forward><duration>17</duration><voice>3</voice></forward>'
+                        + n("B", 2, 4, 'eighth', 3, tuplet=True) + '</measure>')
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "s.musicxml"
+            path.write_text(xml)
+            _, part = tabify.load_score([str(path)])
+        notes = list(part.recurse().notes)
+        self.assertTrue(all(not n.duration.tuplets for n in notes))
+        bass = [n for n in notes if n.pitch.nameWithOctave == "B2" and n.getContextByClass(tabify.m21.stream.Voice).id == "3"]
+        self.assertEqual(float(bass[0].getOffsetInHierarchy(part)), 1.5)
+        self.assertEqual(float(bass[0].duration.quarterLength), 0.5)
+
     def test_slur_between_ledger_notes_goes_below_whatever_the_ocr_said(self):
         def low(step, octave, slur):
             return (f'<note><pitch><step>{step}</step><octave>{octave}</octave></pitch><duration>1</duration>'
