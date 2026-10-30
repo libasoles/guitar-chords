@@ -71,16 +71,30 @@
   const MAX_VOICE = 4;
   const REST_CLEARANCE = 6; // pasos diatonicos entre una nota y un silencio que suenan a la vez
 
-  // Un tresillo ocupa dos tercios de su valor; no admite puntillo.
+  // Grupos de valoracion especial: n figuras (clave) ocupan el tiempo de TUPLETS[n] del mismo valor. `tp` identifica el
+  // grupo dentro del compas y `tn` guarda cuantas figuras tiene (sin `tn` son 3: el tresillo). No admiten puntillo.
+  const TUPLETS = { 2: 3, 3: 2, 4: 3, 5: 4, 6: 4, 7: 4, 8: 6, 9: 8 };
+  const TUPLET_NAMES = { 2: 'dosillo', 3: 'tresillo', 4: 'cuatrillo', 5: 'quintillo', 6: 'sextillo', 7: 'septillo', 8: 'octillo', 9: 'nonillo' };
+  const MULTIPLIER = 630; // divisiones extra al exportar: hace enteras las duraciones de todos los grupos (5, 7 y 9 figuras)
+
+  // Los grupos dan duraciones fraccionarias (5 corcheas en 4: 9,6); se redondea para que las sumas sean exactas.
+  // Un grupo completo vuelve a un entero (7 figuras de 24/7 suman 24 y no 23,999997).
+  const tidy = (x) => (Math.abs(x - Math.round(x)) < 1e-4 ? Math.round(x) : Math.round(x * 1e6) / 1e6);
+
+  function tupletSize(ev) {
+    return TUPLETS[ev.tn] ? ev.tn : 3;
+  }
+
   function length(ev) {
-    return ev.tp ? VALUES[ev.d] * 2 / 3 : ev.dot === 2 ? VALUES[ev.d] * 1.75 : ev.dot ? VALUES[ev.d] * 1.5 : VALUES[ev.d];
+    return ev.tp ? tidy(VALUES[ev.d] * TUPLETS[tupletSize(ev)] / tupletSize(ev)) : ev.dot === 2 ? VALUES[ev.d] * 1.75 : ev.dot ? VALUES[ev.d] * 1.5 : VALUES[ev.d];
   }
 
   // Cuadricula de posicion para estas figuras: la mas fina que necesiten (un tresillo y una fusa juntos, 1).
   function gridOf(events) {
+    const odd = events.some((ev) => ev.tp && tupletSize(ev) !== 3);
     const triplet = events.some((ev) => ev.tp);
     const thirtySecond = events.some((ev) => ev.d === 'f');
-    return triplet ? (thirtySecond ? 1 : 2) : thirtySecond ? 3 : GRID;
+    return odd ? 0.1 : triplet ? (thirtySecond ? 1 : 2) : thirtySecond ? 3 : GRID;
   }
 
   function savedVoice(ev) {
@@ -92,7 +106,7 @@
     let cursor = 0;
     return measure.map((ev) => {
       const at = Number.isInteger(ev.at) ? ev.at : cursor;
-      cursor = Math.max(cursor, at + length(ev));
+      cursor = tidy(Math.max(cursor, at + length(ev)));
       return at;
     });
   }
@@ -194,7 +208,7 @@
       const start = Math.max(...batch.map((item) => item.voice.end));
       batch.forEach(({ g, voice }) => {
         g.at = start;
-        voice.end = start + g.size;
+        voice.end = tidy(start + g.size);
         g.indices.forEach((i) => { starts[i] = start; });
       });
       p = q;
@@ -250,7 +264,7 @@
     const size = length(ev);
     if (size > limit) return null;
     const grid = gridOf([ev]);
-    const at = Math.max(0, Math.min(limit - size, Math.round(t / grid) * grid));
+    const at = Math.max(0, Math.min(limit - size, tidy(Math.round(t / grid) * grid)));
     const starts = hints(others);
     if (!ev.rest && others.some((o, i) => !o.rest && starts[i] === at && o.n === ev.n && o.acc === ev.acc)) return null;
     if (!ev.rest) {
@@ -365,7 +379,7 @@
           if (!pieces) return null;
           made = pieces.map((value, k) => {
             const part = Object.assign(clone(ev), value, { at: 0 });
-            delete part.tp; delete part.dot;
+            delete part.tp; delete part.tn; delete part.dot;
             if (value.dot) part.dot = true;
             if (k < pieces.length - 1 || remaining > size) { if (!ev.rest) part.tie = true; delete part.slur; }
             return part;
@@ -829,6 +843,7 @@
         if (!value) return false;
         const part = Object.assign(clone(ev), value, { at: cursor });
         delete part.tp;
+        delete part.tn;
         delete part.dot;
         if (value.dot) part.dot = true;
         size -= length(value);
@@ -1224,7 +1239,7 @@
           if (raw.rest) { ev.rest = true; if (Number.isInteger(raw.n)) ev.n = clampPitch(raw.n); }
           else if (Number.isInteger(raw.n)) ev.n = clampPitch(raw.n);
           else return;
-          if (Number.isInteger(raw.tp) && raw.tp > 0 && TRIPLETABLE.includes(raw.d)) ev.tp = raw.tp;
+          if (Number.isInteger(raw.tp) && raw.tp > 0 && TRIPLETABLE.includes(raw.d)) { ev.tp = raw.tp; if (TUPLETS[raw.tn] && raw.tn !== 3) ev.tn = raw.tn; }
           else if (raw.dot && raw.d !== 'w' && raw.d !== 's' && raw.d !== 'f') ev.dot = raw.dot === 2 && DOUBLE_DOTTABLE.includes(raw.d) ? 2 : true;
           if (!ev.rest && ACCIDENTALS[raw.acc]) ev.acc = raw.acc;
           if (!ev.rest && raw.tie === true) ev.tie = true;
@@ -1555,13 +1570,14 @@
     const picked = lane.groups.filter((g) => g.indices.some((i) => sel.some((s) => s.i === i)));
     if (!sel.every((s) => picked.some((g) => g.indices.includes(s.i)))) return null;
     const first = lane.groups.indexOf(picked[0]);
-    const joined = picked.every((g, k) => lane.groups[first + k] === g && (k === 0 || picked[k - 1].at + picked[k - 1].size === g.at));
+    const joined = picked.every((g, k) => lane.groups[first + k] === g && (k === 0 || tidy(picked[k - 1].at + picked[k - 1].size) === tidy(g.at)));
     return joined ? { measure, lane, groups: picked, mi: sel[0].mi } : null;
   }
 
+  // Seleccion de 2 a 9 figuras seguidas del mismo valor: ofrece el grupo que corresponde a su cantidad.
   function tripletRun(score, sel) {
     const r = run(score, sel);
-    if (!r || r.groups.length < 3 || r.groups.length % 3) return null;
+    if (!r || !TUPLETS[r.groups.length]) return null;
     const d = r.measure[r.groups[0].indices[0]].d;
     const plain = r.groups.every((g) => g.indices.every((i) => {
       const ev = r.measure[i];
@@ -1572,7 +1588,9 @@
 
   function untripletRun(score, sel) {
     const r = run(score, sel);
-    return r && r.groups.every((g) => g.indices.every((i) => r.measure[i].tp)) ? r : null;
+    if (!r || !r.groups.every((g) => g.indices.every((i) => r.measure[i].tp))) return null;
+    const size = tupletSize(r.measure[r.groups[0].indices[0]]);
+    return r.groups.every((g) => g.indices.every((i) => tupletSize(r.measure[i]) === size)) ? Object.assign(r, { size }) : null;
   }
 
   // Dos notas, una al final de un compas y otra al comienzo del siguiente.
@@ -1600,11 +1618,16 @@
     return Object.assign(r, { joins });
   }
 
+  // 'triplet' para 3 figuras (el nombre de siempre) y 'tupletN' para las demas.
+  const tupletAction = (size) => (size === 3 ? 'triplet' : 'tuplet' + size);
+
   // Acciones disponibles para una seleccion de figuras [{ mi, i }], en el orden en que se ofrecen.
   function selectionActions(score, sel) {
     const actions = [];
-    if (tripletRun(score, sel)) actions.push('triplet');
-    if (untripletRun(score, sel)) actions.push('untriplet');
+    const group = tripletRun(score, sel);
+    if (group) actions.push(tupletAction(group.groups.length));
+    const loose = untripletRun(score, sel);
+    if (loose) actions.push('un' + tupletAction(loose.size));
     const pair = linkPair(score, sel);
     if (pair) actions.push(pair.existing ? 'unlink' : 'link');
     const beams = beamRun(score, sel);
@@ -1620,24 +1643,24 @@
   // Aplica una de las acciones de `selectionActions`; false si no corresponde o no entra.
   function applySelection(score, sel, action) {
     if (!selectionActions(score, sel).includes(action)) return false;
-    if (action === 'triplet') {
+    if (/^(triplet|tuplet\d)$/.test(action)) {
       // El orden no cambia: las figuras se acortan y lo que sigue en su voz se adelanta.
       const r = tripletRun(score, sel);
-      let id = Math.max(0, ...r.measure.map((ev) => ev.tp || 0));
+      const size = r.groups.length;
+      const id = Math.max(0, ...r.measure.map((ev) => ev.tp || 0)) + 1;
       settle(r.measure);
-      r.groups.forEach((g, k) => {
-        if (k % 3 === 0) id += 1;
-        eachEvent(r, g, (ev) => { ev.tp = id; });
+      r.groups.forEach((g) => {
+        eachEvent(r, g, (ev) => { ev.tp = id; if (size === 3) delete ev.tn; else ev.tn = size; });
       });
       settle(r.measure);
       return true;
     }
-    if (action === 'untriplet') {
+    if (/^(untriplet|untuplet\d)$/.test(action)) {
       // Las figuras se alargan y lo que sigue en su voz se corre; no se hace si la voz deja de entrar en el compas.
       const r = untripletRun(score, sel);
       settle(r.measure);
       const saved = clone(r.measure);
-      r.groups.forEach((g) => eachEvent(r, g, (ev) => { delete ev.tp; }));
+      r.groups.forEach((g) => eachEvent(r, g, (ev) => { delete ev.tp; delete ev.tn; }));
       if (measureLength(r.measure) > capacity(score, sel[0].mi)) {
         r.measure.splice(0, r.measure.length, ...saved);
         return false;
@@ -1676,7 +1699,7 @@
   }
 
   // `roles`: { tie: ['start'|'stop'], slur: [...], tuplet: 'start'|'stop'|'both' } de los extremos de esta nota.
-  function noteXml(ev, id, beams, chord, voice, alter, roles, stem) {
+  function noteXml(ev, id, beams, chord, voice, alter, roles, stem, mult) {
     const dur = length(ev);
     const base = VALUES[ev.d];
     const ties = (roles && roles.tie) || [];
@@ -1690,10 +1713,10 @@
       xml += `<pitch><step>${STEPS[ev.n % 7]}</step>${alter ? `<alter>${alter}</alter>` : ''}` +
         `<octave>${Math.floor(ev.n / 7) - 1}</octave></pitch>`;
     }
-    xml += `<duration>${dur}</duration>${ties.map((type) => `<tie type="${type}"/>`).join('')}` +
+    xml += `<duration>${dur * mult}</duration>${ties.map((type) => `<tie type="${type}"/>`).join('')}` +
       `<voice>${voice}</voice><type>${TYPES[base]}</type>${ev.dot === 2 ? '<dot/><dot/>' : ev.dot ? '<dot/>' : ''}`;
     if (!ev.rest && ev.acc) xml += `<accidental>${ACCIDENTALS[ev.acc].name}</accidental>`;
-    if (ev.tp) xml += '<time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification>';
+    if (ev.tp) xml += `<time-modification><actual-notes>${tupletSize(ev)}</actual-notes><normal-notes>${TUPLETS[tupletSize(ev)]}</normal-notes></time-modification>`;
     if (!ev.rest && stem) xml += `<stem>${stem}</stem>`;
     if (beams) Object.keys(beams).forEach((level) => { xml += `<beam number="${level}">${beams[level]}</beam>`; });
     const marks = ties.map((type) => `<tied type="${type}"/>`).concat(slurs.map((type) => `<slur type="${type}" number="1"/>`));
@@ -1708,6 +1731,7 @@
   function toMusicXml(score) {
     const all = measures(score);
     const clef = CLEFS[clefOf(score)];
+    const mult = all.some((measure) => measure.some((ev) => ev.tp && tupletSize(ev) !== 3)) ? MULTIPLIER : 1;
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<score-partwise version="3.1">' +
       (score.title ? '<work><work-title>' + score.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</work-title></work>' : '') +
       (score.author ? '<identification><creator type="composer">' + score.author.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</creator></identification>' : '') +
@@ -1729,7 +1753,7 @@
       xml += `<measure number="${mi + 1}" id="m${mi}"${capacity(score, mi) < capacity({ meter: meterAt(score, mi) }) ? ' implicit="yes"' : ''}>`;
       if (rowFirsts.has(mi)) xml += '<print new-system="yes"/>';
       if (mi === 0) {
-        xml += `<attributes><divisions>${DIVISIONS}</divisions><key><fifths>${fifthsOf(score)}</fifths></key>` +
+        xml += `<attributes><divisions>${DIVISIONS * mult}</divisions><key><fifths>${fifthsOf(score)}</fifths></key>` +
           `<time><beats>${beats}</beats><beat-type>${unit}</beat-type></time>` +
           `<clef><sign>${clef.sign}</sign><line>${clef.line}</line>${clef.octave ? `<clef-octave-change>${clef.octave}</clef-octave-change>` : ''}</clef></attributes>`;
       }
@@ -1771,13 +1795,13 @@
       let barreOpen = !barre && Boolean(closing);
       let barreClosed = false;
       voices(measure).forEach((voice, vi, all) => {
-        if (vi > 0) xml += `<backup><duration>${capacity(score, mi)}</duration></backup>`;
+        if (vi > 0) xml += `<backup><duration>${capacity(score, mi) * mult}</duration></backup>`;
         const indices = voice.groups.flatMap((g) => g.indices);
         const events = indices.map((i) => Object.assign({}, measure[i], { at: starts[i] }));
         const beams = beamStates(events, { meter: meterAt(score, mi) });
         const pad = (from, to) => {
           padding(to - from).forEach((size) => {
-            xml += `<note print-object="no"><rest/><duration>${size}</duration><voice>${vi + 1}</voice>${TYPES[size] ? `<type>${TYPES[size]}</type>` : ''}</note>`;
+            xml += `<note print-object="no"><rest/><duration>${size * mult}</duration><voice>${vi + 1}</voice>${TYPES[size] ? `<type>${TYPES[size]}</type>` : ''}</note>`;
           });
         };
         // Inicio y fin de la cejilla se escriben en la primera voz con un hueco (o un limite) justo en ese tiempo.
@@ -1807,7 +1831,7 @@
           group.indices.forEach((i, ci) => {
             const own = roles.get(mi + '-' + i) || {};
             const tuplet = ci === 0 && span && (span.first === span.last ? 'both' : gi === span.first ? 'start' : gi === span.last ? 'stop' : undefined);
-            xml += noteXml(measure[i], `e${mi}-${i}`, beams[index++], ci > 0, vi + 1, alters[i], Object.assign({}, own, { tuplet }), stemOf(vi, all.length));
+            xml += noteXml(measure[i], `e${mi}-${i}`, beams[index++], ci > 0, vi + 1, alters[i], Object.assign({}, own, { tuplet }), stemOf(vi, all.length), mult);
           });
           cursor = group.at + group.size;
         });
@@ -1858,7 +1882,7 @@
       let end = k;
       if (ev.tp) {
         while (end + 1 < items.length && items[end + 1].ev.tp === ev.tp) end += 1;
-        names.push('tresillo de ' + FIGURES[ev.d][1]);
+        names.push(TUPLET_NAMES[tupletSize(ev)] + ' de ' + FIGURES[ev.d][1]);
       } else if (beam && beam[1] === 'begin') {
         while (end + 1 < items.length && items[end].beam[1] !== 'end') end += 1;
         names.push(beamedName(items.slice(k, end + 1).map((item) => item.ev)));
@@ -1881,7 +1905,7 @@
   }
 
   return {
-    voicesText, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
+    voicesText, TUPLETS, tupletSize, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
     captureTabReferences, restoreTabReferences, copySelection, pasteSelection, duplicateSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, moveMeasure, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
     meterOf, meterAt, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setNavigation, removeNavigation, navigationEndings, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
