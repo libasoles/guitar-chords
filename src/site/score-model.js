@@ -930,9 +930,10 @@
   // Pone el silencio `ev` en `at`, clickeado a la altura `n`, sin tocar `measure`.
   // Las voces se ordenan de arriba (1) a abajo: sobre una nota el silencio queda en una voz mas aguda, bajo ella en una mas grave.
   // Usa la voz libre mas cercana en ese sentido; si no hay, abre una nueva y las voces desde ahi bajan un lugar.
+  // Antes de la primera columna, antepone el silencio en la voz mas cercana y corre las figuras existentes.
   // Devuelve { measure, index }, { voice } (la voz del click) si las MAX_VOICE voces estan ocupadas en ese tiempo, o
   // { full: true } si su voz, contada en orden, ya no entra en el compas.
-  function placeRest(measure, ev, at, n, score, mi) {
+  function placeRest(measure, ev, at, n, score, mi, beforeFirst = false) {
     // `at` explicito sin asentar: si el silencio se esta moviendo, las demas conservan el lugar en que se ven.
     const others = measure.map((o) => Object.assign({}, o));
     const h = hints(others);
@@ -941,6 +942,18 @@
     const rest = Object.assign({}, ev);
     delete rest.v;
     delete rest.n;
+    if (beforeFirst && others.length) {
+      const first = Math.min(...h);
+      const leading = others.filter((o) => o.at === first);
+      const ref = leading.reduce((a, b) => Math.abs((b.n ?? n) - n) < Math.abs((a.n ?? n) - n) ? b : a);
+      rest.v = ref.v;
+      others.forEach((o) => { o.at += length(rest); });
+      rest.at = 0;
+      others.unshift(rest);
+      settle(others);
+      if (measureLength(others) > capacity(score, mi)) return { full: true };
+      return { measure: others, index: 0 };
+    }
     const end = at + length(ev);
     const overlaps = (o) => o.at < end && at < o.at + length(o);
     const clash = others.filter(overlaps);
