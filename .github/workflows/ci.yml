@@ -144,7 +144,7 @@ jobs:
   # One stable check for branch protection: skipped e2e suites count as
   # passed; failed or cancelled jobs do not.
   ci-ok:
-    needs: [test-and-build, e2e]
+    needs: [changes, test-and-build, e2e]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -157,11 +157,12 @@ jobs:
           done
 
   deploy:
-    needs: [test-and-build, e2e]
+    needs: [changes, test-and-build, e2e]
     runs-on: ubuntu-latest
     # e2e is skipped when no suite is affected, which would skip this job too.
     if: >-
       !cancelled() && github.ref == 'refs/heads/main' && github.event_name == 'push' &&
+      needs.changes.result == 'success' &&
       needs.test-and-build.result == 'success' && contains(fromJSON('["success","skipped"]'), needs.e2e.result)
     concurrency:
       group: ${{ github.workflow }}-deploy

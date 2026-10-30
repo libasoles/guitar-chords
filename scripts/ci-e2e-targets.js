@@ -82,6 +82,13 @@ const SUITES = {
       /^test\/score-editor\./,
     ],
   },
+  'score-beam-selection': {
+    build: 'site',
+    paths: [
+      /^src\/site\/score-(editor|model)\./,
+      /^test\/score-beam-selection\./,
+    ],
+  },
   'score-document-tabs': {
     build: 'site',
     paths: [

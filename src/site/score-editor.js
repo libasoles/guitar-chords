@@ -49,6 +49,7 @@
   let selectedNavigation = []; // { first, last, mark }: selected return signs or ending spans
   let selected = null; // { mi, i }: la figura principal
   let group = []; // con dos o mas figuras elegidas, todas (incluida la principal)
+  let selectedBeam = null; // { node, refs }: barrado elegido sin seleccionar sus notas
   let drag = null;
   let activeItem = null;
   let layout = []; // por compas: { left, right, lines: [y1..y5] } relativo al escenario
@@ -288,6 +289,7 @@
 
   function change(mutate, tabRefs = M.captureTabReferences(score, score.showTabs ? tabColumns : score.tabs)) {
     clearBarSelection();
+    selectedBeam = null;
     const before = M.clone(score);
     if (mutate() === false) return false;
     // `at` queda siempre igual al tiempo que se ve (sin huecos): asi los clics y arrastres siguientes se ubican en el orden.
@@ -331,6 +333,7 @@
 
   function setPicks(list) {
     selectedNavigation = [];
+    selectedBeam = null;
     if (list.length) clearBarSelection();
     selected = list.length ? list[list.length - 1] : null;
     group = list.length > 1 ? list : [];
@@ -447,7 +450,7 @@
   }
 
   function activateTool(item) {
-    if (selectedNavigation.length) { selectedNavigation = []; markSelected(); }
+    if (selectedNavigation.length || selectedBeam) { selectedNavigation = []; selectedBeam = null; markSelected(); }
     if (activeItem === item) { deactivateTool(); return; }
     activeItem = item;
     stage.classList.add('has-tool');
@@ -617,6 +620,11 @@
         });
         selectedNavigation = [];
       });
+      return;
+    }
+    if (selectedBeam) {
+      const refs = selectedBeam.refs;
+      change(() => M.applySelection(score, refs, 'unbeam'));
       return;
     }
     const list = picks().filter(eventAt);
@@ -970,9 +978,7 @@
         button.addEventListener('click', () => {
           clearBarSelection();
           deactivateTool();
-          selected = null;
-          selectedNavigation = [];
-          markSelected();
+          setPicks([]);
           node.classList.add('is-bar-selected');
           button.setAttribute('aria-pressed', 'true');
           showBarRemove(mi, side, x, y, button);
@@ -1464,6 +1470,14 @@
     stage.querySelectorAll('[data-navigation-mark]').forEach((node) => {
       if (selectedNavigation.some((pick) => pick.first === Number(node.dataset.navigationFirst) && pick.mark === node.dataset.navigationMark)) node.classList.add('is-selected');
     });
+    if (selectedBeam && !selectedBeam.node.isConnected) selectedBeam = null;
+    // Highlight the connection whenever one of its notes is selected, without
+    // selecting the other notes or changing what Delete acts on.
+    stage.querySelectorAll('g.beam').forEach((beam) => {
+      if (beam === selectedBeam?.node || beam.querySelector('g.note.is-selected, g.rest.is-selected')) {
+        beam.querySelectorAll(':scope > polygon').forEach((node) => node.classList.add('is-selected'));
+      }
+    });
     updateSelectionMenu();
   }
 
@@ -1827,6 +1841,22 @@
       beginDrag(event, { insert: true });
       return;
     }
+    // Verovio groups the notes and beam polygons together. Only the polygons
+    // select the connection; a notehead inside the group still selects its note.
+    const beam = event.target.closest('g.beam');
+    if (beam && event.target.matches('polygon') && event.target.parentElement === beam && !activeItem) {
+      const refs = [...beam.querySelectorAll('g.note, g.rest')].map((node) => /^e(\d+)-(\d+)$/.exec(node.id))
+        .filter(Boolean).map((match) => ({ mi: +match[1], i: +match[2] }));
+      if (M.selectionActions(score, refs).includes('unbeam')) {
+        event.preventDefault();
+        setPicks([]);
+        clearBarSelection();
+        selectedBeam = { node: beam, refs };
+        markSelected();
+        stage.focus({ preventScroll: true });
+        return;
+      }
+    }
     let match = eventUnder(event.clientX, event.clientY);
     // Con una nota o un silencio en mano, un click sobre un silencio coloca la figura nueva en vez de seleccionarlo.
     if (match && activeItem && !isModifier(activeItem) && eventAt(match).rest) match = null;
@@ -2056,7 +2086,7 @@
   document.addEventListener('pointerdown', (event) => {
     if (!(event.target instanceof Element)) return;
     // Los campos del titulo y el autor tambien quedan fuera de la seleccion musical.
-    if ((picks().length || selectedNavigation.length) && !event.target.closest('.score-stage, .score-palette, .score-toolbar, .score-side-actions, .score-doc-tab, [popover]')) setPicks([]);
+    if ((picks().length || selectedNavigation.length || selectedBeam) && !event.target.closest('.score-stage, .score-palette, .score-toolbar, .score-side-actions, .score-doc-tab, [popover]')) setPicks([]);
     if (!activeItem) return;
     if (event.target.closest('.score-stage, .score-palette, .score-toolbar, .score-side-actions, .score-doc-tab, [popover], button, a, input, select, textarea')) return;
     deactivateTool();
@@ -2429,8 +2459,8 @@
     'file-code': '<path d="M10 12.5 8 15l2 2.5"/><path d="m14 12.5 2 2.5-2 2.5"/><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
     trash:'<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
     // Sin equivalente en Lucide: ligadura (arco entre dos notas) y ligadura quitada.
-    link: '<ellipse cx="5" cy="8" rx="3" ry="2" transform="rotate(-25 5 8)" fill="currentColor" stroke="none"/><ellipse cx="19" cy="8" rx="3" ry="2" transform="rotate(-25 19 8)" fill="currentColor" stroke="none"/><path d="M4 13c1.500 7 14.500 7 16 0"/>',
-    unlink: '<ellipse cx="5" cy="8" rx="3" ry="2" transform="rotate(-25 5 8)" fill="currentColor" stroke="none"/><ellipse cx="19" cy="8" rx="3" ry="2" transform="rotate(-25 19 8)" fill="currentColor" stroke="none"/><path d="M4 13c1.500 7 14.500 7 16 0"/><path d="M4 3l16 18"/>',
+    link: '<ellipse cx="3" cy="8" rx="3" ry="2" transform="rotate(-25 3 8)" fill="currentColor" stroke="none"/><ellipse cx="21" cy="8" rx="3" ry="2" transform="rotate(-25 21 8)" fill="currentColor" stroke="none"/><path d="M4 13c1.500 7 14.500 7 16 0"/>',
+    unlink: '<ellipse cx="3" cy="8" rx="3" ry="2" transform="rotate(-25 3 8)" fill="currentColor" stroke="none"/><ellipse cx="21" cy="8" rx="3" ry="2" transform="rotate(-25 21 8)" fill="currentColor" stroke="none"/><path d="M4 13c1.500 7 14.500 7 16 0"/><path d="M4 3l16 18"/>',
     beam: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
     // Sin equivalente en Lucide: tresillo, tresillo quitado y notas separadas.
     triplet: '<path d="M3 19v-5h6M21 19v-5h-6"/><path d="M10 7.500c.5-1 4-1.500 4 .500 0 1.200-1.500 1.800-2 1.800.600 0 2.200.400 2.200 2 0 2-3.700 1.800-4.200.700" stroke-width="1.700"/>',

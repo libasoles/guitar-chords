@@ -14,9 +14,10 @@ test('a tool-specific change runs only its suite', () => {
   assert.deepEqual(targets(['test/score-tab-pdf.e2e.js']), ['score-tab-pdf']);
   assert.deepEqual(targets(['test/score-navigation.e2e.js']), ['score-navigation']);
   assert.deepEqual(targets(['test/score-reorder.e2e.js']), ['score-reorder']);
+  assert.deepEqual(targets(['test/score-beam-selection.e2e.js']), ['score-beam-selection']);
   assert.deepEqual(targets(['src/site/picking-render.js']), ['picking-intervals']);
   assert.deepEqual(targets(['src/site/note-finder.js']), ['note-finder']);
-  assert.deepEqual(targets(['src/site/score-editor.js', 'src/site/score-editor.css']), ['score-editor', 'score-document-tabs', 'score-navigation', 'score-paste-signatures', 'score-reorder', 'score-tab-pdf']);
+  assert.deepEqual(targets(['src/site/score-editor.js', 'src/site/score-editor.css']), ['score-editor', 'score-beam-selection', 'score-document-tabs', 'score-navigation', 'score-paste-signatures', 'score-reorder', 'score-tab-pdf']);
 });
 
 test('a score change runs only its article suite', () => {
