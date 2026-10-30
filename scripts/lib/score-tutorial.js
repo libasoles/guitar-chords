@@ -94,11 +94,10 @@ function barDemo(s) {
     '<path class="score-demo__bar" d="M0 5.5V43.5M148 5.5V43.5" stroke="currentColor" stroke-width="1.6"/>' +
     '<path class="score-demo__bar score-demo__bar--a" d="M73 5.5V43.5" stroke="currentColor" stroke-width="1.6"/>' +
     '<path class="score-demo__bar score-demo__bar--b" d="M77.5 5.5V43.5" stroke="currentColor" stroke-width="1.6"/>' +
-    '<g class="score-demo__remove" transform="translate(73 -3)">' +
-    '<circle r="7" fill="var(--paper)" stroke="var(--rule)" stroke-width=".8"/>' +
-    '<path d="M-3 -3 3 3M3 -3 -3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></g>' +
+    '<g class="score-demo__delete" transform="translate(110 -3)">' +
+    '<rect x="-22" y="-8" width="44" height="16" rx="3" fill="var(--paper)" stroke="var(--rule)" stroke-width=".8"/>' +
+    '<text text-anchor="middle" dominant-baseline="central" font-size="10" fill="currentColor">Delete</text></g>' +
     '<circle class="score-demo__ring score-demo__ring--e" cx="73" cy="25" r="7"/>' +
-    '<circle class="score-demo__ring score-demo__ring--f" cx="73" cy="-3" r="7"/>' +
     '<g class="score-demo__pointer score-demo__pointer--bar" transform="translate(73 25)">' + CURSOR + '</g>';
   return demo('score-demo--bar', svg, s('scoreBarTitle'), s('scoreBarBody'));
 }

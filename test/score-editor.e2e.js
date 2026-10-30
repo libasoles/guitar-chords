@@ -214,56 +214,66 @@ async function checkBarlines(page) {
   async function selectBar(mi, side) {
     const trigger = page.locator('.score-barline-trigger[data-measure="' + mi + '"][data-side="' + side + '"]');
     await trigger.click();
-    const bar = await trigger.boundingBox();
-    const remove = await page.locator('.score-barline-remove').boundingBox();
-    assert.ok(remove.y + remove.height < bar.y, 'la x aparece encima de la barra');
-    assert.equal(await page.locator('.score-barline-remove').count(), 1);
+    assert.equal(await page.locator('.score-barline-remove').count(), 0, 'no aparece una X');
+    assert.equal(await page.locator('.is-bar-selected').count(), 1);
+    const colors = await page.locator('.is-bar-selected').evaluate(node => {
+      const sample = document.createElement('span');
+      sample.style.color = 'var(--brand-yellow)';
+      document.body.appendChild(sample);
+      const yellow = getComputedStyle(sample).color;
+      sample.remove();
+      return { fill: getComputedStyle(node.querySelector('path') || node).fill, yellow, filter: getComputedStyle(node).filter };
+    });
+    assert.equal(colors.fill, colors.yellow, 'la barra se resalta con el amarillo de las notas');
+    assert.notEqual(colors.filter, 'none', 'conserva el halo de las notas');
   }
   // Seleccionar la barra desactiva la herramienta de insercion que seguia activa.
   await selectBar(0, 'start');
-  await page.locator('.score-barline-remove').click();
+  await page.keyboard.press('Delete');
   assert.equal(await page.locator('.score-barline-trigger[data-measure="0"][data-side="start"]').count(), 0);
   assert.equal(await page.locator('.score-barline-remove').count(), 0);
   await page.keyboard.press('ControlOrMeta+z');
   assert.equal(await page.evaluate(() => scoreEditor.score.barlines[0].start), true);
   await selectBar(3, 'end');
-  await page.locator('.score-barline-remove').click();
+  await page.keyboard.press('Delete');
   assert.deepEqual(await page.evaluate(() => scoreEditor.score.barlines[3]), { hidden: true });
   assert.equal(await page.locator('[id="m3"] g.barLine path').count(), 0);
   await selectBar(2, 'end'); // barra simple original
-  await page.locator('.score-barline-remove').focus();
-  await page.keyboard.press('Enter');
+  await page.keyboard.press('Backspace');
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
   assert.equal(await page.evaluate(() => scoreEditor.score.barlines[2].hidden), true);
   assert.equal(await page.locator('.score-barline-trigger[data-measure="2"]').count(), 0);
   await selectBar(1, 'end');
   await page.keyboard.press('Escape');
-  assert.equal(await page.locator('.score-barline-remove').count(), 0);
+  assert.equal(await page.locator('.is-bar-selected').count(), 0);
   await selectBar(1, 'end');
   await page.locator('#scoreTitle').click();
-  assert.equal(await page.locator('.score-barline-remove').count(), 0);
-  // Click en el compas (sin herramienta): ambas barras visibles se activan y ofrecen su X.
+  assert.equal(await page.locator('.is-bar-selected').count(), 0);
+  // Click en el compas (sin herramienta): ambas barras visibles se resaltan en amarillo.
   await page.keyboard.press('Escape');
   const dragBox = await page.locator('[id="m1"]').boundingBox();
   await page.mouse.move(dragBox.x + 10, dragBox.y + dragBox.height / 2);
   await page.mouse.down();
   await page.mouse.move(dragBox.x + dragBox.width / 2, dragBox.y + dragBox.height / 2, { steps: 5 });
   await page.mouse.up();
-  assert.equal(await page.locator('.score-barline-remove').count(), 0, 'arrastrar para seleccionar no selecciona el compas');
+  assert.equal(await page.locator('.is-bar-selected').count(), 0, 'arrastrar para seleccionar no selecciona el compas');
   const measureBox = await page.locator('[id="m1"]').boundingBox();
   await page.mouse.click(measureBox.x + measureBox.width / 2, measureBox.y + measureBox.height / 2);
-  await page.waitForSelector('.score-barline-remove');
-  assert.equal(await page.locator('.score-barline-remove').count(), 2);
+  await page.waitForSelector('.is-bar-selected', { state: 'attached' });
+  assert.equal(await page.locator('.is-bar-selected').count(), 2);
   assert.deepEqual(await page.locator('.score-barline-trigger[aria-pressed="true"]').evaluateAll(nodes =>
     nodes.map(node => [node.dataset.measure, node.dataset.side])), [['0', 'end'], ['1', 'end']]);
-  for (const remove of await page.locator('.score-barline-remove').all()) {
-    assert.ok((await remove.boundingBox()).width <= 28, 'cada X conserva su tamano pequeño');
-  }
+  const beforeDelete = await page.evaluate(() => structuredClone(scoreEditor.score));
+  await page.keyboard.press('Delete');
+  assert.deepEqual(await page.evaluate(() => [scoreEditor.score.barlines[0], scoreEditor.score.barlines[1]]), [{ start: true, hidden: true }, { hidden: true }]);
+  assert.equal(await page.locator('.is-bar-selected').count(), 0);
+  await page.keyboard.press('ControlOrMeta+z');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score), beforeDelete, 'deshacer restaura ambas barras en un paso');
   // El compas siguiente no tiene barra propia: solo se activa su barra izquierda (cierre del anterior).
   const nextBox = await page.locator('[id="m2"]').boundingBox();
   await page.mouse.click(nextBox.x + nextBox.width / 2, nextBox.y + nextBox.height / 2);
-  await page.waitForFunction(() => document.querySelectorAll('.score-barline-remove').length === 1);
+  await page.waitForFunction(() => document.querySelectorAll('.is-bar-selected').length === 1);
   assert.deepEqual(await page.locator('.score-barline-trigger[aria-pressed="true"]').evaluateAll(nodes =>
     nodes.map(node => [node.dataset.measure, node.dataset.side])), [['1', 'end']], 'cambiar de compas limpia la seleccion anterior');
   await page.locator('#scoreTitle').click();
@@ -308,18 +318,23 @@ async function checkKeyChanges(page) {
   // Una barra simple solo ofrece eliminarla, sin menu de clave y armadura.
   await page.locator('.score-barline-trigger[data-measure="1"][data-side="end"]').click();
   assert.equal(await page.locator('#scoreClefPopup').isVisible(), false);
-  assert.equal(await page.locator('.score-barline-remove').count(), 1);
+  assert.equal(await page.locator('.is-bar-selected').count(), 1);
   await page.keyboard.press('Escape');
   // Una barra doble al final del renglon no tiene compas siguiente: solo ofrece eliminarla.
   await page.evaluate(() => { scoreEditor.score.barlines = { 3: { double: true } }; scoreEditor.render(); });
   await page.locator('.score-barline-trigger[data-measure="3"][data-side="end"]').click();
   assert.equal(await page.locator('#scoreClefPopup').isVisible(), false);
-  assert.equal(await page.locator('.score-barline-remove').count(), 1);
+  assert.equal(await page.locator('.is-bar-selected').count(), 1);
   await page.keyboard.press('Escape');
   // La barra de cierre de un compas (aqui doble) cambia la armadura del compas siguiente.
   await page.evaluate(() => { scoreEditor.score.barlines = { 1: { double: true } }; scoreEditor.render(); });
   await page.locator('.score-barline-trigger[data-measure="1"][data-side="end"]').click();
   assert.equal(await page.locator('#scoreClefPopup').isVisible(), true);
+  await page.keyboard.press('Delete');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barlines[1]), { hidden: true }, 'Delete borra la doble barra con el menu abierto');
+  await page.keyboard.press('ControlOrMeta+z');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.barlines[1]), { double: true });
+  await page.locator('.score-barline-trigger[data-measure="1"][data-side="end"]').click();
   await page.locator('.score-key-options [data-fifths="-2"]').click();
   await page.keyboard.press('Escape');
   assert.deepEqual(await keys(), [0, { 2: -2, 4: 2 }]);

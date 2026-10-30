@@ -890,32 +890,23 @@
 
   function clearBarSelection() {
     selectedMeasure = null;
-    stage.querySelectorAll('.score-barline-remove').forEach((node) => node.remove());
     stage.querySelectorAll('.is-bar-selected').forEach((node) => node.classList.remove('is-bar-selected'));
     stage.querySelectorAll('.score-barline-trigger').forEach((button) => button.setAttribute('aria-pressed', 'false'));
   }
 
   document.addEventListener('pointerdown', (event) => {
-    if (!event.target.closest('.score-barline-trigger, .score-barline-remove')) clearBarSelection();
+    if (!event.target.closest('.score-barline-trigger')) clearBarSelection();
   });
 
-  function showBarRemove(mi, side, x, y, button) {
-    const remove = document.createElement('button');
-    remove.type = 'button';
-    remove.className = 'score-barline-remove tooltip';
-    remove.setAttribute('aria-label', t.deleteBarline);
-    remove.dataset.tooltip = t.deleteBarline;
-    remove.innerHTML = lucide('x');
-    remove.style.left = x + 'px';
-    remove.style.top = (y - 4) + 'px';
-    remove.addEventListener('click', () => change(() => M.removeBarline(score, mi, side)));
-    remove.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') { clearBarSelection(); button.focus(); }
-    });
-    stage.appendChild(remove);
+  function removeSelectedBars() {
+    const bars = [...stage.querySelectorAll('.score-barline-trigger[aria-pressed="true"]')]
+      .map((button) => ({ mi: Number(button.dataset.measure), side: button.dataset.side }));
+    if (!bars.length) return false;
+    change(() => bars.forEach(({ mi, side }) => M.removeBarline(score, mi, side)));
+    return true;
   }
 
-  // Un compas elegido es el destino del pegado; sus barras visibles muestran la X.
+  // Un compas elegido es el destino del pegado; sus barras visibles se resaltan.
   function selectMeasureBars(event) {
     const origin = stage.getBoundingClientRect();
     const mi = layout.findIndex((m) => event.clientX >= origin.left + m.left && event.clientX <= origin.left + m.right &&
@@ -933,7 +924,6 @@
     if (score.barlines?.[mi]?.start) sides.push([mi, 'start']);
     else if (mi > M.rowOf(score, mi).first) sides.push([mi - 1, 'end']);
     sides.push([mi, 'end']);
-    const origin = stage.getBoundingClientRect();
     sides.forEach(([m, side]) => {
       const button = stage.querySelector('.score-barline-trigger[data-measure="' + m + '"][data-side="' + side + '"]');
       if (!button) return;
@@ -941,8 +931,6 @@
       const node = side === 'start' ? nodes[0] : nodes[nodes.length - 1];
       node?.classList.add('is-bar-selected');
       button.setAttribute('aria-pressed', 'true');
-      const box = button.getBoundingClientRect();
-      showBarRemove(m, side, box.left + box.width / 2 - origin.left, box.top - origin.top, button);
     });
   }
 
@@ -981,7 +969,6 @@
           setPicks([]);
           node.classList.add('is-bar-selected');
           button.setAttribute('aria-pressed', 'true');
-          showBarRemove(mi, side, x, y, button);
           // La armadura rige desde el compas siguiente si la barra cierra el compas, o desde este si la abre.
           const target = side === 'start' ? mi : mi + 1;
           // Si la barra es la ultima del renglon, no hay a que compas siguiente aplicar clave ni armadura.
@@ -1705,7 +1692,7 @@
     const raw = hoverPoint;
     const point = raw && aimed(raw);
     const over = point && document.elementFromPoint(point.clientX, point.clientY);
-    const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span, .score-selection-menu');
+    const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-barre-field, .score-barre-span, .score-selection-menu');
     const hit = activeItem && !shiftMeasures && !measureDrag && !drag && overStage && locate(point.clientX, point.clientY);
     if (!hit) { clearHoverGhost(); return; }
     if (!hoverGhost) {
@@ -1829,7 +1816,7 @@
       selectNavigation(navigation, event);
       return;
     }
-    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-key-trigger, .score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span, .score-selection-menu')) return;
+    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-key-trigger, .score-barline-trigger, .score-barre-field, .score-barre-span, .score-selection-menu')) return;
     // Las cabezas graves pueden quedar dentro de TAB: la partitura recibe
     // el gesto antes de que el componente enfoque y redibuje su celda.
     const overTab = event.target.closest('.score-tab');
@@ -2096,6 +2083,9 @@
 
   document.addEventListener('keydown', (event) => {
     if (event.target.closest('input, textarea, select, [contenteditable], ascii-tabs')) return;
+    if (!event.metaKey && !event.ctrlKey && !event.altKey && (event.key === 'Delete' || event.key === 'Backspace')) {
+      if (removeSelectedBars()) { event.preventDefault(); return; }
+    }
     if (event.key === 'Escape') {
       clearBarSelection();
       deactivateTool();

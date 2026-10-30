@@ -61,15 +61,15 @@ async function run() {
     await seed(page, [[{ d: 'e', n: 30, at: 0 }, { d: 'e', n: 31, at: 12 }]]);
     const picked = await center(page, 'e0-0');
     await page.mouse.click(picked.x, picked.y);
-    assert.equal(await page.locator('#scoreStage .is-selected').count(), 1);
+    assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 1);
     await page.locator('#scoreTitle').click();
-    assert.equal(await page.locator('#scoreStage .is-selected').count(), 0, 'el titulo deselecciona una sola figura');
+    assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 0, 'el titulo deselecciona una sola figura');
     for (const target of ['.score-title', '#scoreTitle', '#scoreAuthor', '.site-header']) {
       await shiftSelect(page, ['e0-0', 'e0-1']);
-      assert.equal(await page.locator('#scoreStage .is-selected').count(), 2);
+      assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 2);
       const box = await page.locator(target).boundingBox();
       await page.locator(target).click({ position: { x: box.width - 2, y: 2 } });
-      assert.equal(await page.locator('#scoreStage .is-selected').count(), 0, target + ' deselecciona las figuras');
+      assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 0, target + ' deselecciona las figuras');
       assert.equal(await page.locator('.score-selection-menu').count(), 0, 'se oculta el menu de seleccion');
     }
 
@@ -81,14 +81,14 @@ async function run() {
     assert.deepEqual(await actions(page), ['unbeam']);
     await shiftSelect(page, ['e0-2']);
     assert.deepEqual(await actions(page), ['triplet', 'beam', 'unbeam']);
-    assert.equal(await page.locator('#scoreStage .is-selected').count(), 3);
+    assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 3);
     const menu = await page.locator('.score-selection-menu').boundingBox();
     const head = await page.locator('[id="e0-0"] .notehead').boundingBox();
     assert.ok(menu.y + menu.height <= head.y, 'el menu aparece sobre las notas ' + JSON.stringify([menu, head]));
     await page.locator('[data-action="triplet"]').click();
     assert.deepEqual((await events(page, 0)).slice(0, 3).map((ev) => [ev.tp, ev.at]), [[1, 0], [1, 8], [1, 16]]);
     assert.ok(await page.locator('#scoreStage g.tuplet').count(), 'se dibuja el tresillo');
-    assert.equal(await page.locator('#scoreStage .is-selected').count(), 3, 'la seleccion sigue despues de aplicar');
+    assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 3, 'la seleccion sigue despues de aplicar');
     assert.ok((await actions(page)).includes('untriplet'));
 
     // Mover el grupo seleccionado arrastrando una de sus notas.
@@ -103,7 +103,7 @@ async function run() {
     assert.ok(after[0][0] > before[0][0], 'las tres notas suben');
     assert.deepEqual(after.slice(0, 3).map(([n]) => n - after[0][0]), [0, 1, 2]);
     assert.deepEqual(after.slice(0, 3).map(([, at]) => at), [0, 8, 16], 'conservan su separacion en el tiempo');
-    assert.equal(await page.locator('#scoreStage .is-selected').count(), 3, 'el grupo sigue seleccionado');
+    assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 3, 'el grupo sigue seleccionado');
     await page.keyboard.press('ControlOrMeta+z');
     assert.deepEqual((await events(page, 0)).map((ev) => [ev.n, ev.at]), before);
     assert.equal(await page.locator('.score-selection-menu').count(), 0, 'deshacer limpia la seleccion');
@@ -134,7 +134,7 @@ async function run() {
     await page.mouse.up();
     assert.equal((await events(page, 0)).length, 0, 'se mueve el grupo agarrado desde la segunda nota');
     assert.deepEqual((await events(page, 1)).map(ev => [ev.n, ev.at]), [[30, 0], [31, 24]]);
-    assert.equal(await page.locator('#scoreStage .is-selected').count(), 2);
+    assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 2);
     await page.keyboard.press('ControlOrMeta+z');
     assert.equal((await events(page, 0)).length, 2, 'deshacer devuelve todo el grupo');
     assert.equal((await events(page, 1)).length, 0);
@@ -164,7 +164,7 @@ async function run() {
     assert.deepEqual(await events(page, 1), []);
     assert.deepEqual((await events(page, 2)).map(ev => [ev.n, ev.at]), phrase.map(ev => [ev.n, ev.at]));
     assert.deepEqual((await events(page, 3)).map(ev => [ev.n, ev.at]), [[36, 0]]);
-    assert.equal(await page.locator('#scoreStage .is-selected').count(), 7);
+    assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 7);
 
     // Marco de seleccion.
     await seed(page, [[{ d: 'e', n: 30, at: 0 }, { d: 'e', n: 31, at: 12 }, { d: 'q', n: 32, at: 48 }], []]);
@@ -176,7 +176,7 @@ async function run() {
     assert.equal(await page.locator('.score-marquee').count(), 1);
     await page.mouse.up();
     assert.equal(await page.locator('.score-marquee').count(), 0);
-    assert.equal(await page.locator('#scoreStage .is-selected').count(), 2);
+    assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 2);
     assert.deepEqual(await actions(page), ['unbeam']);
     // Dos corcheas de pulsos distintos: barrar; despues, separar.
     // El silencio de corchea las corre al contratiempo: sin el empezarian en 0, en el mismo pulso.
@@ -240,7 +240,7 @@ async function run() {
     await selectBar(2);
     assert.equal(await page.locator('.score-barline-trigger[aria-pressed="true"]').count(), 2, 'ambas barras indican el compas elegido');
     assert.equal(await page.locator('.is-bar-selected').count(), 2);
-    assert.equal(await page.locator('.score-barline-remove').count(), 2, 'cada barra ofrece su X');
+    assert.equal(await page.locator('.score-barline-remove').count(), 0, 'no aparecen botones X');
     await page.keyboard.press('ControlOrMeta+v');
     await page.waitForFunction(() => ScoreModel.measures(scoreEditor.score)[3].length === 1);
     assert.deepEqual(await events(page, 2), original[0]);
@@ -248,7 +248,7 @@ async function run() {
     const pastedTabs = await page.evaluate(() => scoreEditor.score.tabs);
     for (const [key, column] of Object.entries(expectedTabs)) assert.deepEqual(pastedTabs[key], column, key);
     assert.deepEqual([await events(page, 0), await events(page, 1)], original, 'el origen queda intacto');
-    assert.equal(await page.locator('#scoreStage .is-selected').count(), 3, 'las notas pegadas quedan seleccionadas');
+    assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 3, 'las notas pegadas quedan seleccionadas');
     assert.equal(await page.locator('.score-barline-remove').count(), 0);
     assert.equal(await page.locator('.is-bar-selected').count(), 0);
     await page.keyboard.press('ControlOrMeta+z');
@@ -262,7 +262,7 @@ async function run() {
     await page.waitForFunction(() => ScoreModel.measures(scoreEditor.score).length > 12);
     assert.deepEqual(await events(page, 11), original[0]);
     assert.deepEqual(await events(page, 12), original[1]);
-    assert.equal(await page.locator('#scoreStage .is-selected').count(), 3);
+    assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 3);
     await page.keyboard.press('ControlOrMeta+z');
     assert.equal(await page.evaluate(() => ScoreModel.measures(scoreEditor.score).length), 12);
     // Esc y un click fuera cancelan el destino del pegado.

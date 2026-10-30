@@ -597,7 +597,7 @@
   "scoreDotTitle": "Dot",
   "scoreDotBody": "Double-click a note to add its dot; double-click again to remove it.",
   "scoreBarTitle": "Delete a barline",
-  "scoreBarBody": "Click a double or repeat barline and press the x that appears to delete it.",
+  "scoreBarBody": "Click a single, double or repeat barline to highlight it in yellow, then press Delete to remove it.",
   "scoreTabEditTitle": "Edit a tab",
   "scoreTabEditBody": "Click a number in the tab and type the new fret; your fingering is saved and the staff does not change.",
   "scoreTabMoveTitle": "Move a tab cell",

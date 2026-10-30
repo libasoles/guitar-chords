@@ -524,7 +524,8 @@ body.score-body {
 }
 
 /* Logo yellow is too pale on paper alone: a dark halo keeps it readable. */
-.score-stage .is-selected {
+.score-stage .is-selected,
+.score-stage .is-bar-selected {
   fill: var(--brand-yellow);
   color: var(--brand-yellow);
   filter: drop-shadow(0 0 0.6px var(--brand-blue-dark))
@@ -532,7 +533,8 @@ body.score-body {
     drop-shadow(0 0 3px var(--brand-yellow));
 }
 
-.score-stage .is-selected * {
+.score-stage .is-selected *,
+.score-stage .is-bar-selected * {
   fill: var(--brand-yellow);
   stroke: var(--brand-yellow);
 }
@@ -756,36 +758,6 @@ body.score-dragging {
   outline-offset: 2px;
 }
 
-.score-stage .is-bar-selected {
-  color: var(--note-selected);
-  fill: var(--note-selected);
-  stroke: var(--note-selected);
-}
-
-.score-barline-remove {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  width: 1.625rem;
-  height: 1.625rem;
-  transform: translate(-50%, -100%);
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: var(--paper);
-  color: var(--ink);
-  cursor: pointer;
-}
-
-.score-barline-remove .lucide {
-  width: 1rem;
-  height: 1rem;
-}
-
-.score-barline-remove.tooltip {
-  position: absolute;
-}
-
 .score-row-tools {
   position: absolute;
   display: flex;
@@ -855,10 +827,6 @@ body.score-dragging {
   bottom: auto;
   left: auto;
   transform: translateY(-50%) rotate(45deg);
-}
-
-.score-barline-remove:hover {
-  color: var(--blue-france);
 }
 
 .score-barre-field {
@@ -1301,7 +1269,7 @@ html body[data-scroll-locked] {
 }
 
 .score-demo__pointer,
-.score-demo__remove {
+.score-demo__delete {
   opacity: 0;
   pointer-events: none;
 }
@@ -1319,8 +1287,7 @@ html body[data-scroll-locked] {
 
 .score-demo--bar .score-demo__pointer { animation: score-demo-pointer-bar 6s ease-in-out infinite; }
 .score-demo--bar .score-demo__ring--e { animation: score-demo-ring 6s ease-out 1.2s infinite; }
-.score-demo--bar .score-demo__ring--f { animation: score-demo-ring 6s ease-out 2.6s infinite; }
-.score-demo--bar .score-demo__remove { animation: score-demo-remove 6s steps(1, end) infinite; }
+.score-demo--bar .score-demo__delete { animation: score-demo-remove 6s steps(1, end) infinite; }
 .score-demo--bar .score-demo__bar--a,
 .score-demo--bar .score-demo__bar--b { animation: score-demo-bar 6s steps(1, end) infinite; }
 
@@ -1343,13 +1310,13 @@ html body[data-scroll-locked] {
   100% { opacity: 0; transform: scale(1.2); }
 }
 
-/* Click a special barline: the x shows over it; clicking the x deletes the bar. */
+/* Select a barline, then press Delete. */
 @keyframes score-demo-pointer-bar {
   0% { transform: translate(110px, 44px); opacity: 0; }
   8% { opacity: 1; }
   16%, 30% { transform: translate(73px, 25px); opacity: 1; }
-  38%, 60% { transform: translate(73px, -3px); opacity: 1; }
-  68% { transform: translate(73px, -3px); opacity: 0; }
+  38%, 60% { transform: translate(73px, 25px); opacity: 1; }
+  68% { transform: translate(73px, 25px); opacity: 0; }
   68.01%, 100% { transform: translate(110px, 44px); opacity: 0; }
 }
 @keyframes score-demo-remove {
@@ -1359,7 +1326,7 @@ html body[data-scroll-locked] {
 }
 @keyframes score-demo-bar {
   0%, 19% { stroke: currentColor; opacity: 1; }
-  20%, 43% { stroke: var(--accent); opacity: 1; }
+  20%, 43% { stroke: var(--brand-yellow); opacity: 1; filter: drop-shadow(0 0 .6px var(--brand-blue-dark)); }
   44%, 99% { opacity: 0; }
   100% { stroke: currentColor; opacity: 1; }
 }
@@ -1368,7 +1335,7 @@ html body[data-scroll-locked] {
   .score-demo__dot,
   .score-demo__pointer,
   .score-demo__ring,
-  .score-demo__remove,
+  .score-demo__delete,
   .score-demo__bar {
     animation: none !important;
   }
