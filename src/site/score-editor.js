@@ -49,6 +49,7 @@
   let selectedNavigation = []; // { first, last, mark }: selected return signs or ending spans
   let selected = null; // { mi, i }: la figura principal
   let group = []; // con dos o mas figuras elegidas, todas (incluida la principal)
+  let selectedBeam = null; // { node, refs }: barrado elegido sin seleccionar sus notas
   let drag = null;
   let activeItem = null;
   let layout = []; // por compas: { left, right, lines: [y1..y5] } relativo al escenario
@@ -288,6 +289,7 @@
 
   function change(mutate, tabRefs = M.captureTabReferences(score, score.showTabs ? tabColumns : score.tabs)) {
     clearBarSelection();
+    selectedBeam = null;
     const before = M.clone(score);
     if (mutate() === false) return false;
     // `at` queda siempre igual al tiempo que se ve (sin huecos): asi los clics y arrastres siguientes se ubican en el orden.
@@ -331,6 +333,7 @@
 
   function setPicks(list) {
     selectedNavigation = [];
+    selectedBeam = null;
     if (list.length) clearBarSelection();
     selected = list.length ? list[list.length - 1] : null;
     group = list.length > 1 ? list : [];
@@ -447,7 +450,7 @@
   }
 
   function activateTool(item) {
-    if (selectedNavigation.length) { selectedNavigation = []; markSelected(); }
+    if (selectedNavigation.length || selectedBeam) { selectedNavigation = []; selectedBeam = null; markSelected(); }
     if (activeItem === item) { deactivateTool(); return; }
     activeItem = item;
     stage.classList.add('has-tool');
@@ -617,6 +620,11 @@
         });
         selectedNavigation = [];
       });
+      return;
+    }
+    if (selectedBeam) {
+      const refs = selectedBeam.refs;
+      change(() => M.applySelection(score, refs, 'unbeam'));
       return;
     }
     const list = picks().filter(eventAt);
@@ -970,9 +978,7 @@
         button.addEventListener('click', () => {
           clearBarSelection();
           deactivateTool();
-          selected = null;
-          selectedNavigation = [];
-          markSelected();
+          setPicks([]);
           node.classList.add('is-bar-selected');
           button.setAttribute('aria-pressed', 'true');
           showBarRemove(mi, side, x, y, button);
@@ -1464,6 +1470,10 @@
     stage.querySelectorAll('[data-navigation-mark]').forEach((node) => {
       if (selectedNavigation.some((pick) => pick.first === Number(node.dataset.navigationFirst) && pick.mark === node.dataset.navigationMark)) node.classList.add('is-selected');
     });
+    if (selectedBeam && !selectedBeam.node.isConnected) selectedBeam = null;
+    if (selectedBeam) {
+      selectedBeam.node.querySelectorAll(':scope > polygon').forEach((node) => node.classList.add('is-selected'));
+    }
     updateSelectionMenu();
   }
 
@@ -1815,6 +1825,22 @@
       beginDrag(event, { insert: true });
       return;
     }
+    // Verovio groups the notes and beam polygons together. Only the polygons
+    // select the connection; a notehead inside the group still selects its note.
+    const beam = event.target.closest('g.beam');
+    if (beam && event.target.matches('polygon') && event.target.parentElement === beam && !activeItem) {
+      const refs = [...beam.querySelectorAll('g.note, g.rest')].map((node) => /^e(\d+)-(\d+)$/.exec(node.id))
+        .filter(Boolean).map((match) => ({ mi: +match[1], i: +match[2] }));
+      if (M.selectionActions(score, refs).includes('unbeam')) {
+        event.preventDefault();
+        setPicks([]);
+        clearBarSelection();
+        selectedBeam = { node: beam, refs };
+        markSelected();
+        stage.focus({ preventScroll: true });
+        return;
+      }
+    }
     let match = eventUnder(event.clientX, event.clientY);
     // Con una nota o un silencio en mano, un click sobre un silencio coloca la figura nueva en vez de seleccionarlo.
     if (match && activeItem && !isModifier(activeItem) && eventAt(match).rest) match = null;
@@ -1934,7 +1960,7 @@
   document.addEventListener('pointerdown', (event) => {
     if (!(event.target instanceof Element)) return;
     // Los campos del titulo y el autor tambien quedan fuera de la seleccion musical.
-    if ((picks().length || selectedNavigation.length) && !event.target.closest('.score-stage, .score-palette, .score-toolbar, .score-side-actions, .score-doc-tab, [popover]')) setPicks([]);
+    if ((picks().length || selectedNavigation.length || selectedBeam) && !event.target.closest('.score-stage, .score-palette, .score-toolbar, .score-side-actions, .score-doc-tab, [popover]')) setPicks([]);
     if (!activeItem) return;
     if (event.target.closest('.score-stage, .score-palette, .score-toolbar, .score-side-actions, .score-doc-tab, [popover], button, a, input, select, textarea')) return;
     deactivateTool();
