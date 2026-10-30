@@ -398,9 +398,10 @@
     }
     const measure = M.measures(score)[target.mi];
     if (item.kind === 'note' || item.kind === 'rest') {
-      const ev = { d: item.d };
+      const ev = { d: item.dead ? lastNoteD : item.d };
       if (item.kind === 'rest') ev.rest = true;
       else ev.n = target.n;
+      if (item.dead) ev.dead = true;
       const spot = M.placement(measure, ev, target.t, score, target.mi);
       if (!spot) return say(noRoom(ev, target.mi));
       ev.d = spot.d;
@@ -439,7 +440,7 @@
   }
 
   function isModifier(item) {
-    return item && (item.kind === 'dot' || item.kind === 'acc' || item.kind === 'dead');
+    return item && (item.kind === 'dot' || item.kind === 'acc');
   }
 
   function deactivateTool() {
@@ -448,6 +449,8 @@
     clearHoverGhost();
     toolbars.querySelectorAll('.score-palette-tool').forEach((button) => button.setAttribute('aria-pressed', 'false'));
   }
+
+  let lastNoteD = 'q'; // duracion con la que se coloca una nota muerta nueva
 
   function activateTool(item) {
     if (selectedNavigation.length || selectedBeam) { selectedNavigation = []; selectedBeam = null; markSelected(); }
@@ -465,6 +468,13 @@
       if (eventAt(selected)) applyModifier(item, selected);
       return;
     }
+    // La nota muerta no cambia la duracion: marca (o, si todas ya lo son, desmarca) las notas elegidas.
+    if (item.dead) {
+      const notes = picks().map((ref) => eventAt(ref)).filter((ev) => ev && !ev.rest);
+      if (notes.length) change(() => { const on = !notes.every((ev) => ev.dead); notes.forEach((ev) => { if (on) ev.dead = true; else delete ev.dead; }); });
+      return;
+    }
+    if (item.kind === 'note') lastNoteD = item.d;
     // La figura se aplica a todas las seleccionadas; cada compas se valida entero antes de tocar nada.
     const edits = picks().filter((ref) => {
       const ev = eventAt(ref);
@@ -515,7 +525,6 @@
       return change(() => { M.settle(measure); ev.dot = plan.dot; moves.forEach(([o, at]) => { o.at = at; }); });
     }
     if (ev.rest) return;
-    if (item.kind === 'dead') return change(() => { if (ev.dead) delete ev.dead; else ev.dead = true; });
     change(() => {
       // Una vez: simple; dos: doble (## o bb); tres: sin alteracion. El becuadro solo se quita.
       const double = { '#': '##', b: 'bb' }[item.acc];
@@ -2637,15 +2646,15 @@
     if (item.kind === 'navigation') return 'nav:' + item.mark;
     if (item.kind === 'bar') return 'bar:' + item.bar;
     if (item.kind === 'barre') return 'barre';
+    if (item.dead) return 'dead';
     if (item.kind === 'note' || item.kind === 'rest') return item.kind + ':' + item.d;
-    if (item.kind === 'dead') return 'dead';
     return item.kind === 'dot' ? 'dot' : 'acc:' + item.acc;
   }
 
   function glyphFor(item) {
     const svg = document.createElementNS(SVG_NS, 'svg');
     // Las banderas superan x=30 y la fusa sube por encima de y=-16.
-    const tall = (item.kind === 'note' && item.d !== 'w') || item.kind === 'dead';
+    const tall = item.kind === 'note' && item.d !== 'w';
     // Los silencios usan la escala de la partitura; la fusa necesita espacio vertical extra.
     const rest = item.kind === 'rest';
     svg.setAttribute('viewBox', tall ? '0 -24 36 56' : rest ? '0 -12 30 56' : '0 0 30 32');
@@ -2666,7 +2675,7 @@
     { kind: 'note', d: 'q', key: '4', label: t.quarter },
     { kind: 'note', d: 'h', key: '5', label: t.half },
     { kind: 'note', d: 'w', key: '6', label: t.whole },
-    { kind: 'dead', key: t.shortcuts.dead, label: t.dead },
+    { kind: 'note', d: 'q', dead: true, key: t.shortcuts.dead, label: t.dead },
     null,
     { kind: 'rest', d: 'f', key: 'q', code: 'KeyQ', label: t.restThirtySecond },
     { kind: 'rest', d: 's', key: 'w', code: 'KeyW', label: t.restSixteenth },
