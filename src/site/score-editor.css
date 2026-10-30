@@ -377,6 +377,14 @@ body.score-body {
   height: auto;
 }
 
+.score-palette .score-palette-item svg.score-note-glyph {
+  width: 28.8px;
+}
+
+.score-palette .score-palette-item svg.score-small-rest-glyph {
+  width: 20px;
+}
+
 .score-palette .score-palette-item {
   padding-top: 0.4rem;
   min-height: 3rem;
