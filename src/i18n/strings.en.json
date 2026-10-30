@@ -590,7 +590,7 @@
   "scoreSeoH1": "Free online sheet music editor",
   "scoreAboutLead": "Write your score straight onto the staff: pick a note value, click where the note goes, done. It is free, runs in your browser and needs no account or install.",
   "scoreShortcutsH2": "Keyboard shortcuts and gestures",
-  "scoreShortcutsIntro": "Press a figure’s key to pick it, then click on the staff to place it. Press A to deselect the current tool. With figures selected, Shift+D duplicates them into the free space of the same measure. These are the keys:",
+  "scoreShortcutsIntro": "Press a figure’s key to pick it, then click on the staff to place it. Press A to deselect the current tool. With figures selected, Shift+D duplicates them right after the last selected one, carrying on into the following measures. These are the keys:",
   "scoreShortcutsNotes": "Notes",
   "scoreShortcutsRests": "Rests",
   "scoreShortcutsMarks": "Dot and accidentals",

@@ -305,46 +305,157 @@
     return { pitches, tabs, type: 'guitar-score-selection', version: 1, ...signatures[0], signatures, measures: fragment };
   }
 
-  // Copia las figuras elegidas de cada compas justo despues de lo que ya suena en ese compas.
-  // Devuelve las figuras nuevas, o null (sin tocar la partitura) si alguna copia no entra.
-  function duplicateInMeasure(score, refs) {
+  // Duplica las figuras elegidas justo despues de la ultima de ellas, conservando su ritmo relativo. Lo que no entra
+  // en el compas sigue en los siguientes (se agregan los que falten; una figura partida queda ligada) y convive con
+  // lo que ya hay: misma altura y duracion se ignora, misma altura y otra duracion actualiza la duracion.
+  // Devuelve las figuras resultantes, o null (sin tocar la partitura) si algo no se puede colocar.
+  function duplicateSelection(score, refs) {
     const trial = clone(score);
-    const created = [];
-    const mis = [...new Set(refs.map((r) => r.mi))].sort((a, b) => a - b);
-    for (const mi of mis) {
-      const measure = measures(trial)[mi];
-      const chosen = refs.filter((r) => r.mi === mi && measure?.[r.i]).map((r) => r.i);
-      if (!chosen.length) continue;
-      const starts = onsets(measure);
-      const desired = pitchContexts(trial, mi);
-      const end = Math.max(...measure.map((ev, i) => starts[i] + length(ev)));
-      const offset = end - Math.min(...chosen.map((i) => starts[i]));
-      const ids = new Map();
-      let nextId = Math.max(0, ...measure.map((ev) => ev.tp || 0));
-      const copies = chosen.map((i) => {
-        const ev = clone(measure[i]);
-        if (ev.tp) {
-          if (!ids.has(ev.tp)) ids.set(ev.tp, ++nextId);
-          ev.tp = ids.get(ev.tp);
+    const all = measures(trial);
+    const chosen = refs.filter((r, k) => all[r.mi]?.[r.i] && refs.findIndex((o) => o.mi === r.mi && o.i === r.i) === k);
+    if (!chosen.length) return null;
+    const savedTabs = captureTabReferences(trial);
+    const sourceAttacks = attacks(trial, true);
+    const starts = () => {
+      let total = 0;
+      const list = measures(trial).map((_, mi) => { const at = total; total += capacity(trial, mi); return at; });
+      return { list, total };
+    };
+    const origin = starts().list;
+    const sources = chosen.map(({ mi, i }) => {
+      const ev = all[mi][i];
+      return { ev, abs: origin[mi] + onsets(all[mi])[i], pitch: pitchContexts(trial, mi)[i], clef: CLEFS[clefAt(trial, mi)].octave || 0 };
+    }).sort((a, b) => a.abs - b.abs);
+    const offset = Math.max(...sources.map((s) => s.abs + length(s.ev))) - sources[0].abs;
+    const needed = Math.max(...sources.map((s) => s.abs + offset + length(s.ev)));
+    while (starts().total < needed) trial.rows.push(emptyRow());
+    const { list: first } = starts();
+    const values = Object.keys(VALUES).flatMap((d) => [{ d }, ...(!['w', 's', 'f'].includes(d) ? [{ d, dot: true }] : [])])
+      .sort((a, b) => length(b) - length(a));
+    const decompose = (size) => {
+      const pieces = [];
+      while (size > 0) {
+        const value = values.find((v) => length(v) <= size);
+        if (!value) return null;
+        pieces.push(value);
+        size -= length(value);
+      }
+      return pieces;
+    };
+    // Cada figura elegida pasa a una o mas partes, cada una en el compas que le toca.
+    const byMeasure = new Map();
+    const partsOf = new Map();
+    for (const source of sources) {
+      const { ev } = source;
+      let pos = source.abs + offset, remaining = length(ev);
+      partsOf.set(ev, []);
+      while (remaining > 0) {
+        const mi = first.findLastIndex((at) => at <= pos);
+        const room = first[mi] + capacity(trial, mi) - pos;
+        const size = Math.min(room, remaining);
+        let made;
+        if (size === length(ev)) made = [clone(ev)];
+        else {
+          if (ev.tp) return null;
+          const pieces = decompose(size);
+          if (!pieces) return null;
+          made = pieces.map((value, k) => {
+            const part = Object.assign(clone(ev), value, { at: 0 });
+            delete part.tp; delete part.dot;
+            if (value.dot) part.dot = true;
+            if (k < pieces.length - 1 || remaining > size) { if (!ev.rest) part.tie = true; delete part.slur; }
+            return part;
+          });
         }
-        delete ev.tie;
-        delete ev.slur;
-        return { ev, pitch: desired[i], at: starts[i] + offset };
-      });
-      const indices = insertMany(measure, copies.map((c) => [c.ev, c.at]));
-      if (measureLength(measure) > capacity(trial, mi)) return null;
-      // Una alteracion que ya sonaba en el compas no debe cambiar la altura de la copia.
-      copies.map((c, k) => k).sort((a, b) => copies[a].at - copies[b].at).forEach((k) => {
-        const { ev, pitch } = copies[k];
-        if (ev.rest || !pitch) return;
-        const actual = pitchContexts(trial, mi)[measure.indexOf(ev)];
-        if (actual.alter !== pitch.alter) ev.acc = accidentalFor(pitch.alter);
-      });
-      indices.forEach((i) => created.push({ mi, i }));
+        made.forEach((part) => {
+          part.at = pos - first[mi];
+          if (!byMeasure.has(mi)) byMeasure.set(mi, []);
+          byMeasure.get(mi).push({ part, source });
+          partsOf.get(ev).push(part);
+          pos += length(part);
+        });
+        remaining -= size;
+      }
     }
-    if (!created.length) return null;
+    const fresh = new Set();
+    const landed = new Map();
+    for (const [mi, entries] of [...byMeasure].sort((a, b) => a[0] - b[0])) {
+      const dest = measures(trial)[mi];
+      const times = onsets(dest);
+      const existing = pitchContexts(trial, mi);
+      const desired = new Map(dest.map((ev, i) => [ev, existing[i]]));
+      const octave = CLEFS[clefAt(trial, mi)].octave || 0;
+      let nextId = Math.max(0, ...dest.map((ev) => ev.tp || 0));
+      const ids = new Map();
+      const inserts = [];
+      for (const { part, source } of entries) {
+        if (!part.rest) {
+          part.n += 7 * (source.clef - octave);
+          if (part.n < LOWEST || part.n > HIGHEST) return null;
+        }
+        const at = part.at;
+        const twin = dest.findIndex((o, j) => times[j] === at && (part.rest
+          ? o.rest
+          : !o.rest && o.n === part.n && existing[j]?.alter === source.pitch?.alter));
+        const blocked = part.rest && dest.some((o, j) => times[j] === at && !o.rest);
+        if (blocked) continue;
+        if (twin >= 0) {
+          const other = dest[twin];
+          if (length(other) !== length(part) && !other.tp && !part.tp) {
+            delete other.dot;
+            Object.assign(other, { d: part.d }, part.dot ? { dot: true } : {});
+          }
+          landed.set(part, other);
+          continue;
+        }
+        if (part.tp) {
+          if (!ids.has(part.tp)) ids.set(part.tp, ++nextId);
+          part.tp = ids.get(part.tp);
+        }
+        if (!part.rest && source.pitch) desired.set(part, source.pitch);
+        inserts.push([part, at]);
+        fresh.add(part);
+        landed.set(part, part);
+      }
+      insertMany(dest, inserts);
+      if (measureLength(dest) > capacity(trial, mi)) return null;
+      // Una alteracion copiada no debe cambiar la altura de lo que ya estaba en el compas.
+      const actual = new Map();
+      const order = onsets(dest);
+      dest.map((ev, i) => i).sort((a, b) => order[a] - order[b]).forEach((i) => {
+        const ev = dest[i];
+        if (ev.rest) return;
+        const pitch = desired.get(ev);
+        const alter = ev.acc ? ACCIDENTALS[ev.acc].alter : actual.has(ev.n) ? actual.get(ev.n) : keyAlter(ev.n, trial, mi);
+        if (pitch && alter !== pitch.alter) ev.acc = accidentalFor(pitch.alter);
+        if (ev.acc) actual.set(ev.n, ACCIDENTALS[ev.acc].alter);
+      });
+    }
+    // La digitacion de la TAB viaja con la nota, igual que al copiar y pegar.
+    const columns = score.tabs || {};
+    sourceAttacks.filter((attack) => columns[attack.key]).forEach((attack) => {
+      const notes = attack.events.flatMap((ev, k) => {
+        const target = partsOf.get(ev)?.[0];
+        return target && fresh.has(target) ? [{ target, midi: attack.midis[k] }] : [];
+      });
+      if (!notes.length) return;
+      const column = columns[attack.key].map((fret, string) =>
+        notes.length === attack.events.length || notes.some((note) => TAB_OPENS[string] + fret === note.midi) ? fret : null);
+      savedTabs.push({ refs: notes.map((note) => tabReference(note.target)), midis: notes.map((note) => note.midi), column });
+    });
+    restoreTabReferences(trial, savedTabs);
+    const created = [];
+    for (const { ev } of sources) {
+      for (const part of partsOf.get(ev)) {
+        const target = landed.get(part);
+        const mi = target && measures(trial).findIndex((m) => m.includes(target));
+        if (target && mi >= 0) created.push({ mi, i: measures(trial)[mi].indexOf(target) });
+      }
+    }
     score.rows = trial.rows;
-    return created;
+    if (trial.tabs) score.tabs = trial.tabs;
+    else delete score.tabs;
+    return created.length ? created : null;
   }
 
   // Prepara todo antes de escribir: un pegado que no entra no cambia la partitura.
@@ -1765,7 +1876,7 @@
 
   return {
     voicesText, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    captureTabReferences, restoreTabReferences, copySelection, pasteSelection, duplicateInMeasure, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, moveMeasure, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
+    captureTabReferences, restoreTabReferences, copySelection, pasteSelection, duplicateSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, moveMeasure, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
     meterOf, meterAt, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setNavigation, removeNavigation, navigationEndings, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };

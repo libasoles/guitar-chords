@@ -2112,13 +2112,13 @@
     }
   });
 
-  // Copia las figuras elegidas en el espacio que queda libre del mismo compas.
+  // Copia las figuras elegidas justo despues de la ultima, siguiendo en los compases que vengan.
   function duplicateSelected() {
     const refs = picks().filter((ref) => eventAt(ref));
     if (!refs.length) return;
     const trial = M.clone(score);
     M.restoreTabReferences(trial, M.captureTabReferences(score, score.showTabs ? tabColumns : score.tabs));
-    const created = M.duplicateInMeasure(trial, refs);
+    const created = M.duplicateSelection(trial, refs);
     if (!created) return say(t.full);
     change(() => {
       Object.assign(score, trial);
