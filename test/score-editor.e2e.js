@@ -225,7 +225,7 @@ async function checkBarlines(page) {
   await selectBar(1, 'end');
   await page.locator('#scoreTitle').click();
   assert.equal(await page.locator('.score-barline-remove').count(), 0);
-  // Click en el compas (sin herramienta): la x aparece sobre su barra especial, y pequeña.
+  // Click en el compas (sin herramienta): ambas barras visibles se activan y ofrecen su X.
   await page.keyboard.press('Escape');
   const dragBox = await page.locator('[id="m1"]').boundingBox();
   await page.mouse.move(dragBox.x + 10, dragBox.y + dragBox.height / 2);
@@ -236,12 +236,18 @@ async function checkBarlines(page) {
   const measureBox = await page.locator('[id="m1"]').boundingBox();
   await page.mouse.click(measureBox.x + measureBox.width / 2, measureBox.y + measureBox.height / 2);
   await page.waitForSelector('.score-barline-remove');
-  assert.equal(await page.locator('.score-barline-remove').count(), 1);
-  assert.ok((await page.locator('.score-barline-remove').boundingBox()).width <= 28);
-  // El compas siguiente no tiene barra propia: la x sale sobre la barra de su izquierda (cierre del anterior).
+  assert.equal(await page.locator('.score-barline-remove').count(), 2);
+  assert.deepEqual(await page.locator('.score-barline-trigger[aria-pressed="true"]').evaluateAll(nodes =>
+    nodes.map(node => [node.dataset.measure, node.dataset.side])), [['0', 'end'], ['1', 'end']]);
+  for (const remove of await page.locator('.score-barline-remove').all()) {
+    assert.ok((await remove.boundingBox()).width <= 28, 'cada X conserva su tamano pequeño');
+  }
+  // El compas siguiente no tiene barra propia: solo se activa su barra izquierda (cierre del anterior).
   const nextBox = await page.locator('[id="m2"]').boundingBox();
   await page.mouse.click(nextBox.x + nextBox.width / 2, nextBox.y + nextBox.height / 2);
   await page.waitForFunction(() => document.querySelectorAll('.score-barline-remove').length === 1);
+  assert.deepEqual(await page.locator('.score-barline-trigger[aria-pressed="true"]').evaluateAll(nodes =>
+    nodes.map(node => [node.dataset.measure, node.dataset.side])), [['1', 'end']], 'cambiar de compas limpia la seleccion anterior');
   await page.locator('#scoreTitle').click();
   await page.locator('#scoreDownloadToggle').click();
   const pendingDownload = page.waitForEvent('download');
