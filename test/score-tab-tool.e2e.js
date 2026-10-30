@@ -35,6 +35,29 @@ const { serveStatic } = require('../scripts/lib/static-server');
     await tab.locator('.ascii-tabs-cell').first().click();
     assert.equal(await tab.evaluate(node => node.classList.contains('ascii-tabs-editing')), true,
       'TAB editing resumes when the tool is released');
+    // Low ledger-line heads overlap the TAB's first empty string cell.
+    await page.evaluate(() => {
+      scoreEditor.score.rows[0][0] = [{ n: 24, d: 'h', at: 0 }];
+      scoreEditor.render();
+    });
+    await tab.locator('.ascii-tabs-cell').first().waitFor();
+    const lowHead = await page.locator('#e0-0 .notehead').boundingBox();
+    const lowPoint = { x: lowHead.x + lowHead.width / 2, y: lowHead.y + lowHead.height / 2 };
+    assert.ok(await page.evaluate(p => !!document.elementFromPoint(p.x, p.y).closest('.score-tab'), lowPoint),
+      'the regression clicks a note head underneath the TAB');
+    await page.mouse.move(lowPoint.x, lowPoint.y);
+    await page.mouse.down();
+    await page.mouse.move(lowPoint.x, lowPoint.y - 30, { steps: 6 });
+    await page.mouse.up();
+    assert.notEqual(await page.evaluate(() => scoreEditor.score.rows[0][0][0].n), 24,
+      'dragging the overlapping head changes the score pitch instead of editing TAB');
+    assert.equal(await tab.evaluate(node => node.classList.contains('ascii-tabs-editing')), false,
+      'the note drag does not open TAB editing');
+    assert.equal(await page.locator('#e0-0.is-selected').count(), 1,
+      'the dragged score note stays selected');
+    await tab.locator('.ascii-tabs-cell[data-s="5"]').first().click();
+    assert.equal(await tab.evaluate(node => node.classList.contains('ascii-tabs-editing')), true,
+      'TAB cells away from the note remain editable');
     console.log('score-tab-tool e2e: OK');
   } finally {
     if (browser) await browser.close();

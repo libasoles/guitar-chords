@@ -1608,7 +1608,14 @@
   document.addEventListener('pointercancel', (event) => endDrag(event, true));
 
   stage.addEventListener('pointerdown', (event) => {
-    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-key-trigger, .score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span, .score-selection-menu, .score-tab')) return;
+    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-key-trigger, .score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span, .score-selection-menu')) return;
+    // Las cabezas graves pueden quedar dentro de TAB: la partitura recibe
+    // el gesto antes de que el componente enfoque y redibuje su celda.
+    const overTab = event.target.closest('.score-tab');
+    if (overTab) {
+      if (!eventUnder(event.clientX, event.clientY)) return;
+      event.stopPropagation();
+    }
     if (isPlacing(activeItem)) {
       event.preventDefault();
       stage.focus({ preventScroll: true });
@@ -1642,7 +1649,7 @@
       kind: ev.rest ? 'rest' : 'note',
       glyph: glyphFor({ kind: ev.rest ? 'rest' : 'note', d: ev.d }),
     });
-  });
+  }, true);
 
   // ---- marco de seleccion ---------------------------------------------------
 
