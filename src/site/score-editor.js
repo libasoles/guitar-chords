@@ -1471,9 +1471,13 @@
       if (selectedNavigation.some((pick) => pick.first === Number(node.dataset.navigationFirst) && pick.mark === node.dataset.navigationMark)) node.classList.add('is-selected');
     });
     if (selectedBeam && !selectedBeam.node.isConnected) selectedBeam = null;
-    if (selectedBeam) {
-      selectedBeam.node.querySelectorAll(':scope > polygon').forEach((node) => node.classList.add('is-selected'));
-    }
+    // Highlight the connection whenever one of its notes is selected, without
+    // selecting the other notes or changing what Delete acts on.
+    stage.querySelectorAll('g.beam').forEach((beam) => {
+      if (beam === selectedBeam?.node || beam.querySelector('g.note.is-selected, g.rest.is-selected')) {
+        beam.querySelectorAll(':scope > polygon').forEach((node) => node.classList.add('is-selected'));
+      }
+    });
     updateSelectionMenu();
   }
 
