@@ -408,9 +408,15 @@
         if (pitch.alter !== keyAlter(ev.n, trial, mi + offset)) ev.acc = accidentalFor(pitch.alter);
       }
       const starts = onsets(destination);
-      if (clean[offset].some((ev) => !ev.rest && destination.some((other, i) =>
+      const clashes = () => clean[offset].some((ev) => !ev.rest && destination.some((other, i) =>
         !other.rest && starts[i] === ev.at && other.n === ev.n &&
-        (desired.has(ev) ? desired.get(other)?.alter === desired.get(ev).alter : other.acc === ev.acc)))) return null;
+        (desired.has(ev) ? desired.get(other)?.alter === desired.get(ev).alter : other.acc === ev.acc)));
+      // Si repite notas que ya suenan ahi (pegar sobre el mismo compas), sigue a lo que ya hay en el compas.
+      if (clashes()) {
+        const shift = measureLength(destination);
+        clean[offset].forEach((ev) => { ev.at += shift; });
+        if (clashes()) return null;
+      }
       const ids = new Map();
       let nextId = Math.max(0, ...destination.map((ev) => ev.tp || 0));
       const list = clean[offset].map((ev) => {
