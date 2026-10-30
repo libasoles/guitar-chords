@@ -1471,10 +1471,12 @@
       if (selectedNavigation.some((pick) => pick.first === Number(node.dataset.navigationFirst) && pick.mark === node.dataset.navigationMark)) node.classList.add('is-selected');
     });
     if (selectedBeam && !selectedBeam.node.isConnected) selectedBeam = null;
-    // Highlight the connection whenever one of its notes is selected, without
-    // selecting the other notes or changing what Delete acts on.
+    // Highlight a connection only when all its figures are selected, or when
+    // the beam itself was picked. This does not change what Delete acts on.
     stage.querySelectorAll('g.beam').forEach((beam) => {
-      if (beam === selectedBeam?.node || beam.querySelector('g.note.is-selected, g.rest.is-selected')) {
+      const figures = [...beam.querySelectorAll('g.note, g.rest')];
+      const fullySelected = figures.length > 0 && figures.every((node) => node.classList.contains('is-selected'));
+      if (beam === selectedBeam?.node || fullySelected) {
         beam.querySelectorAll(':scope > polygon').forEach((node) => node.classList.add('is-selected'));
       }
     });
