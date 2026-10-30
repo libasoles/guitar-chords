@@ -125,6 +125,7 @@ async function run() {
     await page.mouse.move(grab.x, grab.y);
     await page.mouse.down();
     await page.mouse.move(staff.x + 20, grab.y, { steps: 8 });
+    assert.equal(await page.locator('.score-ghost svg').count(), 2, 'el phantom representa todas las figuras del grupo');
     await page.mouse.up();
     assert.equal((await events(page, 0)).length, 0);
     assert.equal((await events(page, 1)).length, 2);
