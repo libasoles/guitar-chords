@@ -6,6 +6,24 @@ const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
 const { serveStatic } = require('../scripts/lib/static-server');
 
+async function checkUndoShortcuts(page) {
+  const rowCount = () => page.evaluate(() => scoreEditor.score.rows.length);
+  const initial = await rowCount();
+  for (const shortcut of ['Meta+Shift+z', 'Meta+z', 'Control+Shift+z', 'Control+z']) {
+    await page.locator('#scoreAddRow').click();
+    assert.equal(await rowCount(), initial + 1);
+    await page.keyboard.press(shortcut);
+    assert.equal(await rowCount(), initial, shortcut + ' deshace la edicion');
+  }
+  // Los campos conservan su propio historial de texto.
+  await page.locator('#scoreAddRow').click();
+  await page.locator('#scoreTitle').focus();
+  await page.keyboard.press('Meta+Shift+z');
+  assert.equal(await rowCount(), initial + 1, 'editar texto no deshace la partitura');
+  await page.locator('#scoreStage').focus();
+  await page.keyboard.press('Meta+z');
+}
+
 async function checkInteriorDoubleBar(page) {
   await page.locator('[data-barline="double"]').click();
   const staff = await page.locator('#scoreStage g.measure').first().locator('g.staff > path').first().boundingBox();
@@ -1047,6 +1065,7 @@ async function run() {
     const url = 'http://localhost:' + server.address().port + '/partitura';
     await page.goto(url);
     await page.waitForSelector('.score-clef-trigger');
+    await checkUndoShortcuts(page);
     assert.equal(await page.locator('.score-clef-trigger').count(), 3);
     await page.evaluate(() => { scoreEditor.ghostOffset = 0; });
 
