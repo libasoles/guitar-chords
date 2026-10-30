@@ -2401,7 +2401,9 @@
           pdf.text(score.title, 8.75, 15);
         }
       }
-      pdf.save('partitura.pdf');
+      const filenameTitle = score.title.trim() || 'partitura';
+      const filenameAuthor = (score.author || '').trim();
+      pdf.save(filenameTitle + (filenameAuthor ? ' - ' + filenameAuthor : '') + '.pdf');
     } catch (e) {
       say(t.pdfError);
     } finally {

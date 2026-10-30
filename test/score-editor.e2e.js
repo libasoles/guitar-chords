@@ -922,11 +922,37 @@ async function checkPrependRest(page) {
   assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0].length), 5);
 }
 
+async function checkPdfFilenames(page, url) {
+  await page.goto(url);
+  await page.waitForSelector('#scoreStage g.measure');
+  for (const [title, author, expected] of [
+    ['Zamba del río', '', 'Zamba del río.pdf'],
+    ['Zamba del río', 'Cuchi Leguizamón', 'Zamba del río - Cuchi Leguizamón.pdf'],
+    ['  Zamba del río  ', '   ', 'Zamba del río.pdf'],
+    ['', '', 'partitura.pdf'],
+  ]) {
+    await page.locator('#scoreTitle').fill(title);
+    await page.locator('#scoreAuthor').fill(author);
+    await page.locator('#scoreDownloadToggle').click();
+    const pending = page.waitForEvent('download');
+    await page.locator('#scoreDownloadPdf').click();
+    const download = await pending;
+    assert.equal(download.suggestedFilename(), expected);
+    await download.delete();
+    await page.waitForFunction(() => !document.getElementById('scoreDownloadPdf').disabled);
+  }
+}
+
 async function run() {
   const server = await serveStatic(path.join(__dirname, '..', 'dist', 'site'), 0);
   let browser;
   try {
     browser = await chromium.launch({ executablePath: playwrightExecutablePath() });
+    for (const route of ['/partitura', '/en/sheet-music-editor']) {
+      const pdfPage = await browser.newPage();
+      await checkPdfFilenames(pdfPage, 'http://localhost:' + server.address().port + route);
+      await pdfPage.close();
+    }
     // El resto de pruebas sueltan justo bajo el puntero; el desplazamiento se prueba aparte.
     const newPage = async (options) => {
       const created = await browser.newPage(options);
