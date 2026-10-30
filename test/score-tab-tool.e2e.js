@@ -68,6 +68,10 @@ const { serveStatic } = require('../scripts/lib/static-server');
     });
     await tab.locator('.ascii-tabs-cell').first().waitFor();
     await page.locator('#scoreStage').focus();
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
+    });
     await page.keyboard.press('4');
     assert.equal(await toggle.getAttribute('aria-pressed'), 'true',
       'TAB stays pressed when a note tool is selected');
