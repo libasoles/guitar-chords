@@ -1718,6 +1718,11 @@
       deactivateTool();
     }
     if (!event.metaKey && !event.ctrlKey && !event.altKey && !meterPopup.matches(':popover-open') && !clefPopup.matches(':popover-open')) {
+      if (event.key.toLowerCase() === 'a') {
+        event.preventDefault();
+        deactivateTool();
+        return;
+      }
       const item = ITEMS.find((item) => item && (item.code ? item.code === event.code : item.key === event.key.toLowerCase()));
       if (item) { event.preventDefault(); if (!event.repeat) activateTool(item); return; }
     }

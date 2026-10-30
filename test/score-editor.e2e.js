@@ -574,6 +574,14 @@ async function checkModifiers(page, url, keys) {
       await page.keyboard.press('ControlOrMeta+z');
     }
   }
+  // A releases the active tool in both locales, without intercepting select-all.
+  for (const key of ['a', 'A']) {
+    await page.keyboard.press('4');
+    await page.keyboard.press('ControlOrMeta+a');
+    assert.equal(await page.locator('[data-shortcut="4"]').getAttribute('aria-pressed'), 'true');
+    await page.keyboard.press(key);
+    assert.equal(await page.locator('.score-palette-item[aria-pressed="true"]').count(), 0, key + ' deselects the tool');
+  }
   // Clicking a figure activates the same persistent tool as its keyboard shortcut.
   await page.locator('[data-shortcut="4"]').click();
   await page.locator('[data-shortcut="4"]').click();
