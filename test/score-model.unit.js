@@ -1188,3 +1188,53 @@ test('las copias de trabajo conservan referencias TAB sin asociar notas iguales 
   M.restoreTabReferences(copied, refs);
   assert.deepEqual(copied.tabs, { '0:0': columns['0:24'], '0:24': columns['0:0'] });
 });
+
+test('navigation marks survive storage and export musical return points and endings', () => {
+  const score = M.emptyScore();
+  for (const [mi, mark] of [[0, 'segno'], [1, 'first'], [2, 'second'], [3, 'ds'], [4, 'dc']]) assert.equal(M.setNavigation(score, mi, mark), true);
+  M.setBarline(score, 1, 'end');
+  const saved = M.sanitize(JSON.parse(JSON.stringify(score)));
+  assert.deepEqual(saved.navigation, score.navigation);
+  const xml = M.toMusicXml(saved);
+  assert.match(xml, /<segno\/>/);
+  assert.match(xml, /<sound segno="segno"\/>/);
+  assert.match(xml, /<sound dalsegno="segno"\/>/);
+  assert.match(xml, /<sound dacapo="yes"\/>/);
+  assert.match(xml, /<ending number="1" type="stop"\/><repeat direction="backward"\/>/);
+  assert.match(xml, /<ending number="2" type="discontinue"\/>/);
+  assert.equal(M.setNavigation(score, -1, 'dc'), false);
+  assert.equal(M.setNavigation(score, 0, 'bad'), false);
+  M.setNavigation(score, 0, 'segno');
+  assert.equal(score.navigation[0], undefined, 'placing the same mark removes it');
+  M.setNavigation(score, 1, 'second');
+  assert.deepEqual(score.navigation[1], { second: true });
+  assert.equal(M.sanitize({ ...score, navigation: { 99: { dc: true }, 0: { dc: 'yes', evil: true } } }).navigation, undefined);
+});
+
+test('navigation marks follow measures when adding, removing and splitting', () => {
+  const score = M.emptyScore();
+  score.rows[0].pop();
+  M.setNavigation(score, 3, 'segno');
+  M.addMeasure(score, 0);
+  assert.deepEqual(score.navigation, { 4: { segno: true } });
+  M.removeMeasure(score, 0);
+  assert.deepEqual(score.navigation, { 3: { segno: true } });
+  M.setBarline(score, 0, 'double', 48);
+  assert.deepEqual(score.navigation, { 4: { segno: true } });
+});
+
+test('consecutive endings share a bracket and splitting keeps the return at the end', () => {
+  const score = M.emptyScore();
+  M.setNavigation(score, 0, 'first');
+  M.setNavigation(score, 1, 'first');
+  M.setNavigation(score, 1, 'dc');
+  let xml = M.toMusicXml(score);
+  assert.equal((xml.match(/<ending number="1" type="start"/g) || []).length, 1);
+  assert.equal((xml.match(/<ending number="1" type="stop"/g) || []).length, 1);
+  M.setBarline(score, 1, 'double', 48);
+  assert.deepEqual(score.navigation[1], { first: true });
+  assert.deepEqual(score.navigation[2], { first: true, dc: true });
+  xml = M.toMusicXml(score);
+  assert.equal((xml.match(/<ending number="1" type="start"/g) || []).length, 1);
+  assert.match(xml.split('<measure number="3"')[1], /D.C./);
+});

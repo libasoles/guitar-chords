@@ -47,18 +47,13 @@ body.score-body {
   background: transparent;
 }
 
-/* Second sidebar: shares the right column with the barlines but stays pinned to the bottom of the viewport. */
-.score-side-bottom {
-  grid-column: 2;
-  grid-row: 1;
-  position: sticky;
-  bottom: 1rem;
-  z-index: 4;
-  align-self: end;
-  background: transparent;
+/* A tall palette must scroll with the page when it cannot fit in the viewport. */
+@media (max-height: 760px) {
+  .score-side { position: relative; top: auto; }
 }
 
 .score-side-actions {
+  margin-top: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;

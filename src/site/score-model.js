@@ -469,7 +469,7 @@
   function addMeasure(score, row) {
     if (!Number.isInteger(row) || row < 0 || row >= score.rows.length || score.rows[row].length >= PER_ROW) return false;
     const at = rowStarts(score)[row] + score.rows[row].length;
-    ['barlines', 'keys', 'clefs', 'meters', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => { if (score[name]) score[name] = shiftKeys(score[name], at, 1); });
+    ['navigation', 'barlines', 'keys', 'clefs', 'meters', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => { if (score[name]) score[name] = shiftKeys(score[name], at, 1); });
     score.rows[row].push([]);
     return true;
   }
@@ -487,7 +487,7 @@
         if (!barre.span) delete barre.span;
       }
     });
-    ['barlines', 'keys', 'clefs', 'meters', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => {
+    ['navigation', 'barlines', 'keys', 'clefs', 'meters', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => {
       if (!score[name]) return;
       delete score[name][at];
       score[name] = shiftKeys(score[name], at, -1);
@@ -514,6 +514,23 @@
       bar[type] = true;
       score.barlines[mi] = bar;
     }
+    return true;
+  }
+
+  // Navigation marks belong to measures and survive row edits and saved scores.
+  const NAVIGATION = ['dc', 'ds', 'segno', 'first', 'second'];
+  function setNavigation(score, mi, mark) {
+    if (!Number.isInteger(mi) || mi < 0 || mi >= measures(score).length || !NAVIGATION.includes(mark)) return false;
+    const marks = Object.assign({}, score.navigation?.[mi]);
+    if (marks[mark]) delete marks[mark];
+    else {
+      if (mark === 'first' || mark === 'second') { delete marks.first; delete marks.second; }
+      if (mark === 'dc' || mark === 'ds') { delete marks.dc; delete marks.ds; }
+      marks[mark] = true;
+    }
+    if (!score.navigation) score.navigation = {};
+    if (Object.keys(marks).length) score.navigation[mi] = marks;
+    else delete score.navigation[mi];
     return true;
   }
 
@@ -580,9 +597,18 @@
         }
       }
     });
-    ['barlines', 'keys', 'clefs', 'meters', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => {
+    ['navigation', 'barlines', 'keys', 'clefs', 'meters', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => {
       if (score[name]) score[name] = shiftKeys(score[name], mi + 1, 1);
     });
+    const nav = score.navigation?.[mi];
+    if (nav) {
+      const rightNav = Object.assign({}, nav);
+      delete rightNav.segno;
+      delete nav.dc;
+      delete nav.ds;
+      if (Object.keys(rightNav).length) score.navigation[mi + 1] = rightNav;
+      if (!Object.keys(nav).length) delete score.navigation[mi];
+    }
     if (movedBarre) score.barres[mi + 1] = movedBarre;
     if (oldWidth) {
       score.measureWidths[mi] = oldWidth * at / end;
@@ -950,6 +976,11 @@
     while (rows.length < MIN_ROWS) rows.push(emptyRow());
     const total = rows.flat().length;
     const lastOf = (index) => rowOf({ rows }, index).last;
+    const navigation = {};
+    Object.entries(data.navigation || {}).forEach(([index, marks]) => {
+      if (!/^(0|[1-9]\d*)$/.test(index) || +index >= total || !marks) return;
+      NAVIGATION.forEach((mark) => { if (marks[mark] === true) setNavigation({ rows, navigation }, +index, mark); });
+    });
     const barlines = {};
     Object.entries(data.barlines || {}).forEach(([index, bar]) => {
       if (!/^(0|[1-9]\d*)$/.test(index) || +index >= total || !bar) return;
@@ -1000,7 +1031,7 @@
       if (/^(0|[1-9]\d*)$/.test(index) && +index < total && Number.isFinite(width) && width > 0 && width <= 1) measureWidths[index] = width;
     });
     const tabs = sanitizeTabs(data.tabs, rows.reduce((sum, row) => sum + row.length, 0));
-    return Object.assign(Object.keys(meters).length ? { meters } : {}, Object.keys(measureWidths).length ? { measureWidths } : {}, Object.keys(measureDurations).length ? { measureDurations } : {}, Object.keys(barlines).length ? { barlines } : {}, Object.keys(keys).length ? { keys } : {}, Object.keys(clefs).length ? { clefs } : {}, Object.keys(barres).length ? { barres } : {}, data.showTabs === true ? { showTabs: true } : {}, Object.keys(tabs).length ? { tabs } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
+    return Object.assign(Object.keys(navigation).length ? { navigation } : {}, Object.keys(meters).length ? { meters } : {}, Object.keys(measureWidths).length ? { measureWidths } : {}, Object.keys(measureDurations).length ? { measureDurations } : {}, Object.keys(barlines).length ? { barlines } : {}, Object.keys(keys).length ? { keys } : {}, Object.keys(clefs).length ? { clefs } : {}, Object.keys(barres).length ? { barres } : {}, data.showTabs === true ? { showTabs: true } : {}, Object.keys(tabs).length ? { tabs } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
   }
 
   // Rellena huecos con silencios ocultos: el final del compas y el espacio entre figuras sueltas.
@@ -1434,7 +1465,15 @@
           (changed ? `<clef><sign>${changed.sign}</sign><line>${changed.line}</line>${changed.octave ? `<clef-octave-change>${changed.octave}</clef-octave-change>` : ''}</clef>` : '') + '</attributes>';
       }
       const bar = score.barlines && score.barlines[mi];
-      if (bar && bar.start) xml += '<barline location="left"><repeat direction="forward"/></barline>';
+      const nav = score.navigation?.[mi] || {};
+      const ending = nav.first ? '1' : nav.second ? '2' : null;
+      const endingStart = ending && (!score.navigation?.[mi - 1]?.[nav.first ? 'first' : 'second'] || score.barlines?.[mi - 1]?.end);
+      const endingStop = ending && (!score.navigation?.[mi + 1]?.[nav.first ? 'first' : 'second'] || bar?.end);
+      if (bar?.start || endingStart) xml += '<barline location="left">' +
+        (endingStart ? `<ending number="${ending}" type="start"/>` : '') +
+        (bar?.start ? '<repeat direction="forward"/>' : '') + '</barline>';
+      if (nav.segno) xml += `<direction id="nav-segno-${mi}" placement="above"><direction-type><segno/></direction-type><sound segno="segno"/></direction>`;
+
       const starts = onsets(measure);
       // Las voces se exportan por separado, pero las alteraciones siguen el orden temporal del compas.
       const accidentals = new Map();
@@ -1501,9 +1540,11 @@
         hidden(cursor, capacity(score, mi));
         if (barreOpen && !barreClosed && vi === all.length - 1) xml += stopXml;
       });
-      if (bar && bar.end) xml += '<barline location="right"><repeat direction="backward"/></barline>';
-      else if (bar && bar.hidden) xml += '<barline location="right"><bar-style>none</bar-style></barline>';
-      else if (bar && bar.double) xml += '<barline location="right"><bar-style>light-light</bar-style></barline>';
+      if (nav.dc || nav.ds) xml += `<direction id="nav-jump-${mi}" placement="above"><direction-type><words justify="right">${nav.dc ? 'D.C.' : 'D.S.'}</words></direction-type><sound ${nav.dc ? 'dacapo="yes"' : 'dalsegno="segno"'}/></direction>`;
+      if (bar?.end || bar?.hidden || bar?.double || endingStop) xml += '<barline location="right">' +
+        (bar?.end ? '' : bar?.hidden ? '<bar-style>none</bar-style>' : bar?.double ? '<bar-style>light-light</bar-style>' : '') +
+        (endingStop ? `<ending number="${ending}" type="${ending === '1' ? 'stop' : 'discontinue'}"/>` : '') +
+        (bar?.end ? '<repeat direction="backward"/>' : '') + '</barline>';
       xml += '</measure>';
     });
     return xml + '</part></score-partwise>\n';
@@ -1568,7 +1609,7 @@
   return {
     voicesText, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
     captureTabReferences, restoreTabReferences, copySelection, pasteSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
-    meterOf, meterAt, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
+    meterOf, meterAt, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setNavigation, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };
 });

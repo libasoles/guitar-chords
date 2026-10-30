@@ -278,6 +278,10 @@
   }
 
   function dropNew(item, target) {
+    if (item.kind === 'navigation') {
+      change(() => M.setNavigation(score, target.mi, item.mark));
+      return;
+    }
     if (item.kind === 'bar') {
       change(() => {
         const widths = currentMeasureWidths();
@@ -349,7 +353,7 @@
   }
 
   function isPlacing(item) {
-    return item && (item.kind === 'bar' || item.kind === 'barre');
+    return item && (item.kind === 'bar' || item.kind === 'barre' || item.kind === 'navigation');
   }
 
   function isModifier(item) {
@@ -370,7 +374,7 @@
     clearHoverGhost();
     updateHoverGhost();
     toolbars.querySelectorAll('.score-palette-tool').forEach((button) => {
-      const same = item.key ? button.dataset.shortcut === item.key : item.kind === 'bar' ? button.dataset.barline === item.bar : button.dataset.tool === item.kind;
+      const same = item.kind === 'navigation' ? button.dataset.navigation === item.mark : item.key ? button.dataset.shortcut === item.key : item.kind === 'bar' ? button.dataset.barline === item.bar : button.dataset.tool === item.kind;
       button.setAttribute('aria-pressed', String(same));
     });
     if (isPlacing(item)) return;
@@ -576,7 +580,7 @@
   function alignBarlinesToFirstStaff() {
     const side = barlines.closest('.score-side');
     const line = stage.querySelector('g.staff > path');
-    const glyph = barlines.querySelector('svg');
+    const glyph = barlines.firstElementChild;
     if (!side || !line || !glyph) return;
     side.style.marginTop = '0';
     const offset = line.getBoundingClientRect().top - glyph.getBoundingClientRect().top;
@@ -883,6 +887,9 @@
     M.pruneKeys(score);
     if (score.barlines) Object.keys(score.barlines).forEach((mi) => {
       if (+mi >= M.measures(score).length) delete score.barlines[mi];
+    });
+    if (score.navigation) Object.keys(score.navigation).forEach((mi) => {
+      if (+mi >= M.measures(score).length) delete score.navigation[mi];
     });
     if (score.barres) Object.keys(score.barres).forEach((mi) => {
       if (+mi >= M.measures(score).length) M.removeBarre(score, +mi);
@@ -1447,7 +1454,8 @@
     marker.hidden = false;
     const line = marker.firstChild;
     const item = drag ? drag.item : activeItem;
-    const x = item && item.kind === 'bar' && item.bar !== 'double' ? layout[hit.mi][item.bar === 'start' ? 'left' : 'right']
+    const x = item?.kind === 'navigation' ? layout[hit.mi][['dc', 'ds'].includes(item.mark) ? 'right' : 'left']
+      : item && item.kind === 'bar' && item.bar !== 'double' ? layout[hit.mi][item.bar === 'start' ? 'left' : 'right']
       : item && item.kind === 'bar' && item.bar === 'double' ? hit.rawX
       : item && item.kind === 'barre' && !hit.onNote ? layout[hit.mi].left : hit.x;
     line.style.left = x + 'px';
@@ -2156,7 +2164,13 @@
     'rest:e': '<g transform="translate(-1.023 -15.817) scale(1.225)"><path d="M7 19.07c0.31 -1.5 1.46 -2.47 3.05 -2.65c1.28 0.13 1.9 0.4 2.34 1.28c0.18 0.35 0.31 0.66 0.44 0.97c0 0.93 -0.04 1.1 -0.49 1.54c-0.22 0.35 -0.79 0.62 -1.77 0.88l0.53 0.13l0.66 0.04c1.94 0 4.28 -1.15 5.38 -2.47c0.44 -0.49 0.79 -1.15 1.06 -1.85c0.31 -0.04 0.66 -0.09 0.97 -0.13l-6.18 18.71h-1.59l4.9 -14.56c-0.44 0.26 -1.19 0.53 -2.34 0.71l-2.3 0.35h-0.44l-0.88 -0.04c-0.04 0 -0.35 -0.13 -0.93 -0.26c-1.63 -0.4 -2.43 -1.24 -2.43 -2.65 z"/></g>',
     'rest:s': '<g transform="translate(-2.346 -22.645) scale(1.225)"><path d="M12.87 29.4c0 1.46 -0.93 2.21 -2.3 2.43c0.44 0.13 0.79 0.18 1.1 0.18c1.77 0 3.05 -1.06 3.97 -2.07l2.91 -8.69c-1.59 0.79 -2.82 1.1 -4.94 1.1c-1.02 0 -1.68 -0.13 -1.99 -0.35c-1.63 -0.31 -2.43 -1.19 -2.43 -2.6c0.35 -1.54 1.32 -2.38 3 -2.56c1.99 0.26 2.16 0.57 2.82 2.12c0 0.13 0.04 0.22 0.04 0.31c0 1.19 -1.1 2.03 -2.3 2.16c0.26 0.18 0.66 0.26 1.15 0.26c1.41 -0.09 2.74 -0.62 3.88 -1.28c1.41 -0.84 1.94 -1.59 2.6 -3.13l0.31 -0.04l0.44 -0.09h0.18c-3.18 9.71 -6.31 19.38 -9.49 29.09h-1.63l4.77 -14.3c-0.88 0.57 -2.25 0.88 -3.62 0.88c-0.93 0 -1.54 -0.18 -1.9 -0.44c-1.63 -0.26 -2.43 -1.15 -2.43 -2.56c0.35 -1.54 1.37 -2.47 3 -2.65c1.9 0.35 2.12 0.57 2.82 2.25 z"/></g>',
     'rest:f': '<g transform="translate(-4.371 -15.964) scale(1.225)"><path d="M10.05 26.88c1.94 0.4 2.16 0.44 2.78 2.21c0 0.62 -0.04 1.06 -0.18 1.28c-0.31 0.49 -1.02 0.88 -2.07 1.15c0.26 0.13 0.66 0.18 1.1 0.18c0.79 0 1.72 -0.31 2.69 -0.97c0.79 -0.53 1.32 -1.15 1.32 -1.15l2.69 -8.25c-0.97 0.53 -2.12 0.93 -3.58 0.93c-0.79 0 -1.5 -0.13 -2.03 -0.4c-1.59 -0.4 -2.38 -1.28 -2.38 -2.69c0.35 -1.5 1.37 -2.56 3 -2.56c1.5 0 2.78 1.06 2.78 2.52c0 0.49 -0.18 0.93 -0.44 1.32c-0.18 0.22 -0.71 0.53 -1.72 0.79c0.35 0.13 0.71 0.22 1.06 0.22c1.54 0 3.13 -1.1 3.88 -1.99l2.91 -8.74c-0.53 0.49 -1.46 0.53 -2.43 0.75c-0.79 0.18 -1.28 0.35 -1.54 0.35h-0.66l-1.24 -0.09c-0.44 -0.04 -0.75 -0.13 -1.02 -0.26c-1.63 -0.31 -2.47 -1.15 -2.47 -2.6c0.4 -1.46 1.46 -2.6 3.18 -2.6c1.46 0 2.34 0.93 2.69 2.16c0 1.63 -0.75 2.07 -2.25 2.43c0.22 0.18 0.57 0.26 1.06 0.26c0.62 0 1.28 -0.13 1.99 -0.35c2.07 -0.66 3.93 -1.9 4.46 -4.06l0.79 -0.09l0.18 0.04l-12.71 39.24h-1.63l4.68 -14.04c-0.75 0.44 -1.9 0.66 -3.18 0.66c-0.97 0 -1.77 -0.13 -2.3 -0.4c-1.54 -0.35 -2.43 -1.02 -2.43 -2.69c0.35 -1.54 1.37 -2.38 3 -2.56 z"/></g>',
+    // Navigation symbols use Bravura outlines and conventional ending brackets.
     // Los tres comparten la misma linea fina en x=15 (y la gruesa de las repeticiones junto a ella), para que apilados se lean como una sola barra.
+    'nav:dc': '<text x="15" y="21" text-anchor="middle" font-size="13" font-family="serif" font-weight="700">D.C.</text>',
+    'nav:ds': '<text x="15" y="21" text-anchor="middle" font-size="13" font-family="serif" font-weight="700">D.S.</text>',
+    'nav:segno': '<path transform="translate(5 29) scale(.049 -.049)" d="M108 474c-22 0 -38 -30 -38 -56c0 -54 73 -85 140 -116l138 205h41l-146 -221c41 -21 73 -44 96 -67c28 -29 42 -62 42 -97c0 -68 -54 -122 -124 -122c-40 0 -76 33 -76 73c0 22 21 38 43 38c23 0 34 -17 39 -38c6 -23 16 -34 31 -34c27 0 42 23 42 54c0 13 -3 23 -8 32c-9 17 -33 36 -72 57l-60 30l-134 -208h-40l141 223c-49 23 -85 50 -109 80c-21 27 -32 55 -32 84c0 47 25 80 54 102c17 13 37 20 58 20c46 0 91 -32 91 -77c0 -22 -23 -36 -45 -36c-19 0 -30 8 -35 25l-7 23c-5 17 -15 26 -30 26zM75 192c0 -21 -16 -38 -36 -38c-23 0 -39 13 -39 35c0 21 15 39 36 39c22 0 39 -15 39 -36zM337 322c0 24 16 38 37 38c23 0 37 -19 37 -37c0 -23 -17 -37 -37 -37c-23 0 -37 17 -37 36z"/>',
+    'nav:first': '<path d="M4 25V7h23" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="8" y="22" font-size="14" font-family="serif">1.</text>',
+    'nav:second': '<path d="M4 25V7h23" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="8" y="22" font-size="14" font-family="serif">2.</text>',
     'bar:double': '<path d="M10 4v24M15 4v24" stroke="currentColor" stroke-width="1.6"/>',
     'bar:start': '<path d="M10 4v24" stroke="currentColor" stroke-width="3.5"/><path d="M15 4v24" stroke="currentColor" stroke-width="1.6"/><circle cx="21" cy="12" r="1.8"/><circle cx="21" cy="20" r="1.8"/>',
     'bar:end': '<path d="M15 4v24" stroke="currentColor" stroke-width="1.6"/><path d="M20 4v24" stroke="currentColor" stroke-width="3.5"/><circle cx="9" cy="12" r="1.8"/><circle cx="9" cy="20" r="1.8"/>',
@@ -2168,6 +2182,7 @@
   };
 
   function glyphKey(item) {
+    if (item.kind === 'navigation') return 'nav:' + item.mark;
     if (item.kind === 'bar') return 'bar:' + item.bar;
     if (item.kind === 'barre') return 'barre';
     if (item.kind === 'note' || item.kind === 'rest') return item.kind + ':' + item.d;
@@ -2211,10 +2226,11 @@
   ];
 
   const BARS = [
-    { kind: 'bar', bar: 'double', label: t.barDouble },
+    { kind: 'barre', label: t.barre },
     { kind: 'bar', bar: 'start', label: t.barRepeatStart },
     { kind: 'bar', bar: 'end', label: t.barRepeatEnd },
-    { kind: 'barre', label: t.barre },
+    { kind: 'bar', bar: 'double', label: t.barDouble },
+    ...['dc', 'ds', 'segno', 'first', 'second'].map((mark) => ({ kind: 'navigation', mark, label: t['nav' + mark] })),
   ];
 
   ITEMS.concat(BARS).forEach((item) => {
@@ -2236,6 +2252,10 @@
       button.addEventListener('click', (event) => {
         if (event.detail === 0) activateTool(item);
       });
+    }
+    if (item.kind === 'navigation') {
+      button.dataset.navigation = item.mark;
+      button.addEventListener('click', (event) => { if (event.detail === 0) activateTool(item); });
     }
     if (item.kind === 'barre') {
       button.dataset.tool = item.kind;
@@ -2260,7 +2280,7 @@
       event.preventDefault();
       beginDrag(event, { item, kind: item.kind, glyph: glyphFor(item) });
     });
-    (item.kind === 'bar' || item.kind === 'barre' ? barlines : palette).appendChild(button);
+    (item.kind === 'bar' || item.kind === 'barre' || item.kind === 'navigation' ? barlines : palette).appendChild(button);
   });
 
   // TAB: muestra u oculta una tablatura bajo cada renglon.
@@ -2276,7 +2296,7 @@
     save();
     render();
   });
-  barlines.appendChild(tabToggle);
+  barlines.prepend(tabToggle);
 
   // ---- renglones, descargas ----------------------------------------------
 
