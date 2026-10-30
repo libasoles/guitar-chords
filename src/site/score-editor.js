@@ -1703,7 +1703,10 @@
 
   // Un click en un lugar neutro (fuera de la partitura, las paletas y los menus) suelta la herramienta.
   document.addEventListener('pointerdown', (event) => {
-    if (!activeItem || !(event.target instanceof Element)) return;
+    if (!(event.target instanceof Element)) return;
+    // Los campos del titulo y el autor tambien quedan fuera de la seleccion musical.
+    if (picks().length && !event.target.closest('.score-stage, .score-palette, .score-toolbar, .score-side-actions, .score-doc-tab, [popover]')) setPicks([]);
+    if (!activeItem) return;
     if (event.target.closest('.score-stage, .score-palette, .score-toolbar, .score-side-actions, .score-doc-tab, [popover], button, a, input, select, textarea')) return;
     deactivateTool();
   });

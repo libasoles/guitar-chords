@@ -57,6 +57,22 @@ async function run() {
     await page.waitForSelector('#scoreStage g.note');
     assert.equal((await events(page, 2))[1].at, 24);
 
+    // Clickear fuera del pentagrama deselecciona, incluso sobre los campos del titulo.
+    await seed(page, [[{ d: 'e', n: 30, at: 0 }, { d: 'e', n: 31, at: 12 }]]);
+    const picked = await center(page, 'e0-0');
+    await page.mouse.click(picked.x, picked.y);
+    assert.equal(await page.locator('#scoreStage .is-selected').count(), 1);
+    await page.locator('#scoreTitle').click();
+    assert.equal(await page.locator('#scoreStage .is-selected').count(), 0, 'el titulo deselecciona una sola figura');
+    for (const target of ['.score-title', '#scoreTitle', '#scoreAuthor', '.site-header']) {
+      await shiftSelect(page, ['e0-0', 'e0-1']);
+      assert.equal(await page.locator('#scoreStage .is-selected').count(), 2);
+      const box = await page.locator(target).boundingBox();
+      await page.locator(target).click({ position: { x: box.width - 2, y: 2 } });
+      assert.equal(await page.locator('#scoreStage .is-selected').count(), 0, target + ' deselecciona las figuras');
+      assert.equal(await page.locator('.score-selection-menu').count(), 0, 'se oculta el menu de seleccion');
+    }
+
     // Tres corcheas seguidas: tresillo.
     await seed(page, [[
       { d: 'e', n: 30, at: 0 }, { d: 'e', n: 31, at: 12 }, { d: 'e', n: 32, at: 24 }, { d: 'q', n: 33, at: 72 },
