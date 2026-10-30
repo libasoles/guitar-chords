@@ -1723,6 +1723,27 @@
     return ghost;
   }
 
+  // Las demas figuras del grupo acompanan a la agarrada con la misma separacion que tienen en pantalla.
+  function addGroupToGhost(ghost, refs, from) {
+    const centre = (ref) => {
+      const node = stage.querySelector('[id="e' + ref.mi + '-' + ref.i + '"]');
+      const rect = (node.querySelector('.notehead') || node).getBoundingClientRect();
+      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    };
+    const anchor = centre(from);
+    refs.filter((ref) => !same(ref, from)).forEach((ref) => {
+      const ev = eventAt(ref);
+      const kind = ev.rest ? 'rest' : 'note';
+      const member = document.createElement('div');
+      const at = centre(ref);
+      member.style.cssText = 'position:absolute;left:' + (at.x - anchor.x) + 'px;top:' + (at.y - anchor.y) + 'px';
+      ghost.appendChild(member);
+      const probe = startGhost(glyphFor({ kind, d: ev.d }), { clientX: 0, clientY: 0 }, kind);
+      probe.remove();
+      member.appendChild(probe.firstChild);
+    });
+  }
+
   // La figura va arriba a la izquierda del puntero para que este no la tape;
   // el punto de soltado es el centro de la figura, no la punta del puntero.
   let ghostOffset = 2;
@@ -1794,6 +1815,7 @@
       hideSelectionMenu();
       if (drag.insert) return;
       drag.ghost = startGhost(drag.glyph, event, drag.kind);
+      if (drag.group) addGroupToGhost(drag.ghost, drag.group, drag.from);
       document.body.classList.add('score-dragging');
     }
     if (drag.insert) return;
