@@ -60,16 +60,20 @@
   const HIGHEST = 51;
   const VALUES = { w: 96, h: 48, q: 24, e: 12, s: 6, f: 3 };
   const TYPES = { 96: 'whole', 48: 'half', 24: 'quarter', 12: 'eighth', 6: '16th', 3: '32nd' };
+  const DOUBLE_DOTTABLE = ['h', 'q']; // el doble puntillo de una corchea (21) no cae en la cuadricula
   const TRIPLETABLE = ['q', 'e', 's'];
   const STEPS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-  const ACCIDENTALS = { '#': { alter: 1, name: 'sharp' }, b: { alter: -1, name: 'flat' }, n: { alter: 0, name: 'natural' } };
+  const ACCIDENTALS = {
+    '#': { alter: 1, name: 'sharp' }, b: { alter: -1, name: 'flat' }, n: { alter: 0, name: 'natural' },
+    '##': { alter: 2, name: 'double-sharp' }, bb: { alter: -2, name: 'flat-flat' },
+  };
 
   const MAX_VOICE = 4;
   const REST_CLEARANCE = 6; // pasos diatonicos entre una nota y un silencio que suenan a la vez
 
   // Un tresillo ocupa dos tercios de su valor; no admite puntillo.
   function length(ev) {
-    return ev.tp ? VALUES[ev.d] * 2 / 3 : ev.dot ? VALUES[ev.d] * 1.5 : VALUES[ev.d];
+    return ev.tp ? VALUES[ev.d] * 2 / 3 : ev.dot === 2 ? VALUES[ev.d] * 1.75 : ev.dot ? VALUES[ev.d] * 1.5 : VALUES[ev.d];
   }
 
   // Cuadricula de posicion para estas figuras: la mas fina que necesiten (un tresillo y una fusa juntos, 1).
@@ -1086,12 +1090,14 @@
   // `moves` queda vacio porque ninguna otra figura cambia de lugar en el orden.
   function dotPlan(measure, index, score) {
     const ev = measure[index];
-    if (ev.dot || ev.tp || ev.d === 'w' || ev.d === 's' || ev.d === 'f') return null;
+    if (ev.dot === 2 || ev.tp || ev.d === 'w' || ev.d === 's' || ev.d === 'f') return null;
+    if (ev.dot && !DOUBLE_DOTTABLE.includes(ev.d)) return null;
     const limit = capacity(score, score && score.rows ? measures(score).indexOf(measure) : undefined);
     const trial = settle(clone(measure));
-    trial[index].dot = true;
+    const dot = ev.dot ? 2 : true;
+    trial[index].dot = dot;
     if (measureLength(trial) > limit) return null;
-    return { start: onsets(measure)[index], moves: [] };
+    return { start: onsets(measure)[index], moves: [], dot };
   }
 
   function dotStart(measure, index, score) {
@@ -1115,7 +1121,7 @@
   }
 
   const SEMITONES = [0, 2, 4, 5, 7, 9, 11];
-  const accidentalFor = (alter) => alter === 1 ? '#' : alter === -1 ? 'b' : 'n';
+  const accidentalFor = (alter) => alter === 2 ? '##' : alter === -2 ? 'bb' : alter === 1 ? '#' : alter === -1 ? 'b' : 'n';
 
   // Altura efectiva de cada figura, incluso si su alteracion viene de una nota no seleccionada.
   function pitchContexts(score, mi) {
@@ -1219,7 +1225,7 @@
           else if (Number.isInteger(raw.n)) ev.n = clampPitch(raw.n);
           else return;
           if (Number.isInteger(raw.tp) && raw.tp > 0 && TRIPLETABLE.includes(raw.d)) ev.tp = raw.tp;
-          else if (raw.dot && raw.d !== 'w' && raw.d !== 's' && raw.d !== 'f') ev.dot = true;
+          else if (raw.dot && raw.d !== 'w' && raw.d !== 's' && raw.d !== 'f') ev.dot = raw.dot === 2 && DOUBLE_DOTTABLE.includes(raw.d) ? 2 : true;
           if (!ev.rest && ACCIDENTALS[raw.acc]) ev.acc = raw.acc;
           if (!ev.rest && raw.tie === true) ev.tie = true;
           else if (!ev.rest && raw.slur === true) ev.slur = true;
@@ -1685,7 +1691,7 @@
         `<octave>${Math.floor(ev.n / 7) - 1}</octave></pitch>`;
     }
     xml += `<duration>${dur}</duration>${ties.map((type) => `<tie type="${type}"/>`).join('')}` +
-      `<voice>${voice}</voice><type>${TYPES[base]}</type>${ev.dot ? '<dot/>' : ''}`;
+      `<voice>${voice}</voice><type>${TYPES[base]}</type>${ev.dot === 2 ? '<dot/><dot/>' : ev.dot ? '<dot/>' : ''}`;
     if (!ev.rest && ev.acc) xml += `<accidental>${ACCIDENTALS[ev.acc].name}</accidental>`;
     if (ev.tp) xml += '<time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification>';
     if (!ev.rest && stem) xml += `<stem>${stem}</stem>`;
@@ -1826,7 +1832,7 @@
   const MULTIPLES = { 2: 'doble ', 3: 'triple ' };
 
   function figureName(ev) {
-    const name = FIGURES[ev.d][0] + (ev.dot ? ' con puntillo' : '');
+    const name = FIGURES[ev.d][0] + (ev.dot === 2 ? ' con doble puntillo' : ev.dot ? ' con puntillo' : '');
     return ev.rest ? 'silencio de ' + name : name;
   }
 
@@ -1834,9 +1840,9 @@
   // todas iguales, cada una por su nombre.
   function beamedName(evs) {
     const first = evs[0];
-    if (!evs.every((ev) => ev.d === first.d && !!ev.dot === !!first.dot)) return evs.map(figureName).join(' + ');
+    if (!evs.every((ev) => ev.d === first.d && (ev.dot || 0) === (first.dot || 0))) return evs.map(figureName).join(' + ');
     const [one, many] = FIGURES[first.d];
-    const dotted = first.dot ? ' con puntillo' : '';
+    const dotted = first.dot === 2 ? ' con doble puntillo' : first.dot ? ' con puntillo' : '';
     return MULTIPLES[evs.length] ? MULTIPLES[evs.length] + one + dotted : evs.length + ' ' + many + dotted + ' unidas';
   }
 

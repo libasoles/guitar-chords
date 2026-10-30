@@ -472,6 +472,7 @@
     if (item.kind === 'rest') { replacement.rest = true; delete replacement.n; delete replacement.acc; }
     else { delete replacement.rest; replacement.n = ev.rest ? M.bottomLine(score, selected.mi) : ev.n; }
     if (item.d === 'w' || item.d === 's' || item.d === 'f') delete replacement.dot;
+    else if (replacement.dot === 2 && item.d !== 'h' && item.d !== 'q') replacement.dot = true;
     const measure = M.measures(score)[selected.mi];
     // Se cuenta en orden: lo que sigue en su voz se corre, y la voz tiene que seguir entrando en el compas.
     const trial = M.settle(M.clone(measure));
@@ -486,15 +487,20 @@
     const measure = M.measures(score)[hit.mi];
     const ev = measure[hit.i];
     if (item.kind === 'dot') {
-      if (ev.dot) return change(() => { delete ev.dot; });
+      // Puntillo, doble puntillo y nada, en ese orden; si el doble no entra, se vuelve a la figura sin puntillo.
+      if (ev.dot === 2) return change(() => { delete ev.dot; });
       const plan = M.dotPlan(measure, hit.i, score);
+      if (!plan && ev.dot) return change(() => { delete ev.dot; });
       if (!plan) return say(ev.d === 'w' || ev.d === 's' || ev.d === 'f' || ev.tp ? t.noDot : t.full);
       const moves = plan.moves.map(([i, at]) => [measure[i], at]);
-      return change(() => { M.settle(measure); ev.dot = true; moves.forEach(([o, at]) => { o.at = at; }); });
+      return change(() => { M.settle(measure); ev.dot = plan.dot; moves.forEach(([o, at]) => { o.at = at; }); });
     }
     if (ev.rest) return;
     change(() => {
-      if (ev.acc === item.acc) delete ev.acc;
+      // Una vez: simple; dos: doble (## o bb); tres: sin alteracion. El becuadro solo se quita.
+      const double = { '#': '##', b: 'bb' }[item.acc];
+      if (ev.acc === item.acc) { if (double) ev.acc = double; else delete ev.acc; }
+      else if (ev.acc === double) delete ev.acc;
       else ev.acc = item.acc;
     });
   }

@@ -54,6 +54,15 @@ test('un compas de 4/4 admite hasta 96 divisiones', () => {
   assert.ok(M.fits(measure, { d: 'h', n: 32 }, 0));
 });
 
+test('el doble puntillo suma tres cuartos y solo entra en blanca y negra con puntillo', () => {
+  assert.equal(M.length({ d: 'q', dot: 2 }), 42);
+  assert.equal(M.dotPlan([{ d: 'q', dot: true, n: 30 }], 0).dot, 2);
+  assert.equal(M.dotPlan([{ d: 'q', n: 30 }], 0).dot, true);
+  assert.equal(M.dotPlan([{ d: 'e', dot: true, n: 30 }], 0), null, 'la corchea no admite doble puntillo');
+  assert.equal(M.dotPlan([{ d: 'q', dot: 2, n: 30 }], 0), null);
+  assert.equal(M.dotPlan([{ d: 'h', dot: true, n: 30 }, { d: 'q', n: 30 }], 0), null, 'no entra en el compas');
+});
+
 test('el puntillo suma la mitad y no entra en redonda ni semicorchea', () => {
   assert.equal(M.length({ d: 'q', dot: true }), 36);
   assert.equal(M.length({ d: 'e', tp: 1 }), 8);
@@ -985,7 +994,7 @@ test('el puntillo se cuenta en orden: la figura sigue donde empieza y lo que vie
   assert.equal(M.dotStart([{ d: 'q', n: 31, at: 0 }, { d: 'h', n: 30, at: 48 }], 1), 24);
   assert.equal(M.dotStart([{ d: 'q', n: 31, at: 0 }, { d: 'q', n: 31, at: 24 }, { d: 'h', n: 30, at: 48 }], 2), null);
   const plan = M.dotPlan([{ d: 'q', n: 31, at: 0 }, { d: 'q', n: 30, at: 24 }, { d: 'q', n: 32, at: 48 }], 0);
-  assert.deepEqual(plan, { start: 0, moves: [] });
+  assert.deepEqual(plan, { start: 0, moves: [], dot: true });
 });
 
 test('en 6/8 el puntillo de una voz no depende de donde cayeron las figuras de la otra', () => {
@@ -997,7 +1006,7 @@ test('en 6/8 el puntillo de una voz no depende de donde cayeron las figuras de l
   const loose = [{ d: 'h', n: 25, at: 24 }, { d: 'q', n: 34, dot: true, at: 24 }, { d: 'q', n: 37, at: 48 }];
   // Sin voz guardada: la blanca grave es la voz 2 y las negras agudas la voz 1, en orden: 0 y 36.
   assert.deepEqual(M.onsets(loose), [0, 0, 36]);
-  assert.deepEqual(M.dotPlan(loose, 2, score), { start: 36, moves: [] });
+  assert.deepEqual(M.dotPlan(loose, 2, score), { start: 36, moves: [], dot: true });
   const three = [{ d: 'h', n: 29, at: 0, v: 1, dot: true }, { d: 'q', n: 35, dot: true, at: 0, v: 2 }, { d: 'q', n: 38, at: 48, v: 3 }];
   assert.equal(M.dotStart(three, 2, score), 0, 'la voz 3 empieza con esa negra: no hay hueco antes');
 });
