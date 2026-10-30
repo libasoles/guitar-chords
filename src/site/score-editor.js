@@ -420,6 +420,16 @@
     const moved = M.clone(ev);
     ['tp', 'tie', 'slur', 'beam'].forEach((key) => { delete moved[key]; });
     if (!ev.rest) moved.n = target.n;
+    // Al separar la unica nota de una voz, seguir la columna anterior: una voz
+    // vacia volveria a empezar en cero y anularia el desplazamiento horizontal.
+    // Las voces con mas figuras conservan su frase al reordenar una nota.
+    if (!ev.rest && from.mi === target.mi && !others.some((o) => o.v === ev.v)) {
+      const starts = M.hints(others);
+      const previous = others.map((o, i) => ({ ev: o, at: starts[i] }))
+        .filter((o) => o.at < target.t)
+        .sort((a, b) => b.at - a.at || Math.abs((a.ev.n ?? target.n) - target.n) - Math.abs((b.ev.n ?? target.n) - target.n))[0];
+      if (previous) moved.v = previous.ev.v;
+    }
     const spot = M.placement(others, moved, target.t, score, target.mi);
     if (!spot) return say(noRoom(moved, target.mi));
     moved.d = spot.d;
