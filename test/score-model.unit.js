@@ -1131,3 +1131,60 @@ test('pegar distingue los tresillos copiados de los existentes', () => {
   assert.equal(M.pasteSelection(score, fragment, 0).length, 3);
   assert.deepEqual([...new Set(score.rows[0][0].map(ev => ev.tp))], [1, 2]);
 });
+
+test('las referencias TAB siguen figuras, no sus indices ni tiempos anteriores', () => {
+  const score = M.emptyScore();
+  const notes = [30, 31, 32].map((n, i) => ({ d: 'q', n, at: i * 24 }));
+  score.rows[0][0] = notes.slice();
+  const columns = { '0:0': [null, null, null, 2, null, null], '0:24': [null, null, null, 3, null, null], '0:48': [null, null, null, null, 10, null] };
+  score.tabs = M.clone(columns);
+  const refs = M.captureTabReferences(score);
+  const moving = M.clone(notes[1]);
+  score.rows[0][0].splice(1, 1);
+  M.settle(score.rows[0][0]);
+  M.insertNote(score.rows[0][1], moving, 0);
+  M.restoreTabReferences(score, refs);
+  assert.deepEqual(score.tabs, { '0:0': columns['0:0'], '0:24': columns['0:48'], '1:0': columns['0:24'] });
+  assert.deepEqual(Object.keys(moving).sort(), ['at', 'd', 'n'], 'la identidad no contamina los datos guardados');
+});
+
+test('una altura nueva recalcula su TAB sin heredar el traste de la figura anterior', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ d: 'q', n: 30, at: 0 }, { d: 'q', n: 31, at: 24 }];
+  score.tabs = { '0:0': [null, null, null, 2, null, null], '0:24': [null, null, null, 3, null, null] };
+  const refs = M.captureTabReferences(score);
+  score.rows[0][0][0].n++;
+  M.restoreTabReferences(score, refs);
+  assert.deepEqual(score.tabs, { '0:24': [null, null, null, 3, null, null] });
+});
+
+test('partir y reunir acordes mantiene las cuerdas corregidas de sus notas', () => {
+  const score = M.emptyScore();
+  const low = { d: 'q', n: 30, at: 0 };
+  const high = { d: 'q', n: 32, at: 0 };
+  score.rows[0][0] = [low, high];
+  score.tabs = { '0:0': [null, null, 0, 2, null, null] };
+  const refs = M.captureTabReferences(score);
+  score.rows[0][0].pop();
+  M.insertNote(score.rows[0][1], high, 0);
+  M.restoreTabReferences(score, refs);
+  assert.deepEqual(score.tabs, { '0:0': [null, null, null, 2, null, null], '1:0': [null, null, 0, null, null, null] });
+  const separated = M.captureTabReferences(score);
+  score.rows[0][1].pop();
+  M.insertNote(score.rows[0][0], high, 0);
+  M.restoreTabReferences(score, separated);
+  assert.deepEqual(score.tabs, { '0:0': [null, null, 0, 2, null, null] });
+});
+
+test('las copias de trabajo conservan referencias TAB sin asociar notas iguales por su altura', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ d: 'q', n: 30, at: 0 }, { d: 'q', n: 30, at: 24 }];
+  const columns = { '0:0': [null, null, null, 2, null, null], '0:24': [null, null, null, null, 7, null] };
+  const refs = M.captureTabReferences(score, columns);
+  const copied = M.clone(score);
+  copied.rows[0][0].reverse();
+  copied.rows[0][0][0].at = 0;
+  copied.rows[0][0][1].at = 24;
+  M.restoreTabReferences(copied, refs);
+  assert.deepEqual(copied.tabs, { '0:0': columns['0:24'], '0:24': columns['0:0'] });
+});

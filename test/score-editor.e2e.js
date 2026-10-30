@@ -754,6 +754,88 @@ async function checkTabs(page) {
   assert.equal(await page.locator('button.score-doc-tab').textContent(), 'Dos');
 }
 
+async function checkTabReferences(page) {
+  const events = (page, mi) => page.evaluate(m => ScoreModel.measures(scoreEditor.score)[m], mi);
+  const seed = async (page, data) => {
+    await page.evaluate(data => {
+      const all = ScoreModel.measures(scoreEditor.score);
+      all.forEach(measure => { measure.length = 0; });
+      data.forEach((measure, mi) => all[mi].push(...measure));
+      scoreEditor.render();
+    }, data);
+    await page.waitForSelector('#scoreStage g.note');
+    await page.locator('#scoreStage').focus();
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+  };
+  const center = async (page, id) => {
+    const box = await page.locator('[id="' + id + '"] .notehead').first().boundingBox();
+    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  };
+  const shiftSelect = async (page, ids) => {
+    await page.keyboard.down('Shift');
+    for (const id of ids) {
+      const point = await center(page, id);
+      await page.mouse.click(point.x, point.y);
+    }
+    await page.keyboard.up('Shift');
+  };
+
+  // Las correcciones TAB siguen a las figuras movidas y a las que se corren en el origen.
+  await seed(page, [[{ d: 'q', n: 30, at: 0 }, { d: 'q', n: 31, at: 24 }, { d: 'q', n: 32, at: 48 }], []]);
+  const corrected = { '0:0': [null, null, null, 2, null, null], '0:24': [null, null, null, 3, null, null], '0:48': [null, null, null, null, 10, null] };
+  await page.evaluate(tabs => { scoreEditor.score.showTabs = true; scoreEditor.score.tabs = tabs; scoreEditor.render(); }, corrected);
+  await page.waitForSelector('.score-tab .ascii-tabs-cell');
+  await page.waitForTimeout(300);
+  const correctedHead = await center(page, 'e0-1');
+  const correctedStaff = await page.locator('#scoreStage g.measure').nth(1).locator('g.staff > path').first().boundingBox();
+  await page.mouse.move(correctedHead.x, correctedHead.y);
+  await page.mouse.down();
+  await page.mouse.move(correctedStaff.x + 20, correctedHead.y, { steps: 8 });
+  await page.mouse.up();
+  assert.equal((await events(page, 1)).length, 1, 'la figura se mueve al otro compas');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.tabs), {
+    '0:0': corrected['0:0'], '0:24': corrected['0:48'], '1:0': corrected['0:24'],
+  }, 'cada correccion sigue a su figura, sin quedar pegada al compas y tiempo anteriores');
+  await page.keyboard.press('ControlOrMeta+z');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.tabs), corrected, 'deshacer restaura tambien las referencias TAB');
+  assert.deepEqual(await page.locator('.score-tab').first().evaluate(node => node.value[0]), [corrected['0:0'], corrected['0:24'], corrected['0:48']]);
+  // El mismo vinculo se conserva en un arrastre de grupo.
+  await shiftSelect(page, ['e0-0', 'e0-1']);
+  const groupHead = await center(page, 'e0-0');
+  const groupStaff = await page.locator('#scoreStage g.measure').nth(1).locator('g.staff > path').first().boundingBox();
+  await page.mouse.move(groupHead.x, groupHead.y);
+  await page.mouse.down();
+  await page.mouse.move(groupStaff.x + 20, groupHead.y, { steps: 8 });
+  await page.mouse.up();
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.tabs), {
+    '0:0': corrected['0:48'], '1:0': corrected['0:0'], '1:24': corrected['0:24'],
+  }, 'las correcciones siguen al grupo y a la figura que queda en el origen');
+  await page.reload();
+  await page.waitForSelector('.score-tab .ascii-tabs-cell');
+  assert.deepEqual(await page.locator('.score-tab').first().evaluate(node => node.value[0]), [corrected['0:48'], corrected['0:0'], corrected['0:24']], 'las posiciones corregidas persisten al recargar');
+
+  // Tambien se conservan las posiciones sugeridas que el usuario ya estaba viendo.
+  await seed(page, [[{ d: 'q', n: 30, at: 0 }, { d: 'q', n: 31, at: 24 }, { d: 'q', n: 32, at: 48 }], []]);
+  await page.evaluate(() => { delete scoreEditor.score.tabs; scoreEditor.render(); });
+  await page.waitForSelector('.score-tab .ascii-tabs-cell');
+  const autoBefore = await page.locator('.score-tab').first().evaluate(node => node.value[0]);
+  const autoHead = await center(page, 'e0-0');
+  const autoStaff = await page.locator('#scoreStage g.measure').nth(1).locator('g.staff > path').first().boundingBox();
+  await page.mouse.move(autoHead.x, autoHead.y);
+  await page.mouse.down();
+  await page.mouse.move(autoStaff.x + 20, autoHead.y, { steps: 8 });
+  await page.mouse.up();
+  assert.deepEqual(await page.locator('.score-tab').first().evaluate(node => node.value[0]), [autoBefore[1], autoBefore[2], autoBefore[0]], 'reordenar no cambia las cuerdas sugeridas de toda la frase');
+  await page.keyboard.press('ArrowUp');
+  const sounding = await page.evaluate(() => {
+    const last = document.querySelector('.score-tab').value[0].at(-1);
+    return last.flatMap((fret, string) => fret === null ? [] : [ScoreFingering.OPENS[string] + fret]);
+  });
+  assert.deepEqual(sounding, await page.evaluate(() => ScoreModel.attacks(scoreEditor.score).at(-1).midis), 'cambiar la altura produce un traste para la nota nueva');
+
+}
+
 async function checkClear(page) {
   await page.locator('[data-shortcut="4"]').click();
   const point = await page.locator('#scoreStage g.measure').first().evaluate(node => {
@@ -1119,6 +1201,7 @@ async function run() {
     await tabsPage.goto(url);
     await tabsPage.waitForSelector('#scoreStage g.measure');
     await checkTabs(tabsPage);
+    await checkTabReferences(tabsPage);
     await tabsPage.close();
     const appendPage = await newPage({ reducedMotion: 'reduce' });
     await appendPage.goto(url);

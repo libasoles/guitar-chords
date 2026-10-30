@@ -53,6 +53,7 @@
   let layout = []; // por compas: { left, right, lines: [y1..y5] } relativo al escenario
   let history = [];
   let renderedWidth = 0;
+  let tabColumns = {}; // digitacion visible, incluidas las correcciones, antes de editar
   let tabSpace = 0; // unidades de Verovio que se reservan bajo cada renglon para su tablatura
   let focusBarre = null; // compas cuya cejilla recien se coloco: su numero queda en foco
 
@@ -210,10 +211,12 @@
 
   function change(mutate) {
     clearBarSelection();
+    const tabRefs = M.captureTabReferences(score, score.showTabs ? tabColumns : score.tabs);
     const before = M.clone(score);
     if (mutate() === false) return false;
     // `at` queda siempre igual al tiempo que se ve (sin huecos): asi los clics y arrastres siguientes se ubican en el orden.
     M.measures(score).forEach(M.settle);
+    M.restoreTabReferences(score, tabRefs);
     history.push(before);
     if (history.length > HISTORY_LIMIT) history.shift();
     save();
@@ -223,9 +226,14 @@
 
   function undo() {
     if (!history.length) return;
+    const tabRefs = M.captureTabReferences(score, score.showTabs ? tabColumns : score.tabs);
     const restored = history.pop();
-    // La tablatura no depende de las notas: deshacer no la toca.
-    ['showTabs', 'tabs'].forEach((key) => { if (score[key]) restored[key] = score[key]; else delete restored[key]; });
+    const previousTabs = restored.tabs;
+    M.restoreTabReferences(restored, tabRefs);
+    if (previousTabs) restored.tabs = Object.assign({}, previousTabs, restored.tabs);
+    // La visibilidad de TAB se conserva; sus referencias vuelven con las figuras.
+    if (score.showTabs) restored.showTabs = true;
+    else delete restored.showTabs;
     score = Object.assign(restored, { title: score.title }, score.author ? { author: score.author } : {});
     clearBarSelection();
     selected = null;
@@ -373,7 +381,7 @@
     }
     const ev = eventAt(selected);
     if (!ev || (ev.d === item.d && !!ev.rest === (item.kind === 'rest'))) return;
-    const replacement = Object.assign({}, ev, { d: item.d });
+    const replacement = Object.assign(M.clone(ev), { d: item.d });
     delete replacement.tp;
     if (item.kind === 'rest') { replacement.rest = true; delete replacement.n; delete replacement.acc; }
     else { delete replacement.rest; replacement.n = ev.rest ? M.bottomLine(score, selected.mi) : ev.n; }
@@ -410,7 +418,7 @@
     const ev = all[from.mi][from.i];
     const destination = all[target.mi];
     const others = destination.filter((o) => o !== ev);
-    const moved = Object.assign({}, ev);
+    const moved = M.clone(ev);
     ['tp', 'tie', 'slur', 'beam'].forEach((key) => { delete moved[key]; });
     if (!ev.rest) moved.n = target.n;
     const spot = M.placement(others, moved, target.t, score, target.mi);
@@ -873,7 +881,7 @@
   }
 
   // Una tablatura (<ascii-tabs>) bajo cada renglon. Las digitaciones salen solas de las notas (ScoreFingering) y cada
-  // columna queda bajo su nota; lo que el usuario corrige se guarda aparte en score.tabs y nunca cambia el pentagrama.
+  // columna queda bajo su nota; score.tabs conserva las posiciones elegidas sin cambiar el pentagrama.
   const TAB_GAP = 8;
   const TAB_CLEF_CLEARANCE = 32; // la clave de guitarra (con su 8) baja por debajo del pentagrama
   const sameColumn = (a, b) => a.length === b.length && a.every((fret, s) => fret === b[s]);
@@ -925,6 +933,7 @@
     const fingered = window.ScoreFingering.assign(all.map((attack) => attack.midis));
     const auto = {};
     all.forEach((attack, i) => { auto[attack.key] = window.ScoreFingering.toColumn(fingered[i]); });
+    tabColumns = Object.assign({}, auto, score.tabs);
     const mounted = [];
     M.rowStarts(score).forEach((start, row) => {
       const size = score.rows[row].length;
@@ -976,6 +985,7 @@
           keys.forEach((key, c) => {
             const column = (columns[c] || []).map((fret) => (Number.isInteger(fret) ? fret : null));
             const edited = M.sanitizeTabs({ [key]: column }, Infinity)[key];
+            if (edited) tabColumns[key] = edited;
             if (edited && !sameColumn(edited, auto[key])) { score.tabs = score.tabs || {}; score.tabs[key] = edited; }
             else if (score.tabs) delete score.tabs[key];
           });

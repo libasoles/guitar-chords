@@ -338,8 +338,22 @@
     return { meter: '4/4', clef: 'guitar', fifths: 0, rows: Array.from({ length: MIN_ROWS }, emptyRow) };
   }
 
+  // Identidad interna de las figuras: no se serializa ni depende de compas, tiempo o indice.
+  const tabReferences = new WeakMap();
+  function tabReference(ev) {
+    if (!tabReferences.has(ev)) tabReferences.set(ev, {});
+    return tabReferences.get(ev);
+  }
+
   function clone(score) {
-    return JSON.parse(JSON.stringify(score));
+    const result = JSON.parse(JSON.stringify(score));
+    const remember = (from, to) => {
+      if (!from || typeof from !== 'object' || !to || typeof to !== 'object') return;
+      tabReferences.set(to, tabReference(from));
+      Object.keys(to).forEach((key) => remember(from[key], to[key]));
+    };
+    remember(score, result);
+    return result;
   }
 
   // Compases en orden de lectura; el indice plano es el que usan los ids del SVG.
@@ -446,7 +460,7 @@
       while (size > 0) {
         const value = values.find((v) => length(v) <= size);
         if (!value) return false;
-        const part = Object.assign({}, ev, value, { at: cursor });
+        const part = Object.assign(clone(ev), value, { at: cursor });
         delete part.tp;
         delete part.dot;
         if (value.dot) part.dot = true;
@@ -459,9 +473,9 @@
     };
     for (let i = 0; i < all[mi].length; i += 1) {
       const ev = all[mi][i], start = starts[i], stop = start + length(ev);
-      const continuation = Object.assign({}, ev, accidentals[i] ? { acc: accidentals[i] } : {});
+      const continuation = Object.assign(clone(ev), accidentals[i] ? { acc: accidentals[i] } : {});
       if (start >= at) right.push(Object.assign(continuation, { at: start - at }));
-      else if (stop <= at) left.push(Object.assign({}, ev, { at: start }));
+      else if (stop <= at) left.push(Object.assign(clone(ev), { at: start }));
       else if (!fragment(ev, start, at - start, true, left) || !fragment(continuation, 0, stop - at, false, right)) return false;
     }
     const oldBar = score.barlines && score.barlines[mi];
@@ -693,7 +707,7 @@
     return plan ? plan.start : null;
   }
 
-  // La tablatura sale sola de las notas; `tabs` guarda solo lo que el usuario corrigio a mano: { 'compas:inicio': [6 trastes] },
+  // La tablatura sale de las notas; `tabs` guarda las correcciones y las posiciones conservadas al editar: { 'compas:inicio': [6 trastes] },
   // con la cuerda 1 primero y null donde no suena nada. Corregirla no cambia las notas del pentagrama.
   const TAB_STRINGS = 6;
   function sanitizeTabs(tabs, measureCount) {
@@ -712,7 +726,7 @@
 
   // Cada momento en que suena algo, en orden de lectura: { mi, at, key, midis } con el tono real (la clave de guitarra
   // suena una octava mas grave que la escrita). Las notas ligadas a la anterior no se vuelven a tocar.
-  function attacks(score) {
+  function attacks(score, withEvents = false) {
     const result = [];
     let tied = new Set();
     measures(score).forEach((measure, mi) => {
@@ -727,16 +741,53 @@
         const alter = accidentals.has(ev.n) ? accidentals.get(ev.n) : keyAlter(ev.n, score, mi);
         const midi = 12 * (Math.floor(ev.n / 7) + 1) + SEMITONES[ev.n % 7] + alter + 12 * (clef.octave || 0);
         if (!moments.has(starts[i])) moments.set(starts[i], []);
-        moments.get(starts[i]).push({ n: ev.n, midi, tie: !!ev.tie });
+        moments.get(starts[i]).push({ n: ev.n, midi, tie: !!ev.tie, ev });
       });
       [...moments.keys()].sort((a, b) => a - b).forEach((at) => {
         const all = moments.get(at);
         const notes = all.filter((note) => !tied.has(note.n));
         all.forEach((note) => { if (note.tie) tied.add(note.n); else tied.delete(note.n); });
-        if (notes.length) result.push({ mi, at, key: mi + ':' + at, midis: notes.map((note) => note.midi) });
+        if (notes.length) result.push(Object.assign({ mi, at, key: mi + ':' + at, midis: notes.map((note) => note.midi) }, withEvents ? { events: notes.map((note) => note.ev) } : {}));
       });
     });
     return result;
+  }
+
+  const TAB_OPENS = [64, 59, 55, 50, 45, 40];
+
+  // Captura lo que se ve antes de editar, asociado a las figuras y su altura real.
+  function captureTabReferences(score, columns = score.tabs || {}) {
+    return attacks(score, true).filter((attack) => columns[attack.key]).map((attack) => ({
+      refs: attack.events.map(tabReference), midis: attack.midis, column: columns[attack.key].slice(),
+    }));
+  }
+
+  // Reconstruye las claves compas:inicio despues de asentar las figuras. Si cambia
+  // la altura, se deja que la digitacion automatica calcule una posicion nueva.
+  function restoreTabReferences(score, saved) {
+    const byRef = new Map();
+    saved.forEach((entry) => entry.refs.forEach((ref, i) => byRef.set(ref, { entry, midi: entry.midis[i] })));
+    const tabs = {};
+    attacks(score, true).forEach((attack) => {
+      const refs = attack.events.map(tabReference);
+      const entries = refs.map((ref) => byRef.get(ref));
+      if (entries.some((entry, i) => !entry || entry.midi !== attack.midis[i])) return;
+      const first = entries[0].entry;
+      if (first.refs.length === refs.length && refs.every((ref) => first.refs.includes(ref))) {
+        tabs[attack.key] = first.column.slice();
+        return;
+      }
+      // Al partir o reunir un acorde, cada nota conserva su cuerda si siguen siendo compatibles.
+      const column = new Array(TAB_STRINGS).fill(null);
+      for (const { entry, midi } of entries) {
+        const string = entry.column.findIndex((fret, s) => fret !== null && TAB_OPENS[s] + fret === midi && column[s] === null);
+        if (string < 0) return;
+        column[string] = entry.column[string];
+      }
+      tabs[attack.key] = column;
+    });
+    if (Object.keys(tabs).length) score.tabs = tabs;
+    else delete score.tabs;
   }
 
   // Descarta lo que no sea una partitura valida (por ejemplo, datos viejos o editados a mano).
@@ -983,11 +1034,11 @@
   // { full: true } si su voz, contada en orden, ya no entra en el compas.
   function placeRest(measure, ev, at, n, score, mi, beforeFirst = false) {
     // `at` explicito sin asentar: si el silencio se esta moviendo, las demas conservan el lugar en que se ven.
-    const others = measure.map((o) => Object.assign({}, o));
+    const others = measure.map((o) => clone(o));
     const h = hints(others);
     others.forEach((o, i) => { o.at = h[i]; });
     settleVoices(others);
-    const rest = Object.assign({}, ev);
+    const rest = clone(ev);
     delete rest.v;
     delete rest.n;
     if (beforeFirst && others.length) {
@@ -1395,7 +1446,7 @@
 
   return {
     voicesText, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    copySelection, pasteSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
+    captureTabReferences, restoreTabReferences, copySelection, pasteSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
     meterOf, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };
