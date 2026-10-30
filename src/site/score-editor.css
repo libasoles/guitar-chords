@@ -1394,3 +1394,17 @@ html body[data-scroll-locked] {
   stroke: none;
   pointer-events: all;
 }
+
+.score-stage.can-move-measures,
+.score-stage.can-move-measures g.measure,
+.score-stage.can-move-measures g.measure * { cursor: pointer; }
+body.score-moving-measure, body.score-moving-measure * { cursor: grabbing !important; user-select: none; }
+.score-stage .is-moving-measure { opacity: 0.35; }
+.score-measure-guide {
+  position: absolute;
+  width: 3px;
+  background: var(--note-selected);
+  box-shadow: 0 0 0 1px #222;
+  pointer-events: none;
+  z-index: 10;
+}

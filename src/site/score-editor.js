@@ -1690,7 +1690,7 @@
     const point = raw && aimed(raw);
     const over = point && document.elementFromPoint(point.clientX, point.clientY);
     const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span, .score-selection-menu');
-    const hit = activeItem && !drag && overStage && locate(point.clientX, point.clientY);
+    const hit = activeItem && !shiftMeasures && !measureDrag && !drag && overStage && locate(point.clientX, point.clientY);
     if (!hit) { clearHoverGhost(); return; }
     if (!hoverGhost) {
       hoverGhost = startGhost(glyphFor(activeItem), raw, activeItem.kind);
@@ -1794,6 +1794,18 @@
   document.addEventListener('pointercancel', (event) => endDrag(event, true));
 
   stage.addEventListener('pointerdown', (event) => {
+    if (!event.shiftKey || event.button !== 0 || event.target.closest('input, button, textarea, ascii-tabs')) return;
+    const origin = stage.getBoundingClientRect();
+    const x = event.clientX - origin.left, y = event.clientY - origin.top;
+    const from = layout.findIndex((m) => x >= m.left && x <= m.right && y >= m.lines[0] - 24 && y <= m.lines[4] + 24);
+    if (from < 0) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    deactivateTool();
+    measureDrag = { from, id: event.pointerId, x: event.clientX, y: event.clientY, fit: new Map(), active: false };
+  }, true);
+
+  stage.addEventListener('pointerdown', (event) => {
     const navigation = event.target.closest('[data-navigation-mark]');
     if (navigation) {
       event.preventDefault();
@@ -1843,6 +1855,116 @@
       glyph: glyphFor({ kind: ev.rest ? 'rest' : 'note', d: ev.d }),
     });
   }, true);
+
+  // Shift reserves the measure gesture before note selection, tools and TAB.
+  let measureDrag = null;
+  const measureGuide = document.createElement('div');
+  measureGuide.className = 'score-measure-guide';
+  let shiftMeasures = false;
+
+  function measureCursor(on) {
+    if (shiftMeasures === on) return;
+    shiftMeasures = on;
+    stage.classList.toggle('can-move-measures', on);
+    if (on) clearHoverGhost();
+    else updateHoverGhost();
+  }
+
+  function measureDrop(event, d) {
+    const origin = stage.getBoundingClientRect();
+    const x = event.clientX - origin.left, y = event.clientY - origin.top;
+    if (x < 0 || x > origin.width || y < 0 || y > origin.height) return null;
+    const starts = M.rowStarts(score);
+    let row = 0;
+    starts.forEach((first, r) => {
+      if (Math.abs(y - layout[first].lines[2]) < Math.abs(y - layout[starts[row]].lines[2])) row = r;
+    });
+    const first = starts[row], last = first + score.rows[row].length - 1;
+    const end = x >= (layout[last].left + layout[last].right) / 2;
+    let before = last + 1, appendRow;
+    if (end && row !== M.rowOf(score, d.from).row && score.rows[M.rowOf(score, d.from).row].length > 1) {
+      if (!d.fit.has(row)) {
+        const trial = M.clone(score);
+        M.moveMeasure(trial, d.from, before, row);
+        const probe = newToolkit();
+        try {
+          probe.setOptions(layoutOptions(stage.clientWidth, { noJustification: true }));
+          probe.loadData(M.toMusicXml(trial));
+          const svg = new DOMParser().parseFromString(probe.renderToSVG(1), 'image/svg+xml');
+          const paths = [...svg.querySelectorAll('g.system')][row]?.querySelectorAll('g.measure > g.staff > path');
+          // Unjustified staff endpoints are in Verovio drawing units (10 per page unit).
+          const ends = paths ? [...paths].map((p) => [...p.getAttribute('d').matchAll(/-?\d+(?:\.\d+)?/g)].map((m) => +m[0])).flatMap((coords) => coords.filter((_, i) => i % 2 === 0)) : [];
+          const available = (Math.round(stage.clientWidth * 100 / SCALE) - 120) * 10;
+          d.fit.set(row, ends.length > 0 && Math.max(...ends) - Math.min(...ends) <= available);
+        } finally { probe.destroy(); }
+      }
+      if (d.fit.get(row)) appendRow = row;
+      else if (row + 1 < starts.length) row += 1;
+      // At the final row, create a following row instead of squeezing it.
+      else return { before, newRow: true, left: layout[last].right, lines: layout[last].lines };
+    } else if (!end) {
+      before = first;
+      for (let mi = first; mi <= last; mi += 1) {
+        if (x > (layout[mi].left + layout[mi].right) / 2) before = mi + 1;
+      }
+    }
+    const nextRow = row > M.rowOf(score, last).row;
+    const guide = nextRow ? layout[starts[row]] : before > last ? layout[last] : layout[before];
+    return { before, appendRow, left: before > last && !nextRow ? guide.right : guide.left, lines: guide.lines };
+  }
+
+  function finishMeasureDrag(event, cancel) {
+    const d = measureDrag;
+    if (!d || (event.pointerId !== undefined && event.pointerId !== d.id)) return;
+    if (d.active && !cancel) d.target = measureDrop(event, d);
+    measureDrag = null;
+    measureGuide.remove();
+    document.body.classList.remove('score-moving-measure');
+    stage.querySelectorAll('.is-moving-measure').forEach((node) => node.classList.remove('is-moving-measure'));
+    if (!d.active && !cancel) {
+      const hit = eventUnder(event.clientX, event.clientY);
+      if (hit) togglePick(hit); // Shift+click still extends the figure selection.
+    }
+    if (d.active && !cancel && d.target) {
+      change(() => {
+        const target = d.target;
+        if (target.newRow) {
+          // Make the final insertion a row of its own without adding a measure.
+          if (!M.moveMeasure(score, d.from, target.before)) return false;
+          const last = score.rows[score.rows.length - 1];
+          if (last.length > 1) score.rows.push([last.pop()]);
+        } else if (!M.moveMeasure(score, d.from, target.before, target.appendRow)) return false;
+        selected = null;
+        group = [];
+        selectedNavigation = [];
+      });
+    }
+    stage.focus({ preventScroll: true });
+  }
+
+  document.addEventListener('pointermove', (event) => {
+    measureCursor(event.shiftKey);
+    const d = measureDrag;
+    if (!d || event.pointerId !== d.id) return;
+    if (!d.active && Math.hypot(event.clientX - d.x, event.clientY - d.y) < 5) return;
+    d.active = true;
+    document.body.classList.add('score-moving-measure');
+    stage.querySelector('#m' + d.from)?.classList.add('is-moving-measure');
+    d.target = measureDrop(event, d);
+    if (!d.target) { measureGuide.remove(); return; }
+    measureGuide.style.left = d.target.left + 'px';
+    measureGuide.style.top = d.target.lines[0] - 20 + 'px';
+    measureGuide.style.height = d.target.lines[4] - d.target.lines[0] + 40 + 'px';
+    if (!measureGuide.isConnected) stage.appendChild(measureGuide);
+  });
+  document.addEventListener('pointerup', (event) => finishMeasureDrag(event, false));
+  document.addEventListener('pointercancel', (event) => finishMeasureDrag(event, true));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Shift') measureCursor(true);
+    if (event.key === 'Escape') finishMeasureDrag(event, true);
+  });
+  document.addEventListener('keyup', (event) => { if (event.key === 'Shift') measureCursor(false); });
+  window.addEventListener('blur', () => { measureCursor(false); finishMeasureDrag({}, true); });
 
   // ---- marco de seleccion ---------------------------------------------------
 

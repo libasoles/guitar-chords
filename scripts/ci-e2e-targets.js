@@ -103,6 +103,13 @@ const SUITES = {
       /^test\/score-paste-signatures\./,
     ],
   },
+  'score-reorder': {
+    build: 'site',
+    paths: [
+      /^src\/site\/score-(editor|model)\./,
+      /^test\/score-reorder\./,
+    ],
+  },
   'score-tab-pdf': {
     build: 'site',
     paths: [

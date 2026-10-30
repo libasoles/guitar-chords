@@ -498,6 +498,61 @@
     return true;
   }
 
+  // `before` is an insertion boundary in the original order. Interior drops keep
+  // row sizes; an append that fits transfers one slot from the source row.
+  function moveMeasure(score, from, before, appendRow) {
+    const all = measures(score);
+    if (!Number.isInteger(from) || from < 0 || from >= all.length ||
+        !Number.isInteger(before) || before < 0 || before > all.length) return false;
+    const source = rowOf(score, from).row;
+    const append = Number.isInteger(appendRow) && appendRow >= 0 && appendRow < score.rows.length;
+    const counts = score.rows.map((row) => row.length);
+    if (append && before !== rowStarts(score)[appendRow] + counts[appendRow]) return false;
+    const target = before - (from < before ? 1 : 0);
+    if (target === from && (!append || source === appendRow)) return false;
+    if (append && source !== appendRow) {
+      // A row always has at least one measure, including otherwise empty rows.
+      if (counts[source] === 1) return false;
+      counts[source] -= 1;
+      counts[appendRow] += 1;
+    }
+    const signatures = all.map((_, mi) => ({ meter: meterAt(score, mi), fifths: keyAt(score, mi), clef: clefAt(score, mi) }));
+    const order = all.map((_, mi) => mi);
+    order.splice(target, 0, order.splice(from, 1)[0]);
+    const positions = new Map(order.map((old, mi) => [old, mi]));
+    ['navigation', 'barlines', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => {
+      if (!score[name]) return;
+      const moved = {};
+      Object.entries(score[name]).forEach(([old, value]) => {
+        const mi = positions.get(+old);
+        if (name === 'barres' && value.span) {
+          const end = barreLast(value, +old);
+          const intact = Array.from({ length: end - old + 1 }, (_, i) => positions.get(+old + i) === mi + i).every(Boolean);
+          if (!intact) { value = { ...value }; delete value.span; delete value.to; }
+        }
+        moved[mi] = value;
+      });
+      score[name] = moved;
+    });
+    if (score.tabs) score.tabs = Object.fromEntries(Object.entries(score.tabs).map(([key, value]) => {
+      const [mi, at] = key.split(':');
+      return [positions.get(+mi) + ':' + at, value];
+    }));
+    all.forEach((measure, mi) => {
+      if (positions.get(mi + 1) !== positions.get(mi) + 1) measure.forEach((ev) => { delete ev.tie; delete ev.slur; });
+    });
+    let offset = 0;
+    score.rows = counts.map((count) => { const row = order.slice(offset, offset + count).map((mi) => all[mi]); offset += count; return row; });
+    [['meter', 'meters'], ['fifths', 'keys'], ['clef', 'clefs']].forEach(([base, map]) => {
+      score[base] = signatures[order[0]][base];
+      const changes = {};
+      order.forEach((old, mi) => { if (mi && signatures[old][base] !== signatures[order[mi - 1]][base]) changes[mi] = signatures[old][base]; });
+      if (Object.keys(changes).length) score[map] = changes;
+      else delete score[map];
+    });
+    return true;
+  }
+
   // Las barras se guardan aparte: JSON no conserva propiedades de los arrays de figuras.
   function setBarline(score, mi, type, at) {
     if (!Number.isInteger(mi) || mi < 0 || mi >= measures(score).length || !['double', 'start', 'end'].includes(type)) return false;
@@ -1632,7 +1687,7 @@
 
   return {
     voicesText, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    captureTabReferences, restoreTabReferences, copySelection, pasteSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
+    captureTabReferences, restoreTabReferences, copySelection, pasteSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, moveMeasure, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
     meterOf, meterAt, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setNavigation, removeNavigation, navigationEndings, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };
