@@ -430,6 +430,12 @@ body.score-body {
   position: absolute;
 }
 
+/* Ledger-line insertion can overlap TAB: an active score tool owns that click. */
+.score-stage.has-tool .score-tab,
+.score-stage.has-tool .score-tab * {
+  pointer-events: none;
+}
+
 /* Frets in regular weight and strings a little closer than the component's 1.5em. */
 .score-tab .ascii-tabs-fret {
   font-weight: 400;
