@@ -522,7 +522,7 @@ async function checkDrag(page) {
     // Numbered tools stay active for repeated clicks and edit the selected figure.
     await page.reload();
     await page.waitForSelector('#scoreStage g.measure');
-    assert.deepEqual(await page.locator('.score-palette-key').allTextContents(), ['1', '2', '3', '4', '5', '6', 'q', 'w', 'e', 'r', 't', 'y', 'p', 's', 'b', 'c']);
+    assert.deepEqual(await page.locator('.score-palette-key').allTextContents(), ['1', '2', '3', '4', '5', '6', 'x', 'q', 'w', 'e', 'r', 't', 'y', 'p', 's', 'b', 'c']);
     await page.keyboard.press('3');
     assert.equal(await page.locator('[data-shortcut="3"]').getAttribute('aria-pressed'), 'true');
     const previewPoint = await page.locator('#scoreStage g.measure').nth(1).evaluate(node => {
@@ -595,9 +595,9 @@ async function checkModifiers(page, url, keys) {
   assert.deepEqual((await page.locator('.score-palette-key').allTextContents()).slice(-4), keys);
   const durations = ['f', 's', 'e', 'q', 'h', 'w'];
   const labels = keys[0] === 'p'
-    ? ['Fusa', 'Semicorchea', 'Corchea', 'Negra', 'Blanca', 'Redonda', 'Silencio de fusa', 'Silencio de semicorchea', 'Silencio de corchea', 'Silencio de negra', 'Silencio de blanca', 'Silencio de redonda']
-    : ['Thirty-second note', 'Sixteenth note', 'Eighth note', 'Quarter note', 'Half note', 'Whole note', 'Thirty-second rest', 'Sixteenth rest', 'Eighth rest', 'Quarter rest', 'Half rest', 'Whole rest'];
-  assert.deepEqual(await page.locator('#scorePalette button').evaluateAll(buttons => buttons.slice(0, 12).map(button => button.getAttribute('aria-label'))), labels);
+    ? ['Fusa', 'Semicorchea', 'Corchea', 'Negra', 'Blanca', 'Redonda', 'Nota muerta', 'Silencio de fusa', 'Silencio de semicorchea', 'Silencio de corchea', 'Silencio de negra', 'Silencio de blanca', 'Silencio de redonda']
+    : ['Thirty-second note', 'Sixteenth note', 'Eighth note', 'Quarter note', 'Half note', 'Whole note', 'Dead note', 'Thirty-second rest', 'Sixteenth rest', 'Eighth rest', 'Quarter rest', 'Half rest', 'Whole rest'];
+  assert.deepEqual(await page.locator('#scorePalette button').evaluateAll(buttons => buttons.slice(0, 13).map(button => button.getAttribute('aria-label'))), labels);
   const point = await page.locator('#scoreStage g.measure').first().evaluate(node => {
     const r = node.querySelector('g.staff > path').getBoundingClientRect();
     return { x: r.left + r.width * 0.25, y: r.top + 10 };
@@ -655,9 +655,18 @@ async function checkModifiers(page, url, keys) {
   assert.equal(await page.locator('.score-hover-ghost').count(), 0);
   assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][2][0].dot), true, 'deactivation does not edit the selected note');
   await page.keyboard.press(keys[0]);
-  assert.equal(await page.evaluate(() => !!scoreEditor.score.rows[0][2][0].dot), false);
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][2][0].dot), 2, 'the second application makes it a double dot');
+  await page.keyboard.press(keys[0]);
+  await page.keyboard.press(keys[0]);
+  assert.equal(await page.evaluate(() => !!scoreEditor.score.rows[0][2][0].dot), false, 'the third removes it');
   await page.keyboard.press('Shift+' + keys[1]);
   assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][2][0].acc), '#');
+  await page.keyboard.press('Shift+' + keys[1]);
+  await page.keyboard.press('Shift+' + keys[1]);
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][2][0].acc), '##', 'the second sharp makes it a double sharp');
+  await page.keyboard.press('Shift+' + keys[1]);
+  await page.keyboard.press('Shift+' + keys[1]);
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][2][0].acc), undefined, 'the third removes it');
   await page.keyboard.down(keys[2]);
   await page.keyboard.down(keys[2]);
   await page.keyboard.up(keys[2]);
@@ -698,10 +707,14 @@ async function checkDoubleClick(page) {
   assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map(ev => !!ev.dot)), [true, false], 'double click dots only the clicked note');
   assert.ok(await page.locator('#scoreStage g.dots').count(), 'dot is rendered');
   await note.dblclick();
-  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map(ev => !!ev.dot)), [false, false], 'double click removes the dot');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map(ev => ev.dot || 0)), [2, 0], 'a second double click makes a double dot');
+  await note.dblclick();
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map(ev => !!ev.dot)), [false, false], 'the third double click removes the dot');
   assert.equal(await page.locator('#scoreStage g.dots').count(), 0);
   await page.keyboard.press('ControlOrMeta+z');
-  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].dot), true, 'dot toggle can be undone');
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].dot), 2, 'dot toggle can be undone');
+  await page.keyboard.press('ControlOrMeta+z');
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].dot), true);
   // Hollow noteheads can have a staff line at their center; hit-testing uses coordinates.
   await page.locator('#e1-0 .notehead').dblclick({ force: true });
   assert.equal(await page.evaluate(() => !!scoreEditor.score.rows[0][1][0].dot), false, 'whole notes cannot be dotted');

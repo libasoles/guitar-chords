@@ -17,6 +17,7 @@
      `sanitize` asientan cada compas, asi que en una partitura guardada `at` coincide con el tiempo que se ve.
    - `v`: voz guardada, 1 = la mas aguda. Opcional: sin `v` la voz sale del registro (ver abajo).
    - `acc` (# b n), `tie`, `slur`, `beam` ('join' | 'break'): alteracion, ligaduras y barrado manual.
+   - `dead`: nota muerta (cabeza en X); solo en notas, no en silencios.
 
    Tiempo y voces (`arrange`): lo que importa es el ORDEN de las figuras, no donde se dibujan.
    - Voces: una figura con `v` va a esa voz. Hacen falta tantas voces como la mayor `v`, o como figuras que no forman
@@ -60,23 +61,41 @@
   const HIGHEST = 51;
   const VALUES = { w: 96, h: 48, q: 24, e: 12, s: 6, f: 3 };
   const TYPES = { 96: 'whole', 48: 'half', 24: 'quarter', 12: 'eighth', 6: '16th', 3: '32nd' };
+  const DOUBLE_DOTTABLE = ['h', 'q']; // el doble puntillo de una corchea (21) no cae en la cuadricula
   const TRIPLETABLE = ['q', 'e', 's'];
   const STEPS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-  const ACCIDENTALS = { '#': { alter: 1, name: 'sharp' }, b: { alter: -1, name: 'flat' }, n: { alter: 0, name: 'natural' } };
+  const ACCIDENTALS = {
+    '#': { alter: 1, name: 'sharp' }, b: { alter: -1, name: 'flat' }, n: { alter: 0, name: 'natural' },
+    '##': { alter: 2, name: 'double-sharp' }, bb: { alter: -2, name: 'flat-flat' },
+  };
 
   const MAX_VOICE = 4;
   const REST_CLEARANCE = 6; // pasos diatonicos entre una nota y un silencio que suenan a la vez
 
-  // Un tresillo ocupa dos tercios de su valor; no admite puntillo.
+  // Grupos de valoracion especial: n figuras (clave) ocupan el tiempo de TUPLETS[n] del mismo valor. `tp` identifica el
+  // grupo dentro del compas y `tn` guarda cuantas figuras tiene (sin `tn` son 3: el tresillo). No admiten puntillo.
+  const TUPLETS = { 2: 3, 3: 2, 4: 3, 5: 4, 6: 4, 7: 4, 8: 6, 9: 8 };
+  const TUPLET_NAMES = { 2: 'dosillo', 3: 'tresillo', 4: 'cuatrillo', 5: 'quintillo', 6: 'sextillo', 7: 'septillo', 8: 'octillo', 9: 'nonillo' };
+  const MULTIPLIER = 630; // divisiones extra al exportar: hace enteras las duraciones de todos los grupos (5, 7 y 9 figuras)
+
+  // Los grupos dan duraciones fraccionarias (5 corcheas en 4: 9,6); se redondea para que las sumas sean exactas.
+  // Un grupo completo vuelve a un entero (7 figuras de 24/7 suman 24 y no 23,999997).
+  const tidy = (x) => (Math.abs(x - Math.round(x)) < 1e-4 ? Math.round(x) : Math.round(x * 1e6) / 1e6);
+
+  function tupletSize(ev) {
+    return TUPLETS[ev.tn] ? ev.tn : 3;
+  }
+
   function length(ev) {
-    return ev.tp ? VALUES[ev.d] * 2 / 3 : ev.dot ? VALUES[ev.d] * 1.5 : VALUES[ev.d];
+    return ev.tp ? tidy(VALUES[ev.d] * TUPLETS[tupletSize(ev)] / tupletSize(ev)) : ev.dot === 2 ? VALUES[ev.d] * 1.75 : ev.dot ? VALUES[ev.d] * 1.5 : VALUES[ev.d];
   }
 
   // Cuadricula de posicion para estas figuras: la mas fina que necesiten (un tresillo y una fusa juntos, 1).
   function gridOf(events) {
+    const odd = events.some((ev) => ev.tp && tupletSize(ev) !== 3);
     const triplet = events.some((ev) => ev.tp);
     const thirtySecond = events.some((ev) => ev.d === 'f');
-    return triplet ? (thirtySecond ? 1 : 2) : thirtySecond ? 3 : GRID;
+    return odd ? 0.1 : triplet ? (thirtySecond ? 1 : 2) : thirtySecond ? 3 : GRID;
   }
 
   function savedVoice(ev) {
@@ -88,7 +107,7 @@
     let cursor = 0;
     return measure.map((ev) => {
       const at = Number.isInteger(ev.at) ? ev.at : cursor;
-      cursor = Math.max(cursor, at + length(ev));
+      cursor = tidy(Math.max(cursor, at + length(ev)));
       return at;
     });
   }
@@ -190,7 +209,7 @@
       const start = Math.max(...batch.map((item) => item.voice.end));
       batch.forEach(({ g, voice }) => {
         g.at = start;
-        voice.end = start + g.size;
+        voice.end = tidy(start + g.size);
         g.indices.forEach((i) => { starts[i] = start; });
       });
       p = q;
@@ -246,7 +265,7 @@
     const size = length(ev);
     if (size > limit) return null;
     const grid = gridOf([ev]);
-    const at = Math.max(0, Math.min(limit - size, Math.round(t / grid) * grid));
+    const at = Math.max(0, Math.min(limit - size, tidy(Math.round(t / grid) * grid)));
     const starts = hints(others);
     if (!ev.rest && others.some((o, i) => !o.rest && starts[i] === at && o.n === ev.n && o.acc === ev.acc)) return null;
     if (!ev.rest) {
@@ -303,6 +322,159 @@
     }).filter((entry) => entry.notes.length);
     const signatures = fragment.map((_, offset) => ({ meter: meterAt(score, first + offset), fifths: keyAt(score, first + offset) }));
     return { pitches, tabs, type: 'guitar-score-selection', version: 1, ...signatures[0], signatures, measures: fragment };
+  }
+
+  // Duplica las figuras elegidas justo despues de la ultima de ellas, conservando su ritmo relativo. Lo que no entra
+  // en el compas sigue en los siguientes (se agregan los que falten; una figura partida queda ligada) y convive con
+  // lo que ya hay: misma altura y duracion se ignora, misma altura y otra duracion actualiza la duracion.
+  // Devuelve las figuras resultantes, o null (sin tocar la partitura) si algo no se puede colocar.
+  function duplicateSelection(score, refs) {
+    const trial = clone(score);
+    const all = measures(trial);
+    const chosen = refs.filter((r, k) => all[r.mi]?.[r.i] && refs.findIndex((o) => o.mi === r.mi && o.i === r.i) === k);
+    if (!chosen.length) return null;
+    const savedTabs = captureTabReferences(trial);
+    const sourceAttacks = attacks(trial, true);
+    const starts = () => {
+      let total = 0;
+      const list = measures(trial).map((_, mi) => { const at = total; total += capacity(trial, mi); return at; });
+      return { list, total };
+    };
+    const origin = starts().list;
+    const sources = chosen.map(({ mi, i }) => {
+      const ev = all[mi][i];
+      return { ev, abs: origin[mi] + onsets(all[mi])[i], pitch: pitchContexts(trial, mi)[i], clef: CLEFS[clefAt(trial, mi)].octave || 0 };
+    }).sort((a, b) => a.abs - b.abs);
+    const offset = Math.max(...sources.map((s) => s.abs + length(s.ev))) - sources[0].abs;
+    const needed = Math.max(...sources.map((s) => s.abs + offset + length(s.ev)));
+    while (starts().total < needed) trial.rows.push(emptyRow());
+    const { list: first } = starts();
+    const values = Object.keys(VALUES).flatMap((d) => [{ d }, ...(!['w', 's', 'f'].includes(d) ? [{ d, dot: true }] : [])])
+      .sort((a, b) => length(b) - length(a));
+    const decompose = (size) => {
+      const pieces = [];
+      while (size > 0) {
+        const value = values.find((v) => length(v) <= size);
+        if (!value) return null;
+        pieces.push(value);
+        size -= length(value);
+      }
+      return pieces;
+    };
+    // Cada figura elegida pasa a una o mas partes, cada una en el compas que le toca.
+    const byMeasure = new Map();
+    const partsOf = new Map();
+    for (const source of sources) {
+      const { ev } = source;
+      let pos = source.abs + offset, remaining = length(ev);
+      partsOf.set(ev, []);
+      while (remaining > 0) {
+        const mi = first.findLastIndex((at) => at <= pos);
+        const room = first[mi] + capacity(trial, mi) - pos;
+        const size = Math.min(room, remaining);
+        let made;
+        if (size === length(ev)) made = [clone(ev)];
+        else {
+          if (ev.tp) return null;
+          const pieces = decompose(size);
+          if (!pieces) return null;
+          made = pieces.map((value, k) => {
+            const part = Object.assign(clone(ev), value, { at: 0 });
+            delete part.tp; delete part.tn; delete part.dot;
+            if (value.dot) part.dot = true;
+            if (k < pieces.length - 1 || remaining > size) { if (!ev.rest) part.tie = true; delete part.slur; }
+            return part;
+          });
+        }
+        made.forEach((part) => {
+          part.at = pos - first[mi];
+          if (!byMeasure.has(mi)) byMeasure.set(mi, []);
+          byMeasure.get(mi).push({ part, source });
+          partsOf.get(ev).push(part);
+          pos += length(part);
+        });
+        remaining -= size;
+      }
+    }
+    const fresh = new Set();
+    const landed = new Map();
+    for (const [mi, entries] of [...byMeasure].sort((a, b) => a[0] - b[0])) {
+      const dest = measures(trial)[mi];
+      const times = onsets(dest);
+      const existing = pitchContexts(trial, mi);
+      const desired = new Map(dest.map((ev, i) => [ev, existing[i]]));
+      const octave = CLEFS[clefAt(trial, mi)].octave || 0;
+      let nextId = Math.max(0, ...dest.map((ev) => ev.tp || 0));
+      const ids = new Map();
+      const inserts = [];
+      for (const { part, source } of entries) {
+        if (!part.rest) {
+          part.n += 7 * (source.clef - octave);
+          if (part.n < LOWEST || part.n > HIGHEST) return null;
+        }
+        const at = part.at;
+        const twin = dest.findIndex((o, j) => times[j] === at && (part.rest
+          ? o.rest
+          : !o.rest && o.n === part.n && existing[j]?.alter === source.pitch?.alter));
+        const blocked = part.rest && dest.some((o, j) => times[j] === at && !o.rest);
+        if (blocked) continue;
+        if (twin >= 0) {
+          const other = dest[twin];
+          if (length(other) !== length(part) && !other.tp && !part.tp) {
+            delete other.dot;
+            Object.assign(other, { d: part.d }, part.dot ? { dot: true } : {});
+          }
+          landed.set(part, other);
+          continue;
+        }
+        if (part.tp) {
+          if (!ids.has(part.tp)) ids.set(part.tp, ++nextId);
+          part.tp = ids.get(part.tp);
+        }
+        if (!part.rest && source.pitch) desired.set(part, source.pitch);
+        inserts.push([part, at]);
+        fresh.add(part);
+        landed.set(part, part);
+      }
+      insertMany(dest, inserts);
+      if (measureLength(dest) > capacity(trial, mi)) return null;
+      // Una alteracion copiada no debe cambiar la altura de lo que ya estaba en el compas.
+      const actual = new Map();
+      const order = onsets(dest);
+      dest.map((ev, i) => i).sort((a, b) => order[a] - order[b]).forEach((i) => {
+        const ev = dest[i];
+        if (ev.rest) return;
+        const pitch = desired.get(ev);
+        const alter = ev.acc ? ACCIDENTALS[ev.acc].alter : actual.has(ev.n) ? actual.get(ev.n) : keyAlter(ev.n, trial, mi);
+        if (pitch && alter !== pitch.alter) ev.acc = accidentalFor(pitch.alter);
+        if (ev.acc) actual.set(ev.n, ACCIDENTALS[ev.acc].alter);
+      });
+    }
+    // La digitacion de la TAB viaja con la nota, igual que al copiar y pegar.
+    const columns = score.tabs || {};
+    sourceAttacks.filter((attack) => columns[attack.key]).forEach((attack) => {
+      const notes = attack.events.flatMap((ev, k) => {
+        const target = partsOf.get(ev)?.[0];
+        return target && fresh.has(target) ? [{ target, midi: attack.midis[k] }] : [];
+      });
+      if (!notes.length) return;
+      const column = columns[attack.key].map((fret, string) =>
+        notes.length === attack.events.length || notes.some((note) => TAB_OPENS[string] + fret === note.midi) ? fret : null);
+      savedTabs.push({ refs: notes.map((note) => tabReference(note.target)), midis: notes.map((note) => note.midi), column });
+    });
+    restoreTabReferences(trial, savedTabs);
+    const created = [];
+    for (const { ev } of sources) {
+      for (const part of partsOf.get(ev)) {
+        const target = landed.get(part);
+        const mi = target && measures(trial).findIndex((m) => m.includes(target));
+        if (target && mi >= 0) created.push({ mi, i: measures(trial)[mi].indexOf(target) });
+      }
+    }
+    score.rows = trial.rows;
+    if (trial.tabs) score.tabs = trial.tabs;
+    else delete score.tabs;
+    return created.length ? created : null;
   }
 
   // Prepara todo antes de escribir: un pegado que no entra no cambia la partitura.
@@ -366,9 +538,15 @@
         if (pitch.alter !== keyAlter(ev.n, trial, mi + offset)) ev.acc = accidentalFor(pitch.alter);
       }
       const starts = onsets(destination);
-      if (clean[offset].some((ev) => !ev.rest && destination.some((other, i) =>
+      const clashes = () => clean[offset].some((ev) => !ev.rest && destination.some((other, i) =>
         !other.rest && starts[i] === ev.at && other.n === ev.n &&
-        (desired.has(ev) ? desired.get(other)?.alter === desired.get(ev).alter : other.acc === ev.acc)))) return null;
+        (desired.has(ev) ? desired.get(other)?.alter === desired.get(ev).alter : other.acc === ev.acc)));
+      // Si repite notas que ya suenan ahi (pegar sobre el mismo compas), sigue a lo que ya hay en el compas.
+      if (clashes()) {
+        const shift = measureLength(destination);
+        clean[offset].forEach((ev) => { ev.at += shift; });
+        if (clashes()) return null;
+      }
       const ids = new Map();
       let nextId = Math.max(0, ...destination.map((ev) => ev.tp || 0));
       const list = clean[offset].map((ev) => {
@@ -471,6 +649,39 @@
     const at = rowStarts(score)[row] + score.rows[row].length;
     ['navigation', 'barlines', 'keys', 'clefs', 'meters', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => { if (score[name]) score[name] = shiftKeys(score[name], at, 1); });
     score.rows[row].push([]);
+    return true;
+  }
+
+  // Inserta un compas vacio en la posicion plana `at` (0..total): el que estaba ahi y todos los siguientes se corren.
+  // Queda en el renglon de `at` (o en el ultimo si `at` es el final). Si el renglon pasa de PER_ROW, su ultimo compas
+  // baja al renglon siguiente, y asi hasta que todo entra; un renglon que ya pasaba de PER_ROW no se vuelve a partir.
+  function insertMeasure(score, at) {
+    const total = measures(score).length;
+    if (!Number.isInteger(at) || at < 0 || at > total) return false;
+    const target = at === total ? score.rows.length - 1 : rowOf(score, at).row;
+    const limits = score.rows.map((row) => Math.max(PER_ROW, row.length));
+    // Una cejilla que cruza el punto de insercion termina antes del compas nuevo.
+    Object.entries(score.barres || {}).forEach(([key, barre]) => {
+      const m = +key;
+      if (m < at && barreLast(barre, m) >= at) {
+        barre.span = at - 1 - m;
+        delete barre.to;
+        if (!barre.span) delete barre.span;
+      }
+    });
+    ['navigation', 'barlines', 'keys', 'clefs', 'meters', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => {
+      if (score[name]) score[name] = shiftKeys(score[name], at, 1);
+    });
+    if (score.tabs) score.tabs = Object.fromEntries(Object.entries(score.tabs).map(([key, value]) => {
+      const [mi, time] = key.split(':');
+      return [(+mi >= at ? +mi + 1 : +mi) + ':' + time, value];
+    }));
+    score.rows[target].splice(at - rowStarts(score)[target], 0, []);
+    for (let row = target; row < score.rows.length && score.rows[row].length > limits[row]; row += 1) {
+      if (row === score.rows.length - 1) score.rows.push([]);
+      score.rows[row + 1].unshift(score.rows[row].pop());
+    }
+    pruneKeys(score);
     return true;
   }
 
@@ -666,6 +877,7 @@
         if (!value) return false;
         const part = Object.assign(clone(ev), value, { at: cursor });
         delete part.tp;
+        delete part.tn;
         delete part.dot;
         if (value.dot) part.dot = true;
         size -= length(value);
@@ -927,12 +1139,14 @@
   // `moves` queda vacio porque ninguna otra figura cambia de lugar en el orden.
   function dotPlan(measure, index, score) {
     const ev = measure[index];
-    if (ev.dot || ev.tp || ev.d === 'w' || ev.d === 's' || ev.d === 'f') return null;
+    if (ev.dot === 2 || ev.tp || ev.d === 'w' || ev.d === 's' || ev.d === 'f') return null;
+    if (ev.dot && !DOUBLE_DOTTABLE.includes(ev.d)) return null;
     const limit = capacity(score, score && score.rows ? measures(score).indexOf(measure) : undefined);
     const trial = settle(clone(measure));
-    trial[index].dot = true;
+    const dot = ev.dot ? 2 : true;
+    trial[index].dot = dot;
     if (measureLength(trial) > limit) return null;
-    return { start: onsets(measure)[index], moves: [] };
+    return { start: onsets(measure)[index], moves: [], dot };
   }
 
   function dotStart(measure, index, score) {
@@ -956,7 +1170,7 @@
   }
 
   const SEMITONES = [0, 2, 4, 5, 7, 9, 11];
-  const accidentalFor = (alter) => alter === 1 ? '#' : alter === -1 ? 'b' : 'n';
+  const accidentalFor = (alter) => alter === 2 ? '##' : alter === -2 ? 'bb' : alter === 1 ? '#' : alter === -1 ? 'b' : 'n';
 
   // Altura efectiva de cada figura, incluso si su alteracion viene de una nota no seleccionada.
   function pitchContexts(score, mi) {
@@ -1059,9 +1273,10 @@
           if (raw.rest) { ev.rest = true; if (Number.isInteger(raw.n)) ev.n = clampPitch(raw.n); }
           else if (Number.isInteger(raw.n)) ev.n = clampPitch(raw.n);
           else return;
-          if (Number.isInteger(raw.tp) && raw.tp > 0 && TRIPLETABLE.includes(raw.d)) ev.tp = raw.tp;
-          else if (raw.dot && raw.d !== 'w' && raw.d !== 's' && raw.d !== 'f') ev.dot = true;
+          if (Number.isInteger(raw.tp) && raw.tp > 0 && TRIPLETABLE.includes(raw.d)) { ev.tp = raw.tp; if (TUPLETS[raw.tn] && raw.tn !== 3) ev.tn = raw.tn; }
+          else if (raw.dot && raw.d !== 'w' && raw.d !== 's' && raw.d !== 'f') ev.dot = raw.dot === 2 && DOUBLE_DOTTABLE.includes(raw.d) ? 2 : true;
           if (!ev.rest && ACCIDENTALS[raw.acc]) ev.acc = raw.acc;
+          if (!ev.rest && raw.dead === true) ev.dead = true;
           if (!ev.rest && raw.tie === true) ev.tie = true;
           else if (!ev.rest && raw.slur === true) ev.slur = true;
           if (Number.isInteger(raw.v) && raw.v >= 1 && raw.v <= MAX_VOICE) ev.v = raw.v;
@@ -1390,13 +1605,14 @@
     const picked = lane.groups.filter((g) => g.indices.some((i) => sel.some((s) => s.i === i)));
     if (!sel.every((s) => picked.some((g) => g.indices.includes(s.i)))) return null;
     const first = lane.groups.indexOf(picked[0]);
-    const joined = picked.every((g, k) => lane.groups[first + k] === g && (k === 0 || picked[k - 1].at + picked[k - 1].size === g.at));
+    const joined = picked.every((g, k) => lane.groups[first + k] === g && (k === 0 || tidy(picked[k - 1].at + picked[k - 1].size) === tidy(g.at)));
     return joined ? { measure, lane, groups: picked, mi: sel[0].mi } : null;
   }
 
+  // Seleccion de 2 a 9 figuras seguidas del mismo valor: ofrece el grupo que corresponde a su cantidad.
   function tripletRun(score, sel) {
     const r = run(score, sel);
-    if (!r || r.groups.length < 3 || r.groups.length % 3) return null;
+    if (!r || !TUPLETS[r.groups.length]) return null;
     const d = r.measure[r.groups[0].indices[0]].d;
     const plain = r.groups.every((g) => g.indices.every((i) => {
       const ev = r.measure[i];
@@ -1407,7 +1623,9 @@
 
   function untripletRun(score, sel) {
     const r = run(score, sel);
-    return r && r.groups.every((g) => g.indices.every((i) => r.measure[i].tp)) ? r : null;
+    if (!r || !r.groups.every((g) => g.indices.every((i) => r.measure[i].tp))) return null;
+    const size = tupletSize(r.measure[r.groups[0].indices[0]]);
+    return r.groups.every((g) => g.indices.every((i) => tupletSize(r.measure[i]) === size)) ? Object.assign(r, { size }) : null;
   }
 
   // Dos notas, una al final de un compas y otra al comienzo del siguiente.
@@ -1435,11 +1653,16 @@
     return Object.assign(r, { joins });
   }
 
+  // 'triplet' para 3 figuras (el nombre de siempre) y 'tupletN' para las demas.
+  const tupletAction = (size) => (size === 3 ? 'triplet' : 'tuplet' + size);
+
   // Acciones disponibles para una seleccion de figuras [{ mi, i }], en el orden en que se ofrecen.
   function selectionActions(score, sel) {
     const actions = [];
-    if (tripletRun(score, sel)) actions.push('triplet');
-    if (untripletRun(score, sel)) actions.push('untriplet');
+    const group = tripletRun(score, sel);
+    if (group) actions.push(tupletAction(group.groups.length));
+    const loose = untripletRun(score, sel);
+    if (loose) actions.push('un' + tupletAction(loose.size));
     const pair = linkPair(score, sel);
     if (pair) actions.push(pair.existing ? 'unlink' : 'link');
     const beams = beamRun(score, sel);
@@ -1455,24 +1678,24 @@
   // Aplica una de las acciones de `selectionActions`; false si no corresponde o no entra.
   function applySelection(score, sel, action) {
     if (!selectionActions(score, sel).includes(action)) return false;
-    if (action === 'triplet') {
+    if (/^(triplet|tuplet\d)$/.test(action)) {
       // El orden no cambia: las figuras se acortan y lo que sigue en su voz se adelanta.
       const r = tripletRun(score, sel);
-      let id = Math.max(0, ...r.measure.map((ev) => ev.tp || 0));
+      const size = r.groups.length;
+      const id = Math.max(0, ...r.measure.map((ev) => ev.tp || 0)) + 1;
       settle(r.measure);
-      r.groups.forEach((g, k) => {
-        if (k % 3 === 0) id += 1;
-        eachEvent(r, g, (ev) => { ev.tp = id; });
+      r.groups.forEach((g) => {
+        eachEvent(r, g, (ev) => { ev.tp = id; if (size === 3) delete ev.tn; else ev.tn = size; });
       });
       settle(r.measure);
       return true;
     }
-    if (action === 'untriplet') {
+    if (/^(untriplet|untuplet\d)$/.test(action)) {
       // Las figuras se alargan y lo que sigue en su voz se corre; no se hace si la voz deja de entrar en el compas.
       const r = untripletRun(score, sel);
       settle(r.measure);
       const saved = clone(r.measure);
-      r.groups.forEach((g) => eachEvent(r, g, (ev) => { delete ev.tp; }));
+      r.groups.forEach((g) => eachEvent(r, g, (ev) => { delete ev.tp; delete ev.tn; }));
       if (measureLength(r.measure) > capacity(score, sel[0].mi)) {
         r.measure.splice(0, r.measure.length, ...saved);
         return false;
@@ -1511,7 +1734,7 @@
   }
 
   // `roles`: { tie: ['start'|'stop'], slur: [...], tuplet: 'start'|'stop'|'both' } de los extremos de esta nota.
-  function noteXml(ev, id, beams, chord, voice, alter, roles, stem) {
+  function noteXml(ev, id, beams, chord, voice, alter, roles, stem, mult) {
     const dur = length(ev);
     const base = VALUES[ev.d];
     const ties = (roles && roles.tie) || [];
@@ -1525,11 +1748,12 @@
       xml += `<pitch><step>${STEPS[ev.n % 7]}</step>${alter ? `<alter>${alter}</alter>` : ''}` +
         `<octave>${Math.floor(ev.n / 7) - 1}</octave></pitch>`;
     }
-    xml += `<duration>${dur}</duration>${ties.map((type) => `<tie type="${type}"/>`).join('')}` +
-      `<voice>${voice}</voice><type>${TYPES[base]}</type>${ev.dot ? '<dot/>' : ''}`;
+    xml += `<duration>${dur * mult}</duration>${ties.map((type) => `<tie type="${type}"/>`).join('')}` +
+      `<voice>${voice}</voice><type>${TYPES[base]}</type>${ev.dot === 2 ? '<dot/><dot/>' : ev.dot ? '<dot/>' : ''}`;
     if (!ev.rest && ev.acc) xml += `<accidental>${ACCIDENTALS[ev.acc].name}</accidental>`;
-    if (ev.tp) xml += '<time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification>';
+    if (ev.tp) xml += `<time-modification><actual-notes>${tupletSize(ev)}</actual-notes><normal-notes>${TUPLETS[tupletSize(ev)]}</normal-notes></time-modification>`;
     if (!ev.rest && stem) xml += `<stem>${stem}</stem>`;
+    if (!ev.rest && ev.dead) xml += '<notehead>x</notehead>';
     if (beams) Object.keys(beams).forEach((level) => { xml += `<beam number="${level}">${beams[level]}</beam>`; });
     const marks = ties.map((type) => `<tied type="${type}"/>`).concat(slurs.map((type) => `<slur type="${type}" number="1"/>`));
     if (tuplet) (tuplet === 'both' ? ['start', 'stop'] : [tuplet]).forEach((type) => { marks.push(`<tuplet type="${type}"/>`); });
@@ -1543,6 +1767,7 @@
   function toMusicXml(score) {
     const all = measures(score);
     const clef = CLEFS[clefOf(score)];
+    const mult = all.some((measure) => measure.some((ev) => ev.tp && tupletSize(ev) !== 3)) ? MULTIPLIER : 1;
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<score-partwise version="3.1">' +
       (score.title ? '<work><work-title>' + score.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</work-title></work>' : '') +
       (score.author ? '<identification><creator type="composer">' + score.author.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</creator></identification>' : '') +
@@ -1564,7 +1789,7 @@
       xml += `<measure number="${mi + 1}" id="m${mi}"${capacity(score, mi) < capacity({ meter: meterAt(score, mi) }) ? ' implicit="yes"' : ''}>`;
       if (rowFirsts.has(mi)) xml += '<print new-system="yes"/>';
       if (mi === 0) {
-        xml += `<attributes><divisions>${DIVISIONS}</divisions><key><fifths>${fifthsOf(score)}</fifths></key>` +
+        xml += `<attributes><divisions>${DIVISIONS * mult}</divisions><key><fifths>${fifthsOf(score)}</fifths></key>` +
           `<time><beats>${beats}</beats><beat-type>${unit}</beat-type></time>` +
           `<clef><sign>${clef.sign}</sign><line>${clef.line}</line>${clef.octave ? `<clef-octave-change>${clef.octave}</clef-octave-change>` : ''}</clef></attributes>`;
       }
@@ -1606,13 +1831,13 @@
       let barreOpen = !barre && Boolean(closing);
       let barreClosed = false;
       voices(measure).forEach((voice, vi, all) => {
-        if (vi > 0) xml += `<backup><duration>${capacity(score, mi)}</duration></backup>`;
+        if (vi > 0) xml += `<backup><duration>${capacity(score, mi) * mult}</duration></backup>`;
         const indices = voice.groups.flatMap((g) => g.indices);
         const events = indices.map((i) => Object.assign({}, measure[i], { at: starts[i] }));
         const beams = beamStates(events, { meter: meterAt(score, mi) });
         const pad = (from, to) => {
           padding(to - from).forEach((size) => {
-            xml += `<note print-object="no"><rest/><duration>${size}</duration><voice>${vi + 1}</voice>${TYPES[size] ? `<type>${TYPES[size]}</type>` : ''}</note>`;
+            xml += `<note print-object="no"><rest/><duration>${size * mult}</duration><voice>${vi + 1}</voice>${TYPES[size] ? `<type>${TYPES[size]}</type>` : ''}</note>`;
           });
         };
         // Inicio y fin de la cejilla se escriben en la primera voz con un hueco (o un limite) justo en ese tiempo.
@@ -1642,7 +1867,7 @@
           group.indices.forEach((i, ci) => {
             const own = roles.get(mi + '-' + i) || {};
             const tuplet = ci === 0 && span && (span.first === span.last ? 'both' : gi === span.first ? 'start' : gi === span.last ? 'stop' : undefined);
-            xml += noteXml(measure[i], `e${mi}-${i}`, beams[index++], ci > 0, vi + 1, alters[i], Object.assign({}, own, { tuplet }), stemOf(vi, all.length));
+            xml += noteXml(measure[i], `e${mi}-${i}`, beams[index++], ci > 0, vi + 1, alters[i], Object.assign({}, own, { tuplet }), stemOf(vi, all.length), mult);
           });
           cursor = group.at + group.size;
         });
@@ -1667,7 +1892,7 @@
   const MULTIPLES = { 2: 'doble ', 3: 'triple ' };
 
   function figureName(ev) {
-    const name = FIGURES[ev.d][0] + (ev.dot ? ' con puntillo' : '');
+    const name = FIGURES[ev.d][0] + (ev.dot === 2 ? ' con doble puntillo' : ev.dot ? ' con puntillo' : '');
     return ev.rest ? 'silencio de ' + name : name;
   }
 
@@ -1675,9 +1900,9 @@
   // todas iguales, cada una por su nombre.
   function beamedName(evs) {
     const first = evs[0];
-    if (!evs.every((ev) => ev.d === first.d && !!ev.dot === !!first.dot)) return evs.map(figureName).join(' + ');
+    if (!evs.every((ev) => ev.d === first.d && (ev.dot || 0) === (first.dot || 0))) return evs.map(figureName).join(' + ');
     const [one, many] = FIGURES[first.d];
-    const dotted = first.dot ? ' con puntillo' : '';
+    const dotted = first.dot === 2 ? ' con doble puntillo' : first.dot ? ' con puntillo' : '';
     return MULTIPLES[evs.length] ? MULTIPLES[evs.length] + one + dotted : evs.length + ' ' + many + dotted + ' unidas';
   }
 
@@ -1693,7 +1918,7 @@
       let end = k;
       if (ev.tp) {
         while (end + 1 < items.length && items[end + 1].ev.tp === ev.tp) end += 1;
-        names.push('tresillo de ' + FIGURES[ev.d][1]);
+        names.push(TUPLET_NAMES[tupletSize(ev)] + ' de ' + FIGURES[ev.d][1]);
       } else if (beam && beam[1] === 'begin') {
         while (end + 1 < items.length && items[end].beam[1] !== 'end') end += 1;
         names.push(beamedName(items.slice(k, end + 1).map((item) => item.ev)));
@@ -1716,8 +1941,8 @@
   }
 
   return {
-    voicesText, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    captureTabReferences, restoreTabReferences, copySelection, pasteSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, moveMeasure, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
+    voicesText, TUPLETS, tupletSize, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
+    captureTabReferences, restoreTabReferences, copySelection, pasteSelection, duplicateSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, moveMeasure, addMeasure, insertMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
     meterOf, meterAt, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setNavigation, removeNavigation, navigationEndings, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };

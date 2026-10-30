@@ -439,7 +439,7 @@
   }
 
   function isModifier(item) {
-    return item && (item.kind === 'dot' || item.kind === 'acc');
+    return item && (item.kind === 'dot' || item.kind === 'acc' || item.kind === 'dead');
   }
 
   function deactivateTool() {
@@ -469,9 +469,11 @@
     if (!ev || (ev.d === item.d && !!ev.rest === (item.kind === 'rest'))) return;
     const replacement = Object.assign(M.clone(ev), { d: item.d });
     delete replacement.tp;
-    if (item.kind === 'rest') { replacement.rest = true; delete replacement.n; delete replacement.acc; }
+    delete replacement.tn;
+    if (item.kind === 'rest') { replacement.rest = true; delete replacement.n; delete replacement.acc; delete replacement.dead; }
     else { delete replacement.rest; replacement.n = ev.rest ? M.bottomLine(score, selected.mi) : ev.n; }
     if (item.d === 'w' || item.d === 's' || item.d === 'f') delete replacement.dot;
+    else if (replacement.dot === 2 && item.d !== 'h' && item.d !== 'q') replacement.dot = true;
     const measure = M.measures(score)[selected.mi];
     // Se cuenta en orden: lo que sigue en su voz se corre, y la voz tiene que seguir entrando en el compas.
     const trial = M.settle(M.clone(measure));
@@ -486,15 +488,21 @@
     const measure = M.measures(score)[hit.mi];
     const ev = measure[hit.i];
     if (item.kind === 'dot') {
-      if (ev.dot) return change(() => { delete ev.dot; });
+      // Puntillo, doble puntillo y nada, en ese orden; si el doble no entra, se vuelve a la figura sin puntillo.
+      if (ev.dot === 2) return change(() => { delete ev.dot; });
       const plan = M.dotPlan(measure, hit.i, score);
+      if (!plan && ev.dot) return change(() => { delete ev.dot; });
       if (!plan) return say(ev.d === 'w' || ev.d === 's' || ev.d === 'f' || ev.tp ? t.noDot : t.full);
       const moves = plan.moves.map(([i, at]) => [measure[i], at]);
-      return change(() => { M.settle(measure); ev.dot = true; moves.forEach(([o, at]) => { o.at = at; }); });
+      return change(() => { M.settle(measure); ev.dot = plan.dot; moves.forEach(([o, at]) => { o.at = at; }); });
     }
     if (ev.rest) return;
+    if (item.kind === 'dead') return change(() => { if (ev.dead) delete ev.dead; else ev.dead = true; });
     change(() => {
-      if (ev.acc === item.acc) delete ev.acc;
+      // Una vez: simple; dos: doble (## o bb); tres: sin alteracion. El becuadro solo se quita.
+      const double = { '#': '##', b: 'bb' }[item.acc];
+      if (ev.acc === item.acc) { if (double) ev.acc = double; else delete ev.acc; }
+      else if (ev.acc === double) delete ev.acc;
       else ev.acc = item.acc;
     });
   }
@@ -505,7 +513,7 @@
     const destination = all[target.mi];
     const others = destination.filter((o) => o !== ev);
     const moved = M.clone(ev);
-    ['tp', 'tie', 'slur', 'beam'].forEach((key) => { delete moved[key]; });
+    ['tp', 'tn', 'tie', 'slur', 'beam'].forEach((key) => { delete moved[key]; });
     if (!ev.rest) moved.n = target.n;
     // Al separar la unica nota de una voz, seguir la columna anterior: una voz
     // vacia volveria a empezar en cero y anularia el desplazamiento horizontal.
@@ -895,7 +903,7 @@
   }
 
   document.addEventListener('pointerdown', (event) => {
-    if (!event.target.closest('.score-barline-trigger')) clearBarSelection();
+    if (!event.target.closest('.score-barline-trigger, .score-insert-measure')) clearBarSelection();
   });
 
   function removeSelectedBars() {
@@ -931,6 +939,31 @@
       const node = side === 'start' ? nodes[0] : nodes[nodes.length - 1];
       node?.classList.add('is-bar-selected');
       button.setAttribute('aria-pressed', 'true');
+    });
+    mountInsertButtons(mi);
+  }
+
+  // Un + sobre cada barra del compas elegido inserta un compas vacio antes o despues; los demas se corren.
+  function mountInsertButtons(mi) {
+    stage.querySelectorAll('.score-insert-measure').forEach((button) => button.remove());
+    const m = layout[mi];
+    [['before', m.left, mi, t.insertMeasureBefore], ['after', m.right, mi + 1, t.insertMeasureAfter]].forEach(([where, x, at, label]) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'score-insert-measure tooltip';
+      button.dataset.where = where;
+      button.dataset.tooltip = label;
+      button.setAttribute('aria-label', label);
+      button.innerHTML = lucide('plus');
+      button.style.left = x + 'px';
+      button.style.top = (m.lines[0] - 18) + 'px';
+      button.addEventListener('click', () => {
+        // El compas nuevo queda elegido para poder seguir insertando.
+        if (!change(() => { selected = null; return M.insertMeasure(score, at); })) return;
+        selectedMeasure = at;
+        markMeasureBars();
+      });
+      stage.appendChild(button);
     });
   }
 
@@ -1701,7 +1734,7 @@
     const raw = hoverPoint;
     const point = raw && aimed(raw);
     const over = point && document.elementFromPoint(point.clientX, point.clientY);
-    const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-barre-field, .score-barre-span, .score-selection-menu');
+    const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-insert-measure, .score-barre-field, .score-barre-span, .score-selection-menu');
     const hit = activeItem && !shiftMeasures && !measureDrag && !drag && overStage && locate(point.clientX, point.clientY);
     if (!hit) { clearHoverGhost(); return; }
     if (!hoverGhost) {
@@ -1825,7 +1858,7 @@
       selectNavigation(navigation, event);
       return;
     }
-    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-key-trigger, .score-barline-trigger, .score-barre-field, .score-barre-span, .score-selection-menu')) return;
+    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-key-trigger, .score-barline-trigger, .score-insert-measure, .score-barre-field, .score-barre-span, .score-selection-menu')) return;
     // Las cabezas graves pueden quedar dentro de TAB: la partitura recibe
     // el gesto antes de que el componente enfoque y redibuje su celda.
     const overTab = event.target.closest('.score-tab');
@@ -2099,6 +2132,12 @@
       clearBarSelection();
       deactivateTool();
     }
+    // Shift+D: sin Ctrl/Cmd/Alt no choca con ningun atajo del navegador (Cmd+D es marcador).
+    if (event.shiftKey && !event.metaKey && !event.ctrlKey && !event.altKey && event.code === 'KeyD') {
+      event.preventDefault();
+      if (!event.repeat) duplicateSelected();
+      return;
+    }
     if (!event.metaKey && !event.ctrlKey && !event.altKey && !meterPopup.matches(':popover-open') && !clefPopup.matches(':popover-open')) {
       if (event.key.toLowerCase() === 'a') {
         event.preventDefault();
@@ -2113,6 +2152,22 @@
       undo();
     }
   });
+
+  // Copia las figuras elegidas justo despues de la ultima, siguiendo en los compases que vengan.
+  function duplicateSelected() {
+    const refs = picks().filter((ref) => eventAt(ref));
+    if (!refs.length) return;
+    const trial = M.clone(score);
+    M.restoreTabReferences(trial, M.captureTabReferences(score, score.showTabs ? tabColumns : score.tabs));
+    const created = M.duplicateSelection(trial, refs);
+    if (!created) return say(t.full);
+    change(() => {
+      Object.assign(score, trial);
+      selected = created[created.length - 1];
+      group = created.length > 1 ? created : [];
+    }, M.captureTabReferences(trial));
+    stage.focus({ preventScroll: true });
+  }
 
   let pasteWithoutSignatures = false;
   document.addEventListener('keydown', (event) => { pasteWithoutSignatures = event.shiftKey; });
@@ -2473,6 +2528,14 @@
   };
 
   const ACTION_ICONS = { triplet: 'triplet', untriplet: 'untriplet', link: 'link', unlink: 'unlink', beam: 'beam', unbeam: 'unbeam' };
+  // Los demas grupos (2, 4 a 9 figuras) son el icono del tresillo con su numero.
+  for (let n = 2; n <= 9; n += 1) {
+    if (n === 3) continue;
+    ICONS['tuplet' + n] = ICONS.triplet.replace(/<path d="M10 7[^>]*>/, '') + '<text x="12" y="13" text-anchor="middle" font-size="12" font-weight="700" stroke="none" fill="currentColor">' + n + '</text>';
+    ICONS['untuplet' + n] = ICONS['tuplet' + n];
+    ACTION_ICONS['tuplet' + n] = 'tuplet' + n;
+    ACTION_ICONS['untuplet' + n] = 'untuplet' + n;
+  }
 
   function lucide(name) {
     return '<svg class="lucide" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" ' +
@@ -2504,6 +2567,7 @@
     'bar:start': '<path d="M10 4v24" stroke="currentColor" stroke-width="3.5"/><path d="M15 4v24" stroke="currentColor" stroke-width="1.6"/><circle cx="21" cy="12" r="1.8"/><circle cx="21" cy="20" r="1.8"/>',
     'bar:end': '<path d="M15 4v24" stroke="currentColor" stroke-width="1.6"/><path d="M20 4v24" stroke="currentColor" stroke-width="3.5"/><circle cx="9" cy="12" r="1.8"/><circle cx="9" cy="20" r="1.8"/>',
     barre: '<text x="3" y="18" font-size="16" font-weight="700" font-family="serif">C</text><path d="M3 24h24" stroke="currentColor" stroke-width="1.6" stroke-dasharray="3 2.500" fill="none"/>',
+    dead: '<path d="M8.500 19.500l11 11M19.500 19.500l-11 11" stroke="currentColor" stroke-width="2.200" fill="none"/><path d="M20.3 22.8V-12.3" stroke="currentColor" stroke-width="1.5" fill="none"/>',
     dot: '<circle cx="15" cy="15" r="3.200"/>',
     'acc:#': '<path d="M11 6v20M18 4v20M7.500 12.500l14-3.500M7.500 21l14-3.500" stroke="currentColor" stroke-width="1.800" fill="none"/>',
     'acc:b': '<path d="M10 4v22c4-2 8-5 8-8.500 0-2.500-2-3.500-4-3.500-1.500 0-3 .800-4 2" stroke="currentColor" stroke-width="1.800" fill="none" stroke-linejoin="round"/>',
@@ -2515,13 +2579,14 @@
     if (item.kind === 'bar') return 'bar:' + item.bar;
     if (item.kind === 'barre') return 'barre';
     if (item.kind === 'note' || item.kind === 'rest') return item.kind + ':' + item.d;
+    if (item.kind === 'dead') return 'dead';
     return item.kind === 'dot' ? 'dot' : 'acc:' + item.acc;
   }
 
   function glyphFor(item) {
     const svg = document.createElementNS(SVG_NS, 'svg');
     // Las banderas superan x=30 y la fusa sube por encima de y=-16.
-    const tall = item.kind === 'note' && item.d !== 'w';
+    const tall = (item.kind === 'note' && item.d !== 'w') || item.kind === 'dead';
     // Los silencios usan la escala de la partitura; la fusa necesita espacio vertical extra.
     const rest = item.kind === 'rest';
     svg.setAttribute('viewBox', tall ? '0 -24 36 56' : rest ? '0 -12 30 56' : '0 0 30 32');
@@ -2542,6 +2607,7 @@
     { kind: 'note', d: 'q', key: '4', label: t.quarter },
     { kind: 'note', d: 'h', key: '5', label: t.half },
     { kind: 'note', d: 'w', key: '6', label: t.whole },
+    { kind: 'dead', key: t.shortcuts.dead, label: t.dead },
     null,
     { kind: 'rest', d: 'f', key: 'q', code: 'KeyQ', label: t.restThirtySecond },
     { kind: 'rest', d: 's', key: 'w', code: 'KeyW', label: t.restSixteenth },

@@ -61,3 +61,13 @@ test('cambiar la armadura al pegar conserva las alturas existentes en el compas'
   assert.ok(M.attacks(s)[0].midis.includes(before));
   assert.equal(s.rows[0][2].find(ev => ev.n === 38).acc, 'n');
 });
+
+test('pasting onto the measure it was copied from follows the existing figures', () => {
+  const s = M.emptyScore(); s.meter = '6/8';
+  s.rows[0][0] = [{ d: 'q', n: 35, dot: true, v: 1, at: 0 }, { d: 'q', n: 32, dot: true, v: 2, at: 0 }];
+  const fragment = M.copySelection(s, [{ mi: 0, i: 0 }, { mi: 0, i: 1 }]);
+  assert.ok(M.pasteSelection(s, fragment, 0));
+  assert.deepEqual(M.measures(s)[0].map((ev) => ev.at), [0, 0, 36, 36]);
+  assert.equal(M.measureLength(M.measures(s)[0]), M.capacity(s, 0));
+  assert.equal(M.pasteSelection(s, fragment, 0), null);
+});

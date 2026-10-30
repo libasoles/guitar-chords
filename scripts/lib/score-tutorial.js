@@ -23,6 +23,8 @@ const NOTES = [
   ['6', '<path d="' + HOLLOW_HEAD + '" fill-rule="evenodd"/>'],
 ];
 
+const DEAD = ['X', '<path d="M8.5 19.5l11 11M19.5 19.5l-11 11" stroke="currentColor" stroke-width="2.2" fill="none"/><path d="M19.6 24.2V-1" ' + STEM + '/>'];
+
 const RESTS = [
   ['q', '<circle cx="12" cy="5" r="2.2"/><circle cx="10" cy="12" r="2.2"/><circle cx="8" cy="19" r="2.2"/><path d="M13 6c3 0 5-1.3 6-3.5l-8 26" ' + LINE + '/>'],
   ['w', '<circle cx="12" cy="9" r="2.4"/><circle cx="10" cy="17" r="2.4"/><path d="M13 10c3 0 5-1.3 6-3.5l-6.5 22" ' + LINE + '/>'],
@@ -135,7 +137,7 @@ function tabMoveDemo(s) {
 function renderScoreTutorial(strings) {
   const s = function (k) { return strings[k] || ''; };
   const keys = (strings.scoreUiStrings && strings.scoreUiStrings.shortcuts) || {};
-  const notes = NOTES.map(function (n) { return keyCell(n[1], n[0], true); });
+  const notes = NOTES.concat([DEAD]).map(function (n) { return keyCell(n[1], n[0], true); });
   const rests = RESTS.map(function (r) { return keyCell(r[1], r[0].toUpperCase()); });
   const marks = MARKS.map(function (m) { return keyCell(m[1], String(keys[m[0]] || '').toUpperCase()); });
   return (

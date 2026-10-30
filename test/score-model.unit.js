@@ -54,6 +54,15 @@ test('un compas de 4/4 admite hasta 96 divisiones', () => {
   assert.ok(M.fits(measure, { d: 'h', n: 32 }, 0));
 });
 
+test('el doble puntillo suma tres cuartos y solo entra en blanca y negra con puntillo', () => {
+  assert.equal(M.length({ d: 'q', dot: 2 }), 42);
+  assert.equal(M.dotPlan([{ d: 'q', dot: true, n: 30 }], 0).dot, 2);
+  assert.equal(M.dotPlan([{ d: 'q', n: 30 }], 0).dot, true);
+  assert.equal(M.dotPlan([{ d: 'e', dot: true, n: 30 }], 0), null, 'la corchea no admite doble puntillo');
+  assert.equal(M.dotPlan([{ d: 'q', dot: 2, n: 30 }], 0), null);
+  assert.equal(M.dotPlan([{ d: 'h', dot: true, n: 30 }, { d: 'q', n: 30 }], 0), null, 'no entra en el compas');
+});
+
 test('el puntillo suma la mitad y no entra en redonda ni semicorchea', () => {
   assert.equal(M.length({ d: 'q', dot: true }), 36);
   assert.equal(M.length({ d: 'e', tp: 1 }), 8);
@@ -532,12 +541,45 @@ test('tres corcheas seguidas ofrecen tresillo y lo aplican compactando sus lugar
   assert.deepEqual(M.selectionActions(score, refs(0, 1, 2)), ['untriplet', 'unbeam']);
 });
 
-test('seis corcheas hacen dos tresillos y se pueden deshacer', () => {
+test('la cantidad de figuras elegidas decide el grupo: dosillo a nonillo', () => {
+  const normal = { 2: 3, 3: 2, 4: 3, 5: 4, 6: 4, 7: 4, 8: 6, 9: 8 };
+  Object.keys(normal).forEach((key) => {
+    const n = Number(key);
+    const name = n === 3 ? 'triplet' : 'tuplet' + n;
+    const score = M.emptyScore();
+    score.rows[0][0] = Array.from({ length: n }, (_, k) => ({ d: 's', n: 30 + k, at: k * 6 }));
+    assert.ok(M.selectionActions(score, refs(...score.rows[0][0].keys())).includes(name), name);
+    assert.ok(M.applySelection(score, refs(...score.rows[0][0].keys()), name));
+    const evs = score.rows[0][0];
+    assert.ok(evs.every((ev) => ev.tp === 1 && (n === 3 ? ev.tn === undefined : ev.tn === n)));
+    assert.ok(Math.abs(M.measureLength(evs) - 6 * normal[n]) < 1e-9, 'ocupan ' + normal[n] + ' semicorcheas');
+    assert.deepEqual(M.sanitize(M.clone(score)), score);
+    const xml = M.toMusicXml(score);
+    assert.equal((xml.match(new RegExp('<actual-notes>' + n + '</actual-notes><normal-notes>' + normal[n] + '</normal-notes>', 'g')) || []).length, n);
+    const total = [...xml.split('<measure ')[1].matchAll(/<duration>(\d+)<\/duration>/g)].reduce((sum, m) => sum + Number(m[1]), 0);
+    assert.ok(Number.isInteger(total));
+    assert.ok(M.selectionActions(score, refs(...evs.keys())).includes('un' + name), 'un' + name);
+    assert.ok(M.applySelection(score, refs(...evs.keys()), 'un' + name));
+    assert.ok(evs.every((ev) => ev.tp === undefined && ev.tn === undefined));
+  });
+  const ten = M.emptyScore();
+  ten.rows[0][0] = Array.from({ length: 10 }, (_, k) => ({ d: 's', n: 30, at: k * 6 }));
+  assert.ok(!M.selectionActions(ten, refs(...ten.rows[0][0].keys())).some((a) => /tuplet|triplet/.test(a)));
+  assert.ok(!M.selectionActions(ten, refs(0)).some((a) => /tuplet|triplet/.test(a)));
+});
+
+test('seis corcheas hacen un sextillo y se puede deshacer; dos tresillos se eligen de a tres', () => {
   const score = triplets(30, 31, 32, 33, 34, 35);
-  assert.ok(M.applySelection(score, refs(0, 1, 2, 3, 4, 5), 'triplet'));
+  assert.ok(M.applySelection(score, refs(0, 1, 2, 3, 4, 5), 'tuplet6'));
+  assert.deepEqual(score.rows[0][0].map((ev) => ev.tn), [6, 6, 6, 6, 6, 6]);
+  assert.ok(M.applySelection(score, refs(0, 1, 2, 3, 4, 5), 'untuplet6'));
+  assert.deepEqual(score.rows[0][0], triplets(30, 31, 32, 33, 34, 35).rows[0][0]);
+  assert.ok(M.applySelection(score, refs(0, 1, 2), 'triplet'));
+  assert.ok(M.applySelection(score, refs(3, 4, 5), 'triplet'));
   assert.deepEqual(score.rows[0][0].map((ev) => ev.tp), [1, 1, 1, 2, 2, 2]);
   assert.deepEqual(M.onsets(score.rows[0][0]), [0, 8, 16, 24, 32, 40]);
-  assert.ok(M.applySelection(score, refs(0, 1, 2, 3, 4, 5), 'untriplet'));
+  assert.ok(M.applySelection(score, refs(0, 1, 2), 'untriplet'));
+  assert.ok(M.applySelection(score, refs(3, 4, 5), 'untriplet'));
   assert.deepEqual(score.rows[0][0], triplets(30, 31, 32, 33, 34, 35).rows[0][0]);
 });
 
@@ -550,6 +592,7 @@ test('no hay tresillo con duraciones mezcladas, con huecos ni fuera de a tres', 
   assert.ok(M.selectionActions(gap, refs(0, 1, 2)).includes('triplet'), 'un hueco en at no separa: en orden van seguidas');
   const four = triplets(30, 31, 32, 33);
   assert.ok(!M.selectionActions(four, refs(0, 1, 2, 3)).includes('triplet'));
+  assert.ok(M.selectionActions(four, refs(0, 1, 2, 3)).includes('tuplet4'));
   const across = triplets(30, 31, 32);
   across.rows[0][1] = [{ d: 'e', n: 30, at: 0 }];
   assert.ok(!M.selectionActions(across, [{ mi: 0, i: 1 }, { mi: 0, i: 2 }, { mi: 1, i: 0 }]).includes('triplet'));
@@ -605,8 +648,8 @@ test('el barrado manual une corcheas de pulsos distintos y separa las unidas', (
   score.rows[0][0] = [{ d: 'e', rest: true, at: 0 }, { d: 'e', n: 30, at: 12 }, { d: 'e', n: 31, at: 24 }, { d: 'e', n: 32, at: 36 }];
   const beams = () => [...M.toMusicXml(score).split('<measure ')[1].matchAll(/<beam number="1">(\w+)<\/beam>/g)].map((m) => m[1]);
   assert.deepEqual(beams(), ['begin', 'end']);
-  assert.deepEqual(M.selectionActions(score, refs(1, 2)), ['beam']);
-  assert.deepEqual(M.selectionActions(score, refs(2, 3)), ['unbeam']);
+  assert.deepEqual(M.selectionActions(score, refs(1, 2)), ['tuplet2', 'beam']);
+  assert.deepEqual(M.selectionActions(score, refs(2, 3)), ['tuplet2', 'unbeam']);
   assert.deepEqual(M.selectionActions(score, refs(1, 2, 3)), ['triplet', 'beam', 'unbeam']);
   M.applySelection(score, refs(1, 2), 'beam');
   assert.deepEqual(beams(), ['begin', 'continue', 'end']);
@@ -626,7 +669,7 @@ test('no se barran silencios, negras ni figuras separadas', () => {
   score.rows[0][0] = [{ d: 'e', n: 30, at: 0 }, { d: 'q', n: 31, at: 12 }, { d: 'e', n: 32, at: 36 }, { d: 'e', rest: true, at: 48 }];
   assert.deepEqual(M.selectionActions(score, refs(0, 1)), []);
   assert.deepEqual(M.selectionActions(score, refs(0, 2)), []);
-  assert.deepEqual(M.selectionActions(score, refs(2, 3)), []);
+  assert.deepEqual(M.selectionActions(score, refs(2, 3)), ['tuplet2'], 'un silencio no se barra, pero si forma dosillo');
 });
 
 test('sequence ordena las figuras por lectura', () => {
@@ -985,7 +1028,7 @@ test('el puntillo se cuenta en orden: la figura sigue donde empieza y lo que vie
   assert.equal(M.dotStart([{ d: 'q', n: 31, at: 0 }, { d: 'h', n: 30, at: 48 }], 1), 24);
   assert.equal(M.dotStart([{ d: 'q', n: 31, at: 0 }, { d: 'q', n: 31, at: 24 }, { d: 'h', n: 30, at: 48 }], 2), null);
   const plan = M.dotPlan([{ d: 'q', n: 31, at: 0 }, { d: 'q', n: 30, at: 24 }, { d: 'q', n: 32, at: 48 }], 0);
-  assert.deepEqual(plan, { start: 0, moves: [] });
+  assert.deepEqual(plan, { start: 0, moves: [], dot: true });
 });
 
 test('en 6/8 el puntillo de una voz no depende de donde cayeron las figuras de la otra', () => {
@@ -997,7 +1040,7 @@ test('en 6/8 el puntillo de una voz no depende de donde cayeron las figuras de l
   const loose = [{ d: 'h', n: 25, at: 24 }, { d: 'q', n: 34, dot: true, at: 24 }, { d: 'q', n: 37, at: 48 }];
   // Sin voz guardada: la blanca grave es la voz 2 y las negras agudas la voz 1, en orden: 0 y 36.
   assert.deepEqual(M.onsets(loose), [0, 0, 36]);
-  assert.deepEqual(M.dotPlan(loose, 2, score), { start: 36, moves: [] });
+  assert.deepEqual(M.dotPlan(loose, 2, score), { start: 36, moves: [], dot: true });
   const three = [{ d: 'h', n: 29, at: 0, v: 1, dot: true }, { d: 'q', n: 35, dot: true, at: 0, v: 2 }, { d: 'q', n: 38, at: 48, v: 3 }];
   assert.equal(M.dotStart(three, 2, score), 0, 'la voz 3 empieza con esa negra: no hay hueco antes');
 });
@@ -1299,6 +1342,17 @@ test('endings cover the whole visible measure after deleting an internal barline
   }
 });
 
+test('a dead note exports an x notehead and survives sanitizing; rests drop it', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ d: 'q', n: 30, dead: true }, { d: 'q', n: 31 }, { d: 'q', rest: true, dead: true }];
+  const clean = M.sanitize(score);
+  const [dead, plain, rest] = clean.rows[0][0];
+  assert.equal(dead.dead, true);
+  assert.equal(plain.dead, undefined);
+  assert.equal(rest.dead, undefined);
+  assert.equal(M.toMusicXml(clean).match(/<notehead>x<\/notehead>/g).length, 1);
+});
+
 test('a restored or forward repeat bar bounds endings at the visible boundary', () => {
   const score = M.emptyScore();
   score.navigation = { 2: { first: true } };
@@ -1309,4 +1363,50 @@ test('a restored or forward repeat bar bounds endings at the visible boundary', 
   assert.equal(M.navigationEndings(score)[0].first, 1);
   M.setBarline(score, 1, 'double');
   assert.equal(M.navigationEndings(score)[0].first, 2);
+});
+
+test('insertar un compas corre los siguientes con sus barras, armaduras, tablatura y figuras', () => {
+  const score = M.emptyScore();
+  score.rows[0][1] = [{ d: 'q', n: 30 }];
+  score.barlines = { 1: { double: true } };
+  score.keys = { 2: 2 };
+  score.tabs = { '1:0': [3, null, null, null, null, null] };
+  assert.ok(M.insertMeasure(score, 1));
+  assert.deepEqual(score.rows.map((row) => row.length), [4, 4, 4, 1]);
+  assert.deepEqual(M.measures(score)[1], []);
+  assert.deepEqual(M.measures(score)[2], [{ d: 'q', n: 30 }]);
+  assert.deepEqual(score.barlines, { 2: { double: true } });
+  assert.deepEqual(score.keys, { 3: 2 });
+  assert.deepEqual(Object.keys(score.tabs), ['2:0']);
+});
+
+test('insertar al principio o al final agrega un compas vacio y rechaza posiciones invalidas', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ d: 'q', n: 30 }];
+  assert.ok(M.insertMeasure(score, 0));
+  assert.deepEqual(M.measures(score)[0], []);
+  assert.deepEqual(M.measures(score)[1], [{ d: 'q', n: 30 }]);
+  const total = M.measures(score).length;
+  assert.ok(M.insertMeasure(score, total));
+  assert.equal(M.measures(score).length, total + 1);
+  assert.ok(!M.insertMeasure(score, -1));
+  assert.ok(!M.insertMeasure(score, M.measures(score).length + 1));
+  assert.ok(!M.insertMeasure(score, 1.5));
+});
+
+test('insertar un compas en un renglon con espacio lo hace crecer sin mover los demas renglones', () => {
+  const score = M.emptyScore();
+  assert.ok(M.removeMeasure(score, 0));
+  assert.ok(M.insertMeasure(score, 1));
+  assert.deepEqual(score.rows.map((row) => row.length), [4, 4, 4]);
+});
+
+test('insertar dentro de una cejilla la corta antes del compas nuevo', () => {
+  const score = M.emptyScore();
+  assert.ok(M.setBarre(score, 0, 0, 2, undefined, 2));
+  assert.ok(M.insertMeasure(score, 2));
+  assert.equal(score.barres[0].span, 1);
+  assert.equal(score.barres[0].to, undefined);
+  assert.ok(M.insertMeasure(score, 1));
+  assert.equal(score.barres[0].span, undefined);
 });
