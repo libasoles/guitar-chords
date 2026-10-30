@@ -82,6 +82,13 @@ const SUITES = {
       /^test\/score-editor\./,
     ],
   },
+  'score-document-tabs': {
+    build: 'site',
+    paths: [
+      /^src\/site\/score-(editor|model)\./,
+      /^test\/score-document-tabs\./,
+    ],
+  },
   'score-navigation': {
     build: 'site',
     paths: [

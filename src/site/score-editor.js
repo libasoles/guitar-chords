@@ -167,6 +167,7 @@
           }
         });
         wrap.appendChild(tabTitle);
+        wrap.dataset.index = index;
         tabsBar.insertBefore(wrap, add);
       } else {
         const button = document.createElement('button');
@@ -176,10 +177,84 @@
         button.setAttribute('aria-selected', 'false');
         button.textContent = tabLabel(one, index);
         button.addEventListener('click', () => switchTo(index));
+        button.dataset.index = index;
         tabsBar.insertBefore(button, add);
       }
     });
   }
+
+  // Keep document order and undo histories together, without changing the open score.
+  let tabDrag = null;
+  let suppressTabClick = false;
+  function finishTabDrag(commit) {
+    if (!tabDrag) return;
+    const { from, before, moving } = tabDrag;
+    tabDrag = null;
+    tabsBar.classList.remove('is-reordering');
+    tabsBar.querySelectorAll('.is-dragging, .drop-before, .drop-after').forEach((node) => {
+      node.classList.remove('is-dragging', 'drop-before', 'drop-after');
+    });
+    if (!moving) return;
+    suppressTabClick = true;
+    setTimeout(() => { suppressTabClick = false; }, 0);
+    if (!commit || before === null) return;
+    const to = before > from ? before - 1 : before;
+    if (to === from) return;
+    docs[active] = score;
+    histories[active] = history;
+    const order = docs.map((_, index) => index);
+    order.splice(to, 0, order.splice(from, 1)[0]);
+    const reorderedDocs = order.map((index) => docs[index]);
+    const reorderedHistories = order.map((index) => histories[index]);
+    active = order.indexOf(active);
+    docs.splice(0, docs.length, ...reorderedDocs);
+    histories.splice(0, histories.length, ...reorderedHistories);
+    save();
+    renderTabs();
+  }
+
+  tabsBar.addEventListener('dragstart', (event) => event.preventDefault());
+  tabsBar.addEventListener('click', (event) => {
+    if (suppressTabClick) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }, true);
+  tabsBar.addEventListener('pointerdown', (event) => {
+    const tab = event.target.closest('.score-doc-tab');
+    if (!tab || event.button !== 0 || !event.isPrimary || docs.length < 2) return;
+    tabDrag = { from: Number(tab.dataset.index), x: event.clientX, y: event.clientY,
+      pointerId: event.pointerId, tab, moving: false, before: null };
+  });
+  window.addEventListener('pointermove', (event) => {
+    if (!tabDrag || event.pointerId !== tabDrag.pointerId) return;
+    if (!tabDrag.moving && Math.hypot(event.clientX - tabDrag.x, event.clientY - tabDrag.y) < 6) return;
+    tabDrag.moving = true;
+    event.preventDefault();
+    tabsBar.classList.add('is-reordering');
+    tabDrag.tab.classList.add('is-dragging');
+    tabsBar.querySelectorAll('.drop-before, .drop-after').forEach((node) => node.classList.remove('drop-before', 'drop-after'));
+    tabDrag.before = null;
+    const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('.score-doc-tab, #scoreNewTab');
+    if (!target || !tabsBar.contains(target)) return;
+    if (target.id === 'scoreNewTab') {
+      tabDrag.before = docs.length;
+      target.classList.add('drop-before');
+    } else {
+      const box = target.getBoundingClientRect();
+      const after = event.clientX >= box.left + box.width / 2;
+      tabDrag.before = Number(target.dataset.index) + (after ? 1 : 0);
+      target.classList.add(after ? 'drop-after' : 'drop-before');
+    }
+  }, { passive: false });
+  window.addEventListener('pointerup', (event) => {
+    if (tabDrag && event.pointerId === tabDrag.pointerId) finishTabDrag(true);
+  });
+  window.addEventListener('pointercancel', () => finishTabDrag(false));
+  window.addEventListener('blur', () => finishTabDrag(false));
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') finishTabDrag(false);
+  });
 
   function switchTo(index) {
     if (index === active || !docs[index]) return;

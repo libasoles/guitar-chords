@@ -184,6 +184,26 @@ body.score-body {
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
+  touch-action: none;
+}
+
+.score-doc-tabs.is-reordering,
+.score-doc-tabs.is-reordering * {
+  cursor: grabbing;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.score-doc-tab.is-dragging {
+  opacity: 0.45;
+}
+
+.score-doc-tabs .drop-before {
+  box-shadow: inset 3px 0 var(--ink);
+}
+
+.score-doc-tabs .drop-after {
+  box-shadow: inset -3px 0 var(--ink);
 }
 
 .score-doc-tab:hover {
