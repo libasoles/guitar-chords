@@ -45,6 +45,7 @@
     }
   });
   let toolkit = null;
+  let selectedMeasure = null; // destino de pegar, independiente de las figuras
   let selected = null; // { mi, i }: la figura principal
   let group = []; // con dos o mas figuras elegidas, todas (incluida la principal)
   let drag = null;
@@ -187,6 +188,7 @@
     score = docs[active];
     history = histories[active];
     if (typeof score.title !== 'string') score.title = '';
+    clearBarSelection();
     selected = null;
     group = [];
     save();
@@ -207,6 +209,7 @@
   // ---- edicion ------------------------------------------------------------
 
   function change(mutate) {
+    clearBarSelection();
     const before = M.clone(score);
     if (mutate() === false) return false;
     // `at` queda siempre igual al tiempo que se ve (sin huecos): asi los clics y arrastres siguientes se ubican en el orden.
@@ -224,6 +227,7 @@
     // La tablatura no depende de las notas: deshacer no la toca.
     ['showTabs', 'tabs'].forEach((key) => { if (score[key]) restored[key] = score[key]; else delete restored[key]; });
     score = Object.assign(restored, { title: score.title }, score.author ? { author: score.author } : {});
+    clearBarSelection();
     selected = null;
     group = [];
     save();
@@ -241,6 +245,7 @@
   }
 
   function setPicks(list) {
+    if (list.length) clearBarSelection();
     selected = list.length ? list[list.length - 1] : null;
     group = list.length > 1 ? list : [];
     markSelected();
@@ -584,6 +589,7 @@
     liftBarreMarks(svg);
     measureLayout();
     mountBarlineButtons();
+    markMeasureBars();
     mountRowTools();
     mountBarreInputs();
     mountTabs();
@@ -744,7 +750,8 @@
   }
 
   function clearBarSelection() {
-    stage.querySelector('.score-barline-remove')?.remove();
+    selectedMeasure = null;
+    stage.querySelectorAll('.score-barline-remove').forEach((node) => node.remove());
     stage.querySelectorAll('.is-bar-selected').forEach((node) => node.classList.remove('is-bar-selected'));
     stage.querySelectorAll('.score-barline-trigger').forEach((button) => button.setAttribute('aria-pressed', 'false'));
   }
@@ -769,27 +776,32 @@
     stage.appendChild(remove);
   }
 
-  // Click en un compas sin herramienta: la x aparece sobre sus barras especiales (doble, inicio, fin).
+  // Un compas elegido es el destino del pegado; sus barras visibles muestran la X.
   function selectMeasureBars(event) {
-    const hit = [...stage.querySelectorAll('g.measure')].find((node) => {
-      const r = node.getBoundingClientRect();
-      return event.clientX >= r.left && event.clientX <= r.right && event.clientY >= r.top && event.clientY <= r.bottom;
-    });
-    if (!hit) return;
-    const mi = Number(hit.id.slice(1));
-    const bars = score.barlines || {};
-    const special = (bar, side) => bar && (side === 'start' ? bar.start : bar.double || bar.end);
-    // Izquierda: la apertura del compas o el cierre del anterior en la misma fila; derecha: su cierre.
-    const sides = [];
-    if (special(bars[mi], 'start')) sides.push([mi, 'start']);
-    else if (mi > M.rowOf(score, mi).first && special(bars[mi - 1], 'end')) sides.push([mi - 1, 'end']);
-    if (special(bars[mi], 'end')) sides.push([mi, 'end']);
-    if (!sides.length) return;
     const origin = stage.getBoundingClientRect();
+    const mi = layout.findIndex((m) => event.clientX >= origin.left + m.left && event.clientX <= origin.left + m.right &&
+      event.clientY >= origin.top + m.lines[0] && event.clientY <= origin.top + m.lines[4]);
+    if (mi < 0) return;
     clearBarSelection();
+    selectedMeasure = mi;
+    markMeasureBars();
+  }
+
+  function markMeasureBars() {
+    const mi = selectedMeasure;
+    if (mi === null || !layout[mi]) return;
+    const sides = [];
+    if (score.barlines?.[mi]?.start) sides.push([mi, 'start']);
+    else if (mi > M.rowOf(score, mi).first) sides.push([mi - 1, 'end']);
+    sides.push([mi, 'end']);
+    const origin = stage.getBoundingClientRect();
     sides.forEach(([m, side]) => {
       const button = stage.querySelector('.score-barline-trigger[data-measure="' + m + '"][data-side="' + side + '"]');
       if (!button) return;
+      const nodes = stage.querySelector('[id="m' + m + '"]').querySelectorAll('g.barLine');
+      const node = side === 'start' ? nodes[0] : nodes[nodes.length - 1];
+      node?.classList.add('is-bar-selected');
+      button.setAttribute('aria-pressed', 'true');
       const box = button.getBoundingClientRect();
       showBarRemove(m, side, box.left + box.width / 2 - origin.left, box.top - origin.top, button);
     });
@@ -1737,6 +1749,36 @@
       event.preventDefault();
       undo();
     }
+  });
+
+  const clipboardType = 'application/x-guitar-score-selection';
+  const editingText = (event) => event.target.closest('input, textarea, select, [contenteditable], ascii-tabs');
+  document.addEventListener('copy', (event) => {
+    if (editingText(event) || !event.clipboardData) return;
+    const fragment = M.copySelection(score, picks());
+    if (!fragment) return;
+    event.preventDefault();
+    const text = JSON.stringify(fragment);
+    event.clipboardData.setData(clipboardType, text);
+    event.clipboardData.setData('text/plain', text);
+  });
+  document.addEventListener('paste', (event) => {
+    if (editingText(event) || selectedMeasure === null || !event.clipboardData) return;
+    let fragment;
+    try {
+      fragment = JSON.parse(event.clipboardData.getData(clipboardType) || event.clipboardData.getData('text/plain'));
+    } catch (error) { return; }
+    if (fragment?.type !== 'guitar-score-selection' || fragment.version !== 1) return;
+    event.preventDefault();
+    const trial = M.clone(score);
+    const refs = M.pasteSelection(trial, fragment, selectedMeasure);
+    if (!refs) return say(t.full);
+    change(() => {
+      Object.assign(score, trial);
+      selected = refs[refs.length - 1];
+      group = refs.length > 1 ? refs : [];
+    });
+    stage.focus({ preventScroll: true });
   });
 
   // ---- selector de compas -------------------------------------------------

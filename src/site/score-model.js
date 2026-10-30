@@ -278,6 +278,54 @@
     return insertMany(measure, [[ev, at]])[0];
   }
 
+  // Un fragmento conserva los compases intermedios y solo las figuras elegidas.
+  function copySelection(score, refs) {
+    const all = measures(score);
+    const chosen = refs.filter((r) => all[r.mi]?.[r.i]);
+    if (!chosen.length) return null;
+    const first = Math.min(...chosen.map((r) => r.mi));
+    const last = Math.max(...chosen.map((r) => r.mi));
+    const fragment = Array.from({ length: last - first + 1 }, () => []);
+    all.forEach((measure, mi) => measure.forEach((ev, i) => {
+      if (chosen.some((r) => r.mi === mi && r.i === i)) fragment[mi - first].push(clone(ev));
+    }));
+    return { type: 'guitar-score-selection', version: 1, meter: meterOf(score), measures: fragment };
+  }
+
+  // Prepara todo antes de escribir: un pegado que no entra no cambia la partitura.
+  function pasteSelection(score, fragment, mi) {
+    if (fragment?.type !== 'guitar-score-selection' || fragment.version !== 1 ||
+      !Number.isInteger(mi) || mi < 0 || mi >= measures(score).length ||
+      !Array.isArray(fragment.measures) || !fragment.measures.length ||
+      !fragment.measures.every(Array.isArray)) return null;
+    const clean = sanitize({ meter: fragment.meter, rows: [fragment.measures] }).rows[0];
+    if (clean.some((m, i) => m.length !== fragment.measures[i].length) || !clean.some((m) => m.length)) return null;
+    const trial = clone(score);
+    while (measures(trial).length < mi + clean.length) trial.rows.push(emptyRow());
+    const all = measures(trial);
+    const refs = [];
+    for (let offset = 0; offset < clean.length; offset += 1) {
+      const destination = all[mi + offset];
+      const starts = onsets(destination);
+      if (clean[offset].some((ev) => !ev.rest && destination.some((other, i) =>
+        !other.rest && starts[i] === ev.at && other.n === ev.n && other.acc === ev.acc))) return null;
+      const ids = new Map();
+      let nextId = Math.max(0, ...destination.map((ev) => ev.tp || 0));
+      const list = clean[offset].map((ev) => {
+        if (ev.tp) {
+          if (!ids.has(ev.tp)) ids.set(ev.tp, ++nextId);
+          ev.tp = ids.get(ev.tp);
+        }
+        return [ev, ev.at];
+      });
+      const indices = insertMany(destination, list);
+      if (measureLength(destination) > capacity(trial, mi + offset)) return null;
+      indices.forEach((i) => refs.push({ mi: mi + offset, i }));
+    }
+    score.rows = trial.rows;
+    return refs;
+  }
+
   function clampPitch(n) {
     return Math.max(LOWEST, Math.min(HIGHEST, n));
   }
@@ -1347,7 +1395,7 @@
 
   return {
     voicesText, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
+    copySelection, pasteSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
     meterOf, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };

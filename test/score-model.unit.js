@@ -1094,3 +1094,40 @@ test('voicesText nombra las figuras de cada compas por voz', () => {
   assert.equal(M.voicesText(score), 'voz 1: negra, negra, blanca | doble corchea, doble corchea, blanca | tresillo de corcheas, tresillo de corcheas, semicorchea, silencio de corchea, fusa | triple corchea, silencio de corchea, blanca');
   assert.equal(M.voicesText(M.emptyScore()), '');
 });
+
+test('copiar y pegar conserva figuras, compases intermedios y datos musicales', () => {
+  const score = M.emptyScore();
+  const phrase = [{ d: 'e', n: 30, at: 0, tp: 1, beam: 'join', acc: '#' }, { d: 'e', n: 31, at: 8, tp: 1 }, { d: 'e', rest: true, at: 16, tp: 1 }];
+  score.rows[0][0] = phrase;
+  score.rows[0][2] = [{ d: 'q', n: 33, at: 0, dot: true }];
+  const before = M.clone(score);
+  const fragment = M.copySelection(score, [{ mi: 2, i: 0 }, { mi: 0, i: 2 }, { mi: 0, i: 0 }, { mi: 0, i: 1 }]);
+  const refs = M.pasteSelection(score, fragment, 11);
+  assert.deepEqual(M.measures(score).slice(11, 14), [phrase, [], before.rows[0][2]]);
+  assert.deepEqual(refs, [{ mi: 11, i: 0 }, { mi: 11, i: 1 }, { mi: 11, i: 2 }, { mi: 13, i: 0 }]);
+  assert.deepEqual(score.rows[0], before.rows[0], 'copiar conserva el origen');
+  M.measures(score)[11][0].n++;
+  assert.equal(fragment.measures[0][0].n, 30, 'cada pegado es independiente');
+});
+
+test('pegar sin espacio falla completo, sin crear renglones ni cambiar compases', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ d: 'w', n: 30, v: 1 }];
+  score.rows[0][1] = [{ d: 'q', n: 32 }];
+  score.measureDurations = { 11: 48 };
+  const before = M.clone(score);
+  const fragment = M.copySelection(score, [{ mi: 0, i: 0 }, { mi: 1, i: 0 }]);
+  assert.equal(M.pasteSelection(score, fragment, 11), null);
+  assert.deepEqual(score, before);
+  assert.equal(M.pasteSelection(score, { ...fragment, measures: [[{ d: 'invalid' }]] }, 1), null);
+  assert.deepEqual(score, before);
+});
+
+test('pegar distingue los tresillos copiados de los existentes', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [0, 1, 2].map(i => ({ d: 'e', n: 30 + i, at: i * 8, tp: 1 }));
+  const fragment = M.copySelection(score, [0, 1, 2].map(i => ({ mi: 0, i })));
+  fragment.measures[0].forEach(ev => { ev.n += 7; });
+  assert.equal(M.pasteSelection(score, fragment, 0).length, 3);
+  assert.deepEqual([...new Set(score.rows[0][0].map(ev => ev.tp))], [1, 2]);
+});

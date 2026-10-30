@@ -213,6 +213,53 @@ async function run() {
     await page.keyboard.press('Delete');
     assert.deepEqual((await events(page, 0)).map((ev) => ev.n), [32]);
 
+    // Copiar una seleccion de dos compases, elegir destino y pegar con el teclado.
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+    await seed(page, [[{ d: 'e', n: 30, at: 0 }, { d: 'e', n: 31, at: 12 }], [{ d: 'q', n: 32, at: 0 }], [], []]);
+    const original = [await events(page, 0), await events(page, 1)];
+    await shiftSelect(page, ['e0-0', 'e0-1', 'e1-0']);
+    await page.keyboard.press('ControlOrMeta+c');
+    const selectBar = async mi => {
+      const lines = await page.locator('#scoreStage g.measure').nth(mi).locator('g.staff > path').evaluateAll(nodes => nodes.slice(0, 5).map(n => { const r = n.getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width }; }));
+      await page.mouse.click(lines[0].x + lines[0].width / 2, (lines[1].y + lines[2].y) / 2);
+    };
+    await selectBar(2);
+    assert.equal(await page.locator('.score-barline-trigger[aria-pressed="true"]').count(), 2, 'ambas barras indican el compas elegido');
+    assert.equal(await page.locator('.is-bar-selected').count(), 2);
+    assert.equal(await page.locator('.score-barline-remove').count(), 2, 'cada barra ofrece su X');
+    await page.keyboard.press('ControlOrMeta+v');
+    await page.waitForFunction(() => ScoreModel.measures(scoreEditor.score)[3].length === 1);
+    assert.deepEqual(await events(page, 2), original[0]);
+    assert.deepEqual(await events(page, 3), original[1]);
+    assert.deepEqual([await events(page, 0), await events(page, 1)], original, 'el origen queda intacto');
+    assert.equal(await page.locator('#scoreStage .is-selected').count(), 3, 'las notas pegadas quedan seleccionadas');
+    assert.equal(await page.locator('.score-barline-remove').count(), 0);
+    assert.equal(await page.locator('.is-bar-selected').count(), 0);
+    await page.keyboard.press('ControlOrMeta+z');
+    assert.deepEqual(await events(page, 2), []);
+    assert.deepEqual(await events(page, 3), []);
+    // El portapapeles sigue disponible y se crean compases si el grupo supera el final.
+    await selectBar(11);
+    await page.keyboard.press('ControlOrMeta+v');
+    await page.waitForFunction(() => ScoreModel.measures(scoreEditor.score).length > 12);
+    assert.deepEqual(await events(page, 11), original[0]);
+    assert.deepEqual(await events(page, 12), original[1]);
+    assert.equal(await page.locator('#scoreStage .is-selected').count(), 3);
+    await page.keyboard.press('ControlOrMeta+z');
+    assert.equal(await page.evaluate(() => ScoreModel.measures(scoreEditor.score).length), 12);
+    // Esc y un click fuera cancelan el destino del pegado.
+    await selectBar(2);
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('.score-barline-remove').count(), 0);
+    await selectBar(2);
+    await page.locator('#scoreTitle').click();
+    assert.equal(await page.locator('.is-bar-selected').count(), 0);
+    await page.locator('#scoreTitle').fill('Titulo de prueba');
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.press('ControlOrMeta+c');
+    await page.keyboard.press('ControlOrMeta+v');
+    assert.equal(await page.locator('#scoreTitle').inputValue(), 'Titulo de prueba', 'copiar y pegar texto sigue siendo nativo');
+
     assert.deepEqual(errors, []);
     console.log('score-selection e2e: OK');
   } finally {
