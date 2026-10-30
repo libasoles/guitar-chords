@@ -439,7 +439,7 @@
   }
 
   function isModifier(item) {
-    return item && (item.kind === 'dot' || item.kind === 'acc');
+    return item && (item.kind === 'dot' || item.kind === 'acc' || item.kind === 'dead');
   }
 
   function deactivateTool() {
@@ -469,7 +469,7 @@
     if (!ev || (ev.d === item.d && !!ev.rest === (item.kind === 'rest'))) return;
     const replacement = Object.assign(M.clone(ev), { d: item.d });
     delete replacement.tp;
-    if (item.kind === 'rest') { replacement.rest = true; delete replacement.n; delete replacement.acc; }
+    if (item.kind === 'rest') { replacement.rest = true; delete replacement.n; delete replacement.acc; delete replacement.dead; }
     else { delete replacement.rest; replacement.n = ev.rest ? M.bottomLine(score, selected.mi) : ev.n; }
     if (item.d === 'w' || item.d === 's' || item.d === 'f') delete replacement.dot;
     else if (replacement.dot === 2 && item.d !== 'h' && item.d !== 'q') replacement.dot = true;
@@ -496,6 +496,7 @@
       return change(() => { M.settle(measure); ev.dot = plan.dot; moves.forEach(([o, at]) => { o.at = at; }); });
     }
     if (ev.rest) return;
+    if (item.kind === 'dead') return change(() => { if (ev.dead) delete ev.dead; else ev.dead = true; });
     change(() => {
       // Una vez: simple; dos: doble (## o bb); tres: sin alteracion. El becuadro solo se quita.
       const double = { '#': '##', b: 'bb' }[item.acc];
@@ -2524,6 +2525,7 @@
     'bar:start': '<path d="M10 4v24" stroke="currentColor" stroke-width="3.5"/><path d="M15 4v24" stroke="currentColor" stroke-width="1.6"/><circle cx="21" cy="12" r="1.8"/><circle cx="21" cy="20" r="1.8"/>',
     'bar:end': '<path d="M15 4v24" stroke="currentColor" stroke-width="1.6"/><path d="M20 4v24" stroke="currentColor" stroke-width="3.5"/><circle cx="9" cy="12" r="1.8"/><circle cx="9" cy="20" r="1.8"/>',
     barre: '<text x="3" y="18" font-size="16" font-weight="700" font-family="serif">C</text><path d="M3 24h24" stroke="currentColor" stroke-width="1.6" stroke-dasharray="3 2.500" fill="none"/>',
+    dead: '<path d="M8.500 19.500l11 11M19.500 19.500l-11 11" stroke="currentColor" stroke-width="2.200" fill="none"/><path d="M20.3 22.8V-12.3" stroke="currentColor" stroke-width="1.5" fill="none"/>',
     dot: '<circle cx="15" cy="15" r="3.200"/>',
     'acc:#': '<path d="M11 6v20M18 4v20M7.500 12.500l14-3.500M7.500 21l14-3.500" stroke="currentColor" stroke-width="1.800" fill="none"/>',
     'acc:b': '<path d="M10 4v22c4-2 8-5 8-8.500 0-2.500-2-3.500-4-3.500-1.500 0-3 .800-4 2" stroke="currentColor" stroke-width="1.800" fill="none" stroke-linejoin="round"/>',
@@ -2535,13 +2537,14 @@
     if (item.kind === 'bar') return 'bar:' + item.bar;
     if (item.kind === 'barre') return 'barre';
     if (item.kind === 'note' || item.kind === 'rest') return item.kind + ':' + item.d;
+    if (item.kind === 'dead') return 'dead';
     return item.kind === 'dot' ? 'dot' : 'acc:' + item.acc;
   }
 
   function glyphFor(item) {
     const svg = document.createElementNS(SVG_NS, 'svg');
     // Las banderas superan x=30 y la fusa sube por encima de y=-16.
-    const tall = item.kind === 'note' && item.d !== 'w';
+    const tall = (item.kind === 'note' && item.d !== 'w') || item.kind === 'dead';
     // Los silencios usan la escala de la partitura; la fusa necesita espacio vertical extra.
     const rest = item.kind === 'rest';
     svg.setAttribute('viewBox', tall ? '0 -24 36 56' : rest ? '0 -12 30 56' : '0 0 30 32');
@@ -2562,6 +2565,7 @@
     { kind: 'note', d: 'q', key: '4', label: t.quarter },
     { kind: 'note', d: 'h', key: '5', label: t.half },
     { kind: 'note', d: 'w', key: '6', label: t.whole },
+    { kind: 'dead', key: t.shortcuts.dead, label: t.dead },
     null,
     { kind: 'rest', d: 'f', key: 'q', code: 'KeyQ', label: t.restThirtySecond },
     { kind: 'rest', d: 's', key: 'w', code: 'KeyW', label: t.restSixteenth },

@@ -17,6 +17,7 @@
      `sanitize` asientan cada compas, asi que en una partitura guardada `at` coincide con el tiempo que se ve.
    - `v`: voz guardada, 1 = la mas aguda. Opcional: sin `v` la voz sale del registro (ver abajo).
    - `acc` (# b n), `tie`, `slur`, `beam` ('join' | 'break'): alteracion, ligaduras y barrado manual.
+   - `dead`: nota muerta (cabeza en X); solo en notas, no en silencios.
 
    Tiempo y voces (`arrange`): lo que importa es el ORDEN de las figuras, no donde se dibujan.
    - Voces: una figura con `v` va a esa voz. Hacen falta tantas voces como la mayor `v`, o como figuras que no forman
@@ -1227,6 +1228,7 @@
           if (Number.isInteger(raw.tp) && raw.tp > 0 && TRIPLETABLE.includes(raw.d)) ev.tp = raw.tp;
           else if (raw.dot && raw.d !== 'w' && raw.d !== 's' && raw.d !== 'f') ev.dot = raw.dot === 2 && DOUBLE_DOTTABLE.includes(raw.d) ? 2 : true;
           if (!ev.rest && ACCIDENTALS[raw.acc]) ev.acc = raw.acc;
+          if (!ev.rest && raw.dead === true) ev.dead = true;
           if (!ev.rest && raw.tie === true) ev.tie = true;
           else if (!ev.rest && raw.slur === true) ev.slur = true;
           if (Number.isInteger(raw.v) && raw.v >= 1 && raw.v <= MAX_VOICE) ev.v = raw.v;
@@ -1695,6 +1697,7 @@
     if (!ev.rest && ev.acc) xml += `<accidental>${ACCIDENTALS[ev.acc].name}</accidental>`;
     if (ev.tp) xml += '<time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes></time-modification>';
     if (!ev.rest && stem) xml += `<stem>${stem}</stem>`;
+    if (!ev.rest && ev.dead) xml += '<notehead>x</notehead>';
     if (beams) Object.keys(beams).forEach((level) => { xml += `<beam number="${level}">${beams[level]}</beam>`; });
     const marks = ties.map((type) => `<tied type="${type}"/>`).concat(slurs.map((type) => `<slur type="${type}" number="1"/>`));
     if (tuplet) (tuplet === 'both' ? ['start', 'stop'] : [tuplet]).forEach((type) => { marks.push(`<tuplet type="${type}"/>`); });

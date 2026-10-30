@@ -728,11 +728,13 @@
     "restThirtySecond": "Thirty-second rest",
     "shortcuts": {
       "dot": "d",
+      "dead": "x",
       "sharp": "s",
       "flat": "f",
       "natural": "n"
     },
     "dot": "Dot",
+    "dead": "Dead note",
     "sharp": "Sharp",
     "flat": "Flat",
     "natural": "Natural",

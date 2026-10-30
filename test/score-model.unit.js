@@ -1308,6 +1308,17 @@ test('endings cover the whole visible measure after deleting an internal barline
   }
 });
 
+test('a dead note exports an x notehead and survives sanitizing; rests drop it', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ d: 'q', n: 30, dead: true }, { d: 'q', n: 31 }, { d: 'q', rest: true, dead: true }];
+  const clean = M.sanitize(score);
+  const [dead, plain, rest] = clean.rows[0][0];
+  assert.equal(dead.dead, true);
+  assert.equal(plain.dead, undefined);
+  assert.equal(rest.dead, undefined);
+  assert.equal(M.toMusicXml(clean).match(/<notehead>x<\/notehead>/g).length, 1);
+});
+
 test('a restored or forward repeat bar bounds endings at the visible boundary', () => {
   const score = M.emptyScore();
   score.navigation = { 2: { first: true } };

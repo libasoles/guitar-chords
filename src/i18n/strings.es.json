@@ -728,11 +728,13 @@
     "restThirtySecond": "Silencio de fusa",
     "shortcuts": {
       "dot": "p",
+      "dead": "x",
       "sharp": "s",
       "flat": "b",
       "natural": "c"
     },
     "dot": "Puntillo",
+    "dead": "Nota muerta",
     "sharp": "Sostenido",
     "flat": "Bemol",
     "natural": "Becuadro",
