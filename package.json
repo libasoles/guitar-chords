@@ -13,7 +13,7 @@
     "build:ext": "node scripts/build-ext.js",
     "build": "npm run build:site && npm run build:ext",
     "test:unit": "node --test test/*.unit.js",
-    "test:e2e": "node test/chord-finder.e2e.js && node test/note-finder.e2e.js && node test/tab-editor.e2e.js && node test/picking-intervals.e2e.js && node test/fifths-wheel.e2e.js && node test/partitura.e2e.js && node test/score-editor.e2e.js && node test/score-document-tabs.e2e.js && node test/score-navigation.e2e.js && node test/score-paste-signatures.e2e.js && node test/score-reorder.e2e.js && node scripts/run-e2e.js articles && node test/extensions.e2e.js",
+    "test:e2e": "node test/chord-finder.e2e.js && node test/note-finder.e2e.js && node test/tab-editor.e2e.js && node test/picking-intervals.e2e.js && node test/fifths-wheel.e2e.js && node test/partitura.e2e.js && node test/score-editor.e2e.js && node test/score-document-tabs.e2e.js && node test/score-navigation.e2e.js && node test/score-paste-signatures.e2e.js && node test/score-reorder.e2e.js && node test/score-lone-voice-move.e2e.js && node scripts/run-e2e.js articles && node test/extensions.e2e.js",
     "test": "npm run test:unit && npm run test:e2e",
     "lighthouse": "node scripts/lighthouse.js",
     "build:ext:chords": "node scripts/build-ext.js chords",

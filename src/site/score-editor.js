@@ -543,7 +543,13 @@
         .sort((a, b) => b.at - a.at || Math.abs((a.ev.n ?? target.n) - target.n) - Math.abs((b.ev.n ?? target.n) - target.n))[0];
       if (previous) moved.v = previous.ev.v;
     }
-    const spot = M.placement(others, moved, target.t, score, target.mi);
+    let spot = M.placement(others, moved, target.t, score, target.mi);
+    // La voz se eligio con el tiempo sin ajustar a la rejilla; si en esa voz no cabe, la figura conserva la suya.
+    if (!spot && moved.v !== ev.v) {
+      const kept = Object.assign({}, moved, { v: ev.v });
+      spot = M.placement(others, kept, target.t, score, target.mi);
+      if (spot) moved.v = ev.v;
+    }
     if (!spot) return say(noRoom(moved, target.mi));
     moved.d = spot.d;
     if (spot.dot) moved.dot = true;
