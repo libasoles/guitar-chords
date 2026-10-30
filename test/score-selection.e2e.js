@@ -78,7 +78,7 @@ async function run() {
       { d: 'e', n: 30, at: 0 }, { d: 'e', n: 31, at: 12 }, { d: 'e', n: 32, at: 24 }, { d: 'q', n: 33, at: 72 },
     ], [{ d: 'q', n: 33, at: 0 }]]);
     await shiftSelect(page, ['e0-0', 'e0-1']);
-    assert.deepEqual(await actions(page), ['unbeam']);
+    assert.deepEqual(await actions(page), ['tuplet2', 'unbeam']);
     await shiftSelect(page, ['e0-2']);
     assert.deepEqual(await actions(page), ['triplet', 'beam', 'unbeam']);
     assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 3);
@@ -110,6 +110,12 @@ async function run() {
     await shiftSelect(page, ['e0-0', 'e0-1', 'e0-2']);
     await page.locator('[data-action="untriplet"]').click();
     assert.deepEqual((await events(page, 0)).slice(0, 3).map((ev) => [ev.tp, ev.at]), [[undefined, 0], [undefined, 12], [undefined, 24]]);
+
+    // Elegir una figura con el teclado cambia todas las seleccionadas, no solo la ultima.
+    await seed(page, [[{ d: 'h', n: 30, at: 0 }, { d: 'h', n: 31, at: 48 }], []]);
+    await shiftSelect(page, ['e0-0', 'e0-1']);
+    await page.keyboard.press('4');
+    assert.deepEqual((await events(page, 0)).map((ev) => ev.d), ['q', 'q'], 'la figura se aplica a todo el grupo');
 
     // Arrastrar el grupo a otro compas.
     await seed(page, [[{ d: 'q', n: 30, at: 0 }, { d: 'q', n: 31, at: 24 }], []]);
@@ -177,15 +183,15 @@ async function run() {
     await page.mouse.up();
     assert.equal(await page.locator('.score-marquee').count(), 0);
     assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 2);
-    assert.deepEqual(await actions(page), ['unbeam']);
+    assert.deepEqual(await actions(page), ['tuplet2', 'unbeam']);
     // Dos corcheas de pulsos distintos: barrar; despues, separar.
     // El silencio de corchea las corre al contratiempo: sin el empezarian en 0, en el mismo pulso.
     await seed(page, [[{ d: 'e', rest: true, at: 0 }, { d: 'e', n: 30, at: 12 }, { d: 'e', n: 31, at: 24 }], []]);
     await shiftSelect(page, ['e0-1', 'e0-2']);
-    assert.deepEqual(await actions(page), ['beam']);
+    assert.deepEqual(await actions(page), ['tuplet2', 'beam']);
     await page.locator('[data-action="beam"]').click();
     assert.ok(await page.locator('#scoreStage g.beam').count());
-    assert.deepEqual(await actions(page), ['unbeam']);
+    assert.deepEqual(await actions(page), ['tuplet2', 'unbeam']);
     await page.locator('[data-action="unbeam"]').click();
     assert.equal(await page.locator('#scoreStage g.beam').count(), 0);
     await page.keyboard.press('Escape');
