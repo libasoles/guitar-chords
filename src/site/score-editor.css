@@ -183,7 +183,7 @@ body.score-body {
   font-size: 0.95rem;
   text-overflow: ellipsis;
   white-space: nowrap;
-  cursor: pointer;
+  cursor: grab;
   touch-action: none;
 }
 
@@ -218,7 +218,6 @@ body.score-body {
   color: var(--ink);
   font-size: 1rem;
   font-weight: 600;
-  cursor: text;
 }
 
 .score-doc-tab-input {
@@ -236,6 +235,7 @@ body.score-body {
   color: inherit;
   font: inherit;
   text-align: left;
+  cursor: text;
   text-overflow: ellipsis;
 }
 
