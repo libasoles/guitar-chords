@@ -46,6 +46,7 @@
   });
   let toolkit = null;
   let selectedMeasure = null; // destino de pegar, independiente de las figuras
+  let selectedNavigation = []; // { first, last, mark }: selected return signs or ending spans
   let selected = null; // { mi, i }: la figura principal
   let group = []; // con dos o mas figuras elegidas, todas (incluida la principal)
   let drag = null;
@@ -266,6 +267,7 @@
     if (typeof score.title !== 'string') score.title = '';
     clearBarSelection();
     selected = null;
+    selectedNavigation = [];
     group = [];
     save();
     renderTabs();
@@ -311,6 +313,7 @@
     score = Object.assign(restored, { title: score.title }, score.author ? { author: score.author } : {});
     clearBarSelection();
     selected = null;
+    selectedNavigation = [];
     group = [];
     save();
     render();
@@ -327,6 +330,7 @@
   }
 
   function setPicks(list) {
+    selectedNavigation = [];
     if (list.length) clearBarSelection();
     selected = list.length ? list[list.length - 1] : null;
     group = list.length > 1 ? list : [];
@@ -443,6 +447,7 @@
   }
 
   function activateTool(item) {
+    if (selectedNavigation.length) { selectedNavigation = []; markSelected(); }
     if (activeItem === item) { deactivateTool(); return; }
     activeItem = item;
     stage.classList.add('has-tool');
@@ -605,6 +610,15 @@
   }
 
   function removeSelected() {
+    if (selectedNavigation.length) {
+      change(() => {
+        selectedNavigation.forEach(({ first, last, mark }) => {
+          for (let mi = first; mi <= last; mi += 1) M.removeNavigation(score, mi, mark);
+        });
+        selectedNavigation = [];
+      });
+      return;
+    }
     const list = picks().filter(eventAt);
     if (!list.length) return;
     change(() => {
@@ -684,6 +698,7 @@
     mountKeyButtons();
     liftBarreMarks(svg);
     measureLayout();
+    mountNavigationMarks();
     mountBarlineButtons();
     markMeasureBars();
     mountRowTools();
@@ -732,8 +747,8 @@
         const scale = width / m.width;
         if (Math.abs(scale - 1) > 0.00001 || Math.abs(left - m.left) > 0.01) {
           node.setAttribute('transform', `translate(${left - scale * m.left} 0) scale(${scale} 1)`);
-          node.querySelectorAll('g.chord, g.note, g.rest, g.clef, g.keySig, g.meterSig, g.barLine, g.accid, g.dots, text').forEach((glyph) => {
-            if (glyph.parentElement.closest('.chord, .note, .rest, .clef, .keySig, .meterSig, .barLine, .accid, .dots, text')) return;
+          node.querySelectorAll('g.chord, g.note, g.rest, g.clef, g.keySig, g.meterSig, g.barLine, g.repeatMark, g.accid, g.dots, text').forEach((glyph) => {
+            if (glyph.parentElement.closest('.chord, .note, .rest, .clef, .keySig, .meterSig, .barLine, .repeatMark, .accid, .dots, text')) return;
             const stem = glyph.querySelector('.stem path');
             const box = glyph.getBBox();
             const x = stem ? stem.getBBox().x : box.x;
@@ -751,6 +766,26 @@
             path.setAttribute('d', d.replace(/-?\d*\.?\d+(?:e[-+]?\d+)?/gi, (number) => coordinate++ % 2 ? number : mapX(Number(number))));
           });
         });
+      });
+      const system = nodes[first].closest('g.system');
+      const spans = M.navigationEndings(score).filter((ending) => ending.first < first + count && ending.last >= first);
+      system.querySelectorAll('g.ending .voltaBracket').forEach((bracket, index) => {
+        const span = spans[index];
+        const line = bracket.querySelector('path');
+        if (!span || !line) return;
+        const start = Math.max(first, span.first) - first;
+        const end = Math.min(first + count - 1, span.last) - first;
+        const box = line.getBBox();
+        // Keep the clef clearance and small barline gaps at their original size.
+        const left = positions[start].left + box.x - original[start].left;
+        const right = positions[end].left + positions[end].width + box.x + box.width - original[end].left - original[end].width;
+        const bracketX = (x) => left + (x - box.x) * (right - left) / box.width;
+        bracket.querySelectorAll('path').forEach((path) => {
+          let coordinate = 0;
+          path.setAttribute('d', path.getAttribute('d').replace(/-?\d*\.?\d+(?:e[-+]?\d+)?/gi,
+            (number) => coordinate++ % 2 ? number : bracketX(Number(number))));
+        });
+        bracket.querySelectorAll('text[x]').forEach((text) => text.setAttribute('x', left + Number(text.getAttribute('x')) - box.x));
       });
     });
   }
@@ -936,6 +971,7 @@
           clearBarSelection();
           deactivateTool();
           selected = null;
+          selectedNavigation = [];
           markSelected();
           node.classList.add('is-bar-selected');
           button.setAttribute('aria-pressed', 'true');
@@ -1363,6 +1399,59 @@
     focusBarre = null;
   }
 
+  function mountNavigationMarks() {
+    const mount = (node, first, last, mark) => {
+      if (!node) return;
+      node.dataset.navigationMark = mark;
+      node.dataset.navigationFirst = first;
+      node.dataset.navigationLast = last;
+      node.classList.add('score-navigation-mark');
+      // Transparent padding makes thin brackets and small glyphs easy to pick.
+      const box = node.getBBox();
+      const scale = node.getScreenCTM()?.a || 1;
+      const pad = 5 / scale;
+      const hit = document.createElementNS(SVG_NS, 'rect');
+      hit.setAttribute('class', 'score-navigation-hit');
+      // Verovio's embedded #svg rect rule overrides stylesheet selectors.
+      hit.style.stroke = 'none';
+      hit.setAttribute('x', box.x - pad);
+      hit.setAttribute('y', box.y - pad);
+      hit.setAttribute('width', box.width + pad * 2);
+      hit.setAttribute('height', box.height + pad * 2);
+      node.prepend(hit);
+    };
+    stage.querySelectorAll('g.measure').forEach((measure) => {
+      const mi = Number(measure.id.slice(1));
+      const nav = score.navigation?.[mi];
+      if (nav?.segno) mount(measure.querySelector('g.repeatMark'), mi, mi, 'segno');
+      if (nav?.dc) mount(measure.querySelector('g.dir.dacapo'), mi, mi, 'dc');
+      if (nav?.ds) mount(measure.querySelector('g.dir.dalsegno'), mi, mi, 'ds');
+    });
+    const endings = M.navigationEndings(score);
+    stage.querySelectorAll('g.system').forEach((system) => {
+      const measures = [...system.querySelectorAll('g.measure')].map((measure) => Number(measure.id.slice(1)));
+      if (!measures.length) return;
+      const spans = endings.filter((ending) => ending.first <= measures[measures.length - 1] && ending.last >= measures[0]);
+      system.querySelectorAll('g.ending > g.voltaBracket').forEach((bracket, i) => {
+        const span = spans[i];
+        if (span) mount(bracket, span.first, span.last, span.mark);
+      });
+    });
+  }
+
+  function selectNavigation(node, event) {
+    const pick = { first: Number(node.dataset.navigationFirst), last: Number(node.dataset.navigationLast), mark: node.dataset.navigationMark };
+    const previous = event.shiftKey || event.ctrlKey || event.metaKey ? selectedNavigation.slice() : [];
+    setPicks([]);
+    clearBarSelection();
+    deactivateTool();
+    const index = previous.findIndex((p) => p.first === pick.first && p.mark === pick.mark);
+    if (index >= 0) previous.splice(index, 1); else previous.push(pick);
+    selectedNavigation = previous;
+    stage.focus({ preventScroll: true });
+    markSelected();
+  }
+
   function markSelected() {
     stage.querySelectorAll('.is-selected').forEach((n) => n.classList.remove('is-selected'));
     if (!selected) group = [];
@@ -1371,6 +1460,10 @@
       selected = null;
       group = [];
     } else nodes.forEach((node) => node.classList.add('is-selected'));
+    selectedNavigation = selectedNavigation.filter((pick) => score.navigation?.[pick.first]?.[pick.mark]);
+    stage.querySelectorAll('[data-navigation-mark]').forEach((node) => {
+      if (selectedNavigation.some((pick) => pick.first === Number(node.dataset.navigationFirst) && pick.mark === node.dataset.navigationMark)) node.classList.add('is-selected');
+    });
     updateSelectionMenu();
   }
 
@@ -1701,6 +1794,13 @@
   document.addEventListener('pointercancel', (event) => endDrag(event, true));
 
   stage.addEventListener('pointerdown', (event) => {
+    const navigation = event.target.closest('[data-navigation-mark]');
+    if (navigation) {
+      event.preventDefault();
+      event.stopPropagation();
+      selectNavigation(navigation, event);
+      return;
+    }
     if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-key-trigger, .score-barline-trigger, .score-barline-remove, .score-barre-field, .score-barre-span, .score-selection-menu')) return;
     // Las cabezas graves pueden quedar dentro de TAB: la partitura recibe
     // el gesto antes de que el componente enfoque y redibuje su celda.
@@ -1811,6 +1911,7 @@
   document.addEventListener('pointercancel', (event) => endMarquee(event, true));
 
   stage.addEventListener('dblclick', (event) => {
+    if (event.target.closest('[data-navigation-mark]')) return;
     const hit = eventUnder(event.clientX, event.clientY);
     if (!hit || eventAt(hit).rest) return;
     event.preventDefault();
@@ -1833,7 +1934,7 @@
   document.addEventListener('pointerdown', (event) => {
     if (!(event.target instanceof Element)) return;
     // Los campos del titulo y el autor tambien quedan fuera de la seleccion musical.
-    if (picks().length && !event.target.closest('.score-stage, .score-palette, .score-toolbar, .score-side-actions, .score-doc-tab, [popover]')) setPicks([]);
+    if ((picks().length || selectedNavigation.length) && !event.target.closest('.score-stage, .score-palette, .score-toolbar, .score-side-actions, .score-doc-tab, [popover]')) setPicks([]);
     if (!activeItem) return;
     if (event.target.closest('.score-stage, .score-palette, .score-toolbar, .score-side-actions, .score-doc-tab, [popover], button, a, input, select, textarea')) return;
     deactivateTool();
@@ -2402,6 +2503,7 @@
       score = docs[active];
       history = histories[active];
       selected = null;
+      selectedNavigation = [];
       group = [];
       save();
       renderTabs();

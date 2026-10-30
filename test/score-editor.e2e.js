@@ -171,7 +171,7 @@ async function checkBarlines(page) {
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
   assert.equal(await page.locator('#scoreTrash').count(), 0);
-  assert.equal(await page.locator('#scoreBarlines button:not(#scoreTabToggle)').count(), 4);
+  assert.equal(await page.locator('#scoreBarlines button[data-barline], #scoreBarlines button[data-tool="barre"]').count(), 4);
   assert.equal(await page.locator('#scoreBarlines #scoreTabToggle').count(), 1);
   async function apply(type, mi) {
     await page.locator('[data-barline="' + type + '"]').click();
@@ -865,8 +865,9 @@ async function checkClear(page) {
   assert.ok(await filled() > 0, 'a note was placed');
   const [clear, download] = await Promise.all(['#scoreClear', '#scoreDownloadToggle'].map(id => page.locator(id).boundingBox()));
   assert.ok(clear.y < download.y, 'delete sits right above download');
-  assert.equal(await page.locator('.score-side #scoreClear, .score-side #scoreDownloadToggle').count(), 0, 'actions are their own sidebar, apart from the barlines');
-  assert.ok(download.y + download.height > page.viewportSize().height - 60, 'download sits at the bottom of the viewport');
+  assert.equal(await page.locator('.score-side-actions #scoreClear, .score-side-actions #scoreDownloadToggle').count(), 2, 'actions stay grouped in the side menu');
+  const tools = await page.locator('#scoreBarlines').boundingBox();
+  assert.ok(clear.y >= tools.y + tools.height, 'actions sit below the expanded palette without covering its tools');
   assert.ok(download.x > (await page.locator('#scoreStage').boundingBox()).x + 300, 'both live in the side menu');
   for (const id of ['#scoreClear', '#scoreDownloadToggle']) {
     await page.locator(id).hover();

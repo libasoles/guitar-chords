@@ -1377,3 +1377,12 @@ html body[data-scroll-locked] {
   background: var(--note-selected);
   pointer-events: none;
 }
+
+/* Navigation signs share note selection colors, with a transparent click target. */
+.score-navigation-mark { cursor: pointer; }
+.score-stage .score-navigation-hit,
+.score-stage .is-selected .score-navigation-hit {
+  fill: transparent;
+  stroke: none;
+  pointer-events: all;
+}
