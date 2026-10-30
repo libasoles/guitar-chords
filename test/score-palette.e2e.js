@@ -1,4 +1,4 @@
-/* Escala de los silencios de /partitura. Ejecutar despues de npm run build:site. */
+/* Figuras completas y escala de los silencios de /partitura. Ejecutar despues de npm run build:site. */
 'use strict';
 const path = require('node:path');
 const assert = require('node:assert/strict');
@@ -15,6 +15,13 @@ async function run() {
       const page = await browser.newPage({ viewport: { width, height: 900 } });
       await page.goto('http://localhost:' + server.address().port + '/partitura');
       await page.waitForSelector('#scoreStage g.measure');
+      const notes = await page.locator('.score-palette [data-shortcut]').evaluateAll(buttons => buttons.slice(0, 6).map(button => {
+        const svg = button.querySelector('svg');
+        const box = svg.getBBox();
+        const view = svg.viewBox.baseVal;
+        return { key: button.dataset.shortcut, fits: box.x >= view.x && box.y >= view.y && box.x + box.width <= view.x + view.width && box.y + box.height <= view.y + view.height };
+      }));
+      for (const note of notes) assert.ok(note.fits, `${width}px: la nota ${note.key} cabe entera en su SVG`);
       await page.evaluate(() => {
         scoreEditor.score.rows[0][0] = ['f', 's', 'e', 'q', 'h', 'w'].map((d, i) => ({ d, rest: true, at: i * 2 }));
         scoreEditor.render();
@@ -34,7 +41,8 @@ async function run() {
         });
       });
       for (const size of sizes) {
-        assert.ok(Math.abs(size.ratio - 1) < 0.05, `${width}px: el silencio ${size.key} tiene la escala de la partitura (${size.ratio})`);
+        const expected = ['q', 'w', 'e'].includes(size.key) ? 20 / 24 : 1;
+        assert.ok(Math.abs(size.ratio - expected) < 0.05, `${width}px: el silencio ${size.key} tiene la escala esperada (${size.ratio})`);
         assert.ok(size.fits, `${width}px: el silencio ${size.key} cabe entero en su SVG`);
       }
       await page.close();

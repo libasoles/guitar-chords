@@ -2266,13 +2266,15 @@
 
   function glyphFor(item) {
     const svg = document.createElementNS(SVG_NS, 'svg');
-    // Las plicas suben por encima de los 32px de los demas glifos, asi que las notas ganan altura arriba.
+    // Las banderas superan x=30 y la fusa sube por encima de y=-16.
     const tall = item.kind === 'note' && item.d !== 'w';
     // Los silencios usan la escala de la partitura; la fusa necesita espacio vertical extra.
     const rest = item.kind === 'rest';
-    svg.setAttribute('viewBox', tall ? '0 -16 30 48' : rest ? '0 -12 30 56' : '0 0 30 32');
-    svg.setAttribute('width', '30');
-    svg.setAttribute('height', tall ? '48' : rest ? '56' : '32');
+    svg.setAttribute('viewBox', tall ? '0 -24 36 56' : rest ? '0 -12 30 56' : '0 0 30 32');
+    svg.setAttribute('width', tall ? '36' : '30');
+    svg.setAttribute('height', tall ? '56' : rest ? '56' : '32');
+    if (tall) svg.classList.add('score-note-glyph');
+    if (rest && ['f', 's', 'e'].includes(item.d)) svg.classList.add('score-small-rest-glyph');
     svg.setAttribute('fill', 'currentColor');
     svg.setAttribute('aria-hidden', 'true');
     svg.innerHTML = GLYPHS[glyphKey(item)];
