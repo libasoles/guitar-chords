@@ -308,7 +308,7 @@
       ev.d = spot.d;
       if (spot.dot) ev.dot = true;
       if (item.kind === 'rest') {
-        const placed = M.placeRest(measure, ev, spot.at, target.n, score, target.mi);
+        const placed = M.placeRest(measure, ev, spot.at, target.n, score, target.mi, target.beforeFirst);
         if (!placed.measure) return say(placed.full ? t.full : fullVoice(placed.voice));
         change(() => {
           measure.splice(0, measure.length, ...placed.measure);
@@ -415,7 +415,7 @@
     else delete moved.dot;
     if (ev.rest) {
       // Un silencio se acomoda segun las notas que suenan a la vez: arrastrarlo arriba o abajo cambia su voz y su altura.
-      const placed = M.placeRest(others, moved, spot.at, target.n, score, target.mi);
+      const placed = M.placeRest(others, moved, spot.at, target.n, score, target.mi, target.beforeFirst);
       if (!placed.measure) return say(placed.full ? t.full : fullVoice(placed.voice));
       // Solo, el silencio queda a la altura donde se soltó: se puede bajar para escribir una nota en el centro.
       const landed = placed.measure[placed.index];
@@ -1371,6 +1371,7 @@
     }
     return {
       mi, n, space, rawT, rawX,
+      beforeFirst: others.length > 0 && x < Math.min(...others.map((i) => centers[i])) - space * 0.8,
       onNote: !!near,
       t: at,
       x: markX,

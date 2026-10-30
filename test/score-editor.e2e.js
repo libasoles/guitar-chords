@@ -888,6 +888,26 @@ async function checkRestWithTool(page) {
   assert.equal(await page.evaluate(() => document.querySelector('.score-stage').classList.contains('has-tool')), false, 'el lienzo vacio suelta la herramienta');
 }
 
+async function checkPrependRest(page) {
+  await page.evaluate(() => {
+    scoreEditor.ghostOffset = 0;
+    scoreEditor.score.rows[0][0] = [28, 30, 32, 33, 32].map((n, i) => ({ n, d: 'e', at: i * 12 }));
+    scoreEditor.render();
+    return document.fonts.ready;
+  });
+  await page.waitForTimeout(200); // ResizeObserver termina el dibujo antes de medir.
+  await page.keyboard.press('e'); // Silencio de corchea.
+  const head = await page.locator('#e0-0 .notehead').boundingBox();
+  const staff = await page.locator('#m0 > g.staff > path').first().boundingBox();
+  await page.mouse.click(head.x - 12, staff.y + 55);
+  const measure = await page.evaluate(() => scoreEditor.score.rows[0][0]);
+  assert.equal(measure[0].rest, true, 'el silencio se antepone a las notas');
+  assert.deepEqual(measure.slice(1).map(ev => ev.at), [12, 24, 36, 48, 60], 'las cinco notas se desplazan una corchea');
+  assert.equal(new Set(measure.map(ev => ev.v || 1)).size, 1, 'el silencio sigue en la misma voz');
+  await page.keyboard.press('ControlOrMeta+z');
+  assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0].length), 5);
+}
+
 async function run() {
   const server = await serveStatic(path.join(__dirname, '..', 'dist', 'site'), 0);
   let browser;
@@ -1074,6 +1094,7 @@ async function run() {
     await restPage.goto(url);
     await restPage.waitForSelector('#scoreStage g.measure');
     await checkRestWithTool(restPage);
+    await checkPrependRest(restPage);
     await restPage.close();
     console.log('score-editor e2e: OK');
   } finally {

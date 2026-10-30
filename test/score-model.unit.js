@@ -859,6 +859,19 @@ function putRest(score, measure, d, at, n) {
   return placed;
 }
 
+test('anteponer un silencio desplaza las voces juntas y rechaza un compas sin espacio', () => {
+  const { score, measure } = threeFour();
+  measure.push({ d: 'q', n: 36, at: 0, v: 1 }, { d: 'e', n: 28, at: 0, v: 2 }, { d: 'e', n: 29, at: 12, v: 2 });
+  const before = M.clone(measure);
+  const placed = M.placeRest(measure, { d: 'e', rest: true }, 0, 36, score, 0, true);
+  assert.equal(placed.index, 0);
+  assert.deepEqual(placed.measure.map(ev => ev.at), [0, 12, 12, 24]);
+  assert.deepEqual(placed.measure.map(ev => ev.v), [1, 1, 2, 2]);
+  assert.deepEqual(measure, before, 'la propuesta no modifica el original');
+  assert.deepEqual(M.placeRest(measure, { d: 'h', rest: true, dot: true }, 0, 36, score, 0, true), { full: true });
+  assert.deepEqual(measure, before, 'rechazar la insercion conserva todas las notas');
+});
+
 test('cada voz tiene su propio silencio y su propia longitud en un compas de 3/4', () => {
   const { score, measure } = threeFour();
   // Voz grave: corchea y silencio de negra, dos veces.
