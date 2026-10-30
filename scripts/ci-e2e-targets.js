@@ -82,6 +82,13 @@ const SUITES = {
       /^test\/score-editor\./,
     ],
   },
+  'score-tab-pdf': {
+    build: 'site',
+    paths: [
+      /^src\/site\/score-(editor|model|fingering)\./,
+      /^test\/score-tab-pdf\./,
+    ],
+  },
   partitura: {
     build: 'site',
     paths: [

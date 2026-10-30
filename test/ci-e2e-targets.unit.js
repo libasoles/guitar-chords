@@ -11,9 +11,10 @@ test('docs, backend and unit test changes need no e2e suite', () => {
 });
 
 test('a tool-specific change runs only its suite', () => {
+  assert.deepEqual(targets(['test/score-tab-pdf.e2e.js']), ['score-tab-pdf']);
   assert.deepEqual(targets(['src/site/picking-render.js']), ['picking-intervals']);
   assert.deepEqual(targets(['src/site/note-finder.js']), ['note-finder']);
-  assert.deepEqual(targets(['src/site/score-editor.js', 'src/site/score-editor.css']), ['score-editor']);
+  assert.deepEqual(targets(['src/site/score-editor.js', 'src/site/score-editor.css']), ['score-editor', 'score-tab-pdf']);
 });
 
 test('a score change runs only its article suite', () => {
