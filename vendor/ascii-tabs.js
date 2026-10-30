@@ -785,7 +785,7 @@ class AsciiTabs extends Base {
     }
   }
 
-  static observedAttributes = ['readonly', 'spacing', 'labels', 'notation', 'tuning', 'lang', 'tools', 'annotations-editable', 'titles-editable', 'annotation-fit'];
+  static observedAttributes = ['readonly', 'spacing', 'labels', 'notation', 'tuning', 'lang', 'tools', 'annotations-editable', 'titles-editable', 'annotation-fit', 'max-fret'];
 
   // Strings: the `lang` preset (English by default) with `messages` merged over it
   get #text() {
@@ -844,6 +844,16 @@ class AsciiTabs extends Base {
 
   set tuning(value) {
     this.setAttribute('tuning', normalizeTuning(value).join(' '));
+  }
+
+  // Highest Fret the editor accepts: 24 by default, lower for instruments with fewer frets
+  get maxFret() {
+    const n = Math.floor(Number(this.getAttribute('max-fret')));
+    return Number.isFinite(n) && n >= 1 && n <= MAX_FRET ? n : MAX_FRET;
+  }
+
+  set maxFret(value) {
+    this.setAttribute('max-fret', value);
   }
 
   get tools() {
@@ -911,7 +921,7 @@ class AsciiTabs extends Base {
       return;
     }
     // Properties set before the element was upgraded shadow the accessors
-    for (const name of ['value', 'columnLayout', 'annotations', 'tabTitles', 'annotationsEditable', 'titlesEditable', 'annotationFit', 'readonly', 'spacing', 'labels', 'notation', 'tuning', 'tools', 'variant', 'theme', 'messages']) {
+    for (const name of ['value', 'columnLayout', 'annotations', 'tabTitles', 'annotationsEditable', 'titlesEditable', 'annotationFit', 'readonly', 'spacing', 'labels', 'notation', 'tuning', 'maxFret', 'tools', 'variant', 'theme', 'messages']) {
       if (Object.hasOwn(this, name)) {
         const own = this[name];
         delete this[name];
@@ -1653,6 +1663,33 @@ class AsciiTabs extends Base {
     this.#goTo(t, c, s + d);
   }
 
+  // Shift+Up/Down: re-finger the focused or selected notes on the nearest String that keeps their
+  // pitch and puts every one of them within 0..maxFret. Strings are assumed to descend in pitch.
+  #refinger(d) {
+    const notes = (this.#selection.length ? this.#selection : [this.#cur]).filter(p => this.#tabs[p.t][p.c]?.[p.s] != null);
+    if (!notes.length) return;
+    const tuning = this.tuning;
+    const depth = [0];
+    for (let s = 1; s < STRING_COUNT; s++) depth[s] = depth[s - 1] + ((tuningPitch(tuning[s - 1]) - tuningPitch(tuning[s]) + 11) % 12 + 1);
+    for (let step = 1; step < STRING_COUNT; step++) {
+      const moved = notes.map(p => {
+        const to = p.s + d * step;
+        const note = this.#tabs[p.t][p.c][p.s];
+        return { ...p, to, fret: fretValue(note) + depth[to] - depth[p.s], note };
+      });
+      if (moved.some(m => m.to < 0 || m.to >= STRING_COUNT || !isFret(m.fret) || m.fret > this.maxFret)) {
+        if (moved.some(m => m.to < 0 || m.to >= STRING_COUNT)) return;
+        continue;
+      }
+      for (const m of moved) this.#setFret(m.t, m.c, m.s, null);
+      for (const m of moved) this.#setFret(m.t, m.c, m.to, typeof m.note === 'object' ? { ...m.note, fret: m.fret } : m.fret);
+      const { t, c, s } = this.#cur;
+      if (this.#selection.length) this.#selection = moved.map(m => ({ t: m.t, c: m.c, s: m.to }));
+      this.#goTo(t, c, s + d * step, this.#selection.length > 0);
+      return this.#emitChange(this.#selection.length ? null : this.#cur);
+    }
+  }
+
   // Typing writes to the value straight away, so `change` follows every keystroke
   #edit(draft, keepParentheses = true) {
     this.#selection = [];
@@ -1670,7 +1707,7 @@ class AsciiTabs extends Base {
   #typeDigit(d) {
     if (this.#draft === null || this.#draft === '') return this.#edit(d);
     const next = this.#draft + d;
-    if (/^(0|[1-9][0-9]?)$/.test(next) && Number(next) <= MAX_FRET) this.#edit(next);
+    if (/^(0|[1-9][0-9]?)$/.test(next) && Number(next) <= this.maxFret) this.#edit(next);
   }
 
   #parenthesize() {
@@ -1751,10 +1788,10 @@ class AsciiTabs extends Base {
         return this.#moveHorizontal(-1);
       case 'ArrowUp':
         e.preventDefault();
-        return this.#moveVertical(-1);
+        return e.shiftKey ? this.#refinger(-1) : this.#moveVertical(-1);
       case 'ArrowDown':
         e.preventDefault();
-        return this.#moveVertical(1);
+        return e.shiftKey ? this.#refinger(1) : this.#moveVertical(1);
       case 'Backspace': {
         e.preventDefault();
         const { t, c, s } = this.#cur;
