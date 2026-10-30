@@ -23,6 +23,10 @@ const { serveStatic } = require('../scripts/lib/static-server');
     const tab = page.locator('.score-tab').first();
     await tab.locator('.ascii-tabs-cell').first().waitFor();
     await page.keyboard.press('4');
+    assert.equal(await toggle.getAttribute('aria-pressed'), 'true',
+      'TAB stays pressed when a note tool is selected');
+    assert.equal(await page.evaluate(() => scoreEditor.score.showTabs), true,
+      'selecting a tool keeps tablature enabled');
     const head = await page.locator('#e0-0 .notehead').boundingBox();
     const box = await tab.boundingBox();
     const point = { x: head.x + head.width / 2, y: box.y + 5 };
@@ -32,6 +36,8 @@ const { serveStatic } = require('../scripts/lib/static-server');
     assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0].length), 2,
       'an active tool inserts the bass note over TAB');
     await page.keyboard.press('Escape');
+    assert.equal(await toggle.getAttribute('aria-pressed'), 'true',
+      'TAB stays pressed when the tool is released with Escape');
     await tab.locator('.ascii-tabs-cell').first().click();
     assert.equal(await tab.evaluate(node => node.classList.contains('ascii-tabs-editing')), true,
       'TAB editing resumes when the tool is released');
@@ -58,6 +64,25 @@ const { serveStatic } = require('../scripts/lib/static-server');
     await tab.locator('.ascii-tabs-cell[data-s="5"]').first().click();
     assert.equal(await tab.evaluate(node => node.classList.contains('ascii-tabs-editing')), true,
       'TAB cells away from the note remain editable');
+    await page.keyboard.press('Escape');
+    for (const enabled of [true, false]) {
+      if (!enabled) await toggle.click();
+      const tools = page.locator('.score-palette-item[data-shortcut], .score-palette-item[data-barline], .score-palette-item[data-tool]');
+      for (const tool of await tools.all()) {
+        await tool.click();
+        assert.equal(await tool.getAttribute('aria-pressed'), 'true', 'the clicked tool is selected');
+        assert.equal(await toggle.getAttribute('aria-pressed'), String(enabled),
+          'selecting any tool preserves the TAB toggle');
+        await tool.click();
+        assert.equal(await tool.getAttribute('aria-pressed'), 'false', 'clicking the tool again releases it');
+        assert.equal(await toggle.getAttribute('aria-pressed'), String(enabled),
+          'releasing any tool preserves the TAB toggle');
+        assert.equal(await page.evaluate(() => !!scoreEditor.score.showTabs), enabled,
+          'tool changes preserve tablature visibility');
+        assert.equal(await page.locator('.score-tab').count() > 0, enabled,
+          'rendered tablature matches the TAB toggle');
+      }
+    }
     console.log('score-tab-tool e2e: OK');
   } finally {
     if (browser) await browser.close();

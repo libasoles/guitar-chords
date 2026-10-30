@@ -360,7 +360,7 @@
     activeItem = null;
     stage.classList.remove('has-tool');
     clearHoverGhost();
-    toolbars.querySelectorAll('.score-palette-item[aria-pressed]').forEach((button) => button.setAttribute('aria-pressed', 'false'));
+    toolbars.querySelectorAll('.score-palette-tool').forEach((button) => button.setAttribute('aria-pressed', 'false'));
   }
 
   function activateTool(item) {
@@ -369,7 +369,7 @@
     stage.classList.add('has-tool');
     clearHoverGhost();
     updateHoverGhost();
-    toolbars.querySelectorAll('.score-palette-item[aria-pressed]').forEach((button) => {
+    toolbars.querySelectorAll('.score-palette-tool').forEach((button) => {
       const same = item.key ? button.dataset.shortcut === item.key : item.kind === 'bar' ? button.dataset.barline === item.bar : button.dataset.tool === item.kind;
       button.setAttribute('aria-pressed', String(same));
     });
@@ -2210,7 +2210,7 @@
     }
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'score-palette-item tooltip';
+    button.className = 'score-palette-item score-palette-tool tooltip';
     button.setAttribute('aria-label', item.label);
     button.dataset.tooltip = item.label;
     button.appendChild(glyphFor(item));
