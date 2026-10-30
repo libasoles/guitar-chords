@@ -2091,6 +2091,12 @@
       clearBarSelection();
       deactivateTool();
     }
+    // Shift+D: sin Ctrl/Cmd/Alt no choca con ningun atajo del navegador (Cmd+D es marcador).
+    if (event.shiftKey && !event.metaKey && !event.ctrlKey && !event.altKey && event.code === 'KeyD') {
+      event.preventDefault();
+      if (!event.repeat) duplicateSelected();
+      return;
+    }
     if (!event.metaKey && !event.ctrlKey && !event.altKey && !meterPopup.matches(':popover-open') && !clefPopup.matches(':popover-open')) {
       if (event.key.toLowerCase() === 'a') {
         event.preventDefault();
@@ -2105,6 +2111,22 @@
       undo();
     }
   });
+
+  // Copia las figuras elegidas en el espacio que queda libre del mismo compas.
+  function duplicateSelected() {
+    const refs = picks().filter((ref) => eventAt(ref));
+    if (!refs.length) return;
+    const trial = M.clone(score);
+    M.restoreTabReferences(trial, M.captureTabReferences(score, score.showTabs ? tabColumns : score.tabs));
+    const created = M.duplicateInMeasure(trial, refs);
+    if (!created) return say(t.full);
+    change(() => {
+      Object.assign(score, trial);
+      selected = created[created.length - 1];
+      group = created.length > 1 ? created : [];
+    }, M.captureTabReferences(trial));
+    stage.focus({ preventScroll: true });
+  }
 
   let pasteWithoutSignatures = false;
   document.addEventListener('keydown', (event) => { pasteWithoutSignatures = event.shiftKey; });

@@ -305,6 +305,48 @@
     return { pitches, tabs, type: 'guitar-score-selection', version: 1, ...signatures[0], signatures, measures: fragment };
   }
 
+  // Copia las figuras elegidas de cada compas justo despues de lo que ya suena en ese compas.
+  // Devuelve las figuras nuevas, o null (sin tocar la partitura) si alguna copia no entra.
+  function duplicateInMeasure(score, refs) {
+    const trial = clone(score);
+    const created = [];
+    const mis = [...new Set(refs.map((r) => r.mi))].sort((a, b) => a - b);
+    for (const mi of mis) {
+      const measure = measures(trial)[mi];
+      const chosen = refs.filter((r) => r.mi === mi && measure?.[r.i]).map((r) => r.i);
+      if (!chosen.length) continue;
+      const starts = onsets(measure);
+      const desired = pitchContexts(trial, mi);
+      const end = Math.max(...measure.map((ev, i) => starts[i] + length(ev)));
+      const offset = end - Math.min(...chosen.map((i) => starts[i]));
+      const ids = new Map();
+      let nextId = Math.max(0, ...measure.map((ev) => ev.tp || 0));
+      const copies = chosen.map((i) => {
+        const ev = clone(measure[i]);
+        if (ev.tp) {
+          if (!ids.has(ev.tp)) ids.set(ev.tp, ++nextId);
+          ev.tp = ids.get(ev.tp);
+        }
+        delete ev.tie;
+        delete ev.slur;
+        return { ev, pitch: desired[i], at: starts[i] + offset };
+      });
+      const indices = insertMany(measure, copies.map((c) => [c.ev, c.at]));
+      if (measureLength(measure) > capacity(trial, mi)) return null;
+      // Una alteracion que ya sonaba en el compas no debe cambiar la altura de la copia.
+      copies.map((c, k) => k).sort((a, b) => copies[a].at - copies[b].at).forEach((k) => {
+        const { ev, pitch } = copies[k];
+        if (ev.rest || !pitch) return;
+        const actual = pitchContexts(trial, mi)[measure.indexOf(ev)];
+        if (actual.alter !== pitch.alter) ev.acc = accidentalFor(pitch.alter);
+      });
+      indices.forEach((i) => created.push({ mi, i }));
+    }
+    if (!created.length) return null;
+    score.rows = trial.rows;
+    return created;
+  }
+
   // Prepara todo antes de escribir: un pegado que no entra no cambia la partitura.
   function pasteSelection(score, fragment, mi, { preserveSignatures = true } = {}) {
     if (fragment?.type !== 'guitar-score-selection' || fragment.version !== 1 ||
@@ -1717,7 +1759,7 @@
 
   return {
     voicesText, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    captureTabReferences, restoreTabReferences, copySelection, pasteSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, moveMeasure, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
+    captureTabReferences, restoreTabReferences, copySelection, pasteSelection, duplicateInMeasure, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, moveMeasure, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
     meterOf, meterAt, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setNavigation, removeNavigation, navigationEndings, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };
