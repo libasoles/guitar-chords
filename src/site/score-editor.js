@@ -1777,6 +1777,10 @@
     }
   });
 
+  let pasteWithoutSignatures = false;
+  document.addEventListener('keydown', (event) => { pasteWithoutSignatures = event.shiftKey; });
+  document.addEventListener('keyup', (event) => { pasteWithoutSignatures = event.shiftKey; });
+  window.addEventListener('blur', () => { pasteWithoutSignatures = false; });
   const clipboardType = 'application/x-guitar-score-selection';
   const editingText = (event) => event.target.closest('input, textarea, select, [contenteditable], ascii-tabs');
   document.addEventListener('copy', (event) => {
@@ -1798,7 +1802,7 @@
     event.preventDefault();
     const trial = M.clone(score);
     M.restoreTabReferences(trial, M.captureTabReferences(score, score.showTabs ? tabColumns : score.tabs));
-    const refs = M.pasteSelection(trial, fragment, selectedMeasure);
+    const refs = M.pasteSelection(trial, fragment, selectedMeasure, { preserveSignatures: !pasteWithoutSignatures });
     if (!refs) return say(t.full);
     change(() => {
       Object.assign(score, trial);

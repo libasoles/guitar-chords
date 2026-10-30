@@ -82,6 +82,13 @@ const SUITES = {
       /^test\/score-editor\./,
     ],
   },
+  'score-paste-signatures': {
+    build: 'site',
+    paths: [
+      /^src\/site\/score-(editor|model)\./,
+      /^test\/score-paste-signatures\./,
+    ],
+  },
   'score-tab-pdf': {
     build: 'site',
     paths: [

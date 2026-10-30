@@ -301,16 +301,17 @@
         notes.length === attack.events.length || notes.some((note) => TAB_OPENS[string] + fret === note.midi) ? fret : null);
       return { notes, column };
     }).filter((entry) => entry.notes.length);
-    return { pitches, tabs, type: 'guitar-score-selection', version: 1, meter: meterOf(score), measures: fragment };
+    const signatures = fragment.map((_, offset) => ({ meter: meterAt(score, first + offset), fifths: keyAt(score, first + offset) }));
+    return { pitches, tabs, type: 'guitar-score-selection', version: 1, ...signatures[0], signatures, measures: fragment };
   }
 
   // Prepara todo antes de escribir: un pegado que no entra no cambia la partitura.
-  function pasteSelection(score, fragment, mi) {
+  function pasteSelection(score, fragment, mi, { preserveSignatures = true } = {}) {
     if (fragment?.type !== 'guitar-score-selection' || fragment.version !== 1 ||
       !Number.isInteger(mi) || mi < 0 || mi >= measures(score).length ||
       !Array.isArray(fragment.measures) || !fragment.measures.length ||
       !fragment.measures.every(Array.isArray)) return null;
-    const clean = sanitize({ meter: fragment.meter, rows: [fragment.measures] }).rows[0];
+    const clean = sanitize({ meter: fragment.meter, meters: Object.fromEntries((Array.isArray(fragment.signatures) ? fragment.signatures : []).map((signature, i) => [i, signature?.meter])), rows: [fragment.measures] }).rows[0];
     if (clean.some((m, i) => m.length !== fragment.measures[i].length) || !clean.some((m) => m.length)) return null;
     const savedTabs = captureTabReferences(score);
     // El portapapeles usa indices serializables; al pegar se les da una identidad nueva.
@@ -325,10 +326,34 @@
     const trial = clone(score);
     while (measures(trial).length < mi + clean.length) trial.rows.push(emptyRow());
     const all = measures(trial);
+    const destinationContexts = all.map((_, index) => pitchContexts(trial, index));
+    if (preserveSignatures) {
+      const end = mi + clean.length;
+      const after = { meter: meterAt(trial, end), fifths: keyAt(trial, end) };
+      for (let offset = 0; offset < clean.length; offset += 1) {
+        const signature = fragment.signatures?.[offset] || (offset === 0 ? fragment : null);
+        if (!signature) continue;
+        if (METERS.includes(signature.meter)) {
+          const changedMeter = meterAt(trial, mi + offset) !== signature.meter;
+          if (mi + offset === 0) trial.meter = signature.meter;
+          else (trial.meters ||= {})[mi + offset] = signature.meter;
+          if (changedMeter && trial.measureDurations) delete trial.measureDurations[mi + offset];
+        }
+        if (Number.isInteger(signature.fifths) && Math.abs(signature.fifths) <= 7) {
+          if (mi + offset === 0) trial.fifths = signature.fifths;
+          else (trial.keys ||= {})[mi + offset] = signature.fifths;
+        }
+      }
+      if (end < all.length) {
+        (trial.meters ||= {})[end] = after.meter;
+        (trial.keys ||= {})[end] = after.fifths;
+      }
+      pruneKeys(trial);
+    }
     const refs = [];
     for (let offset = 0; offset < clean.length; offset += 1) {
       const destination = all[mi + offset];
-      const destinationPitches = pitchContexts(trial, mi + offset);
+      const destinationPitches = destinationContexts[mi + offset];
       const desired = new Map(destination.map((ev, i) => [ev, destinationPitches[i]]));
       const octave = CLEFS[clefAt(trial, mi + offset)].octave || 0;
       for (let i = 0; i < clean[offset].length; i += 1) {
@@ -370,6 +395,10 @@
     }
     restoreTabReferences(trial, savedTabs);
     score.rows = trial.rows;
+    for (const name of ['meter', 'meters', 'fifths', 'keys', 'measureDurations']) {
+      if (trial[name] !== undefined) score[name] = trial[name];
+      else delete score[name];
+    }
     if (trial.tabs) score.tabs = trial.tabs;
     else delete score.tabs;
     return refs;
@@ -440,7 +469,7 @@
   function addMeasure(score, row) {
     if (!Number.isInteger(row) || row < 0 || row >= score.rows.length || score.rows[row].length >= PER_ROW) return false;
     const at = rowStarts(score)[row] + score.rows[row].length;
-    ['barlines', 'keys', 'clefs', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => { if (score[name]) score[name] = shiftKeys(score[name], at, 1); });
+    ['barlines', 'keys', 'clefs', 'meters', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => { if (score[name]) score[name] = shiftKeys(score[name], at, 1); });
     score.rows[row].push([]);
     return true;
   }
@@ -458,7 +487,7 @@
         if (!barre.span) delete barre.span;
       }
     });
-    ['barlines', 'keys', 'clefs', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => {
+    ['barlines', 'keys', 'clefs', 'meters', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => {
       if (!score[name]) return;
       delete score[name][at];
       score[name] = shiftKeys(score[name], at, -1);
@@ -551,7 +580,7 @@
         }
       }
     });
-    ['barlines', 'keys', 'clefs', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => {
+    ['barlines', 'keys', 'clefs', 'meters', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => {
       if (score[name]) score[name] = shiftKeys(score[name], mi + 1, 1);
     });
     if (movedBarre) score.barres[mi + 1] = movedBarre;
@@ -628,6 +657,24 @@
     return score && METERS.includes(score.meter) ? score.meter : '4/4';
   }
 
+  // Indicacion de compas vigente desde el ultimo cambio.
+  function meterAt(score, mi) {
+    let meter = meterOf(score), last = -1;
+    Object.entries(score?.meters || {}).forEach(([index, value]) => {
+      if (/^(0|[1-9]\d*)$/.test(index) && +index <= mi && +index > last && METERS.includes(value)) { meter = value; last = +index; }
+    });
+    return meter;
+  }
+
+  function pruneMeters(score) {
+    let previous = meterOf(score);
+    for (const mi of Object.keys(score.meters || {}).map(Number).sort((a, b) => a - b)) {
+      if (mi < 1 || mi >= measures(score).length || !METERS.includes(score.meters[mi]) || score.meters[mi] === previous) delete score.meters[mi];
+      else previous = score.meters[mi];
+    }
+    if (score.meters && !Object.keys(score.meters).length) delete score.meters;
+  }
+
   function clefOf(score) {
     return score && Object.hasOwn(CLEFS, score.clef) ? score.clef : 'guitar';
   }
@@ -681,6 +728,7 @@
   // Quita los cambios fuera de la partitura y los que repiten la armadura anterior.
   function pruneKeys(score) {
     pruneClefs(score);
+    pruneMeters(score);
     if (!score.keys) return;
     let previous = fifthsOf(score);
     Object.keys(score.keys).map(Number).sort((a, b) => a - b).forEach((mi) => {
@@ -708,7 +756,7 @@
 
   function capacity(score, mi) {
     if (score && score.measureDurations && Number.isInteger(mi) && Number.isInteger(score.measureDurations[mi])) return score.measureDurations[mi];
-    const [beats, unit] = meterOf(score).split('/').map(Number);
+    const [beats, unit] = meterAt(score, mi).split('/').map(Number);
     return beats * DIVISIONS * 4 / unit;
   }
 
@@ -719,6 +767,7 @@
     const limit = capacity({ meter });
     if (measures(score).some((m) => measureLength(m) > limit)) return false;
     score.meter = meter;
+    delete score.meters;
     Object.keys(score.measureDurations || {}).forEach((mi) => {
       if (score.measureDurations[mi] >= capacity({ meter })) delete score.measureDurations[mi];
     });
@@ -862,12 +911,13 @@
     if (!data || !Array.isArray(data.rows)) return emptyScore();
     const meter = meterOf(data);
     const factor = DIVISIONS / (scale || DIVISIONS);
+    let measureIndex = 0;
     const rows = data.rows.map((row) => {
       const count = Array.isArray(row) && row.length ? row.length : PER_ROW;
       const result = Array.from({ length: count }, () => []);
       (Array.isArray(row) ? row : []).forEach((measure, m) => {
         const events = [];
-        const limit = capacity({ meter });
+        const limit = capacity({ meter: meterAt(data, measureIndex + m) });
         (Array.isArray(measure) ? measure : []).forEach((raw) => {
           if (!raw || !VALUES[raw.d]) return;
           const ev = { d: raw.d };
@@ -894,6 +944,7 @@
         events.sort((a, b) => a.at - b.at);
         result[m] = settle(events);
       });
+      measureIndex += count;
       return result;
     });
     while (rows.length < MIN_ROWS) rows.push(emptyRow());
@@ -909,6 +960,9 @@
       else if (bar.double === true || bar.single === true) barlines[index] = { double: true };
       if (bar.hidden === true && bar.end !== true) barlines[index] = Object.assign(barlines[index] || {}, { hidden: true });
     });
+    const meterContext = { meter, meters: clone(data.meters || {}), rows };
+    pruneMeters(meterContext);
+    const meters = meterContext.meters || {};
     const keys = {};
     let previousKey = fifthsOf(data);
     Object.entries(data.keys || {}).filter(([index]) => /^[1-9]\d*$/.test(index) && +index < total).sort((a, b) => a[0] - b[0]).forEach(([index, value]) => {
@@ -927,26 +981,26 @@
       const at = barre.at * factor;
       const to = barre.to * factor;
       const span = barre.span || 0;
-      if (!Number.isInteger(at) || at < 0 || at >= capacity({ meter })) return;
+      if (!Number.isInteger(at) || at < 0 || at >= capacity(meterContext, +index)) return;
       if (!Number.isInteger(barre.fret) || barre.fret < 1 || barre.fret > MAX_FRET) return;
       if (!Number.isInteger(span) || span < 0 || +index + span > lastOf(+index)) return;
       if (Object.keys(barres).some((key) => barreLast(barres[key], +key) >= +index)) return;
       const result = { at, fret: barre.fret };
       if (span) result.span = span;
-      if (Number.isInteger(to) && (span ? to > 0 : to > at) && to < capacity({ meter })) result.to = to;
+      if (Number.isInteger(to) && (span ? to > 0 : to > at) && to < capacity(meterContext, +index + span)) result.to = to;
       barres[index] = result;
     });
     const measureDurations = {};
     Object.entries(data.measureDurations || {}).forEach(([index, duration]) => {
       const size = duration * factor;
-      if (/^(0|[1-9]\d*)$/.test(index) && +index < total && Number.isInteger(size) && size > 0 && size < capacity({ meter }) && measureLength(rows.flat()[+index]) <= size) measureDurations[index] = size;
+      if (/^(0|[1-9]\d*)$/.test(index) && +index < total && Number.isInteger(size) && size > 0 && size < capacity(meterContext, +index) && measureLength(rows.flat()[+index]) <= size) measureDurations[index] = size;
     });
     const measureWidths = {};
     Object.entries(data.measureWidths || {}).forEach(([index, width]) => {
       if (/^(0|[1-9]\d*)$/.test(index) && +index < total && Number.isFinite(width) && width > 0 && width <= 1) measureWidths[index] = width;
     });
     const tabs = sanitizeTabs(data.tabs, rows.reduce((sum, row) => sum + row.length, 0));
-    return Object.assign(Object.keys(measureWidths).length ? { measureWidths } : {}, Object.keys(measureDurations).length ? { measureDurations } : {}, Object.keys(barlines).length ? { barlines } : {}, Object.keys(keys).length ? { keys } : {}, Object.keys(clefs).length ? { clefs } : {}, Object.keys(barres).length ? { barres } : {}, data.showTabs === true ? { showTabs: true } : {}, Object.keys(tabs).length ? { tabs } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
+    return Object.assign(Object.keys(meters).length ? { meters } : {}, Object.keys(measureWidths).length ? { measureWidths } : {}, Object.keys(measureDurations).length ? { measureDurations } : {}, Object.keys(barlines).length ? { barlines } : {}, Object.keys(keys).length ? { keys } : {}, Object.keys(clefs).length ? { clefs } : {}, Object.keys(barres).length ? { barres } : {}, data.showTabs === true ? { showTabs: true } : {}, Object.keys(tabs).length ? { tabs } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
   }
 
   // Rellena huecos con silencios ocultos: el final del compas y el espacio entre figuras sueltas.
@@ -1233,7 +1287,7 @@
     if (!r || r.groups.length < 2 || !r.groups.every((g) => g.indices.every((i) => isBeamable(r.measure[i])))) return null;
     const starts = onsets(r.measure);
     const order = r.lane.groups.flatMap((g) => g.indices);
-    const states = beamStates(order.map((i) => Object.assign({}, r.measure[i], { at: starts[i] })), score);
+    const states = beamStates(order.map((i) => Object.assign({}, r.measure[i], { at: starts[i] })), { meter: meterAt(score, measures(score).indexOf(r.measure)) });
     const joins = r.groups.slice(0, -1).map((g) => {
       const state = states[order.indexOf(g.indices[0])];
       return !!state && (state[1] === 'begin' || state[1] === 'continue');
@@ -1298,7 +1352,7 @@
     const starts = onsets(r.measure);
     r.groups.slice(0, -1).forEach((g, k) => {
       const right = r.groups[k + 1];
-      const auto = autoBeam(r.measure[g.indices[0]], starts[g.indices[0]], r.measure[right.indices[0]], starts[right.indices[0]], score);
+      const auto = autoBeam(r.measure[g.indices[0]], starts[g.indices[0]], r.measure[right.indices[0]], starts[right.indices[0]], { meter: meterAt(score, measures(score).indexOf(r.measure)) });
       const want = action === 'beam';
       eachEvent(r, g, (ev) => {
         if (want === auto) delete ev.beam;
@@ -1349,7 +1403,6 @@
   function toMusicXml(score) {
     const all = measures(score);
     const clef = CLEFS[clefOf(score)];
-    const [beats, unit] = meterOf(score).split('/');
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<score-partwise version="3.1">' +
       (score.title ? '<work><work-title>' + score.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</work-title></work>' : '') +
       (score.author ? '<identification><creator type="composer">' + score.author.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</creator></identification>' : '') +
@@ -1366,16 +1419,18 @@
     });
     const rowFirsts = new Set(rowStarts(score));
     all.forEach((measure, mi) => {
-      xml += `<measure number="${mi + 1}" id="m${mi}"${capacity(score, mi) < capacity(score) ? ' implicit="yes"' : ''}>`;
+      const [beats, unit] = meterAt(score, mi).split('/');
+      xml += `<measure number="${mi + 1}" id="m${mi}"${capacity(score, mi) < capacity({ meter: meterAt(score, mi) }) ? ' implicit="yes"' : ''}>`;
       if (rowFirsts.has(mi)) xml += '<print new-system="yes"/>';
       if (mi === 0) {
         xml += `<attributes><divisions>${DIVISIONS}</divisions><key><fifths>${fifthsOf(score)}</fifths></key>` +
           `<time><beats>${beats}</beats><beat-type>${unit}</beat-type></time>` +
           `<clef><sign>${clef.sign}</sign><line>${clef.line}</line>${clef.octave ? `<clef-octave-change>${clef.octave}</clef-octave-change>` : ''}</clef></attributes>`;
       }
-      if (mi > 0 && (keyAt(score, mi) !== keyAt(score, mi - 1) || clefAt(score, mi) !== clefAt(score, mi - 1))) {
+      if (mi > 0 && (meterAt(score, mi) !== meterAt(score, mi - 1) || keyAt(score, mi) !== keyAt(score, mi - 1) || clefAt(score, mi) !== clefAt(score, mi - 1))) {
         const changed = clefAt(score, mi) !== clefAt(score, mi - 1) ? CLEFS[clefAt(score, mi)] : null;
         xml += '<attributes>' + (keyAt(score, mi) !== keyAt(score, mi - 1) ? `<key><fifths>${keyAt(score, mi)}</fifths></key>` : '') +
+          (meterAt(score, mi) !== meterAt(score, mi - 1) ? `<time><beats>${beats}</beats><beat-type>${unit}</beat-type></time>` : '') +
           (changed ? `<clef><sign>${changed.sign}</sign><line>${changed.line}</line>${changed.octave ? `<clef-octave-change>${changed.octave}</clef-octave-change>` : ''}</clef>` : '') + '</attributes>';
       }
       const bar = score.barlines && score.barlines[mi];
@@ -1406,7 +1461,7 @@
         if (vi > 0) xml += `<backup><duration>${capacity(score, mi)}</duration></backup>`;
         const indices = voice.groups.flatMap((g) => g.indices);
         const events = indices.map((i) => Object.assign({}, measure[i], { at: starts[i] }));
-        const beams = beamStates(events, score);
+        const beams = beamStates(events, { meter: meterAt(score, mi) });
         const pad = (from, to) => {
           padding(to - from).forEach((size) => {
             xml += `<note print-object="no"><rest/><duration>${size}</duration><voice>${vi + 1}</voice>${TYPES[size] ? `<type>${TYPES[size]}</type>` : ''}</note>`;
@@ -1480,7 +1535,7 @@
   function voiceFigures(measure, voice, score) {
     const starts = onsets(measure);
     const indices = voice.groups.flatMap((g) => g.indices);
-    const beams = beamStates(indices.map((i) => Object.assign({}, measure[i], { at: starts[i] })), score);
+    const beams = beamStates(indices.map((i) => Object.assign({}, measure[i], { at: starts[i] })), { meter: meterAt(score, measures(score).indexOf(measure)) });
     const items = voice.groups.map((g) => ({ ev: measure[g.indices[0]], beam: beams[indices.indexOf(g.indices[0])] }));
     const names = [];
     for (let k = 0; k < items.length; k += 1) {
@@ -1513,7 +1568,7 @@
   return {
     voicesText, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
     captureTabReferences, restoreTabReferences, copySelection, pasteSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
-    meterOf, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
+    meterOf, meterAt, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };
 });
