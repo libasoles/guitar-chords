@@ -758,6 +758,32 @@ body.score-dragging {
   outline-offset: 2px;
 }
 
+/* + sobre las barras del compas elegido: inserta un compas antes o despues. */
+.score-insert-measure {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--brand-blue-dark);
+  border-radius: 50%;
+  background: var(--brand-yellow);
+  color: var(--brand-blue-dark);
+  cursor: pointer;
+}
+
+.score-insert-measure .lucide {
+  width: 1rem;
+  height: 1rem;
+}
+
+.score-insert-measure:hover,
+.score-insert-measure:focus-visible {
+  background: var(--paper);
+}
+
 .score-row-tools {
   position: absolute;
   display: flex;

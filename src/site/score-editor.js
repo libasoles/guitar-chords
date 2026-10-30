@@ -903,7 +903,7 @@
   }
 
   document.addEventListener('pointerdown', (event) => {
-    if (!event.target.closest('.score-barline-trigger')) clearBarSelection();
+    if (!event.target.closest('.score-barline-trigger, .score-insert-measure')) clearBarSelection();
   });
 
   function removeSelectedBars() {
@@ -939,6 +939,31 @@
       const node = side === 'start' ? nodes[0] : nodes[nodes.length - 1];
       node?.classList.add('is-bar-selected');
       button.setAttribute('aria-pressed', 'true');
+    });
+    mountInsertButtons(mi);
+  }
+
+  // Un + sobre cada barra del compas elegido inserta un compas vacio antes o despues; los demas se corren.
+  function mountInsertButtons(mi) {
+    stage.querySelectorAll('.score-insert-measure').forEach((button) => button.remove());
+    const m = layout[mi];
+    [['before', m.left, mi, t.insertMeasureBefore], ['after', m.right, mi + 1, t.insertMeasureAfter]].forEach(([where, x, at, label]) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'score-insert-measure tooltip';
+      button.dataset.where = where;
+      button.dataset.tooltip = label;
+      button.setAttribute('aria-label', label);
+      button.innerHTML = lucide('plus');
+      button.style.left = x + 'px';
+      button.style.top = (m.lines[0] - 18) + 'px';
+      button.addEventListener('click', () => {
+        // El compas nuevo queda elegido para poder seguir insertando.
+        if (!change(() => { selected = null; return M.insertMeasure(score, at); })) return;
+        selectedMeasure = at;
+        markMeasureBars();
+      });
+      stage.appendChild(button);
     });
   }
 
@@ -1701,7 +1726,7 @@
     const raw = hoverPoint;
     const point = raw && aimed(raw);
     const over = point && document.elementFromPoint(point.clientX, point.clientY);
-    const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-barre-field, .score-barre-span, .score-selection-menu');
+    const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-insert-measure, .score-barre-field, .score-barre-span, .score-selection-menu');
     const hit = activeItem && !shiftMeasures && !measureDrag && !drag && overStage && locate(point.clientX, point.clientY);
     if (!hit) { clearHoverGhost(); return; }
     if (!hoverGhost) {
@@ -1825,7 +1850,7 @@
       selectNavigation(navigation, event);
       return;
     }
-    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-key-trigger, .score-barline-trigger, .score-barre-field, .score-barre-span, .score-selection-menu')) return;
+    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-key-trigger, .score-barline-trigger, .score-insert-measure, .score-barre-field, .score-barre-span, .score-selection-menu')) return;
     // Las cabezas graves pueden quedar dentro de TAB: la partitura recibe
     // el gesto antes de que el componente enfoque y redibuje su celda.
     const overTab = event.target.closest('.score-tab');

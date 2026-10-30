@@ -1364,3 +1364,49 @@ test('a restored or forward repeat bar bounds endings at the visible boundary', 
   M.setBarline(score, 1, 'double');
   assert.equal(M.navigationEndings(score)[0].first, 2);
 });
+
+test('insertar un compas corre los siguientes con sus barras, armaduras, tablatura y figuras', () => {
+  const score = M.emptyScore();
+  score.rows[0][1] = [{ d: 'q', n: 30 }];
+  score.barlines = { 1: { double: true } };
+  score.keys = { 2: 2 };
+  score.tabs = { '1:0': [3, null, null, null, null, null] };
+  assert.ok(M.insertMeasure(score, 1));
+  assert.deepEqual(score.rows.map((row) => row.length), [4, 4, 4, 1]);
+  assert.deepEqual(M.measures(score)[1], []);
+  assert.deepEqual(M.measures(score)[2], [{ d: 'q', n: 30 }]);
+  assert.deepEqual(score.barlines, { 2: { double: true } });
+  assert.deepEqual(score.keys, { 3: 2 });
+  assert.deepEqual(Object.keys(score.tabs), ['2:0']);
+});
+
+test('insertar al principio o al final agrega un compas vacio y rechaza posiciones invalidas', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ d: 'q', n: 30 }];
+  assert.ok(M.insertMeasure(score, 0));
+  assert.deepEqual(M.measures(score)[0], []);
+  assert.deepEqual(M.measures(score)[1], [{ d: 'q', n: 30 }]);
+  const total = M.measures(score).length;
+  assert.ok(M.insertMeasure(score, total));
+  assert.equal(M.measures(score).length, total + 1);
+  assert.ok(!M.insertMeasure(score, -1));
+  assert.ok(!M.insertMeasure(score, M.measures(score).length + 1));
+  assert.ok(!M.insertMeasure(score, 1.5));
+});
+
+test('insertar un compas en un renglon con espacio lo hace crecer sin mover los demas renglones', () => {
+  const score = M.emptyScore();
+  assert.ok(M.removeMeasure(score, 0));
+  assert.ok(M.insertMeasure(score, 1));
+  assert.deepEqual(score.rows.map((row) => row.length), [4, 4, 4]);
+});
+
+test('insertar dentro de una cejilla la corta antes del compas nuevo', () => {
+  const score = M.emptyScore();
+  assert.ok(M.setBarre(score, 0, 0, 2, undefined, 2));
+  assert.ok(M.insertMeasure(score, 2));
+  assert.equal(score.barres[0].span, 1);
+  assert.equal(score.barres[0].to, undefined);
+  assert.ok(M.insertMeasure(score, 1));
+  assert.equal(score.barres[0].span, undefined);
+});

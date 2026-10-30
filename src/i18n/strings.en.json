@@ -663,6 +663,8 @@
     "deleteMeasure": "Delete measure",
     "addMeasure": "Add measure",
     "noRoomForMeasure": "No room",
+    "insertMeasureBefore": "Insert measure before",
+    "insertMeasureAfter": "Insert measure after",
     "navdc": "Da capo: return to the beginning",
     "navds": "Dal segno: return to the sign",
     "navsegno": "Segno: return point",

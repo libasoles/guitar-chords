@@ -663,6 +663,8 @@
     "deleteMeasure": "Eliminar compás",
     "addMeasure": "Agregar compás",
     "noRoomForMeasure": "No hay espacio",
+    "insertMeasureBefore": "Insertar compás antes",
+    "insertMeasureAfter": "Insertar compás después",
     "navdc": "Da capo: volver al inicio",
     "navds": "Dal segno: volver al signo",
     "navsegno": "Segno: inicio del retorno",
