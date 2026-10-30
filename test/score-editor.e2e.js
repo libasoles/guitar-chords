@@ -522,7 +522,7 @@ async function checkDrag(page) {
     // Numbered tools stay active for repeated clicks and edit the selected figure.
     await page.reload();
     await page.waitForSelector('#scoreStage g.measure');
-    assert.deepEqual(await page.locator('.score-palette-key').allTextContents(), ['1', '2', '3', '4', '5', '6', 'q', 'w', 'e', 'r', 't', 'y', 'p', 's', 'b', 'c']);
+    assert.deepEqual(await page.locator('.score-palette-key').allTextContents(), ['1', '2', '3', '4', '5', '6', 'x', 'q', 'w', 'e', 'r', 't', 'y', 'p', 's', 'b', 'c']);
     await page.keyboard.press('3');
     assert.equal(await page.locator('[data-shortcut="3"]').getAttribute('aria-pressed'), 'true');
     const previewPoint = await page.locator('#scoreStage g.measure').nth(1).evaluate(node => {
@@ -595,9 +595,9 @@ async function checkModifiers(page, url, keys) {
   assert.deepEqual((await page.locator('.score-palette-key').allTextContents()).slice(-4), keys);
   const durations = ['f', 's', 'e', 'q', 'h', 'w'];
   const labels = keys[0] === 'p'
-    ? ['Fusa', 'Semicorchea', 'Corchea', 'Negra', 'Blanca', 'Redonda', 'Silencio de fusa', 'Silencio de semicorchea', 'Silencio de corchea', 'Silencio de negra', 'Silencio de blanca', 'Silencio de redonda']
-    : ['Thirty-second note', 'Sixteenth note', 'Eighth note', 'Quarter note', 'Half note', 'Whole note', 'Thirty-second rest', 'Sixteenth rest', 'Eighth rest', 'Quarter rest', 'Half rest', 'Whole rest'];
-  assert.deepEqual(await page.locator('#scorePalette button').evaluateAll(buttons => buttons.slice(0, 12).map(button => button.getAttribute('aria-label'))), labels);
+    ? ['Fusa', 'Semicorchea', 'Corchea', 'Negra', 'Blanca', 'Redonda', 'Nota muerta', 'Silencio de fusa', 'Silencio de semicorchea', 'Silencio de corchea', 'Silencio de negra', 'Silencio de blanca', 'Silencio de redonda']
+    : ['Thirty-second note', 'Sixteenth note', 'Eighth note', 'Quarter note', 'Half note', 'Whole note', 'Dead note', 'Thirty-second rest', 'Sixteenth rest', 'Eighth rest', 'Quarter rest', 'Half rest', 'Whole rest'];
+  assert.deepEqual(await page.locator('#scorePalette button').evaluateAll(buttons => buttons.slice(0, 13).map(button => button.getAttribute('aria-label'))), labels);
   const point = await page.locator('#scoreStage g.measure').first().evaluate(node => {
     const r = node.querySelector('g.staff > path').getBoundingClientRect();
     return { x: r.left + r.width * 0.25, y: r.top + 10 };
