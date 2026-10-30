@@ -1235,6 +1235,43 @@ test('consecutive endings share a bracket and splitting keeps the return at the 
   assert.deepEqual(score.navigation[1], { first: true });
   assert.deepEqual(score.navigation[2], { first: true, dc: true });
   xml = M.toMusicXml(score);
-  assert.equal((xml.match(/<ending number="1" type="start"/g) || []).length, 1);
+  assert.equal((xml.match(/<ending number="1" type="start"/g) || []).length, 2, 'the inserted double bar closes the first span');
   assert.match(xml.split('<measure number="3"')[1], /D.C./);
+});
+
+test('second ending closes at a closing double bar or repeat, and remains open at a simple bar', () => {
+  for (const type of ['double', 'end', null]) {
+    const score = M.emptyScore();
+    M.setNavigation(score, 1, 'second');
+    if (type) M.setBarline(score, 1, type);
+    const xml = M.toMusicXml(score);
+    assert.ok(xml.includes(`<ending number="2" type="${type ? 'stop' : 'discontinue'}"/>`), `second ending at ${type || 'simple'} bar`);
+  }
+});
+
+test('navigation ending spans stop at closing bars and close at the final visible bar', () => {
+  const score = M.emptyScore();
+  score.navigation = { 2: { first: true }, 3: { first: true }, 4: { first: true }, 5: { second: true }, 6: { second: true }, 11: { second: true } };
+  score.barlines = { 5: { double: true } };
+  assert.deepEqual(M.navigationEndings(score), [
+    { first: 2, last: 4, mark: 'first', number: '1', closed: true },
+    { first: 5, last: 5, mark: 'second', number: '2', closed: true },
+    { first: 6, last: 6, mark: 'second', number: '2', closed: false },
+    { first: 11, last: 11, mark: 'second', number: '2', closed: true },
+  ]);
+  score.barlines[11] = { hidden: true };
+  assert.equal(M.navigationEndings(score).at(-1).closed, false);
+});
+
+test('removing navigation preserves other marks and note data', () => {
+  const score = M.emptyScore();
+  score.rows[0][0] = [{ n: 30, d: 'q' }];
+  score.navigation = { 0: { first: true, segno: true } };
+  assert.equal(M.removeNavigation(score, 0, 'first'), true);
+  assert.deepEqual(score.navigation, { 0: { segno: true } });
+  assert.equal(M.removeNavigation(score, 0, 'first'), false);
+  assert.equal(M.removeNavigation(score, 0, 'invalid'), false);
+  assert.equal(M.removeNavigation(score, 0, 'segno'), true);
+  assert.equal(score.navigation, undefined);
+  assert.deepEqual(score.rows[0][0], [{ n: 30, d: 'q' }]);
 });

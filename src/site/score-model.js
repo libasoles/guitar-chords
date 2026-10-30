@@ -534,6 +534,30 @@
     return true;
   }
 
+  function removeNavigation(score, mi, mark) {
+    if (!NAVIGATION.includes(mark) || score.navigation?.[mi]?.[mark] !== true) return false;
+    delete score.navigation[mi][mark];
+    if (!Object.keys(score.navigation[mi]).length) delete score.navigation[mi];
+    if (!Object.keys(score.navigation).length) delete score.navigation;
+    return true;
+  }
+
+  // A bracket spans adjacent measures with the same ending; closing bars break the span.
+  function navigationEndings(score) {
+    const all = measures(score), endings = [];
+    for (let mi = 0; mi < all.length; mi += 1) {
+      const nav = score.navigation?.[mi];
+      const mark = nav?.first ? 'first' : nav?.second ? 'second' : null;
+      if (!mark) continue;
+      const first = mi;
+      while (mi + 1 < all.length && score.navigation?.[mi + 1]?.[mark] && !score.barlines?.[mi]?.end && !score.barlines?.[mi]?.double) mi += 1;
+      const bar = score.barlines?.[mi];
+      endings.push({ first, last: mi, mark, number: mark === 'first' ? '1' : '2',
+        closed: mark === 'first' || !!(bar?.end || bar?.double || (mi === all.length - 1 && !bar?.hidden)) });
+    }
+    return endings;
+  }
+
   // Una barra interior crea dos compases incompletos sin cambiar la indicacion de compas.
   function splitMeasure(score, mi, at) {
     const all = measures(score);
@@ -1449,6 +1473,7 @@
       roleOf(link.to)[link.type].push('stop');
     });
     const rowFirsts = new Set(rowStarts(score));
+    const endings = navigationEndings(score);
     all.forEach((measure, mi) => {
       const [beats, unit] = meterAt(score, mi).split('/');
       xml += `<measure number="${mi + 1}" id="m${mi}"${capacity(score, mi) < capacity({ meter: meterAt(score, mi) }) ? ' implicit="yes"' : ''}>`;
@@ -1466,11 +1491,10 @@
       }
       const bar = score.barlines && score.barlines[mi];
       const nav = score.navigation?.[mi] || {};
-      const ending = nav.first ? '1' : nav.second ? '2' : null;
-      const endingStart = ending && (!score.navigation?.[mi - 1]?.[nav.first ? 'first' : 'second'] || score.barlines?.[mi - 1]?.end);
-      const endingStop = ending && (!score.navigation?.[mi + 1]?.[nav.first ? 'first' : 'second'] || bar?.end);
+      const endingStart = endings.find((ending) => ending.first === mi);
+      const endingStop = endings.find((ending) => ending.last === mi);
       if (bar?.start || endingStart) xml += '<barline location="left">' +
-        (endingStart ? `<ending number="${ending}" type="start"/>` : '') +
+        (endingStart ? `<ending number="${endingStart.number}" type="start"/>` : '') +
         (bar?.start ? '<repeat direction="forward"/>' : '') + '</barline>';
       if (nav.segno) xml += `<direction id="nav-segno-${mi}" placement="above"><direction-type><segno/></direction-type><sound segno="segno"/></direction>`;
 
@@ -1543,7 +1567,7 @@
       if (nav.dc || nav.ds) xml += `<direction id="nav-jump-${mi}" placement="above"><direction-type><words justify="right">${nav.dc ? 'D.C.' : 'D.S.'}</words></direction-type><sound ${nav.dc ? 'dacapo="yes"' : 'dalsegno="segno"'}/></direction>`;
       if (bar?.end || bar?.hidden || bar?.double || endingStop) xml += '<barline location="right">' +
         (bar?.end ? '' : bar?.hidden ? '<bar-style>none</bar-style>' : bar?.double ? '<bar-style>light-light</bar-style>' : '') +
-        (endingStop ? `<ending number="${ending}" type="${ending === '1' ? 'stop' : 'discontinue'}"/>` : '') +
+        (endingStop ? `<ending number="${endingStop.number}" type="${endingStop.closed ? 'stop' : 'discontinue'}"/>` : '') +
         (bar?.end ? '<repeat direction="backward"/>' : '') + '</barline>';
       xml += '</measure>';
     });
@@ -1609,7 +1633,7 @@
   return {
     voicesText, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
     captureTabReferences, restoreTabReferences, copySelection, pasteSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, addMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
-    meterOf, meterAt, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setNavigation, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
+    meterOf, meterAt, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setNavigation, removeNavigation, navigationEndings, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };
 });

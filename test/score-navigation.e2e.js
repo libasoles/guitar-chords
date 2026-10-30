@@ -5,6 +5,79 @@ const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
 const { serveStatic } = require('../scripts/lib/static-server');
 
+async function checkNavigationRegressions(page) {
+  await page.evaluate(() => {
+    const score = scoreEditor.score;
+    score.rows[0][0] = [{ n: 30, d: 'q', at: 0 }];
+    score.navigation = { 0: { segno: true }, 1: { dc: true }, 2: { ds: true }, 4: { first: true }, 5: { second: true } };
+    scoreEditor.render();
+  });
+  assert.equal(await page.locator('.score-navigation-hit').first().evaluate((el) => getComputedStyle(el).stroke), 'none', 'selection targets have no visible outline');
+  const failures = [];
+  for (const selector of ['#m0 g.repeatMark use', '#m1 g.dir text', '#m2 g.dir text', 'g.ending text >> nth=0', 'g.ending text >> nth=1']) {
+    await page.locator(selector).click();
+    const selected = await page.locator(selector).evaluate((el) => !!el.closest('.is-selected'));
+    if (!selected) failures.push('symbol cannot be selected: ' + selector);
+    else {
+      const color = await page.locator(selector).evaluate((el) => ({ fill: getComputedStyle(el).fill, selectedColor: getComputedStyle(el.closest('.is-selected')).color }));
+      assert.equal(color.fill, color.selectedColor, 'selected symbols use the same yellow as notes');
+      const before = await page.evaluate(() => JSON.stringify(scoreEditor.score.navigation));
+      await page.keyboard.press('Delete');
+      assert.notEqual(await page.evaluate(() => JSON.stringify(scoreEditor.score.navigation)), before, 'Delete removes the selected symbol');
+      assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0].length), 1, 'deleting a symbol keeps the notes');
+      await page.keyboard.press('ControlOrMeta+z');
+      assert.equal(await page.evaluate(() => JSON.stringify(scoreEditor.score.navigation)), before, 'undo restores the symbol');
+    }
+    await page.keyboard.press('Escape');
+  }
+  const positions = () => page.evaluate(() => {
+    return Array.from(document.querySelectorAll('#scoreStage g.ending')).map((ending, i) => {
+      const measure = document.querySelector('#m' + (4 + i) + ' > g.staff > path').getBoundingClientRect();
+      const line = ending.querySelector('path').getBoundingClientRect();
+      return { left: line.left, right: line.right, measureLeft: measure.left, measureRight: measure.right };
+    });
+  });
+  const before = await positions();
+  await page.evaluate(() => { scoreEditor.score.measureWidths = { 4: 0.12, 5: 0.38, 6: 0.2, 7: 0.3 }; scoreEditor.render(); });
+  const after = await positions();
+  for (let i = 0; i < after.length; i++) {
+    const leftOffset = before[i].left - before[i].measureLeft;
+    const rightOffset = before[i].right - before[i].measureRight;
+    if (Math.abs(after[i].left - after[i].measureLeft - leftOffset) > 3 || Math.abs(after[i].right - after[i].measureRight - rightOffset) > 3) failures.push('ending does not follow measure width: ' + JSON.stringify({ i, before: before[i], after: after[i] }));
+  }
+  assert.deepEqual(failures, []);
+  // Resizing through the actual barline handle must keep both ends anchored too.
+  const handle = await page.locator('.score-barline-trigger[data-measure="4"][data-side="end"]').boundingBox();
+  await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(handle.x + handle.width / 2 + 45, handle.y + handle.height / 2, { steps: 5 });
+  await page.mouse.up();
+  const resized = await positions();
+  for (let i = 0; i < resized.length; i++) {
+    assert.ok(Math.abs((resized[i].left - resized[i].measureLeft) - (before[i].left - before[i].measureLeft)) < 3, 'left anchor follows a dragged barline');
+    assert.ok(Math.abs((resized[i].right - resized[i].measureRight) - (before[i].right - before[i].measureRight)) < 3, 'right anchor follows a dragged barline');
+  }
+  for (const closing of ['double', 'end']) {
+    await page.evaluate((closing) => { scoreEditor.score.barlines = { 5: { [closing]: true } }; scoreEditor.render(); }, closing);
+    assert.equal(await page.locator('g.ending >> nth=1').locator('.voltaBracket > path').count(), 3, 'second ending draws its closing hook');
+  }
+  // A span continued on another row is selected and removed as one symbol.
+  await page.evaluate(() => {
+    delete scoreEditor.score.barlines;
+    scoreEditor.score.navigation = { 2: { first: true }, 3: { first: true }, 4: { first: true }, 5: { first: true } };
+    scoreEditor.render();
+  });
+  assert.equal(await page.locator('g.ending').count(), 2, 'the ending continues on the next row');
+  await page.locator('g.ending >> nth=1').locator('text').click();
+  assert.equal(await page.locator('g.voltaBracket.is-selected').count(), 2, 'both continuation segments turn yellow');
+  await page.keyboard.press('Backspace');
+  assert.equal(await page.locator('g.ending').count(), 0);
+  assert.equal(await page.evaluate(() => scoreEditor.score.navigation), undefined);
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+}
+
 (async () => {
   const server = await serveStatic(path.join(__dirname, '../dist/site'), 0);
   const browser = await chromium.launch({ executablePath: playwrightExecutablePath(), headless: true });
@@ -14,6 +87,7 @@ const { serveStatic } = require('../scripts/lib/static-server');
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto(`http://127.0.0.1:${server.address().port}/partitura`);
     await page.waitForSelector('#scoreStage g.measure');
+    await checkNavigationRegressions(page);
     assert.deepEqual(await page.locator('#scoreBarlines > button').evaluateAll((buttons) => buttons.map((b) => b.id || b.dataset.tool || b.dataset.barline || b.dataset.navigation)),
       ['scoreTabToggle', 'barre', 'start', 'end', 'double', 'dc', 'ds', 'segno', 'first', 'second']);
     for (const [mi, mark] of [[0, 'segno'], [1, 'first'], [2, 'second'], [3, 'ds'], [4, 'dc']]) {
