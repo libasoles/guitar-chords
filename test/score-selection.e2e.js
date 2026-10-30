@@ -123,6 +123,49 @@ async function run() {
     assert.equal((await events(page, 0)).length, 0);
     assert.equal((await events(page, 1)).length, 2);
 
+    // Agarrar una nota intermedia no impide llevar el grupo al inicio de un compas vacio.
+    await seed(page, [[{ d: 'q', n: 30, at: 0 }, { d: 'q', n: 31, at: 24 }], []]);
+    await shiftSelect(page, ['e0-0', 'e0-1']);
+    const middle = await center(page, 'e0-1');
+    const emptyStaff = await page.locator('#scoreStage g.measure').nth(1).locator('g.staff > path').first().boundingBox();
+    await page.mouse.move(middle.x, middle.y);
+    await page.mouse.down();
+    await page.mouse.move(emptyStaff.x + 20, middle.y, { steps: 8 });
+    await page.mouse.up();
+    assert.equal((await events(page, 0)).length, 0, 'se mueve el grupo agarrado desde la segunda nota');
+    assert.deepEqual((await events(page, 1)).map(ev => [ev.n, ev.at]), [[30, 0], [31, 24]]);
+    assert.equal(await page.locator('#scoreStage .is-selected').count(), 2);
+    await page.keyboard.press('ControlOrMeta+z');
+    assert.equal((await events(page, 0)).length, 2, 'deshacer devuelve todo el grupo');
+    assert.equal((await events(page, 1)).length, 0);
+
+    // El limite derecho tambien se calcula para el grupo entero.
+    await shiftSelect(page, ['e0-0', 'e0-1']);
+    const first = await center(page, 'e0-0');
+    const rightStaff = await page.locator('#scoreStage g.measure').nth(1).locator('g.staff > path').first().boundingBox();
+    await page.mouse.move(first.x, first.y);
+    await page.mouse.down();
+    await page.mouse.move(rightStaff.x + rightStaff.width - 2, first.y, { steps: 8 });
+    await page.mouse.up();
+    assert.equal((await events(page, 0)).length, 0);
+    assert.deepEqual((await events(page, 1)).map(ev => [ev.n, ev.at]), [[30, 0], [31, 24]]);
+
+    // Como en la captura: la seleccion ocupa dos compases y conserva su distribucion.
+    const phrase = Array.from({ length: 6 }, (_, i) => ({ d: 'e', n: 30 + i, at: i * 12 }));
+    await seed(page, [phrase, [{ d: 'q', n: 36, at: 0 }], [], []]);
+    await shiftSelect(page, [...phrase.map((_, i) => 'e0-' + i), 'e1-0']);
+    const phraseHead = await center(page, 'e0-3');
+    const phraseStaff = await page.locator('#scoreStage g.measure').nth(2).locator('g.staff > path').first().boundingBox();
+    await page.mouse.move(phraseHead.x, phraseHead.y);
+    await page.mouse.down();
+    await page.mouse.move(phraseStaff.x + 20, phraseHead.y, { steps: 8 });
+    await page.mouse.up();
+    assert.deepEqual(await events(page, 0), []);
+    assert.deepEqual(await events(page, 1), []);
+    assert.deepEqual((await events(page, 2)).map(ev => [ev.n, ev.at]), phrase.map(ev => [ev.n, ev.at]));
+    assert.deepEqual((await events(page, 3)).map(ev => [ev.n, ev.at]), [[36, 0]]);
+    assert.equal(await page.locator('#scoreStage .is-selected').count(), 7);
+
     // Marco de seleccion.
     await seed(page, [[{ d: 'e', n: 30, at: 0 }, { d: 'e', n: 31, at: 12 }, { d: 'q', n: 32, at: 48 }], []]);
     const a = await page.locator('[id="e0-0"] .notehead').boundingBox();

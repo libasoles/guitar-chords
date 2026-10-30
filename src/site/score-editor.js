@@ -442,8 +442,14 @@
     const items = refs.map((r) => ({ ev: all[r.mi][r.i], mi: r.mi, at: M.onsets(all[r.mi])[r.i] }));
     const anchorAt = items.find((x) => x.ev === anchor).at;
     const grid = M.gridOf(items.map((x) => x.ev));
-    const dt = Math.round((target.t - anchorAt) / grid) * grid;
     const dmi = target.mi - from.mi;
+    // La nota agarrada puede estar en medio del grupo. Ajustar el desplazamiento
+    // al espacio disponible para todo el grupo, tambien al soltar cerca de una barra.
+    if (items.some((x) => !all[x.mi + dmi])) return say(t.full);
+    const minDt = Math.ceil(Math.max(...items.map((x) => -x.at)) / grid) * grid;
+    const maxDt = Math.floor(Math.min(...items.map((x) => M.capacity(score, x.mi + dmi) - x.at - M.length(x.ev))) / grid) * grid;
+    if (minDt > maxDt) return say(t.full);
+    const dt = Math.max(minDt, Math.min(maxDt, Math.round((target.t - anchorAt) / grid) * grid));
     const pitched = items.filter((x) => !x.ev.rest);
     let dn = anchor.rest ? 0 : target.n - anchor.n;
     if (pitched.length) {
