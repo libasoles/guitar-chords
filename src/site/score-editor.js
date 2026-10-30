@@ -1890,6 +1890,12 @@
     updateHoverGhost();
   });
   document.addEventListener('pointercancel', (event) => endDrag(event, true));
+  // Escape durante un arrastre lo cancela sin tocar la seleccion ni la herramienta.
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || !drag) return;
+    event.stopImmediatePropagation();
+    endDrag({ pointerId: drag.id }, true);
+  }, true);
 
   stage.addEventListener('pointerdown', (event) => {
     if (!event.shiftKey || event.button !== 0 || event.target.closest('input, button, textarea, ascii-tabs')) return;

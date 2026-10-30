@@ -126,6 +126,14 @@ async function run() {
     await page.mouse.down();
     await page.mouse.move(staff.x + 20, grab.y, { steps: 8 });
     assert.equal(await page.locator('.score-ghost svg').count(), 2, 'el phantom representa todas las figuras del grupo');
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('.score-ghost').count(), 0, 'Escape quita el phantom');
+    await page.mouse.up();
+    assert.equal((await events(page, 0)).length, 2, 'Escape cancela el arrastre y no mueve nada');
+    assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 2, 'la seleccion se conserva');
+    await page.mouse.move(grab.x, grab.y);
+    await page.mouse.down();
+    await page.mouse.move(staff.x + 20, grab.y, { steps: 8 });
     await page.mouse.up();
     assert.equal((await events(page, 0)).length, 0);
     assert.equal((await events(page, 1)).length, 2);
