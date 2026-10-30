@@ -469,6 +469,7 @@
     if (!ev || (ev.d === item.d && !!ev.rest === (item.kind === 'rest'))) return;
     const replacement = Object.assign(M.clone(ev), { d: item.d });
     delete replacement.tp;
+    delete replacement.tn;
     if (item.kind === 'rest') { replacement.rest = true; delete replacement.n; delete replacement.acc; }
     else { delete replacement.rest; replacement.n = ev.rest ? M.bottomLine(score, selected.mi) : ev.n; }
     if (item.d === 'w' || item.d === 's' || item.d === 'f') delete replacement.dot;
@@ -505,7 +506,7 @@
     const destination = all[target.mi];
     const others = destination.filter((o) => o !== ev);
     const moved = M.clone(ev);
-    ['tp', 'tie', 'slur', 'beam'].forEach((key) => { delete moved[key]; });
+    ['tp', 'tn', 'tie', 'slur', 'beam'].forEach((key) => { delete moved[key]; });
     if (!ev.rest) moved.n = target.n;
     // Al separar la unica nota de una voz, seguir la columna anterior: una voz
     // vacia volveria a empezar en cero y anularia el desplazamiento horizontal.
@@ -2487,6 +2488,14 @@
   };
 
   const ACTION_ICONS = { triplet: 'triplet', untriplet: 'untriplet', link: 'link', unlink: 'unlink', beam: 'beam', unbeam: 'unbeam' };
+  // Los demas grupos (2, 4 a 9 figuras) son el icono del tresillo con su numero.
+  for (let n = 2; n <= 9; n += 1) {
+    if (n === 3) continue;
+    ICONS['tuplet' + n] = ICONS.triplet.replace(/<path d="M10 7[^>]*>/, '') + '<text x="12" y="13" text-anchor="middle" font-size="12" font-weight="700" stroke="none" fill="currentColor">' + n + '</text>';
+    ICONS['untuplet' + n] = ICONS['tuplet' + n];
+    ACTION_ICONS['tuplet' + n] = 'tuplet' + n;
+    ACTION_ICONS['untuplet' + n] = 'untuplet' + n;
+  }
 
   function lucide(name) {
     return '<svg class="lucide" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" ' +

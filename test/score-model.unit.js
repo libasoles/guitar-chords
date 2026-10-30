@@ -532,12 +532,45 @@ test('tres corcheas seguidas ofrecen tresillo y lo aplican compactando sus lugar
   assert.deepEqual(M.selectionActions(score, refs(0, 1, 2)), ['untriplet', 'unbeam']);
 });
 
-test('seis corcheas hacen dos tresillos y se pueden deshacer', () => {
+test('la cantidad de figuras elegidas decide el grupo: dosillo a nonillo', () => {
+  const normal = { 2: 3, 3: 2, 4: 3, 5: 4, 6: 4, 7: 4, 8: 6, 9: 8 };
+  Object.keys(normal).forEach((key) => {
+    const n = Number(key);
+    const name = n === 3 ? 'triplet' : 'tuplet' + n;
+    const score = M.emptyScore();
+    score.rows[0][0] = Array.from({ length: n }, (_, k) => ({ d: 's', n: 30 + k, at: k * 6 }));
+    assert.ok(M.selectionActions(score, refs(...score.rows[0][0].keys())).includes(name), name);
+    assert.ok(M.applySelection(score, refs(...score.rows[0][0].keys()), name));
+    const evs = score.rows[0][0];
+    assert.ok(evs.every((ev) => ev.tp === 1 && (n === 3 ? ev.tn === undefined : ev.tn === n)));
+    assert.ok(Math.abs(M.measureLength(evs) - 6 * normal[n]) < 1e-9, 'ocupan ' + normal[n] + ' semicorcheas');
+    assert.deepEqual(M.sanitize(M.clone(score)), score);
+    const xml = M.toMusicXml(score);
+    assert.equal((xml.match(new RegExp('<actual-notes>' + n + '</actual-notes><normal-notes>' + normal[n] + '</normal-notes>', 'g')) || []).length, n);
+    const total = [...xml.split('<measure ')[1].matchAll(/<duration>(\d+)<\/duration>/g)].reduce((sum, m) => sum + Number(m[1]), 0);
+    assert.ok(Number.isInteger(total));
+    assert.ok(M.selectionActions(score, refs(...evs.keys())).includes('un' + name), 'un' + name);
+    assert.ok(M.applySelection(score, refs(...evs.keys()), 'un' + name));
+    assert.ok(evs.every((ev) => ev.tp === undefined && ev.tn === undefined));
+  });
+  const ten = M.emptyScore();
+  ten.rows[0][0] = Array.from({ length: 10 }, (_, k) => ({ d: 's', n: 30, at: k * 6 }));
+  assert.ok(!M.selectionActions(ten, refs(...ten.rows[0][0].keys())).some((a) => /tuplet|triplet/.test(a)));
+  assert.ok(!M.selectionActions(ten, refs(0)).some((a) => /tuplet|triplet/.test(a)));
+});
+
+test('seis corcheas hacen un sextillo y se puede deshacer; dos tresillos se eligen de a tres', () => {
   const score = triplets(30, 31, 32, 33, 34, 35);
-  assert.ok(M.applySelection(score, refs(0, 1, 2, 3, 4, 5), 'triplet'));
+  assert.ok(M.applySelection(score, refs(0, 1, 2, 3, 4, 5), 'tuplet6'));
+  assert.deepEqual(score.rows[0][0].map((ev) => ev.tn), [6, 6, 6, 6, 6, 6]);
+  assert.ok(M.applySelection(score, refs(0, 1, 2, 3, 4, 5), 'untuplet6'));
+  assert.deepEqual(score.rows[0][0], triplets(30, 31, 32, 33, 34, 35).rows[0][0]);
+  assert.ok(M.applySelection(score, refs(0, 1, 2), 'triplet'));
+  assert.ok(M.applySelection(score, refs(3, 4, 5), 'triplet'));
   assert.deepEqual(score.rows[0][0].map((ev) => ev.tp), [1, 1, 1, 2, 2, 2]);
   assert.deepEqual(M.onsets(score.rows[0][0]), [0, 8, 16, 24, 32, 40]);
-  assert.ok(M.applySelection(score, refs(0, 1, 2, 3, 4, 5), 'untriplet'));
+  assert.ok(M.applySelection(score, refs(0, 1, 2), 'untriplet'));
+  assert.ok(M.applySelection(score, refs(3, 4, 5), 'untriplet'));
   assert.deepEqual(score.rows[0][0], triplets(30, 31, 32, 33, 34, 35).rows[0][0]);
 });
 
@@ -550,6 +583,7 @@ test('no hay tresillo con duraciones mezcladas, con huecos ni fuera de a tres', 
   assert.ok(M.selectionActions(gap, refs(0, 1, 2)).includes('triplet'), 'un hueco en at no separa: en orden van seguidas');
   const four = triplets(30, 31, 32, 33);
   assert.ok(!M.selectionActions(four, refs(0, 1, 2, 3)).includes('triplet'));
+  assert.ok(M.selectionActions(four, refs(0, 1, 2, 3)).includes('tuplet4'));
   const across = triplets(30, 31, 32);
   across.rows[0][1] = [{ d: 'e', n: 30, at: 0 }];
   assert.ok(!M.selectionActions(across, [{ mi: 0, i: 1 }, { mi: 0, i: 2 }, { mi: 1, i: 0 }]).includes('triplet'));
@@ -605,8 +639,8 @@ test('el barrado manual une corcheas de pulsos distintos y separa las unidas', (
   score.rows[0][0] = [{ d: 'e', rest: true, at: 0 }, { d: 'e', n: 30, at: 12 }, { d: 'e', n: 31, at: 24 }, { d: 'e', n: 32, at: 36 }];
   const beams = () => [...M.toMusicXml(score).split('<measure ')[1].matchAll(/<beam number="1">(\w+)<\/beam>/g)].map((m) => m[1]);
   assert.deepEqual(beams(), ['begin', 'end']);
-  assert.deepEqual(M.selectionActions(score, refs(1, 2)), ['beam']);
-  assert.deepEqual(M.selectionActions(score, refs(2, 3)), ['unbeam']);
+  assert.deepEqual(M.selectionActions(score, refs(1, 2)), ['tuplet2', 'beam']);
+  assert.deepEqual(M.selectionActions(score, refs(2, 3)), ['tuplet2', 'unbeam']);
   assert.deepEqual(M.selectionActions(score, refs(1, 2, 3)), ['triplet', 'beam', 'unbeam']);
   M.applySelection(score, refs(1, 2), 'beam');
   assert.deepEqual(beams(), ['begin', 'continue', 'end']);
@@ -626,7 +660,7 @@ test('no se barran silencios, negras ni figuras separadas', () => {
   score.rows[0][0] = [{ d: 'e', n: 30, at: 0 }, { d: 'q', n: 31, at: 12 }, { d: 'e', n: 32, at: 36 }, { d: 'e', rest: true, at: 48 }];
   assert.deepEqual(M.selectionActions(score, refs(0, 1)), []);
   assert.deepEqual(M.selectionActions(score, refs(0, 2)), []);
-  assert.deepEqual(M.selectionActions(score, refs(2, 3)), []);
+  assert.deepEqual(M.selectionActions(score, refs(2, 3)), ['tuplet2'], 'un silencio no se barra, pero si forma dosillo');
 });
 
 test('sequence ordena las figuras por lectura', () => {
