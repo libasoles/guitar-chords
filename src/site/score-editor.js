@@ -928,6 +928,13 @@
     const bars = [...stage.querySelectorAll('.score-barline-trigger[aria-pressed="true"]')]
       .map((button) => ({ mi: Number(button.dataset.measure), side: button.dataset.side }));
     if (!bars.length) return false;
+    // Un compas elegido (sus barras estan resaltadas por eso) se borra entero; una barra elegida sola, no.
+    if (selectedMeasure !== null) {
+      const mi = selectedMeasure;
+      change(() => { selected = null; return M.removeMeasureAt(score, mi); });
+      clearBarSelection();
+      return true;
+    }
     change(() => bars.forEach(({ mi, side }) => M.removeBarline(score, mi, side)));
     return true;
   }

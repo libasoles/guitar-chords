@@ -1410,3 +1410,14 @@ test('insertar dentro de una cejilla la corta antes del compas nuevo', () => {
   assert.ok(M.insertMeasure(score, 1));
   assert.equal(score.barres[0].span, undefined);
 });
+
+test('quitar un compas cualquiera lo borra con sus barras y corre los siguientes', () => {
+  const score = M.emptyScore();
+  M.measures(score)[2].push({ d: 'q', n: 30 });
+  score.barlines = { 1: { double: true }, 3: { double: true } };
+  assert.ok(M.removeMeasureAt(score, 1));
+  assert.deepEqual(M.measures(score).map((m) => m.length).slice(0, 3), [0, 1, 0]);
+  assert.deepEqual(score.barlines, { 2: { double: true } });
+  assert.equal(M.measures(score).length, 11);
+  assert.ok(!M.removeMeasureAt(score, 99));
+});

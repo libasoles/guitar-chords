@@ -688,7 +688,13 @@
   // Quita el ultimo compas del renglon `row` (con sus figuras), salvo que sea el unico.
   function removeMeasure(score, row) {
     if (!Number.isInteger(row) || row < 0 || row >= score.rows.length || score.rows[row].length <= 1) return false;
-    const at = rowStarts(score)[row] + score.rows[row].length - 1;
+    return removeMeasureAt(score, rowStarts(score)[row] + score.rows[row].length - 1);
+  }
+
+  // Quita el compas plano `at` con sus figuras; los siguientes se corren. Un renglon que queda vacio desaparece.
+  function removeMeasureAt(score, at) {
+    if (!Number.isInteger(at) || at < 0 || at >= measures(score).length || measures(score).length <= 1) return false;
+    const { row } = rowOf(score, at);
     if (score.barres) Object.keys(score.barres).forEach((key) => {
       const barre = score.barres[key];
       if (+key === at) delete score.barres[key];
@@ -704,7 +710,14 @@
       score[name] = shiftKeys(score[name], at, -1);
       if (!Object.keys(score[name]).length) delete score[name];
     });
-    score.rows[row].pop();
+    if (score.tabs) score.tabs = Object.fromEntries(Object.entries(score.tabs)
+      .filter(([key]) => +key.split(':')[0] !== at)
+      .map(([key, value]) => {
+        const [mi, time] = key.split(':');
+        return [(+mi > at ? +mi - 1 : +mi) + ':' + time, value];
+      }));
+    score.rows[row].splice(at - rowStarts(score)[row], 1);
+    if (!score.rows[row].length) score.rows.splice(row, 1);
     pruneKeys(score);
     return true;
   }
@@ -1942,7 +1955,7 @@
 
   return {
     voicesText, TUPLETS, tupletSize, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
-    captureTabReferences, restoreTabReferences, copySelection, pasteSelection, duplicateSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, moveMeasure, addMeasure, insertMeasure, removeMeasure, fits, canDot, dotStart, dotPlan,
+    captureTabReferences, restoreTabReferences, copySelection, pasteSelection, duplicateSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, moveMeasure, addMeasure, insertMeasure, removeMeasure, removeMeasureAt, fits, canDot, dotStart, dotPlan,
     meterOf, meterAt, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setNavigation, removeNavigation, navigationEndings, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };

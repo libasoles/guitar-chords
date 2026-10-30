@@ -43,6 +43,15 @@ async function run() {
     await page.keyboard.press('ControlOrMeta+z');
     assert.deepEqual((await filled()).slice(0, 3), [0, 0, 1], 'deshacer quita el compas insertado');
 
+    // Delete con un compas elegido lo borra entero, no solo sus barras.
+    await selectBar(2);
+    const before = await page.evaluate(() => ScoreModel.measures(scoreEditor.score).length);
+    await page.keyboard.press('Delete');
+    assert.equal(await page.evaluate(() => ScoreModel.measures(scoreEditor.score).length), before - 1, 'Delete quita el compas');
+    assert.deepEqual((await filled()).slice(0, 3), [0, 0, 0], 'el compas con figuras desaparece y los demas se corren');
+    await page.keyboard.press('ControlOrMeta+z');
+    assert.deepEqual((await filled()).slice(0, 3), [0, 0, 1], 'deshacer devuelve el compas');
+
     await page.locator('#scoreTitle').click();
     assert.equal(await page.locator('.score-insert-measure').count(), 0, 'cancelar la seleccion quita los +');
 

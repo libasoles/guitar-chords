@@ -265,11 +265,12 @@ async function checkBarlines(page) {
   assert.deepEqual(await page.locator('.score-barline-trigger[aria-pressed="true"]').evaluateAll(nodes =>
     nodes.map(node => [node.dataset.measure, node.dataset.side])), [['0', 'end'], ['1', 'end']]);
   const beforeDelete = await page.evaluate(() => structuredClone(scoreEditor.score));
+  const measureCount = await page.evaluate(() => ScoreModel.measures(scoreEditor.score).length);
   await page.keyboard.press('Delete');
-  assert.deepEqual(await page.evaluate(() => [scoreEditor.score.barlines[0], scoreEditor.score.barlines[1]]), [{ start: true, hidden: true }, { hidden: true }]);
+  assert.equal(await page.evaluate(() => ScoreModel.measures(scoreEditor.score).length), measureCount - 1, 'Delete con el compas elegido lo borra entero, no solo sus barras');
   assert.equal(await page.locator('.is-bar-selected').count(), 0);
   await page.keyboard.press('ControlOrMeta+z');
-  assert.deepEqual(await page.evaluate(() => scoreEditor.score), beforeDelete, 'deshacer restaura ambas barras en un paso');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score), beforeDelete, 'deshacer restaura el compas en un paso');
   // El compas siguiente no tiene barra propia: solo se activa su barra izquierda (cierre del anterior).
   const nextBox = await page.locator('[id="m2"]').boundingBox();
   await page.mouse.click(nextBox.x + nextBox.width / 2, nextBox.y + nextBox.height / 2);
