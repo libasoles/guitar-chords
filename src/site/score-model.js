@@ -279,17 +279,26 @@
   }
 
   // Un fragmento conserva los compases intermedios y solo las figuras elegidas.
-  function copySelection(score, refs) {
+  function copySelection(score, refs, columns = score.tabs || {}) {
     const all = measures(score);
     const chosen = refs.filter((r) => all[r.mi]?.[r.i]);
     if (!chosen.length) return null;
     const first = Math.min(...chosen.map((r) => r.mi));
     const last = Math.max(...chosen.map((r) => r.mi));
     const fragment = Array.from({ length: last - first + 1 }, () => []);
+    const positions = new Map();
     all.forEach((measure, mi) => measure.forEach((ev, i) => {
-      if (chosen.some((r) => r.mi === mi && r.i === i)) fragment[mi - first].push(clone(ev));
+      if (!chosen.some((r) => r.mi === mi && r.i === i)) return;
+      positions.set(ev, { mi: mi - first, i: fragment[mi - first].length });
+      fragment[mi - first].push(clone(ev));
     }));
-    return { type: 'guitar-score-selection', version: 1, meter: meterOf(score), measures: fragment };
+    const tabs = attacks(score, true).filter((attack) => columns[attack.key]).map((attack) => {
+      const notes = attack.events.flatMap((ev, i) => positions.has(ev) ? [{ ...positions.get(ev), midi: attack.midis[i] }] : []);
+      const column = columns[attack.key].map((fret, string) =>
+        notes.length === attack.events.length || notes.some((note) => TAB_OPENS[string] + fret === note.midi) ? fret : null);
+      return { notes, column };
+    }).filter((entry) => entry.notes.length);
+    return { tabs, type: 'guitar-score-selection', version: 1, meter: meterOf(score), measures: fragment };
   }
 
   // Prepara todo antes de escribir: un pegado que no entra no cambia la partitura.
@@ -300,6 +309,16 @@
       !fragment.measures.every(Array.isArray)) return null;
     const clean = sanitize({ meter: fragment.meter, rows: [fragment.measures] }).rows[0];
     if (clean.some((m, i) => m.length !== fragment.measures[i].length) || !clean.some((m) => m.length)) return null;
+    const savedTabs = captureTabReferences(score);
+    // El portapapeles usa indices serializables; al pegar se les da una identidad nueva.
+    if (Array.isArray(fragment.tabs)) fragment.tabs.forEach((entry) => {
+      if (!entry || !Array.isArray(entry.notes) || !entry.notes.length || !Array.isArray(entry.column)) return;
+      const notes = entry.notes.map((note) => note && Number.isInteger(note.mi) && Number.isInteger(note.i) &&
+        Number.isInteger(note.midi) && clean[note.mi]?.[note.i] && !clean[note.mi][note.i].rest ? note : null);
+      if (notes.some((note) => !note)) return;
+      savedTabs.push({ refs: notes.map((note) => tabReference(clean[note.mi][note.i])), midis: notes.map((note) => note.midi),
+        column: sanitizeTabs({ '0:0': entry.column }, 1)['0:0'] });
+    });
     const trial = clone(score);
     while (measures(trial).length < mi + clean.length) trial.rows.push(emptyRow());
     const all = measures(trial);
@@ -322,7 +341,10 @@
       if (measureLength(destination) > capacity(trial, mi + offset)) return null;
       indices.forEach((i) => refs.push({ mi: mi + offset, i }));
     }
+    restoreTabReferences(trial, savedTabs);
     score.rows = trial.rows;
+    if (trial.tabs) score.tabs = trial.tabs;
+    else delete score.tabs;
     return refs;
   }
 

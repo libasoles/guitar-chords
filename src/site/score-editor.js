@@ -209,9 +209,8 @@
 
   // ---- edicion ------------------------------------------------------------
 
-  function change(mutate) {
+  function change(mutate, tabRefs = M.captureTabReferences(score, score.showTabs ? tabColumns : score.tabs)) {
     clearBarSelection();
-    const tabRefs = M.captureTabReferences(score, score.showTabs ? tabColumns : score.tabs);
     const before = M.clone(score);
     if (mutate() === false) return false;
     // `at` queda siempre igual al tiempo que se ve (sin huecos): asi los clics y arrastres siguientes se ubican en el orden.
@@ -1765,7 +1764,7 @@
   const editingText = (event) => event.target.closest('input, textarea, select, [contenteditable], ascii-tabs');
   document.addEventListener('copy', (event) => {
     if (editingText(event) || !event.clipboardData) return;
-    const fragment = M.copySelection(score, picks());
+    const fragment = M.copySelection(score, picks(), score.showTabs ? tabColumns : score.tabs);
     if (!fragment) return;
     event.preventDefault();
     const text = JSON.stringify(fragment);
@@ -1781,13 +1780,14 @@
     if (fragment?.type !== 'guitar-score-selection' || fragment.version !== 1) return;
     event.preventDefault();
     const trial = M.clone(score);
+    M.restoreTabReferences(trial, M.captureTabReferences(score, score.showTabs ? tabColumns : score.tabs));
     const refs = M.pasteSelection(trial, fragment, selectedMeasure);
     if (!refs) return say(t.full);
     change(() => {
       Object.assign(score, trial);
       selected = refs[refs.length - 1];
       group = refs.length > 1 ? refs : [];
-    });
+    }, M.captureTabReferences(trial));
     stage.focus({ preventScroll: true });
   });
 
