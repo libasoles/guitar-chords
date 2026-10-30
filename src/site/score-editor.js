@@ -465,21 +465,39 @@
       if (eventAt(selected)) applyModifier(item, selected);
       return;
     }
-    const ev = eventAt(selected);
-    if (!ev || (ev.d === item.d && !!ev.rest === (item.kind === 'rest'))) return;
-    const replacement = Object.assign(M.clone(ev), { d: item.d });
-    delete replacement.tp;
-    delete replacement.tn;
-    if (item.kind === 'rest') { replacement.rest = true; delete replacement.n; delete replacement.acc; delete replacement.dead; }
-    else { delete replacement.rest; replacement.n = ev.rest ? M.bottomLine(score, selected.mi) : ev.n; }
-    if (item.d === 'w' || item.d === 's' || item.d === 'f') delete replacement.dot;
-    else if (replacement.dot === 2 && item.d !== 'h' && item.d !== 'q') replacement.dot = true;
-    const measure = M.measures(score)[selected.mi];
+    // La figura se aplica a todas las seleccionadas; cada compas se valida entero antes de tocar nada.
+    const edits = picks().filter((ref) => {
+      const ev = eventAt(ref);
+      return ev && !(ev.d === item.d && !!ev.rest === (item.kind === 'rest'));
+    }).map((ref) => {
+      const ev = eventAt(ref);
+      const replacement = Object.assign(M.clone(ev), { d: item.d });
+      delete replacement.tp;
+      delete replacement.tn;
+      if (item.kind === 'rest') { replacement.rest = true; delete replacement.n; delete replacement.acc; delete replacement.dead; }
+      else { delete replacement.rest; replacement.n = ev.rest ? M.bottomLine(score, ref.mi) : ev.n; }
+      if (item.d === 'w' || item.d === 's' || item.d === 'f') delete replacement.dot;
+      else if (replacement.dot === 2 && item.d !== 'h' && item.d !== 'q') replacement.dot = true;
+      return { ref, replacement };
+    });
+    if (!edits.length) return;
+    const place = (measure, { ref, replacement }) => {
+      measure[ref.i] = Object.assign(replacement, { at: measure[ref.i].at }, Number.isInteger(measure[ref.i].v) ? { v: measure[ref.i].v } : {});
+    };
+    const touched = [...new Set(edits.map((e) => e.ref.mi))];
     // Se cuenta en orden: lo que sigue en su voz se corre, y la voz tiene que seguir entrando en el compas.
-    const trial = M.settle(M.clone(measure));
-    trial[selected.i] = Object.assign(replacement, { at: trial[selected.i].at }, Number.isInteger(trial[selected.i].v) ? { v: trial[selected.i].v } : {});
-    if (M.measureLength(trial) > M.capacity(score, selected.mi)) return say(t.full);
-    change(() => { M.settle(measure); measure[selected.i] = replacement; });
+    for (const mi of touched) {
+      const trial = M.settle(M.clone(M.measures(score)[mi]));
+      edits.filter((e) => e.ref.mi === mi).forEach((e) => place(trial, { ref: e.ref, replacement: M.clone(e.replacement) }));
+      if (M.measureLength(trial) > M.capacity(score, mi)) return say(t.full);
+    }
+    change(() => {
+      touched.forEach((mi) => {
+        const measure = M.measures(score)[mi];
+        M.settle(measure);
+        edits.filter((e) => e.ref.mi === mi).forEach((e) => place(measure, e));
+      });
+    });
     say('');
   }
 
