@@ -1,0 +1,48 @@
+/* Escala de los silencios de /partitura. Ejecutar despues de npm run build:site. */
+'use strict';
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const { chromium } = require('playwright');
+const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
+const { serveStatic } = require('../scripts/lib/static-server');
+
+async function run() {
+  const server = await serveStatic(path.join(__dirname, '..', 'dist', 'site'), 0);
+  let browser;
+  try {
+    browser = await chromium.launch({ executablePath: playwrightExecutablePath() });
+    for (const width of [1280, 390]) {
+      const page = await browser.newPage({ viewport: { width, height: 900 } });
+      await page.goto('http://localhost:' + server.address().port + '/partitura');
+      await page.waitForSelector('#scoreStage g.measure');
+      await page.evaluate(() => {
+        scoreEditor.score.rows[0][0] = ['f', 's', 'e', 'q', 'h', 'w'].map((d, i) => ({ d, rest: true, at: i * 2 }));
+        scoreEditor.render();
+        return document.fonts.ready;
+      });
+      const sizes = await page.evaluate(() => {
+        const keys = ['q', 'w', 'e', 'r', 't', 'y'];
+        return keys.map((key, i) => {
+          const svg = document.querySelector(`[data-shortcut="${key}"] svg`);
+          const glyph = svg.querySelector('g path').getBoundingClientRect();
+          const score = document.querySelectorAll('#m0 g.rest use')[i].getBoundingClientRect();
+          const frame = svg.getBoundingClientRect();
+          return {
+            key, ratio: glyph.height / score.height,
+            fits: glyph.top >= frame.top && glyph.bottom <= frame.bottom && glyph.left >= frame.left && glyph.right <= frame.right,
+          };
+        });
+      });
+      for (const size of sizes) {
+        assert.ok(Math.abs(size.ratio - 1) < 0.05, `${width}px: el silencio ${size.key} tiene la escala de la partitura (${size.ratio})`);
+        assert.ok(size.fits, `${width}px: el silencio ${size.key} cabe entero en su SVG`);
+      }
+      await page.close();
+    }
+    console.log('score-palette e2e: OK');
+  } finally {
+    if (browser) await browser.close();
+    await new Promise((resolve) => server.close(resolve));
+  }
+}
+run().catch((error) => { console.error(error); process.exitCode = 1; });
