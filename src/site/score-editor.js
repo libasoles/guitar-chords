@@ -2341,8 +2341,14 @@
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
+  function downloadFilename(exportScore, extension) {
+    const filenameTitle = exportScore.title.trim() || 'partitura';
+    const filenameAuthor = (exportScore.author || '').trim();
+    return filenameTitle + (filenameAuthor ? ' - ' + filenameAuthor : '') + '.' + extension;
+  }
+
   document.getElementById('scoreDownloadXml').addEventListener('click', () => {
-    download(new Blob([M.toMusicXml(score)], { type: 'application/vnd.recordare.musicxml+xml' }), 'partitura.musicxml');
+    download(new Blob([M.toMusicXml(score)], { type: 'application/vnd.recordare.musicxml+xml' }), downloadFilename(score, 'musicxml'));
   });
 
   // Verovio numera el primer compas de cada renglon; en una partitura de uso personal sobran.
@@ -2503,9 +2509,7 @@
           pdf.text(exportScore.title, 8.75, 15);
         }
       }
-      const filenameTitle = exportScore.title.trim() || 'partitura';
-      const filenameAuthor = (exportScore.author || '').trim();
-      pdf.save(filenameTitle + (filenameAuthor ? ' - ' + filenameAuthor : '') + '.pdf');
+      pdf.save(downloadFilename(exportScore, 'pdf'));
     } catch (e) {
       say(t.pdfError);
     } finally {
