@@ -26,6 +26,48 @@ const { serveStatic } = require('../scripts/lib/static-server');
       await document.fonts.ready;
       for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
     });
+    // Shift+arrows change the fingering while the score's pitches stay fixed.
+    await page.evaluate(() => {
+      scoreEditor.score.rows[0][0] = [{ n: 23, d: 'q', at: 0 }];
+      scoreEditor.score.tabs = { '0:0': [null, null, null, null, 7, null] };
+      scoreEditor.render();
+    });
+    const cell = (s) => tab.locator(`.ascii-tabs-cell[data-c="0"][data-s="${s}"]`);
+    const column = () => tab.evaluate(node => node.value[0][0]);
+    await cell(4).click();
+    const notation = await page.evaluate(() => structuredClone(scoreEditor.score.rows));
+    const layout = await tab.evaluate(node => node.columnLayout);
+    await page.keyboard.press('Shift+ArrowUp');
+    assert.deepEqual(await column(), [null, null, null, 2, null, null],
+      'Shift+Up re-fingers A-string 7 as D-string 2 instead of moving only the cursor');
+    assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows), notation,
+      're-fingering preserves the written score');
+    assert.deepEqual(await tab.evaluate(node => node.columnLayout), layout,
+      're-fingering preserves the columns aligned with the score');
+    assert.deepEqual(await page.evaluate(() => scoreEditor.score.tabs['0:0']), await column(),
+      'the new fingering reaches the score model');
+    await page.keyboard.press('Shift+ArrowDown');
+    assert.deepEqual(await column(), [null, null, null, null, 7, null],
+      'Shift+Down restores A-string 7');
+    await page.keyboard.press('Shift+ArrowUp');
+    await page.reload();
+    await cell(3).waitFor();
+    assert.deepEqual(await column(), [null, null, null, 2, null, null],
+      'the new fingering survives reload');
+    await cell(3).click();
+    await page.keyboard.press('Shift+ArrowUp');
+    assert.deepEqual(await column(), [null, null, null, 2, null, null],
+      'a pitch too low for the higher strings keeps its fingering');
+    assert.equal(await tab.locator('.ascii-tabs-cur').getAttribute('data-s'), '3',
+      'an impossible re-fingering keeps the cursor on its note');
+    await page.keyboard.press('Escape');
+    await page.evaluate(() => {
+      scoreEditor.score.rows[0][0] = [{ n: 28, d: 'q', at: 0 }];
+      delete scoreEditor.score.tabs;
+      scoreEditor.render();
+    });
+    await tab.locator('.ascii-tabs-cell').first().waitFor();
+    await page.locator('#scoreStage').focus();
     await page.keyboard.press('4');
     assert.equal(await toggle.getAttribute('aria-pressed'), 'true',
       'TAB stays pressed when a note tool is selected');

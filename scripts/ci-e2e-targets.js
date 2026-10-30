@@ -117,6 +117,14 @@ const SUITES = {
       /^test\/score-reorder\./,
     ],
   },
+  'score-tab-tool': {
+    build: 'site',
+    paths: [
+      /^src\/site\/score-(editor|model|fingering)\./,
+      /^vendor\/ascii-tabs\.js$/,
+      /^test\/score-tab-tool\./,
+    ],
+  },
   'score-tab-pdf': {
     build: 'site',
     paths: [
