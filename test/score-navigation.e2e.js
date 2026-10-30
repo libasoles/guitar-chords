@@ -5,6 +5,55 @@ const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
 const { serveStatic } = require('../scripts/lib/static-server');
 
+async function checkHiddenBarlineEndings(page) {
+  await page.evaluate(() => {
+    scoreEditor.score.navigation = { 2: { first: true } };
+    scoreEditor.render();
+  });
+  const bounds = () => page.evaluate(() => {
+    const line = document.querySelector('g.ending .voltaBracket > path').getBoundingClientRect();
+    const staff = document.querySelector('#m1 > g.staff > path').getBoundingClientRect();
+    return { left: line.left, measureLeft: staff.left };
+  });
+  const handle = page.locator('.score-barline-trigger[data-measure="1"][data-side="end"]');
+  await handle.click();
+  await page.keyboard.press('Delete');
+  assert.equal(await page.evaluate(() => scoreEditor.score.barlines[1].hidden), true);
+  let box = await bounds();
+  assert.ok(Math.abs(box.left - box.measureLeft) < 10, 'existing ending expands left across the deleted barline: ' + JSON.stringify(box));
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+  box = await bounds();
+  assert.ok(Math.abs(box.left - box.measureLeft) < 10, 'saved ending keeps the visible boundary after reload');
+  await page.locator('g.ending text').click();
+  await page.keyboard.press('Delete');
+  assert.equal(await page.locator('g.ending').count(), 0);
+  await page.keyboard.press('ControlOrMeta+z');
+  assert.equal(await page.locator('g.ending').count(), 1, 'undo restores the expanded ending');
+  await page.locator('g.ending text').click();
+  await page.keyboard.press('Delete');
+  assert.equal(await page.locator('g.ending').count(), 0);
+  for (const mi of [1, 2]) {
+    await page.locator('[data-navigation="first"]').click();
+    const staff = await page.locator(`#m${mi} > g.staff > path`).first().boundingBox();
+    await page.mouse.click(staff.x + staff.width / 2, staff.y + 12);
+    await page.keyboard.press('Escape');
+    box = await bounds();
+    assert.ok(Math.abs(box.left - box.measureLeft) < 10, 'new ending covers the visible measure from either half: ' + JSON.stringify(box));
+    const right = await page.evaluate(() => ({
+      bracket: document.querySelector('g.ending .voltaBracket > path').getBoundingClientRect().right,
+      staff: document.querySelector('#m2 > g.staff > path').getBoundingClientRect().right,
+    }));
+    assert.ok(Math.abs(right.bracket - right.staff) < 10, 'ending reaches the next visible barline: ' + JSON.stringify(right));
+    await page.locator('g.ending text').click();
+    await page.keyboard.press('Delete');
+    assert.equal(await page.locator('g.ending').count(), 0);
+  }
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.waitForSelector('#scoreStage g.measure');
+}
+
 async function checkNavigationRegressions(page) {
   await page.evaluate(() => {
     const score = scoreEditor.score;
@@ -87,6 +136,7 @@ async function checkNavigationRegressions(page) {
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto(`http://127.0.0.1:${server.address().port}/partitura`);
     await page.waitForSelector('#scoreStage g.measure');
+    await checkHiddenBarlineEndings(page);
     await checkNavigationRegressions(page);
     assert.deepEqual(await page.locator('#scoreBarlines > button').evaluateAll((buttons) => buttons.map((b) => b.id || b.dataset.tool || b.dataset.barline || b.dataset.navigation)),
       ['scoreTabToggle', 'barre', 'start', 'end', 'double', 'dc', 'ds', 'segno', 'first', 'second']);

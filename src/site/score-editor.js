@@ -1453,7 +1453,8 @@
       selected = null;
       group = [];
     } else nodes.forEach((node) => node.classList.add('is-selected'));
-    selectedNavigation = selectedNavigation.filter((pick) => score.navigation?.[pick.first]?.[pick.mark]);
+    selectedNavigation = selectedNavigation.filter((pick) =>
+      Array.from({ length: pick.last - pick.first + 1 }, (_, i) => score.navigation?.[pick.first + i]?.[pick.mark]).some(Boolean));
     stage.querySelectorAll('[data-navigation-mark]').forEach((node) => {
       if (selectedNavigation.some((pick) => pick.first === Number(node.dataset.navigationFirst) && pick.mark === node.dataset.navigationMark)) node.classList.add('is-selected');
     });

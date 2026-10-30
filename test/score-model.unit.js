@@ -1275,3 +1275,38 @@ test('removing navigation preserves other marks and note data', () => {
   assert.equal(score.navigation, undefined);
   assert.deepEqual(score.rows[0][0], [{ n: 30, d: 'q' }]);
 });
+
+
+test('endings cover the whole visible measure after deleting an internal barline', () => {
+  for (const mark of ['first', 'second']) {
+    for (const mi of [1, 2, 3]) {
+      const score = M.emptyScore();
+      M.setNavigation(score, mi, mark);
+      M.removeBarline(score, 1, 'end');
+      M.removeBarline(score, 2, 'end');
+      const expected = [{ first: 1, last: 3, mark, number: mark === 'first' ? '1' : '2', closed: mark === 'first' }];
+      assert.deepEqual(M.navigationEndings(score), expected);
+      assert.deepEqual(M.navigationEndings(M.sanitize(M.clone(score))), expected);
+      const xml = M.toMusicXml(score);
+      assert.match(xml.split('<measure number="2"')[1].split('</measure>')[0], /<ending .*type="start"/);
+      assert.match(xml.split('<measure number="4"')[1].split('</measure>')[0], /<ending .*type="(?:stop|discontinue)"/);
+      M.removeNavigation(score, mi, mark);
+      M.setNavigation(score, mi, mark);
+      assert.deepEqual(M.navigationEndings(score), expected, 'placing a new ending uses the visible boundaries');
+      M.setNavigation(score, 2, mark);
+      assert.deepEqual(M.navigationEndings(score), [], 'placing the same mark in another half toggles it off');
+    }
+  }
+});
+
+test('a restored or forward repeat bar bounds endings at the visible boundary', () => {
+  const score = M.emptyScore();
+  score.navigation = { 2: { first: true } };
+  M.removeBarline(score, 1, 'end');
+  M.setBarline(score, 2, 'start');
+  assert.equal(M.navigationEndings(score)[0].first, 2);
+  M.removeBarline(score, 2, 'start');
+  assert.equal(M.navigationEndings(score)[0].first, 1);
+  M.setBarline(score, 1, 'double');
+  assert.equal(M.navigationEndings(score)[0].first, 2);
+});

@@ -572,14 +572,36 @@
     return true;
   }
 
+  // Hidden internal bars join stored measures into one visible measure.
+  function visibleMeasureRange(score, mi, count) {
+    const hidden = (index) => score.barlines?.[index]?.hidden && !score.barlines[index].end &&
+      !score.barlines[index].double && !score.barlines?.[index + 1]?.start;
+    let first = mi, last = mi;
+    while (first > 0 && hidden(first - 1)) first -= 1;
+    while (last + 1 < count && hidden(last)) last += 1;
+    return { first, last };
+  }
+
   // Navigation marks belong to measures and survive row edits and saved scores.
   const NAVIGATION = ['dc', 'ds', 'segno', 'first', 'second'];
   function setNavigation(score, mi, mark) {
     if (!Number.isInteger(mi) || mi < 0 || mi >= measures(score).length || !NAVIGATION.includes(mark)) return false;
+    if (mark === 'first' || mark === 'second') {
+      const { first, last } = visibleMeasureRange(score, mi, measures(score).length);
+      const active = Array.from({ length: last - first + 1 }, (_, i) => score.navigation?.[first + i]?.[mark]).some(Boolean);
+      for (let i = first; i <= last; i += 1) {
+        removeNavigation(score, i, 'first');
+        removeNavigation(score, i, 'second');
+      }
+      if (!active) {
+        if (!score.navigation) score.navigation = {};
+        score.navigation[first] = { ...score.navigation[first], [mark]: true };
+      }
+      return true;
+    }
     const marks = Object.assign({}, score.navigation?.[mi]);
     if (marks[mark]) delete marks[mark];
     else {
-      if (mark === 'first' || mark === 'second') { delete marks.first; delete marks.second; }
       if (mark === 'dc' || mark === 'ds') { delete marks.dc; delete marks.ds; }
       marks[mark] = true;
     }
@@ -597,18 +619,26 @@
     return true;
   }
 
-  // A bracket spans adjacent measures with the same ending; closing bars break the span.
+  // A bracket covers visible measures; closing bars break consecutive endings.
   function navigationEndings(score) {
     const all = measures(score), endings = [];
-    for (let mi = 0; mi < all.length; mi += 1) {
-      const nav = score.navigation?.[mi];
-      const mark = nav?.first ? 'first' : nav?.second ? 'second' : null;
+    for (let mi = 0; mi < all.length;) {
+      const { first, last } = visibleMeasureRange(score, mi, all.length);
+      let mark = null;
+      for (let i = first; i <= last && !mark; i += 1) {
+        const nav = score.navigation?.[i];
+        mark = nav?.first ? 'first' : nav?.second ? 'second' : null;
+      }
+      mi = last + 1;
       if (!mark) continue;
-      const first = mi;
-      while (mi + 1 < all.length && score.navigation?.[mi + 1]?.[mark] && !score.barlines?.[mi]?.end && !score.barlines?.[mi]?.double) mi += 1;
-      const bar = score.barlines?.[mi];
-      endings.push({ first, last: mi, mark, number: mark === 'first' ? '1' : '2',
-        closed: mark === 'first' || !!(bar?.end || bar?.double || (mi === all.length - 1 && !bar?.hidden)) });
+      const bar = score.barlines?.[last];
+      const previous = endings.at(-1);
+      const closing = score.barlines?.[first - 1];
+      const closed = mark === 'first' || !!(bar?.end || bar?.double || (last === all.length - 1 && !bar?.hidden));
+      if (previous?.mark === mark && previous.last === first - 1 && !closing?.end && !closing?.double) {
+        previous.last = last;
+        previous.closed = closed;
+      } else endings.push({ first, last, mark, number: mark === 'first' ? '1' : '2', closed });
     }
     return endings;
   }
