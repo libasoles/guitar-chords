@@ -41,7 +41,7 @@ const { serveStatic } = require('../scripts/lib/static-server');
     pages = await exportPages();
     assert.ok(pages.every(svg => !svg.includes('class="pdf-tab"')), 'PDF omits TAB when disabled');
     await page.evaluate(() => {
-      const row = [[{ n: 28, d: 'q', at: 0 }], [], [], []];
+      const row = [[{ n: 24, d: 'h', at: 0 }], [], [], []];
       scoreEditor.score.rows = Array.from({ length: 12 }, () => structuredClone(row));
       scoreEditor.score.showTabs = true;
       scoreEditor.render();
@@ -59,6 +59,11 @@ const { serveStatic } = require('../scripts/lib/static-server');
         const systems = [...svg.querySelectorAll('g.system')];
         return {
           count: tabs.length,
+          clear: tabs.every(tab => {
+            const music = [...tab.parentNode.querySelectorAll('g.layer')].map(node => node.getBoundingClientRect());
+            const fret = [...tab.querySelectorAll('text')].find(node => /^\d+$/.test(node.textContent));
+            return fret && fret.getBoundingClientRect().top > Math.max(...music.map(box => box.bottom));
+          }),
           frets: tabs.map(tab => [...tab.querySelectorAll('text')].map(text => text.textContent).join('')),
           inside: tabs.every(tab => tab.getBoundingClientRect().bottom < pageBox.bottom),
           separated: tabs.every((tab, i) => !systems[i + 1] ||
@@ -74,6 +79,7 @@ const { serveStatic } = require('../scripts/lib/static-server');
       } finally { host.remove(); }
     }), pages);
     assert.equal(geometry.reduce((sum, page) => sum + page.count, 0), 12, 'all systems include TAB');
+    assert.ok(geometry.every(page => page.clear), 'low notes stay above the TAB frets');
     assert.ok(geometry.every(page => page.inside), 'TAB stays inside each PDF page');
     assert.ok(geometry.every(page => page.separated), 'TAB does not overlap the next system');
     assert.ok(geometry.every(page => page.aligned), 'frets align with their notation');

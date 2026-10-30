@@ -10,7 +10,7 @@ const { serveStatic } = require('../scripts/lib/static-server');
   let browser;
   try {
     browser = await chromium.launch({ executablePath: playwrightExecutablePath() });
-    const page = await browser.newPage();
+    const page = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
     await page.goto('http://localhost:' + server.address().port + '/partitura');
     await page.waitForSelector('.score-clef-trigger');
     await page.evaluate(() => {
@@ -22,6 +22,10 @@ const { serveStatic } = require('../scripts/lib/static-server');
     if (!(await page.locator('.score-tab').count())) await toggle.click();
     const tab = page.locator('.score-tab').first();
     await tab.locator('.ascii-tabs-cell').first().waitFor();
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
+    });
     await page.keyboard.press('4');
     assert.equal(await toggle.getAttribute('aria-pressed'), 'true',
       'TAB stays pressed when a note tool is selected');
@@ -41,22 +45,32 @@ const { serveStatic } = require('../scripts/lib/static-server');
     await tab.locator('.ascii-tabs-cell').first().click();
     assert.equal(await tab.evaluate(node => node.classList.contains('ascii-tabs-editing')), true,
       'TAB editing resumes when the tool is released');
-    // Low ledger-line heads overlap the TAB's first empty string cell.
+    // Low ledger-line heads and stems must leave the TAB clear.
     await page.evaluate(() => {
       scoreEditor.score.rows[0][0] = [{ n: 24, d: 'h', at: 0 }];
       scoreEditor.render();
     });
     await tab.locator('.ascii-tabs-cell').first().waitFor();
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
+    });
     const lowHead = await page.locator('#e0-0 .notehead').boundingBox();
     const lowPoint = { x: lowHead.x + lowHead.width / 2, y: lowHead.y + lowHead.height / 2 };
-    assert.ok(await page.evaluate(p => !!document.elementFromPoint(p.x, p.y).closest('.score-tab'), lowPoint),
-      'the regression clicks a note head underneath the TAB');
+    const gap = await page.evaluate(() => {
+      const note = document.querySelector('#e0-0').getBoundingClientRect();
+      const tab = document.querySelector('.score-tab').getBoundingClientRect();
+      return tab.top - note.bottom;
+    });
+    assert.ok(gap >= 7.9, 'low notes leave at least 8px before TAB: ' + gap);
+    assert.ok(await page.evaluate(p => !document.elementFromPoint(p.x, p.y).closest('.score-tab'), lowPoint),
+      'the low note head stays above TAB');
     await page.mouse.move(lowPoint.x, lowPoint.y);
     await page.mouse.down();
     await page.mouse.move(lowPoint.x, lowPoint.y - 30, { steps: 6 });
     await page.mouse.up();
     assert.notEqual(await page.evaluate(() => scoreEditor.score.rows[0][0][0].n), 24,
-      'dragging the overlapping head changes the score pitch instead of editing TAB');
+      'dragging the low head changes the score pitch instead of editing TAB');
     assert.equal(await tab.evaluate(node => node.classList.contains('ascii-tabs-editing')), false,
       'the note drag does not open TAB editing');
     assert.equal(await page.locator('#e0-0.is-selected').count(), 1,

@@ -1080,13 +1080,19 @@
       tabs.setAttribute('aria-label', t.tabLabel + ' ' + (row + 1));
       tabs.style.setProperty('--ascii-tabs-font-size', font + 'px');
       tabs.style.left = head.left + 'px';
-      tabs.style.top = (last.lines[4] + TAB_CLEF_CLEARANCE) + 'px';
+      // Measure the whole engraved row, including low heads, stems and ledger lines.
+      const system = stage.querySelectorAll('g.system')[row];
+      const boxes = [...system.querySelectorAll('g.layer, g.fermata, g.slur, g.tie')]
+        .map(node => node.getBoundingClientRect()).filter(box => box.width || box.height);
+      const contentBottom = Math.max(last.lines[4], ...boxes.map(box => box.bottom - origin.top));
+      const offset = Math.max(TAB_CLEF_CLEARANCE, contentBottom - last.lines[4] + TAB_GAP);
+      tabs.style.top = (last.lines[4] + offset) + 'px';
       tabs.style.width = (last.right - head.left) + 'px';
       tabs.appendChild(document.createElement('ascii-tabs-sheet'));
       // El componente se redibuja al hacer clic, asi que el escenario ya no puede reconocer el destino: no le llega el evento.
       tabs.addEventListener('pointerdown', (event) => event.stopPropagation());
       stage.appendChild(tabs);
-      mounted.push({ tabs, keys, positions, width, start, size, head });
+      mounted.push({ tabs, keys, positions, width, start, size, head, offset });
     });
     customElements.whenDefined('ascii-tabs').then(() => {
       if (!mounted.length || !mounted[0].tabs.isConnected) return;
@@ -1113,8 +1119,10 @@
           save();
         });
       });
-      const want = Math.ceil((mounted[0].tabs.getBoundingClientRect().height + TAB_CLEF_CLEARANCE + TAB_GAP) / unit);
-      if (want !== tabSpace) { tabSpace = want; render(); return; }
+      const want = Math.ceil(Math.max(...mounted.map(({ tabs, offset }) =>
+        tabs.getBoundingClientRect().height + offset + TAB_GAP)) / unit);
+      // Subpixel SVG rounding can alternate between adjacent unit counts.
+      if (Math.abs(want - tabSpace) > 1) { tabSpace = want; render(); return; }
       // Los botones de renglones van bajo el escenario: que no tapen la ultima tablatura.
       const bottom = mounted[mounted.length - 1].tabs.getBoundingClientRect().bottom - stage.getBoundingClientRect().top;
       stage.style.minHeight = Math.ceil(bottom + 24) + 'px';
@@ -2742,7 +2750,9 @@
         const space = (bottom - top) / 4;
         const left = first.getBBox().x;
         const right = last.getBBox().x + last.getBBox().width;
-        const y = bottom + space * 3.5;
+        const content = system.getBBox();
+        // Frets extend half a font above their string; leave a staff space clear.
+        const y = Math.max(bottom + space * 3.5, content.y + content.height + space * 2);
         const step = space * 2.5;
         const font = space * 2;
         const group = document.createElementNS(ns, 'g');
