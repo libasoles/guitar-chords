@@ -287,10 +287,13 @@
     const last = Math.max(...chosen.map((r) => r.mi));
     const fragment = Array.from({ length: last - first + 1 }, () => []);
     const positions = new Map();
+    const pitches = fragment.map(() => []);
+    const contexts = all.map((measure, mi) => pitchContexts(score, mi));
     all.forEach((measure, mi) => measure.forEach((ev, i) => {
       if (!chosen.some((r) => r.mi === mi && r.i === i)) return;
       positions.set(ev, { mi: mi - first, i: fragment[mi - first].length });
       fragment[mi - first].push(clone(ev));
+      pitches[mi - first].push(contexts[mi][i]);
     }));
     const tabs = attacks(score, true).filter((attack) => columns[attack.key]).map((attack) => {
       const notes = attack.events.flatMap((ev, i) => positions.has(ev) ? [{ ...positions.get(ev), midi: attack.midis[i] }] : []);
@@ -298,7 +301,7 @@
         notes.length === attack.events.length || notes.some((note) => TAB_OPENS[string] + fret === note.midi) ? fret : null);
       return { notes, column };
     }).filter((entry) => entry.notes.length);
-    return { tabs, type: 'guitar-score-selection', version: 1, meter: meterOf(score), measures: fragment };
+    return { pitches, tabs, type: 'guitar-score-selection', version: 1, meter: meterOf(score), measures: fragment };
   }
 
   // Prepara todo antes de escribir: un pegado que no entra no cambia la partitura.
@@ -325,9 +328,22 @@
     const refs = [];
     for (let offset = 0; offset < clean.length; offset += 1) {
       const destination = all[mi + offset];
+      const destinationPitches = pitchContexts(trial, mi + offset);
+      const desired = new Map(destination.map((ev, i) => [ev, destinationPitches[i]]));
+      const octave = CLEFS[clefAt(trial, mi + offset)].octave || 0;
+      for (let i = 0; i < clean[offset].length; i += 1) {
+        const ev = clean[offset][i];
+        const pitch = fragment.pitches?.[offset]?.[i];
+        if (ev.rest || !pitch || ![-1, 0, 1].includes(pitch.alter) || ![-1, 0].includes(pitch.octave)) continue;
+        ev.n += 7 * (pitch.octave - octave);
+        if (ev.n < LOWEST || ev.n > HIGHEST) return null;
+        desired.set(ev, pitch);
+        if (pitch.alter !== keyAlter(ev.n, trial, mi + offset)) ev.acc = accidentalFor(pitch.alter);
+      }
       const starts = onsets(destination);
       if (clean[offset].some((ev) => !ev.rest && destination.some((other, i) =>
-        !other.rest && starts[i] === ev.at && other.n === ev.n && other.acc === ev.acc))) return null;
+        !other.rest && starts[i] === ev.at && other.n === ev.n &&
+        (desired.has(ev) ? desired.get(other)?.alter === desired.get(ev).alter : other.acc === ev.acc)))) return null;
       const ids = new Map();
       let nextId = Math.max(0, ...destination.map((ev) => ev.tp || 0));
       const list = clean[offset].map((ev) => {
@@ -338,6 +354,17 @@
         return [ev, ev.at];
       });
       const indices = insertMany(destination, list);
+      // Una alteracion pegada no debe cambiar las notas que ya estaban en el destino.
+      const actual = new Map();
+      const times = onsets(destination);
+      destination.map((ev, i) => i).sort((a, b) => times[a] - times[b]).forEach((i) => {
+        const ev = destination[i];
+        if (ev.rest) return;
+        const pitch = desired.get(ev);
+        const alter = ev.acc ? ACCIDENTALS[ev.acc].alter : actual.has(ev.n) ? actual.get(ev.n) : keyAlter(ev.n, trial, mi + offset);
+        if (pitch && alter !== pitch.alter) ev.acc = accidentalFor(pitch.alter);
+        if (ev.acc) actual.set(ev.n, ACCIDENTALS[ev.acc].alter);
+      });
       if (measureLength(destination) > capacity(trial, mi + offset)) return null;
       indices.forEach((i) => refs.push({ mi: mi + offset, i }));
     }
@@ -745,6 +772,23 @@
   }
 
   const SEMITONES = [0, 2, 4, 5, 7, 9, 11];
+  const accidentalFor = (alter) => alter === 1 ? '#' : alter === -1 ? 'b' : 'n';
+
+  // Altura efectiva de cada figura, incluso si su alteracion viene de una nota no seleccionada.
+  function pitchContexts(score, mi) {
+    const measure = measures(score)[mi];
+    const starts = onsets(measure);
+    const accidentals = new Map();
+    const result = measure.map(() => null);
+    const octave = CLEFS[clefAt(score, mi)].octave || 0;
+    measure.map((ev, i) => i).sort((a, b) => starts[a] - starts[b]).forEach((i) => {
+      const ev = measure[i];
+      if (ev.rest) return;
+      if (ev.acc) accidentals.set(ev.n, ACCIDENTALS[ev.acc].alter);
+      result[i] = { alter: accidentals.has(ev.n) ? accidentals.get(ev.n) : keyAlter(ev.n, score, mi), octave };
+    });
+    return result;
+  }
 
   // Cada momento en que suena algo, en orden de lectura: { mi, at, key, midis } con el tono real (la clave de guitarra
   // suena una octava mas grave que la escrita). Las notas ligadas a la anterior no se vuelven a tocar.

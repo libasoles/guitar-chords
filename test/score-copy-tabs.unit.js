@@ -53,8 +53,46 @@ test('los fragmentos anteriores y las entradas TAB invalidas se pueden pegar', (
   s.rows[0][0] = [{ d: 'q', n: 37, at: 0 }];
   const f = copy(s, [{ mi: 0, i: 0 }]);
   delete f.tabs;
+  delete f.pitches;
   assert.ok(M.pasteSelection(s, f, 1));
   f.tabs = [null, { notes: [null], column: [5] }, { notes: [{ mi: 99, i: 0, midi: 64 }], column: [5] }];
   assert.ok(M.pasteSelection(s, f, 2));
   assert.equal(s.tabs, undefined);
+});
+
+test('pegar en una partitura nueva con TAB apagada conserva la altura y la digitacion de otra armadura', () => {
+  const source = M.emptyScore();
+  source.fifths = 1;
+  source.rows[0][0] = [{ d: 'q', n: 38, at: 0 }];
+  source.tabs = { '0:0': [null, 7, null, null, null, null] };
+  const destination = M.emptyScore();
+  const fragment = copy(source, [{ mi: 0, i: 0 }]);
+  assert.ok(M.pasteSelection(destination, fragment, 0));
+  assert.deepEqual(destination.tabs, source.tabs);
+  assert.deepEqual(M.attacks(destination)[0].midis, M.attacks(source)[0].midis);
+  assert.equal(destination.showTabs, undefined);
+});
+
+
+test('copiar una nota con alteracion heredada conserva su sonido sin afectar las notas del destino', () => {
+  const source = M.emptyScore();
+  source.rows[0][0] = [{ d: 'q', n: 38, acc: '#', at: 0 }, { d: 'q', n: 38, at: 24 }];
+  source.tabs = { '0:24': [null, 7, null, null, null, null] };
+  const destination = M.emptyScore();
+  destination.rows[0][0] = [{ d: 'q', n: 37, at: 0 }, { d: 'q', n: 38, at: 24 }];
+  M.pasteSelection(destination, copy(source, [{ mi: 0, i: 1 }]), 0);
+  assert.deepEqual(M.attacks(destination).map(a => a.midis), [[64, 66], [65]]);
+  assert.equal(destination.rows[0][0].find(ev => ev.n === 38 && ev.at === 24).acc, 'n');
+});
+
+test('copiar entre claves conserva la octava sonora y la TAB', () => {
+  const source = M.emptyScore();
+  source.clef = 'treble';
+  source.rows[0][0] = [{ d: 'q', n: 30, at: 0 }];
+  source.tabs = { '0:0': column };
+  const destination = M.emptyScore();
+  M.pasteSelection(destination, copy(source, [{ mi: 0, i: 0 }]), 0);
+  assert.deepEqual(destination.tabs, source.tabs);
+  assert.deepEqual(M.attacks(destination)[0].midis, [64]);
+  assert.equal(destination.rows[0][0][0].n, 37);
 });

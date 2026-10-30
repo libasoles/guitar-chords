@@ -278,6 +278,38 @@ async function run() {
     await page.keyboard.press('ControlOrMeta+v');
     assert.equal(await page.locator('#scoreTitle').inputValue(), 'Titulo de prueba', 'copiar y pegar texto sigue siendo nativo');
 
+    // Entre documentos: el destino empieza con TAB apagada y sin armadura.
+    for (const fifths of [0, 1]) {
+      const fret = fifths ? 7 : 6;
+      const expected = [null, fret, null, null, null, null];
+      await page.evaluate(({ fifths, expected }) => {
+        Object.assign(scoreEditor.score, ScoreModel.emptyScore(), { fifths, showTabs: true, tabs: { '0:0': expected } });
+        delete scoreEditor.score.keys;
+        delete scoreEditor.score.clefs;
+        scoreEditor.score.rows[0][0] = [{ d: 'q', n: 38, at: 0 }];
+        scoreEditor.render();
+      }, { fifths, expected });
+      const visibleFret = page.locator('#scoreStage .ascii-tabs-cell[data-s="1"] .ascii-tabs-fret').first();
+      await visibleFret.waitFor();
+      assert.equal(await visibleFret.textContent(), String(fret));
+      await page.locator('#e0-0 .notehead').first().click();
+      await page.keyboard.press('ControlOrMeta+c');
+      await page.locator('#scoreNewTab').click();
+      assert.equal(await page.locator('#scoreTabToggle').getAttribute('aria-pressed'), 'false');
+      await selectBar(0);
+      await page.keyboard.press('ControlOrMeta+v');
+      await page.waitForFunction(() => scoreEditor.score.rows[0][0].length === 1);
+      assert.deepEqual(await page.evaluate(() => scoreEditor.score.tabs), { '0:0': expected }, 'TAB guardada aunque este oculta');
+      await page.locator('#scoreTabToggle').click();
+      assert.deepEqual(await page.evaluate(() => scoreEditor.score.tabs), { '0:0': expected }, 'mostrar TAB conserva la digitacion');
+      await visibleFret.waitFor();
+      assert.equal(await visibleFret.textContent(), String(fret), 'se muestra el traste original');
+      assert.equal(await page.evaluate(() => ScoreModel.attacks(scoreEditor.score)[0].midis[0]), 59 + fret);
+      await page.reload();
+      await page.waitForSelector('#scoreStage ascii-tabs');
+      assert.deepEqual(await page.evaluate(() => scoreEditor.score.tabs), { '0:0': expected }, 'se conserva al recargar');
+    }
+
     assert.deepEqual(errors, []);
     console.log('score-selection e2e: OK');
   } finally {
