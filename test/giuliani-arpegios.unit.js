@@ -169,6 +169,7 @@ test('ejercicio 34: el bajo comparte los ataques del arpegio sin crear notas dob
 const REVIEWED_RIGHT_HAND = {
   41: 'pimpmi',
   43: 'pmipim',
+  44: 'pmipmi',
 };
 for (const [number, fingers] of Object.entries(REVIEWED_RIGHT_HAND)) {
   test(`ejercicio ${number}: dedos de la mano derecha cotejados con la edicion`, () => {
