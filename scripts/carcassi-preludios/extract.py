@@ -306,6 +306,11 @@ def build(number):
             bass, low, mid, high = (None, None, None, 2, None, None), (None, None, 0, None, None, None), (None, None, 3, None, None, None), (None, 5, None, None, None, None)
             assert len(tabs[2]) == 12
             tabs[2] = [list(c) for c in (bass, low, mid, high, mid, low) * 2]
+            # M. 4: the F bass is fret 3 of the fourth string in both halves, not fret 8 of the fifth in the first.
+            for column in tabs[3]:
+                if column[4] == 8 and column[3] is None:
+                    column[4] = None
+                    column[3] = 3
         if EDITION == "santisteban" and number == 12:
             # Requested TAB voicing: the three D bass quarters of the last bar (m. 12 in the file,
             # shown as 13) all on the open fourth string instead of fret 5 on the fifth.
