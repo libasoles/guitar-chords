@@ -908,14 +908,8 @@
         <type>16th</type>
         <stem>up</stem>
         <staff>1</staff>
-        <beam number="1">end</beam>
-        <beam number="2">end</beam>
-      </note>
-      <note>
-        <rest measure="yes" />
-        <duration>15120</duration>
-        <voice>1</voice>
-        <staff>1</staff>
+        <beam number="1">continue</beam>
+        <beam number="2">continue</beam>
       </note>
       <note id="tab-note-29">
         <pitch>
@@ -927,6 +921,8 @@
         <type>16th</type>
         <stem>up</stem>
         <staff>1</staff>
+        <beam number="1">continue</beam>
+        <beam number="2">continue</beam>
       </note>
       <note id="tab-note-30">
         <pitch>
@@ -938,6 +934,8 @@
         <type>16th</type>
         <stem>up</stem>
         <staff>1</staff>
+        <beam number="1">continue</beam>
+        <beam number="2">continue</beam>
       </note>
       <note id="tab-note-31">
         <pitch>
@@ -949,9 +947,11 @@
         <type>16th</type>
         <stem>up</stem>
         <staff>1</staff>
+        <beam number="1">end</beam>
+        <beam number="2">end</beam>
       </note>
       <backup>
-        <duration>30240</duration>
+        <duration>15120</duration>
       </backup>
       <note>
         <pitch>
@@ -1000,12 +1000,6 @@
             <string>2</string><fret>1</fret>
           </technical>
         </notations>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest measure="yes" />
-        <duration>15120</duration>
-        <voice>2</voice>
-        <staff>2</staff>
       </note>
       <note>
         <pitch>
@@ -3567,19 +3561,16 @@
     </measure>
     <!--========================= Measure 18 =========================-->
     <measure implicit="no" number="18">
-      <attributes>
-        <key>
-          <fifths>1</fifths>
-        </key>
-      </attributes>
       <note id="tab-note-114">
         <pitch>
           <step>D</step>
+          <alter>1</alter>
           <octave>5</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
         <type>16th</type>
+        <accidental>sharp</accidental>
         <stem>up</stem>
         <staff>1</staff>
       </note>
@@ -3605,17 +3596,19 @@
       </backup>
       <note>
         <pitch>
-          <step>D</step>
+          <step>E</step>
+          <alter>-1</alter>
           <octave>4</octave>
         </pitch>
         <duration>2520</duration>
         <voice>2</voice>
         <type>16th</type>
+        <accidental>flat</accidental>
         <stem>none</stem>
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>3</fret>
+            <string>2</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -3647,7 +3640,6 @@
       <note id="tab-note-116">
         <pitch>
           <step>F</step>
-          <alter>1</alter>
           <octave>5</octave>
         </pitch>
         <duration>2520</duration>
@@ -3744,18 +3736,16 @@
       <note>
         <pitch>
           <step>F</step>
-          <alter>1</alter>
           <octave>4</octave>
         </pitch>
         <duration>2520</duration>
         <voice>1</voice>
         <type>16th</type>
-        <accidental>sharp</accidental>
         <stem>none</stem>
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>2</fret>
+            <string>1</string><fret>1</fret>
           </technical>
         </notations>
       </note>
@@ -4371,11 +4361,6 @@
     </measure>
     <!--========================= Measure 23 =========================-->
     <measure implicit="no" number="23">
-      <attributes>
-        <key>
-          <fifths>0</fifths>
-        </key>
-      </attributes>
       <note id="tab-note-139">
         <pitch>
           <step>F</step>

@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT / 'scripts' / 'carcassi-preludios'))
 import pdf_notes as P  # noqa: E402
 from transcribe_lib import DIVISIONS, Accidentals, fill, hidden_rest, note_xml, key_alters, parse, pitch_xml  # noqa: E402
 
-SOURCES = ROOT / 'resources' / 'carcassi-op59-youtube'
+SOURCES = ROOT / 'resources' / 'partituras' / 'carcassi-op59-youtube'
 STEPS = 'CDEFGAB'
 
 
@@ -285,6 +285,11 @@ def convert(number):
         ]}]
         measures[17]['length'] = 6
         measures[17]['fingers'] = {}
+    if number == 26:
+        # Compás 5 (6 contando la anacrusa): seis semicorcheas mi5-sol5-do5-mi5-sol4-do5, como el compás 1. El silencio
+        # que la fuente dibuja en medio es de otra voz y el motor lo leía como parte de la melodía (compás
+        # desbordado, notas convertidas en apoyaturas y TAB desalineada).
+        measures[5]['voices'] = measures[5]['voices'][:1]
     measures[-1]['final'] = True
     return meta, measures
 

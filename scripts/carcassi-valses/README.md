@@ -6,7 +6,7 @@ dominio público.
 
 ## Fuente
 
-Los PDF de `resources/carcassi-op59-youtube/` (carpeta no versionada, de solo lectura) vienen de las descripciones de la
+Los PDF de `resources/partituras/carcassi-op59-youtube/` (carpeta no versionada, de solo lectura) vienen de las descripciones de la
 lista de reproducción «Carcassi Op. 59» del canal Guitar Notes en YouTube: exportaciones de MuseScore 4 con la fuente
 Leland. Son vectoriales, así que las notas se leen de la geometría del PDF sin OCR (`pdf_notes.py`) y se cotejan con el
 libro. El libro escaneado de Ditson 1853 (Internet Archive) es la referencia impresa.
@@ -33,3 +33,7 @@ seguido de re♯5 de corchea, sin superposición. La plica descendente de la
 corchea se había interpretado como otra voz al inicio del compás, produciendo
 la posición imposible `x475x3`. Se cotejó con Ditson, página impresa 77, y
 con `op59-02.pdf`. La corrección se conserva también en `convert(2)`.
+
+Vals 26, compás 5 (6 contando la anacrusa): seis semicorcheas mi5–sol5–do5–mi5–sol4–do5, igual que el compás 1. El
+silencio que la fuente dibuja en medio pertenece a otra voz; el motor lo leía como parte de la melodía, desbordaba el
+compás, convertía las notas en apoyaturas y desalineaba la TAB. Se cotejó con `op59-26.pdf`.
