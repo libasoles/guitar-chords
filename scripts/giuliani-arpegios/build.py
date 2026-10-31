@@ -7,6 +7,7 @@ Usa el mismo motor y las mismas rutinas de grabado que los preludios (scripts/ca
 notacion y TAB del motor, PDF de A4, vista previa del primer sistema y paginas SVG para el modal.
 """
 import json
+from contextlib import contextmanager
 import os
 import re
 import sys
@@ -65,6 +66,22 @@ def file_base(number):
     return f'Arpeggio Exercise {number:03d} - {AUTHOR}'
 
 
+@contextmanager
+def reviewed_tuplets(tabify, number):
+    """El 34 tiene grupos completos de valores mixtos que el reparador de OMR deshace.
+
+    Cuenta cabezas, no duraciones: ocho notas no son un multiplo de seis.
+    Conservar la fuente revisada tanto al preparar como al releer para exportar.
+    """
+    original = tabify.repair_orphan_tuplets
+    try:
+        if number == 34:
+            tabify.repair_orphan_tuplets = lambda root: False
+        yield
+    finally:
+        tabify.repair_orphan_tuplets = original
+
+
 def build(number):
     from pypdf import PdfReader, PdfWriter
     from pypdf.generic import NameObject
@@ -76,7 +93,7 @@ def build(number):
         raise SystemExit(f'falta la fuente: {source}')
     base_options = dict(tabify.PDF_OPTIONS)
     tabify.KEEP_TEXT = True
-    with tempfile.TemporaryDirectory() as tmp:
+    with reviewed_tuplets(tabify, number), tempfile.TemporaryDirectory() as tmp:
         extract.patch_engine(tabify)
         prepared = os.path.join(tmp, 'prepared')
         result = tabify.prepare(source, 'musicxml', 'standard', prepared, per_row=PER_ROW.get(number, 4), arpeggio='auto' if number in ARPEGGIO else False)

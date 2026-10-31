@@ -100,7 +100,7 @@ test('ejercicio 34: solo ocho cifras de seisillo, sin cifras adicionales del aco
     const xml = fs.readFileSync(file, 'utf8');
     const notes = [...xml.matchAll(/<note\b[^>]*>([\s\S]*?)<\/note>/g)].map((m) => m[1]);
     const lower = notes.filter((note) => /<voice>[23]<\/voice>/.test(note) && !/<staff>2<\/staff>/.test(note));
-    assert.ok(lower.some((note) => /<time-modification>/.test(note)), 'conservar las duraciones irregulares');
+    assert.ok(lower.some((note) => /<time-modification>/.test(note)), 'conservar la subdivision del bajo');
     for (const note of lower) {
       for (const [tuplet] of note.matchAll(/<tuplet\b[^>]*>/g)) {
         if (!/type="start"/.test(tuplet)) continue;
@@ -134,5 +134,32 @@ test('ejercicio 40: p-m, i-m, p, i quedan en el primer grupo de semicorcheas', (
     const marked = notes.flatMap((n, index) => [...n.matchAll(/<fingering[^>]*>([pima])<\/fingering>/g)]
       .map((m) => [index, m[1]]));
     assert.deepEqual(marked, [[0, 'p'], [1, 'm'], [2, 'i'], [3, 'm'], [4, 'p'], [5, 'i']], file);
+  }
+});
+
+/* Las dos plicas del original comparten cabeza: el bajo coincide con una nota del seisillo. */
+test('ejercicio 34: el bajo comparte los ataques del arpegio sin crear notas dobles', () => {
+  for (const file of [path.join(__dirname, '../scripts/giuliani-arpegios/sources/034.musicxml'),
+    path.join(DOWNLOADS_DIR, 'Arpeggio Exercise 034 - Mauro Giuliani.musicxml')]) {
+    const xml = fs.readFileSync(file, 'utf8');
+    const divisions = Number(xml.match(/<divisions>(\d+)<\/divisions>/)[1]);
+    const measures = [...xml.matchAll(/<measure\b[^>]*>([\s\S]*?)<\/measure>/g)].slice(0, 2);
+    for (const [index, match] of measures.entries()) {
+      let cursor = 0;
+      const bass = [];
+      for (const [element] of match[1].matchAll(/<(?:note|backup|forward)\b[^>]*>[\s\S]*?<\/(?:note|backup|forward)>/g)) {
+        const duration = Number(element.match(/<duration>(\d+)<\/duration>/)?.[1] || 0);
+        if (element.startsWith('<backup>')) { cursor -= duration; continue; }
+        if (element.startsWith('<forward>')) { cursor += duration; continue; }
+        if (/<voice>[23]<\/voice>/.test(element) && !/<staff>2<\/staff>|<rest\b/.test(element)) {
+          bass.push([cursor / divisions * 3, duration / divisions * 3,
+            element.match(/<step>(\w)<\/step>/)[1]]);
+        }
+        if (!/<chord\s*\//.test(element)) cursor += duration;
+      }
+      const [low, high] = index === 0 ? ['C', 'E'] : ['B', 'D'];
+      assert.deepEqual(bass, [[0, 1, low], [1, 2, low], [3, 1, high], [4, 2, high],
+        [6, 1, low], [7, 2, low], [9, 1, high], [10, 2, high]], file);
+    }
   }
 });

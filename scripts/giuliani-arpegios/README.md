@@ -42,17 +42,22 @@ Descarga sin captcha: `https://s9.imslp.org/files/imglnks/usimg/c/ca/IMSLP660049
 - **Ejercicios 96, 100 y 110**: las reglas de arpegio del motor mandan el mi5 repetido a la 2.ª cuerda (traste 5). Su fuente
   lleva las casillas impresas como `<string>`/`<fret>` y `build.py` no aplica las reglas (`PRINTED_TAB`). Con eso la TAB
   publicada coincide con la edición en las 5890 casillas de los 120 ejercicios.
-- **Revisión pendiente**: los ejercicios 34, 36 y 40 a 120 llevan la marca (`scripts/lib/editor-marks.js`) hasta cotejarlos con el
-  libro; el 1 al 33, el 35 y el 37 al 39 ya están revisados. Los 116 a 119 (polifonía con fusas y silencios) pasan el control de alturas y compases, pero son los que más lo necesitan.
+- **Revisión pendiente**: los ejercicios 41 y 43 a 120 llevan la marca (`scripts/lib/editor-marks.js`) hasta cotejarlos con el
+  libro; el 1 al 40 y el 42 ya están revisados. Los 116 a 119 (polifonía con fusas y silencios) pasan el control de alturas y compases, pero son los que más lo necesitan.
 
 ## Licencia y crédito
 
 CC0 no exige atribución; el pie del PDF la da igualmente («Con modificaciones a partir de» / «Marieh (2020) · CC0 1.0»,
 con enlaces).
 
-El ejercicio 34 conserva las duraciones irregulares del acompanamiento, pero sus marcas de grupo
-se ocultan en la fuente curada (`show-number="none"`, `bracket="no"`): las ocho cifras de seisillo
-de la voz superior ya indican la subdivision. Las otras voces imprimian cifras adicionales dentro del pentagrama.
+El ejercicio 34 tiene una sola altura por ataque. Las notas del pulgar comparten cabeza con la voz
+superior, con dos plicas: corchea en la primera semicorchea del seisillo y negra en la tercera,
+ambas dentro de la subdivision 6:4. La fuente curada usa una sola voz inferior, sin silencios
+de relleno ni tercera voz. La lectura anterior dejaba algunas corcheas fuera del seisillo y
+creaba silencios con duracion y figura incompatibles: el grabador desplazaba las cabezas del
+bajo y aparentaban notas dobles. Las marcas de grupo del bajo se ocultan (`show-number="none"`,
+`bracket="no"`); las ocho cifras de la voz superior indican la subdivision. Las letras del primer
+medio compas son `p i p i m a p i p i m a`, como en la pagina 7 de la edicion de Marieh.
 
 En el 36, las letras de la mano derecha se limitan al primer grupo de cuatro semicorcheas:
 `p` en el bajo y `m` en la nota aguda simultanea, despues `i p i`. La proximidad geometrica
@@ -60,3 +65,7 @@ habia intercambiado los dedos del ataque inicial y desplazado las ultimas dos le
 
 En el 40, el primer grupo lleva `p+m`, `i+m`, `p`, `i`. Se corrigen en la fuente curada
 los dedos intercambiados de las dos parejas y la ultima letra desplazada al grupo siguiente.
+
+El build del 34 omite la reparacion de grupos incompletos del OMR: esa heuristica cuenta
+cabezas y deshace los grupos completos de valores mixtos del bajo revisado. El motor
+compartido y las demas piezas conservan su comportamiento.
