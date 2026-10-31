@@ -312,13 +312,19 @@ def build(number):
                     column[4] = None
                     column[3] = 3
         if EDITION == "valses" and number == 7:
-            # Requested TAB voicing (m. 2): the C# and E eighth-note chord on the fifth and sixth frets of the second and
-            # third strings (x56), staying in the position of the quarter chord before it, not on the open first string (02x).
-            for column in tabs[1]:
-                if column[0] == 0 and column[1] == 2 and column[2] is None:
-                    column[0] = None
-                    column[1] = 5
-                    column[2] = 6
+            # Requested TAB voicing (m. 2 and 4): the C# and E eighth-note chord on the fifth and sixth frets of the second
+            # and third strings (x56), staying in the position of the quarter chord before it, not on the open first string (02x).
+            for measure in (1, 3):
+                for column in tabs[measure]:
+                    if column[0] == 0 and column[1] == 2 and column[2] is None:
+                        column[0] = None
+                        column[1] = 5
+                        column[2] = 6
+            # M. 5: the two B eighths are fret 4 of the third string (after the D on fret 3 of the second), not the open second.
+            for column in tabs[4]:
+                if column[1] == 0 and column[2] is None:
+                    column[1] = None
+                    column[2] = 4
         if EDITION == "santisteban" and number == 12:
             # Requested TAB voicing: the three D bass quarters of the last bar (m. 12 in the file,
             # shown as 13) all on the open fourth string instead of fret 5 on the fifth.
