@@ -42,8 +42,8 @@ Descarga sin captcha: `https://s9.imslp.org/files/imglnks/usimg/c/ca/IMSLP660049
 - **Ejercicios 96, 100 y 110**: las reglas de arpegio del motor mandan el mi5 repetido a la 2.ª cuerda (traste 5). Su fuente
   lleva las casillas impresas como `<string>`/`<fret>` y `build.py` no aplica las reglas (`PRINTED_TAB`). Con eso la TAB
   publicada coincide con la edición en las 5890 casillas de los 120 ejercicios.
-- **Revisión pendiente**: los ejercicios 49 a 120 llevan la marca (`scripts/lib/editor-marks.js`) hasta cotejarlos con el
-  libro; el 1 al 48 ya están revisados. Los 116 a 119 (polifonía con fusas y silencios) pasan el control de alturas y compases, pero son los que más lo necesitan.
+- **Revisión pendiente**: los ejercicios 50 a 120 llevan la marca (`scripts/lib/editor-marks.js`) hasta cotejarlos con el
+  libro; el 1 al 49 ya están revisados. Los 116 a 119 (polifonía con fusas y silencios) pasan el control de alturas y compases, pero son los que más lo necesitan.
 
 ## Licencia y crédito
 
@@ -85,3 +85,4 @@ y desplazado otras al ataque siguiente. El bajo lleva `p`, el sol `i` y el mi ag
 | 46 | `p+m / i+m / p+m / i` |
 | 47 | `p / i+m / p+m / i+m` |
 | 48 | `p+m / i / p+m / i+m` |
+| 49 | `p+m / i+m / p / i+m` |
