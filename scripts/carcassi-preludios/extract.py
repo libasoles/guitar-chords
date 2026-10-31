@@ -249,8 +249,64 @@ def patch_engine(tabify):
 
 
 # The preludes retain their reviewed legacy arpeggio treatment. Mixed collections
-# such as the waltzes use the engine's passage detection before choosing strings.
+# such as the waltzes (scripts/carcassi-progresivas/build.py) use the engine's passage detection instead.
 avoid_repeated_strings = fingering.avoid_repeated_strings
+
+
+def waltz_voicing(number, tabs):
+    """Requested TAB voicings of the Carcassi waltzes (hand position kept), applied to the engine's suggestion in place."""
+    if number == 7:
+        # Requested TAB voicing (m. 2 and 4): the C# and E eighth-note chord on the fifth and sixth frets of the second
+        # and third strings (x56), staying in the position of the quarter chord before it, not on the open first string (02x).
+        for measure in (1, 3):
+            for column in tabs[measure]:
+                if column[0] == 0 and column[1] == 2 and column[2] is None:
+                    column[0] = None
+                    column[1] = 5
+                    column[2] = 6
+        # M. 5: the two B eighths are fret 4 of the third string (after the D on fret 3 of the second), not the open second.
+        for column in tabs[4]:
+            if column[1] == 0 and column[2] is None:
+                column[1] = None
+                column[2] = 4
+    if number == 26:
+        # M. 19 and 23: the descending F-E-D-C-B-A scale keeps the B on the open second string (after the C on fret 1),
+        # not on fret 4 of the third.
+        for measure in (19, 23):
+            for column in tabs[measure]:
+                if column[2] == 4 and all(c is None for i, c in enumerate(column) if i != 2):
+                    column[2] = None
+                    column[1] = 0
+    if number == 34:
+        # Requested TAB voicing (m. 10, 12, 14): the first note of the bar is the same pitch that closes the bar inside
+        # the chord on the second string (F# fret 7, E fret 5), so play it there too: the hand stays in one position
+        # instead of leaping from the open or low first-string note up to the chord (2 -> 7, 0 -> 5).
+        for measure, old_fret, new_fret in [(10, 2, 7), (12, 0, 5), (14, 2, 7)]:
+            for column in tabs[measure]:
+                if column[0] == old_fret and column[1] is None and any(c is not None for c in column):
+                    column[0] = None
+                    column[1] = new_fret
+                    break
+    if number == 36:
+        # Requested TAB voicing (m. 1): the E on the second string, fret 5, next to the A on fret 5 of the first,
+        # not the open first string.
+        for column in tabs[1]:
+            if column[0] == 0 and column[1] is None and column[2] is None:
+                column[0] = None
+                column[1] = 5
+                break
+        # M. 31: the C closing the D-D-C figure is fret 1 of the second string, like its neighbours, not fret 5 of the third.
+        for column in tabs[31]:
+            if column[2] == 5 and all(c is None for i, c in enumerate(column) if i != 2):
+                column[2] = None
+                column[1] = 1
+        # M. 22: the C# and E chords around the E-flat and C chord (second and third strings, frets 4-5) are x56
+        # (frets 5 and 6 of the same strings), not 02x: the chromatic chord slides one fret and the hand does not move.
+        for column in tabs[22]:
+            if column[0] == 0 and column[1] == 2 and column[2] is None:
+                column[0] = None
+                column[1] = 5
+                column[2] = 6
 
 
 def build(number):
@@ -274,17 +330,14 @@ def build(number):
     with tempfile.TemporaryDirectory() as tmp:
         patch_engine(tabify)
         prepared = os.path.join(tmp, "prepared")
-        contextual = EDITION == "valses"
-        result = tabify.prepare(source, "musicxml", "standard", prepared, per_row=PER_ROW.get(number, 4),
-                                arpeggio="auto" if contextual else False)
+        result = tabify.prepare(source, "musicxml", "standard", prepared, per_row=PER_ROW.get(number, 4), arpeggio=False)
         if result["dropped"]:
             raise RuntimeError(f"Notas descartadas en {EDITION} {number}: {result['dropped']}")
         exported = os.path.join(tmp, "export")
         with open(os.path.join(prepared, tabify.SUGGESTION_NAME), encoding="utf-8") as f:
             suggestion = json.load(f)
         tabs = suggestion["tabs"]
-        if not contextual:
-            tabs = avoid_repeated_strings(tabs, tabify.open_midis(tabify.STANDARD_TUNING), barres=suggestion.get("barres"))
+        tabs = avoid_repeated_strings(tabs, tabify.open_midis(tabify.STANDARD_TUNING), barres=suggestion.get("barres"))
         if EDITION == "carcassi" and number == 9:
             # Requested TAB voicing: play the B bass on the sixth string in m. 15,
             # and play G# on the third string in the closing chord (m. 16).
@@ -311,45 +364,6 @@ def build(number):
                 if column[4] == 8 and column[3] is None:
                     column[4] = None
                     column[3] = 3
-        if EDITION == "valses" and number == 7:
-            # Requested TAB voicing (m. 2 and 4): the C# and E eighth-note chord on the fifth and sixth frets of the second
-            # and third strings (x56), staying in the position of the quarter chord before it, not on the open first string (02x).
-            for measure in (1, 3):
-                for column in tabs[measure]:
-                    if column[0] == 0 and column[1] == 2 and column[2] is None:
-                        column[0] = None
-                        column[1] = 5
-                        column[2] = 6
-            # M. 5: the two B eighths are fret 4 of the third string (after the D on fret 3 of the second), not the open second.
-            for column in tabs[4]:
-                if column[1] == 0 and column[2] is None:
-                    column[1] = None
-                    column[2] = 4
-        if EDITION == "valses" and number == 34:
-            # Requested TAB voicing (m. 10, 12, 14): the first note of the bar is the same pitch that closes the bar inside
-            # the chord on the second string (F# fret 7, E fret 5), so play it there too: the hand stays in one position
-            # instead of leaping from the open or low first-string note up to the chord (2 -> 7, 0 -> 5).
-            for measure, old_fret, new_fret in [(10, 2, 7), (12, 0, 5), (14, 2, 7)]:
-                for column in tabs[measure]:
-                    if column[0] == old_fret and column[1] is None and any(c is not None for c in column):
-                        column[0] = None
-                        column[1] = new_fret
-                        break
-        if EDITION == "valses" and number == 36:
-            # Requested TAB voicing (m. 1): the E on the second string, fret 5, next to the A on fret 5 of the first,
-            # not the open first string.
-            for column in tabs[1]:
-                if column[0] == 0 and column[1] is None and column[2] is None:
-                    column[0] = None
-                    column[1] = 5
-                    break
-            # M. 22: the C# and E chords around the E-flat and C chord (second and third strings, frets 4-5) are x56
-            # (frets 5 and 6 of the same strings), not 02x: the chromatic chord slides one fret and the hand does not move.
-            for column in tabs[22]:
-                if column[0] == 0 and column[1] == 2 and column[2] is None:
-                    column[0] = None
-                    column[1] = 5
-                    column[2] = 6
         if EDITION == "santisteban" and number == 12:
             # Requested TAB voicing: the three D bass quarters of the last bar (m. 12 in the file,
             # shown as 13) all on the open fourth string instead of fret 5 on the fifth.

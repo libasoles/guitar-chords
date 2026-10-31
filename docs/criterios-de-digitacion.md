@@ -167,7 +167,8 @@ y bordaduras melódicas. Así convertía `5–4–5–3–0` de primera cuerda e
 segunda (9 y 8) y tercera (9). La regla de «forma de cejilla» podía reforzarlo:
 si el resultado mezclaba trastes 6–11 con cuerdas al aire, eliminaba estas últimas.
 
-Los valses usan ahora `tabify.prepare(..., arpeggio="auto")` y conservan su
+Los valses (que publican también las piezas progresivas, con los mismos archivos; los construye
+`scripts/carcassi-progresivas/build.py`) usan ahora `tabify.prepare(..., arpeggio="auto")` y conservan su
 Digitación sugerida sin volver a aplicar el posproceso general. El detector
 existente distingue por compás los patrones de saltos recurrentes y pulso
 regular de las melodías por grados conjuntos. En un pasaje melódico, repetir

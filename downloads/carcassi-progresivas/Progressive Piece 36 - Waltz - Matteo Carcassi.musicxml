@@ -210,7 +210,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -3351,9 +3351,6 @@
         <type>16th</type>
         <stem>up</stem>
         <staff>1</staff>
-        <notations>
-          <slur number="3" type="start" />
-        </notations>
       </note>
       <note>
         <grace slash="yes" />
@@ -3367,9 +3364,6 @@
         <accidental>natural</accidental>
         <stem>up</stem>
         <staff>1</staff>
-        <notations>
-          <slur number="3" type="stop" />
-        </notations>
       </note>
       <note id="tab-note-100">
         <pitch>
@@ -3896,7 +3890,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -3914,7 +3908,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>2</fret>
+            <string>3</string><fret>6</fret>
           </technical>
         </notations>
       </note>
@@ -3964,7 +3958,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -3982,7 +3976,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>2</fret>
+            <string>3</string><fret>6</fret>
           </technical>
         </notations>
       </note>
@@ -4796,7 +4790,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>4</string><fret>0</fret>
+            <string>5</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -4814,7 +4808,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>2</fret>
+            <string>2</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -4846,7 +4840,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -5212,7 +5206,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>0</fret>
+            <string>2</string><fret>5</fret>
           </technical>
         </notations>
       </note>
@@ -5648,7 +5642,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>3</string><fret>5</fret>
+            <string>2</string><fret>1</fret>
           </technical>
         </notations>
       </note>
@@ -5676,7 +5670,7 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <notations>
-          <slur number="4" type="start" />
+          <slur number="3" placement="above" type="start" />
         </notations>
       </note>
       <note id="tab-note-174">
@@ -5693,7 +5687,7 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <notations>
-          <slur number="4" type="stop" />
+          <slur number="3" type="stop" />
         </notations>
       </note>
       <note id="tab-note-175">

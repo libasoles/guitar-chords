@@ -24,7 +24,8 @@ const ARTICLE_SUITES = {
   'articles-arpeggio-layout': articleSuite(/^src\/site\/(articles\/arpeggios\/|og-score-arpeggios\.)/, /^scripts\/lib\/article-arpeggio/, /^test\/articles-arpeggio-layout\./),
   'articles-preludios': articleSuite(/^src\/site\/(articles\/(carcassi|santisteban)-preludios\/|og-score-preludes\.)/, /^scripts\/carcassi-preludios\//, /^scripts\/lib\/article-carcassi-preludes\.js$/, /^test\/articles-preludios\./),
   'articles-progresivas': articleSuite(/^src\/site\/articles\/carcassi-progresivas\//, /^scripts\/carcassi-progresivas\//, /^scripts\/lib\/article-carcassi-progressive\.js$/, /^test\/articles-progresivas\./),
-  'articles-valses': articleSuite(/^src\/site\/articles\/carcassi-valses\//, /^scripts\/carcassi-valses\//, /^test\/articles-valses\./),
+  // Los valses comparten los archivos de las progresivas (downloads/ y vistas previas): un cambio ahi tambien la afecta.
+  'articles-valses': articleSuite(/^src\/site\/articles\/carcassi-(valses|progresivas)\//, /^scripts\/carcassi-progresivas\//, /^scripts\/lib\/article-carcassi-(preludes|progressive)\.js$/, /^test\/articles-valses\./),
   'articles-aguado': articleSuite(/^src\/site\/articles\/aguado\//, /^scripts\/aguado\//, /^scripts\/lib\/article-aguado\.js$/, /^test\/articles-aguado\./),
   'articles-sagreras': articleSuite(/^src\/site\/articles\/sagreras-lecciones\//, /^scripts\/sagreras\//, /^scripts\/lib\/article-sagreras\.js$/, /^test\/articles-sagreras\./),
   'articles-sor': articleSuite(/^src\/site\/articles\/sor\//, /^scripts\/sor\//, /^scripts\/lib\/article-sor(-collection)?\.js$/, /^test\/articles-sor\./),

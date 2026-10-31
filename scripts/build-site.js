@@ -1377,7 +1377,7 @@ function renderArticlesIndex(strings, locale) {
       strings.artArpeggiosIntro,
     ) +
     articleCard(ARTICLE_SANTISTEBAN_SLUG, locale, articlePreludes.santisteban.cardImage().url, [684, 204], strings.artSantistebanH1, strings.artSantistebanCardSummary) +
-    articleCard(ARTICLE_WALTZES_SLUG, locale, articlePreludes.waltzes.cardImage().url, [684, 204], strings.artWaltzesH1, strings.artWaltzesCardSummary) +
+    articleCard(ARTICLE_WALTZES_SLUG, locale, articlePreludes.waltzes.cardImage().url, articlePreludes.waltzes.cardImage().size, strings.artWaltzesH1, strings.artWaltzesCardSummary) +
     articleCard(ARTICLE_PROGRESSIVE_SLUG, locale, articleProgressive.cardImage().url, articleProgressive.cardImage().size, strings.artProgressiveH1, strings.artProgressiveCardSummary) +
     articleCard(ARTICLE_AGUADO_SLUG, locale, articleAguado.cardImage().url, articleAguado.cardImage().size, strings.artAguadoH1, strings.artAguadoCardSummary) +
     articleCard(ARTICLE_SAGRERAS_SLUG, locale, articleSagreras.cardImage().url, articleSagreras.cardImage().size, strings.artSagrerasH1, strings.artSagrerasCardSummary) +

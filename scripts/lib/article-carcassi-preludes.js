@@ -12,16 +12,24 @@ const { pagePath } = require('./slugs');
 const { scoreNavigation } = require('./score-navigation');
 const { editorMarks } = require('./editor-marks');
 const { escapeAttr, inlineScore, glyphDefs, DOWNLOAD_ICON } = require('./score-svg');
+const progressive = require('./article-carcassi-progressive');
 
 const ROOT = path.join(__dirname, '..', '..');
 function createEdition(edition) {
   const waltzes = edition === 'valses';
   const folder = waltzes ? 'carcassi-valses' : edition === 'santisteban' ? 'santisteban-preludios' : 'carcassi-preludios';
-  const DOWNLOADS_DIR = path.join(ROOT, 'downloads', folder);
-  const PREVIEW_DIR = path.join(ROOT, 'src', 'site', 'articles', folder);
-  const ASSETS_URL = '/assets/articles/' + folder + '/';
+  /* Los valses son piezas de las progresivas (mismos numeros que el libro): comparten con esa pagina el PDF, el
+     MusicXML, la vista previa y las paginas del modal, y no tienen archivos propios. Solo la prosa y las marcas del
+     editor llevan la clave `folder`. */
+  const filesFolder = waltzes ? 'carcassi-progresivas' : folder;
+  const DOWNLOADS_DIR = path.join(ROOT, 'downloads', filesFolder);
+  const PREVIEW_DIR = path.join(ROOT, 'src', 'site', 'articles', filesFolder);
+  const BODY_DIR = path.join(ROOT, 'src', 'site', 'articles', folder);
+  const ASSETS_URL = '/assets/articles/' + filesFolder + '/';
   const FULL_DIR = path.join(PREVIEW_DIR, 'full');
-  const SCORE_PREFIX = waltzes ? 'waltz-' : edition === 'santisteban' ? 'santisteban-prelude-' : 'prelude-';
+  const SCORE_PREFIX = waltzes ? 'progressive-' : edition === 'santisteban' ? 'santisteban-prelude-' : 'prelude-';
+  /* Prefijo del id de cada modal: distinto del de la pagina de progresivas, porque la pagina de favoritas muestra ambas. */
+  const ID_PREFIX = waltzes ? 'waltz-score-' : SCORE_PREFIX + 'score-';
   const PIECE = waltzes ? 'Waltz' : 'Prelude';
 
   const KEYS = {
@@ -30,6 +38,12 @@ function createEdition(edition) {
 
   /* [{number, base, key, pdf, preview}] de los preludios con PDF, MusicXML y vista previa. */
   function publishedPreludes() {
+    if (waltzes) {
+      return progressive.publishedPieces().filter((p) => progressive.PIECES[p.number].key).map((p) => {
+        const [tonic, mode] = progressive.PIECES[p.number].key.split(' ');
+        return { number: p.number, base: p.base, tonic, mode, pdf: p.pdf };
+      });
+    }
     if (!fs.existsSync(DOWNLOADS_DIR)) return [];
     return fs.readdirSync(DOWNLOADS_DIR)
       .map((file) => file.match(new RegExp('^(' + PIECE + ' (\\d+) in ([A-G][#b]?) (Major|Minor) - Matteo Carcassi(?: - Santisteban)?)\\.pdf$')))
@@ -76,7 +90,7 @@ function createEdition(edition) {
   function card(prelude, locale, strings, sharedGlyphs, all) {
     const name = preludeName(prelude, locale);
     const svg = fs.readFileSync(path.join(PREVIEW_DIR, SCORE_PREFIX + String(prelude.number).padStart(2, '0') + '.svg'), 'utf8');
-    const id = SCORE_PREFIX + 'score-' + prelude.number;
+    const id = ID_PREFIX + prelude.number;
     const href = ASSETS_URL + encodeURIComponent(prelude.pdf);
     const download = '<a class="example-download" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' + strings.artPreludesDownload + '</a>';
     /* El titulo es el boton que abre la partitura completa en un modal; su ::after cubre toda la tarjeta.
@@ -110,7 +124,7 @@ function createEdition(edition) {
     });
     /* El boton azul de descarga va en un pie fijo, como el de Partitura y tablatura. */
     const keyButton = (target, label) => target
-      ? '<button type="button" class="modal-key" popovertarget="' + SCORE_PREFIX + 'score-' + target.number + '" popovertargetaction="show">' +
+      ? '<button type="button" class="modal-key" popovertarget="' + ID_PREFIX + target.number + '" popovertargetaction="show">' +
         MUSIC_ICON + '<span>' + escapeAttr(preludeName(target, locale)) + '</span><span class="modal-key-label">' + label + '</span></button>'
       : '';
     const relative = relativeOf(prelude, all);
@@ -118,7 +132,7 @@ function createEdition(edition) {
       keyButton(relative, relative && relative.mode === 'Minor' ? strings.artPreludesRelativeMinor : strings.artPreludesRelativeMajor) +
       keyButton(dominantOf(prelude, all), strings.artPreludesDominant) + '</div>';
     return '<div class="modal-pages">' + editorMarks(folder, prelude.number, strings) + pages.join('') + '</div>' +
-      '<div class="modal-footer">' + scoreNavigation(all, prelude, SCORE_PREFIX + 'score-', preludeName, locale) + keyButtons + '<a class="modal-download" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' +
+      '<div class="modal-footer">' + scoreNavigation(all, prelude, ID_PREFIX, preludeName, locale) + keyButtons + '<a class="modal-download" href="' + href + '" download="' + escapeAttr(prelude.pdf) + '">' +
       DOWNLOAD_ICON + '<span>' + strings.artPreludesDownload + '</span></a></div>';
   }
 
@@ -133,7 +147,7 @@ function createEdition(edition) {
   }
 
   function renderBody(locale, strings) {
-    const prose = fs.readFileSync(path.join(PREVIEW_DIR, 'body.' + locale + '.html'), 'utf8');
+    const prose = fs.readFileSync(path.join(BODY_DIR, 'body.' + locale + '.html'), 'utf8');
     return prose.split('%%PRELUDES%%').join(renderGrid(locale, strings, publishedPreludes()));
   }
 
@@ -156,7 +170,10 @@ function createEdition(edition) {
   function cardImage() {
     const first = publishedPreludes()[0];
     const name = SCORE_PREFIX + String(first.number).padStart(2, '0') + '.svg';
-    return { src: path.join(PREVIEW_DIR, name), name, url: ASSETS_URL + name };
+    const src = path.join(PREVIEW_DIR, name);
+    if (!waltzes) return { src, name, url: ASSETS_URL + name };
+    const [, width, height] = fs.readFileSync(src, 'utf8').slice(0, 200).match(/viewBox="0 0 (\d+) (\d+)"/);
+    return { src, name, url: ASSETS_URL + name, size: [684, Math.round(684 * height / width)] };
   }
 
   return { publishedPreludes, renderCards, renderBody, pdfFiles, pageSvgFiles, cardImage, keyName, DOWNLOADS_DIR, PREVIEW_DIR, SCORE_PREFIX };

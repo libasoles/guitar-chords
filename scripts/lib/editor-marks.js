@@ -31,11 +31,23 @@ const MARKS = {
   },
 };
 
+/* Los ocho valses de Carcassi (2, 5, 7, 10, 15, 26, 34 y 36) estan en dos paginas, valses y piezas progresivas, con los
+   mismos numeros del libro y los mismos archivos: sus marcas se editan solo aca y valen en ambas colecciones. */
+const CARCASSI_WALTZES = { favorite: [10], pending: [15, 26] };
+const CARCASSI_PROGRESSIVE = { favorite: [1, 12] };
+
+/* Une listas de marcas: {favorite: [1]} + {favorite: [10], pending: [15]} -> {favorite: [1, 10], pending: [15]}. */
+function mergeMarks(...lists) {
+  const merged = {};
+  for (const list of lists) for (const mark of Object.keys(list)) merged[mark] = (merged[mark] || []).concat(list[mark]);
+  return merged;
+}
+
 const PIECES = {
   sor: { favorite: [5], effort: [1] },
   'carcassi-preludios': { favorite: [2, 4], insightful: [9], effort: [10] },
-  'carcassi-progresivas': { favorite: [1, 12] },
-  'carcassi-valses': { favorite: [10], pending: [15, 26] },
+  'carcassi-progresivas': mergeMarks(CARCASSI_PROGRESSIVE, CARCASSI_WALTZES),
+  'carcassi-valses': CARCASSI_WALTZES,
   'santisteban-preludios': { favorite: [2, 3, 4] },
   sagreras: { favorite: [36, 40, 42, 49, 59, 62, 70, 73, 75], insightful: [16, 61], effort: [38, 43], bookmark: [2, 9, 17, 25, 31], pending: [76, 81, 84] },
   aguado: { pending: Object.keys(require('../aguado/pieces.json')).map(Number) },

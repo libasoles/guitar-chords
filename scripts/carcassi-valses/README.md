@@ -4,36 +4,33 @@ Página `/articulos/valses-de-carcassi`: los valses de la Tercera parte del *Mé
 (numeración del libro, ver `resources/Libro Carcassi - Metodo.pdf`, pdf 87+). Carcassi murió en 1853: la obra es de
 dominio público.
 
-## Fuente
+## Los valses son piezas progresivas
 
-Los PDF de `resources/partituras/carcassi-op59-youtube/` (carpeta no versionada, de solo lectura) vienen de las descripciones de la
-lista de reproducción «Carcassi Op. 59» del canal Guitar Notes en YouTube: exportaciones de MuseScore 4 con la fuente
-Leland. Son vectoriales, así que las notas se leen de la geometría del PDF sin OCR (`pdf_notes.py`) y se cotejan con el
-libro. El libro escaneado de Ditson 1853 (Internet Archive) es la referencia impresa.
-IMSLP bloquea la descarga por script; Mutopia solo tiene los preludios del Op. 59.
+Los ocho valses (2, 5, 7, 10, 15, 26, 34 y 36) también son piezas de la página de piezas progresivas, con los mismos
+números del libro. **No se generan dos veces**: se construyen con `scripts/carcassi-progresivas/build.py` (ver su
+README) y las dos páginas publican los mismos archivos: el PDF y el MusicXML de `downloads/carcassi-progresivas/`, la
+vista previa y las páginas del modal de `src/site/articles/carcassi-progresivas/`. Un vals es una pieza de
+`pieces.json` con el campo `"key"` (su tonalidad); `scripts/lib/article-carcassi-preludes.js` (`waltzes`) lista esas
+piezas, y `src/site/articles/carcassi-valses/` solo guarda la prosa de la página.
 
-## Reproducir
+Las marcas del editor (favorita, pending, etc.) de estos ocho se editan una sola vez, en `CARCASSI_WALTZES` de
+`scripts/lib/editor-marks.js`, y valen en las dos páginas.
 
-```sh
-.venv-carcassi/bin/python scripts/carcassi-valses/transcribe_valses.py 2   # corrected/waltz-02.musicxml
-.venv-carcassi/bin/python scripts/carcassi-valses/build.py 2               # PDF, MusicXML y SVG con TAB
-```
+Para corregir un vals: la notación en `scripts/carcassi-progresivas/sources/NN.musicxml` (fuente curada, cotejada con el
+libro), la digitación en `extract.waltz_voicing` (`scripts/carcassi-preludios/extract.py`), y luego
+`.venv-carcassi/bin/python scripts/carcassi-progresivas/build.py N`. Pruebas: `test/carcassi-valses.unit.js`.
 
-Requiere `pymupdf` además de lo que pide `carcassi-preludios/README.md`. El PDF y el MusicXML publicados salen del
-motor (`backend/engine/tabify.py`); la TAB es una propuesta del motor con detección de arpegios por compás
-(`arpeggio="auto"`). Las melodías por grados conjuntos conservan las cuerdas
-que elige el Viterbi; no se les aplica la penalización de repetir cuerda de los
-arpegios. Ver `docs/criterios-de-digitacion.md`, §8.1.
-Un tiempo = una semicorchea. Los compases de anacrusa y de cierre suman juntos un compás completo.
+## Qué queda en esta carpeta
 
-## Correcciones cotejadas
+Antes los valses salían de aquí: los PDF de `resources/partituras/carcassi-op59-youtube/` (carpeta no versionada, de solo
+lectura; exportaciones de MuseScore 4 con la fuente Leland, de la lista «Carcassi Op. 59» del canal Guitar Notes) se leían
+de la geometría vectorial sin OCR. Esa transcripción tenía errores que las fuentes `.mscz` de las progresivas no tienen
+(p. ej. un fa♯ de más en el vals 26 y sin dinámicas, ligaduras ni D.C.), así que los valses pasaron a las progresivas.
+Lo que sigue aquí es la biblioteca de lectura de PDF que importan otras colecciones:
 
-Vals 2, compás 17 (18 contando la anacrusa): acorde sol3–sol4–re5 de negra,
-seguido de re♯5 de corchea, sin superposición. La plica descendente de la
-corchea se había interpretado como otra voz al inicio del compás, produciendo
-la posición imposible `x475x3`. Se cotejó con Ditson, página impresa 77, y
-con `op59-02.pdf`. La corrección se conserva también en `convert(2)`.
+- `pdf_notes.py`: geometría del PDF de MuseScore → notas (Sagreras, Barrios y Giuliani).
+- `transcribe_valses.py`: del PDF a MusicXML de notación (la usa Sagreras: `convert_measure`, `pitch_name`, etc.).
+- `check.py`: comprueba que cada compás de un PDF sume su duración.
+- `crop_systems.py`: recorta sistemas de un PDF.
 
-Vals 26, compás 5 (6 contando la anacrusa): seis semicorcheas mi5–sol5–do5–mi5–sol4–do5, igual que el compás 1. El
-silencio que la fuente dibuja en medio pertenece a otra voz; el motor lo leía como parte de la melodía, desbordaba el
-compás, convertía las notas en apoyaturas y desalineaba la TAB. Se cotejó con `op59-26.pdf`.
+Las reglas de digitación de los valses (contexto melódico) están en `docs/criterios-de-digitacion.md`, §8.1.
