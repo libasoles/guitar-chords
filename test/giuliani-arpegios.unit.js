@@ -168,6 +168,7 @@ test('ejercicio 34: el bajo comparte los ataques del arpegio sin crear notas dob
    Los dedos de una pareja se asignan por altura, no por proximidad a la letra. */
 const REVIEWED_RIGHT_HAND = {
   41: 'pimpmi',
+  43: 'pmipim',
 };
 for (const [number, fingers] of Object.entries(REVIEWED_RIGHT_HAND)) {
   test(`ejercicio ${number}: dedos de la mano derecha cotejados con la edicion`, () => {
