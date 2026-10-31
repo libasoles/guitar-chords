@@ -23,8 +23,8 @@ const SCORE_PREFIX = 'progressive-';
 
 const PIECES = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts', 'carcassi-progresivas', 'pieces.json'), 'utf8'));
 
-/* [{number, base, form, pdf}] de las piezas con PDF, MusicXML y vista previa. */
-function publishedPieces() {
+/* [{number, base, form, pdf}] de todas las piezas con PDF, MusicXML y vista previa, valses incluidos. */
+function allPublishedPieces() {
   if (!fs.existsSync(DOWNLOADS_DIR)) return [];
   return fs.readdirSync(DOWNLOADS_DIR)
     .map((file) => file.match(/^(Progressive Piece (\d+) - (.+) - Matteo Carcassi)\.pdf$/))
@@ -34,6 +34,12 @@ function publishedPieces() {
       fs.existsSync(path.join(PREVIEW_DIR, SCORE_PREFIX + String(p.number).padStart(2, '0') + '.svg')))
     .sort((a, b) => a.number - b.number);
 }
+
+/* Los valses (con "key" en pieces.json) se listan en su propia pagina (article-carcassi-preludes.js, `waltzes`) con estos
+   mismos archivos; esta pagina muestra las demas piezas. */
+const isWaltz = (piece) => 'key' in PIECES[piece.number];
+const publishedPieces = () => allPublishedPieces().filter((p) => !isWaltz(p));
+const publishedWaltzes = () => allPublishedPieces().filter(isWaltz);
 
 function pieceName(piece, locale) {
   const form = locale === 'es' ? PIECES[piece.number].es : piece.form;
@@ -116,4 +122,4 @@ function cardImage() {
   return { src, name, url: ASSETS_URL + name, size: [684, Math.round(684 * height / width)] };
 }
 
-module.exports = { publishedPieces, renderCards, renderBody, pdfFiles, pageSvgFiles, cardImage, DOWNLOADS_DIR, PREVIEW_DIR, SCORE_PREFIX, PIECES };
+module.exports = { publishedPieces, publishedWaltzes, allPublishedPieces, renderCards, renderBody, pdfFiles, pageSvgFiles, cardImage, DOWNLOADS_DIR, PREVIEW_DIR, SCORE_PREFIX, PIECES };

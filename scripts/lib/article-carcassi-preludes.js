@@ -39,7 +39,7 @@ function createEdition(edition) {
   /* [{number, base, key, pdf, preview}] de los preludios con PDF, MusicXML y vista previa. */
   function publishedPreludes() {
     if (waltzes) {
-      return progressive.publishedPieces().filter((p) => progressive.PIECES[p.number].key).map((p) => {
+      return progressive.publishedWaltzes().map((p) => {
         const [tonic, mode] = progressive.PIECES[p.number].key.split(' ');
         return { number: p.number, base: p.base, tonic, mode, pdf: p.pdf };
       });

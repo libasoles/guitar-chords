@@ -6,15 +6,17 @@ dominio público.
 
 ## Los valses son piezas progresivas
 
-Los ocho valses (2, 5, 7, 10, 15, 26, 34 y 36) también son piezas de la página de piezas progresivas, con los mismos
-números del libro. **No se generan dos veces**: se construyen con `scripts/carcassi-progresivas/build.py` (ver su
-README) y las dos páginas publican los mismos archivos: el PDF y el MusicXML de `downloads/carcassi-progresivas/`, la
-vista previa y las páginas del modal de `src/site/articles/carcassi-progresivas/`. Un vals es una pieza de
+Los ocho valses (2, 5, 7, 10, 15, 26, 34 y 36) son piezas de la Tercera Parte, con los mismos números del libro. **No tienen
+build propio**: se construyen con `scripts/carcassi-progresivas/build.py` (ver su README) y la página de valses publica el
+PDF y el MusicXML de `downloads/carcassi-progresivas/`, la vista previa y las páginas del modal de
+`src/site/articles/carcassi-progresivas/`. Un vals es una pieza de
 `pieces.json` con el campo `"key"` (su tonalidad); `scripts/lib/article-carcassi-preludes.js` (`waltzes`) lista esas
 piezas, y `src/site/articles/carcassi-valses/` solo guarda la prosa de la página.
 
-Las marcas del editor (favorita, pending, etc.) de estos ocho se editan una sola vez, en `CARCASSI_WALTZES` de
-`scripts/lib/editor-marks.js`, y valen en las dos páginas.
+La página de piezas progresivas **no** lista los valses: solo la de valses los muestra (`publishedWaltzes` y
+`publishedPieces` en `scripts/lib/article-carcassi-progressive.js`). Sus marcas del editor van bajo `carcassi-valses` en
+`scripts/lib/editor-marks.js`, con el número del libro. Cuando haya más valses de la Tercera Parte con fuente, basta
+agregarlos a las progresivas con `"key"` en `pieces.json`.
 
 Para corregir un vals: la notación en `scripts/carcassi-progresivas/sources/NN.musicxml` (fuente curada, cotejada con el
 libro), la digitación en `extract.waltz_voicing` (`scripts/carcassi-preludios/extract.py`), y luego

@@ -34,7 +34,8 @@ function scoreShape(xml) {
     staves: Number((part.match(/<staves>(\d+)<\/staves>/) || [])[1]) };
 }
 
-const pieces = catalog.publishedPieces();
+/* Todas las piezas, valses incluidos: la pagina de valses publica sus archivos desde esta carpeta. */
+const pieces = catalog.allPublishedPieces();
 const { DOWNLOADS_DIR, PREVIEW_DIR, SCORE_PREFIX, PIECES } = catalog;
 
 test('hay al menos una pieza publicada y salen en orden numerico', () => {

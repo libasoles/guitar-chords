@@ -74,25 +74,18 @@ test('Vals 7, compás 20: 2–1–2 en tercera cuerda y 0–1–3 en segunda', (
 /* Los ocho valses estan en dos paginas (valses y piezas progresivas) y no se generan dos veces. */
 const WALTZES = [2, 5, 7, 10, 15, 26, 34, 36];
 
-test('la pagina de valses publica los mismos archivos que la de piezas progresivas', () => {
+test('los valses salen de los archivos de las progresivas y solo se listan en la pagina de valses', () => {
   const { waltzes } = require('../scripts/lib/article-carcassi-preludes');
   const progressive = require('../scripts/lib/article-carcassi-progressive');
   assert.deepEqual(waltzes.publishedPreludes().map((p) => p.number), WALTZES);
   assert.equal(waltzes.PREVIEW_DIR, progressive.PREVIEW_DIR);
   assert.equal(waltzes.DOWNLOADS_DIR, progressive.DOWNLOADS_DIR);
   assert.equal(waltzes.SCORE_PREFIX, progressive.SCORE_PREFIX);
-  const shared = new Map(progressive.publishedPieces().map((p) => [p.number, p.pdf]));
+  const shared = new Map(progressive.allPublishedPieces().map((p) => [p.number, p.pdf]));
   for (const waltzPiece of waltzes.publishedPreludes()) assert.equal(waltzPiece.pdf, shared.get(waltzPiece.number));
+  assert.deepEqual(progressive.publishedWaltzes().map((p) => p.number), WALTZES);
+  assert.deepEqual(progressive.publishedPieces().filter((p) => WALTZES.includes(p.number)), [], 'la pagina de progresivas no lista valses');
   assert.ok(!fs.existsSync(path.join(__dirname, '../downloads/carcassi-valses')), 'sin una segunda copia de los PDF');
-});
-
-test('una marca del editor en un vals vale en las dos colecciones', () => {
-  const { PIECES } = require('../scripts/lib/editor-marks');
-  for (const mark of ['favorite', 'insightful', 'effort', 'bookmark', 'pending']) {
-    const inWaltzes = (PIECES['carcassi-valses'][mark] || []).slice().sort((a, b) => a - b);
-    const inProgressive = (PIECES['carcassi-progresivas'][mark] || []).filter((n) => WALTZES.includes(n)).sort((a, b) => a - b);
-    assert.deepEqual(inProgressive, inWaltzes, mark);
-  }
 });
 
 /* Digitaciones pedidas (extract.waltz_voicing): [compas, nota, cuerda, traste]. */
