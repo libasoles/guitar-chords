@@ -299,6 +299,13 @@ def build(number):
                 if column[4] == 5 and column[3] is None:
                     column[4] = None
                     column[3] = 0
+        if EDITION == "carcassi" and number == 11:
+            # Requested TAB voicing (m. 3): the E bass on the fourth string, fret 2, so the G and B flat of the arpeggio
+            # fall on the open and third-fret third string and the E above on the second string, fret 5. The open
+            # first string would keep ringing under the next notes, and the fifth-fret position would drop the open strings.
+            bass, low, mid, high = (None, None, None, 2, None, None), (None, None, 0, None, None, None), (None, None, 3, None, None, None), (None, 5, None, None, None, None)
+            assert len(tabs[2]) == 12
+            tabs[2] = [list(c) for c in (bass, low, mid, high, mid, low) * 2]
         if EDITION == "santisteban" and number == 12:
             # Requested TAB voicing: the three D bass quarters of the last bar (m. 12 in the file,
             # shown as 13) all on the open fourth string instead of fret 5 on the fifth.
