@@ -1,5 +1,19 @@
 /* ----- Articles (index and Carcassi article) ----- */
 
+.articles-section > .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding-top: 1rem;
+  margin-top: -1rem;
+  background: var(--paper);
+}
+
+.articles-section .site-menu-panel {
+  max-height: calc(100dvh - 7rem);
+  overflow-y: auto;
+}
+
 .article-back {
   margin: 0 0 1rem;
   font-family: var(--sans);
