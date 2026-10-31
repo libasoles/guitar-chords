@@ -134,6 +134,9 @@ def build(number):
         with open(os.path.join(prepared, tabify.SUGGESTION_NAME), encoding='utf-8') as f:
             suggestion = json.load(f)
         tabs = suggestion['tabs']
+        # `tab_fixes` del catalogo: compas (desde 1) -> columnas de la TAB que se conservan en vez de las del motor.
+        for bar, columns in PIECES[number].get('tab_fixes', {}).items():
+            tabs[int(bar) - 1] = columns
         # El primer nivel (el menos compacto) con el que el PDF ocupa menos paginas.
         # `min_scale` del catalogo corta la busqueda: antes que encoger el grabado hasta que sea ilegible, mas paginas.
         best = None

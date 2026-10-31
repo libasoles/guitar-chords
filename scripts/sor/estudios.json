@@ -4,7 +4,7 @@
   "603": {"opus": 6, "n": "3", "form": "E Major", "es": "Mi mayor", "source": "sorf-op6n03.ly", "editor": "Glen Larsen", "license": "4.0"},
   "604": {"opus": 6, "n": "4", "form": "G Major", "es": "Sol mayor", "source": "sorf-op6n04.ly", "editor": "Glen Larsen", "license": "4.0"},
   "605": {"opus": 6, "n": "5", "form": "C Major", "es": "Do mayor", "source": "sorf-op6n05.ly", "editor": "Glen Larsen", "license": "4.0"},
-  "606": {"opus": 6, "n": "6", "form": "A Major", "es": "La mayor", "source": "sorf-op6n06.ly", "editor": "Glen Larsen", "license": "4.0"},
+  "606": {"opus": 6, "n": "6", "form": "A Major", "es": "La mayor", "source": "sorf-op6n06.ly", "editor": "Glen Larsen", "license": "4.0", "tab_fixes": {"27": [[2, 2, 3, null, null, null], [null, 3, 4, null, null, null], [0, 2, null, null, null, null]]}},
   "607": {"tuning": "dropd", "opus": 6, "n": "7", "form": "D Major", "es": "Re mayor", "source": "sorf-op6n07.ly", "editor": "Glen Larsen", "license": "4.0"},
   "608": {"opus": 6, "n": "8", "form": "C Major", "es": "Do mayor", "source": "sorf-op6n08.ly", "editor": "Glen Larsen", "license": "4.0"},
   "609": {"tuning": "dropd", "opus": 6, "n": "9", "form": "D Minor", "es": "Re menor", "source": "sorf-op6n09.ly", "editor": "Glen Larsen", "license": "4.0"},
