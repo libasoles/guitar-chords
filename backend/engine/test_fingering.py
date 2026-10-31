@@ -388,6 +388,11 @@ class RepeatedNotesTests(unittest.TestCase):
     def test_a_low_cell_played_again_is_not_charged_twice(self):
         self.assertEqual(fingering.repeated_notes(((3, 5),), ((3, 5),), self.OPENS), ([(3, 5)], 0))
 
+    def test_a_note_that_ended_before_the_onset_is_not_a_repeat(self):
+        """After a rest the pitch is a new note: it may take the most comfortable string."""
+        self.assertEqual(fingering.repeated_notes(((2, 0),), ((3, 5),), self.OPENS, {55: 1.0}, 2.0), ([], 0))
+        self.assertEqual(fingering.repeated_notes(((2, 0),), ((3, 5),), self.OPENS, {55: 2.0}, 2.0), ([], 1))
+
     def test_a_high_cell_played_again_still_pays_for_its_fret(self):
         self.assertEqual(fingering.repeated_notes(((5, 10),), ((5, 10),), self.OPENS), ([], 0))
 

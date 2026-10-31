@@ -779,7 +779,7 @@ def sustained_path(flat, layers, opens):
                 ringing, kept = fingering.ringing_cost(alive, combo, fingers[i], MAX_SPAN)
                 own = cost
                 if same_measure:
-                    again, moved = fingering.repeated_notes(prev_combo, combo, opens)
+                    again, moved = fingering.repeated_notes(prev_combo, combo, opens, flat[i - 1].get("until"), flat[i].get("time"))
                     own = (local_cost(tuple(cell for cell in combo if cell not in again)) if again else cost) + fingering.REPEAT_MOVED * moved
                 total = prev_cost + own + move + ringing
                 new_key = (k, _held_after(flat, i, combo, kept, opens))

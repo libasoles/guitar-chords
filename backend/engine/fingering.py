@@ -281,12 +281,14 @@ def ringing_cost(held, combo, fingers, reach):
 REPEAT_FREE_FRET = 7    # a repeated note whose finger is already down is not charged again up to this fret (the low positions)
 
 
-def repeated_notes(previous, combo, opens):
-    """(cells, moved) for the pitches of `combo` that also sound in the previous column: the cells played again where they were,
+def repeated_notes(previous, combo, opens, until=None, time=None):
+    """(cells, moved) for the pitches of `combo` that also sound in the previous column (`until`: pitch -> end of that note, `time`:
+    this column's onset; a pitch whose note was over before the onset, after a rest, is not a repeat): the cells played again where they were,
     up to `REPEAT_FREE_FRET` (the finger is already down, so the caller does not charge their frets a second time), and how
     many pitches changed string (each costs `REPEAT_MOVED`, A2). It keeps the quick repeated bass of Sor Op. 6 No. 4 on one
     string from the first chord to the last repeat instead of cutting the held notes above it."""
-    before = {opens[s] + f: (s, f) for s, f in previous}
+    before = {opens[s] + f: (s, f) for s, f in previous
+              if until is None or until.get(opens[s] + f, time) >= time - 1e-6}
     again = [(s, f) for s, f in combo if before.get(opens[s] + f) == (s, f) and f <= REPEAT_FREE_FRET]
     moved = sum(1 for s, f in combo if opens[s] + f in before and before[opens[s] + f] != (s, f))
     return again, moved
