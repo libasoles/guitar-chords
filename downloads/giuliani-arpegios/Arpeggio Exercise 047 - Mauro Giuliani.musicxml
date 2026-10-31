@@ -56,7 +56,7 @@
         <beam number="2">begin</beam>
         <notations>
           <technical>
-            <fingering alternate="no" substitution="no">m</fingering>
+            <fingering alternate="no" substitution="no">p</fingering>
           </technical>
         </notations>
       </note>
@@ -74,7 +74,7 @@
         <beam number="2">continue</beam>
         <notations>
           <technical>
-            <fingering alternate="no" substitution="no">p</fingering>
+            <fingering alternate="no" substitution="no">i</fingering>
           </technical>
         </notations>
       </note>
@@ -91,7 +91,7 @@
         <staff>1</staff>
         <notations>
           <technical>
-            <fingering alternate="no" substitution="no">i</fingering>
+            <fingering alternate="no" substitution="no">m</fingering>
           </technical>
         </notations>
       </note>
@@ -109,7 +109,7 @@
         <beam number="2">continue</beam>
         <notations>
           <technical>
-            <fingering alternate="no" substitution="no">m</fingering>
+            <fingering alternate="no" substitution="no">p</fingering>
           </technical>
         </notations>
       </note>
@@ -126,7 +126,7 @@
         <staff>1</staff>
         <notations>
           <technical>
-            <fingering alternate="no" substitution="no">p</fingering>
+            <fingering alternate="no" substitution="no">m</fingering>
           </technical>
         </notations>
       </note>
@@ -144,7 +144,7 @@
         <beam number="2">end</beam>
         <notations>
           <technical>
-            <fingering alternate="no" substitution="no">m</fingering>
+            <fingering alternate="no" substitution="no">i</fingering>
           </technical>
         </notations>
       </note>
@@ -161,7 +161,7 @@
         <staff>1</staff>
         <notations>
           <technical>
-            <fingering alternate="no" substitution="no">i</fingering>
+            <fingering alternate="no" substitution="no">m</fingering>
           </technical>
         </notations>
       </note>
