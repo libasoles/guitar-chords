@@ -379,6 +379,19 @@ class HarmonicTests(unittest.TestCase):
         self.assertEqual(kept[0][2], [None, None, None, 12, None, None])
 
 
+class RepeatedNotesTests(unittest.TestCase):
+    OPENS = [64, 59, 55, 50, 45, 40]
+
+    def test_a_pitch_on_another_string_than_before_counts_as_moved(self):
+        self.assertEqual(fingering.repeated_notes(((3, 5),), ((2, 0),), self.OPENS), ([], 1))
+
+    def test_a_low_cell_played_again_is_not_charged_twice(self):
+        self.assertEqual(fingering.repeated_notes(((3, 5),), ((3, 5),), self.OPENS), ([(3, 5)], 0))
+
+    def test_a_high_cell_played_again_still_pays_for_its_fret(self):
+        self.assertEqual(fingering.repeated_notes(((5, 10),), ((5, 10),), self.OPENS), ([], 0))
+
+
 class RingingNotesTests(unittest.TestCase):
     """M2-M4 and N9: a pressed note that rings on constrains what comes next."""
     HELD = (4, 2, 4.0, None)  # B on the 5th string, fret 2, ringing until beat 4
@@ -400,6 +413,11 @@ class RingingNotesTests(unittest.TestCase):
     def test_a_new_note_on_the_string_of_a_ringing_one_cuts_it(self):
         cost, kept = self.cost(((4, 5),))
         self.assertEqual((cost, kept), (fingering.CUT_COST, []))
+
+    def test_an_open_string_that_rings_is_cut_like_a_pressed_one(self):
+        cost, kept = self.cost(((4, 5),), (4, 0, 4.0, None))
+        self.assertEqual((cost, kept), (fingering.CUT_COST, []))
+        self.assertEqual(self.cost(((1, 4),), (4, 0, 4.0, None)), (0.0, [(4, 0, 4.0, None)]))
 
     def test_playing_the_same_cell_again_is_free(self):
         self.assertEqual(self.cost(((4, 2),)), (0.0, []))

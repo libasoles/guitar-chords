@@ -763,6 +763,7 @@ def sustained_path(flat, layers, opens):
     rows.append(first)
     for i in range(1, len(layers)):
         slurred = flat[i].get("slurred")
+        same_measure = flat[i].get("offset", 1) > flat[i - 1].get("offset", 0)  # a bar's bass pattern keeps its strings; a new bar may not
         row = {}
         for key, (prev_cost, _, prev_hand, prev_position) in rows[i - 1].items():
             prev_combo = layers[i - 1][key[0]][0]
@@ -776,7 +777,11 @@ def sustained_path(flat, layers, opens):
                 if position is not None and prev_position is not None:
                     move += fingering.position_jump(position, prev_position)
                 ringing, kept = fingering.ringing_cost(alive, combo, fingers[i], MAX_SPAN)
-                total = prev_cost + cost + move + ringing
+                own = cost
+                if same_measure:
+                    again, moved = fingering.repeated_notes(prev_combo, combo, opens)
+                    own = (local_cost(tuple(cell for cell in combo if cell not in again)) if again else cost) + fingering.REPEAT_MOVED * moved
+                total = prev_cost + own + move + ringing
                 new_key = (k, _held_after(flat, i, combo, kept, opens))
                 if new_key not in row or total < row[new_key][0]:
                     row[new_key] = (total, key, h if h is not None else prev_hand,
@@ -796,7 +801,7 @@ def _held_after(flat, i, combo, kept, opens):
     """The pressed notes ringing after column i plays `combo`: those it left ringing plus its own that outlast the next onset."""
     following = flat[i + 1]["time"] if i + 1 < len(flat) else None
     fingers = [flat[i].get("hints", {}).get(m, {}).get("finger") for m in flat[i]["midis"]]
-    own = [(s, f, flat[i]["until"].get(opens[s] + f, flat[i]["time"]), d) for (s, f), d in zip(combo, fingers) if f > 0]
+    own = [(s, f, flat[i]["until"].get(opens[s] + f, flat[i]["time"]), d) for (s, f), d in zip(combo, fingers)]
     ringing = kept + [cell for cell in own if following is not None and cell[2] > following + 1e-6]
     return tuple(sorted(ringing, key=lambda cell: (cell[0], cell[1], cell[2], cell[3] or 0)))
 

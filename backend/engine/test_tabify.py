@@ -469,6 +469,26 @@ class SustainTests(unittest.TestCase):
         released = [(0, 1, 47, [((4, 2), 0.0)], None)] + specs[1:]
         self.assertEqual(self.path(*released)[2], (1, 8))
 
+    def test_a_quick_repeated_bass_goes_to_another_string_than_the_longer_notes_above(self):
+        """Sor Op. 6 No. 4: a crotchet B and a repeated semiquaver G. G is free on the open third string, which is B's string:
+        the bass repeats on the fourth string, fret 5, and the crotchet keeps ringing. The first bass note is on that string
+        already; every repeat keeps it."""
+        specs = [(0, 4, 59, [((2, 4), 0.0)], None),
+                 (1, 2, 55, [((2, 0), 0.0), ((3, 5), 2.75)], None),
+                 (2, 3, 55, [((2, 0), 0.0), ((3, 5), 2.75)], None)]
+        self.assertEqual(self.path(*specs)[1:], [(3, 5), (3, 5)])
+        # Once the B is over, the open string is free again.
+        released = [(0, 1, 59, [((2, 4), 0.0)], None)] + specs[1:]
+        self.assertEqual(self.path(*released)[1:], [(2, 0), (2, 0)])
+
+    def test_a_ringing_open_string_is_not_cut_by_the_next_note(self):
+        """The open first string rings for the bar; G4 is cheaper on that string (fret 3) but would silence it."""
+        specs = [(0, 4, 64, [((0, 0), 0.0)], None),
+                 (1, 2, 67, [((0, 3), 0.0), ((1, 8), 2.0)], None)]
+        self.assertEqual(self.path(*specs)[1], (1, 8))
+        released = [(0, 1, 64, [((0, 0), 0.0)], None)] + specs[1:]
+        self.assertEqual(self.path(*released)[1], (0, 3))
+
     def test_written_fingers_keep_the_position_between_columns(self):
         """N7: finger 1 at fret 3, then finger 1 again for B4. Fret 12 of the second string is the cheaper cell, but it moves the
         position nine frets; fret 7 of the first string moves it four."""

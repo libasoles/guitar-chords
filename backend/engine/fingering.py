@@ -236,7 +236,8 @@ def allowed_cells(midi, opens, hint, max_fret, barre=None):
 # carries the ringing notes in its Viterbi state and asks `ringing_cost` what each candidate does to them.
 
 LIFT_COST = 1.5         # a finger that must leave a note still ringing: the new position is out of its reach
-CUT_COST = 4.0          # a new note on the string of a pressed note still ringing: it is cut
+CUT_COST = 8.0          # a new note on the string of a note still ringing (pressed or open): it is cut. Two cuts outweigh
+#                         moving the quick repeated bass up to fret 5, so it changes string before it silences a longer note
 SAME_FINGER_COST = 6.0  # N9: one written finger asked to hold two ringing notes (a barre excepted)
 POSITION_JUMP = 1.2     # N7: per fret the written fingers' position moves beyond one stretch between columns
 
@@ -252,7 +253,9 @@ def ringing_cost(held, combo, fingers, reach):
     """What playing `combo` costs the notes still ringing from earlier columns. `held`: (string, fret, end, finger) of
     pressed notes. Returns (cost, the notes that keep ringing).
 
-    * M2/M4: a ringing note whose string the new notes use is cut (`CUT_COST`), unless it is the same cell again;
+    * M2/M4: a ringing note whose string the new notes use is cut (`CUT_COST`), unless it is the same cell again. An open
+      string rings too, so it is cut like a pressed one (the note that holds the longer value keeps its string and the
+      quicker voice that repeats moves to another: Sor Op. 6 No. 4, the crotchets above the repeated bass);
     * M3: a finger must not leave a ringing note, so the new fretted notes have to stay within `reach` frets of it (`LIFT_COST` per
       note they do not);
     * N9: one written finger cannot hold two different ringing notes (the first finger on one fret is a barre)."""
@@ -264,6 +267,8 @@ def ringing_cost(held, combo, fingers, reach):
             continue  # played again: it re-enters the held notes below
         if any(s == string for s, _ in combo):
             cost += CUT_COST
+        elif fret == 0:
+            kept.append(cell)  # no finger holds it: nothing to lift, and nobody else may hold it either
         elif fretted and max(max(fretted), fret) - min(min(fretted), fret) > reach:
             cost += LIFT_COST
         elif finger and any(d == finger and not (d == 1 and f == fret) for (_, f), d in zip(combo, fingers) if f > 0):
@@ -271,6 +276,20 @@ def ringing_cost(held, combo, fingers, reach):
         else:
             kept.append(cell)
     return cost, kept
+
+
+REPEAT_FREE_FRET = 7    # a repeated note whose finger is already down is not charged again up to this fret (the low positions)
+
+
+def repeated_notes(previous, combo, opens):
+    """(cells, moved) for the pitches of `combo` that also sound in the previous column: the cells played again where they were,
+    up to `REPEAT_FREE_FRET` (the finger is already down, so the caller does not charge their frets a second time), and how
+    many pitches changed string (each costs `REPEAT_MOVED`, A2). It keeps the quick repeated bass of Sor Op. 6 No. 4 on one
+    string from the first chord to the last repeat instead of cutting the held notes above it."""
+    before = {opens[s] + f: (s, f) for s, f in previous}
+    again = [(s, f) for s, f in combo if before.get(opens[s] + f) == (s, f) and f <= REPEAT_FREE_FRET]
+    moved = sum(1 for s, f in combo if opens[s] + f in before and before[opens[s] + f] != (s, f))
+    return again, moved
 
 
 def position_jump(position, previous):
