@@ -35,6 +35,9 @@ PDF_OVERRIDES = {}
 # Piezas a las que se aplican las reglas de arpegio del motor (backend/engine/fingering.py): el motor detecta los
 # compases de arpegio de cada una, y los demas quedan como los digita el Viterbi. Vacio: ninguna.
 ARPEGGIO = {18}
+# Valses (los que llevan "key" en pieces.json): los comparte la pagina de valses. Usan la deteccion de pasajes del motor
+# (`arpeggio="auto"`, sin el posproceso de cuerdas repetidas) y los voicings pedidos de `extract.waltz_voicing`.
+WALTZES = {n for n, piece in PIECES.items() if 'key' in piece}
 # Pagina virtual mas grande con escala menor (el PDF sigue midiendo lo mismo, como en los preludios
 # largos): el grabado se achica y caben mas compases por sistema y mas sistemas por pagina. Se prueba de menos a mas
 # reduccion y se queda con el primer nivel que ocupa menos paginas.
@@ -88,12 +91,14 @@ def build(number):
     with tempfile.TemporaryDirectory() as tmp:
         extract.patch_engine(tabify)
         prepared = os.path.join(tmp, 'prepared')
-        result = tabify.prepare(source, 'musicxml', 'standard', prepared, per_row=PER_ROW.get(number, 4), arpeggio='auto' if number in ARPEGGIO else False)
+        result = tabify.prepare(source, 'musicxml', 'standard', prepared, per_row=PER_ROW.get(number, 4), arpeggio='auto' if number in ARPEGGIO | WALTZES else False)
         if result['dropped']:
             raise RuntimeError(f"Notas descartadas en la pieza {number}: {result['dropped']}")
         with open(os.path.join(prepared, tabify.SUGGESTION_NAME), encoding='utf-8') as f:
             suggestion = json.load(f)
         tabs = suggestion['tabs']
+        if number in WALTZES:
+            extract.waltz_voicing(number, tabs)
         # El primer nivel (el menos compacto) con el que el PDF ocupa menos paginas.
         best = None
         for level in ([PDF_OVERRIDES[number]] if number in PDF_OVERRIDES else [zoom_options(sc) for sc in SCALES]):

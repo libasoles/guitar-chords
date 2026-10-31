@@ -23,6 +23,11 @@ descripción: un PDF con TAB y su archivo MuseScore (`.mscz`). Se usa el MuseSco
    `src/site/articles/carcassi-progresivas/` la vista previa (`progressive-NN.svg`) y las páginas del modal
    (`full/`). Reutiliza el grabado de los preludios (`scripts/carcassi-preludios/extract.py`).
 
+Los valses (las piezas con `"key"` en `pieces.json`: 2, 5, 7, 10, 15, 26, 34 y 36) también los publica la página de valses
+(`/articulos/valses-de-carcassi`) con **los mismos archivos**; no tienen build propio (ver `scripts/carcassi-valses/README.md`).
+Para ellos `build.py` activa `arpeggio="auto"` (detección de pasajes del motor, §8.1 de `docs/criterios-de-digitacion.md`)
+y aplica `extract.waltz_voicing`, las digitaciones pedidas que mantienen la mano en una posición.
+
 La TAB es la digitación sugerida por el motor (afinación estándar). Las piezas listadas en `ARPEGGIO` de `build.py`
 (hoy la 18) pasan además por las reglas de arpegio del motor (`backend/engine/fingering.py`): dos notas distintas
 seguidas no comparten cuerda, así que un arpegio que repite una forma de acorde (p. ej. la 18, c. 4: cejilla en el

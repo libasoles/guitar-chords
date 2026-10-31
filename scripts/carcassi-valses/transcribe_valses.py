@@ -1,10 +1,13 @@
 """Valses del Op. 59 de Carcassi: PDF vectorial de MuseScore -> MusicXML con notacion (sin TAB).
 
-    python scripts/carcassi-valses/transcribe_valses.py 2        # escribe corrected/waltz-02.musicxml
+    python scripts/carcassi-valses/transcribe_valses.py 2 salida.musicxml
 
 Las notas se leen de la geometria del PDF (ver pdf_notes.py); no se copia nada del PDF a la salida: el
-MusicXML lleva solo alturas y duraciones, y la TAB la propone el motor (ver build.py). Alturas escritas
-(clave de sol), como en los preludios. Un tiempo = una semicorchea.
+MusicXML lleva solo alturas y duraciones, y la TAB la propone el motor. Alturas escritas (clave de sol), como en
+los preludios. Un tiempo = una semicorchea.
+
+Es la biblioteca de lectura de PDF de MuseScore que importan Sagreras, Barrios y Giuliani. Los valses publicados ya no
+salen de aqui sino de las piezas progresivas (scripts/carcassi-progresivas), con las que comparten archivos.
 """
 import math
 import os
@@ -333,6 +336,6 @@ def write(number, title, path):
 
 if __name__ == '__main__':
     n = int(sys.argv[1])
-    out = HERE / 'corrected' / f'waltz-{n:02d}.musicxml'
+    out = Path(sys.argv[2])
     meta, measures = write(n, f'Waltz {n}', str(out))
     print('escrito', out, len(measures), 'compases', meta['fifths'], meta['time'])
