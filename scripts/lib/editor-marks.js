@@ -44,7 +44,8 @@ const PIECES = {
   giuliani: { pending: Array.from({ length: 24 }, (_, i) => i + 1) },
   'giuliani-arpegios': { pending: Array.from({ length: 70 }, (_, i) => i + 51) },
   // Lecciones 7, 8 y 10-13 transcritas a mano del facsimil (claves 21-27 de scripts/aguado/pieces.json): sin cotejar con el editor.
-  aguado: { pending: Array.from({ length: 7 }, (_, i) => i + 21) },
+  // La 23 (clave 3): digitacion del acorde la-do# de los compases 1 y 5 por revisar.
+  aguado: { pending: [3, ...Array.from({ length: 7 }, (_, i) => i + 21)] },
 };
 
 /* Iconos de las marcas de la pieza dentro de un <span class="editor-marks">; vacio si no tiene ninguna. */
