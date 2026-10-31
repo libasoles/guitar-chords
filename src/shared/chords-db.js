@@ -3,7 +3,7 @@
    la consume el buscador web (reference/chord-finder.html) y la extensión de Chrome.
 
    Cobertura: para las 12 fundamentales — mayor, menor, 7, m7, maj7, 6, maj9, 9,
-   m9, 7♭9, sus2, sus4, 11, m11, maj11, add11 — más dim7 (los 12), aug (los 12), slash y tensiones comunes.
+   m9, 7♭9, sus2, sus4, 11, m11, maj11, add11, 13 — más dim7 (los 12), aug (los 12), slash y tensiones comunes.
    Posiciones abiertas donde existen; formas movibles con cejilla para el resto.
 
    Voicings notation per svguitar: fingers = [[string, fret|'x'|'o', fingerLabel?], ...]
@@ -748,6 +748,44 @@ window.CHORDS = [
   { name: 'B(add11)', families: ['otros'], aliases: ['Badd11','B(add4)','Badd4'],
     notes: 'B E B D♯ F♯ B', position: 7, barres: [{fromString:6,toString:1,fret:7}],
     fingers: [[4,9,'3'],[3,8,'2']] },
+
+  // ----- TRECEAVAS DOMINANTES (13): sin quinta ni novena -----
+  { name: 'C13', families: ['otros'], aliases: ['C7(13)'],
+    notes: 'C E B♭ E A', position: 2, barres: [{fromString:2,toString:1,fret:5}],
+    fingers: [[6,'x'],[5,3,'3'],[4,2,'1'],[3,3,'2'],[2,5,'4'],[1,5,'4']] },
+  { name: 'D♭13', families: ['otros'], aliases: ['D♭7(13)','C♯13','C♯7(13)'],
+    notes: 'D♭ F C♭ F B♭', position: 3, barres: [{fromString:2,toString:1,fret:6}],
+    fingers: [[6,'x'],[5,4,'3'],[4,3,'1'],[3,4,'2'],[2,6,'4'],[1,6,'4']] },
+  { name: 'D13', families: ['otros'], aliases: ['D7(13)'],
+    notes: 'D F♯ C F♯ B', position: 4, barres: [{fromString:2,toString:1,fret:7}],
+    fingers: [[6,'x'],[5,5,'3'],[4,4,'1'],[3,5,'2'],[2,7,'4'],[1,7,'4']] },
+  { name: 'E♭13', families: ['otros'], aliases: ['E♭7(13)','D♯13','D♯7(13)'],
+    notes: 'E♭ G D♭ G C', position: 5, barres: [{fromString:2,toString:1,fret:8}],
+    fingers: [[6,'x'],[5,6,'3'],[4,5,'1'],[3,6,'2'],[2,8,'4'],[1,8,'4']] },
+  { name: 'E13', families: ['otros'], aliases: ['E7(13)'],
+    notes: 'E G♯ D G♯ C♯', position: 6, barres: [{fromString:2,toString:1,fret:9}],
+    fingers: [[6,'x'],[5,7,'3'],[4,6,'1'],[3,7,'2'],[2,9,'4'],[1,9,'4']] },
+  { name: 'F13', families: ['otros'], aliases: ['F7(13)'],
+    notes: 'F A E♭ A D', position: 7, barres: [{fromString:2,toString:1,fret:10}],
+    fingers: [[6,'x'],[5,8,'3'],[4,7,'1'],[3,8,'2'],[2,10,'4'],[1,10,'4']] },
+  { name: 'F♯13', families: ['otros'], aliases: ['F♯7(13)','G♭13','G♭7(13)'],
+    notes: 'F♯ A♯ E A♯ D♯', position: 8, barres: [{fromString:2,toString:1,fret:11}],
+    fingers: [[6,'x'],[5,9,'3'],[4,8,'1'],[3,9,'2'],[2,11,'4'],[1,11,'4']] },
+  { name: 'G13', families: ['otros'], aliases: ['G7(13)'],
+    notes: 'G B F B E', position: 9, barres: [{fromString:2,toString:1,fret:12}],
+    fingers: [[6,'x'],[5,10,'3'],[4,9,'1'],[3,10,'2'],[2,12,'4'],[1,12,'4']] },
+  { name: 'A♭13', families: ['otros'], aliases: ['A♭7(13)','G♯13','G♯7(13)'],
+    notes: 'A♭ C G♭ C F', position: 10, barres: [{fromString:2,toString:1,fret:13}],
+    fingers: [[6,'x'],[5,11,'3'],[4,10,'1'],[3,11,'2'],[2,13,'4'],[1,13,'4']] },
+  { name: 'A13', families: ['otros'], aliases: ['A7(13)'],
+    notes: 'A G C♯ F♯',
+    fingers: [[6,'x'],[5,'o'],[4,'x'],[3,'o'],[2,2,'1'],[1,2,'2']] },
+  { name: 'B♭13', families: ['otros'], aliases: ['A♯13','B♭7(13)','A♯7(13)'],
+    notes: 'B♭ D A♭ D G',
+    fingers: [[6,'x'],[5,1,'1'],[4,'o'],[3,1,'2'],[2,3,'3'],[1,3,'4']] },
+  { name: 'B13', families: ['otros'], aliases: ['B7(13)'],
+    notes: 'B D♯ A D♯ G♯', barres: [{fromString:2,toString:1,fret:4}],
+    fingers: [[6,'x'],[5,2,'3'],[4,1,'1'],[3,2,'2'],[2,4,'4'],[1,4,'4']] },
 
   // ----- OTROS (dim7, aug, semidisminuido, tensiones) -----
   { name: 'Bm7b5', families: ['otros'], aliases: ['Bø','Bm7(♭5)','B-7b5'],

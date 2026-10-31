@@ -295,3 +295,11 @@ test('oncenas: nombres y alias enarmónicos se encuentran en el buscador', () =>
     assert.ok(names(query).includes(name), `${query} → ${name}`);
   }
 });
+
+test('treceavas: nombres y alias enarmónicos se encuentran en el buscador', () => {
+  for (const [query, name] of [
+    ['F13', 'F13'], ['F7(13)', 'F13'], ['A13', 'A13'], ['C#13', 'D♭13'], ['Bb13', 'B♭13'],
+  ]) {
+    assert.ok(names(query).includes(name), `${query} → ${name}`);
+  }
+});

@@ -109,6 +109,7 @@ const eleventhVoicings = {
   'm11': [0, 2, 3, 5, 10], // Sin quinta.
   'maj11': [0, 4, 5, 7, 11], // Sin novena.
   '(add11)': [0, 4, 5, 7], // Sin séptima ni novena.
+  '13': [0, 4, 9, 10], // Sin quinta ni novena.
 };
 
 for (const [suffix, intervals] of Object.entries(eleventhVoicings)) {
