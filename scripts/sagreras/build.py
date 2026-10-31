@@ -17,7 +17,14 @@ sys.path.insert(0, os.path.join(ROOT, 'scripts', 'carcassi-preludios'))
 sys.path.insert(0, os.path.join(ROOT, 'backend', 'engine'))
 
 import extract  # noqa: E402  (rutinas de grabado compartidas con los preludios)
-from engraving import barre_above_line, clear_rests, clear_triplets, separate_rests
+import importlib.util  # noqa: E402
+
+# backend/engine tiene su propio engraving.py: este se carga por ruta para que no lo tape.
+_spec = importlib.util.spec_from_file_location('sagreras_engraving', os.path.join(HERE, 'engraving.py'))
+_engraving = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_engraving)
+barre_above_line, clear_rests, clear_triplets, separate_rests = (
+    _engraving.barre_above_line, _engraving.clear_rests, _engraving.clear_triplets, _engraving.separate_rests)
 
 AUTHOR = 'Julio Salvador Sagreras'
 # Atribucion que exige la licencia de la edicion de origen (CC BY-NC 4.0): pie gris en sans, a la izquierda de cada pagina.

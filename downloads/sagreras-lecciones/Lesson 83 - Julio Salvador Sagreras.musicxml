@@ -3070,6 +3070,12 @@
         <stem>down</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
+        <notations>
+          <technical>
+            <string>3</string>
+            <fret>4</fret>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-94">
         <pitch>
@@ -3094,6 +3100,12 @@
         <stem>down</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
+        <notations>
+          <technical>
+            <string>3</string>
+            <fret>4</fret>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-96">
         <pitch>
@@ -3118,6 +3130,12 @@
         <stem>down</stem>
         <staff>1</staff>
         <beam number="1">begin</beam>
+        <notations>
+          <technical>
+            <string>3</string>
+            <fret>4</fret>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-98">
         <pitch>
@@ -3203,7 +3221,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -3235,7 +3253,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -3267,7 +3285,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -4425,7 +4443,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
