@@ -32,7 +32,7 @@
   "3519": {"opus": 35, "n": "19", "form": "C Major", "es": "Do mayor", "source": "sorf_op35_no19.ly", "editor": "Glen Larsen", "license": "4.0"},
   "3520": {"opus": 35, "n": "20", "form": "A Major", "es": "La mayor", "source": "sorf_op35_no20.ly", "editor": "Glen Larsen", "license": "4.0"},
   "3521": {"opus": 35, "n": "21", "form": "A Major", "es": "La mayor", "source": "sorf_op35_no21.ly", "editor": "Glen Larsen", "license": "4.0"},
-  "3522": {"opus": 35, "n": "22", "form": "B Minor", "es": "Si menor", "source": "sorf_op35_no22.ly", "min_scale": 38, "tie_dirs": true, "editor": "Glen Larsen", "license": "3.0"},
+  "3522": {"opus": 35, "n": "22", "form": "B Minor", "es": "Si menor", "source": "sorf_op35_no22.ly", "min_scale": 38, "tie_dirs": true, "string_hints": true, "editor": "Glen Larsen", "license": "3.0"},
   "3523": {"opus": 35, "n": "23", "form": "E Major", "es": "Mi mayor", "source": "sorf_op35_no23.ly", "editor": "Glen Larsen", "license": "4.0"},
   "3524": {"opus": 35, "n": "24", "patches": [["d, a'' c, d c d c d fis, a' c, d d, a'' c, d", "d, a'' c,\\3 d c\\3 d c\\3 d fis, a' c,\\3 d d, a'' c,\\3 d"]], "string_hints": true, "form": "E Minor", "es": "Mi menor", "source": "sorf_op35_no24.ly", "editor": "Glen Larsen", "license": "4.0"}
 }
