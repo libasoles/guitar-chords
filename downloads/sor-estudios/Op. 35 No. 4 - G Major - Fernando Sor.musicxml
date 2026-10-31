@@ -1994,7 +1994,7 @@
         <stem>down</stem>
         <staff>1</staff>
         <notations>
-          <slur number="1" type="start" />
+          <slur number="1" placement="below" type="start" />
           <technical>
             <fingering alternate="no" substitution="no">2</fingering>
           </technical>
@@ -2294,7 +2294,7 @@
         <stem>down</stem>
         <staff>1</staff>
         <notations>
-          <slur number="2" type="start" />
+          <slur number="2" placement="below" type="start" />
           <technical>
             <fingering alternate="no" substitution="no">1</fingering>
           </technical>
@@ -4879,7 +4879,7 @@
         <stem>up</stem>
         <staff>1</staff>
         <notations>
-          <slur number="3" type="start" />
+          <slur number="3" placement="below" type="start" />
         </notations>
       </note>
       <note id="tab-note-143">

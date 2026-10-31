@@ -7176,7 +7176,7 @@
         <stem>down</stem>
         <staff>1</staff>
         <notations>
-          <slur number="1" type="start" />
+          <slur number="1" placement="below" type="start" />
           <technical>
             <fingering alternate="no" substitution="no">3</fingering>
           </technical>

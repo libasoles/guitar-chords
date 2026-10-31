@@ -67,6 +67,9 @@ PER_ROW = {}
 ARPEGGIO = set()
 PDF_OVERRIDES = {}
 SCALES = [45, 41, 38, 35]  # la escala de Verovio es entera; 45 es la del motor; con menos de 35 lo impreso es ilegible
+# Escala minima de los estudios: por debajo el PDF mete demasiados compases por renglon y la TAB queda apretada, asi que
+# se prefieren mas paginas. `min_scale` en el catalogo la baja o la sube para una pieza.
+MIN_SCALE = {'lecciones': 0, 'estudios': 45}
 
 
 def zoom_options(scale):
@@ -134,7 +137,7 @@ def build(number):
         # El primer nivel (el menos compacto) con el que el PDF ocupa menos paginas.
         # `min_scale` del catalogo corta la busqueda: antes que encoger el grabado hasta que sea ilegible, mas paginas.
         best = None
-        for level in ([PDF_OVERRIDES[number]] if number in PDF_OVERRIDES else [zoom_options(sc) for sc in SCALES if sc >= PIECES[number].get('min_scale', 0)]):
+        for level in ([PDF_OVERRIDES[number]] if number in PDF_OVERRIDES else [zoom_options(sc) for sc in SCALES if sc >= PIECES[number].get('min_scale', MIN_SCALE[COLLECTION])]):
             tabify.PDF_OPTIONS = {**base_options, **level}
             exported = os.path.join(tmp, f"export-{level['scale']}")
             tabify.export(os.path.join(prepared, tabify.NORMALIZED_NAME), os.path.join(prepared, tabify.SUGGESTION_NAME),

@@ -27259,7 +27259,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>7</fret>
+            <string>2</string><fret>12</fret>
           </technical>
         </notations>
       </note>
@@ -27282,7 +27282,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>5</fret>
+            <string>2</string><fret>10</fret>
           </technical>
         </notations>
       </note>
@@ -27519,7 +27519,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>3</fret>
+            <string>2</string><fret>8</fret>
           </technical>
         </notations>
       </note>
@@ -27563,7 +27563,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>3</fret>
+            <string>2</string><fret>8</fret>
           </technical>
         </notations>
       </note>
@@ -27588,7 +27588,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>2</fret>
+            <string>2</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -31251,7 +31251,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>2</fret>
+            <string>2</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -31469,7 +31469,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>3</fret>
+            <string>2</string><fret>8</fret>
           </technical>
         </notations>
       </note>
@@ -31531,7 +31531,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>2</fret>
+            <string>2</string><fret>7</fret>
           </technical>
         </notations>
       </note>
@@ -33124,7 +33124,7 @@
         <stem>up</stem>
         <staff>1</staff>
         <notations>
-          <slur number="1" type="start" />
+          <slur number="1" placement="above" type="start" />
         </notations>
       </note>
       <note id="tab-note-1014">
