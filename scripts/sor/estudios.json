@@ -23,6 +23,7 @@
   "3510": {"opus": 35, "n": "10", "form": "F Major", "es": "Fa mayor", "source": "sorf_op35_no10.ly", "editor": "Glen Larsen", "license": "3.0"},
   "3511": {"opus": 35, "n": "11", "form": "D Minor", "es": "Re menor", "source": "sorf_op35_no11.ly", "editor": "Glen Larsen", "license": "4.0"},
   "3512": {"opus": 35, "n": "12", "form": "F Major", "es": "Fa mayor", "source": "sorf_op35_no12.ly", "editor": "Glen Larsen", "license": "4.0"},
+  "3512": {"tuning": "lowf", "opus": 35, "n": "12", "form": "F Major", "es": "Fa mayor", "source": "sorf_op35_no12.ly", "editor": "Glen Larsen", "license": "4.0"},
   "3513": {"patches": [["<g,-2>16[ b'] \\sD <f-1>16[ b]", "<gis,-2>16[ b'] \\sD <f-1>16[ b]"]], "opus": 35, "n": "13", "form": "C Major", "es": "Do mayor", "source": "sorf_op35_no13.ly", "editor": "Glen Larsen", "license": "4.0"},
   "3514": {"opus": 35, "n": "14", "form": "A Minor", "es": "La menor", "source": "Sor_Etude_Opus35_14.ly", "editor": "Jakob Bagterp", "license": "public-domain"},
   "3515": {"opus": 35, "n": "15", "form": "A Major", "es": "La mayor", "source": "sorf_op35_no15.ly", "editor": "Glen Larsen", "license": "4.0"},

@@ -43,6 +43,7 @@ VEROVIO_DATA = os.path.join(os.path.dirname(verovio.__file__), "data")
 
 STANDARD_TUNING = "E2,A2,D3,G3,B3,E4"  # string 6 -> string 1
 DROP_D_TUNING = "D2,A2,D3,G3,B3,E4"
+LOW_F_TUNING = "F2,A2,D3,G3,B3,E4"  # sixth string up to F (Sor Op. 35 No. 12); only asked for by name, never guessed
 MAX_FRET = 19
 MAX_SPAN = 4  # frets the hand covers without stretching
 MAX_HELD_FRETS = 4  # distinct frets pressed at once: one per finger
@@ -1375,7 +1376,7 @@ def build_output(score, part, measures, tuning, title, out_base, header=None):
 
 # --- Pure operations on artifacts ------------------------------------------
 
-TUNINGS = {"standard": STANDARD_TUNING, "dropd": DROP_D_TUNING}
+TUNINGS = {"standard": STANDARD_TUNING, "dropd": DROP_D_TUNING, "lowf": LOW_F_TUNING}
 SUGGESTION_VERSION = 1
 HARMONIC_ID = "tab-harmonic-"
 NORMALIZED_NAME = "normalized.musicxml"
