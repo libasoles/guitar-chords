@@ -10,7 +10,7 @@ Dos páginas, las dos desde los archivos LilyPond de [Mutopia](https://www.mutop
 
 La clave del catálogo es el número de la lección; en los estudios, opus × 100 + número (601 = Op. 6 n.º 1, 3524 = Op. 35
 n.º 24). `form`/`es` son la tonalidad, `editor` y `license` los de la edición de Mutopia; `tuning: "dropd"` pone la sexta
-cuerda en Re (Op. 6 n.º 7 y 9); `patches` son correcciones de erratas del `.ly` (ver abajo).
+cuerda en Re (Op. 6 n.º 7 y 9); `patches` son correcciones de erratas del `.ly` (ver abajo). `string_hints: true` hace que el conversor lea `\3` tras una nota como cuerda fija en la TAB (en el Op. 35 n.º 24, compás 19, `c,\3`: el do en la 3.ª cuerda, traste 5, en vez de la 2.ª al 1).
 
 ```sh
 .venv-carcassi/bin/python scripts/sor/build.py [estudios] convert 3501   # el .ly -> sources/.../3501.musicxml

@@ -103,7 +103,7 @@ def file_base(number):
 def convert(number):
     piece = PIECES[number]
     source = os.path.join(SOURCES, piece['source'])
-    xml = ly_to_musicxml.convert(source, title_of(number), AUTHOR, words=piece.get('words'), patches=piece.get('patches', ()), tie_dirs=piece.get('tie_dirs', False))
+    xml = ly_to_musicxml.convert(source, title_of(number), AUTHOR, words=piece.get('words'), patches=piece.get('patches', ()), tie_dirs=piece.get('tie_dirs', False), string_hints=piece.get('string_hints', False))
     target = os.path.join(SOURCES, f'{number:02d}.musicxml')
     with open(target, 'w', encoding='utf-8') as f:
         f.write(xml)

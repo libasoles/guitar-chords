@@ -138,7 +138,7 @@ FUNCTION = re.compile(r'(\w+)\s*=\s*#\(define-music-function\s*\([^)]*\)\s*\(([^
 
 
 class Parser:
-    def __init__(self, text, tie_dirs=False):
+    def __init__(self, text, tie_dirs=False, string_hints=False):
         global GERMAN
         GERMAN = '\\include "deutsch.ly"' in text
         text = strip_comments(text)
@@ -162,6 +162,7 @@ class Parser:
         self.stem = None  # 'up', 'down' o None (automatica) segun \voiceOne, \stemDown...
         self.tie_dir = None  # 'under' si la voz lleva \tieDown y la pieza lo pide (`tie_dirs`); None: la ligadura automatica
         self.tie_dirs = tie_dirs
+        self.string_hints = string_hints  # `\3` tras una nota fija la cuerda en la TAB (`string_hints`); si no, se ignora
 
     # -- lectura de tokens -----------------------------------------------------------------------
     def peek(self, offset=0):
@@ -600,6 +601,8 @@ class Parser:
                 while self.peek()[0] in ('stringnum', 'dir', 'script', 'finger', 'dyn') or self.peek()[1] in ('\\rest', '~', '(', ')', '[', ']'):
                     if self.peek()[0] == 'finger':
                         pitches[-1]['fingers'].append(self.peek()[1][1])
+                    if self.peek()[0] == 'stringnum' and self.string_hints:
+                        pitches[-1]['string'] = self.peek()[1][1]
                     if self.peek()[1] == '~':
                         pitches[-1]['tie_wanted'] = True
                     if self.peek()[1] == '(':
@@ -635,6 +638,8 @@ class Parser:
                     pitches[-1]['fingers'].append(nxt[1])
             elif kind in ('script', 'stringnum'):
                 self.take()
+                if kind == 'stringnum' and self.string_hints and pitches:
+                    pitches[-1]['string'] = nxt[1]
             elif kind == 'dir':  # `_"Fine."`, `^\\markup { ... }`, `-\\tenuto`
                 self.take()
                 after = self.peek()
@@ -1046,8 +1051,9 @@ class Writer:
                 notations += '<slur type="start" number="%d"/>' % number * e['slur_start']
                 if e.get('fermata'):
                     notations += '<fermata type="upright"/>'
-            if p['fingers']:
-                notations += '<technical>%s</technical>' % ''.join('<fingering>%s</fingering>' % f for f in p['fingers'])
+            if p['fingers'] or p.get('string'):
+                notations += '<technical>%s%s</technical>' % (''.join('<fingering>%s</fingering>' % f for f in p['fingers']),
+                                                              '<string>%s</string>' % p['string'] if p.get('string') else '')
             if notations:
                 parts.append('<notations>%s</notations>' % notations)
             parts.append('</note>')
@@ -1108,7 +1114,7 @@ def pitch_key(p):
     return (p['step'], p['alter'], p['octave'])
 
 
-def convert(path, title, composer, words=None, patches=(), tie_dirs=False):
+def convert(path, title, composer, words=None, patches=(), tie_dirs=False, string_hints=False):
     """`patches`: pares [texto, reemplazo] sobre el `.ly` (erratas de la edicion de Mutopia). Cada texto debe aparecer
     una sola vez: si el archivo cambia, la correccion falla en vez de aplicarse donde no toca.
     `tie_dirs`: respeta `\tieDown` (ligadura por debajo); solo en las piezas cuya ligadura solapa otras notas."""
@@ -1118,7 +1124,7 @@ def convert(path, title, composer, words=None, patches=(), tie_dirs=False):
         if text.count(old) != 1:
             raise LyError('la correccion %r aparece %d veces en %s' % (old, text.count(old), os.path.basename(path)))
         text = text.replace(old, new)
-    parser = Parser(text, tie_dirs)
+    parser = Parser(text, tie_dirs, string_hints)
     voices = parser.parse_file()
     mark_ties(voices)
     # Con clave de sol normal el archivo da la altura escrita de la guitarra (suena una octava mas grave); con
