@@ -124,7 +124,8 @@ def separate_rests(svg):
     def move(match):
         identifier = re.search(r'\bid="([^"]+)"', match[0])
         shift = shifts.get(identifier[1]) if identifier else None
-        return match[0][:-1] + f' transform="translate(0, {shift})">' if shift else match[0]
+        # drop_brace puede aplicarse dos veces al mismo SVG: el segundo paso no repite el desplazamiento.
+        return match[0][:-1] + f' transform="translate(0, {shift})">' if shift and 'transform=' not in match[0] else match[0]
 
     return re.sub(r'<g\b[^>]*class="rest"[^>]*>', move, svg)
 
@@ -187,7 +188,8 @@ def clear_rests(svg):
     def move(match):
         identifier = re.search(r'\bid="([^"]+)"', match[0])
         shift = shifts.get(identifier[1]) if identifier else None
-        return match[0][:-1] + f' transform="translate(0, {shift})">' if shift else match[0]
+        # drop_brace puede aplicarse dos veces al mismo SVG: el segundo paso no repite el desplazamiento.
+        return match[0][:-1] + f' transform="translate(0, {shift})">' if shift and 'transform=' not in match[0] else match[0]
 
     return re.sub(r'<g\b[^>]*class="rest"[^>]*>', move, svg)
 
