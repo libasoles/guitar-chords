@@ -325,6 +325,31 @@ def build(number):
                 if column[1] == 0 and column[2] is None:
                     column[1] = None
                     column[2] = 4
+        if EDITION == "valses" and number == 34:
+            # Requested TAB voicing (m. 10, 12, 14): the first note of the bar is the same pitch that closes the bar inside
+            # the chord on the second string (F# fret 7, E fret 5), so play it there too: the hand stays in one position
+            # instead of leaping from the open or low first-string note up to the chord (2 -> 7, 0 -> 5).
+            for measure, old_fret, new_fret in [(10, 2, 7), (12, 0, 5), (14, 2, 7)]:
+                for column in tabs[measure]:
+                    if column[0] == old_fret and column[1] is None and any(c is not None for c in column):
+                        column[0] = None
+                        column[1] = new_fret
+                        break
+        if EDITION == "valses" and number == 36:
+            # Requested TAB voicing (m. 1): the E on the second string, fret 5, next to the A on fret 5 of the first,
+            # not the open first string.
+            for column in tabs[1]:
+                if column[0] == 0 and column[1] is None and column[2] is None:
+                    column[0] = None
+                    column[1] = 5
+                    break
+            # M. 22: the C# and E chords around the E-flat and C chord (second and third strings, frets 4-5) are x56
+            # (frets 5 and 6 of the same strings), not 02x: the chromatic chord slides one fret and the hand does not move.
+            for column in tabs[22]:
+                if column[0] == 0 and column[1] == 2 and column[2] is None:
+                    column[0] = None
+                    column[1] = 5
+                    column[2] = 6
         if EDITION == "santisteban" and number == 12:
             # Requested TAB voicing: the three D bass quarters of the last bar (m. 12 in the file,
             # shown as 13) all on the open fourth string instead of fret 5 on the fifth.
