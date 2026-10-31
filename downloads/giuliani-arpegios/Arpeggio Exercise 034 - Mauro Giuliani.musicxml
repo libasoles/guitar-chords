@@ -60,6 +60,9 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">p</fingering>
+          </technical>
           <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
@@ -112,6 +115,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">p</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-3">
         <pitch>
@@ -201,6 +209,9 @@
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
         <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">p</fingering>
+          </technical>
           <tuplet bracket="yes" number="1" placement="above" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
@@ -253,6 +264,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <fingering alternate="no" substitution="no">p</fingering>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-9">
         <pitch>
@@ -578,29 +594,6 @@
           <step>C</step>
           <octave>4</octave>
         </pitch>
-        <duration>5040</duration>
-        <voice>2</voice>
-        <type>eighth</type>
-        <stem>down</stem>
-        <staff>1</staff>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">p</fingering>
-          </technical>
-        </notations>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>5040</duration>
-        <voice>2</voice>
-        <type>eighth</type>
-        <staff>1</staff>
-      </note>
-      <note id="tab-note-25">
-        <pitch>
-          <step>E</step>
-          <octave>4</octave>
-        </pitch>
         <duration>3360</duration>
         <voice>2</voice>
         <type>eighth</type>
@@ -612,10 +605,7 @@
         <stem>down</stem>
         <staff>1</staff>
         <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">p</fingering>
-          </technical>
-          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
+          <tuplet bracket="no" number="1" show-number="none" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -626,12 +616,44 @@
             </tuplet-normal>
           </tuplet>
         </notations>
+      </note>
+      <note id="tab-note-25">
+        <pitch>
+          <step>C</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>6720</duration>
+        <voice>2</voice>
+        <type>quarter</type>
+        <time-modification>
+          <actual-notes>6</actual-notes>
+          <normal-notes>4</normal-notes>
+          <normal-type>eighth</normal-type>
+        </time-modification>
+        <stem>down</stem>
+        <staff>1</staff>
       </note>
       <note id="tab-note-26">
         <pitch>
           <step>E</step>
           <octave>4</octave>
         </pitch>
+        <duration>3360</duration>
+        <voice>2</voice>
+        <type>eighth</type>
+        <time-modification>
+          <actual-notes>6</actual-notes>
+          <normal-notes>4</normal-notes>
+          <normal-type>eighth</normal-type>
+        </time-modification>
+        <stem>down</stem>
+        <staff>1</staff>
+      </note>
+      <note id="tab-note-27">
+        <pitch>
+          <step>E</step>
+          <octave>4</octave>
+        </pitch>
         <duration>6720</duration>
         <voice>2</voice>
         <type>quarter</type>
@@ -641,34 +663,11 @@
           <normal-type>eighth</normal-type>
         </time-modification>
         <stem>down</stem>
-        <staff>1</staff>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">p</fingering>
-          </technical>
-        </notations>
-      </note>
-      <note id="tab-note-27">
-        <pitch>
-          <step>C</step>
-          <octave>4</octave>
-        </pitch>
-        <duration>5040</duration>
-        <voice>2</voice>
-        <type>eighth</type>
-        <stem>down</stem>
-        <staff>1</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>5040</duration>
-        <voice>2</voice>
-        <type>eighth</type>
         <staff>1</staff>
       </note>
       <note id="tab-note-28">
         <pitch>
-          <step>E</step>
+          <step>C</step>
           <octave>4</octave>
         </pitch>
         <duration>3360</duration>
@@ -681,22 +680,10 @@
         </time-modification>
         <stem>down</stem>
         <staff>1</staff>
-        <notations>
-          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
-            <tuplet-actual>
-              <tuplet-number>6</tuplet-number>
-              <tuplet-type>eighth</tuplet-type>
-            </tuplet-actual>
-            <tuplet-normal>
-              <tuplet-number>4</tuplet-number>
-              <tuplet-type>eighth</tuplet-type>
-            </tuplet-normal>
-          </tuplet>
-        </notations>
       </note>
       <note id="tab-note-29">
         <pitch>
-          <step>E</step>
+          <step>C</step>
           <octave>4</octave>
         </pitch>
         <duration>6720</duration>
@@ -708,91 +695,42 @@
           <normal-type>eighth</normal-type>
         </time-modification>
         <stem>down</stem>
-        <staff>1</staff>
-        <notations>
-          <tuplet number="1" type="stop" />
-        </notations>
-      </note>
-      <backup>
-        <duration>40320</duration>
-      </backup>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>3360</duration>
-        <voice>3</voice>
-        <type>eighth</type>
         <staff>1</staff>
       </note>
       <note id="tab-note-30">
         <pitch>
-          <step>C</step>
+          <step>E</step>
           <octave>4</octave>
         </pitch>
-        <duration>6720</duration>
-        <voice>3</voice>
-        <type>quarter</type>
+        <duration>3360</duration>
+        <voice>2</voice>
+        <type>eighth</type>
         <time-modification>
           <actual-notes>6</actual-notes>
           <normal-notes>4</normal-notes>
-          <normal-type>quarter</normal-type>
+          <normal-type>eighth</normal-type>
         </time-modification>
         <stem>down</stem>
-        <staff>1</staff>
-        <notations>
-          <technical>
-            <fingering alternate="no" substitution="no">p</fingering>
-          </technical>
-          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
-            <tuplet-actual>
-              <tuplet-number>6</tuplet-number>
-              <tuplet-type>quarter</tuplet-type>
-            </tuplet-actual>
-            <tuplet-normal>
-              <tuplet-number>4</tuplet-number>
-              <tuplet-type>quarter</tuplet-type>
-            </tuplet-normal>
-          </tuplet>
-        </notations>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>10080</duration>
-        <voice>3</voice>
-        <type>quarter</type>
-        <staff>1</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>3360</duration>
-        <voice>3</voice>
-        <type>eighth</type>
         <staff>1</staff>
       </note>
       <note id="tab-note-31">
         <pitch>
-          <step>C</step>
+          <step>E</step>
           <octave>4</octave>
         </pitch>
         <duration>6720</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <time-modification>
           <actual-notes>6</actual-notes>
           <normal-notes>4</normal-notes>
-          <normal-type>quarter</normal-type>
+          <normal-type>eighth</normal-type>
         </time-modification>
         <stem>down</stem>
         <staff>1</staff>
         <notations>
           <tuplet number="1" type="stop" />
         </notations>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>10080</duration>
-        <voice>3</voice>
-        <type>quarter</type>
-        <staff>1</staff>
       </note>
       <backup>
         <duration>40320</duration>
@@ -1353,20 +1291,6 @@
       </backup>
       <note print-object="no" print-spacing="yes">
         <rest />
-        <duration>5040</duration>
-        <voice>2</voice>
-        <type>eighth</type>
-        <staff>2</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>5040</duration>
-        <voice>2</voice>
-        <type>eighth</type>
-        <staff>2</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
         <duration>3360</duration>
         <voice>2</voice>
         <type>eighth</type>
@@ -1377,7 +1301,7 @@
         </time-modification>
         <staff>2</staff>
         <notations>
-          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
+          <tuplet bracket="no" number="1" show-number="none" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -1403,16 +1327,26 @@
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
-        <duration>5040</duration>
+        <duration>3360</duration>
         <voice>2</voice>
         <type>eighth</type>
+        <time-modification>
+          <actual-notes>6</actual-notes>
+          <normal-notes>4</normal-notes>
+          <normal-type>eighth</normal-type>
+        </time-modification>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
-        <duration>5040</duration>
+        <duration>6720</duration>
         <voice>2</voice>
-        <type>eighth</type>
+        <type>quarter</type>
+        <time-modification>
+          <actual-notes>6</actual-notes>
+          <normal-notes>4</normal-notes>
+          <normal-type>eighth</normal-type>
+        </time-modification>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
@@ -1426,18 +1360,30 @@
           <normal-type>eighth</normal-type>
         </time-modification>
         <staff>2</staff>
-        <notations>
-          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
-            <tuplet-actual>
-              <tuplet-number>6</tuplet-number>
-              <tuplet-type>eighth</tuplet-type>
-            </tuplet-actual>
-            <tuplet-normal>
-              <tuplet-number>4</tuplet-number>
-              <tuplet-type>eighth</tuplet-type>
-            </tuplet-normal>
-          </tuplet>
-        </notations>
+      </note>
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>6720</duration>
+        <voice>2</voice>
+        <type>quarter</type>
+        <time-modification>
+          <actual-notes>6</actual-notes>
+          <normal-notes>4</normal-notes>
+          <normal-type>eighth</normal-type>
+        </time-modification>
+        <staff>2</staff>
+      </note>
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>3360</duration>
+        <voice>2</voice>
+        <type>eighth</type>
+        <time-modification>
+          <actual-notes>6</actual-notes>
+          <normal-notes>4</normal-notes>
+          <normal-type>eighth</normal-type>
+        </time-modification>
+        <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
@@ -1453,76 +1399,6 @@
         <notations>
           <tuplet number="1" type="stop" />
         </notations>
-      </note>
-      <backup>
-        <duration>40320</duration>
-      </backup>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>3360</duration>
-        <voice>3</voice>
-        <type>eighth</type>
-        <staff>2</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>6720</duration>
-        <voice>3</voice>
-        <type>quarter</type>
-        <time-modification>
-          <actual-notes>6</actual-notes>
-          <normal-notes>4</normal-notes>
-          <normal-type>quarter</normal-type>
-        </time-modification>
-        <staff>2</staff>
-        <notations>
-          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
-            <tuplet-actual>
-              <tuplet-number>6</tuplet-number>
-              <tuplet-type>quarter</tuplet-type>
-            </tuplet-actual>
-            <tuplet-normal>
-              <tuplet-number>4</tuplet-number>
-              <tuplet-type>quarter</tuplet-type>
-            </tuplet-normal>
-          </tuplet>
-        </notations>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>10080</duration>
-        <voice>3</voice>
-        <type>quarter</type>
-        <staff>2</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>3360</duration>
-        <voice>3</voice>
-        <type>eighth</type>
-        <staff>2</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>6720</duration>
-        <voice>3</voice>
-        <type>quarter</type>
-        <time-modification>
-          <actual-notes>6</actual-notes>
-          <normal-notes>4</normal-notes>
-          <normal-type>quarter</normal-type>
-        </time-modification>
-        <staff>2</staff>
-        <notations>
-          <tuplet number="1" type="stop" />
-        </notations>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>10080</duration>
-        <voice>3</voice>
-        <type>quarter</type>
-        <staff>2</staff>
       </note>
     </measure>
     <!--========================= Measure 2 ==========================-->
@@ -2027,24 +1903,6 @@
           <step>B</step>
           <octave>3</octave>
         </pitch>
-        <duration>5040</duration>
-        <voice>2</voice>
-        <type>eighth</type>
-        <stem>down</stem>
-        <staff>1</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>5040</duration>
-        <voice>2</voice>
-        <type>eighth</type>
-        <staff>1</staff>
-      </note>
-      <note id="tab-note-57">
-        <pitch>
-          <step>D</step>
-          <octave>4</octave>
-        </pitch>
         <duration>3360</duration>
         <voice>2</voice>
         <type>eighth</type>
@@ -2056,7 +1914,7 @@
         <stem>down</stem>
         <staff>1</staff>
         <notations>
-          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
+          <tuplet bracket="no" number="1" show-number="none" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2068,14 +1926,30 @@
           </tuplet>
         </notations>
       </note>
+      <note id="tab-note-57">
+        <pitch>
+          <step>B</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>6720</duration>
+        <voice>2</voice>
+        <type>quarter</type>
+        <time-modification>
+          <actual-notes>6</actual-notes>
+          <normal-notes>4</normal-notes>
+          <normal-type>eighth</normal-type>
+        </time-modification>
+        <stem>down</stem>
+        <staff>1</staff>
+      </note>
       <note id="tab-note-58">
         <pitch>
           <step>D</step>
           <octave>4</octave>
         </pitch>
-        <duration>6720</duration>
+        <duration>3360</duration>
         <voice>2</voice>
-        <type>quarter</type>
+        <type>eighth</type>
         <time-modification>
           <actual-notes>6</actual-notes>
           <normal-notes>4</normal-notes>
@@ -2086,26 +1960,24 @@
       </note>
       <note id="tab-note-59">
         <pitch>
-          <step>B</step>
-          <octave>3</octave>
+          <step>D</step>
+          <octave>4</octave>
         </pitch>
-        <duration>5040</duration>
+        <duration>6720</duration>
         <voice>2</voice>
-        <type>eighth</type>
+        <type>quarter</type>
+        <time-modification>
+          <actual-notes>6</actual-notes>
+          <normal-notes>4</normal-notes>
+          <normal-type>eighth</normal-type>
+        </time-modification>
         <stem>down</stem>
-        <staff>1</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>5040</duration>
-        <voice>2</voice>
-        <type>eighth</type>
         <staff>1</staff>
       </note>
       <note id="tab-note-60">
         <pitch>
-          <step>D</step>
-          <octave>4</octave>
+          <step>B</step>
+          <octave>3</octave>
         </pitch>
         <duration>3360</duration>
         <voice>2</voice>
@@ -2117,23 +1989,11 @@
         </time-modification>
         <stem>down</stem>
         <staff>1</staff>
-        <notations>
-          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
-            <tuplet-actual>
-              <tuplet-number>6</tuplet-number>
-              <tuplet-type>eighth</tuplet-type>
-            </tuplet-actual>
-            <tuplet-normal>
-              <tuplet-number>4</tuplet-number>
-              <tuplet-type>eighth</tuplet-type>
-            </tuplet-normal>
-          </tuplet>
-        </notations>
       </note>
       <note id="tab-note-61">
         <pitch>
-          <step>D</step>
-          <octave>4</octave>
+          <step>B</step>
+          <octave>3</octave>
         </pitch>
         <duration>6720</duration>
         <voice>2</voice>
@@ -2144,75 +2004,36 @@
           <normal-type>eighth</normal-type>
         </time-modification>
         <stem>down</stem>
-        <staff>1</staff>
-        <notations>
-          <tuplet number="1" type="stop" />
-        </notations>
-      </note>
-      <backup>
-        <duration>40320</duration>
-      </backup>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>3360</duration>
-        <voice>3</voice>
-        <type>eighth</type>
         <staff>1</staff>
       </note>
       <note id="tab-note-62">
         <pitch>
-          <step>B</step>
-          <octave>3</octave>
+          <step>D</step>
+          <octave>4</octave>
         </pitch>
-        <duration>6720</duration>
-        <voice>3</voice>
-        <type>quarter</type>
+        <duration>3360</duration>
+        <voice>2</voice>
+        <type>eighth</type>
         <time-modification>
           <actual-notes>6</actual-notes>
           <normal-notes>4</normal-notes>
-          <normal-type>quarter</normal-type>
+          <normal-type>eighth</normal-type>
         </time-modification>
         <stem>down</stem>
-        <staff>1</staff>
-        <notations>
-          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
-            <tuplet-actual>
-              <tuplet-number>6</tuplet-number>
-              <tuplet-type>quarter</tuplet-type>
-            </tuplet-actual>
-            <tuplet-normal>
-              <tuplet-number>4</tuplet-number>
-              <tuplet-type>quarter</tuplet-type>
-            </tuplet-normal>
-          </tuplet>
-        </notations>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>10080</duration>
-        <voice>3</voice>
-        <type>quarter</type>
-        <staff>1</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>3360</duration>
-        <voice>3</voice>
-        <type>eighth</type>
         <staff>1</staff>
       </note>
       <note id="tab-note-63">
         <pitch>
-          <step>B</step>
-          <octave>3</octave>
+          <step>D</step>
+          <octave>4</octave>
         </pitch>
         <duration>6720</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <time-modification>
           <actual-notes>6</actual-notes>
           <normal-notes>4</normal-notes>
-          <normal-type>quarter</normal-type>
+          <normal-type>eighth</normal-type>
         </time-modification>
         <stem>down</stem>
         <staff>1</staff>
@@ -2220,13 +2041,6 @@
           <tuplet number="1" type="stop" />
         </notations>
       </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>10080</duration>
-        <voice>3</voice>
-        <type>quarter</type>
-        <staff>1</staff>
-      </note>
       <backup>
         <duration>40320</duration>
       </backup>
@@ -2783,20 +2597,6 @@
       </backup>
       <note print-object="no" print-spacing="yes">
         <rest />
-        <duration>5040</duration>
-        <voice>2</voice>
-        <type>eighth</type>
-        <staff>2</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>5040</duration>
-        <voice>2</voice>
-        <type>eighth</type>
-        <staff>2</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
         <duration>3360</duration>
         <voice>2</voice>
         <type>eighth</type>
@@ -2807,7 +2607,7 @@
         </time-modification>
         <staff>2</staff>
         <notations>
-          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
+          <tuplet bracket="no" number="1" show-number="none" type="start">
             <tuplet-actual>
               <tuplet-number>6</tuplet-number>
               <tuplet-type>eighth</tuplet-type>
@@ -2833,16 +2633,26 @@
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
-        <duration>5040</duration>
+        <duration>3360</duration>
         <voice>2</voice>
         <type>eighth</type>
+        <time-modification>
+          <actual-notes>6</actual-notes>
+          <normal-notes>4</normal-notes>
+          <normal-type>eighth</normal-type>
+        </time-modification>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
-        <duration>5040</duration>
+        <duration>6720</duration>
         <voice>2</voice>
-        <type>eighth</type>
+        <type>quarter</type>
+        <time-modification>
+          <actual-notes>6</actual-notes>
+          <normal-notes>4</normal-notes>
+          <normal-type>eighth</normal-type>
+        </time-modification>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
@@ -2856,18 +2666,30 @@
           <normal-type>eighth</normal-type>
         </time-modification>
         <staff>2</staff>
-        <notations>
-          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
-            <tuplet-actual>
-              <tuplet-number>6</tuplet-number>
-              <tuplet-type>eighth</tuplet-type>
-            </tuplet-actual>
-            <tuplet-normal>
-              <tuplet-number>4</tuplet-number>
-              <tuplet-type>eighth</tuplet-type>
-            </tuplet-normal>
-          </tuplet>
-        </notations>
+      </note>
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>6720</duration>
+        <voice>2</voice>
+        <type>quarter</type>
+        <time-modification>
+          <actual-notes>6</actual-notes>
+          <normal-notes>4</normal-notes>
+          <normal-type>eighth</normal-type>
+        </time-modification>
+        <staff>2</staff>
+      </note>
+      <note print-object="no" print-spacing="yes">
+        <rest />
+        <duration>3360</duration>
+        <voice>2</voice>
+        <type>eighth</type>
+        <time-modification>
+          <actual-notes>6</actual-notes>
+          <normal-notes>4</normal-notes>
+          <normal-type>eighth</normal-type>
+        </time-modification>
+        <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
@@ -2883,76 +2705,6 @@
         <notations>
           <tuplet number="1" type="stop" />
         </notations>
-      </note>
-      <backup>
-        <duration>40320</duration>
-      </backup>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>3360</duration>
-        <voice>3</voice>
-        <type>eighth</type>
-        <staff>2</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>6720</duration>
-        <voice>3</voice>
-        <type>quarter</type>
-        <time-modification>
-          <actual-notes>6</actual-notes>
-          <normal-notes>4</normal-notes>
-          <normal-type>quarter</normal-type>
-        </time-modification>
-        <staff>2</staff>
-        <notations>
-          <tuplet bracket="no" number="1" placement="above" show-number="none" type="start">
-            <tuplet-actual>
-              <tuplet-number>6</tuplet-number>
-              <tuplet-type>quarter</tuplet-type>
-            </tuplet-actual>
-            <tuplet-normal>
-              <tuplet-number>4</tuplet-number>
-              <tuplet-type>quarter</tuplet-type>
-            </tuplet-normal>
-          </tuplet>
-        </notations>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>10080</duration>
-        <voice>3</voice>
-        <type>quarter</type>
-        <staff>2</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>3360</duration>
-        <voice>3</voice>
-        <type>eighth</type>
-        <staff>2</staff>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>6720</duration>
-        <voice>3</voice>
-        <type>quarter</type>
-        <time-modification>
-          <actual-notes>6</actual-notes>
-          <normal-notes>4</normal-notes>
-          <normal-type>quarter</normal-type>
-        </time-modification>
-        <staff>2</staff>
-        <notations>
-          <tuplet number="1" type="stop" />
-        </notations>
-      </note>
-      <note print-object="no" print-spacing="yes">
-        <rest />
-        <duration>10080</duration>
-        <voice>3</voice>
-        <type>quarter</type>
-        <staff>2</staff>
       </note>
       <barline location="right">
         <repeat direction="backward" />

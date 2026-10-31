@@ -19,7 +19,8 @@ import tabify  # noqa: E402
 
 
 def engine_cells(number):
-    score, part = tabify.load_score([str(HERE / 'sources' / f'{number:03d}.musicxml')])
+    with T.B.reviewed_tuplets(tabify, number):
+        score, part = tabify.load_score([str(HERE / 'sources' / f'{number:03d}.musicxml')])
     measures, _ = tabify.build_columns(part, tabify.octave_shifts(list(part.getElementsByClass(tabify.m21.stream.Measure))))
     tabify.assign_frets(measures, tabify.STANDARD_TUNING, 'auto' if number in T.B.ARPEGGIO else False)
     return Counter((s, f) for m in measures for col in m['columns'] for s, f in enumerate(col['cells']) if f is not None)
