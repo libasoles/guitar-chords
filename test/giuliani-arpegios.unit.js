@@ -175,6 +175,7 @@ const REVIEWED_RIGHT_HAND = {
   47: 'pimpmim',
   48: 'pmipmim',
   49: 'pmimpim',
+  50: 'pmimpmim',
 };
 for (const [number, fingers] of Object.entries(REVIEWED_RIGHT_HAND)) {
   test(`ejercicio ${number}: dedos de la mano derecha cotejados con la edicion`, () => {
