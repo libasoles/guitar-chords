@@ -563,6 +563,46 @@ async function fillForm(page, name) {
         await page.close();
       }
 
+      // While a score is still processing, a tip about Shift+Up/Down re-fingering appears three seconds in.
+      // Pressing its X remembers the choice; ending without it (or a fast job) leaves it for next time.
+      {
+        const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+        const slow = { jobs: [{ status: 'processing', stage: 'ocr', elapsedSeconds: 3 }] };
+        const page = await context.newPage();
+        await mockApi(page, slow);
+        await page.goto(toolUrl);
+        await fillForm(page, 'score.musicxml');
+        await page.waitForSelector('#partProgress:not([hidden])');
+        await page.waitForTimeout(1500);
+        assert.equal(await page.locator('.toast-tip').count(), 0, 'not at upload start');
+        await page.waitForSelector('.toast-tip', { timeout: 6000 });
+        assert.ok((await page.locator('.toast-tip').textContent()).includes(S.toastRefingerTip));
+        assert.equal(await page.locator('.toast-tip kbd').count(), 4);
+        assert.equal(await page.evaluate(() => localStorage.getItem('partitura.tip.refinger.dismissed')), null);
+        await page.locator('.toast-tip .toast-close').click();
+        assert.equal(await page.evaluate(() => localStorage.getItem('partitura.tip.refinger.dismissed')), '1');
+        await page.close();
+
+        const again = await context.newPage();
+        await mockApi(again, slow);
+        await again.goto(toolUrl);
+        await fillForm(again, 'score.musicxml');
+        await again.waitForSelector('#partProgress:not([hidden])');
+        await again.waitForTimeout(4000);
+        assert.equal(await again.locator('.toast').count(), 0, 'dismissed tips stay away');
+        await again.close();
+        await context.close();
+
+        const fast = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+        await mockApi(fast, { jobs: [READY] });
+        await fast.goto(toolUrl);
+        await fillForm(fast, 'score.musicxml');
+        await fast.waitForSelector('#partRows .part-row');
+        await fast.waitForTimeout(3500);
+        assert.equal(await fast.locator('.toast').count(), 0, 'no tip once the preview is ready');
+        await fast.close();
+      }
+
       // Desktop flow: create, upload, process, poll, preview, edit, export.
       {
         const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });

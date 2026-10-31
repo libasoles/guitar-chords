@@ -25,14 +25,43 @@ const alertIcon = h('svg', {
   h('line', { x1: 12, x2: 12.01, y1: 16, y2: 16 }),
 );
 
-function render(message, duration, variant) {
+// Lucide lightbulb for tips.
+const tipIcon = h('svg', {
+  className: 'toast-icon', viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+  strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true,
+},
+  h('path', { d: 'M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5' }),
+  h('path', { d: 'M9 18h6' }),
+  h('path', { d: 'M10 22h4' }),
+);
+
+// The re-fingering tip: the keys and a before/after of the same pitch moving from String 5 to String 4.
+function refingerTip() {
+  const tab = (...lines) => h('pre', { className: 'toast-tip-tab', 'aria-hidden': true }, ...lines);
+  const key = (label, ariaLabel) => h('kbd', { 'aria-label': ariaLabel }, label);
+  return h('div', { className: 'toast-tip-body' },
+    h('p', null, strings.toastRefingerTip),
+    h('p', { className: 'toast-tip-keys' },
+      key('Shift'), ' + ', key('↑', strings.toastRefingerUp), ' / ', key('Shift'), ' + ', key('↓', strings.toastRefingerDown)),
+    h('div', { className: 'toast-tip-demo' },
+      tab('e|-----\nB|-----\nG|-----\nD|-----\nA|--', h('mark', null, '7'), '--\nE|-----'),
+      h('span', { className: 'toast-tip-arrow', 'aria-hidden': true }, '→'),
+      tab('e|-----\nB|-----\nG|-----\nD|--', h('mark', null, '2'), '--\nA|-----\nE|-----'),
+    ),
+  );
+}
+
+// The tip variant renders the re-fingering lesson in place of a message. `onClose` fires only when the
+// X button is pressed, not when the toast times out or is replaced by another one.
+function render(message, duration, variant, onClose) {
   const alert = variant === 'alert';
+  const tip = variant === 'tip';
   flushSync(() => root.render(
     h(Toast.Provider, { duration: 6000, label: strings.toastLabel, swipeDirection: 'right' },
-      message ? h(Toast.Root, { key: ++sequence, className: alert ? 'toast toast-alert' : 'toast', duration: duration || (alert ? ALERT_DURATION : undefined) },
-        alert ? alertIcon : null,
-        h(Toast.Description, { className: 'toast-description' }, message),
-        h(Toast.Close, { className: 'toast-close', 'aria-label': strings.toastClose },
+      message || tip ? h(Toast.Root, { key: ++sequence, className: alert ? 'toast toast-alert' : tip ? 'toast toast-tip' : 'toast', duration: duration || (alert ? ALERT_DURATION : undefined) },
+        alert ? alertIcon : tip ? tipIcon : null,
+        h(Toast.Description, { className: 'toast-description', asChild: tip }, tip ? refingerTip() : message),
+        h(Toast.Close, { className: 'toast-close', 'aria-label': strings.toastClose, onClick: onClose },
           h('span', { 'aria-hidden': true }, '×')),
       ) : null,
       h(Toast.Viewport, { className: 'toast-viewport', label: strings.toastViewportLabel }),
@@ -41,6 +70,6 @@ function render(message, duration, variant) {
 }
 
 window.SiteToast = {
-  show(message, { duration, variant } = {}) { render(message, duration, variant); },
+  show(message, { duration, variant, onClose } = {}) { render(message, duration, variant, onClose); },
   clear() { render(null); },
 };

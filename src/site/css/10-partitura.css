@@ -260,6 +260,22 @@
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
+.toast-tip { align-items: flex-start; }
+.toast-tip p { margin: 0; }
+.toast-tip-keys { margin-top: 0.6rem !important; }
+.toast-tip kbd {
+  display: inline-block;
+  min-width: 1.5rem;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid #000;
+  border-bottom-width: 2px;
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: center;
+}
+.toast-tip-demo { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 0.75rem; }
+.toast-tip-tab { margin: 0; font-family: var(--mono, monospace); font-size: 0.75rem; line-height: 1.25; }
+.toast-tip-tab mark { background: #000; color: #fff; }
 .toast-icon { flex: none; width: 1.5rem; height: 1.5rem; }
 .toast-description { flex: 1; }
 .toast-close {

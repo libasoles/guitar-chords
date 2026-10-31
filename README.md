@@ -39,7 +39,7 @@ npm run build       # Build site + extension → dist/
 npm test            # Unit + E2E tests
 ```
 
-Production bundles ascii-tabs [v0.10.3](https://github.com/libasoles/ascii-tabs/releases/tag/v0.10.3)
+Production bundles ascii-tabs [v0.11.1](https://github.com/libasoles/ascii-tabs/releases/tag/v0.11.1)
 from the committed `vendor/ascii-tabs.js`. The editor uses `annotation-fit="widen"`
 to reserve column width for annotations, including in ASCII copies; article tabs
 use `annotation-fit="overflow"` to preserve their spacing. Cmd/Alt+Right Arrow duplicates a

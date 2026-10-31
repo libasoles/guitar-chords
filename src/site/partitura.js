@@ -132,6 +132,42 @@
     }, function () { /* the preview is the main thing; no fallback dialog for a tip */ });
   }
 
+  // Educational tip shown while a score is still processing, three seconds after the job starts. Pressing its X
+  // saves the preference so it never comes back; timing out or being replaced does not.
+  var TIP_KEY = 'partitura.tip.refinger.dismissed';
+  var TIP_DELAY_MS = 3000;
+  var tipTimer = null;
+  var tipRun = 0;
+
+  function tipDismissed() {
+    try { return window.localStorage.getItem(TIP_KEY) === '1'; } catch (e) { return false; }
+  }
+
+  function scheduleRefingerTip() {
+    cancelRefingerTip();
+    if (tipDismissed()) return;
+    var run = ++tipRun;
+    tipTimer = setTimeout(function () {
+      tipTimer = null;
+      loadToast().then(function () {
+        if (run !== tipRun) return; // processing ended while the bundle loaded
+        window.SiteToast.show(null, {
+          variant: 'tip',
+          duration: 20000,
+          onClose: function () {
+            try { window.localStorage.setItem(TIP_KEY, '1'); } catch (e) { /* ignore */ }
+          },
+        });
+      }, function () { /* a tip is optional */ });
+    }, TIP_DELAY_MS);
+  }
+
+  function cancelRefingerTip() {
+    tipRun++;
+    clearTimeout(tipTimer);
+    tipTimer = null;
+  }
+
   function clearRightsError() {
     rightsError.textContent = '';
     rightsError.hidden = true;
@@ -392,6 +428,7 @@
   }
 
   function fail(code) {
+    cancelRefingerTip();
     stopPolling();
     stopElapsed();
     setStatus('');
@@ -469,6 +506,7 @@
     new Promise(function (resolve) { setTimeout(resolve, 500); })
       .then(function () {
         setBusy(true);
+        scheduleRefingerTip();
         setStatus(t('partVerifying'));
         startElapsed(0);
         return takeToken();
@@ -583,6 +621,7 @@
 
   function onReady(job) {
     var jobId = state.jobId;
+    cancelRefingerTip();
     if (job.lowQualityScan) showScanAdvice();
     if (!isDesktop()) {
       setStatus('');
