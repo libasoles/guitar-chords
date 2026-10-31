@@ -663,6 +663,9 @@ def candidates(midis, opens, hints=None, barre=None):
     return out
 
 
+PRESS_COST = 0.25  # per fret of every pressed note in `local_cost`; a finger already down is not charged it again
+
+
 def local_cost(combo):
     fretted = [f for _, f in combo if f > 0]
     if not fretted:
@@ -673,7 +676,7 @@ def local_cost(combo):
     # Every pressed fret counts, so an open string in the chord beats a compact shape higher up the neck (A-C#-G
     # as 5-2-0, not 5-6-5): the books keep chords in low position. Measured against Sagreras' printed tab
     # (scripts/sagreras/compare_positions.py): 53 -> 18 differing cells of 3070, none worse.
-    cost += 0.25 * sum(fretted)
+    cost += PRESS_COST * sum(fretted)
     return cost
 
 
@@ -780,7 +783,7 @@ def sustained_path(flat, layers, opens):
                 own = cost
                 if same_measure:
                     again, moved = fingering.repeated_notes(prev_combo, combo, opens, flat[i - 1].get("until"), flat[i].get("time"))
-                    own = (local_cost(tuple(cell for cell in combo if cell not in again)) if again else cost) + fingering.REPEAT_MOVED * moved
+                    own = cost - PRESS_COST * sum(f for _, f in again) + fingering.REPEAT_MOVED * moved
                 total = prev_cost + own + move + ringing
                 new_key = (k, _held_after(flat, i, combo, kept, opens))
                 if new_key not in row or total < row[new_key][0]:
