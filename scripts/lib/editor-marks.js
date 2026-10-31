@@ -35,7 +35,7 @@ const PIECES = {
   sor: { favorite: [5], effort: [1] },
   'carcassi-preludios': { favorite: [2, 4], insightful: [9], effort: [10] },
   'carcassi-progresivas': { favorite: [1, 12] },
-  'carcassi-valses': { favorite: [10], pending: [15] },
+  'carcassi-valses': { favorite: [10], pending: [15, 26] },
   'santisteban-preludios': { favorite: [2, 3, 4] },
   sagreras: { favorite: [36, 40, 42, 49, 59, 62, 70, 73, 75], insightful: [16, 61], effort: [38, 43], bookmark: [2, 9, 17, 25, 31], pending: [76, 81, 84] },
   aguado: { pending: Object.keys(require('../aguado/pieces.json')).map(Number) },
