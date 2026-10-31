@@ -163,3 +163,24 @@ test('ejercicio 34: el bajo comparte los ataques del arpegio sin crear notas dob
     }
   }
 });
+
+/* Edicion Marieh, paginas 9-10: letras solo en los cuatro primeros ataques.
+   Los dedos de una pareja se asignan por altura, no por proximidad a la letra. */
+const REVIEWED_RIGHT_HAND = {
+  41: 'pimpmi',
+};
+for (const [number, fingers] of Object.entries(REVIEWED_RIGHT_HAND)) {
+  test(`ejercicio ${number}: dedos de la mano derecha cotejados con la edicion`, () => {
+    for (const file of [path.join(__dirname, `../scripts/giuliani-arpegios/sources/${number.padStart(3, '0')}.musicxml`),
+      path.join(DOWNLOADS_DIR, `Arpeggio Exercise ${number.padStart(3, '0')} - Mauro Giuliani.musicxml`)]) {
+      const xml = fs.readFileSync(file, 'utf8');
+      const measures = [...xml.matchAll(/<measure\b[^>]*>([\s\S]*?)<\/measure>/g)];
+      const marked = measures.flatMap(([_, measure], measureIndex) =>
+        [...measure.matchAll(/<note\b[^>]*>([\s\S]*?)<\/note>/g)].map((m) => m[1])
+          .filter((note) => !/<staff>2<\/staff>/.test(note))
+          .flatMap((note, noteIndex) => [...note.matchAll(/<fingering[^>]*>([pima])<\/fingering>/g)]
+            .map((m) => [measureIndex, noteIndex, m[1]])));
+      assert.deepEqual(marked, [...fingers].map((finger, index) => [0, index, finger]), file);
+    }
+  });
+}

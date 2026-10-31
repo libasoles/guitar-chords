@@ -42,8 +42,8 @@ Descarga sin captcha: `https://s9.imslp.org/files/imglnks/usimg/c/ca/IMSLP660049
 - **Ejercicios 96, 100 y 110**: las reglas de arpegio del motor mandan el mi5 repetido a la 2.ª cuerda (traste 5). Su fuente
   lleva las casillas impresas como `<string>`/`<fret>` y `build.py` no aplica las reglas (`PRINTED_TAB`). Con eso la TAB
   publicada coincide con la edición en las 5890 casillas de los 120 ejercicios.
-- **Revisión pendiente**: los ejercicios 41 y 43 a 120 llevan la marca (`scripts/lib/editor-marks.js`) hasta cotejarlos con el
-  libro; el 1 al 40 y el 42 ya están revisados. Los 116 a 119 (polifonía con fusas y silencios) pasan el control de alturas y compases, pero son los que más lo necesitan.
+- **Revisión pendiente**: los ejercicios 43 a 120 llevan la marca (`scripts/lib/editor-marks.js`) hasta cotejarlos con el
+  libro; el 1 al 42 ya están revisados. Los 116 a 119 (polifonía con fusas y silencios) pasan el control de alturas y compases, pero son los que más lo necesitan.
 
 ## Licencia y crédito
 
@@ -69,3 +69,13 @@ los dedos intercambiados de las dos parejas y la ultima letra desplazada al grup
 El build del 34 omite la reparacion de grupos incompletos del OMR: esa heuristica cuenta
 cabezas y deshace los grupos completos de valores mixtos del bajo revisado. El motor
 compartido y las demas piezas conservan su comportamiento.
+
+## Mano derecha revisada (paginas 9-10 de Marieh)
+
+Las letras se conservan solo en los cuatro primeros ataques, como en la edicion.
+La proximidad geometrica habia intercambiado letras entre las notas de una pareja
+y desplazado otras al ataque siguiente. El bajo lleva `p`, el sol `i` y el mi agudo `m`.
+
+| Ejercicio | Primeros cuatro ataques (`+` = simultaneos) |
+|---|---|
+| 41 | `p / i+m / p+m / i` |
