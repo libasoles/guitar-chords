@@ -108,7 +108,7 @@ function visibleText(html) {
     .replace(/<style[\s\S]*?<\/style>/g, ' ')
     .replace(/<svg[\s\S]*?<\/svg>/g, ' ')
     .replace(/<!--[\s\S]*?-->/g, ' ')
-    .replace(/<[^>]+>/g, ' ')
+    .replace(/<(?:"[^"]*"|'[^']*'|[^'">])*>/g, ' ')
     .replace(/&[a-z#0-9]+;/g, ' ')
     .replace(/\s+/g, ' ');
 }
