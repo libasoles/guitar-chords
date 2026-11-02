@@ -24,15 +24,23 @@ const AUTHOR = 'Dionisio Aguado';
 const PIECES = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts', FOLDER, 'pieces.json'), 'utf8'));
 
 const LABELS = {
-  lesson: { en: 'Lesson', es: 'Lección' },
-  righthand: { en: 'Right Hand Exercises', es: 'Ejercicios de mano derecha' },
-  study: { en: 'Study', es: 'Estudio' },
+  lesson: { en: 'Lesson', es: 'Lección', pt: 'Lição' },
+  righthand: { en: 'Right Hand Exercises', es: 'Ejercicios de mano derecha', pt: 'Exercícios de mão direita' },
+  study: { en: 'Study', es: 'Estudio', pt: 'Estudo' },
 };
 
-/* Titulo de la pieza: «Lesson 14: Waltz in G» / «Lección 14: Vals en Sol» (es el /Title del PDF en ingles). */
+/* Campo de pieces.json con la forma de la pieza en cada idioma (`form` es la inglesa). */
+const FORM_FIELD = { en: 'form', es: 'es', pt: 'pt' };
+
+/* Titulo de la pieza: «Lesson 14: Waltz in G» / «Lección 14: Vals en Sol» / «Lição 14: Valsa em Sol» (el /Title del PDF es el ingles). */
 function pieceName(piece, locale) {
-  const base = LABELS[piece.kind][locale] + ' ' + piece.n;
-  return piece.form ? base + ': ' + (locale === 'es' ? piece.es : piece.form) : base;
+  const label = LABELS[piece.kind][locale];
+  const field = FORM_FIELD[locale];
+  if (!label || !field) throw new Error('article-aguado: idioma sin etiquetas: ' + locale);
+  const base = label + ' ' + piece.n;
+  if (!piece.form) return base;
+  if (!piece[field]) throw new Error('article-aguado: falta ' + field + ' en pieces.json para ' + base);
+  return base + ': ' + piece[field];
 }
 
 function fileBase(piece) {

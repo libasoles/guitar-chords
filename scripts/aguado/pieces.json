@@ -1,12 +1,12 @@
 {
-  "1": {"kind": "lesson", "n": "14", "form": "Waltz in G", "es": "Vals en Sol", "source": "aguado_nuevo-metodo_1leccion-14_pen.mscz", "texts": {"Vals": ""}, "words": [[-1, "Fin."]]},
-  "2": {"kind": "lesson", "n": "22", "form": "Waltz in A", "es": "Vals en La", "source": "aguado_nuevo-metodo_1leccion-22_pen.mscz", "words": [[1, "Wals."]]},
-  "3": {"kind": "lesson", "n": "23", "form": "Waltz in A", "es": "Vals en La", "source": "aguado_nuevo-metodo_1leccion-23_pen.mscz"},
-  "4": {"kind": "lesson", "n": "25", "form": "Waltz in A", "es": "Vals en La", "source": "aguado_nuevo-metodo_1leccion-25_pen.mscz", "texts": {"WALS .": ""}},
+  "1": {"kind": "lesson", "n": "14", "form": "Waltz in G", "es": "Vals en Sol", "pt": "Valsa em Sol", "source": "aguado_nuevo-metodo_1leccion-14_pen.mscz", "texts": {"Vals": ""}, "words": [[-1, "Fin."]]},
+  "2": {"kind": "lesson", "n": "22", "form": "Waltz in A", "es": "Vals en La", "pt": "Valsa em Lá", "source": "aguado_nuevo-metodo_1leccion-22_pen.mscz", "words": [[1, "Wals."]]},
+  "3": {"kind": "lesson", "n": "23", "form": "Waltz in A", "es": "Vals en La", "pt": "Valsa em Lá", "source": "aguado_nuevo-metodo_1leccion-23_pen.mscz"},
+  "4": {"kind": "lesson", "n": "25", "form": "Waltz in A", "es": "Vals en La", "pt": "Valsa em Lá", "source": "aguado_nuevo-metodo_1leccion-25_pen.mscz", "texts": {"WALS .": ""}},
   "5": {"kind": "lesson", "n": "26", "source": "aguado_nuevo-metodo_1leccion-26_pen.mscz"},
-  "6": {"kind": "lesson", "n": "28", "form": "Waltz in A", "es": "Vals en La", "source": "aguado_nuevo-metodo_1leccion-28_pen.mscz", "texts": {"WALS.": "Wals."}},
-  "7": {"kind": "lesson", "n": "29", "form": "Andante", "es": "Andante", "source": "aguado_nuevo-metodo_1leccion-29_pen.mscz", "halve": true, "words": [[1, "Andante."]]},
-  "8": {"kind": "lesson", "n": "31", "form": "Andante", "es": "Andante", "source": "aguado_nuevo-metodo_1leccion-31_pen.mscz", "words": [[1, "Andante."]]},
+  "6": {"kind": "lesson", "n": "28", "form": "Waltz in A", "es": "Vals en La", "pt": "Valsa em Lá", "source": "aguado_nuevo-metodo_1leccion-28_pen.mscz", "texts": {"WALS.": "Wals."}},
+  "7": {"kind": "lesson", "n": "29", "form": "Andante", "es": "Andante", "pt": "Andante", "source": "aguado_nuevo-metodo_1leccion-29_pen.mscz", "halve": true, "words": [[1, "Andante."]]},
+  "8": {"kind": "lesson", "n": "31", "form": "Andante", "es": "Andante", "pt": "Andante", "source": "aguado_nuevo-metodo_1leccion-31_pen.mscz", "words": [[1, "Andante."]]},
   "9": {"kind": "lesson", "n": "33", "source": "aguado_nuevo-metodo_1leccion-33_pen.mscz"},
   "10": {"kind": "lesson", "n": "34", "source": "aguado_nuevo-metodo_1leccion-34_pen.mscz"},
   "11": {"kind": "righthand", "n": "1-2", "source": "aguado_nuevo-metodo_2ejercicios-para-derecha_01-02_pen.mscz", "texts": {"Exercicio 1": "Ejercicio 1.º", "Exercicio 2": "Ejercicio 2.º"}},
@@ -18,10 +18,10 @@
   "18": {"kind": "study", "n": "13", "source": "Aguado_Nuevo_Metodo_Estudio13_pen.mscz"},
   "19": {"kind": "study", "n": "14", "source": "Aguado_Nuevo_Metodo_Estudio14.mscz", "texts": {"Estudio 14°.\nAllegro.": "Allegro."}},
   "20": {"kind": "study", "n": "19", "source": "Aguado_Nuevo_Metodo_Estudio19_pen.mscz", "words": [[1, "Cantabile."]]},
-  "21": {"kind": "lesson", "n": "7", "form": "Waltz in G", "es": "Vals en Sol", "credit": "Transcripción del facsímil de 1843 (Biblioteca Nacional de España, vía IMSLP)", "credit_url": "https://imslp.org/wiki/Nuevo_m%C3%A9todo_para_guitarra_(Aguado,_Dionisio)"},
-  "24": {"kind": "lesson", "n": "10", "form": "Waltz in C", "es": "Vals en Do", "credit": "Transcripción del facsímil de 1843 (Biblioteca Nacional de España, vía IMSLP)", "credit_url": "https://imslp.org/wiki/Nuevo_m%C3%A9todo_para_guitarra_(Aguado,_Dionisio)"},
+  "21": {"kind": "lesson", "n": "7", "form": "Waltz in G", "es": "Vals en Sol", "pt": "Valsa em Sol", "credit": "Transcripción del facsímil de 1843 (Biblioteca Nacional de España, vía IMSLP)", "credit_url": "https://imslp.org/wiki/Nuevo_m%C3%A9todo_para_guitarra_(Aguado,_Dionisio)"},
+  "24": {"kind": "lesson", "n": "10", "form": "Waltz in C", "es": "Vals en Do", "pt": "Valsa em Dó", "credit": "Transcripción del facsímil de 1843 (Biblioteca Nacional de España, vía IMSLP)", "credit_url": "https://imslp.org/wiki/Nuevo_m%C3%A9todo_para_guitarra_(Aguado,_Dionisio)"},
   "25": {"kind": "lesson", "n": "11", "credit": "Transcripción del facsímil de 1843 (Biblioteca Nacional de España, vía IMSLP)", "credit_url": "https://imslp.org/wiki/Nuevo_m%C3%A9todo_para_guitarra_(Aguado,_Dionisio)"},
   "26": {"kind": "lesson", "n": "12", "credit": "Transcripción del facsímil de 1843 (Biblioteca Nacional de España, vía IMSLP)", "credit_url": "https://imslp.org/wiki/Nuevo_m%C3%A9todo_para_guitarra_(Aguado,_Dionisio)"},
   "27": {"kind": "lesson", "n": "13", "credit": "Transcripción del facsímil de 1843 (Biblioteca Nacional de España, vía IMSLP)", "credit_url": "https://imslp.org/wiki/Nuevo_m%C3%A9todo_para_guitarra_(Aguado,_Dionisio)"},
-  "22": {"kind": "lesson", "n": "8", "form": "Exercises", "es": "Ejercicios", "credit": "Transcripción del facsímil de 1843 (Biblioteca Nacional de España, vía IMSLP)", "credit_url": "https://imslp.org/wiki/Nuevo_m%C3%A9todo_para_guitarra_(Aguado,_Dionisio)"}
+  "22": {"kind": "lesson", "n": "8", "form": "Exercises", "es": "Ejercicios", "pt": "Exercícios", "credit": "Transcripción del facsímil de 1843 (Biblioteca Nacional de España, vía IMSLP)", "credit_url": "https://imslp.org/wiki/Nuevo_m%C3%A9todo_para_guitarra_(Aguado,_Dionisio)"}
 }
