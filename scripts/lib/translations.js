@@ -26,7 +26,7 @@ const TRANSLATED_COLLECTIONS = {
     'indice',
     // 'carcassi',
     // 'sor',
-    // 'aguado',
+    'aguado',
     // 'sagreras',
     // 'giuliani',
     // 'barrios',
