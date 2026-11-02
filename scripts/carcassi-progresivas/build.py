@@ -99,6 +99,15 @@ def build(number):
         tabs = suggestion['tabs']
         if number in WALTZES:
             extract.waltz_voicing(number, tabs)
+        if number == 12:
+            # Requested TAB voicing (m. 11 and 15): the C# and E eighth chord is frets 6 and 5 of the third and second
+            # strings, in the position of the Eb/C chord, not 02x.
+            for measure in (11, 15):
+                for column in tabs[measure]:
+                    if column[0] == 0 and column[1] == 2 and column[2] is None:
+                        column[0] = None
+                        column[1] = 5
+                        column[2] = 6
         # El primer nivel (el menos compacto) con el que el PDF ocupa menos paginas.
         best = None
         for level in ([PDF_OVERRIDES[number]] if number in PDF_OVERRIDES else [zoom_options(sc) for sc in SCALES]):
