@@ -330,31 +330,6 @@ function altLangHref(locale, outputMode) {
   return outputMode === "clean" ? "./" : "../";
 }
 
-// First-visit language suggestion, only on the home of the root language (es):
-// the offer to every other published language, worded in that language.
-function langBannerScripts(locale, assetsPrefix) {
-  if (locale !== "es") return "";
-  const config = {};
-  publishedLocales().forEach(function (target) {
-    if (target.code === locale) return;
-    const targetStrings = JSON.parse(
-      fs.readFileSync(path.join(SRC_I18N, "strings." + target.code + ".json"), "utf8"),
-    );
-    config[target.code] = {
-      lang: target.htmlLang,
-      href: homeHref(target.code),
-      text: targetStrings.langBannerText,
-      accept: targetStrings.langBannerAccept,
-      dismiss: targetStrings.langBannerDismiss,
-    };
-  });
-  return (
-    "<script>window.LANG_BANNER_CONFIG=" +
-    JSON.stringify(config).replace(/</g, "\\u003c") +
-    '</script>\n    <script defer src="' + assetsPrefix + 'lang-banner.js"></script>'
-  );
-}
-
 function canonicalUrl(locale) {
   return SITE_BASE_URL + homeHref(locale);
 }
@@ -686,7 +661,6 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     .join(partituraPromo(strings, locale, resolvedAssetsPrefix));
   html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
   html = html.split("%%altLangHref%%").join(altLangHref(locale, outputMode));
-  html = html.split("%%LANG_BANNER%%").join(langBannerScripts(locale, resolvedAssetsPrefix));
   html = html.split("%%canonicalUrl%%").join(canonicalUrl(locale));
   html = html
     .split("%%hreflangLinks%%")
@@ -1975,10 +1949,6 @@ copyFile(
   path.join(ASSETS_DIST, "chord-finder.js"),
 );
 copyFile(
-  path.join(SRC_SITE, "lang-banner.js"),
-  path.join(ASSETS_DIST, "lang-banner.js"),
-);
-copyFile(
   path.join(SRC_SITE, "v7-guide.js"),
   path.join(ASSETS_DIST, "v7-guide.js"),
 );
@@ -2562,37 +2532,7 @@ const SITE_MENU_SCRIPT =
   "function c(){m.removeAttribute('open')}" +
   "document.addEventListener('click',function(e){if(!m.contains(e.target))c()});" +
   "document.addEventListener('keydown',function(e){if(e.key==='Escape')c()});" +
-  // A language picked in the menu is a manual choice: remember it so the
-  // first-visit suggestion never overrides it.
-  "m.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('.site-menu-language-links a');" +
-  "if(a)try{localStorage.setItem('langChoice',a.hreflang.split('-')[0])}catch(x){}});" +
   "})()</script>";
-
-// Language selector: the same page in every language (home when the page has
-// no registered equivalent, e.g. an article not translated yet or the 404).
-function languageSelector(strings, locale, file) {
-  const key = file ? keyForFile(file, locale) : null;
-  return (
-    '<div class="site-menu-wide site-menu-languages"><p class="site-menu-heading">' +
-    escapeHtml(strings.menuLanguage) +
-    '</p><div class="site-menu-language-links">' +
-    publishedLocales()
-      .map(function (target) {
-        const href =
-          key && isTranslated(key, target.code)
-            ? pagePath(key, target.code)
-            : homeHref(target.code);
-        const current = target.code === locale;
-        return (
-          '<a href="' + href + '" lang="' + target.htmlLang + '" hreflang="' +
-          target.hreflang + '"' + (current ? ' aria-current="true"' : "") + ">" +
-          escapeHtml(target.label) + "</a>"
-        );
-      })
-      .join("") +
-    "</div></div>"
-  );
-}
 
 function siteMenu(strings, locale, file) {
   const link = function (href, label, beta = false, desktopOnly = false) {
@@ -2671,7 +2611,6 @@ function siteMenu(strings, locale, file) {
     "</strong><small>" +
     escapeHtml(strings.extensionDescription) +
     '</small></span><img src="/assets/guitar-player-cubist-left-head.svg" alt="" width="48" height="48"></a></div>' +
-    languageSelector(strings, locale, file) +
     "</nav></details>" +
     SITE_MENU_SCRIPT
   );

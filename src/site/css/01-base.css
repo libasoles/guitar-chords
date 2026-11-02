@@ -197,17 +197,6 @@ body {
   letter-spacing: 0.08em;
   color: var(--ink-soft);
 }
-.site-menu-language-links {
-  display: flex;
-  flex-wrap: wrap;
-}
-.site-menu-panel .site-menu-language-links a {
-  padding: 0.45rem 1.1rem;
-}
-.site-menu-panel .site-menu-language-links a[aria-current] {
-  font-weight: 600;
-  color: var(--accent);
-}
 .site-menu-panel .site-menu-ext {
   display: flex;
   align-items: center;
@@ -332,33 +321,3 @@ a:hover {
   transition-delay: var(--tooltip-delay, 0s);
 }
 
-/* ----- First-visit language suggestion ----- */
-.lang-banner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem 1rem;
-  padding: 0.6rem 1.1rem;
-  background: var(--paper);
-  border-bottom: 1px solid var(--rule);
-  font-size: 0.95rem;
-}
-.lang-banner p {
-  margin: 0;
-}
-.lang-banner-accept {
-  font-weight: 600;
-}
-.lang-banner-dismiss {
-  margin-left: auto;
-  padding: 0 0.4rem;
-  border: none;
-  background: none;
-  color: var(--ink-soft);
-  font-size: 1.4rem;
-  line-height: 1;
-  cursor: pointer;
-}
-.lang-banner-dismiss:hover {
-  color: var(--accent);
-}

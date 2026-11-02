@@ -63,14 +63,6 @@ const SUITES = {
       /^test\/tab-editor\./,
     ],
   },
-  'language-selector': {
-    build: 'site',
-    paths: [/^scripts\/lib\/(locales|slugs|translations)\.js$/, /^src\/i18n\/strings\./, /^test\/language-selector\.e2e\./],
-  },
-  'lang-banner': {
-    build: 'site',
-    paths: [/^src\/site\/(lang-banner\.js|template\.html)$/, /^src\/i18n\/strings\./, /^test\/lang-banner\.e2e\./],
-  },
   'not-found': {
     build: 'site',
     paths: [/^src\/site\/404\.html$/, /^src\/i18n\/strings\./, /^test\/not-found\.e2e\./],
