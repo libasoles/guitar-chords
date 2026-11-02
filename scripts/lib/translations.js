@@ -23,7 +23,7 @@ const COLLECTIONS = {
 /* Colecciones con cuerpo pt publicado. Se agregan de a una (tickets 6a-6h). */
 const TRANSLATED_COLLECTIONS = {
   pt: [
-    // 'indice',
+    'indice',
     // 'carcassi',
     // 'sor',
     // 'aguado',

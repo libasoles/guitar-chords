@@ -15,6 +15,8 @@ const read = (file) => fs.readFileSync(path.join(DIST, file), 'utf8');
 
 const PARTITURA_PUBLISHED = fs.existsSync(path.join(DIST, pageFile('partitura-y-tablatura', 'es')));
 const optionalKeys = new Set(PARTITURA_PUBLISHED ? [] : ['partitura-y-tablatura']);
+/* Paginas ocultas: noindex y fuera del sitemap. */
+const hiddenKeys = new Set(['articulo-favoritas']);
 /* Paginas de herramientas (no articulos) que existen en es. */
 const toolKeys = Object.keys(SLUGS).filter((key) => isTranslated(key, 'pt') && fs.existsSync(path.join(DIST, pageFile(key, 'es'))));
 const ptFiles = ['pt.html', 'pt/index.html', ...toolKeys.map((key) => pageFile(key, 'pt'))];
@@ -76,7 +78,7 @@ test('el sitemap lista las URL pt con sus alternativas', () => {
   }));
   const locs = entries.map((e) => e.loc);
   assert.ok(locs.includes(BASE + '/pt'));
-  toolKeys.filter((key) => !optionalKeys.has(key)).forEach((key) => {
+  toolKeys.filter((key) => !optionalKeys.has(key) && !hiddenKeys.has(key)).forEach((key) => {
     assert.ok(locs.includes(BASE + pagePath(key, 'pt')), key);
   });
   entries.filter((e) => e.loc.includes('/pt')).forEach((e) => assert.deepEqual(e.alternates, ['es', 'en', 'pt-BR'], e.loc));

@@ -7,7 +7,7 @@ const CHEVRONS = ['m15 18-6-6 6-6', 'm9 18 6-6-6-6'];
 
 function scoreNavigation(pieces, piece, prefix, name, locale, { mobile = false } = {}) {
   const index = pieces.indexOf(piece);
-  const labels = locale === 'es' ? ['Partitura anterior', 'Partitura siguiente'] : ['Previous score', 'Next score'];
+  const labels = { es: ['Partitura anterior', 'Partitura siguiente'], pt: ['Partitura anterior', 'Próxima partitura'] }[locale] || ['Previous score', 'Next score'];
   const buttons = [pieces[index - 1], pieces[index + 1]].map((target, i) => {
     const attrs = target
       ? 'popovertarget="' + prefix + target.number + '" popovertargetaction="show" aria-label="' + escapeAttr(labels[i] + ': ' + name(target, locale)) + '"'
