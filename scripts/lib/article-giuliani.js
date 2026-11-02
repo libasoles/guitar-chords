@@ -23,9 +23,13 @@ const AUTHOR = 'Mauro Giuliani';
 
 const PIECES = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts', FOLDER, 'pieces.json'), 'utf8'));
 
-/* Estudio N en espanol, Study N en ingles. */
+/* Estudio N en espanol, Study N en ingles, Estudo N en portugues. */
+const NAME_FIELD = { es: 'title', en: 'en', pt: 'pt' };
+
 function pieceName(piece, locale) {
-  return locale === 'es' ? piece.title : piece.en;
+  const field = NAME_FIELD[locale];
+  if (!field || !piece[field]) throw new Error('Giuliani: falta el nombre ' + locale + ' de la pieza ' + piece.number);
+  return piece[field];
 }
 
 function fileBase(piece) {
