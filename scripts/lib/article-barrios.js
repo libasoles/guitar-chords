@@ -23,9 +23,12 @@ const AUTHOR = 'Agustín Barrios Mangoré';
 
 const PIECES = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts', FOLDER, 'pieces.json'), 'utf8'));
 
-/* Los titulos son los de Barrios (en espanol); la version inglesa solo traduce la tonalidad. */
+/* es: titulos de Barrios; en: solo traduce la tonalidad; pt: titulos traducidos (pieces.json, campo pt). */
+const TITLE_FIELD = { es: 'title', en: 'en', pt: 'pt' };
 function pieceName(piece, locale) {
-  return locale === 'es' ? piece.title : piece.en;
+  const field = TITLE_FIELD[locale];
+  if (!field) throw new Error('article-barrios: idioma sin titulos de piezas: ' + locale);
+  return piece[field];
 }
 
 function fileBase(piece) {

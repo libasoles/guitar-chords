@@ -29,7 +29,7 @@ const TRANSLATED_COLLECTIONS = {
     'aguado',
     'sagreras',
     'giuliani',
-    // 'barrios',
+    'barrios',
     // 'arpegios',
   ],
 };
