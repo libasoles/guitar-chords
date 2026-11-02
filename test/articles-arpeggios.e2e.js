@@ -1,6 +1,7 @@
 'use strict';
 const assert = require('node:assert/strict');
 const { pagePath } = require('../scripts/lib/slugs');
+const { isTranslated } = require('../scripts/lib/translations');
 const { GROUPS: ARPEGGIOS } = require('../scripts/lib/article-arpeggios');
 const { run } = require('./articles-harness');
 
@@ -8,18 +9,26 @@ const arpeggioGroup = (root, quality) => ARPEGGIOS.find((group) => group[1] === 
 
 run('articles-arpeggios', async ({ base, page }) => {
   // Arpeggio positions: qualities share accessible tabs per root.
-  for (const locale of ['es', 'en']) {
+  for (const locale of ['es', 'en', 'pt']) {
     const url = pagePath('articulo-tablaturas-arpegios', locale);
     await page.goto(base + url);
     await page.waitForSelector('.arpeggio-group ascii-tabs .ascii-tabs-tab');
-    assert.equal(await page.locator('h1').textContent(), locale === 'es' ? 'Tablaturas para arpegios' : 'Tabs for arpeggios');
-    assert.equal(await page.locator('.lead a').getAttribute('href'), pagePath('articulo-carcassi', locale));
+    assert.equal(await page.locator('h1').textContent(), { es: 'Tablaturas para arpegios', en: 'Tabs for arpeggios', pt: 'Tablaturas para arpejos' }[locale]);
+    // The Carcassi link only exists once that collection is translated into the locale.
+    if (isTranslated('articulo-carcassi', locale)) assert.equal(await page.locator('.lead a').getAttribute('href'), pagePath('articulo-carcassi', locale));
+    else assert.equal(await page.locator('.lead a').count(), 0);
     assert.equal(await page.locator('.sequence-forms ascii-tabs[readonly]').count(), 87);
     const titles = await page.locator('.arpeggio-group figcaption').allTextContents();
-    assert.deepEqual(titles.slice(0, 3), locale === 'es' ? ['Do mayor', 'Do menor', 'Do 7'] : ['C major', 'C minor', 'C 7']);
+    assert.deepEqual(titles.slice(0, 3), { es: ['Do mayor', 'Do menor', 'Do 7'], en: ['C major', 'C minor', 'C 7'], pt: ['Dó maior', 'Dó menor', 'Dó 7'] }[locale]);
     if (locale !== 'es') {
       // Everything below is layout and behaviour, identical in every locale: it runs once, in Spanish.
-      assert.equal(await page.locator('.arpeggio-search-toggle').getAttribute('aria-label'), 'Search by notes');
+      assert.equal(await page.locator('.arpeggio-search-toggle').getAttribute('aria-label'), { en: 'Search by notes', pt: 'Buscar por notas' }[locale]);
+      if (locale === 'pt') {
+        // The note toggle uses solfège in Portuguese too, and the sharps and flats are named in Portuguese.
+        assert.deepEqual((await page.locator('.arpeggio-root').allTextContents()).slice(0, 8), ['Dó', 'Ré♭', 'Ré', 'Mi♭', 'Mi', 'Fá', 'Fá♯', 'Sol']);
+        await page.locator('#arpeggio-C-root').click();
+        assert.equal(await page.locator('#arpeggio-C-panel-0 ascii-tabs').first().getAttribute('notation'), 'solfege');
+      }
       continue;
     }
     const groups = await page.locator('.arpeggio-group ascii-tabs').evaluateAll((els) => els.map((el) => el.value.flat().filter((column) => column.some((f) => f !== null)).map((column) => column.map((note) => note === null ? null : typeof note === 'object' ? note.fret : note))));

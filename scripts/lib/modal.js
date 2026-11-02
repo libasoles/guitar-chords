@@ -4,6 +4,14 @@
    variante: `chord-popover` (tarjeta chica con fondo) o `modal-full` (pantalla completa). Los estilos estan en
    11-articles.css. */
 
+const { LOCALE_CODES, localeConfig } = require('./locales');
+
+/* Inicio del idioma: / (es), /en, /pt. Sin idioma conocido, el inicio en espanol. */
+function homeHrefFor(locale) {
+  const prefix = LOCALE_CODES.includes(locale) ? localeConfig(locale).prefix : '';
+  return prefix ? '/' + prefix : '/';
+}
+
 function escapeAttr(text) {
   return String(text).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
@@ -14,7 +22,7 @@ const CLOSE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" s
 
 /* Los modales a pantalla completa llevan el logo: `logoHref` permite elegir su destino.
    Por defecto vuelve al inicio del idioma; `strings` proporciona su etiqueta. */
-function modal({ id, label, closeLabel, className, content, closeContent = '×', locale, strings, logoHref = locale === 'en' ? '/en' : '/' }) {
+function modal({ id, label, closeLabel, className, content, closeContent = '×', locale, strings, logoHref = homeHrefFor(locale) }) {
   const homeHref = className === 'modal-full' ? logoHref : '';
   const homeLabel = homeHref ? strings.wordmark + ' ' + strings.wordmarkSmall : '';
   return '<div id="' + id + '" class="modal ' + className + '" popover role="dialog" aria-label="' + escapeAttr(label) + '">' +

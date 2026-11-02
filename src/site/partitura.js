@@ -976,7 +976,7 @@
         tabs.setAttribute('labels', 'none');
         tabs.setAttribute('variant', 'flat');
         tabs.setAttribute('theme', 'light');
-        tabs.setAttribute('lang', CFG.locale === 'en' ? 'en' : 'es');
+        tabs.setAttribute('lang', CFG.locale);
         tabs.setAttribute('readonly', '');
         tabs.appendChild(document.createElement('ascii-tabs-sheet'));
         tabsLine.appendChild(tabs);
@@ -1195,7 +1195,7 @@
             tabsEl.setAttribute('tuning', preview.tuning || 'E B G D A E');
             tabsEl.setAttribute('variant', 'flat');
             tabsEl.setAttribute('theme', 'light');
-            tabsEl.setAttribute('lang', CFG.locale === 'en' ? 'en' : 'es');
+            tabsEl.setAttribute('lang', CFG.locale);
             tabsEl.dataset.measure = String(index);
             tabsEl.appendChild(document.createElement('ascii-tabs-sheet'));
             tabsLine.appendChild(tabsEl);

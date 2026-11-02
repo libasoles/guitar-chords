@@ -320,3 +320,4 @@ a:hover {
   /* Pages can set --tooltip-delay; it only applies when showing, hiding is immediate. */
   transition-delay: var(--tooltip-delay, 0s);
 }
+

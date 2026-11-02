@@ -448,10 +448,10 @@
             if (pattern.tonics[key]) elements[key].classList.add('picking-note-tonic');
             var title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
             var fret = key.split(':')[1];
-            var spanishTitle = document.documentElement.lang === 'es';
+            var lang = (document.documentElement.lang || '').slice(0, 2);
             title.textContent = fret === '0'
-              ? (spanishTitle ? 'Cuerda al aire' : 'Open string')
-              : (spanishTitle ? 'Traste ' : 'Fret ') + fret;
+              ? ({ es: 'Cuerda al aire', pt: 'Corda solta' }[lang] || 'Open string')
+              : ({ es: 'Traste ', pt: 'Casa ' }[lang] || 'Fret ') + fret;
             elements[key].appendChild(title);
           });
         }
@@ -461,21 +461,27 @@
   var slider = document.getElementById('picking-transpose');
   var minorSwitch = document.getElementById('picking-minor');
   if (transposable && slider) {
-    var spanish = document.documentElement.lang === 'es';
+    var lang = (document.documentElement.lang || '').slice(0, 2);
+    var spanish = lang === 'es';
+    var portuguese = lang === 'pt';
     // Minor keys are spelled with the fewest accidentals: A♭ major but
     // G♯ minor.
-    var majorKeys = spanish
+    var majorKeys = portuguese
+      ? ['Mi', 'Fá', 'Fá♯', 'Sol', 'Lá♭', 'Lá', 'Si♭', 'Si', 'Dó', 'Dó♯', 'Ré', 'Mi♭']
+      : spanish
       ? ['Mi', 'Fa', 'Fa♯', 'Sol', 'La♭', 'La', 'Si♭', 'Si', 'Do', 'Do♯', 'Re', 'Mi♭']
       : ['E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B', 'C', 'C♯', 'D', 'E♭'];
-    var minorKeys = spanish
+    var minorKeys = portuguese
+      ? ['Mi', 'Fá', 'Fá♯', 'Sol', 'Sol♯', 'Lá', 'Si♭', 'Si', 'Dó', 'Dó♯', 'Ré', 'Mi♭']
+      : spanish
       ? ['Mi', 'Fa', 'Fa♯', 'Sol', 'Sol♯', 'La', 'Si♭', 'Si', 'Do', 'Do♯', 'Re', 'Mi♭']
       : ['E', 'F', 'F♯', 'G', 'G♯', 'A', 'B♭', 'B', 'C', 'C♯', 'D', 'E♭'];
     function update() {
       var offset = Number(slider.value);
       var minor = !!(minorSwitch && minorSwitch.checked);
       var key = minor
-        ? minorKeys[offset] + (spanish ? ' menor' : ' minor')
-        : majorKeys[offset] + (spanish ? ' mayor' : ' major');
+        ? minorKeys[offset] + (spanish || portuguese ? ' menor' : ' minor')
+        : majorKeys[offset] + (spanish ? ' mayor' : portuguese ? ' maior' : ' major');
       document.getElementById('picking-key').textContent = key;
       slider.setAttribute('aria-valuetext', key);
       renderPatterns(offset, minor);

@@ -17,6 +17,15 @@
 */
 
 const fs = require("fs");
+const { localesFor, isTranslated } = require("./lib/translations");
+const {
+  LOCALE_CODES,
+  localeConfig,
+  publishedLocales,
+  altLocale,
+  ogImageLocale,
+  hreflangLinks,
+} = require("./lib/locales");
 const path = require("path");
 const { fingerprintAssets } = require("./lib/fingerprint");
 const { minifyAssets } = require("./lib/minify-assets");
@@ -52,6 +61,7 @@ const { renderArticleLinks } = require("./lib/article-link");
 const {
   pagePath,
   pageFile,
+  keyForFile,
   legacyEnglishRedirects,
   lastmodRenames,
   redirectHtml,
@@ -208,7 +218,9 @@ const partituraPromoTemplate = fs.readFileSync(
   path.join(SRC_SITE, "partitura-promo.html"),
   "utf8",
 );
-const LOCALES = ["es", "en"];
+const LOCALES = publishedLocales().map(function (l) {
+  return l.code;
+});
 
 // Build the chord-finder i18n subset (only the cfXxx keys).
 function finderI18N(strings) {
@@ -314,11 +326,12 @@ function ctaButton(strings, storeUrl = extensionStoreUrl()) {
 // Replace all %%KEY%% placeholders in the template.
 function altLangHref(locale, outputMode) {
   if (locale === "es") return "en";
+  if (locale === "pt") return "/en";
   return outputMode === "clean" ? "./" : "../";
 }
 
 function canonicalUrl(locale) {
-  return locale === "es" ? SITE_BASE_URL + "/" : SITE_BASE_URL + "/en";
+  return SITE_BASE_URL + homeHref(locale);
 }
 
 function v7PageHref(locale, slug) {
@@ -330,7 +343,7 @@ function v7CanonicalUrl(locale, slug) {
 }
 
 function homeHref(locale) {
-  return locale === "es" ? "/" : "/en";
+  return locale === "es" ? "/" : "/" + localeConfig(locale).prefix;
 }
 
 // Pages rendered from the shared src/site/v7-guide.html template — one for
@@ -487,13 +500,14 @@ const ALL_PICKING_PAGES = [INTERVALS_PAGE];
 // raster previews of the existing notation + TAB examples (social crawlers
 // do not reliably display SVG images).
 function socialImage(url) {
-  if (url === SITE_BASE_URL + homeHref("es") ||
-      url === SITE_BASE_URL + homeHref("en")) {
+  if (LOCALE_CODES.some(function (locale) {
+    return url === SITE_BASE_URL + homeHref(locale);
+  })) {
     return SITE_BASE_URL + "/assets/og-image.png";
   }
-  for (const locale of ["es", "en"]) {
+  for (const locale of LOCALE_CODES) {
     if (url === v7CanonicalUrl(locale, "circulo-de-quintas")) {
-      return SITE_BASE_URL + "/assets/og-fifths-" + locale + ".png";
+      return SITE_BASE_URL + "/assets/og-fifths-" + ogImageLocale(locale) + ".png";
     }
     if (url === v7CanonicalUrl(locale, TAB_EDITOR_SLUG)) {
       return SITE_BASE_URL + "/assets/og-tab-editor.png";
@@ -502,10 +516,10 @@ function socialImage(url) {
       return SITE_BASE_URL + "/assets/og-score-arpeggios.png";
     }
     if (url === v7CanonicalUrl(locale, NOTE_FINDER_SLUG)) {
-      return SITE_BASE_URL + "/assets/og-note-finder-" + locale + ".png";
+      return SITE_BASE_URL + "/assets/og-note-finder-" + ogImageLocale(locale) + ".png";
     }
   }
-  const carcassi = ["es", "en"].some(function (locale) {
+  const carcassi = LOCALE_CODES.some(function (locale) {
     return url === v7CanonicalUrl(locale, ARTICLE_CARCASSI_SLUG);
   });
   return SITE_BASE_URL + "/assets/og-score-" +
@@ -519,7 +533,7 @@ function structuredDataOpts(locale, url, name, description, homeUrl) {
     baseUrl: SITE_BASE_URL,
     siteName: "Guitar Chords",
     ogImage: socialImage(url),
-    locale: locale,
+    locale: localeConfig(locale).htmlLang,
     url: url,
     homeUrl: homeUrl || SITE_BASE_URL + homeHref(locale),
     name: name,
@@ -648,8 +662,9 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
   html = html.split("%%altLangHref%%").join(altLangHref(locale, outputMode));
   html = html.split("%%canonicalUrl%%").join(canonicalUrl(locale));
-  html = html.split("%%hreflangEs%%").join(SITE_BASE_URL + "/");
-  html = html.split("%%hreflangEn%%").join(SITE_BASE_URL + "/en");
+  html = html
+    .split("%%hreflangLinks%%")
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + homeHref(loc); }));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html.split("%%DECODER_ROWS%%").join(decoderRows(strings));
   html = html.split("%%EXTENSION_CTA_BUTTON%%").join(ctaButton(strings));
@@ -740,17 +755,12 @@ function renderV7Page(template, strings, locale, page) {
   html = html
     .split("%%altLangHref%%")
     .join(
-      locale === "es"
-        ? v7PageHref("en", page.slug)
-        : v7PageHref("es", page.slug),
+      v7PageHref(altLocale(locale), page.slug),
     );
   html = html.split("%%canonicalUrl%%").join(v7CanonicalUrl(locale, page.slug));
   html = html
-    .split("%%hreflangEs%%")
-    .join(SITE_BASE_URL + v7PageHref("es", page.slug));
-  html = html
-    .split("%%hreflangEn%%")
-    .join(SITE_BASE_URL + v7PageHref("en", page.slug));
+    .split("%%hreflangLinks%%")
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, page.slug); }, localesFor(page.slug)));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html.split("%%EXTENSION_CTA_BUTTON%%").join(ctaButton(strings));
   html = html
@@ -819,17 +829,12 @@ function renderCirclePage(template, strings, locale, page) {
   html = html
     .split("%%altLangHref%%")
     .join(
-      locale === "es"
-        ? v7PageHref("en", page.slug)
-        : v7PageHref("es", page.slug),
+      v7PageHref(altLocale(locale), page.slug),
     );
   html = html.split("%%canonicalUrl%%").join(v7CanonicalUrl(locale, page.slug));
   html = html
-    .split("%%hreflangEs%%")
-    .join(SITE_BASE_URL + v7PageHref("es", page.slug));
-  html = html
-    .split("%%hreflangEn%%")
-    .join(SITE_BASE_URL + v7PageHref("en", page.slug));
+    .split("%%hreflangLinks%%")
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, page.slug); }, localesFor(page.slug)));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html.split("%%EXTENSION_CTA_BUTTON%%").join(ctaButton(strings));
   html = html
@@ -889,15 +894,12 @@ function renderDimPage(template, strings, locale) {
   html = html
     .split("%%altLangHref%%")
     .join(
-      locale === "es" ? v7PageHref("en", DIM_SLUG) : v7PageHref("es", DIM_SLUG),
+      v7PageHref(altLocale(locale), DIM_SLUG),
     );
   html = html.split("%%canonicalUrl%%").join(v7CanonicalUrl(locale, DIM_SLUG));
   html = html
-    .split("%%hreflangEs%%")
-    .join(SITE_BASE_URL + v7PageHref("es", DIM_SLUG));
-  html = html
-    .split("%%hreflangEn%%")
-    .join(SITE_BASE_URL + v7PageHref("en", DIM_SLUG));
+    .split("%%hreflangLinks%%")
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, DIM_SLUG); }, localesFor(DIM_SLUG)));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html.split("%%EXTENSION_CTA_BUTTON%%").join(ctaButton(strings));
   html = html
@@ -976,19 +978,14 @@ function renderNoteFinderPage(template, strings, locale) {
   html = html
     .split("%%altLangHref%%")
     .join(
-      locale === "es"
-        ? v7PageHref("en", NOTE_FINDER_SLUG)
-        : v7PageHref("es", NOTE_FINDER_SLUG),
+      v7PageHref(altLocale(locale), NOTE_FINDER_SLUG),
     );
   html = html
     .split("%%canonicalUrl%%")
     .join(v7CanonicalUrl(locale, NOTE_FINDER_SLUG));
   html = html
-    .split("%%hreflangEs%%")
-    .join(SITE_BASE_URL + v7PageHref("es", NOTE_FINDER_SLUG));
-  html = html
-    .split("%%hreflangEn%%")
-    .join(SITE_BASE_URL + v7PageHref("en", NOTE_FINDER_SLUG));
+    .split("%%hreflangLinks%%")
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, NOTE_FINDER_SLUG); }, localesFor(NOTE_FINDER_SLUG)));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html.split("%%EXTENSION_CTA_BUTTON%%").join(ctaButton(strings));
   html = html
@@ -1031,19 +1028,14 @@ function renderTabEditorPage(template, strings, locale) {
   html = html
     .split("%%altLangHref%%")
     .join(
-      locale === "es"
-        ? v7PageHref("en", TAB_EDITOR_SLUG)
-        : v7PageHref("es", TAB_EDITOR_SLUG),
+      v7PageHref(altLocale(locale), TAB_EDITOR_SLUG),
     );
   html = html
     .split("%%canonicalUrl%%")
     .join(v7CanonicalUrl(locale, TAB_EDITOR_SLUG));
   html = html
-    .split("%%hreflangEs%%")
-    .join(SITE_BASE_URL + v7PageHref("es", TAB_EDITOR_SLUG));
-  html = html
-    .split("%%hreflangEn%%")
-    .join(SITE_BASE_URL + v7PageHref("en", TAB_EDITOR_SLUG));
+    .split("%%hreflangLinks%%")
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, TAB_EDITOR_SLUG); }, localesFor(TAB_EDITOR_SLUG)));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html
     .split("%%MANIFEST_HREF%%")
@@ -1097,19 +1089,14 @@ function renderSixthsPage(template, strings, locale) {
   html = html
     .split("%%altLangHref%%")
     .join(
-      locale === "es"
-        ? v7PageHref("en", SIXTHS_SLUG)
-        : v7PageHref("es", SIXTHS_SLUG),
+      v7PageHref(altLocale(locale), SIXTHS_SLUG),
     );
   html = html
     .split("%%canonicalUrl%%")
     .join(v7CanonicalUrl(locale, SIXTHS_SLUG));
   html = html
-    .split("%%hreflangEs%%")
-    .join(SITE_BASE_URL + v7PageHref("es", SIXTHS_SLUG));
-  html = html
-    .split("%%hreflangEn%%")
-    .join(SITE_BASE_URL + v7PageHref("en", SIXTHS_SLUG));
+    .split("%%hreflangLinks%%")
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, SIXTHS_SLUG); }, localesFor(SIXTHS_SLUG)));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html
     .split("%%MANIFEST_HREF%%")
@@ -1139,13 +1126,11 @@ function fillPageChrome(html, strings, locale, slug, ogImage) {
     .split("%%homeHref%%")
     .join(homeHref(locale))
     .split("%%altLangHref%%")
-    .join(locale === "es" ? v7PageHref("en", slug) : v7PageHref("es", slug))
+    .join(v7PageHref(altLocale(locale), slug))
     .split("%%canonicalUrl%%")
     .join(v7CanonicalUrl(locale, slug))
-    .split("%%hreflangEs%%")
-    .join(SITE_BASE_URL + v7PageHref("es", slug))
-    .split("%%hreflangEn%%")
-    .join(SITE_BASE_URL + v7PageHref("en", slug))
+    .split("%%hreflangLinks%%")
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, slug); }, localesFor(slug)))
     .split("%%ogImage%%")
     .join(ogImage || socialImage(v7CanonicalUrl(locale, slug)))
     .split("%%MANIFEST_HREF%%")
@@ -1188,7 +1173,7 @@ function renderScoreEditorPage(template, strings, locale) {
   };
   html = html
     .split("%%ogLocale%%")
-    .join(locale === "es" ? "es_AR" : "en_US")
+    .join(localeConfig(locale).ogLocale)
     .split("%%scoreSeoH1%%")
     .join(escapeHtml(strings.scoreSeoH1 || ""))
     .split("%%scoreAboutLead%%")
@@ -1333,6 +1318,7 @@ function renderArticlePage(strings, locale, slug, keys, bodyHtml, backHtml, head
 }
 
 function articleCard(slug, locale, image, size, title, summary) {
+  if (!isTranslated(slug, locale)) return "";
   return (
     '<a class="article-card" href="' +
     pagePath(slug, locale) +
@@ -1426,6 +1412,12 @@ function renderCarcassiArticle(strings, locale) {
 function renderArpeggiosArticle(strings, locale) {
   const back = '<p class="article-back"><a href="' + pagePath(ARTICLES_SLUG, locale) + '">' +
     escapeHtml(strings.artBackToIndex) + '</a></p>';
+  // The Carcassi article may not exist in this locale yet: then the lead keeps its text without the link.
+  if (!isTranslated(ARTICLE_CARCASSI_SLUG, locale)) {
+    strings = Object.assign({}, strings, {
+      artArpeggiosLead: strings.artArpeggiosLead.replace(/<a href="%%CARCASSI_HREF%%">([^<]*)<\/a>/, "$1"),
+    });
+  }
   return renderArticlePage(strings, locale, ARTICLE_ARPEGGIOS_SLUG, {
     title: "artArpeggiosPageTitle",
     meta: "artArpeggiosMetaDescription",
@@ -1695,6 +1687,7 @@ function writeArticlePages(strings, locale) {
     [ARTICLE_ARPEGGIOS_SLUG, renderArpeggiosArticle],
     [ARTICLE_FAVORITES_SLUG, renderFavoritesArticle],
   ].forEach(function (entry) {
+    if (!isTranslated(entry[0], locale)) return;
     const outFile = path.join(DIST_SITE, pageFile(entry[0], locale));
     ensureDir(path.dirname(outFile));
     fs.writeFileSync(outFile, entry[1](strings, locale), "utf8");
@@ -1725,7 +1718,7 @@ function renderPartituraPage(template, strings, locale) {
     strings,
     locale,
     PARTITURA_SLUG,
-    SITE_BASE_URL + "/assets/og-partitura-" + locale + ".png",
+    SITE_BASE_URL + "/assets/og-partitura-" + ogImageLocale(locale) + ".png",
   );
   [
     "partPromoAlt",
@@ -1779,7 +1772,7 @@ function renderPartituraPage(template, strings, locale) {
     .split("%%OG_DESCRIPTION%%")
     .join(escapeHtml(strings.partPromoDescription || ""))
     .split("%%ogLocale%%")
-    .join(locale === "es" ? "es_AR" : "en_US")
+    .join(localeConfig(locale).ogLocale)
     .split("%%PRIVACY_HREF%%")
     .join(v7PageHref(locale, PRIVACY_SLUG))
     .split("%%TAB_EDITOR_PAGE_HREF%%")
@@ -1795,7 +1788,7 @@ function renderPartituraPage(template, strings, locale) {
     strings.partPageTitle || "",
     strings.partMetaDescription || "",
   );
-  opts.ogImage = SITE_BASE_URL + "/assets/og-partitura-" + locale + ".png";
+  opts.ogImage = SITE_BASE_URL + "/assets/og-partitura-" + ogImageLocale(locale) + ".png";
   opts.faq = faq;
   return injectJsonLd(html, toolJsonLd(opts));
 }
@@ -1843,17 +1836,12 @@ function renderPickingPage(template, strings, locale, page) {
   html = html
     .split("%%altLangHref%%")
     .join(
-      locale === "es"
-        ? v7PageHref("en", page.slug)
-        : v7PageHref("es", page.slug),
+      v7PageHref(altLocale(locale), page.slug),
     );
   html = html.split("%%canonicalUrl%%").join(v7CanonicalUrl(locale, page.slug));
   html = html
-    .split("%%hreflangEs%%")
-    .join(SITE_BASE_URL + v7PageHref("es", page.slug));
-  html = html
-    .split("%%hreflangEn%%")
-    .join(SITE_BASE_URL + v7PageHref("en", page.slug));
+    .split("%%hreflangLinks%%")
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, page.slug); }, localesFor(page.slug)));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html.split("%%EXTENSION_CTA_BUTTON%%").join(ctaButton(strings));
   html = html
@@ -1874,7 +1862,7 @@ function renderPickingPage(template, strings, locale, page) {
 // Render the site-wide 404 page (src/site/404.html) for GitHub Pages. A
 // single Spanish page at the root — GitHub Pages only serves one 404.html
 // at the domain root, so there's no per-locale variant.
-function render404Page(template, strings) {
+function render404Page(template, strings, locale = "es") {
   // Pages serves this document at the missing URL, potentially nested.
   const resolvedAssetsPrefix = "/assets/";
   const ogImage = socialImage();
@@ -1902,19 +1890,23 @@ function render404Page(template, strings) {
   html = html.split("%%PAGE_LEAD%%").join(strings.notFoundLead || "");
   html = html
     .split("%%NOTE_FINDER_PROMO%%")
-    .join(noteFinderPromo(strings, "es"));
+    .join(noteFinderPromo(strings, locale));
 
+  html = html.replace(
+    '<html lang="es">',
+    '<html lang="' + localeConfig(locale).htmlLang + '">',
+  );
   html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
-  html = html.split("%%homeHref%%").join(homeHref("es"));
-  html = html.split("%%V7_PAGE_HREF%%").join(v7PageHref("es"));
+  html = html.split("%%homeHref%%").join(homeHref(locale));
+  html = html.split("%%V7_PAGE_HREF%%").join(v7PageHref(locale));
   html = html
     .split("%%PICKING_PAGE_HREF%%")
-    .join(v7PageHref("es", INTERVALS_PAGE.slug));
+    .join(v7PageHref(locale, INTERVALS_PAGE.slug));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html.split("%%EXTENSION_CTA_BUTTON%%").join(ctaButton(strings));
   html = html
     .split("%%MANIFEST_HREF%%")
-    .join(resolvedAssetsPrefix + "manifest.es.webmanifest");
+    .join(resolvedAssetsPrefix + "manifest." + locale + ".webmanifest");
   html = html.split("%%SW_PATH%%").join("/sw.js");
 
   return html;
@@ -2026,10 +2018,39 @@ copyFile(
   path.join(SRC_VENDOR, "jspdf.umd.min.js"),
   path.join(VENDOR_DIST, "jspdf.umd.min.js"),
 );
-copyFile(
-  ASCII_TABS,
-  path.join(VENDOR_DIST, "ascii-tabs.js"),
-);
+// The pinned ascii-tabs release only ships es/en message presets: add the
+// pt-BR one at copy time so the editor's own labels are in Portuguese.
+{
+  const presets = "const PRESETS = { en: MESSAGES_EN, es: MESSAGES_ES };";
+  const source = fs.readFileSync(ASCII_TABS, "utf8");
+  if (source.indexOf(presets) === -1) {
+    fail("ascii-tabs.js: PRESETS declaration not found; update the pt-BR patch in build-site.js");
+  }
+  const messagesPt = `const MESSAGES_PT = {
+  hint: 'Clique em uma corda e digite o número da casa.',
+  copy: 'Copiar tablatura',
+  copied: 'Copiado',
+  delete: 'Excluir tablatura',
+  add: 'Nova tablatura',
+  fret: 'Casa',
+  annotation: 'Editar anotação da coluna',
+  tabTitle: 'Editar título da tablatura',
+  spacing: 'Espaçamento',
+  notation: 'Notação',
+  frets: 'Números das casas',
+  letters: 'Letras (E D F)',
+  solfege: 'Notas em solfejo (mi ré fá)',
+};
+`;
+  fs.writeFileSync(
+    path.join(VENDOR_DIST, "ascii-tabs.js"),
+    source.replace(
+      presets,
+      messagesPt + "const PRESETS = { en: MESSAGES_EN, es: MESSAGES_ES, pt: MESSAGES_PT };",
+    ),
+    "utf8",
+  );
+}
 // Private score editor (/partitura): Verovio draws the staff, jsPDF exports it.
 ["score-model.js", "score-fingering.js", "score-editor.js", "score-editor.css"].forEach(function (f) {
   copyFile(path.join(SRC_SITE, f), path.join(ASSETS_DIST, f));
@@ -2140,14 +2161,18 @@ ensureDir(ICONS_DIST);
 
 console.log("==> Writing web app manifests...");
 function writeManifest(locale, strings) {
-  const name = locale === "es" ? "Acordes para la guitarra" : "Guitar Chords";
+  const name = {
+    es: "Acordes para la guitarra",
+    en: "Guitar Chords",
+    pt: "Acordes para violão",
+  }[locale];
   const shortName = strings.wordmark || name;
   const manifest = {
     name: name,
     short_name: shortName,
     description: strings.metaDescription || "",
     lang: strings.htmlLang || locale,
-    start_url: locale === "es" ? "/" : "/en",
+    start_url: homeHref(locale),
     scope: "/",
     display: "standalone",
     background_color: "#fdfaf5",
@@ -2234,6 +2259,29 @@ fs.writeFileSync(
 say(path.relative(ROOT, swFile));
 
 console.log("==> Rendering locale pages...");
+
+// Every catalog must have exactly the same keys as the Spanish one: a missing
+// or extra key means untranslated (or stale) text would ship.
+{
+  const catalogKeys = function (locale) {
+    const file = path.join(SRC_I18N, "strings." + locale + ".json");
+    if (!fs.existsSync(file)) fail("Missing: " + file);
+    return Object.keys(JSON.parse(fs.readFileSync(file, "utf8")));
+  };
+  const reference = new Set(catalogKeys("es"));
+  LOCALES.forEach(function (locale) {
+    const keys = new Set(catalogKeys(locale));
+    const missing = [...reference].filter(function (k) { return !keys.has(k); });
+    const extra = [...keys].filter(function (k) { return !reference.has(k); });
+    if (missing.length || extra.length) {
+      fail(
+        "strings." + locale + ".json keys differ from strings.es.json" +
+          (missing.length ? " | missing: " + missing.join(", ") : "") +
+          (extra.length ? " | extra: " + extra.join(", ") : ""),
+      );
+    }
+  });
+}
 
 LOCALES.forEach(function (locale) {
   const stringsPath = path.join(SRC_I18N, "strings." + locale + ".json");
@@ -2367,7 +2415,7 @@ LOCALES.forEach(function (locale) {
 
   V7_PAGES.forEach(function (page) {
     const v7Html = renderV7Page(v7Template, strings, locale, page);
-    const v7OutFile = path.join(DIST_SITE, pageFile(page.slug, "en"));
+    const v7OutFile = path.join(DIST_SITE, pageFile(page.slug, locale));
     fs.writeFileSync(v7OutFile, v7Html, "utf8");
     say(path.relative(ROOT, v7OutFile));
   });
@@ -2379,14 +2427,14 @@ LOCALES.forEach(function (locale) {
       locale,
       page,
     );
-    const circleOutFile = path.join(DIST_SITE, pageFile(page.slug, "en"));
+    const circleOutFile = path.join(DIST_SITE, pageFile(page.slug, locale));
     fs.writeFileSync(circleOutFile, circleHtml, "utf8");
     say(path.relative(ROOT, circleOutFile));
   });
 
   {
     const dimHtml = renderDimPage(dimTemplate, strings, locale);
-    const dimOutFile = path.join(DIST_SITE, pageFile(DIM_SLUG, "en"));
+    const dimOutFile = path.join(DIST_SITE, pageFile(DIM_SLUG, locale));
     fs.writeFileSync(dimOutFile, dimHtml, "utf8");
     say(path.relative(ROOT, dimOutFile));
   }
@@ -2397,7 +2445,7 @@ LOCALES.forEach(function (locale) {
       strings,
       locale,
     );
-    const noteFinderOutFile = path.join(DIST_SITE, pageFile(NOTE_FINDER_SLUG, "en"));
+    const noteFinderOutFile = path.join(DIST_SITE, pageFile(NOTE_FINDER_SLUG, locale));
     fs.writeFileSync(noteFinderOutFile, noteFinderHtml, "utf8");
     say(path.relative(ROOT, noteFinderOutFile));
   }
@@ -2408,20 +2456,20 @@ LOCALES.forEach(function (locale) {
       strings,
       locale,
     );
-    const tabEditorOutFile = path.join(DIST_SITE, pageFile(TAB_EDITOR_SLUG, "en"));
+    const tabEditorOutFile = path.join(DIST_SITE, pageFile(TAB_EDITOR_SLUG, locale));
     fs.writeFileSync(tabEditorOutFile, tabEditorHtml, "utf8");
     say(path.relative(ROOT, tabEditorOutFile));
   }
 
   {
     const sixthsHtml = renderSixthsPage(sixthsTemplate, strings, locale);
-    const sixthsOutFile = path.join(DIST_SITE, pageFile(SIXTHS_SLUG, "en"));
+    const sixthsOutFile = path.join(DIST_SITE, pageFile(SIXTHS_SLUG, locale));
     fs.writeFileSync(sixthsOutFile, sixthsHtml, "utf8");
     say(path.relative(ROOT, sixthsOutFile));
   }
 
   {
-    const privacyOutFile = path.join(DIST_SITE, pageFile(PRIVACY_SLUG, "en"));
+    const privacyOutFile = path.join(DIST_SITE, pageFile(PRIVACY_SLUG, locale));
     fs.writeFileSync(
       privacyOutFile,
       renderPrivacyPage(privacyTemplate, strings, locale),
@@ -2433,7 +2481,7 @@ LOCALES.forEach(function (locale) {
   writeArticlePages(strings, locale);
 
   {
-    const scoreOutFile = path.join(DIST_SITE, pageFile(SCORE_EDITOR_SLUG, "en"));
+    const scoreOutFile = path.join(DIST_SITE, pageFile(SCORE_EDITOR_SLUG, locale));
     fs.writeFileSync(
       scoreOutFile,
       renderScoreEditorPage(scoreEditorTemplate, strings, locale),
@@ -2443,7 +2491,7 @@ LOCALES.forEach(function (locale) {
   }
 
   if (PARTITURA_ENABLED) {
-    const partOutFile = path.join(DIST_SITE, pageFile(PARTITURA_SLUG, "en"));
+    const partOutFile = path.join(DIST_SITE, pageFile(PARTITURA_SLUG, locale));
     fs.writeFileSync(
       partOutFile,
       renderPartituraPage(partituraTemplate, strings, locale),
@@ -2459,7 +2507,7 @@ LOCALES.forEach(function (locale) {
       locale,
       page,
     );
-    const pickingOutFile = path.join(DIST_SITE, pageFile(page.slug, "en"));
+    const pickingOutFile = path.join(DIST_SITE, pageFile(page.slug, locale));
     fs.writeFileSync(pickingOutFile, pickingHtml, "utf8");
     say(path.relative(ROOT, pickingOutFile));
   });
@@ -2486,10 +2534,10 @@ const SITE_MENU_SCRIPT =
   "document.addEventListener('keydown',function(e){if(e.key==='Escape')c()});" +
   "})()</script>";
 
-function siteMenu(strings, locale) {
+function siteMenu(strings, locale, file) {
   const link = function (href, label, beta = false, desktopOnly = false) {
     const externalLabel =
-      label + " — " + (locale === "en" ? "Open in a new tab" : "Abrir en otra pestaña");
+      label + " — " + ({ es: "Abrir en otra pestaña", en: "Open in a new tab", pt: "Abrir em outra aba" }[locale]);
     return '<div class="site-menu-row' + (desktopOnly ? ' desktop-only' : '') + '"><a href="' + href + '">' + escapeHtml(label) +
       (beta ? ' <span class="beta-badge">Beta</span>' : '') +
       '</a><a class="site-menu-external" href="' + href +
@@ -2506,7 +2554,8 @@ function siteMenu(strings, locale) {
   if (PARTITURA_ENABLED)
     items.push(link(pagePath(PARTITURA_SLUG, locale), strings.menuAddTabs, true));
   items.push(link(pagePath("circulo-de-quintas", locale), strings.menuFifths));
-  items.push(link(pagePath(ARTICLE_ARPEGGIOS_SLUG, locale), strings.artArpeggiosH1));
+  if (isTranslated(ARTICLE_ARPEGGIOS_SLUG, locale))
+    items.push(link(pagePath(ARTICLE_ARPEGGIOS_SLUG, locale), strings.artArpeggiosH1));
   const articles = [
     [ARTICLE_CARCASSI_SLUG, strings.artCarcH1],
     [ARTICLE_PRELUDES_SLUG, strings.artPreludesH1],
@@ -2521,6 +2570,14 @@ function siteMenu(strings, locale) {
     [ARTICLE_GIULIANI_SLUG, strings.artGiulianiH1],
     [ARTICLE_GIULIANI_ARPEGIOS_SLUG, strings.artGiulianiArpegiosH1],
   ];
+  const articleLinks = articles
+    .filter(function (a) {
+      return isTranslated(a[0], locale);
+    })
+    .map(function (a) {
+      return link(pagePath(a[0], locale), a[1]);
+    })
+    .join("");
   return (
     '<details class="site-menu"><summary aria-label="' +
     escapeHtml(strings.menuButtonLabel) +
@@ -2532,15 +2589,15 @@ function siteMenu(strings, locale) {
     escapeHtml(strings.menuResources) +
     "</p>" +
     items.join("") +
-    '</div><div class="site-menu-col"><p class="site-menu-heading">' +
-    escapeHtml(strings.menuArticles) +
-    "</p>" +
-    articles
-      .map(function (a) {
-        return link(pagePath(a[0], locale), a[1]);
-      })
-      .join("") +
-    '</div><div class="site-menu-wide"><p class="site-menu-heading">' +
+    "</div>" +
+    (articleLinks
+      ? '<div class="site-menu-col"><p class="site-menu-heading">' +
+        escapeHtml(strings.menuArticles) +
+        "</p>" +
+        articleLinks +
+        "</div>"
+      : "") +
+    '<div class="site-menu-wide"><p class="site-menu-heading">' +
     escapeHtml(strings.menuExtensions) +
     "</p>" +
     '<a class="site-menu-ext" href="' + escapeHtml(tabsExtensionStoreUrl()) +
@@ -2553,9 +2610,19 @@ function siteMenu(strings, locale) {
     escapeHtml(strings.menuChordFinder) +
     "</strong><small>" +
     escapeHtml(strings.extensionDescription) +
-    '</small></span><img src="/assets/guitar-player-cubist-left-head.svg" alt="" width="48" height="48"></a></div></nav></details>' +
+    '</small></span><img src="/assets/guitar-player-cubist-left-head.svg" alt="" width="48" height="48"></a></div>' +
+    "</nav></details>" +
     SITE_MENU_SCRIPT
   );
+}
+
+// Idioma de un archivo construido, por su ruta relativa a dist/site.
+function localeOfFile(rel) {
+  const found = LOCALE_CODES.find(function (code) {
+    const prefix = localeConfig(code).prefix;
+    return prefix && (rel === prefix + ".html" || rel.indexOf(prefix + "/") === 0);
+  });
+  return found || "es";
 }
 
 console.log("==> Adding the hamburger menu to every page...");
@@ -2576,12 +2643,12 @@ console.log("==> Adding the hamburger menu to every page...");
       }
       if (!entry.name.endsWith(".html")) return;
       const rel = path.relative(DIST_SITE, full).split(path.sep).join("/");
-      const locale = rel === "en.html" || rel.indexOf("en/") === 0 ? "en" : "es";
+      const locale = localeOfFile(rel);
       const html = fs.readFileSync(full, "utf8");
       if (html.indexOf("<!--SITE_MENU-->") === -1) return;
       fs.writeFileSync(
         full,
-        html.split("<!--SITE_MENU-->").join(siteMenu(menuStrings[locale], locale)),
+        html.split("<!--SITE_MENU-->").join(siteMenu(menuStrings[locale], locale, rel)),
         "utf8",
       );
     });
@@ -2592,6 +2659,21 @@ console.log("==> Adding the hamburger menu to every page...");
 // ---- Privacy policy link at the bottom of every page -------------------------
 // Runs on the built HTML so every page, including pages without a footer,
 // links to the policy in its own language.
+
+function withPrivacyLink(html, locale) {
+  const label = {
+    es: "Política de privacidad",
+    en: "Privacy policy",
+    pt: "Política de privacidade",
+  }[locale];
+  const href = pagePath(PRIVACY_SLUG, locale);
+  if (html.indexOf('class="privacy-link"') !== -1) return html;
+  const link =
+    '<p class="privacy-link"><a href="' + href + '">' + label + "</a></p>";
+  const bodyEnd = html.lastIndexOf("</body>");
+  if (bodyEnd === -1) return html;
+  return html.slice(0, bodyEnd) + link + "\n  " + html.slice(bodyEnd);
+}
 
 console.log("==> Linking the privacy policy at the bottom of every page...");
 function addPrivacyLinks(dir) {
@@ -2604,20 +2686,43 @@ function addPrivacyLinks(dir) {
     }
     if (!entry.name.endsWith(".html")) return;
     const rel = path.relative(DIST_SITE, full).split(path.sep).join("/");
-    const isEn = rel === "en.html" || rel.indexOf("en/") === 0;
-    const label = isEn ? "Privacy policy" : "Política de privacidad";
-    const href = pagePath(PRIVACY_SLUG, isEn ? "en" : "es");
-    let html = fs.readFileSync(full, "utf8");
-    if (html.indexOf('class="privacy-link"') !== -1) return;
-    const link =
-      '<p class="privacy-link"><a href="' + href + '">' + label + "</a></p>";
-    const bodyEnd = html.lastIndexOf("</body>");
-    if (bodyEnd === -1) return;
-    html = html.slice(0, bodyEnd) + link + "\n  " + html.slice(bodyEnd);
-    fs.writeFileSync(full, html, "utf8");
+    const locale = localeOfFile(rel);
+    const html = fs.readFileSync(full, "utf8");
+    const linked = withPrivacyLink(html, locale);
+    if (linked !== html) fs.writeFileSync(full, linked, "utf8");
   });
 }
 addPrivacyLinks(DIST_SITE);
+
+// ---- Portuguese 404 --------------------------------------------------------
+// GitHub Pages serves one 404.html for every missing URL, so the Spanish page
+// carries the Portuguese one and swaps to it, before first paint, when the
+// requested path is under /pt/. Crawlers never index either (noindex).
+
+console.log("==> Embedding the Portuguese 404 page...");
+{
+  const ptStrings = JSON.parse(
+    fs.readFileSync(path.join(SRC_I18N, "strings.pt.json"), "utf8"),
+  );
+  let ptHtml = render404Page(notFoundTemplate, ptStrings, "pt");
+  ptHtml = ptHtml
+    .split("<!--SITE_MENU-->")
+    .join(siteMenu(ptStrings, "pt", "404.html"));
+  ptHtml = withPrivacyLink(ptHtml, "pt");
+  const swap =
+    "<script>if(/^\\/pt(\\/|$)/.test(location.pathname)){" +
+    // document.open() is ignored while the parser is still running, so the swap
+    // waits for DOMContentLoaded; meanwhile the Spanish page stays hidden.
+    "document.documentElement.style.visibility='hidden';" +
+    "document.addEventListener('DOMContentLoaded',function(){document.open();document.write(" +
+    JSON.stringify(ptHtml).replace(/<\//g, "<\\/").replace(/<!--/g, "<\\!--") +
+    ");document.close()})}</script>\n    ";
+  const file = path.join(DIST_SITE, "404.html");
+  const esHtml = fs.readFileSync(file, "utf8");
+  const headEnd = esHtml.indexOf('<meta name="robots"');
+  if (headEnd === -1) fail("404.html: robots meta not found");
+  fs.writeFileSync(file, esHtml.slice(0, headEnd) + swap + esHtml.slice(headEnd), "utf8");
+}
 
 // ---- Redirects for the old English URLs (Spanish slugs under /en/) ---------
 // GitHub Pages has no server redirects: minimal HTML with canonical, meta
@@ -2653,37 +2758,55 @@ console.log("==> Writing sitemap.xml...");
 const today = new Date().toISOString().slice(0, 10);
 
 // Each entry: URL path, the built file whose content defines "modified", and
-// (for bilingual pages) the es/en alternates. lastmod comes from the
+// (for translated pages) the alternates per locale. lastmod comes from the
 // build-generated content-hash manifest.
 const sitemapEntries = [];
-function addBilingual(esPath, esFile, enPath, enFile, priorities) {
-  sitemapEntries.push({
-    loc: esPath,
-    file: esFile,
-    changefreq: "monthly",
-    priority: priorities[0],
-    es: esPath,
-    en: enPath,
+// pages: [{ locale, loc, file, priority }] one per published language.
+function addTranslated(pages) {
+  const alternates = pages.map(function (page) {
+    return { hreflang: localeConfig(page.locale).hreflang, loc: page.loc };
   });
-  sitemapEntries.push({
-    loc: enPath,
-    file: enFile,
-    changefreq: "monthly",
-    priority: priorities[1],
-    es: esPath,
-    en: enPath,
+  pages.forEach(function (page) {
+    sitemapEntries.push({
+      loc: page.loc,
+      file: page.file,
+      changefreq: "monthly",
+      priority: page.priority,
+      alternates: alternates,
+    });
   });
 }
-addBilingual("/", "index.html", "/en", "en.html", ["1.0", "0.9"]);
+// Priority of the first language, then a lower one for the rest.
+function priorityFor(locale, priorities) {
+  return locale === "es" ? priorities[0] : priorities[1];
+}
+function addHome() {
+  addTranslated(
+    LOCALES.map(function (locale) {
+      return {
+        locale: locale,
+        loc: locale === "es" ? "/" : homeHref(locale),
+        file: locale === "es" ? "index.html" : localeConfig(locale).prefix + ".html",
+        priority: priorityFor(locale, ["1.0", "0.9"]),
+      };
+    }),
+  );
+}
+addHome();
 // Pages are keyed by their registered slug (scripts/lib/slugs.js).
 function addSlugPages(slugs, priorities) {
   slugs.forEach(function (slug) {
-    addBilingual(
-      pagePath(slug, "es"),
-      pageFile(slug, "es"),
-      pagePath(slug, "en"),
-      pageFile(slug, "en"),
-      priorities || ["0.5", "0.4"],
+    addTranslated(
+      LOCALES.filter(function (locale) {
+        return isTranslated(slug, locale);
+      }).map(function (locale) {
+        return {
+          locale: locale,
+          loc: pagePath(slug, locale),
+          file: pageFile(slug, locale),
+          priority: priorityFor(locale, priorities || ["0.5", "0.4"]),
+        };
+      }),
     );
   });
 }
@@ -2740,18 +2863,16 @@ const sitemapXml = [
       "    <lastmod>" + resolvedLastmods.lastmods[entry.loc] + "</lastmod>",
       "    <changefreq>" + entry.changefreq + "</changefreq>",
       "    <priority>" + entry.priority + "</priority>",
-      ...(entry.es
-        ? [
-            '    <xhtml:link rel="alternate" hreflang="es" href="' +
-              SITE_BASE_URL +
-              entry.es +
-              '"/>',
-            '    <xhtml:link rel="alternate" hreflang="en" href="' +
-              SITE_BASE_URL +
-              entry.en +
-              '"/>',
-          ]
-        : []),
+      ...(entry.alternates || []).map(function (alt) {
+        return (
+          '    <xhtml:link rel="alternate" hreflang="' +
+          alt.hreflang +
+          '" href="' +
+          SITE_BASE_URL +
+          alt.loc +
+          '"/>'
+        );
+      }),
       "  </url>",
     ];
   }),

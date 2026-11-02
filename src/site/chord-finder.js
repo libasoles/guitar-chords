@@ -567,18 +567,18 @@
   ChordFinder.prototype._searchPlaceholder = function () {
     var self = this;
     var examples = SEARCH_EXAMPLE_CHORDS.map(function (chord) {
-      return self._notation === 'es' && window.NoteNames ? window.NoteNames.toSpanishName(chord) : chord;
+      return self._notation === 'es' && window.NoteNames ? window.NoteNames.toSolfegeName(chord, document.documentElement.lang) : chord;
     });
     return examples.join(', ') + '…';
   };
 
   ChordFinder.prototype._displayName = function (chord) {
-    if (this._notation === 'es' && window.NoteNames) return window.NoteNames.toSpanishName(chord.name);
+    if (this._notation === 'es' && window.NoteNames) return window.NoteNames.toSolfegeName(chord.name, document.documentElement.lang);
     return chord.name;
   };
 
   ChordFinder.prototype._displayNotes = function (chord) {
-    if (this._notation === 'es' && window.NoteNames) return window.NoteNames.toSpanishNotes(chord.notes || '');
+    if (this._notation === 'es' && window.NoteNames) return window.NoteNames.toSolfegeNotes(chord.notes || '', document.documentElement.lang);
     return chord.notes || '';
   };
 
@@ -636,7 +636,7 @@
     var spanishOption = document.createElement('button');
     spanishOption.type = 'button';
     spanishOption.className = 'notation-option';
-    spanishOption.textContent = 'Do';
+    spanishOption.textContent = /^pt/i.test(document.documentElement.lang) ? 'Dó' : 'Do';
     spanishOption.title = t('cfNotationSpanish', 'Notación en español (Do Re Mi)');
     spanishOption.setAttribute('aria-label', spanishOption.title);
 

@@ -66,7 +66,7 @@ function ldOf(file) {
   return {
     graph: JSON.parse(blocks[0][1])['@graph'],
     canonical: html.match(/rel="canonical" href="([^"]+)"/)[1],
-    lang: html.match(/<html lang="(\w+)"/)[1],
+    lang: html.match(/<html lang="([\w-]+)"/)[1],
   };
 }
 
@@ -103,7 +103,7 @@ test('las vistas previas usan la imagen de cada pagina y reservan la extension p
     const html = fs.readFileSync(path.join(DIST, file), 'utf8');
     const og = html.match(/property="og:image" content="([^"]+)"/);
     if (!og) continue;
-    const home = ['index.html', 'en.html', 'en/index.html'].includes(file);
+    const home = ['index.html', 'en.html', 'en/index.html', 'pt.html', 'pt/index.html'].includes(file);
     assert.equal(og[1].endsWith('/assets/og-image.png'), home, file);
   }
 });
@@ -111,7 +111,8 @@ test('las vistas previas usan la imagen de cada pagina y reservan la extension p
 test('home y guias generadas emiten JSON-LD con canonica e idioma de la pagina', () => {
   const files = ['index.html', 'en.html', 'v7.html', 'en/v7-minor.html', 'acordes-mayores-y-sus-notas.html',
     'acordes-disminuidos.html', 'en/diminished-chords.html', 'punteo-terceras-sextas-decimas.html',
-    'en/picking-thirds-sixths-tenths.html'];
+    'en/picking-thirds-sixths-tenths.html', 'pt.html', 'pt/v7-menor.html', 'pt/acordes-diminutos.html',
+    'pt/dedilhado-terceiras-sextas-decimas.html'];
   files.forEach((file) => {
     const { graph, canonical, lang } = ldOf(file);
     const typed = graph.filter((n) => n.url);
@@ -119,7 +120,7 @@ test('home y guias generadas emiten JSON-LD con canonica e idioma de la pagina',
     typed.forEach((n) => assert.equal(n.url, canonical, file));
     graph.filter((n) => n.inLanguage).forEach((n) => assert.equal(n.inLanguage, lang, file));
     const kinds = graph.map((n) => n['@type']);
-    assert.ok(kinds.includes(file === 'index.html' || file === 'en.html' ? 'WebApplication' : 'Article'), file);
+    assert.ok(kinds.includes(['index.html', 'en.html', 'pt.html'].includes(file) ? 'WebApplication' : 'Article'), file);
   });
 });
 

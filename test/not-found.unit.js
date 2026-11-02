@@ -21,3 +21,10 @@ for (const pathname of ['/canciones', '/canciones/', '/en/missing/page/']) {
     assert.match(html, /name="robots" content="noindex"/);
   });
 }
+
+test('404: lleva incrustado el 404 en portugues para rutas /pt/ y sigue noindex', () => {
+  assert.match(html, /location\.pathname/);
+  assert.match(html, /Página não encontrada/);
+  assert.match(html, /<html lang=\\"pt-BR\\">/);
+  assert.match(html, /name="robots" content="noindex"/);
+});

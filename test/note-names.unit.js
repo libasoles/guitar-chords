@@ -3,7 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { toSpanishName, toSpanishNotes } = require('../src/shared/note-names.js');
+const { toSpanishName, toSpanishNotes, toPortugueseName, toPortugueseNotes, toSolfegeName, toSolfegeNotes } = require('../src/shared/note-names.js');
 
 test('toSpanishName: raíces simples', () => {
   assert.equal(toSpanishName('C'), 'Do');
@@ -44,4 +44,21 @@ test('toSpanishName: null/undefined/vacío → ""', () => {
 test('toSpanishNotes: lista de notas separadas por espacio', () => {
   assert.equal(toSpanishNotes('C E G'), 'Do Mi Sol');
   assert.equal(toSpanishNotes('D A D F♯'), 'Re La Re Fa♯');
+});
+
+test('portugués: solfejo con tilde, alteraciones, calidad y bajo', () => {
+  assert.equal(toPortugueseName('C'), 'Dó');
+  assert.equal(toPortugueseName('D'), 'Ré');
+  assert.equal(toPortugueseName('F♯m7'), 'Fá♯m7');
+  assert.equal(toPortugueseName('Bb'), 'Si♭');
+  assert.equal(toPortugueseName('A/C♯'), 'Lá/Dó♯');
+  assert.equal(toPortugueseNotes('C E G'), 'Dó Mi Sol');
+  assert.equal(toPortugueseName(null), '');
+});
+
+test('toSolfegeName elige según el idioma de la página', () => {
+  assert.equal(toSolfegeName('C', 'pt-BR'), 'Dó');
+  assert.equal(toSolfegeName('C', 'es'), 'Do');
+  assert.equal(toSolfegeNotes('D F♯ A', 'pt-BR'), 'Ré Fá♯ Lá');
+  assert.equal(toSolfegeNotes('D F♯ A', 'es'), 'Re Fa♯ La');
 });
