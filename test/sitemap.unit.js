@@ -5,6 +5,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { legacyEnglishRedirects } = require('../scripts/lib/slugs');
+const { publishedLocales, X_DEFAULT_LOCALE } = require('../scripts/lib/locales');
+
+const HREFLANGS = publishedLocales().map((l) => l.hreflang);
 
 const DIST = path.join(__dirname, '..', 'dist', 'site');
 const BASE = 'https://acordesdeguitarra.com.ar';
@@ -13,14 +16,15 @@ function fileForUrl(url) {
   assert.ok(url.startsWith(BASE), url);
   const p = url.slice(BASE.length);
   if (p === '/' || p === '') return 'index.html';
-  if (p === '/en') return 'en.html';
+  const home = publishedLocales().find((l) => l.prefix && p === '/' + l.prefix);
+  if (home) return home.prefix + '.html';
   return p.endsWith('.html') ? p.slice(1) : p.slice(1) + '.html';
 }
 
 const xml = fs.readFileSync(path.join(DIST, 'sitemap.xml'), 'utf8');
 const entries = [...xml.matchAll(/<url>(.*?)<\/url>/gs)].map((m) => ({
   loc: m[1].match(/<loc>(.*?)<\/loc>/)[1],
-  alternates: [...m[1].matchAll(/hreflang="(\w+)" href="([^"]+)"/g)].map((a) => [a[1], a[2]]),
+  alternates: [...m[1].matchAll(/hreflang="([\w-]+)" href="([^"]+)"/g)].map((a) => [a[1], a[2]]),
 }));
 
 test('cada loc del sitemap existe en dist', () => {
@@ -31,11 +35,14 @@ test('cada loc del sitemap existe en dist', () => {
 test('cada hreflang apunta a una pagina existente que se apunta de vuelta', () => {
   const html = (url) => fs.readFileSync(path.join(DIST, fileForUrl(url)), 'utf8');
   entries.filter((e) => e.alternates.length).forEach((e) => {
-    assert.deepEqual(e.alternates.map((a) => a[0]), ['es', 'en'], e.loc);
+    assert.deepEqual(e.alternates.map((a) => a[0]), HREFLANGS, e.loc);
     e.alternates.forEach(([, href]) => {
       assert.ok(fs.existsSync(path.join(DIST, fileForUrl(href))), href);
-      const back = [...html(href).matchAll(/rel="alternate" hreflang="(\w+)" href="([^"]+)"/g)].map((a) => [a[1], a[2]]);
+      const back = [...html(href).matchAll(/rel="alternate" hreflang="([\w-]+)" href="([^"]+)"/g)].map((a) => [a[1], a[2]]);
+      const xDefault = back.pop();
       assert.deepEqual(back, e.alternates, 'hreflang de ' + href);
+      assert.equal(xDefault[0], 'x-default');
+      assert.equal(xDefault[1], e.alternates.find(([lang]) => lang === X_DEFAULT_LOCALE)[1], 'x-default de ' + href);
     });
   });
 });
