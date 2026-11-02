@@ -34,8 +34,11 @@ function publishedPieces() {
     .sort((a, b) => a.number - b.number);
 }
 
+const EXERCISE_LABEL = { es: 'Ejercicio ', en: 'Exercise ', pt: 'Exercício ' };
+
 function pieceName(piece, locale) {
-  return (locale === 'es' ? 'Ejercicio ' : 'Exercise ') + piece.number;
+  if (!EXERCISE_LABEL[locale]) throw new Error('Giuliani arpegios: falta la etiqueta ' + locale);
+  return EXERCISE_LABEL[locale] + piece.number;
 }
 
 function card(piece, locale, strings, sharedGlyphs, pieces) {
