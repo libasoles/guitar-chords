@@ -102,8 +102,11 @@ test('los enlaces internos de las paginas pt existen', () => {
 const SPANISH = /(?<![\w\u00C0-\u017F-])(los|las|una|con|del|para el|para la|también|cuando|donde|mejor|tu|tus|hacé|hacer|cuerda|cuerdas)(?![\w\u00C0-\u017F-])/i;
 const ENGLISH = /(?<![\w-])(the|and|with|your|you|from|this|that|are|click|chords?|strings?|frets?|open)(?![\w-])/i;
 
+/* Titulos de obras: nombres propios que se conservan en su idioma original. */
+const WORK_TITLES = ['Camino de las Tropas'];
+
 function visibleText(html) {
-  return html
+  return WORK_TITLES.reduce((text, title) => text.split(title).join(' '), html)
     .replace(/<script[\s\S]*?<\/script>/g, ' ')
     .replace(/<style[\s\S]*?<\/style>/g, ' ')
     .replace(/<svg[\s\S]*?<\/svg>/g, ' ')
