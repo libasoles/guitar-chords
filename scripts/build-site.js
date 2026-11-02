@@ -1855,7 +1855,7 @@ function renderPickingPage(template, strings, locale, page) {
 // Render the site-wide 404 page (src/site/404.html) for GitHub Pages. A
 // single Spanish page at the root — GitHub Pages only serves one 404.html
 // at the domain root, so there's no per-locale variant.
-function render404Page(template, strings) {
+function render404Page(template, strings, locale = "es") {
   // Pages serves this document at the missing URL, potentially nested.
   const resolvedAssetsPrefix = "/assets/";
   const ogImage = socialImage();
@@ -1883,19 +1883,23 @@ function render404Page(template, strings) {
   html = html.split("%%PAGE_LEAD%%").join(strings.notFoundLead || "");
   html = html
     .split("%%NOTE_FINDER_PROMO%%")
-    .join(noteFinderPromo(strings, "es"));
+    .join(noteFinderPromo(strings, locale));
 
+  html = html.replace(
+    '<html lang="es">',
+    '<html lang="' + localeConfig(locale).htmlLang + '">',
+  );
   html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
-  html = html.split("%%homeHref%%").join(homeHref("es"));
-  html = html.split("%%V7_PAGE_HREF%%").join(v7PageHref("es"));
+  html = html.split("%%homeHref%%").join(homeHref(locale));
+  html = html.split("%%V7_PAGE_HREF%%").join(v7PageHref(locale));
   html = html
     .split("%%PICKING_PAGE_HREF%%")
-    .join(v7PageHref("es", INTERVALS_PAGE.slug));
+    .join(v7PageHref(locale, INTERVALS_PAGE.slug));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html.split("%%EXTENSION_CTA_BUTTON%%").join(ctaButton(strings));
   html = html
     .split("%%MANIFEST_HREF%%")
-    .join(resolvedAssetsPrefix + "manifest.es.webmanifest");
+    .join(resolvedAssetsPrefix + "manifest." + locale + ".webmanifest");
   html = html.split("%%SW_PATH%%").join("/sw.js");
 
   return html;
@@ -2648,6 +2652,21 @@ console.log("==> Adding the hamburger menu to every page...");
 // Runs on the built HTML so every page, including pages without a footer,
 // links to the policy in its own language.
 
+function withPrivacyLink(html, locale) {
+  const label = {
+    es: "Política de privacidad",
+    en: "Privacy policy",
+    pt: "Política de privacidade",
+  }[locale];
+  const href = pagePath(PRIVACY_SLUG, locale);
+  if (html.indexOf('class="privacy-link"') !== -1) return html;
+  const link =
+    '<p class="privacy-link"><a href="' + href + '">' + label + "</a></p>";
+  const bodyEnd = html.lastIndexOf("</body>");
+  if (bodyEnd === -1) return html;
+  return html.slice(0, bodyEnd) + link + "\n  " + html.slice(bodyEnd);
+}
+
 console.log("==> Linking the privacy policy at the bottom of every page...");
 function addPrivacyLinks(dir) {
   fs.readdirSync(dir, { withFileTypes: true }).forEach(function (entry) {
@@ -2660,23 +2679,42 @@ function addPrivacyLinks(dir) {
     if (!entry.name.endsWith(".html")) return;
     const rel = path.relative(DIST_SITE, full).split(path.sep).join("/");
     const locale = localeOfFile(rel);
-    const label = {
-      es: "Política de privacidad",
-      en: "Privacy policy",
-      pt: "Política de privacidade",
-    }[locale];
-    const href = pagePath(PRIVACY_SLUG, locale);
-    let html = fs.readFileSync(full, "utf8");
-    if (html.indexOf('class="privacy-link"') !== -1) return;
-    const link =
-      '<p class="privacy-link"><a href="' + href + '">' + label + "</a></p>";
-    const bodyEnd = html.lastIndexOf("</body>");
-    if (bodyEnd === -1) return;
-    html = html.slice(0, bodyEnd) + link + "\n  " + html.slice(bodyEnd);
-    fs.writeFileSync(full, html, "utf8");
+    const html = fs.readFileSync(full, "utf8");
+    const linked = withPrivacyLink(html, locale);
+    if (linked !== html) fs.writeFileSync(full, linked, "utf8");
   });
 }
 addPrivacyLinks(DIST_SITE);
+
+// ---- Portuguese 404 --------------------------------------------------------
+// GitHub Pages serves one 404.html for every missing URL, so the Spanish page
+// carries the Portuguese one and swaps to it, before first paint, when the
+// requested path is under /pt/. Crawlers never index either (noindex).
+
+console.log("==> Embedding the Portuguese 404 page...");
+{
+  const ptStrings = JSON.parse(
+    fs.readFileSync(path.join(SRC_I18N, "strings.pt.json"), "utf8"),
+  );
+  let ptHtml = render404Page(notFoundTemplate, ptStrings, "pt");
+  ptHtml = ptHtml
+    .split("<!--SITE_MENU-->")
+    .join(siteMenu(ptStrings, "pt"));
+  ptHtml = withPrivacyLink(ptHtml, "pt");
+  const swap =
+    "<script>if(/^\\/pt(\\/|$)/.test(location.pathname)){" +
+    // document.open() is ignored while the parser is still running, so the swap
+    // waits for DOMContentLoaded; meanwhile the Spanish page stays hidden.
+    "document.documentElement.style.visibility='hidden';" +
+    "document.addEventListener('DOMContentLoaded',function(){document.open();document.write(" +
+    JSON.stringify(ptHtml).replace(/<\//g, "<\\/").replace(/<!--/g, "<\\!--") +
+    ");document.close()})}</script>\n    ";
+  const file = path.join(DIST_SITE, "404.html");
+  const esHtml = fs.readFileSync(file, "utf8");
+  const headEnd = esHtml.indexOf('<meta name="robots"');
+  if (headEnd === -1) fail("404.html: robots meta not found");
+  fs.writeFileSync(file, esHtml.slice(0, headEnd) + swap + esHtml.slice(headEnd), "utf8");
+}
 
 // ---- Redirects for the old English URLs (Spanish slugs under /en/) ---------
 // GitHub Pages has no server redirects: minimal HTML with canonical, meta

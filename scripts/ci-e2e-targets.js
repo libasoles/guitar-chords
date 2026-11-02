@@ -63,6 +63,10 @@ const SUITES = {
       /^test\/tab-editor\./,
     ],
   },
+  'not-found': {
+    build: 'site',
+    paths: [/^src\/site\/404\.html$/, /^src\/i18n\/strings\./, /^test\/not-found\.e2e\./],
+  },
   'picking-intervals': {
     build: 'site',
     paths: [/^src\/site\/picking-/, /^test\/picking-intervals\./],
