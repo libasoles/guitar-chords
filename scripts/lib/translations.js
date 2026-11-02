@@ -24,7 +24,7 @@ const COLLECTIONS = {
 const TRANSLATED_COLLECTIONS = {
   pt: [
     'indice',
-    // 'carcassi',
+    'carcassi',
     'sor',
     'aguado',
     'sagreras',

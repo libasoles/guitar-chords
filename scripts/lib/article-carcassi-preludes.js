@@ -34,6 +34,7 @@ function createEdition(edition) {
 
   const KEYS = {
     es: { C: 'Do', D: 'Re', E: 'Mi', F: 'Fa', G: 'Sol', A: 'La', B: 'Si', Major: 'mayor', Minor: 'menor' },
+    pt: { C: 'Dó', D: 'Ré', E: 'Mi', F: 'Fá', G: 'Sol', A: 'Lá', B: 'Si', Major: 'maior', Minor: 'menor' },
   };
 
   /* [{number, base, key, pdf, preview}] de los preludios con PDF, MusicXML y vista previa. */
@@ -57,7 +58,8 @@ function createEdition(edition) {
   function keyName(prelude, locale) {
     const accidental = prelude.tonic.slice(1) === '#' ? '#' : prelude.tonic.slice(1) === 'b' ? 'b' : '';
     if (locale === 'en') return prelude.tonic + ' ' + (prelude.mode === 'Major' ? 'major' : 'minor');
-    const k = KEYS.es;
+    const k = KEYS[locale];
+    if (!k) throw new Error('article-carcassi-preludes: idioma sin nombres de tonalidad: ' + locale);
     return k[prelude.tonic[0]] + accidental + ' ' + k[prelude.mode];
   }
 
@@ -84,7 +86,14 @@ function createEdition(edition) {
     'stroke-linejoin="round" aria-hidden="true"><path d="m19 6-5.2-3.9a.5.5 0 0 0-.8.4V18"/><circle cx="9" cy="18" r="4"/></svg>';
 
   function preludeName(prelude, locale) {
-    return (locale === 'es' ? (waltzes ? 'Vals ' : 'Preludio ') : PIECE + ' ') + prelude.number + (locale === 'es' ? ' en ' : ' in ') + keyName(prelude, locale);
+    const word = {
+      es: waltzes ? 'Vals' : 'Preludio',
+      en: PIECE,
+      pt: waltzes ? 'Valsa' : 'Prelúdio',
+    }[locale];
+    const preposition = { es: 'en', en: 'in', pt: 'em' }[locale];
+    if (!word) throw new Error('article-carcassi-preludes: idioma sin nombres de pieza: ' + locale);
+    return word + ' ' + prelude.number + ' ' + preposition + ' ' + keyName(prelude, locale);
   }
 
   function card(prelude, locale, strings, sharedGlyphs, all) {

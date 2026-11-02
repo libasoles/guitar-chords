@@ -11,6 +11,8 @@ const path = require('path');
 const { fullForm, chordObject, chordCard, CHORD_CARD_LOADER } = require('./chord-forms');
 const { PREVIEW_DIR } = require('./article-carcassi-preludes');
 const { normalizeScoreDirections } = require('./score-svg');
+const { pagePath } = require('./slugs');
+const { isTranslated } = require('./translations');
 
 const ARTICLE_DIR = path.join(__dirname, '..', '..', 'src', 'site', 'articles', 'carcassi');
 const ASSETS_URL = '/assets/articles/carcassi/';
@@ -164,9 +166,19 @@ function sequenceComparison(names, strings, locale) {
 const TAB_LOADER = '<script type="module" src="/assets/vendor/ascii-tabs.js"></script>' +
   '<script>customElements.whenDefined("ascii-tabs").then(function(){document.querySelectorAll("ascii-tabs[data-value]").forEach(function(el){el.setDocument({value:JSON.parse(el.dataset.value),annotations:el.dataset.annotations?JSON.parse(el.dataset.annotations):null});});});</script>';
 
+/* Parrafo opcional hacia las tablaturas de arpegios, entre <!--ARPEGGIOS-->...<!--/ARPEGGIOS-->: se publica solo si esa
+   pagina existe en el idioma (las colecciones pt se traducen de a una); si no, el bloque se descarta. */
+function arpeggiosLink(prose, locale) {
+  return prose.replace(/<!--ARPEGGIOS-->([\s\S]*?)<!--\/ARPEGGIOS-->\n?/g, function (_, block) {
+    return isTranslated('articulo-tablaturas-arpegios', locale)
+      ? block.split('%%ARPEGGIOS_HREF%%').join(pagePath('articulo-tablaturas-arpegios', locale))
+      : '';
+  });
+}
+
 /* Cuerpo del articulo para un idioma: la prosa vive en body.<locale>.html. */
 function renderBody(locale, strings) {
-  const prose = fs.readFileSync(path.join(ARTICLE_DIR, 'body.' + locale + '.html'), 'utf8');
+  const prose = arpeggiosLink(fs.readFileSync(path.join(ARTICLE_DIR, 'body.' + locale + '.html'), 'utf8'), locale);
   return prose
     .split('%%EXAMPLE_ALLEGRETTO%%').join(exampleCard('allegretto-compases-1-4', strings.artAllegrettoAlt, strings))
     .split('%%FORMS_ALLEGRETTO%%').join(comparisons(ALLEGRETTO_CHORDS, strings, locale))
