@@ -35,7 +35,9 @@ function publishedPieces() {
 }
 
 function pieceName(piece, locale) {
-  return (locale === 'es' ? 'Lección ' : 'Lesson ') + piece.number;
+  const label = { es: 'Lección ', en: 'Lesson ', pt: 'Lição ' }[locale];
+  if (!label) throw new Error('article-sagreras: sin etiqueta de leccion para ' + locale);
+  return label + piece.number;
 }
 
 function card(piece, locale, strings, sharedGlyphs, pieces) {
