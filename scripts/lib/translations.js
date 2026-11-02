@@ -21,7 +21,18 @@ const COLLECTIONS = {
 };
 
 /* Colecciones con cuerpo pt publicado. Se agregan de a una (tickets 6a-6h). */
-const TRANSLATED_COLLECTIONS = { pt: [] };
+const TRANSLATED_COLLECTIONS = {
+  pt: [
+    // 'indice',
+    // 'carcassi',
+    // 'sor',
+    // 'aguado',
+    // 'sagreras',
+    // 'giuliani',
+    // 'barrios',
+    // 'arpegios',
+  ],
+};
 
 const ARTICLE_KEYS = new Set(Object.values(COLLECTIONS).flat());
 

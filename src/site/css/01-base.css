@@ -331,3 +331,34 @@ a:hover {
   /* Pages can set --tooltip-delay; it only applies when showing, hiding is immediate. */
   transition-delay: var(--tooltip-delay, 0s);
 }
+
+/* ----- First-visit language suggestion ----- */
+.lang-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  padding: 0.6rem 1.1rem;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.95rem;
+}
+.lang-banner p {
+  margin: 0;
+}
+.lang-banner-accept {
+  font-weight: 600;
+}
+.lang-banner-dismiss {
+  margin-left: auto;
+  padding: 0 0.4rem;
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.lang-banner-dismiss:hover {
+  color: var(--accent);
+}
