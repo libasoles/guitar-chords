@@ -61,6 +61,7 @@ const { renderArticleLinks } = require("./lib/article-link");
 const {
   pagePath,
   pageFile,
+  keyForFile,
   legacyEnglishRedirects,
   lastmodRenames,
   redirectHtml,
@@ -2527,7 +2528,33 @@ const SITE_MENU_SCRIPT =
   "document.addEventListener('keydown',function(e){if(e.key==='Escape')c()});" +
   "})()</script>";
 
-function siteMenu(strings, locale) {
+// Language selector: the same page in every language (home when the page has
+// no registered equivalent, e.g. an article not translated yet or the 404).
+function languageSelector(strings, locale, file) {
+  const key = file ? keyForFile(file, locale) : null;
+  return (
+    '<div class="site-menu-wide site-menu-languages"><p class="site-menu-heading">' +
+    escapeHtml(strings.menuLanguage) +
+    '</p><div class="site-menu-language-links">' +
+    publishedLocales()
+      .map(function (target) {
+        const href =
+          key && isTranslated(key, target.code)
+            ? pagePath(key, target.code)
+            : homeHref(target.code);
+        const current = target.code === locale;
+        return (
+          '<a href="' + href + '" lang="' + target.htmlLang + '" hreflang="' +
+          target.hreflang + '"' + (current ? ' aria-current="true"' : "") + ">" +
+          escapeHtml(target.label) + "</a>"
+        );
+      })
+      .join("") +
+    "</div></div>"
+  );
+}
+
+function siteMenu(strings, locale, file) {
   const link = function (href, label, beta = false, desktopOnly = false) {
     const externalLabel =
       label + " — " + ({ es: "Abrir en otra pestaña", en: "Open in a new tab", pt: "Abrir em outra aba" }[locale]);
@@ -2603,7 +2630,9 @@ function siteMenu(strings, locale) {
     escapeHtml(strings.menuChordFinder) +
     "</strong><small>" +
     escapeHtml(strings.extensionDescription) +
-    '</small></span><img src="/assets/guitar-player-cubist-left-head.svg" alt="" width="48" height="48"></a></div></nav></details>' +
+    '</small></span><img src="/assets/guitar-player-cubist-left-head.svg" alt="" width="48" height="48"></a></div>' +
+    languageSelector(strings, locale, file) +
+    "</nav></details>" +
     SITE_MENU_SCRIPT
   );
 }
@@ -2640,7 +2669,7 @@ console.log("==> Adding the hamburger menu to every page...");
       if (html.indexOf("<!--SITE_MENU-->") === -1) return;
       fs.writeFileSync(
         full,
-        html.split("<!--SITE_MENU-->").join(siteMenu(menuStrings[locale], locale)),
+        html.split("<!--SITE_MENU-->").join(siteMenu(menuStrings[locale], locale, rel)),
         "utf8",
       );
     });
@@ -2699,7 +2728,7 @@ console.log("==> Embedding the Portuguese 404 page...");
   let ptHtml = render404Page(notFoundTemplate, ptStrings, "pt");
   ptHtml = ptHtml
     .split("<!--SITE_MENU-->")
-    .join(siteMenu(ptStrings, "pt"));
+    .join(siteMenu(ptStrings, "pt", "404.html"));
   ptHtml = withPrivacyLink(ptHtml, "pt");
   const swap =
     "<script>if(/^\\/pt(\\/|$)/.test(location.pathname)){" +

@@ -65,6 +65,12 @@ function pageFile(key, locale) {
   return (prefix ? prefix + '/' : '') + slugFor(key, locale) + '.html';
 }
 
+/* Clave del registro de la pagina construida en `file` (relativa a dist/site) del idioma
+   `locale`, o null (inicio, 404, paginas fuera del registro). */
+function keyForFile(file, locale) {
+  return Object.keys(SLUGS).find((key) => pageFile(key, locale) === file) || null;
+}
+
 function renamedKeys() {
   return Object.keys(SLUGS).filter((key) => !SLUGS[key].isNew && SLUGS[key].en !== SLUGS[key].es);
 }
@@ -91,4 +97,4 @@ function redirectHtml(baseUrl, to) {
     '</head><body><a href="' + to + '">' + url + '</a></body></html>\n';
 }
 
-module.exports = { SLUGS, assertComplete, slugFor, pagePath, pageFile, legacyEnglishRedirects, lastmodRenames, redirectHtml };
+module.exports = { SLUGS, assertComplete, keyForFile, slugFor, pagePath, pageFile, legacyEnglishRedirects, lastmodRenames, redirectHtml };

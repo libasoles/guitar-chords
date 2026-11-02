@@ -4,9 +4,9 @@
    sitemap, selector) sale de aqui. Agregar un idioma = agregar una entrada. */
 
 const LOCALES = [
-  { code: 'es', hreflang: 'es', htmlLang: 'es', ogLocale: 'es_AR', prefix: '' },
-  { code: 'en', hreflang: 'en', htmlLang: 'en', ogLocale: 'en_US', prefix: 'en' },
-  { code: 'pt', hreflang: 'pt-BR', htmlLang: 'pt-BR', ogLocale: 'pt_BR', prefix: 'pt' },
+  { code: 'es', hreflang: 'es', htmlLang: 'es', ogLocale: 'es_AR', prefix: '', label: 'Español' },
+  { code: 'en', hreflang: 'en', htmlLang: 'en', ogLocale: 'en_US', prefix: 'en', label: 'English' },
+  { code: 'pt', hreflang: 'pt-BR', htmlLang: 'pt-BR', ogLocale: 'pt_BR', prefix: 'pt', label: 'Português' },
 ];
 
 const LOCALE_CODES = LOCALES.map((l) => l.code);

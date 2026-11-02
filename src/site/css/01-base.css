@@ -197,6 +197,17 @@ body {
   letter-spacing: 0.08em;
   color: var(--ink-soft);
 }
+.site-menu-language-links {
+  display: flex;
+  flex-wrap: wrap;
+}
+.site-menu-panel .site-menu-language-links a {
+  padding: 0.45rem 1.1rem;
+}
+.site-menu-panel .site-menu-language-links a[aria-current] {
+  font-weight: 600;
+  color: var(--accent);
+}
 .site-menu-panel .site-menu-ext {
   display: flex;
   align-items: center;
