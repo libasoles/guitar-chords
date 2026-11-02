@@ -1149,7 +1149,7 @@
       tabs.setAttribute('labels', 'none');
       tabs.setAttribute('variant', 'flat');
       tabs.setAttribute('theme', 'light');
-      tabs.setAttribute('lang', document.documentElement.lang === 'en' ? 'en' : 'es');
+      tabs.setAttribute('lang', document.documentElement.lang);
       tabs.setAttribute('aria-label', t.tabLabel + ' ' + (row + 1));
       tabs.style.setProperty('--ascii-tabs-font-size', font + 'px');
       tabs.style.left = head.left + 'px';

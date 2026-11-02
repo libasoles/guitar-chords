@@ -12,10 +12,10 @@ test('el orden de idiomas es es, en, pt y x-default apunta al ingles', () => {
 
 test('hreflang: un enlace por idioma publicado, pt-BR para portugues, y x-default', () => {
   const url = (code) => 'https://x.test/' + code;
-  const all = hreflangLinks(url, ['es', 'en', 'pt']);
+  const all = hreflangLinks(url, publishedLocales(['es', 'en', 'pt']));
   assert.ok(all.includes('hreflang="pt-BR" href="https://x.test/pt"'));
   assert.ok(all.includes('hreflang="x-default" href="https://x.test/en"'));
-  const some = hreflangLinks(url, ['es', 'en']);
+  const some = hreflangLinks(url, publishedLocales(['es', 'en']));
   assert.ok(!some.includes('pt-BR'));
   assert.deepEqual(publishedLocales(['es', 'pt']).map((l) => l.hreflang), ['es', 'pt-BR']);
 });

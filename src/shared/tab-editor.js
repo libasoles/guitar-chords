@@ -168,7 +168,7 @@ try {
 }
 function updateDisplay() {
   editor.notation = noteNames.checked
-    ? (editor.lang === 'es' ? 'solfege' : 'letters')
+    ? (/^(es|pt)/i.test(editor.lang) ? 'solfege' : 'letters')
     : 'frets';
   editor.labels = letterLabels.checked ? 'notes' : 'numbers';
 }

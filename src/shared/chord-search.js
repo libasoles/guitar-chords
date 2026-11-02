@@ -87,6 +87,8 @@
       .replace(/ø/g, 'm7b5')
       .replace(/[°º˚]/g, 'dim')
       .toLowerCase()
+      // Tildes del solfejo portugués (Dó, Ré, Fá, Lá) y del español: se buscan sin ellas.
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/\s+/g, '');
     const prefix = notation === 'es' ? ES_NOTE_PREFIX_WITH_D : ES_NOTE_PREFIX;
     const map = notation === 'es' ? ES_TO_EN_NOTE_WITH_D : ES_TO_EN_NOTE;

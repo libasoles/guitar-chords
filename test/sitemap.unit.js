@@ -35,7 +35,9 @@ test('cada loc del sitemap existe en dist', () => {
 test('cada hreflang apunta a una pagina existente que se apunta de vuelta', () => {
   const html = (url) => fs.readFileSync(path.join(DIST, fileForUrl(url)), 'utf8');
   entries.filter((e) => e.alternates.length).forEach((e) => {
-    assert.deepEqual(e.alternates.map((a) => a[0]), HREFLANGS, e.loc);
+    const langs = e.alternates.map((a) => a[0]);
+    assert.deepEqual(langs, HREFLANGS.filter((l) => langs.includes(l)), e.loc); // en orden de la lista de idiomas
+    assert.ok(langs.includes('es') && langs.includes('en'), e.loc);
     e.alternates.forEach(([, href]) => {
       assert.ok(fs.existsSync(path.join(DIST, fileForUrl(href))), href);
       const back = [...html(href).matchAll(/rel="alternate" hreflang="([\w-]+)" href="([^"]+)"/g)].map((a) => [a[1], a[2]]);

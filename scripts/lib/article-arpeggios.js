@@ -735,7 +735,7 @@ document.querySelectorAll('.arpeggio-group').forEach(function(group) {
   var root = group.querySelector('.arpeggio-root');
   function updateView() {
     group.querySelectorAll('ascii-tabs').forEach(function(tab) {
-      tab.setAttribute('notation', root.getAttribute('aria-pressed') === 'true' ? (tab.lang === 'es' ? 'solfege' : 'letters') : 'frets');
+      tab.setAttribute('notation', root.getAttribute('aria-pressed') === 'true' ? (/^(es|pt)/i.test(tab.lang) ? 'solfege' : 'letters') : 'frets');
     });
     var diagrams = viewSwitch.getAttribute('aria-checked') === 'false';
     group.classList.toggle('is-diagrams', diagrams);

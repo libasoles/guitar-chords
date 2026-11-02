@@ -17,6 +17,7 @@
 */
 
 const fs = require("fs");
+const { localesFor, isTranslated } = require("./lib/translations");
 const {
   LOCALE_CODES,
   localeConfig,
@@ -531,7 +532,7 @@ function structuredDataOpts(locale, url, name, description, homeUrl) {
     baseUrl: SITE_BASE_URL,
     siteName: "Guitar Chords",
     ogImage: socialImage(url),
-    locale: locale,
+    locale: localeConfig(locale).htmlLang,
     url: url,
     homeUrl: homeUrl || SITE_BASE_URL + homeHref(locale),
     name: name,
@@ -758,7 +759,7 @@ function renderV7Page(template, strings, locale, page) {
   html = html.split("%%canonicalUrl%%").join(v7CanonicalUrl(locale, page.slug));
   html = html
     .split("%%hreflangLinks%%")
-    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, page.slug); }));
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, page.slug); }, localesFor(page.slug)));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html.split("%%EXTENSION_CTA_BUTTON%%").join(ctaButton(strings));
   html = html
@@ -832,7 +833,7 @@ function renderCirclePage(template, strings, locale, page) {
   html = html.split("%%canonicalUrl%%").join(v7CanonicalUrl(locale, page.slug));
   html = html
     .split("%%hreflangLinks%%")
-    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, page.slug); }));
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, page.slug); }, localesFor(page.slug)));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html.split("%%EXTENSION_CTA_BUTTON%%").join(ctaButton(strings));
   html = html
@@ -897,7 +898,7 @@ function renderDimPage(template, strings, locale) {
   html = html.split("%%canonicalUrl%%").join(v7CanonicalUrl(locale, DIM_SLUG));
   html = html
     .split("%%hreflangLinks%%")
-    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, DIM_SLUG); }));
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, DIM_SLUG); }, localesFor(DIM_SLUG)));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html.split("%%EXTENSION_CTA_BUTTON%%").join(ctaButton(strings));
   html = html
@@ -983,7 +984,7 @@ function renderNoteFinderPage(template, strings, locale) {
     .join(v7CanonicalUrl(locale, NOTE_FINDER_SLUG));
   html = html
     .split("%%hreflangLinks%%")
-    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, NOTE_FINDER_SLUG); }));
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, NOTE_FINDER_SLUG); }, localesFor(NOTE_FINDER_SLUG)));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html.split("%%EXTENSION_CTA_BUTTON%%").join(ctaButton(strings));
   html = html
@@ -1033,7 +1034,7 @@ function renderTabEditorPage(template, strings, locale) {
     .join(v7CanonicalUrl(locale, TAB_EDITOR_SLUG));
   html = html
     .split("%%hreflangLinks%%")
-    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, TAB_EDITOR_SLUG); }));
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, TAB_EDITOR_SLUG); }, localesFor(TAB_EDITOR_SLUG)));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html
     .split("%%MANIFEST_HREF%%")
@@ -1094,7 +1095,7 @@ function renderSixthsPage(template, strings, locale) {
     .join(v7CanonicalUrl(locale, SIXTHS_SLUG));
   html = html
     .split("%%hreflangLinks%%")
-    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, SIXTHS_SLUG); }));
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, SIXTHS_SLUG); }, localesFor(SIXTHS_SLUG)));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html
     .split("%%MANIFEST_HREF%%")
@@ -1128,7 +1129,7 @@ function fillPageChrome(html, strings, locale, slug, ogImage) {
     .split("%%canonicalUrl%%")
     .join(v7CanonicalUrl(locale, slug))
     .split("%%hreflangLinks%%")
-    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, slug); }))
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, slug); }, localesFor(slug)))
     .split("%%ogImage%%")
     .join(ogImage || socialImage(v7CanonicalUrl(locale, slug)))
     .split("%%MANIFEST_HREF%%")
@@ -1316,6 +1317,7 @@ function renderArticlePage(strings, locale, slug, keys, bodyHtml, backHtml, head
 }
 
 function articleCard(slug, locale, image, size, title, summary) {
+  if (!isTranslated(slug, locale)) return "";
   return (
     '<a class="article-card" href="' +
     pagePath(slug, locale) +
@@ -1678,6 +1680,7 @@ function writeArticlePages(strings, locale) {
     [ARTICLE_ARPEGGIOS_SLUG, renderArpeggiosArticle],
     [ARTICLE_FAVORITES_SLUG, renderFavoritesArticle],
   ].forEach(function (entry) {
+    if (!isTranslated(entry[0], locale)) return;
     const outFile = path.join(DIST_SITE, pageFile(entry[0], locale));
     ensureDir(path.dirname(outFile));
     fs.writeFileSync(outFile, entry[1](strings, locale), "utf8");
@@ -1831,7 +1834,7 @@ function renderPickingPage(template, strings, locale, page) {
   html = html.split("%%canonicalUrl%%").join(v7CanonicalUrl(locale, page.slug));
   html = html
     .split("%%hreflangLinks%%")
-    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, page.slug); }));
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, page.slug); }, localesFor(page.slug)));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html.split("%%EXTENSION_CTA_BUTTON%%").join(ctaButton(strings));
   html = html
@@ -2004,10 +2007,39 @@ copyFile(
   path.join(SRC_VENDOR, "jspdf.umd.min.js"),
   path.join(VENDOR_DIST, "jspdf.umd.min.js"),
 );
-copyFile(
-  ASCII_TABS,
-  path.join(VENDOR_DIST, "ascii-tabs.js"),
-);
+// The pinned ascii-tabs release only ships es/en message presets: add the
+// pt-BR one at copy time so the editor's own labels are in Portuguese.
+{
+  const presets = "const PRESETS = { en: MESSAGES_EN, es: MESSAGES_ES };";
+  const source = fs.readFileSync(ASCII_TABS, "utf8");
+  if (source.indexOf(presets) === -1) {
+    fail("ascii-tabs.js: PRESETS declaration not found; update the pt-BR patch in build-site.js");
+  }
+  const messagesPt = `const MESSAGES_PT = {
+  hint: 'Clique em uma corda e digite o número da casa.',
+  copy: 'Copiar tablatura',
+  copied: 'Copiado',
+  delete: 'Excluir tablatura',
+  add: 'Nova tablatura',
+  fret: 'Casa',
+  annotation: 'Editar anotação da coluna',
+  tabTitle: 'Editar título da tablatura',
+  spacing: 'Espaçamento',
+  notation: 'Notação',
+  frets: 'Números das casas',
+  letters: 'Letras (E D F)',
+  solfege: 'Notas em solfejo (mi ré fá)',
+};
+`;
+  fs.writeFileSync(
+    path.join(VENDOR_DIST, "ascii-tabs.js"),
+    source.replace(
+      presets,
+      messagesPt + "const PRESETS = { en: MESSAGES_EN, es: MESSAGES_ES, pt: MESSAGES_PT };",
+    ),
+    "utf8",
+  );
+}
 // Private score editor (/partitura): Verovio draws the staff, jsPDF exports it.
 ["score-model.js", "score-fingering.js", "score-editor.js", "score-editor.css"].forEach(function (f) {
   copyFile(path.join(SRC_SITE, f), path.join(ASSETS_DIST, f));
@@ -2216,6 +2248,29 @@ fs.writeFileSync(
 say(path.relative(ROOT, swFile));
 
 console.log("==> Rendering locale pages...");
+
+// Every catalog must have exactly the same keys as the Spanish one: a missing
+// or extra key means untranslated (or stale) text would ship.
+{
+  const catalogKeys = function (locale) {
+    const file = path.join(SRC_I18N, "strings." + locale + ".json");
+    if (!fs.existsSync(file)) fail("Missing: " + file);
+    return Object.keys(JSON.parse(fs.readFileSync(file, "utf8")));
+  };
+  const reference = new Set(catalogKeys("es"));
+  LOCALES.forEach(function (locale) {
+    const keys = new Set(catalogKeys(locale));
+    const missing = [...reference].filter(function (k) { return !keys.has(k); });
+    const extra = [...keys].filter(function (k) { return !reference.has(k); });
+    if (missing.length || extra.length) {
+      fail(
+        "strings." + locale + ".json keys differ from strings.es.json" +
+          (missing.length ? " | missing: " + missing.join(", ") : "") +
+          (extra.length ? " | extra: " + extra.join(", ") : ""),
+      );
+    }
+  });
+}
 
 LOCALES.forEach(function (locale) {
   const stringsPath = path.join(SRC_I18N, "strings." + locale + ".json");
@@ -2488,7 +2543,8 @@ function siteMenu(strings, locale) {
   if (PARTITURA_ENABLED)
     items.push(link(pagePath(PARTITURA_SLUG, locale), strings.menuAddTabs, true));
   items.push(link(pagePath("circulo-de-quintas", locale), strings.menuFifths));
-  items.push(link(pagePath(ARTICLE_ARPEGGIOS_SLUG, locale), strings.artArpeggiosH1));
+  if (isTranslated(ARTICLE_ARPEGGIOS_SLUG, locale))
+    items.push(link(pagePath(ARTICLE_ARPEGGIOS_SLUG, locale), strings.artArpeggiosH1));
   const articles = [
     [ARTICLE_CARCASSI_SLUG, strings.artCarcH1],
     [ARTICLE_PRELUDES_SLUG, strings.artPreludesH1],
@@ -2503,6 +2559,14 @@ function siteMenu(strings, locale) {
     [ARTICLE_GIULIANI_SLUG, strings.artGiulianiH1],
     [ARTICLE_GIULIANI_ARPEGIOS_SLUG, strings.artGiulianiArpegiosH1],
   ];
+  const articleLinks = articles
+    .filter(function (a) {
+      return isTranslated(a[0], locale);
+    })
+    .map(function (a) {
+      return link(pagePath(a[0], locale), a[1]);
+    })
+    .join("");
   return (
     '<details class="site-menu"><summary aria-label="' +
     escapeHtml(strings.menuButtonLabel) +
@@ -2514,15 +2578,15 @@ function siteMenu(strings, locale) {
     escapeHtml(strings.menuResources) +
     "</p>" +
     items.join("") +
-    '</div><div class="site-menu-col"><p class="site-menu-heading">' +
-    escapeHtml(strings.menuArticles) +
-    "</p>" +
-    articles
-      .map(function (a) {
-        return link(pagePath(a[0], locale), a[1]);
-      })
-      .join("") +
-    '</div><div class="site-menu-wide"><p class="site-menu-heading">' +
+    "</div>" +
+    (articleLinks
+      ? '<div class="site-menu-col"><p class="site-menu-heading">' +
+        escapeHtml(strings.menuArticles) +
+        "</p>" +
+        articleLinks +
+        "</div>"
+      : "") +
+    '<div class="site-menu-wide"><p class="site-menu-heading">' +
     escapeHtml(strings.menuExtensions) +
     "</p>" +
     '<a class="site-menu-ext" href="' + escapeHtml(tabsExtensionStoreUrl()) +
@@ -2687,7 +2751,9 @@ addHome();
 function addSlugPages(slugs, priorities) {
   slugs.forEach(function (slug) {
     addTranslated(
-      LOCALES.map(function (locale) {
+      LOCALES.filter(function (locale) {
+        return isTranslated(slug, locale);
+      }).map(function (locale) {
         return {
           locale: locale,
           loc: pagePath(slug, locale),

@@ -1,9 +1,11 @@
 /* Interactive fifths, with diatonic spelling derived from each key signature. */
 (function () {
   'use strict';
-  var es = document.documentElement.lang === 'es';
+  var lang = (document.documentElement.lang || '').slice(0, 2);
+  var pt = lang === 'pt';
+  var es = lang === 'es';
   var letters = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-  var solfege = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
+  var solfege = pt ? ['Dó', 'Ré', 'Mi', 'Fá', 'Sol', 'Lá', 'Si'] : ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
   var natural = [0, 2, 4, 5, 7, 9, 11];
   var keys = ['C', 'G', 'D', 'A', 'E', 'B', 'F♯', 'D♭', 'A♭', 'E♭', 'B♭', 'F'];
   var counts = [0, 1, 2, 3, 4, 5, 6, -5, -4, -3, -2, -1];
@@ -23,7 +25,7 @@
     return el;
   }
   function name(note) {
-    return es ? solfege[letters.indexOf(note[0])] + note.slice(1) : note;
+    return es || pt ? solfege[letters.indexOf(note[0])] + note.slice(1) : note;
   }
   function signature(index) {
     var count = counts[index];
@@ -79,12 +81,12 @@
       }
     });
   }
-  var wheel = svg('svg', { viewBox: '0 0 860 860', class: 'fifths-svg', role: 'group', 'aria-label': es ? 'Tonalidades y armaduras' : 'Keys and key signatures' });
+  var wheel = svg('svg', { viewBox: '0 0 860 860', class: 'fifths-svg', role: 'group', 'aria-label': es ? 'Tonalidades y armaduras' : pt ? 'Tonalidades e armaduras de clave' : 'Keys and key signatures' });
   keys.forEach(function (_, index) {
     var notes = scale(index);
     [false, true].forEach(function (minor) {
       var chord = notes[minor ? 5 : 0] + (minor ? 'm' : '');
-      var g = svg('g', { class: 'fifths-key', tabindex: 0, role: 'button', 'aria-label': name(notes[minor ? 5 : 0]) + (minor ? (es ? ' menor' : ' minor') : (es ? ' mayor' : ' major')), 'aria-pressed': 'false' });
+      var g = svg('g', { class: 'fifths-key', tabindex: 0, role: 'button', 'aria-label': name(notes[minor ? 5 : 0]) + (minor ? (es ? ' menor' : pt ? ' menor' : ' minor') : (es ? ' mayor' : pt ? ' maior' : ' major')), 'aria-pressed': 'false' });
       g.appendChild(svg('path', { d: sector(minor ? 186 : 254, minor ? 118 : 186, index * 30) }));
       var pos = polar(minor ? 152 : 220, index * 30);
       var label = svg('text', { x: pos[0], y: pos[1], class: 'fifths-chord-name', 'text-anchor': 'middle', 'dominant-baseline': 'central' }, name(notes[minor ? 5 : 0]) + (minor ? 'm' : ''));
@@ -100,7 +102,7 @@
     var group = svg('g', { transform: 'translate(' + (p[0] - 66) + ' ' + (p[1] - 43) + ')', class: 'fifths-outer-signature' });
     group.appendChild(staff(index, 132, 62));
     var accidentals = signature(index).map(name);
-    var chunks = accidentals.length ? [accidentals.slice(0, 3).join(' · '), accidentals.slice(3).join(' · ')] : [es ? 'Sin alteraciones' : 'No accidentals'];
+    var chunks = accidentals.length ? [accidentals.slice(0, 3).join(' · '), accidentals.slice(3).join(' · ')] : [es ? 'Sin alteraciones' : pt ? 'Sem alterações' : 'No accidentals'];
     chunks.forEach(function (text, i) {
       group.appendChild(svg('text', { x: 66, y: 72 + i * 17, 'text-anchor': 'middle', class: 'fifths-accidental-names' }, text));
     });
@@ -125,7 +127,7 @@
       button.degree.textContent = match < 0 ? '' : degrees[match];
       button.label.textContent = match < 0 ? name(scale(button.index)[button.minor ? 5 : 0]) + button.quality : name(chords[match].note) + button.quality;
     });
-    var title = name(chords[0].note) + (minor ? (es ? ' menor' : ' minor') : (es ? ' mayor' : ' major'));
+    var title = name(chords[0].note) + (minor ? (es ? ' menor' : pt ? ' menor' : ' minor') : (es ? ' mayor' : pt ? ' maior' : ' major'));
     centerName.textContent = title;
     var dimIndex = minor ? 1 : 6;
     diminished.textContent = degrees[dimIndex] + ' · ' + name(chords[dimIndex].note) + '°';
@@ -133,7 +135,7 @@
     var signatureEl = document.getElementById('fifths-signature');
     signatureEl.replaceChildren(staff(index, 180, 84));
     var text = document.createElement('span');
-    text.textContent = signature(index).map(name).join(' · ') || (es ? 'Sin alteraciones' : 'No accidentals');
+    text.textContent = signature(index).map(name).join(' · ') || (es ? 'Sin alteraciones' : pt ? 'Sem alterações' : 'No accidentals');
     signatureEl.appendChild(text);
     var chordList = document.getElementById('fifths-chords');
     chordList.replaceChildren();

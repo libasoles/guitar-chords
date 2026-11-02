@@ -15,7 +15,7 @@ const DEFAULT_LOCALE = 'es';
 const X_DEFAULT_LOCALE = 'en';
 /* Idiomas con paginas publicadas. Un idioma registrado pero no publicado no se
    genera ni aparece en hreflang ni en el sitemap. */
-const PUBLISHED_LOCALES = ['es', 'en'];
+const PUBLISHED_LOCALES = ['es', 'en', 'pt'];
 /* Idioma de las imagenes sociales cuando el idioma no tiene las suyas. */
 const OG_IMAGE_FALLBACK = { pt: 'en' };
 
@@ -40,9 +40,10 @@ function ogImageLocale(code) {
 }
 
 /* <link rel="alternate"> de una pagina. urlFor(code) devuelve la URL absoluta de la
-   pagina en ese idioma. Incluye una por idioma publicado y x-default. */
-function hreflangLinks(urlFor, published = PUBLISHED_LOCALES) {
-  const links = publishedLocales(published).map(
+   pagina en ese idioma. Incluye una por idioma en `locales` (configs; por defecto todos
+   los publicados) y x-default. */
+function hreflangLinks(urlFor, locales = publishedLocales()) {
+  const links = locales.map(
     (l) => '<link rel="alternate" hreflang="' + l.hreflang + '" href="' + urlFor(l.code) + '" />',
   );
   links.push('<link rel="alternate" hreflang="x-default" href="' + urlFor(X_DEFAULT_LOCALE) + '" />');
