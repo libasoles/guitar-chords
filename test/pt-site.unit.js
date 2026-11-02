@@ -5,7 +5,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { SLUGS, pagePath, pageFile } = require('../scripts/lib/slugs');
-const { isTranslated } = require('../scripts/lib/translations');
+const { isTranslated, COLLECTIONS, TRANSLATED_COLLECTIONS } = require('../scripts/lib/translations');
 const { LOCALE_CODES, localeConfig } = require('../scripts/lib/locales');
 
 const ROOT = path.join(__dirname, '..');
@@ -130,4 +130,11 @@ test('el idioma pt esta registrado una sola vez con prefijo /pt', () => {
   assert.ok(LOCALE_CODES.includes('pt'));
   assert.equal(localeConfig('pt').htmlLang, 'pt-BR');
   assert.equal(pagePath('v7', 'pt'), '/pt/v7');
+});
+
+test('cobertura final: todas las colecciones de articulos estan traducidas a pt', () => {
+  assert.deepEqual([...TRANSLATED_COLLECTIONS.pt].sort(), Object.keys(COLLECTIONS).sort());
+  Object.values(COLLECTIONS).flat().forEach((key) => {
+    assert.ok(fs.existsSync(path.join(DIST, pageFile(key, 'pt'))), key);
+  });
 });
