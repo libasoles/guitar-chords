@@ -1438,6 +1438,12 @@ function renderCarcassiArticle(strings, locale) {
 function renderArpeggiosArticle(strings, locale) {
   const back = '<p class="article-back"><a href="' + pagePath(ARTICLES_SLUG, locale) + '">' +
     escapeHtml(strings.artBackToIndex) + '</a></p>';
+  // The Carcassi article may not exist in this locale yet: then the lead keeps its text without the link.
+  if (!isTranslated(ARTICLE_CARCASSI_SLUG, locale)) {
+    strings = Object.assign({}, strings, {
+      artArpeggiosLead: strings.artArpeggiosLead.replace(/<a href="%%CARCASSI_HREF%%">([^<]*)<\/a>/, "$1"),
+    });
+  }
   return renderArticlePage(strings, locale, ARTICLE_ARPEGGIOS_SLUG, {
     title: "artArpeggiosPageTitle",
     meta: "artArpeggiosMetaDescription",
