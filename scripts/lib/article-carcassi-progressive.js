@@ -41,9 +41,14 @@ const isWaltz = (piece) => 'key' in PIECES[piece.number];
 const publishedPieces = () => allPublishedPieces().filter((p) => !isWaltz(p));
 const publishedWaltzes = () => allPublishedPieces().filter(isWaltz);
 
+/* Prefijo y forma de cada pieza por idioma; las formas en es y pt salen de pieces.json. */
+const PIECE_WORD = { es: 'Pieza', en: 'Piece', pt: 'Peça' };
+
 function pieceName(piece, locale) {
-  const form = locale === 'es' ? PIECES[piece.number].es : piece.form;
-  return (locale === 'es' ? 'Pieza ' : 'Piece ') + piece.number + ': ' + form;
+  if (!(locale in PIECE_WORD)) throw new Error('article-carcassi-progressive: idioma sin nombres de pieza: ' + locale);
+  const form = locale === 'en' ? piece.form : PIECES[piece.number][locale];
+  if (!form) throw new Error('article-carcassi-progressive: la pieza ' + piece.number + ' no tiene forma en ' + locale);
+  return PIECE_WORD[locale] + ' ' + piece.number + ': ' + form;
 }
 
 function card(piece, locale, strings, sharedGlyphs, pieces) {
