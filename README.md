@@ -39,8 +39,8 @@ npm run build       # Build site + extension → dist/
 npm test            # Unit + E2E tests
 ```
 
-Production bundles ascii-tabs [v0.11.2](https://github.com/libasoles/ascii-tabs/releases/tag/v0.11.2)
-from the committed `vendor/ascii-tabs.js`, including the upstream string-bar prefix
+Production bundles ascii-tabs [v0.11.3](https://github.com/libasoles/ascii-tabs/releases/tag/v0.11.3)
+from the committed `vendor/ascii-tabs.js`, including the string-bar prefix
 spacing fix. String bars are optional (`string-bars`); note labels default to `e `,
 with `e|` when bars are enabled. The editor uses `annotation-fit="widen"`
 to reserve column width for annotations, including in ASCII copies; article tabs
