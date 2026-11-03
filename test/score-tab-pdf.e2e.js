@@ -12,7 +12,7 @@ const { serveStatic } = require('../scripts/lib/static-server');
     browser = await chromium.launch({ executablePath: playwrightExecutablePath() });
     const page = await browser.newPage();
     await page.goto('http://localhost:' + server.address().port + '/partitura');
-    await page.waitForSelector('#scoreStage g.measure');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     await page.evaluate(() => {
       const create = URL.createObjectURL.bind(URL);
       window.exportSvgs = [];

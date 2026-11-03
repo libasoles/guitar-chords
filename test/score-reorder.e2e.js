@@ -13,7 +13,7 @@ const { serveStatic } = require('../scripts/lib/static-server');
     const errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
     await page.goto(`http://127.0.0.1:${server.address().port}/partitura`);
-    await page.waitForSelector('#m11');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) #m11');
     await page.evaluate(async () => { await document.fonts.ready; });
     const reset = async (dense = false) => {
       await page.evaluate((dense) => {
@@ -52,7 +52,7 @@ const { serveStatic } = require('../scripts/lib/static-server');
     assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows.map((r) => r.length)), [5, 3, 4]);
     const saved = await order();
     await page.reload();
-    await page.waitForSelector('#m11');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) #m11');
     assert.deepEqual(await order(), saved);
     assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows.map((r) => r.length)), [5, 3, 4]);
     await reset(true);

@@ -14,7 +14,7 @@ async function run() {
     for (const width of [1280, 390]) {
       const page = await browser.newPage({ viewport: { width, height: 900 } });
       await page.goto('http://localhost:' + server.address().port + '/partitura');
-      await page.waitForSelector('#scoreStage g.measure');
+      await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
       const notes = await page.locator('.score-palette [data-shortcut]').evaluateAll(buttons => buttons.slice(0, 6).map(button => {
         const svg = button.querySelector('svg');
         const box = svg.getBBox();

@@ -45,7 +45,7 @@ async function checkInteriorDoubleBar(page) {
   await page.mouse.click(x, y);
   assert.equal(await page.evaluate(() => scoreEditor.score.rows.flat().length), 13);
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   assert.deepEqual(await page.evaluate(() => scoreEditor.score.measureDurations), split.durations);
   assert.equal(await page.locator('#scoreStage g.measure').count(), 13);
 }
@@ -53,7 +53,7 @@ async function checkInteriorDoubleBar(page) {
 async function checkSplitKeepsRows(page) {
   await clearScoreStorage(page);
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   await page.evaluate(() => {
     scoreEditor.score.rows[2] = [[], []];
     scoreEditor.score.rows[0][3] = [{ n: 30, d: 'q', at: 0 }, { d: 'h', rest: true, at: 24 }, { n: 32, d: 'q', at: 72 }];
@@ -89,7 +89,7 @@ async function checkSplitKeepsRows(page) {
   };
   await check();
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   await check();
 }
 
@@ -150,7 +150,7 @@ async function checkMeasureWidths(page) {
   assert.equal(await page.evaluate(() => JSON.stringify(scoreEditor.score.rows)), music, 'el ancho no cambia la musica');
   assert.ok(Math.abs(await tieGap() - gapBefore) < 3, 'la ligadura sigue llegando a la nota del compas vecino');
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   assert.ok(Math.abs((await staff(0)).width - after.width) < 2, 'el ancho se conserva al recargar');
   const current = await trigger.boundingBox();
   await page.mouse.move(current.x + current.width / 2, current.y + 10);
@@ -170,7 +170,7 @@ async function checkMeasureWidths(page) {
 async function checkBarlines(page) {
   await clearScoreStorage(page);
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   assert.equal(await page.locator('#scoreTrash').count(), 0);
   assert.equal(await page.locator('#scoreBarlines button[data-barline], #scoreBarlines button[data-tool="barre"]').count(), 4);
   assert.equal(await page.locator('#scoreBarlines #scoreTabToggle').count(), 1);
@@ -187,7 +187,7 @@ async function checkBarlines(page) {
   assert.deepEqual(await page.evaluate(() => scoreEditor.score.barlines), { 0: { start: true }, 3: { end: true } });
   assert.ok(await page.locator('#scoreStage g.barLine').count() > 0);
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   assert.equal(await page.evaluate(() => scoreEditor.score.barlines[0].start), true);
   await apply('double', 0);
   assert.deepEqual(await page.evaluate(() => scoreEditor.score.barlines[0]), { double: true });
@@ -242,7 +242,7 @@ async function checkBarlines(page) {
   await selectBar(2, 'end'); // barra simple original
   await page.keyboard.press('Backspace');
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   assert.equal(await page.evaluate(() => scoreEditor.score.barlines[2].hidden), true);
   assert.equal(await page.locator('.score-barline-trigger[data-measure="2"]').count(), 0);
   await selectBar(1, 'end');
@@ -303,7 +303,7 @@ async function checkBarlines(page) {
 async function checkKeyChanges(page) {
   await clearScoreStorage(page);
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   const keys = () => page.evaluate(() => [scoreEditor.score.fifths, scoreEditor.score.keys || null]);
   // La armadura elegida en el segundo renglon no toca el primero.
   await page.locator('.score-clef-trigger').nth(1).click();
@@ -352,14 +352,14 @@ async function checkKeyChanges(page) {
   await page.keyboard.press('Escape');
   assert.deepEqual(await keys(), [0, { 2: -2, 4: 2, 5: 1 }]);
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   assert.deepEqual(await keys(), [0, { 2: -2, 4: 2, 5: 1 }]);
 }
 
 async function checkRowMeasureTools(page) {
   await clearScoreStorage(page);
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   const sizes = () => page.evaluate(() => scoreEditor.score.rows.map((row) => row.length));
   const hover = async (row) => {
     const measure = page.locator('#scoreStage g.measure').nth(row * 4 + (await sizes())[row] - 1);
@@ -401,7 +401,7 @@ async function checkRowMeasureTools(page) {
 async function checkBarre(page) {
   await clearScoreStorage(page);
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   await page.evaluate(() => {
     scoreEditor.score.rows[0][0] = [{ d: 'q', n: 30, at: 0 }, { d: 'q', n: 32, at: 24 }, { d: 'q', n: 34, at: 48 }, { d: 'q', n: 35, at: 72 }];
     scoreEditor.render();
@@ -510,7 +510,7 @@ async function checkDrag(page) {
     await checkGhost();
     await page.mouse.up();
     assert.equal(await page.locator('.score-ghost').count(), 0);
-    await page.waitForSelector('#scoreStage g.note');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) g.note');
 
     const note = await page.locator('#scoreStage g.note .notehead').first().boundingBox();
     await page.mouse.move(note.x + note.width / 2, note.y + note.height / 2);
@@ -523,7 +523,7 @@ async function checkDrag(page) {
     await page.mouse.up();
     // Numbered tools stay active for repeated clicks and edit the selected figure.
     await page.reload();
-    await page.waitForSelector('#scoreStage g.measure');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     assert.deepEqual(await page.locator('.score-palette-key').allTextContents(), ['1', '2', '3', '4', '5', '6', 'x', 'q', 'w', 'e', 'r', 't', 'y', 'p', 's', 'b', 'c']);
     await page.keyboard.press('3');
     assert.equal(await page.locator('[data-shortcut="3"]').getAttribute('aria-pressed'), 'true');
@@ -593,7 +593,7 @@ async function checkDrag(page) {
 
 async function checkModifiers(page, url, keys) {
   await page.goto(url);
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   assert.deepEqual((await page.locator('.score-palette-key').allTextContents()).slice(-4), keys);
   const durations = ['f', 's', 'e', 'q', 'h', 'w'];
   const labels = keys[0] === 'p'
@@ -723,13 +723,13 @@ async function checkDoubleClick(page) {
   await page.locator('#e2-0 .notehead').dblclick({ force: true });
   assert.deepEqual(await page.evaluate(() => { const ev = scoreEditor.score.rows[0][2][0]; return [!!ev.dot, ev.at]; }), [true, 0], 'a lone figure is moved to the measure start to fit its dot');
   await page.reload();
-  await page.waitForSelector('#scoreStage g.note');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.note');
   assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].dot), true, 'dot is saved');
   // 6/8: bajo en blanca con una voz superior (negra con puntillo y negra). Las voces salen del registro y se cuentan en orden:
   // el bajo puntillado sigue en 0, la negra sigue a la negra con puntillo (36) y las voces quedan fijas al puntillar.
   await clearScoreStorage(page);
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   await page.evaluate(() => {
     ScoreModel.setMeter(scoreEditor.score, '6/8');
     scoreEditor.score.rows[0][0].splice(0, 3, { d: 'h', n: 25, at: 18 }, { d: 'q', n: 35, dot: true, at: 18 }, { d: 'q', n: 37, at: 48 });
@@ -785,7 +785,7 @@ async function checkDoubleClick(page) {
 async function checkTabs(page) {
   await clearScoreStorage(page);
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   assert.ok(await page.evaluate(() => document.querySelector('.score-doc-tabs').compareDocumentPosition(document.querySelector('.score-toolbar')) & Node.DOCUMENT_POSITION_FOLLOWING), 'las pestanas van antes de la barra de herramientas');
   await page.locator('.score-doc-tab-input').fill('Uno');
   assert.equal(await page.locator('#scoreTitle').inputValue(), 'Uno');
@@ -797,7 +797,7 @@ async function checkTabs(page) {
   await page.locator('button.score-doc-tab').click();
   assert.equal(await page.locator('#scoreTitle').inputValue(), 'Uno');
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   assert.equal(await page.locator('#scoreTitle').inputValue(), 'Uno');
   assert.equal(await page.locator('button.score-doc-tab').textContent(), 'Dos');
 }
@@ -811,7 +811,7 @@ async function checkTabReferences(page) {
       data.forEach((measure, mi) => all[mi].push(...measure));
       scoreEditor.render();
     }, data);
-    await page.waitForSelector('#scoreStage g.note');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) g.note');
     await page.locator('#scoreStage').focus();
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
@@ -990,7 +990,7 @@ async function checkStartAndLedgers(page) {
 async function checkRestWithTool(page) {
   await clearScoreStorage(page);
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   await page.evaluate(() => {
     scoreEditor.score.rows[0][0] = [{ rest: true, d: 'q', at: 0 }];
     scoreEditor.render();
@@ -1055,7 +1055,7 @@ async function checkPrependRest(page) {
 
 async function checkDownloadFilenames(page, url) {
   await page.goto(url);
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   for (const [title, author, expected] of [
     ['Zamba del río', '', 'Zamba del río'],
     ['Zamba del río', 'Cuchi Leguizamón', 'Zamba del río - Cuchi Leguizamón'],
@@ -1213,19 +1213,19 @@ async function run() {
     assert.deepEqual(errors, []);
     const splitPage = await newPage({ reducedMotion: 'reduce' });
     await splitPage.goto(url);
-    await splitPage.waitForSelector('#scoreStage g.measure');
+    await splitPage.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     await checkInteriorDoubleBar(splitPage);
     await checkSplitKeepsRows(splitPage);
     await splitPage.close();
     const widthsPage = await newPage({ reducedMotion: 'reduce' });
     await widthsPage.goto(url);
-    await widthsPage.waitForSelector('#scoreStage g.measure');
+    await widthsPage.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     await checkMeasureWidths(widthsPage);
     await checkBarResizeConstraints(widthsPage);
     await widthsPage.close();
     const dragPage = await newPage({ reducedMotion: 'reduce', viewport: { width: 1280, height: 900 } });
     await dragPage.goto(url);
-    await dragPage.waitForSelector('#scoreStage g.measure');
+    await dragPage.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     await checkDrag(dragPage);
     await checkBarlines(dragPage);
     await checkBarre(dragPage);
@@ -1242,33 +1242,33 @@ async function run() {
     }
     const doubleClickPage = await newPage({ reducedMotion: 'reduce' });
     await doubleClickPage.goto(url);
-    await doubleClickPage.waitForSelector('#scoreStage g.measure');
+    await doubleClickPage.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     await checkDoubleClick(doubleClickPage);
     await doubleClickPage.close();
     const clearPage = await newPage({ reducedMotion: 'reduce' });
     await clearPage.goto(url);
-    await clearPage.waitForSelector('#scoreStage g.measure');
+    await clearPage.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     await checkClear(clearPage);
     await clearPage.close();
     const tabsPage = await newPage({ reducedMotion: 'reduce' });
     await tabsPage.goto(url);
-    await tabsPage.waitForSelector('#scoreStage g.measure');
+    await tabsPage.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     await checkTabs(tabsPage);
     await checkTabReferences(tabsPage);
     await tabsPage.close();
     const appendPage = await newPage({ reducedMotion: 'reduce' });
     await appendPage.goto(url);
-    await appendPage.waitForSelector('#scoreStage g.measure');
+    await appendPage.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     await checkAppendAfterLast(appendPage);
     await appendPage.close();
     const ledgerPage = await newPage({ reducedMotion: 'reduce' });
     await ledgerPage.goto(url);
-    await ledgerPage.waitForSelector('#scoreStage g.measure');
+    await ledgerPage.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     await checkStartAndLedgers(ledgerPage);
     await ledgerPage.close();
     const restPage = await newPage({ reducedMotion: 'reduce' });
     await restPage.goto(url);
-    await restPage.waitForSelector('#scoreStage g.measure');
+    await restPage.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     await checkRestWithTool(restPage);
     await checkPrependRest(restPage);
     await restPage.close();

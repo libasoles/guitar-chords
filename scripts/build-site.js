@@ -16,6 +16,8 @@
      TURNSTILE_SITE_KEY    Cloudflare Turnstile public site key for that page
 */
 
+(async function buildSite() {
+
 const fs = require("fs");
 const { localesFor, isTranslated } = require("./lib/translations");
 const {
@@ -28,6 +30,8 @@ const {
 } = require("./lib/locales");
 const path = require("path");
 const { fingerprintAssets } = require("./lib/fingerprint");
+const { writeVerovioBrowser } = require("./lib/verovio-browser");
+const { renderEmptyStaff } = require("./lib/score-initial-staff");
 const { minifyAssets } = require("./lib/minify-assets");
 const { readSiteCss, readPartituraCss } = require("./lib/site-css");
 const { renderScoreTutorial } = require("./lib/score-tutorial");
@@ -1155,9 +1159,12 @@ function linkifyEmails(text) {
   );
 }
 
+// Render once during the build; GitHub Pages serves this as static SVG.
+const initialStaff = await renderEmptyStaff();
+
 // Render the score editor page (src/site/score-editor.html).
 function renderScoreEditorPage(template, strings, locale) {
-  let html = fillPageChrome(template, strings, locale, SCORE_EDITOR_SLUG);
+  let html = fillPageChrome(template, strings, locale, SCORE_EDITOR_SLUG).split("%%SCORE_INITIAL_STAFF%%").join(initialStaff);
   const sheetToTabHref = PARTITURA_ENABLED ? v7PageHref(locale, PARTITURA_SLUG) : "";
   // Without the sheet-to-tab page the link would be dead: keep its text only.
   const faq = (strings.scoreFaq || []).map(function (item) {
@@ -2071,10 +2078,7 @@ require("esbuild").buildSync({
   format: "iife",
   define: { "process.env.NODE_ENV": '"production"' },
 });
-copyFile(
-  path.join(SRC_VENDOR, "verovio-toolkit-wasm.js"),
-  path.join(VENDOR_DIST, "verovio-toolkit-wasm.js"),
-);
+writeVerovioBrowser(path.join(SRC_VENDOR, "verovio-toolkit-wasm.js"), VENDOR_DIST);
 if (PARTITURA_ENABLED) {
   copyFile(
     path.join(SRC_SITE, "partitura.js"),
@@ -2921,3 +2925,5 @@ const fingerprinted = fingerprintAssets(DIST_SITE);
 say(fingerprinted.size + " assets versioned");
 
 console.log("==> Done. Site output: dist/site/");
+
+})().catch(error => { console.error(error); process.exitCode = 1; });

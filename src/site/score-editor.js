@@ -24,6 +24,7 @@
 
   const tabsBar = document.getElementById('scoreTabs');
   const stored = loadAll();
+  if (window.ScoreStore.stored) stage.classList.add('is-loading');
   const docs = stored.scores; // una partitura por pestana
   const histories = docs.map(() => []);
   let active = stored.active;
@@ -3339,7 +3340,11 @@
   }).observe(stage);
 
   stage.setAttribute('aria-busy', 'true');
-  loadVerovio().then(() => {
+  const whenIdle = window.requestIdleCallback || (fn => setTimeout(fn, 200));
+  const loadSoon = window.ScoreStore.stored
+    ? Promise.resolve()
+    : new Promise(resolve => whenIdle(resolve, { timeout: 1500 }));
+  loadSoon.then(loadVerovio).then(() => {
     stage.removeAttribute('aria-busy');
     render();
     stage.classList.remove('is-loading');

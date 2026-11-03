@@ -15,7 +15,7 @@ const { serveStatic } = require('../scripts/lib/static-server');
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto('http://localhost:' + server.address().port + '/partitura');
-    await page.waitForSelector('#scoreStage g.measure');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     await page.evaluate(() => {
       ScoreModel.measures(scoreEditor.score).forEach(m => { m.length = 0; });
       scoreEditor.score.rows[0][0].push(

@@ -1,6 +1,6 @@
 'use strict';
 /* fingerprint.js — Versiona por contenido los assets estaticos de dist/site.
-   Renombra assets/**.{js,css,svg} y assets/icons/*.png a <nombre>.<hash10>.<ext> y reescribe todas
+   Renombra assets/**.{js,css,svg,wasm} y assets/icons/*.png a <nombre>.<hash10>.<ext> y reescribe todas
    las referencias (HTML, JS, CSS, manifests y sw.js). Un deploy que cambia un
    archivo cambia su URL, asi que las URLs fingerprinted son inmutables y se
    pueden servir con cache de larga vida. */
@@ -9,11 +9,11 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const HASHED_EXT = new Set(['.js', '.css', '.svg', '.png']);
+const HASHED_EXT = new Set(['.js', '.css', '.svg', '.png', '.wasm']);
 const TEXT_EXT = new Set(['.html', '.js', '.css', '.webmanifest', '.svg', '.xml', '.json']);
 const HASH_LEN = 10;
 // Nombre ya fingerprinted: name.<10 hex>.ext
-const HASHED_NAME_RE = new RegExp('\\.[0-9a-f]{' + HASH_LEN + '}\\.(js|css|svg|png)$');
+const HASHED_NAME_RE = new RegExp('\\.[0-9a-f]{' + HASH_LEN + '}\\.(js|css|svg|png|wasm)$');
 
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
@@ -29,7 +29,7 @@ function hashOf(buf) {
 // Any asset-looking file name delimited like a reference. One scan per file
 // finds every candidate; a Map lookup decides whether it is one we renamed.
 // "(" precedes an unquoted url(name.svg), which minified CSS produces.
-const NAME_RE = "(?<=[/'\"`(])([^/'\"`()\\s?#]+\\.(?:js|css|svg|png))(?=['\"`?#)\\s])";
+const NAME_RE = "(?<=[/'\"`(])([^/'\"`()\\s?#]+\\.(?:js|css|svg|png|wasm))(?=['\"`?#)\\s])";
 
 /* Reemplaza el nombre de archivo cuando aparece como ultimo segmento de una
    ruta o literal ("/x/name.js", 'name.js', "name.js?v=1"). */

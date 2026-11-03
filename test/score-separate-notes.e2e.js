@@ -13,7 +13,7 @@ async function run() {
     browser = await chromium.launch({ executablePath: playwrightExecutablePath() });
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     await page.goto('http://localhost:' + server.address().port + '/partitura');
-    await page.waitForSelector('#scoreStage g.measure');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     for (const index of [1, 0]) {
       await page.evaluate(() => {
         ScoreModel.measures(scoreEditor.score).forEach(m => { m.length = 0; });

@@ -14,7 +14,7 @@ async function seed(page, measures) {
     data.forEach((events, mi) => all[mi].push(...events));
     scoreEditor.render();
   }, measures);
-  await page.waitForSelector('#scoreStage g.note');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.note');
   await page.locator('#scoreStage').focus();
   await page.keyboard.press('Escape');
   await page.waitForTimeout(300); // El ResizeObserver completa el dibujo antes de clickear las notas.
@@ -47,7 +47,7 @@ async function run() {
     page.on('pageerror', (error) => errors.push(error.message));
     const url = 'http://localhost:' + server.address().port + '/partitura';
     await page.goto(url);
-    await page.waitForSelector('#scoreStage g.measure');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
 
     // Partituras guardadas con 8 divisiones por negra se reescalan; el hueco antes de la primera figura no cuenta.
     await clearScoreStorage(page);
@@ -55,7 +55,7 @@ async function run() {
       localStorage.setItem('scoreEditor.v1', JSON.stringify({ rows: [[[], [], [{ d: 'q', n: 30, at: 0 }, { d: 'e', n: 31, at: 8 }], []]] }));
     });
     await page.reload();
-    await page.waitForSelector('#scoreStage g.note');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) g.note');
     assert.equal((await events(page, 2))[1].at, 24);
 
     // Clickear fuera del pentagrama deselecciona, incluso sobre los campos del titulo.
@@ -237,7 +237,7 @@ async function run() {
       scoreEditor.score.tabs = { '0:0': [null, null, null, null, 7, null], '0:12': [null, null, null, null, 8, null] };
       scoreEditor.render();
     });
-    await page.waitForSelector('#scoreStage ascii-tabs');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) ascii-tabs');
     const original = [await events(page, 0), await events(page, 1)];
     await shiftSelect(page, ['e0-0', 'e0-1', 'e1-0']);
     await page.keyboard.press('ControlOrMeta+c');
@@ -322,7 +322,7 @@ async function run() {
       assert.equal(await visibleFret.textContent(), String(fret), 'se muestra el traste original');
       assert.equal(await page.evaluate(() => ScoreModel.attacks(scoreEditor.score)[0].midis[0]), 59 + fret);
       await page.reload();
-      await page.waitForSelector('#scoreStage ascii-tabs');
+      await page.waitForSelector('#scoreStage:not([aria-busy]) ascii-tabs');
       assert.deepEqual(await page.evaluate(() => scoreEditor.score.tabs), { '0:0': expected }, 'se conserva al recargar');
     }
 

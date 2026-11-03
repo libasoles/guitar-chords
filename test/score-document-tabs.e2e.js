@@ -14,7 +14,7 @@ async function run() {
     browser = await chromium.launch({ executablePath: playwrightExecutablePath(), headless: true });
     const page = await browser.newPage();
     await page.goto('http://localhost:' + server.address().port + '/partitura');
-    await page.waitForSelector('#scoreStage g.measure');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     const order = () => page.locator('.score-doc-tab').evaluateAll(tabs => tabs.map(tab => tab.querySelector('input')?.value ?? tab.textContent));
     const stored = () => readScoreStorage(page);
     const rows = () => page.evaluate(() => scoreEditor.score.rows.length);
@@ -73,7 +73,7 @@ async function run() {
     assert.equal(await rows(), initialRows + 1);
     await page.locator('.score-doc-tab-input').fill('Dos editado');
     await page.reload();
-    await page.waitForSelector('#scoreStage g.measure');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     assert.deepEqual(await order(), ['Tres', 'Uno', 'Dos editado']);
     assert.equal(await page.locator('#scoreTitle').inputValue(), 'Dos editado');
     assert.equal(await rows(), initialRows + 1);

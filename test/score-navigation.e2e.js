@@ -23,7 +23,7 @@ async function checkHiddenBarlineEndings(page) {
   let box = await bounds();
   assert.ok(Math.abs(box.left - box.measureLeft) < 10, 'existing ending expands left across the deleted barline: ' + JSON.stringify(box));
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   box = await bounds();
   assert.ok(Math.abs(box.left - box.measureLeft) < 10, 'saved ending keeps the visible boundary after reload');
   await page.locator('g.ending text').click();
@@ -52,7 +52,7 @@ async function checkHiddenBarlineEndings(page) {
   }
   await clearScoreStorage(page);
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
 }
 
 async function checkNavigationRegressions(page) {
@@ -125,7 +125,7 @@ async function checkNavigationRegressions(page) {
   assert.equal(await page.evaluate(() => scoreEditor.score.navigation), undefined);
   await clearScoreStorage(page);
   await page.reload();
-  await page.waitForSelector('#scoreStage g.measure');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
 }
 
 (async () => {
@@ -136,7 +136,7 @@ async function checkNavigationRegressions(page) {
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto(`http://127.0.0.1:${server.address().port}/partitura`);
-    await page.waitForSelector('#scoreStage g.measure');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     await checkHiddenBarlineEndings(page);
     await checkNavigationRegressions(page);
     assert.deepEqual(await page.locator('#scoreBarlines > button').evaluateAll((buttons) => buttons.map((b) => b.id || b.dataset.tool || b.dataset.barline || b.dataset.navigation)),
@@ -154,7 +154,7 @@ async function checkNavigationRegressions(page) {
     assert.ok((await page.locator('#scoreStage').textContent()).includes('D.S.'));
     const saved = await page.evaluate(() => scoreEditor.score.navigation);
     await page.reload();
-    await page.waitForSelector('#scoreStage g.measure');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     assert.deepEqual(await page.evaluate(() => scoreEditor.score.navigation), saved);
     assert.equal(await page.locator('#scoreStage g.ending').count(), 2);
     await page.locator('[data-navigation="segno"]').click();

@@ -12,7 +12,7 @@ const { serveStatic } = require('../scripts/lib/static-server');
     browser = await chromium.launch({ executablePath: playwrightExecutablePath() });
     const page = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
     await page.goto('http://localhost:' + server.address().port + '/partitura');
-    await page.waitForSelector('#scoreStage g.measure');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     async function spacing(n, d = 'h') {
       await page.evaluate(({ n, d }) => {
         scoreEditor.score.rows = [[[{ n, d, at: 0 }], [], [], []], [[{ n: 35, d: 'q', at: 0 }], [], [], []]];

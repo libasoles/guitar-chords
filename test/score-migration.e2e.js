@@ -108,10 +108,10 @@ const IO = require('../src/site/score-io');
       }
     }, original);
     await fallback.goto(url);
-    await fallback.waitForSelector('#scoreStage g.measure');
+    await fallback.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     await fallback.locator('#scoreTitle').fill('Respaldo');
     await fallback.reload();
-    await fallback.waitForSelector('#scoreStage g.measure');
+    await fallback.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     assert.equal(await fallback.locator('#scoreTitle').inputValue(), 'Respaldo');
     assert.equal(await fallback.evaluate(() => JSON.parse(localStorage.getItem('scoreEditor.tabs.v1')).scores[0].title), 'Respaldo');
     console.log('score-migration e2e: OK');

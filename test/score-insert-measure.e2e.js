@@ -15,7 +15,7 @@ async function run() {
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto('http://localhost:' + server.address().port + '/partitura');
-    await page.waitForSelector('#scoreStage g.measure');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     await page.evaluate(() => {
       ScoreModel.measures(scoreEditor.score)[1].push({ d: 'q', n: 30 });
       scoreEditor.render();

@@ -13,7 +13,7 @@ const { serveStatic } = require('../scripts/lib/static-server');
     const errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
     await page.goto(`http://127.0.0.1:${server.address().port}/partitura`);
-    await page.waitForSelector('#m0');
+    await page.waitForSelector('#scoreStage:not([aria-busy]) #m0');
     await page.evaluate(async () => { await document.fonts.ready; });
     // 6/8: blanca sola en la voz 2 bajo un silencio y cinco corcheas de la voz 1.
     await page.evaluate(() => {

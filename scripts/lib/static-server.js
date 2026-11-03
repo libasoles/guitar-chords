@@ -16,6 +16,7 @@ const MIME = {
   '.svg': 'image/svg+xml',
   '.json': 'application/json; charset=utf-8',
   '.ico': 'image/x-icon',
+  '.wasm': 'application/wasm',
 };
 
 /* Resuelve con el server ya escuchando. Con port 0 el sistema elige uno

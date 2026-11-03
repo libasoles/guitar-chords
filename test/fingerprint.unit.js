@@ -153,3 +153,18 @@ test('build: toda url() de los CSS publicados apunta a un archivo existente', ()
     }
   });
 });
+
+test('WASM binaries are fingerprinted and their names propagate into the loader', () => {
+  const dir = makeSite({
+    'index.html': '<script src="assets/vendor/runtime.js"></script>',
+    'assets/vendor/runtime.js': 'fetch(new URL("runtime.wasm", document.currentScript.src))',
+    'assets/vendor/runtime.wasm': Buffer.from([0, 97, 115, 109, 1, 0, 0, 0]),
+  });
+  try {
+    const map = fingerprintAssets(dir);
+    const wasm = map.get('assets/vendor/runtime.wasm');
+    assert.match(wasm, /runtime\.[a-f0-9]{10}\.wasm$/);
+    assert.ok(read(dir, map.get('assets/vendor/runtime.js')).includes(path.basename(wasm)));
+    assert.equal(fs.readFileSync(path.join(dir, wasm)).readUInt32LE(), 0x6d736100);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});

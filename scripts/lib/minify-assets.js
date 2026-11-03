@@ -1,8 +1,8 @@
 'use strict';
 /* minify-assets.js — Minifies the .js and .css files under dist/site/assets in
    place with esbuild. Runs before fingerprinting, so the content hash covers
-   the minified bytes. Files that already ship minified (*.min.js) are skipped,
-   and so is Verovio (7 MB with its WASM embedded: minifying it takes minutes).
+   the minified bytes. Files that already ship minified (*.min.js) are skipped.
+   Verovio is now small enough to minify because its WASM is a separate file.
    Returns { files, before, after } byte totals for logging. */
 
 const fs = require('fs');
@@ -24,7 +24,7 @@ function minifyAssets(assetsDir) {
   let after = 0;
   walk(assetsDir).forEach((file) => {
     const loader = LOADERS[path.extname(file)];
-    if (!loader || /\.min\.(js|css)$|verovio-toolkit-wasm\.js$/.test(file)) return;
+    if (!loader || /\.min\.(js|css)$/.test(file)) return;
     const source = fs.readFileSync(file, 'utf8');
     const out = esbuild.transformSync(source, { loader, minify: true, legalComments: 'none', sourcefile: file }).code;
     fs.writeFileSync(file, out, 'utf8');

@@ -87,6 +87,14 @@ const SUITES = {
       /^test\/score-editor\./,
     ],
   },
+  'score-loading': {
+    build: 'site',
+    paths: [
+      /^src\/site\/score-(editor|model|storage)\./,
+      /^scripts\/lib\/(verovio-browser|score-initial-staff)\.js$/,
+      /^test\/score-loading\./,
+    ],
+  },
   'score-migration': {
     build: 'site',
     paths: [

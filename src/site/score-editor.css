@@ -14,19 +14,6 @@ body.score-body {
   border-bottom: 0;
 }
 
-/* Reveal from the center without scaling the score or shifting its layout.
-   No fill mode: menus and tooltips can overflow normally after the opening. */
-@media (prefers-reduced-motion: no-preference) {
-  .score-page {
-    animation: score-page-reveal 850ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-}
-
-@keyframes score-page-reveal {
-  from { clip-path: inset(0 50%); }
-  to { clip-path: inset(0 0); }
-}
-
 .score-workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -1628,3 +1615,24 @@ body.score-moving-measure, body.score-moving-measure * { cursor: grabbing !impor
 }
 #betaPopover[hidden] { display: none; }
 #betaPopover p { margin: 0 0 0.75rem; }
+
+/* Saved scores replace the static empty staff as soon as the runtime is ready. */
+.score-stage.is-loading > svg { opacity: 0.12; }
+.score-stage.is-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: -2.25rem 0 0 -2.25rem;
+  box-sizing: border-box;
+  border: 10px solid #e3e3e3;
+  border-top-color: #333;
+  border-radius: 50%;
+  animation: score-loading-spin 0.9s linear infinite;
+}
+@keyframes score-loading-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .score-stage.is-loading::after { animation-duration: 2.4s; }
+}
