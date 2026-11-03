@@ -129,7 +129,7 @@ test('adding an eighth below the first eighth preserves both measures', async ({
   await page.mouse.up();
   const result = await page.evaluate(() => window.scoreEditor.score);
   const expected = structuredClone(score.rows[0][0]);
-  expected.splice(2, 0, { d: 'e', n: 28, v: 1, at: 12 });
+  expected.splice(2, 0, { d: 'e', n: 28, v: 2, at: 12 });
   assert.deepEqual(result.rows[0][0], expected);
   assert.deepEqual(result.rows[0][1], score.rows[0][1]);
   const ids = await page.locator('#scoreStage g.note, #scoreStage g.rest').evaluateAll(nodes => nodes.map(node => node.id));
@@ -142,6 +142,101 @@ test('adding an eighth below the first eighth preserves both measures', async ({
   await count(page.locator('#scoreStage g.note'), 10);
   assert.deepEqual(await page.evaluate(() => window.scoreEditor.score.rows[0].slice(0, 2)), score.rows[0].slice(0, 2));
 });
+async function seedVoices(page, measure) {
+  const score = { ...M.emptyScore(), clef: 'guitar', meter: '6/8', fifths: -1 };
+  score.rows[0][0] = measure;
+  await page.addInitScript(score => {
+    if (!sessionStorage.getItem('voicesSeeded')) {
+      localStorage.setItem('scoreEditor.tabs.v1', JSON.stringify({ active: 0, scores: [score] }));
+      sessionStorage.setItem('voicesSeeded', 'true');
+    }
+  }, score);
+  await page.goto(baseUrl + '/partitura');
+  await count(page.locator('#scoreStage g.note'), measure.length);
+}
+
+async function selectVoices(page, indices) {
+  await page.keyboard.press('Escape');
+  for (const [k, i] of indices.entries()) {
+    await page.locator(`[id="e0-${i}"] .notehead`).click(k ? { modifiers: ['Shift'] } : {});
+  }
+}
+
+test('recalculating the reported bass separates its stems and beams independently with undo', async ({ page }) => {
+  const measure = [
+    { d: 'q', n: 35, v: 1, at: 0 }, { d: 'e', n: 28, v: 2, at: 0 },
+    { d: 'e', n: 36, v: 1, at: 24 }, { d: 'e', n: 30, v: 1, at: 24 },
+    { d: 'e', n: 38, v: 1, at: 36 }, { d: 'e', n: 32, v: 1, at: 36 },
+    { d: 'q', n: 35, v: 1, at: 48 }, { d: 'q', n: 28, v: 1, at: 48 },
+  ];
+  await seedVoices(page, measure);
+  await count(page.locator('#scoreStage g.chord'), 3);
+  await selectVoices(page, [1, 3]);
+  await page.getByRole('button', { name: 'Recalcular voces del compás', exact: true }).click();
+  await count(page.locator('#scoreStage g.chord'), 0);
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map(ev => ev.v)), [1, 2, 1, 2, 1, 2, 1, 2]);
+  await count(page.locator('[data-action="beam"]'), 0);
+  await selectVoices(page, [3, 5]);
+  await page.getByRole('button', { name: 'Barrar', exact: true }).click();
+  const beam = page.locator('#scoreStage g.beam');
+  await count(beam, 1);
+  assert.deepEqual(await beam.locator('g.note').evaluateAll(nodes => nodes.map(n => n.id)), ['e0-3', 'e0-5']);
+  await page.keyboard.press('ControlOrMeta+z');
+  await count(beam, 0);
+  await count(page.locator('#scoreStage g.chord'), 0);
+  await page.keyboard.press('ControlOrMeta+z');
+  await count(page.locator('#scoreStage g.chord'), 3);
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0]), measure);
+});
+
+test('explicit chord grouping supports undo and survives reload', async ({ page }) => {
+  await seedVoices(page, [{ n: 35, d: 'e', at: 0 }, { n: 28, d: 'e', at: 0 }]);
+  await count(page.locator('#scoreStage g.chord'), 0);
+  await selectVoices(page, [0, 1]);
+  await page.getByRole('button', { name: 'Formar acorde', exact: true }).click();
+  await count(page.locator('#scoreStage g.chord'), 1);
+  await page.keyboard.press('ControlOrMeta+z');
+  await count(page.locator('#scoreStage g.chord'), 0);
+  await selectVoices(page, [0, 1]);
+  await page.getByRole('button', { name: 'Formar acorde', exact: true }).click();
+  const expected = await page.evaluate(() => JSON.stringify(scoreEditor.score.rows[0][0]));
+  await page.waitForFunction(expected => new Promise((resolve, reject) => {
+    const open = indexedDB.open('partitura', 1);
+    open.onerror = () => reject(open.error);
+    open.onsuccess = () => {
+      const db = open.result;
+      const read = db.transaction('workspace').objectStore('workspace').get('tabs');
+      read.onsuccess = () => { db.close(); resolve(JSON.stringify(read.result?.scores[0].rows[0][0]) === expected); };
+      read.onerror = () => { db.close(); reject(read.error); };
+    };
+  }), expected);
+  await page.reload();
+  await count(page.locator('#scoreStage g.chord'), 1);
+  await count(page.locator('#scoreStage g.note'), 2);
+});
+
+test('MusicXML preserves explicit single-voice chords and separate homorhythmic parts', async ({ page }) => {
+  await page.goto(baseUrl + '/partitura');
+  await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
+  await page.addScriptTag({ content: require('node:fs').readFileSync(path.join(__dirname, '../src/site/score-io.js'), 'utf8') });
+  const result = await page.evaluate(() => {
+    const M = ScoreModel;
+    const score = M.emptyScore();
+    const roundTrip = measure => {
+      score.rows[0][0] = measure;
+      const parsed = ScoreIO.parseMusicXml(M.toMusicXml(score), M);
+      return M.voices(parsed.rows[0][0]).map(v => v.groups.map(g => g.indices
+        .filter(i => !parsed.rows[0][0][i].rest).map(i => parsed.rows[0][0][i].n)).filter(g => g.length));
+    };
+    return {
+      chord: roundTrip([{ n: 35, d: 'q', at: 0, v: 1 }, { n: 28, d: 'q', at: 0, v: 1 }]),
+      parts: roundTrip([{ n: 35, d: 'q', at: 0, v: 1 }, { n: 28, d: 'q', at: 0, v: 2 }]),
+    };
+  });
+  assert.deepEqual(result.chord, [[[35, 28]]]);
+  assert.deepEqual(result.parts, [[[35]], [[28]]]);
+});
+
 let baseUrl;
 (async () => {
   const server = await serveStatic(path.join(__dirname, '../dist/site'), 0);

@@ -15,18 +15,17 @@
      NO es el inicio real ni ocupa tiempo: solo ordena las figuras de una misma voz y alinea las de voces distintas
      (las que comparten `at` empiezan juntas). `settle` lo reescribe con el inicio musical, sin huecos; el editor y
      `sanitize` asientan cada compas, asi que en una partitura guardada `at` coincide con el tiempo que se ve.
-   - `v`: voz guardada, 1 = la mas aguda. Opcional: sin `v` la voz sale del registro (ver abajo).
+   - `v`: identidad de voz guardada. La numeracion inicial va de agudo a grave; un cruce no cambia la identidad.
+     Opcional: sin `v` se infiere por continuidad melodica (ver docs/voice-leading.md).
    - `acc` (# b n), `tie`, `slur`, `beam` ('join' | 'break'): alteracion, ligaduras y barrado manual.
    - `dead`: nota muerta (cabeza en X); solo en notas, no en silencios.
 
    Tiempo y voces (`arrange`): lo que importa es el ORDEN de las figuras, no donde se dibujan.
-   - Voces: una figura con `v` va a esa voz. Hacen falta tantas voces como la mayor `v`, o como figuras que no forman
-     acorde empiezan en el mismo `at`. Con una sola voz todo va en orden; con varias, las notas sin `v` se reparten
-     por registro: los saltos de altura mas grandes del compas separan la voz aguda (1) de la grave (entre saltos
-     iguales, el corte que menos corre las figuras respecto de su `at`); un silencio sin `v` va a la primera voz que
-     no tiene nada en ese `at`. Un acorde cuyas
-     notas caen en registros distintos se parte, una nota por voz. Dentro de una voz no empiezan juntas dos figuras
-     que no forman acorde (igual `at` y duracion): la mas grave pasa a la voz siguiente.
+   - Voces: una figura con `v` conserva su linea, incluidos cruces de registro. Sin `v`, las notas simultaneas
+     son lineas distintas aunque tengan el mismo valor. Se asignan conjuntamente por proximidad a las notas
+     anteriores y a las siguientes voces declaradas; la altura inicial solo inicia/desempata las identidades.
+     La coincidencia de ritmo no prueba identidad de voz. Un acorde de notacion requiere una decision explicita
+     (misma `v`, inicio y duracion); se conserva esa decision en partituras guardadas e importadas.
    - Tiempo: cada voz suena en orden, cada figura pegada a la anterior de su voz; la primera empieza en 0. Un hueco en
      `at` (antes de la primera figura o entre dos) no dura nada. Solo se espera para alinear: las figuras de voces
      distintas con el mismo `at` empiezan juntas, cuando termina la ultima de las que vienen antes. Un compas con una
@@ -69,7 +68,7 @@
     '##': { alter: 2, name: 'double-sharp' }, bb: { alter: -2, name: 'flat-flat' },
   };
 
-  const MAX_VOICE = 4;
+  const MAX_VOICE = 16;
   const REST_CLEARANCE = 6; // pasos diatonicos entre una nota y un silencio que suenan a la vez
 
   // Grupos de valoracion especial: n figuras (clave) ocupan el tiempo de TUPLETS[n] del mismo valor. `tp` identifica el
@@ -112,64 +111,115 @@
     });
   }
 
+  // Inferencia horizontal, no analisis armonico: una coincidencia vertical no prueba que dos notas sean una voz.
+  // Las voces guardadas son decisiones de escritura; solo se infieren las figuras sin `v`.
+  function inferVoiceLanes(measure, hint) {
+    if (measure.every(savedVoice)) return measure.map((ev) => ev.v - 1);
+    const frames = new Map();
+    measure.forEach((ev, i) => {
+      if (!frames.has(hint[i])) frames.set(hint[i], []);
+      frames.get(hint[i]).push(i);
+    });
+    const batches = [...frames].sort((a, b) => a[0] - b[0]).map(([at, indices]) => {
+      const units = [];
+      indices.forEach((i) => {
+        const ev = measure[i];
+        // Solo una voz ya declarada permite compartir plica (acorde de notacion).
+        const chord = !ev.rest && savedVoice(ev) && units.find((u) =>
+          !measure[u[0]].rest && savedVoice(measure[u[0]]) === ev.v && length(measure[u[0]]) === length(ev));
+        if (chord) chord.push(i);
+        else units.push([i]);
+      });
+      return { at, units };
+    });
+    const count = Math.max(1, ...measure.map(savedVoice), ...batches.map((b) => b.units.length));
+    const pitches = (unit) => unit.filter((i) => !measure[i].rest).map((i) => measure[i].n);
+    const distance = (a, b) => a.length && b.length ? Math.min(...a.flatMap((x) => b.map((y) => Math.abs(x - y)))) : 0;
+    const lane = [];
+    const previous = Array.from({ length: count }, () => null);
+    // Registro solo para iniciar o desempatar, nunca como frontera fija entre voces.
+    const seed = batches.reduce((best, b) => b.units.length > best.units.length ? b : best, batches[0]);
+    const ranked = seed.units.slice().sort((a, b) => Math.max(-Infinity, ...pitches(b)) - Math.max(-Infinity, ...pitches(a)));
+    const register = [...new Set(measure.filter(ev => !ev.rest).map(ev => ev.n))].sort((a, b) => b - a);
+    const seedPitches = Array.from({ length: count }, (_, k) => {
+      const unit = seed.units.find(u => savedVoice(measure[u[0]]) === k + 1) || ranked[k] || [];
+      const own = pitches(unit);
+      if (own.length) return own;
+      // Un silencio no aporta altura: iniciar esa parte con una referencia de registro,
+      // sin darle coste cero frente a cualquier nota ni imponer un corte permanente.
+      const pitch = register[Math.round(k * (register.length - 1) / Math.max(1, count - 1))];
+      return pitch === undefined ? [] : [pitch];
+    });
+    batches.forEach(({ at, units }) => {
+      const taken = new Set();
+      const unknown = [];
+      units.forEach((unit) => {
+        const voice = savedVoice(measure[unit[0]]);
+        if (voice) { unit.forEach((i) => { lane[i] = voice - 1; }); taken.add(voice - 1); }
+        else unknown.push(unit);
+      });
+      const free = Array.from({ length: count }, (_, k) => k).filter((k) => !taken.has(k));
+      const cost = (unit, k) => {
+        const own = pitches(unit);
+        const before = previous[k];
+        // La siguiente decision explicita tambien informa la continuidad (entrada tardia, cruces).
+        const after = batches.find((b) => b.at > at && b.units.some((u) => savedVoice(measure[u[0]]) === k + 1 && pitches(u).length));
+        const next = after?.units.find((u) => savedVoice(measure[u[0]]) === k + 1 && pitches(u).length);
+        if (before || next) return (before ? distance(own, before) : 0) + (next ? distance(own, pitches(next)) : 0);
+        return distance(own, seedPitches[k]);
+      };
+      // Asignacion conjunta: dos notas simultaneas no compiten codiciosamente por la misma linea.
+      const assigned = minimumAssignment(unknown.map((unit) => free.map((k) => cost(unit, k))));
+      unknown.forEach((unit, j) => unit.forEach((i) => { lane[i] = free[assigned[j]]; }));
+      units.forEach((unit) => {
+        const own = pitches(unit);
+        if (own.length) previous[lane[unit[0]]] = own;
+      });
+    });
+    return lane;
+  }
+
+  // Emparejamiento de coste minimo (Hungarian), O(n^3), sin enumerar permutaciones de acordes grandes.
+  function minimumAssignment(costs) {
+    if (!costs.length) return [];
+    const n = costs.length, m = costs[0].length;
+    const u = Array(n + 1).fill(0), v = Array(m + 1).fill(0), p = Array(m + 1).fill(0), way = Array(m + 1).fill(0);
+    for (let i = 1; i <= n; i += 1) {
+      p[0] = i;
+      let j0 = 0;
+      const min = Array(m + 1).fill(Infinity), used = Array(m + 1).fill(false);
+      do {
+        used[j0] = true;
+        const i0 = p[j0];
+        let delta = Infinity, j1 = 0;
+        for (let j = 1; j <= m; j += 1) {
+          if (used[j]) continue;
+          const cur = costs[i0 - 1][j - 1] - u[i0] - v[j];
+          if (cur < min[j]) { min[j] = cur; way[j] = j0; }
+          if (min[j] < delta) { delta = min[j]; j1 = j; }
+        }
+        for (let j = 0; j <= m; j += 1) {
+          if (used[j]) { u[p[j]] += delta; v[j] -= delta; }
+          else min[j] -= delta;
+        }
+        j0 = j1;
+      } while (p[j0]);
+      do { const j1 = way[j0]; p[j0] = p[j1]; j0 = j1; } while (j0);
+    }
+    const result = [];
+    for (let j = 1; j <= m; j += 1) if (p[j]) result[p[j] - 1] = j - 1;
+    return result;
+  }
+
   // Reparte las figuras en voces y calcula cuando empieza cada una (ver el encabezado).
   function arrange(measure) {
     if (!measure.length) return { lanes: [{ end: 0, groups: [] }], starts: [] };
     const hint = hints(measure);
-    // Cuantas voces hacen falta: la mayor `v` guardada, o cuantas figuras que no forman acorde empiezan juntas.
-    let count = Math.max(1, ...measure.map(savedVoice));
-    const byHint = new Map();
-    measure.forEach((ev, i) => {
-      if (!byHint.has(hint[i])) byHint.set(hint[i], []);
-      byHint.get(hint[i]).push(i);
-    });
-    byHint.forEach((list) => {
-      const slots = new Set();
-      list.forEach((i) => {
-        const ev = measure[i];
-        if (ev.rest) slots.add('r' + i);
-        else if (savedVoice(ev)) slots.add('n' + length(ev) + ':' + ev.v);
-      });
-      list.forEach((i) => {
-        const ev = measure[i];
-        if (ev.rest || savedVoice(ev)) return;
-        if (![...slots].some((slot) => slot.startsWith('n' + length(ev) + ':'))) slots.add('n' + length(ev));
-      });
-      count = Math.max(count, slots.size);
-    });
-    // Registro: con varias voces, los saltos de altura mas grandes del compas separan las voces de agudo a grave.
-    // Entre saltos iguales gana el corte que menos corre las figuras respecto de su `at`.
-    const pitches = [...new Set(measure.filter((ev) => !ev.rest).map((ev) => ev.n))].sort((a, b) => a - b);
-    const gaps = pitches.slice(1).map((p, j) => ({ size: p - pitches[j], above: p })).sort((a, b) => b.size - a.size || a.above - b.above);
-    const need = Math.min(count - 1, gaps.length);
-    let options = [gaps.slice(0, need).map((gap) => gap.above)];
-    if (need > 0 && need < gaps.length && gaps[need].size === gaps[need - 1].size) {
-      const threshold = gaps[need - 1].size;
-      const sure = gaps.filter((gap) => gap.size > threshold).map((gap) => gap.above);
-      const tied = gaps.filter((gap) => gap.size === threshold).map((gap) => gap.above);
-      const combos = (from, k) => (k === 0 ? [[]] : from.length < k ? [] :
-        combos(from.slice(1), k - 1).map((rest) => [from[0]].concat(rest)).concat(combos(from.slice(1), k)));
-      options = combos(tied, need - sure.length).slice(0, 32).map((picked) => sure.concat(picked));
-    }
-    let best = null;
-    options.forEach((cuts) => {
-      const result = layout(measure, hint, cuts);
-      result.shift = result.starts.reduce((sum, start, i) => sum + Math.abs(start - hint[i]), 0);
-      if (!best || result.shift < best.shift) best = result;
-    });
-    return { lanes: best.lanes, starts: best.starts };
+    return layout(measure, hint, inferVoiceLanes(measure, hint));
   }
 
-  // Voces y tiempos de `arrange` para unos cortes de registro dados (`cuts`: la nota mas grave de cada voz superior).
-  function layout(measure, hint, cuts) {
-    const lane = measure.map((ev) => (savedVoice(ev) ? ev.v - 1 : ev.rest ? -1 : cuts.filter((above) => above > ev.n).length));
-    // Un silencio sin voz va a la primera voz que no tiene nada en ese lugar.
-    measure.forEach((ev, i) => {
-      if (lane[i] >= 0) return;
-      let k = 0;
-      while (measure.some((o, j) => j !== i && lane[j] === k && hint[j] === hint[i])) k += 1;
-      lane[i] = k;
-    });
+  // Voces y tiempos de `arrange` para una asignacion de lineas melodicas.
+  function layout(measure, hint, lane) {
     // Dentro de una voz no empiezan juntas dos figuras que no forman acorde: queda la mas aguda y las demas bajan una voz.
     const top = (list) => (measure[list[0]].rest ? -Infinity : Math.max(...list.map((i) => measure[i].n)));
     for (let k = 0; k <= Math.max(...lane); k += 1) {
@@ -270,9 +320,9 @@
     if (!ev.rest && others.some((o, i) => !o.rest && starts[i] === at && o.n === ev.n && o.acc === ev.acc)) return null;
     if (!ev.rest) {
       const trial = clone(others);
-      // Al mover se conserva la voz; agregar una nota puede incorporarla a un acorde.
+      // Al mover se conserva la voz; al agregar se busca una linea independiente.
       (preserveVoice ? insertAt : insertNote)(trial, Object.assign({}, ev), at);
-      if (measureLength(trial) > limit) return null;
+      if (voices(trial).length > MAX_VOICE || measureLength(trial) > limit) return null;
     }
     return { at, d: ev.d, dot: ev.dot };
   }
@@ -332,6 +382,9 @@
   function duplicateSelection(score, refs) {
     const trial = clone(score);
     const all = measures(trial);
+    // Duplicar continua las partes originales; no debe reinterpretar las copias
+    // como voces nuevas cuando coinciden con notas que ya estaban en el destino.
+    all.forEach(settleVoices);
     const chosen = refs.filter((r, k) => all[r.mi]?.[r.i] && refs.findIndex((o) => o.mi === r.mi && o.i === r.i) === k);
     if (!chosen.length) return null;
     const savedTabs = captureTabReferences(trial);
@@ -1614,39 +1667,21 @@
     return arrange(measure).lanes;
   }
 
-  // Descarta las `v` guardadas y vuelve a repartir las voces (por registro y por lo que empieza junto). Si salen mas de 2,
-  // la voz sobrante se une a la voz mas cercana en altura: sus figuras se intercalan en el orden de su inicio. Si lo que
-  // queda no cabe en `limit`, el compas no cambia. Devuelve si tuvo que unir voces.
+  // Recalcula las lineas sin fusionar voces ni cambiar su ritmo para hacerlas caber.
+  // Nombre conservado para los consumidores anteriores del modelo.
   function mergeVoices(measure, limit) {
     const saved = measure.map((ev) => Object.assign({}, ev));
+    const starts = onsets(measure);
+    const previous = [];
+    voices(measure).forEach((voice, k) => voice.groups.forEach(g => g.indices.forEach(i => { previous[i] = k + 1; })));
     measure.forEach((ev) => { delete ev.v; });
-    const lanes = voices(measure).map((voice) => voice.groups.slice());
-    const high = (groups) => Math.max(-Infinity, ...groups.flatMap((g) => g.indices.map((i) => (measure[i].rest ? -Infinity : measure[i].n))));
-    const merged = lanes.length > 2;
-    while (lanes.length > 2) {
-      const extra = lanes.pop();
-      const target = lanes.map((lane, k) => [Math.abs(high(lane) - high(extra)), k]).sort((a, b) => a[0] - b[0])[0][1];
-      lanes[target] = lanes[target].concat(extra);
-    }
-    if (merged) {
-      // Una voz unida queda en orden desde el inicio, sin huecos ni dos figuras empezando juntas.
-      lanes.forEach((lane) => {
-        let cursor = 0;
-        lane.sort((a, b) => a.at - b.at || a.hint - b.hint);
-        lane.forEach((group) => {
-          group.indices.forEach((i) => { measure[i].at = cursor; });
-          cursor += group.size;
-        });
-      });
-    }
-    lanes.forEach((lane, k) => lane.forEach((g) => g.indices.forEach((i) => { measure[i].v = k + 1; })));
-    if (measureLength(measure) > limit) {
+    if (voices(measure).length > MAX_VOICE || measureLength(measure) > limit || onsets(measure).some((at, i) => at !== starts[i])) {
       measure.forEach((ev, i) => { Object.keys(ev).forEach((key) => delete ev[key]); Object.assign(ev, saved[i]); });
       return false;
     }
     settle(measure);
     settleVoices(measure);
-    return merged;
+    return measure.some((ev, i) => ev.v !== previous[i]);
   }
 
   // Fija `v` en todas las figuras segun la voz en la que hoy suenan, para que agregar otra no las reparta distinto.
@@ -1728,15 +1763,20 @@
     return { measure: others, index };
   }
 
-  // Inserta una nota; si cae en un acorde existente (mismo inicio y duracion) toma su voz.
-  // Con varios acordes posibles (uno por voz), el mas cercano en altura.
+  // Una nota nueva continua una linea libre o abre otra; compartir duracion no la convierte en acorde.
+  // La union en acorde se pide explicitamente con la seleccion.
   function insertNote(measure, ev, at) {
-    const h = hints(measure);
-    const chords = measure.filter((o, i) => !o.rest && h[i] === at && length(o) === length(ev));
-    if (chords.length) {
-      const chord = chords.reduce((a, b) => (Math.abs(b.n - ev.n) < Math.abs(a.n - ev.n) ? b : a));
-      if (Number.isInteger(chord.v)) ev.v = chord.v;
-      else delete ev.v;
+    if (measure.length && !savedVoice(ev)) {
+      settleVoices(measure);
+      const h = hints(measure);
+      const lanes = voices(measure);
+      const together = measure.filter((o, i) => h[i] === at);
+      if (new Set(together.map((o) => o.v)).size === lanes.length) {
+        const closest = together.reduce((a, b) => Math.abs((b.n ?? ev.n) - ev.n) < Math.abs((a.n ?? ev.n) - ev.n) ? b : a);
+        const voice = closest.v + (ev.n > (closest.n ?? ev.n) ? 0 : 1);
+        measure.forEach((o) => { if (o.v >= voice) o.v += 1; });
+        ev.v = voice;
+      }
     }
     return insertAt(measure, ev, at);
   }
@@ -1829,6 +1869,31 @@
   // 'triplet' para 3 figuras (el nombre de siempre) y 'tupletN' para las demas.
   const tupletAction = (size) => (size === 3 ? 'triplet' : 'tuplet' + size);
 
+  function voiceSelection(score, sel) {
+    const all = measures(score);
+    if (sel.length < 2 || sel.some((s) => s.mi !== sel[0].mi || !all[s.mi]?.[s.i])) return null;
+    const indices = [...new Set(sel.map((s) => s.i))];
+    return indices.length > 1 ? { measure: all[sel[0].mi], mi: sel[0].mi, indices } : null;
+  }
+
+  function chordSelection(score, sel) {
+    const r = voiceSelection(score, sel);
+    if (!r) return null;
+    const first = r.measure[r.indices[0]];
+    const starts = onsets(r.measure);
+    if (r.indices.some((i) => {
+      const ev = r.measure[i];
+      return ev.rest || starts[i] !== starts[r.indices[0]] || ev.d !== first.d || ev.dot !== first.dot || ev.tp !== first.tp || ev.tn !== first.tn;
+    })) return null;
+    const groups = voices(r.measure).flatMap((v) => v.groups).filter((g) => g.indices.some((i) => r.indices.includes(i)));
+    if (groups.length < 2 || !groups.every((g) => g.indices.every((i) => r.indices.includes(i)))) return null;
+    const trial = clone(r.measure);
+    settleVoices(trial);
+    const voice = Math.min(...r.indices.map((i) => trial[i].v));
+    r.indices.forEach((i) => { trial[i].v = voice; });
+    return onsets(trial).every((at, i) => at === starts[i]) ? r : null;
+  }
+
   // Acciones disponibles para una seleccion de figuras [{ mi, i }], en el orden en que se ofrecen.
   function selectionActions(score, sel) {
     const actions = [];
@@ -1841,6 +1906,9 @@
     const beams = beamRun(score, sel);
     if (beams && beams.joins.some((j) => !j)) actions.push('beam');
     if (beams && beams.joins.some((j) => j)) actions.push('unbeam');
+    if (chordSelection(score, sel)) actions.push('joinChord');
+    const voice = voiceSelection(score, sel);
+    if (voice && mergeVoices(clone(voice.measure), capacity(score, voice.mi))) actions.push('revoice');
     return actions;
   }
 
@@ -1851,6 +1919,17 @@
   // Aplica una de las acciones de `selectionActions`; false si no corresponde o no entra.
   function applySelection(score, sel, action) {
     if (!selectionActions(score, sel).includes(action)) return false;
+    if (action === 'revoice') {
+      const r = voiceSelection(score, sel);
+      return mergeVoices(r.measure, capacity(score, r.mi));
+    }
+    if (action === 'joinChord') {
+      const r = chordSelection(score, sel);
+      settleVoices(r.measure);
+      const voice = Math.min(...r.indices.map((i) => r.measure[i].v));
+      r.indices.forEach((i) => { r.measure[i].v = voice; });
+      return true;
+    }
     if (/^(triplet|tuplet\d)$/.test(action)) {
       // El orden no cambia: las figuras se acortan y lo que sigue en su voz se adelanta.
       const r = tripletRun(score, sel);
@@ -2143,7 +2222,7 @@
   }
 
   return {
-    voicesText, TUPLETS, tupletSize, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
+    voicesText, TUPLETS, tupletSize, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, MAX_VOICE, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
     captureTabReferences, restoreTabReferences, copySelection, pasteSelection, duplicateSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, moveMeasure, addMeasure, insertMeasure, removeMeasure, removeMeasureAt, fits, canDot, dotStart, dotPlan,
     TUNINGS, tuningOf, tuningLabels, meterOf, meterAt, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setNavigation, removeNavigation, navigationEndings, setBarline, removeBarline, setBarre, removeBarre, HAIRPINS, DYNAMICS, hairpinFits, findHairpin, setHairpin, removeHairpin, setHairpinDynamic, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,

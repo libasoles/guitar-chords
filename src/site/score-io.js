@@ -180,13 +180,12 @@
           const voice = text(node, 'voice') || '1';
           if (!voices.has(voice)) voices.set(voice, voices.size + 1);
           const v = voices.get(voice);
-          if (v <= 4) ev.v = v;
+          if (v <= M.MAX_VOICE) ev.v = v;
           ev.at = Math.round(start * M.DIVISIONS / divisions);
           events.push(ev);
         }
       });
-      // Con una sola voz no hace falta fijarla.
-      if (voices.size <= 1) events.forEach((ev) => { delete ev.v; });
+      // Conservar tambien la voz unica: los <chord> importados son decisiones explicitas de notacion.
       flat.push(events);
     });
 

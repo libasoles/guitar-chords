@@ -46,3 +46,10 @@ Every icon must be a [Lucide](https://lucide.dev) icon whenever one exists (inli
 ## Editor marks
 
 The user marks some scores with editor marks (their own picks) and will ask for more in later sessions. Four exist: **favorite** ("favorita del editor", filled black Lucide `star`), **insightful** (Lucide `square-star`), **effort** (Lucide `square-activity`) and **bookmark** (Lucide `bookmark`). Each shows as an icon with no visible text left of the title in its card and, in the full-score modal, on the score title line flush with the staff left edge (`.modal-pages > .editor-marks`). To mark one, add its number to the collection list in `scripts/lib/editor-marks.js`; if that collection card builder does not yet call `editorMarks(...)` in the `prelude-card-title` h2 and in its modal `.modal-pages` (only Sagreras and Carcassi's progressive pieces do), add it. Each icon shows a black Radix-style tooltip on hover/focus (`.tooltip` + `data-tooltip` in `11-articles.css`; reuse it for any other tooltip). Mark every new one the same way; do not invent another style. The Carcassi waltzes are only on the waltzes page (`carcassi-valses`, with the book's piece numbers); the progressive pieces page lists the other pieces. Adding scores to editor marks is a trivial data edit in `scripts/lib/editor-marks.js`: do not run local builds or tests when only updating these lists.
+
+## Voces y conducción
+
+- Fundamentación, fuentes, reglas y límites: `docs/voice-leading.md`.
+- No inferir una única voz porque dos notas coincidan en inicio y duración. Conservar la continuidad de las líneas y las voces explícitas, incluidos cruces de registro.
+- Formar un acorde de notación es una decisión explícita; no equivale a analizar las voces contrapuntísticas del acorde.
+- Recalcular voces no debe fusionarlas para hacerlas caber ni cambiar los inicios o las duraciones. Verificar homorritmia, cruces, independencia del bajo y persistencia.
