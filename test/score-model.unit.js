@@ -1421,3 +1421,33 @@ test('quitar un compas cualquiera lo borra con sus barras y corre los siguientes
   assert.equal(M.measures(score).length, 11);
   assert.ok(!M.removeMeasureAt(score, 99));
 });
+
+
+test('barrar acordes exporta cada nivel solo en la primera nota del acorde', () => {
+  for (const d of ['e', 's', 'f']) {
+    const score = { ...M.emptyScore(), meter: '6/8' };
+    const step = M.VALUES[d];
+    score.rows[0][0] = [
+      { n: 28, d: 'q', at: 0 }, { n: 35, d: 'q', at: 0 },
+      { n: 30, d, at: 24, beam: 'break' }, { n: 36, d, at: 24 },
+      { n: 32, d, at: 24 + step }, { n: 38, d, at: 24 + step },
+      { n: 28, d: 'q', at: 24 + 2 * step }, { n: 35, d: 'q', at: 24 + 2 * step },
+    ];
+    const refs = [{ mi: 0, i: 2 }, { mi: 0, i: 4 }];
+    const before = score.rows[0][0].map(({ beam, ...ev }) => ev);
+    assert.equal(M.applySelection(score, refs, 'beam'), true);
+    assert.deepEqual(score.rows[0][0].map(({ beam, ...ev }) => ev), before);
+    const xml = M.toMusicXml(score).split('<measure ')[1];
+    const notes = [...xml.matchAll(/<note id="e0-\d+">([\s\S]*?)<\/note>/g)].map(m => m[1]);
+    assert.equal(notes.length, 8);
+    for (const note of notes.filter(note => note.includes('<chord/>'))) {
+      assert.ok(!note.includes('<beam '), 'las notas adicionales no repiten las barras');
+    }
+    const levels = { e: 1, s: 2, f: 3 }[d];
+    for (let level = 1; level <= levels; level++) {
+      assert.deepEqual([...xml.matchAll(new RegExp(`<beam number="${level}">(\\w+)</beam>`, 'g'))].map(m => m[1]), ['begin', 'end']);
+    }
+    assert.equal(M.applySelection(score, refs, 'unbeam'), true);
+    assert.ok(!M.toMusicXml(score).split('<measure ')[1].includes('<beam '));
+  }
+});

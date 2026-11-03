@@ -1919,7 +1919,9 @@
     if (ev.tp) xml += `<time-modification><actual-notes>${tupletSize(ev)}</actual-notes><normal-notes>${TUPLETS[tupletSize(ev)]}</normal-notes></time-modification>`;
     if (!ev.rest && stem) xml += `<stem>${stem}</stem>`;
     if (!ev.rest && ev.dead) xml += '<notehead>x</notehead>';
-    if (beams) Object.keys(beams).forEach((level) => { xml += `<beam number="${level}">${beams[level]}</beam>`; });
+    // La barra pertenece al acorde entero: repetirla en sus notas adicionales hace
+    // que Verovio abra/cierre el mismo grupo varias veces y pierda figuras.
+    if (beams && !chord) Object.keys(beams).forEach((level) => { xml += `<beam number="${level}">${beams[level]}</beam>`; });
     const marks = ties.map((type) => `<tied type="${type}"/>`).concat(slurs.map((type) => `<slur type="${type}" number="1"/>`));
     if (tuplet) (tuplet === 'both' ? ['start', 'stop'] : [tuplet]).forEach((type) => { marks.push(`<tuplet type="${type}"/>`); });
     if (marks.length) xml += `<notations>${marks.join('')}</notations>`;
