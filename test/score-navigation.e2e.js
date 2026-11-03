@@ -1,5 +1,5 @@
 'use strict';
-const { clearScoreStorage } = require('./score-storage-helpers');
+const { clearScoreStorage, readScoreStorage } = require('./score-storage-helpers');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const { chromium } = require('playwright');
@@ -22,6 +22,7 @@ async function checkHiddenBarlineEndings(page) {
   assert.equal(await page.evaluate(() => scoreEditor.score.barlines[1].hidden), true);
   let box = await bounds();
   assert.ok(Math.abs(box.left - box.measureLeft) < 10, 'existing ending expands left across the deleted barline: ' + JSON.stringify(box));
+  await readScoreStorage(page);
   await page.reload();
   await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
   box = await bounds();
@@ -139,8 +140,8 @@ async function checkNavigationRegressions(page) {
     await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     await checkHiddenBarlineEndings(page);
     await checkNavigationRegressions(page);
-    assert.deepEqual(await page.locator('#scoreBarlines > button').evaluateAll((buttons) => buttons.map((b) => b.id || b.dataset.tool || b.dataset.barline || b.dataset.navigation)),
-      ['scoreTabToggle', 'barre', 'start', 'end', 'double', 'dc', 'ds', 'segno', 'first', 'second']);
+    assert.deepEqual(await page.locator('#scoreBarlines > button').evaluateAll((buttons) => buttons.map((b) => b.id || b.dataset.tool || b.dataset.barline || b.dataset.navigation || b.dataset.hairpin)),
+      ['scoreTabToggle', 'barre', 'start', 'end', 'double', 'dc', 'ds', 'segno', 'first', 'second', 'cresc', 'dim']);
     for (const [mi, mark] of [[0, 'segno'], [1, 'first'], [2, 'second'], [3, 'ds'], [4, 'dc']]) {
       await page.locator(`[data-navigation="${mark}"]`).click();
       const staff = await page.locator(`#m${mi} > g.staff > path`).first().boundingBox();
@@ -153,6 +154,7 @@ async function checkNavigationRegressions(page) {
     assert.ok((await page.locator('#scoreStage').textContent()).includes('D.C.'));
     assert.ok((await page.locator('#scoreStage').textContent()).includes('D.S.'));
     const saved = await page.evaluate(() => scoreEditor.score.navigation);
+    assert.deepEqual((await readScoreStorage(page)).scores[0].navigation, saved);
     await page.reload();
     await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     assert.deepEqual(await page.evaluate(() => scoreEditor.score.navigation), saved);
