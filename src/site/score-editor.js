@@ -2931,10 +2931,14 @@
       button.setAttribute('aria-pressed', String(Number(button.dataset.fifths) === M.keyAt(score, keyMeasure)));
     });
     if (!clefPopup.matches(':popover-open')) clefPopup.showPopover();
-    clefOptions.querySelectorAll('button').forEach((button) => {
-      if (!button.querySelector('svg')) signaturePreview(button, button.dataset.clef, 0, 'clef');
-    });
-    if (galleryClef !== M.clefAt(score, keyMeasure)) {
+    // getBBox() devuelve cajas vacias dentro de una seccion con display:none.
+    // Generar y guardar las muestras solo cuando su seccion ya esta visible.
+    if (popupSections !== 'key') {
+      clefOptions.querySelectorAll('button').forEach((button) => {
+        if (!button.querySelector('svg')) signaturePreview(button, button.dataset.clef, 0, 'clef');
+      });
+    }
+    if (popupSections !== 'clef' && galleryClef !== M.clefAt(score, keyMeasure)) {
       keyOptions.querySelectorAll('button').forEach((button) => {
         if (!Number(button.dataset.fifths)) return;
         button.querySelector('svg')?.remove();

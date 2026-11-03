@@ -130,6 +130,13 @@ const SUITES = {
       /^test\/score-paste-signatures\./,
     ],
   },
+  'score-signature-preview': {
+    build: 'site',
+    paths: [
+      /^src\/site\/score-(editor|model)\./,
+      /^test\/score-signature-preview\./,
+    ],
+  },
   'score-reorder': {
     build: 'site',
     paths: [
