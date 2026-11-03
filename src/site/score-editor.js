@@ -1236,6 +1236,15 @@
       const tabs = document.createElement('ascii-tabs');
       tabs.className = 'score-tab';
       tabs.setAttribute('labels', row === 0 ? 'notes' : 'none');
+      if (row === 0) {
+        // Temporary workaround: ascii-tabs includes ASCII pipes in note labels.
+        // It rebuilds them on interaction; keep the gutter width and tuning names.
+        new MutationObserver(() => {
+          tabs.querySelectorAll('.ascii-tabs-label').forEach((label) => {
+            if (label.textContent.includes('|')) label.textContent = label.textContent.replace(/\|/g, '');
+          });
+        }).observe(tabs, { childList: true, subtree: true });
+      }
       tabs.setAttribute('tuning', M.tuningLabels(score).join(' '));
       tabs.setAttribute('variant', 'flat');
       tabs.setAttribute('theme', 'light');
