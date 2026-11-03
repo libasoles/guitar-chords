@@ -51,7 +51,7 @@ run('articles-carcassi', async ({ base, page, tmp, BASE_URL }) => {
     assert.deepEqual(values[1][3], [0, 0, 1, null, null, 0]);
     assert.deepEqual(values[2][3], [0, 3, 1, null, 2, null]);
     // Letter labels on the strings.
-    assert.match(await page.locator('.sequence-forms ascii-tabs').first().locator('.ascii-tabs-tab').first().innerText(), /^e\|/);
+    assert.match(await page.locator('.sequence-forms ascii-tabs').first().locator('.ascii-tabs-tab').first().innerText(), /^e /);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     assert.ok(overflow <= 0, 'scroll horizontal de ' + overflow + 'px en ' + article);
     // The score cards fit inside the viewport.

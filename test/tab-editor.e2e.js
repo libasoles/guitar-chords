@@ -268,12 +268,19 @@ async function run() {
     assert.strictEqual(await firstFret.textContent(), 'do');
     assert.deepStrictEqual(await labels(), ['1 ', '2 ', '3 ', '4 ', '5 ', '6 ']);
     await letterLabels.check();
-    assert.deepStrictEqual(await labels(), ['e|', 'B|', 'G|', 'D|', 'A|', 'E|']);
+    assert.deepStrictEqual(await labels(), ['e ', 'B ', 'G ', 'D ', 'A ', 'E ']);
     assert.strictEqual(await firstFret.textContent(), 'do');
     await noteNames.uncheck();
     assert.strictEqual(await firstFret.textContent(), '3');
-    assert.deepStrictEqual(await labels(), ['e|', 'B|', 'G|', 'D|', 'A|', 'E|']);
+    assert.deepStrictEqual(await labels(), ['e ', 'B ', 'G ', 'D ', 'A ', 'E ']);
+    // String bars occupy the label's separator space and remain independent of labels.
+    await page.locator('ascii-tabs').evaluate(el => { el.stringBars = true; });
+    assert.deepStrictEqual(await labels(), ['e', 'B', 'G', 'D', 'A', 'E']);
+    assert.ok(await page.locator('.ascii-tabs-bar').count() >= 6);
     await letterLabels.uncheck();
+    assert.deepStrictEqual(await labels(), ['1', '2', '3', '4', '5', '6']);
+    await page.locator('ascii-tabs').evaluate(el => { el.stringBars = false; });
+    assert.strictEqual(await page.locator('.ascii-tabs-bar').count(), 0);
     assert.deepStrictEqual(await labels(), ['1 ', '2 ', '3 ', '4 ', '5 ', '6 ']);
     assert.deepStrictEqual(await page.evaluate(() => document.querySelector('ascii-tabs').value), originalTabs);
     assert.strictEqual(await page.evaluate(() => localStorage.getItem('tabEditor.tabs')), originalStorage);
@@ -537,7 +544,7 @@ async function run() {
     await page.getByRole('checkbox', { name: 'Show note names' }).check();
     assert.strictEqual(await page.locator('.ascii-tabs-cell[data-c="0"][data-s="0"] .ascii-tabs-fret').textContent(), 'E');
     await page.getByRole('checkbox', { name: 'String labels as letters' }).check();
-    assert.deepStrictEqual(await labels(), ['e|', 'B|', 'G|', 'D|', 'A|', 'E|']);
+    assert.deepStrictEqual(await labels(), ['e ', 'B ', 'G ', 'D ', 'A ', 'E ']);
     await page.goto(base + pagePath('ejercicio-de-sextas', 'en'));
     await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
     const enSixths = await page.evaluate(() => {

@@ -39,18 +39,20 @@ npm run build       # Build site + extension → dist/
 npm test            # Unit + E2E tests
 ```
 
-Production bundles ascii-tabs [v0.11.1](https://github.com/libasoles/ascii-tabs/releases/tag/v0.11.1)
-from the committed `vendor/ascii-tabs.js`. The editor uses `annotation-fit="widen"`
+Production bundles ascii-tabs [v0.11.2](https://github.com/libasoles/ascii-tabs/releases/tag/v0.11.2)
+from the committed `vendor/ascii-tabs.js`, including the upstream string-bar prefix
+spacing fix. String bars are optional (`string-bars`); note labels default to `e `,
+with `e|` when bars are enabled. The editor uses `annotation-fit="widen"`
 to reserve column width for annotations, including in ASCII copies; article tabs
 use `annotation-fit="overflow"` to preserve their spacing. Cmd/Alt+Right Arrow duplicates a
 column; Cmd/Alt+0 fills its empty strings with open-string frets; B toggles bold.
 Drag from an empty cell to select a group of notes, then move, duplicate,
 copy or delete it. ASCII tabs can also be pasted at the current column.
 
-For local development, link the sibling `punteo-ascii` project:
+For local development, link the sibling `ascii-tabs` project:
 
 ```bash
-ln -s ../../punteo-ascii/ascii-tabs.js vendor/ascii-tabs.local.js
+ln -s ../../ascii-tabs/ascii-tabs.js vendor/ascii-tabs.local.js
 npm run dev
 ```
 

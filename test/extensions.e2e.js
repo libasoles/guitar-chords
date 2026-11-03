@@ -209,7 +209,7 @@ async function displayOptions(page, language) {
   await notes.check();
   assert.equal(await cell(page, 0, 0).locator('.ascii-tabs-fret').textContent(), es ? 'mi' : 'E');
   await labels.check();
-  assert.deepEqual(await page.locator('.ascii-tabs-label').allTextContents(), ['e|', 'B|', 'G|', 'D|', 'A|', 'E|']);
+  assert.deepEqual(await page.locator('.ascii-tabs-label').allTextContents(), ['e ', 'B ', 'G ', 'D ', 'A ', 'E ']);
   await page.keyboard.press('Escape');
   assert.equal(await notes.isVisible(), false);
   assert.equal(await menu.evaluate(el => el === document.activeElement), true);

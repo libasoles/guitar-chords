@@ -23,14 +23,16 @@ const normalizeTuning = value => {
     : [...STANDARD_TUNING];
 };
 const labelStyle = value => (value === 'notes' || value === 'none' ? value : 'numbers');
-const stringLabels = (labels, tuning) => {
+const stringLabels = (labels, tuning, stringBars = false) => {
   if (labelStyle(labels) === 'none') return Array(STRING_COUNT).fill('');
-  if (labelStyle(labels) === 'numbers') return ['1 ', '2 ', '3 ', '4 ', '5 ', '6 '];
-  const names = tuning.map((name, s) => `${s === 0 ? name.toLowerCase() : name}|`);
-  const width = Math.max(...names.map(name => name.length));
+  const names = labelStyle(labels) === 'numbers'
+    ? ['1', '2', '3', '4', '5', '6']
+    : tuning.map((name, s) => s === 0 ? name.toLowerCase() : name);
+  const width = Math.max(...names.map(name => name.length)) + (stringBars ? 0 : 1);
   return names.map(name => name.padEnd(width, ' '));
 };
-const labelWidth = (labels, tuning) => stringLabels(labels, tuning)[0].length;
+const labelWidth = (labels, tuning, stringBars = false) => stringLabels(labels, tuning, stringBars)[0].length;
+const prefixWidth = (labels, tuning, stringBars) => labelWidth(labels, tuning, stringBars) + (stringBars ? 1 : 0);
 const notationStyle = value => (value === 'letters' || value === 'solfege' ? value : 'frets');
 const NOTE_NAMES = {
   letters: ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
@@ -176,22 +178,22 @@ function layout(tab, spacing, capacity, notation, tuning, sizes = []) {
 }
 
 // One Tab as plain ASCII, every Staff cut right after its last Column
-function format(tab, { spacing = DEFAULT_SPACING, labels = 'numbers', notation = 'frets', tuning = STANDARD_TUNING, width = Infinity, annotations = [], annotationFit = 'overflow' } = {}) {
+function format(tab, { spacing = DEFAULT_SPACING, labels = 'numbers', stringBars = false, notation = 'frets', tuning = STANDARD_TUNING, width = Infinity, annotations = [], annotationFit = 'overflow' } = {}) {
   tuning = normalizeTuning(tuning);
   annotations = normalizeAnnotations([annotations], [tab])[0] ?? [];
-  const names = stringLabels(labels, tuning);
+  const names = stringLabels(labels, tuning, stringBars);
   const columns = tab.slice(0, lastContent(tab, annotations) + 1);
   if (!columns.length) return '';
   const lead = '-'.repeat(leadingDashes(spacing));
   const trail = '-'.repeat(spacing - lead.length);
-  const capacity = width - labelWidth(labels, tuning);
+  const capacity = width - prefixWidth(labels, tuning, stringBars);
   const sizes = annotationSizes(columns, annotations, normalizeAnnotationFit(annotationFit), { spacing, notation, tuning, capacity });
   return layout(columns, spacing, capacity, notation, tuning, sizes)
     .map(([start, end]) => {
       const offsets = columnOffsets(columns, start, end, spacing, notation, tuning, sizes);
-      const lines = annotationLines(annotations, start, end, offsets, labelWidth(labels, tuning));
+      const lines = annotationLines(annotations, start, end, offsets, prefixWidth(labels, tuning, stringBars));
       for (let s = 0; s < STRING_COUNT; s++) {
-        let line = names[s];
+        let line = names[s] + (stringBars ? '|' : '');
         for (let c = start; c < end; c++) {
           const digits = sizes[c] ?? columnDigits(columns[c], notation, tuning);
           const fret = fretText(columns[c][s], s, notation, tuning);
@@ -229,7 +231,7 @@ function parse(ascii) {
       continue;
     }
     const label = LABEL_PATTERN.exec(line);
-    if (!label && !/^\s*-/.test(line)) return fail(`unexpected line "${line.trim()}"`);
+    if (!label && !/^\s*[-|]/.test(line)) return fail(`unexpected line "${line.trim()}"`);
     const body = label ? line.slice(label[0].length) : line;
     if (!/^[-|\d\s]*$/.test(body.replace(/\(\d*\)/g, ''))) return fail(`unexpected characters in "${line.trim()}"`);
     group.push(body);
@@ -453,6 +455,7 @@ ascii-tabs .ascii-tabs-text-editor:focus { border-bottom-color: var(--ascii-tabs
 
 ascii-tabs .ascii-tabs-line { display: block; height: 1.5em; line-height: 1.5em; }
 ascii-tabs .ascii-tabs-label { color: var(--ascii-tabs-dash); }
+ascii-tabs .ascii-tabs-bar { display: inline-block; flex: 0 0 1ch; }
 ascii-tabs .ascii-tabs-string { color: var(--ascii-tabs-string); }
 ascii-tabs .ascii-tabs-cell {
   display: inline-block; height: 1.5em;
@@ -785,7 +788,7 @@ class AsciiTabs extends Base {
     }
   }
 
-  static observedAttributes = ['readonly', 'spacing', 'labels', 'notation', 'tuning', 'lang', 'tools', 'annotations-editable', 'titles-editable', 'annotation-fit', 'max-fret'];
+  static observedAttributes = ['readonly', 'spacing', 'labels', 'string-bars', 'notation', 'tuning', 'lang', 'tools', 'annotations-editable', 'titles-editable', 'annotation-fit', 'max-fret'];
 
   // Strings: the `lang` preset (English by default) with `messages` merged over it
   get #text() {
@@ -828,6 +831,14 @@ class AsciiTabs extends Base {
 
   set labels(value) {
     this.setAttribute('labels', labelStyle(value));
+  }
+
+  get stringBars() {
+    return this.hasAttribute('string-bars');
+  }
+
+  set stringBars(on) {
+    this.toggleAttribute('string-bars', Boolean(on));
   }
 
   get notation() {
@@ -891,7 +902,7 @@ class AsciiTabs extends Base {
 
   attributeChangedCallback(name) {
     if (name === 'spacing') return this.#applySpacing();
-    if (name === 'labels' || name === 'tuning') {
+    if (name === 'labels' || name === 'string-bars' || name === 'tuning') {
       this.#measure();
       return this.#render();
     }
@@ -921,7 +932,7 @@ class AsciiTabs extends Base {
       return;
     }
     // Properties set before the element was upgraded shadow the accessors
-    for (const name of ['value', 'columnLayout', 'annotations', 'tabTitles', 'annotationsEditable', 'titlesEditable', 'annotationFit', 'readonly', 'spacing', 'labels', 'notation', 'tuning', 'maxFret', 'tools', 'variant', 'theme', 'messages']) {
+    for (const name of ['value', 'columnLayout', 'annotations', 'tabTitles', 'annotationsEditable', 'titlesEditable', 'annotationFit', 'readonly', 'spacing', 'labels', 'stringBars', 'notation', 'tuning', 'maxFret', 'tools', 'variant', 'theme', 'messages']) {
       if (Object.hasOwn(this, name)) {
         const own = this[name];
         delete this[name];
@@ -1120,7 +1131,7 @@ class AsciiTabs extends Base {
     if (!charWidth) return;
     this.#scheduleOverflow();
     const chars = Math.floor(width / charWidth);
-    const capacity = Math.max(chars - labelWidth(this.labels, this.tuning), 4 * (this.#spacing + 1));
+    const capacity = Math.max(chars - prefixWidth(this.labels, this.tuning, this.stringBars), 4 * (this.#spacing + 1));
     const signature = `${width}:${charWidth}`;
     const annotationResized = this.#annotationMeasure !== signature;
     this.#annotationMeasure = signature;
@@ -1173,8 +1184,8 @@ class AsciiTabs extends Base {
     this.#annotationResizeObserver?.disconnect();
     const annotationPositions = [];
     const labels = this.labels, notation = this.notation, tuning = this.tuning;
-    const gutter = labelWidth(labels, tuning);
-    const names = stringLabels(labels, tuning);
+    const gutter = labelWidth(labels, tuning, this.stringBars);
+    const names = stringLabels(labels, tuning, this.stringBars);
     this.#titleEls.forEach((title, t) => {
       title.textContent = this.#tabTitles[t] ?? '';
       title.hidden = !title.textContent && !(this.titlesEditable && !this.readonly);
@@ -1198,6 +1209,7 @@ class AsciiTabs extends Base {
         for (let s = 0; s < STRING_COUNT; s++) {
           html += '<span class="ascii-tabs-line">';
           if (labels !== 'none') html += `<span class="ascii-tabs-label" style="flex-basis:${gutter}ch">${names[s]}</span>`;
+          if (this.stringBars) html += '<span class="ascii-tabs-bar ascii-tabs-string" aria-hidden="true">|</span>';
           if (geometry) html += `<span class="ascii-tabs-area" data-t="${t}" data-s="${s}" style="width:${geometry.width}px">`;
           for (let c = start; c < end; c++) {
             const isCur = this.#cur && this.#cur.t === t && this.#cur.c === c && this.#cur.s === s;
@@ -1249,7 +1261,7 @@ class AsciiTabs extends Base {
       const annotations = entries.filter(a => a.column >= start && a.column < end && (a.html ?? a.text));
       if (!annotations.length && !(this.annotationsEditable && !this.readonly)) return;
       const band = this.#el('div', 'ascii-tabs-annotations');
-      if (geometry) band.style.width = `calc(${geometry.width}px + ${labelWidth(this.labels, this.tuning)}ch)`;
+      if (geometry) band.style.width = `calc(${geometry.width}px + ${prefixWidth(this.labels, this.tuning, this.stringBars)}ch)`;
       staff.prepend(band);
       const shown = shownAnnotations(entries);
       for (const entry of annotations) {
@@ -1823,7 +1835,7 @@ class AsciiTabs extends Base {
     const last = Math.max(...this.#selection.map(p => p.c));
     const columns = Array.from({ length: last - first + 1 }, emptyColumn);
     for (const { t, c, s } of this.#selection) columns[c - first][s] = this.#tabs[t][c][s];
-    return format(columns, { spacing: this.#spacing, labels: this.labels, notation: this.notation, tuning: this.tuning });
+    return format(columns, { spacing: this.#spacing, labels: this.labels, stringBars: this.stringBars, notation: this.notation, tuning: this.tuning });
   }
 
   #onCopy = e => {
@@ -2012,7 +2024,7 @@ class AsciiTabs extends Base {
   async copy(index = 0) {
     const tab = this.#tabs[index];
     if (!tab) return;
-    await copyText(this.#selection.length && this.#selection[0].t === index ? this.#selectionText() : format(tab, { spacing: this.#spacing, labels: this.labels, notation: this.notation, tuning: this.tuning, width: this.#capacity + labelWidth(this.labels, this.tuning), annotations: this.#annotations[index], annotationFit: this.#annotationFit() }));
+    await copyText(this.#selection.length && this.#selection[0].t === index ? this.#selectionText() : format(tab, { spacing: this.#spacing, labels: this.labels, stringBars: this.stringBars, notation: this.notation, tuning: this.tuning, width: this.#capacity + prefixWidth(this.labels, this.tuning, this.stringBars), annotations: this.#annotations[index], annotationFit: this.#annotationFit() }));
     const button = this.#sheetEls[index]?.querySelector('.ascii-tabs-copy');
     if (!button) return;
     this.#flashCopied(button);
