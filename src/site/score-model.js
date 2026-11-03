@@ -260,7 +260,7 @@
 
   // Lugar `at` (pista de orden, en la cuadricula) para soltar `ev` en el tiempo `t`; null si repite una nota que ya
   // suena ahi o si el compas, contado en orden, ya no la admite.
-  function placement(others, ev, t, score, mi) {
+  function placement(others, ev, t, score, mi, preserveVoice = false) {
     const limit = capacity(score, mi);
     const size = length(ev);
     if (size > limit) return null;
@@ -270,7 +270,8 @@
     if (!ev.rest && others.some((o, i) => !o.rest && starts[i] === at && o.n === ev.n && o.acc === ev.acc)) return null;
     if (!ev.rest) {
       const trial = clone(others);
-      insertNote(trial, Object.assign({}, ev), at);
+      // Al mover se conserva la voz; agregar una nota puede incorporarla a un acorde.
+      (preserveVoice ? insertAt : insertNote)(trial, Object.assign({}, ev), at);
       if (measureLength(trial) > limit) return null;
     }
     return { at, d: ev.d, dot: ev.dot };
@@ -1681,13 +1682,20 @@
     const rest = clone(ev);
     delete rest.v;
     delete rest.n;
-    if (beforeFirst && others.length) {
-      const first = Math.min(...h);
-      const leading = others.filter((o) => o.at === first);
-      const ref = leading.reduce((a, b) => Math.abs((b.n ?? n) - n) < Math.abs((a.n ?? n) - n) ? b : a);
+    const first = Math.min(...h);
+    const leading = others.filter((o) => o.at === first);
+    const pitch = (o) => o.n ?? bottomLine(score, mi) + 4;
+    const ref = leading.reduce((a, b) => !a || Math.abs(pitch(b) - n) < Math.abs(pitch(a) - n) ? b : a, null);
+    // Bajo un silencio inicial, anteponer a la voz grave tambien al soltar en esa columna.
+    const underRest = at === first && ref && !ref.rest && leading.some((o) => o.rest && pitch(o) > n);
+    if (others.length && (beforeFirst || underRest)) {
       rest.v = ref.v;
-      others.forEach((o) => { o.at += length(rest); });
-      rest.at = 0;
+      // Solo separar del silencio la primera columna de esa voz. Correr todas las voces
+      // desplaza tambien la melodia y puede desbordar un compas que si admite el silencio.
+      // Duplicar las pistas de orden deja un entero entre columnas, aun con fusas o tresillos.
+      others.forEach((o) => { o.at *= 2; });
+      leading.filter((o) => o.v === ref.v).forEach((o) => { o.at += 1; });
+      rest.at = first * 2;
       others.unshift(rest);
       settle(others);
       if (measureLength(others) > capacity(score, mi)) return { full: true };

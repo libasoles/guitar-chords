@@ -575,11 +575,11 @@
         .sort((a, b) => b.at - a.at || Math.abs((a.ev.n ?? target.n) - target.n) - Math.abs((b.ev.n ?? target.n) - target.n))[0];
       if (previous) moved.v = previous.ev.v;
     }
-    let spot = M.placement(others, moved, target.t, score, target.mi);
+    let spot = M.placement(others, moved, target.t, score, target.mi, true);
     // La voz se eligio con el tiempo sin ajustar a la rejilla; si en esa voz no cabe, la figura conserva la suya.
     if (!spot && moved.v !== ev.v) {
       const kept = Object.assign({}, moved, { v: ev.v });
-      spot = M.placement(others, kept, target.t, score, target.mi);
+      spot = M.placement(others, kept, target.t, score, target.mi, true);
       if (spot) moved.v = ev.v;
     }
     if (!spot) return say(noRoom(moved, target.mi));
@@ -603,7 +603,8 @@
     }
     change(() => {
       all[from.mi].splice(from.i, 1);
-      selected = { mi: target.mi, i: M.insertNote(destination, moved, spot.at) };
+      // Alinear con otra columna no convierte la nota movida en parte de su acorde.
+      selected = { mi: target.mi, i: M.insertAt(destination, moved, spot.at) };
       group = [];
     });
   }
