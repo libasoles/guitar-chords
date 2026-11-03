@@ -765,20 +765,20 @@ async function checkDoubleClick(page) {
   });
   await page.locator('#e0-2 .notehead').dblclick({ force: true });
   assert.deepEqual(await state(), [[false, 0], [true, 0], [true, 36]], 'the misaligned voice is packed in order');
-  // fix() recalcula las voces guardadas: la 1 es la aguda.
+  // fix() recalcula la numeracion inicial sin fusionar tres partes independientes.
   await page.evaluate(() => {
-    scoreEditor.score.rows[0][0].splice(0, 3, { d: 'h', n: 25, at: 0, v: 1 }, { d: 'q', n: 35, dot: true, at: 0, v: 2 }, { d: 'q', n: 38, at: 48, v: 3 });
+    scoreEditor.score.rows[0][0].splice(0, 3, { d: 'h', n: 25, at: 0, v: 1 }, { d: 'q', n: 35, dot: true, at: 0, v: 2 }, { d: 'q', n: 38, at: 0, v: 3 });
     scoreEditor.render();
   });
   assert.equal(await page.evaluate(() => scoreEditor.fix()), true);
-  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => ev.v)), [2, 1, 1], 'fix recomputes voices, treble first');
-  // Con posiciones desalineadas que fabrican una tercera voz, fix() la une y acomoda la voz en orden.
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => ev.v)), [3, 2, 1], 'fix preserves three independent parts, treble first');
+  // Las pistas de orden desalineadas se normalizan sin fusionar partes.
   await page.evaluate(() => {
     scoreEditor.score.rows[0][0].splice(0, 3, { d: 'h', n: 25, at: 24 }, { d: 'q', n: 34, dot: true, at: 24 }, { d: 'q', n: 37, at: 48 });
     scoreEditor.render();
   });
   assert.equal(await page.evaluate(() => scoreEditor.fix()), true);
-  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => [ev.at, ev.v])), [[0, 2], [0, 1], [36, 1]], 'fix merges the extra voice');
+  assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => [ev.at, ev.v])), [[0, 2], [0, 1], [36, 1]], 'fix normalizes inferred voices without merging parts');
 }
 
 // Varias partituras: el titulo es la pestana activa y el + abre una partitura independiente.
@@ -948,9 +948,9 @@ async function checkAppendAfterLast(page) {
   const placed = await page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => ev.d + '@' + ev.at));
   assert.deepEqual(placed, ['e@0', 'q@12', 'e@36', 'q@48'], 'un clic a la derecha de la ultima figura la agrega despues, sin encimarla');
   await page.keyboard.press('Escape');
-  // Una negra y una corchea en la misma columna: arrastrar la negra a la derecha de la corchea la pone despues.
+  // Dos partes en la misma columna: arrastrar la negra conserva la independencia del bajo.
   await page.evaluate(() => {
-    scoreEditor.score.rows[0][0] = [{ n: 34, d: 'e', at: 0 }, { n: 36, d: 'q', at: 12 }, { n: 38, d: 'q', at: 36 }, { n: 34, d: 'e', at: 36 }];
+    scoreEditor.score.rows[0][0] = [{ n: 34, d: 'e', at: 0, v: 2 }, { n: 36, d: 'q', at: 0, v: 1 }, { n: 38, d: 'q', at: 24, v: 1 }, { n: 34, d: 'e', at: 24, v: 2 }];
     scoreEditor.render();
     return document.fonts.ready;
   });
@@ -963,7 +963,9 @@ async function checkAppendAfterLast(page) {
   await page.mouse.move(heads[3][0] + 25, heads[2][1], { steps: 8 });
   await page.mouse.up();
   const dragged = await page.evaluate(() => scoreEditor.score.rows[0][0].map((ev) => ev.d + ev.n + '@' + ev.at).sort());
-  assert.deepEqual(dragged, ['e34@0', 'e34@36', 'q36@12', 'q38@48'], 'arrastrar la negra a la derecha de la corchea la pone despues');
+  assert.deepEqual(dragged, ['e34@0', 'e34@24', 'q36@0', 'q38@24'], 'arrastrar no fusiona el bajo con la voz superior');
+  assert.equal(await page.evaluate(() => ScoreModel.voices(scoreEditor.score.rows[0][0]).length), 2);
+  await page.getByText('Ese movimiento desplazaría otra voz.', { exact: true }).waitFor();
 }
 
 async function checkStartAndLedgers(page) {

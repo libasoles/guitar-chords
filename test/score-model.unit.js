@@ -126,13 +126,16 @@ test('una negra sola en medio de un compas vacio es un compas de una negra: el h
   assert.deepEqual(M.sanitize(M.clone(score)).rows[0][0], [{ d: 'q', n: 30, at: 0 }]);
 });
 
-test('soltar sobre una nota conserva la duracion elegida y permite acordes de igual duracion', () => {
+test('soltar sobre una nota conserva la duracion y formar el acorde requiere una accion explicita', () => {
   const measure = [{ d: 'e', n: 30, at: 0 }];
   const spot = M.placement(measure, { d: 'q', n: 34 }, 0);
   assert.deepEqual(spot, { at: 0, d: 'q', dot: undefined });
   assert.equal(M.placement(measure, { d: 'q', n: 30 }, 0), null);
   M.insertAt(measure, { d: 'e', n: 34 }, 0);
-  assert.match(M.toMusicXml({ rows: [[measure, [], [], []]] }), /<chord\/>/);
+  const score = { ...M.emptyScore(), rows: [[measure, [], [], []]] };
+  assert.doesNotMatch(M.toMusicXml(score), /<chord\/>/);
+  assert.equal(M.applySelection(score, [{ mi: 0, i: 0 }, { mi: 0, i: 1 }], 'joinChord'), true);
+  assert.match(M.toMusicXml(score), /<chord\/>/);
 });
 
 test('una figura soltada encima de otra en otro tiempo va despues en orden, si el compas la admite', () => {
@@ -204,9 +207,9 @@ test('el compas elegido limita la colocacion libre y conserva los acordes', () =
   assert.equal(M.placement([], { d: 'h', n: 30 }, 0, score), null);
   assert.equal(M.placement([], { d: 'e', n: 30 }, 72, score).at, 24);
   M.setMeter(score, '12/8');
-  const chord = [{ d: 'e', n: 30, at: 120 }, { d: 'e', n: 34, at: 120 }];
+  const chord = [{ d: 'e', n: 30, at: 120, v: 1 }, { d: 'e', n: 34, at: 120, v: 1 }];
   score.rows[0][0] = chord;
-  assert.deepEqual(M.sanitize(score).rows[0][0], [{ d: 'e', n: 30, at: 0 }, { d: 'e', n: 34, at: 0 }], 'el acorde se conserva y pierde el hueco de adelante');
+  assert.deepEqual(M.sanitize(score).rows[0][0], [{ d: 'e', n: 30, at: 0, v: 1 }, { d: 'e', n: 34, at: 0, v: 1 }], 'el acorde se conserva y pierde el hueco de adelante');
   assert.equal(M.placement([], { d: 'q', n: 30 }, 120, score).at, 120);
   assert.equal(M.setMeter(score, '4/4'), true);
   assert.deepEqual(M.onsets(score.rows[0][0]), [0, 0]);
@@ -231,7 +234,7 @@ test('la polifonia sobrevive al guardado y exporta tiempos, duraciones y voces i
     { d: 'q', n: 36, at: 0 },
     { d: 'q', n: 35, at: 24 },
     { d: 'h', n: 33, at: 48 },
-    { d: 'h', rest: true, at: 48 },
+    { d: 'h', rest: true, at: 48, v: 2 },
   ]) {
     const spot = M.placement(measure, ev, ev.at, score);
     assert.ok(spot);
@@ -261,8 +264,8 @@ test('la polifonia sobrevive al guardado y exporta tiempos, duraciones y voces i
     assert.equal(notes.get(i).duration, M.length(ev));
   });
   assert.notEqual(notes.get(0).voice, notes.get(1).voice);
-  assert.equal(notes.get(1).voice, notes.get(2).voice);
-  assert.equal(notes.get(5).voice, notes.get(0).voice, 'el silencio sin voz va a la voz que no tiene nada en ese lugar');
+  assert.notEqual(notes.get(1).voice, notes.get(2).voice, 'el mismo ritmo no fusiona las partes');
+  assert.equal(notes.get(5).voice, notes.get(0).voice, 'el silencio declarado conserva su parte');
   assert.equal(cursor, M.capacity(score));
 });
 
@@ -972,13 +975,13 @@ test('el silencio con altura propia se exporta con display-step y se conserva al
   assert.equal(M.sanitize(M.clone(score)).rows[0][0][1].n, 25);
 });
 
-test('con las 4 voces ocupadas en ese tiempo un silencio avisa de la voz del click y no toca el compas', () => {
+test('con el limite de voces ocupado un silencio avisa de la voz del click y no toca el compas', () => {
   const { score, measure } = threeFour();
-  [1, 2, 3, 4].forEach((v) => measure.push({ d: 'q', n: 40 - v * 3, at: 0, v }));
+  Array.from({ length: M.MAX_VOICE }, (_, i) => i + 1).forEach(v => measure.push({ d: 'q', n: 45 - v, at: 0, v }));
   const before = JSON.stringify(measure);
   const placed = M.placeRest(measure, { d: 'q', rest: true }, 0, 20, score, 0);
   assert.equal(placed.measure, undefined);
-  assert.equal(placed.voice, 4);
+  assert.equal(placed.voice, M.MAX_VOICE);
   assert.equal(JSON.stringify(measure), before);
 });
 
@@ -1002,12 +1005,12 @@ test('al mover una nota, las demas conservan su lugar en el orden hasta que entr
   assert.deepEqual(group.map((ev) => [ev.n, ev.at]), [[30, 0], [31, 12], [33, 36], [34, 48]]);
 });
 
-test('una nota agregada a un acorde toma la voz del acorde', () => {
+test('una nota nueva conserva su independencia aunque coincida con otra', () => {
   const { measure } = threeFour();
   measure.push({ d: 'q', n: 30, at: 0, v: 2 });
   M.insertNote(measure, { d: 'q', n: 33 }, 0);
-  assert.deepEqual(measure.map((o) => o.v), [2, 2]);
-  assert.equal(M.voices(measure).filter((lane) => lane.groups.length).length, 1);
+  assert.deepEqual(measure.map((o) => o.v), [2, 1]);
+  assert.equal(M.voices(measure).filter((lane) => lane.groups.length).length, 2);
 });
 
 test('un acorde de cinco notas es una sola voz y no se parte al agregar un silencio', () => {
@@ -1045,21 +1048,22 @@ test('en 6/8 el puntillo de una voz no depende de donde cayeron las figuras de l
   assert.equal(M.dotStart(three, 2, score), 0, 'la voz 3 empieza con esa negra: no hay hueco antes');
 });
 
-test('mergeVoices recalcula las voces por registro y une la tercera voz a la mas cercana en altura', () => {
+test('mergeVoices conserva las partes independientes y rechaza cambios de tiempo', () => {
   const dotted = (n, at, x = {}) => Object.assign({ d: 'q', n, at, dot: true }, x);
   const first = [{ d: 'h', n: 25, at: 0, dot: true }, dotted(37, 0), dotted(35, 18)];
   assert.equal(M.mergeVoices(first, 72), false, 'ya son dos voces');
   assert.deepEqual(first.map((ev) => [ev.at, ev.v]), [[0, 2], [0, 1], [36, 1]]);
   const pinned = [dotted(35, 0, { v: 2 }), { d: 'h', n: 29, at: 0, v: 1, dot: true }, dotted(38, 36, { v: 3 })];
-  M.mergeVoices(pinned, 72);
-  assert.deepEqual(pinned.map((ev) => ev.v), [1, 2, 1], 'las v guardadas se descartan: la aguda es la 1');
+  const pinnedBefore = M.clone(pinned);
+  assert.equal(M.mergeVoices(pinned, 72), false, 'no mueve la entrada de la tercera voz');
+  assert.deepEqual(pinned, pinnedBefore);
   const three = [dotted(37, 0), { d: 'e', n: 31, at: 0 }, { d: 'h', n: 25, at: 0, dot: true }];
   assert.equal(M.voices(three).length, 3);
-  assert.equal(M.mergeVoices(three, 96), true);
-  assert.deepEqual(three.map((ev) => [ev.at, ev.v]), [[0, 1], [0, 2], [12, 2]]);
+  assert.equal(M.mergeVoices(three, 96), false, 'las tres partes ya son independientes');
+  assert.deepEqual(three.map((ev) => [ev.at, ev.v]), [[0, 1], [0, 2], [0, 3]]);
   const full = [dotted(37, 0), { d: 'e', n: 31, at: 0 }, { d: 'h', n: 25, at: 0, dot: true }];
   const copy = JSON.parse(JSON.stringify(full));
-  assert.equal(M.mergeVoices(full, 72), false, 'si la voz unida no cabe en el compas, no se toca');
+  assert.equal(M.mergeVoices(full, 24), false, 'si las partes no caben, no se toca');
   assert.deepEqual(full, copy);
 });
 
@@ -1433,6 +1437,7 @@ test('barrar acordes exporta cada nivel solo en la primera nota del acorde', () 
       { n: 32, d, at: 24 + step }, { n: 38, d, at: 24 + step },
       { n: 28, d: 'q', at: 24 + 2 * step }, { n: 35, d: 'q', at: 24 + 2 * step },
     ];
+    score.rows[0][0].forEach(ev => { ev.v = 1; }); // Acordes declarados, no inferidos por duracion.
     const refs = [{ mi: 0, i: 2 }, { mi: 0, i: 4 }];
     const before = score.rows[0][0].map(({ beam, ...ev }) => ev);
     assert.equal(M.applySelection(score, refs, 'beam'), true);

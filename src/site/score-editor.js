@@ -601,6 +601,16 @@
       });
       return;
     }
+    if (from.mi === target.mi && Number.isInteger(moved.v)) {
+      const starts = M.onsets(destination);
+      const kept = destination.flatMap((o, i) => o === ev ? [] : [{ ev: M.clone(o), at: starts[i] }]);
+      const trial = kept.map(item => item.ev);
+      M.insertAt(trial, M.clone(moved), spot.at);
+      const planned = M.onsets(trial);
+      // Quitar una coincidencia vertical no debe adelantar otra parte para rellenar
+      // el hueco. Hasta representar esas esperas explicitamente, conservar la escritura.
+      if (kept.some(item => item.ev.v !== moved.v && planned[trial.indexOf(item.ev)] !== item.at)) return say(t.keepVoiceTiming);
+    }
     change(() => {
       all[from.mi].splice(from.i, 1);
       // Alinear con otra columna no convierte la nota movida en parte de su acorde.
@@ -720,7 +730,7 @@
   function applyAction(action) {
     const list = picks();
     const result = change(() => M.applySelection(score, list, action));
-    if (!result) say(t.full);
+    if (!result) say(action === 'revoice' ? t.voicesUnavailable : t.full);
     else say('');
     stage.focus({ preventScroll: true });
   }
@@ -3053,7 +3063,7 @@
     download: '<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
   };
 
-  const ACTION_ICONS = { triplet: 'triplet', untriplet: 'untriplet', link: 'link', unlink: 'unlink', beam: 'beam', unbeam: 'unbeam' };
+  const ACTION_ICONS = { triplet: 'triplet', untriplet: 'untriplet', link: 'link', unlink: 'unlink', beam: 'beam', unbeam: 'unbeam', joinChord: 'link', revoice: 'unbeam' };
   // Los demas grupos (2, 4 a 9 figuras) son el icono del tresillo con su numero.
   for (let n = 2; n <= 9; n += 1) {
     if (n === 3) continue;
@@ -3371,7 +3381,7 @@
   // Consola del navegador: `voces()` lista las figuras de cada compas, por voz.
   window.voces = () => console.log(M.voicesText(score));
 
-  // Para la consola: descarta las voces guardadas de la partitura activa y las recalcula (la 1 es la aguda; si salen mas de 2 las une y acomoda). Se puede deshacer.
+  // Para la consola: recalcula las voces sin fusionarlas ni cambiar sus tiempos. Se puede deshacer.
   function fix() {
     const before = JSON.stringify(score.rows);
     change(() => { M.measures(score).forEach((measure, mi) => { M.mergeVoices(measure, M.capacity(score, mi)); }); });
