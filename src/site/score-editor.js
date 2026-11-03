@@ -1,16 +1,18 @@
 /* score-editor.js — Pagina /partitura: una partitura donde se arrastran notas desde la paleta.
    Verovio dibuja el MusicXML que sale de ScoreModel; aca solo viven la paleta, el arrastre y las descargas. */
-(function () {
+// Restore IndexedDB before the editor reads the workspace.
+(async function () {
   'use strict';
+
+  const script = document.currentScript;
+  await window.initScoreStorage();
 
   const M = window.ScoreModel;
   const STORAGE_KEY = 'scoreEditor.v2';
-  const TABS_KEY = 'scoreEditor.tabs.v1'; // varias partituras: { active, scores: [...] }
   const LEGACY_KEY = 'scoreEditor.v1'; // guardada con 8 divisiones por negra
   const SCALE = 60;
   const HISTORY_LIMIT = 100;
   const SVG_NS = 'http://www.w3.org/2000/svg';
-  const script = document.currentScript;
   const t = JSON.parse(document.getElementById('scoreStrings').textContent);
 
   const stage = document.getElementById('scoreStage');
@@ -47,6 +49,7 @@
   let toolkit = null;
   let selectedMeasure = null; // destino de pegar, independiente de las figuras
   let selectedNavigation = []; // { first, last, mark }: selected return signs or ending spans
+  let selectedHairpin = null; // { mi, at }: el regulador elegido (empieza en el compas `mi`, en el tiempo `at`)
   let selected = null; // { mi, i }: la figura principal
   let group = []; // con dos o mas figuras elegidas, todas (incluida la principal)
   let selectedBeam = null; // { node, refs }: barrado elegido sin seleccionar sus notas
@@ -71,7 +74,7 @@
 
   function loadAll() {
     try {
-      const data = JSON.parse(localStorage.getItem(TABS_KEY));
+      const data = window.ScoreStore.stored; // cargado desde IndexedDB antes de arrancar (storage.js)
       if (data && Array.isArray(data.scores) && data.scores.length) {
         const scores = data.scores.map((one) => M.sanitize(one));
         return { scores, active: Math.min(Math.max(data.active | 0, 0), scores.length - 1) };
@@ -84,11 +87,7 @@
 
   function save() {
     docs[active] = score;
-    try {
-      localStorage.setItem(TABS_KEY, JSON.stringify({ active, scores: docs }));
-    } catch (e) {
-      // Sin almacenamiento la partitura sigue funcionando, solo que no se recuerda.
-    }
+    window.ScoreStore.save({ active, scores: docs });
   }
 
   // Messages are Radix alert toasts; an empty text leaves any toast to expire on its own.
@@ -113,6 +112,8 @@
   function newToolkit() {
     return new window.verovio.toolkit();
   }
+
+  function loadAsciiTabs() { return customElements.whenDefined('ascii-tabs'); }
 
   async function loadVerovio() {
     await loadScript(vendorUrl('verovio-toolkit-wasm.js'));
@@ -141,6 +142,7 @@
     return one.title || t.untitledScore.replace('{n}', index + 1);
   }
 
+  let enteringTab = -1; // index of the tab just added, animated in by renderTabs
   function renderTabs() {
     tabsBar.querySelectorAll('.score-doc-tab').forEach((node) => node.remove());
     const add = document.getElementById('scoreNewTab');
@@ -170,6 +172,7 @@
         });
         wrap.appendChild(tabTitle);
         wrap.dataset.index = index;
+        if (index === enteringTab) wrap.classList.add('is-entering');
         tabsBar.insertBefore(wrap, add);
       } else {
         const button = document.createElement('button');
@@ -180,9 +183,11 @@
         button.textContent = tabLabel(one, index);
         button.addEventListener('click', () => switchTo(index));
         button.dataset.index = index;
+        if (index === enteringTab) button.classList.add('is-entering');
         tabsBar.insertBefore(button, add);
       }
     });
+    enteringTab = -1;
   }
 
   // Keep document order and undo histories together, without changing the open score.
@@ -269,6 +274,7 @@
     clearBarSelection();
     selected = null;
     selectedNavigation = [];
+    selectedHairpin = null;
     group = [];
     save();
     renderTabs();
@@ -280,6 +286,7 @@
     histories[active] = history;
     docs.push(Object.assign(M.emptyScore(), { title: defaultTitle }));
     histories.push([]);
+    enteringTab = docs.length - 1;
     switchTo(docs.length - 1);
     tabTitle.focus();
     tabTitle.select();
@@ -307,7 +314,7 @@
     const tabRefs = M.captureTabReferences(score, score.showTabs ? tabColumns : score.tabs);
     const restored = history.pop();
     const previousTabs = restored.tabs;
-    M.restoreTabReferences(restored, tabRefs);
+    if (M.tuningOf(restored).id === M.tuningOf(score).id) M.restoreTabReferences(restored, tabRefs);
     if (previousTabs) restored.tabs = Object.assign({}, previousTabs, restored.tabs);
     // La visibilidad de TAB se conserva; sus referencias vuelven con las figuras.
     if (score.showTabs) restored.showTabs = true;
@@ -316,6 +323,7 @@
     clearBarSelection();
     selected = null;
     selectedNavigation = [];
+    selectedHairpin = null;
     group = [];
     save();
     render();
@@ -333,6 +341,7 @@
 
   function setPicks(list) {
     selectedNavigation = [];
+    selectedHairpin = null;
     selectedBeam = null;
     if (list.length) clearBarSelection();
     selected = list.length ? list[list.length - 1] : null;
@@ -387,6 +396,19 @@
       say('');
       return;
     }
+    if (item.kind === 'hairpin') {
+      // Como la cejilla: arranca sobre la nota soltada (o al inicio del compas) y llega hasta el final, o hasta el proximo regulador.
+      const at = target.onNote ? target.t : 0;
+      const stop = Math.min(M.capacity(score, target.mi), ...((score.hairpins && score.hairpins[target.mi]) || []).filter((h) => h.at > at).map((h) => h.at));
+      const placed = change(() => {
+        const saved = M.setHairpin(score, target.mi, { kind: item.hairpin, at, to: stop });
+        // Con una herramienta activa el regulador nuevo no queda elegido: seleccion y herramienta no conviven.
+        if (saved && !activeItem) selectedHairpin = { mi: target.mi, at };
+        return saved;
+      });
+      say(placed ? '' : t.hairpinTaken);
+      return;
+    }
     if (item.kind === 'barre') {
       // Sobre una nota que no es la primera arranca ahi; si no, cubre desde el inicio del compas.
       const existing = score.barres && score.barres[target.mi];
@@ -436,7 +458,7 @@
   }
 
   function isPlacing(item) {
-    return item && (item.kind === 'bar' || item.kind === 'barre' || item.kind === 'navigation');
+    return item && (item.kind === 'bar' || item.kind === 'barre' || item.kind === 'navigation' || item.kind === 'hairpin');
   }
 
   function isModifier(item) {
@@ -453,14 +475,14 @@
   let lastNoteD = 'q'; // duracion con la que se coloca una nota muerta nueva
 
   function activateTool(item) {
-    if (selectedNavigation.length || selectedBeam) { selectedNavigation = []; selectedBeam = null; markSelected(); }
+    if (selectedNavigation.length || selectedBeam || selectedHairpin) { selectedNavigation = []; selectedBeam = null; selectedHairpin = null; markSelected(); }
     if (activeItem === item) { deactivateTool(); return; }
     activeItem = item;
     stage.classList.add('has-tool');
     clearHoverGhost();
     updateHoverGhost();
     toolbars.querySelectorAll('.score-palette-tool').forEach((button) => {
-      const same = item.kind === 'navigation' ? button.dataset.navigation === item.mark : item.key ? button.dataset.shortcut === item.key : item.kind === 'bar' ? button.dataset.barline === item.bar : button.dataset.tool === item.kind;
+      const same = item.kind === 'navigation' ? button.dataset.navigation === item.mark : item.kind === 'hairpin' ? button.dataset.hairpin === item.hairpin : item.key ? button.dataset.shortcut === item.key : item.kind === 'bar' ? button.dataset.barline === item.bar : button.dataset.tool === item.kind;
       button.setAttribute('aria-pressed', String(same));
     });
     if (isPlacing(item)) return;
@@ -654,6 +676,15 @@
   }
 
   function removeSelected() {
+    if (selectedHairpin) {
+      const { mi, at } = selectedHairpin;
+      change(() => {
+        const h = M.findHairpin(score, mi, at);
+        selectedHairpin = null;
+        return h ? M.removeHairpin(score, mi, h) : false;
+      });
+      return;
+    }
     if (selectedNavigation.length) {
       change(() => {
         selectedNavigation.forEach(({ first, last, mark }) => {
@@ -720,9 +751,15 @@
     const line = stage.querySelector('g.staff > path');
     const glyph = barlines.firstElementChild;
     if (!side || !line || !glyph) return;
+    // Measured in its natural position: while sticky, the scroll shifts the glyph and the offset drifts whenever the stage height changes (TAB).
+    side.style.position = 'relative';
+    side.style.top = 'auto';
     side.style.marginTop = '0';
     const offset = line.getBoundingClientRect().top - glyph.getBoundingClientRect().top;
+    side.style.position = '';
+    side.style.top = '';
     side.style.marginTop = Math.max(0, offset) + 'px';
+    side.style.setProperty('--side-offset', Math.max(0, offset) + 'px');
   }
 
   function render() {
@@ -732,11 +769,14 @@
     renderedWidth = width;
     toolkit.setOptions(layoutOptions(width, score.showTabs && tabSpace ? { spacingSystem: Math.min(48, 12 + tabSpace), pageMarginBottom: 60 + tabSpace } : undefined));
     toolkit.loadData(M.toMusicXml(score));
+    tuningPopup.hidePopover();
     meterPopup.hidePopover();
     clefPopup.hidePopover();
+    dynamicsPopup.hidePopover();
     stage.innerHTML = toolkit.renderToSVG(1);
     applyMeasureWidths();
-    stage.style.minHeight = '';
+    // With TAB the height is set again once the tabs are measured; clearing it here would collapse and re-grow the stage on every pass.
+    if (!score.showTabs) stage.style.minHeight = '';
     alignBarlinesToFirstStaff();
     marker = null;
     const svg = stage.querySelector('svg');
@@ -796,8 +836,8 @@
         const scale = width / m.width;
         if (Math.abs(scale - 1) > 0.00001 || Math.abs(left - m.left) > 0.01) {
           node.setAttribute('transform', `translate(${left - scale * m.left} 0) scale(${scale} 1)`);
-          node.querySelectorAll('g.chord, g.note, g.rest, g.clef, g.keySig, g.meterSig, g.barLine, g.repeatMark, g.accid, g.dots, text').forEach((glyph) => {
-            if (glyph.parentElement.closest('.chord, .note, .rest, .clef, .keySig, .meterSig, .barLine, .repeatMark, .accid, .dots, text')) return;
+          node.querySelectorAll('g.chord, g.note, g.rest, g.clef, g.keySig, g.meterSig, g.barLine, g.repeatMark, g.accid, g.dots, g.dynam, text').forEach((glyph) => {
+            if (glyph.parentElement.closest('.chord, .note, .rest, .clef, .keySig, .meterSig, .barLine, .repeatMark, .accid, .dots, .dynam, text')) return;
             const stem = glyph.querySelector('.stem path');
             const box = glyph.getBBox();
             const x = stem ? stem.getBBox().x : box.x;
@@ -805,14 +845,18 @@
             glyph.setAttribute('transform', `translate(${x} 0) scale(${1 / scale} 1) translate(${-x} 0) ${transform}`);
           });
         }
-        // Las ligaduras y cejillas pueden terminar en otro compas, con una escala diferente.
-        node.querySelectorAll('g.tie, g.slur, g.bracketSpan').forEach((span) => {
+        // Las ligaduras, cejillas y reguladores pueden terminar en otro compas, con una escala diferente.
+        node.querySelectorAll('g.tie, g.slur, g.bracketSpan, g.hairpin').forEach((span) => {
           span.setAttribute('transform', `translate(${(scale * m.left - left) / scale} 0) scale(${1 / scale} 1)`);
           span.querySelectorAll('path').forEach((path) => {
             const d = path.getAttribute('d');
             if (!d || (d.match(/[a-z]/gi) || []).some((command) => !['M', 'L', 'C', 'Q', 'Z'].includes(command))) return;
             let coordinate = 0;
             path.setAttribute('d', d.replace(/-?\d*\.?\d+(?:e[-+]?\d+)?/gi, (number) => coordinate++ % 2 ? number : mapX(Number(number))));
+          });
+          // Los reguladores son polilineas: "x,y x,y x,y".
+          span.querySelectorAll('polyline').forEach((line) => {
+            line.setAttribute('points', (line.getAttribute('points') || '').replace(/(-?\d*\.?\d+),/g, (match, x) => mapX(Number(x)) + ','));
           });
         });
       });
@@ -907,10 +951,31 @@
 
   // Verovio pega la cejilla (letra y linea) al pentagrama; se sube un poco para que respire.
   const BARRE_LIFT = 10;
+  const DYNAMIC_DROP = 16;
+  const DYNAMIC_GAP = 6; // separacion extra entre una dinamica y su regulador
+  const DYNAMIC_SCALE = 0.72;
   function liftBarreMarks(svg) {
     svg.querySelectorAll('g.measure g.dir, g.measure g.bracketSpan').forEach((node) => {
       const scale = node.getScreenCTM() && node.getScreenCTM().a;
       if (scale) node.setAttribute('transform', 'translate(0 ' + (-BARRE_LIFT / scale) + ') ' + (node.getAttribute('transform') || ''));
+    });
+    // Reguladores y dinamicas van bajo el pentagrama: se bajan para no quedar pegados a el.
+    svg.querySelectorAll('g.measure g.hairpin, g.measure g.dynam').forEach((node) => {
+      const scale = node.getScreenCTM() && node.getScreenCTM().a;
+      if (scale) node.setAttribute('transform', 'translate(0 ' + (DYNAMIC_DROP / scale) + ') ' + (node.getAttribute('transform') || ''));
+    });
+    // Las dinamicas se achican (sobre su centro) y se apartan del regulador que acompanan.
+    const hairpins = [...svg.querySelectorAll('g.hairpin')].map((node) => node.getBoundingClientRect());
+    [...svg.querySelectorAll('g.measure g.dynam')].forEach((node) => {
+      const box = node.getBoundingClientRect();
+      const parent = node.parentNode.getScreenCTM();
+      if (!parent || !box.width) return;
+      const reach = box.height;
+      const before = hairpins.some((h) => Math.abs(box.right - h.left) < reach && Math.abs(box.top + box.height / 2 - (h.top + h.height / 2)) < reach);
+      const after = hairpins.some((h) => Math.abs(box.left - h.right) < reach && Math.abs(box.top + box.height / 2 - (h.top + h.height / 2)) < reach);
+      const centre = new DOMPoint(box.left + box.width / 2, box.top + box.height / 2).matrixTransform(parent.inverse());
+      const shift = (after && !before ? DYNAMIC_GAP : before && !after ? -DYNAMIC_GAP : 0) / parent.a;
+      node.setAttribute('transform', 'translate(' + shift + ' 0) translate(' + centre.x + ' ' + centre.y + ') scale(' + DYNAMIC_SCALE + ') translate(' + -centre.x + ' ' + -centre.y + ') ' + (node.getAttribute('transform') || ''));
     });
   }
 
@@ -1071,6 +1136,10 @@
     if (score.barres) Object.keys(score.barres).forEach((mi) => {
       if (+mi >= M.measures(score).length) M.removeBarre(score, +mi);
     });
+    if (score.hairpins) {
+      Object.keys(score.hairpins).forEach((mi) => { if (+mi >= M.measures(score).length) delete score.hairpins[mi]; });
+      if (!Object.keys(score.hairpins).length) delete score.hairpins;
+    }
   }
 
   // Una tablatura (<ascii-tabs>) bajo cada renglon. Las digitaciones salen solas de las notas (ScoreFingering) y cada
@@ -1107,11 +1176,30 @@
       const mark = document.createElement('span');
       mark.className = 'score-tab-clef';
       mark.textContent = letter;
-      mark.style.fontSize = font * 1.25 + 'px';
+      mark.style.fontSize = font * 1.05 + 'px';
       mark.style.left = x + 'px';
       mark.style.top = (ys[0] + step * (1.5 + i)) + 'px';
       stage.appendChild(mark);
     });
+    if (row === 0) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'score-tuning-trigger';
+      const labels = [...tabs.querySelectorAll('.ascii-tabs-label')];
+      const firstLabel = labels[0].getBoundingClientRect();
+      const lastLabel = labels[labels.length - 1].getBoundingClientRect();
+      button.style.left = (firstLabel.left - origin.left) + 'px';
+      button.style.top = (firstLabel.top - origin.top) + 'px';
+      button.style.width = firstLabel.width + 'px';
+      button.style.height = (lastLabel.bottom - firstLabel.top) + 'px';
+      button.setAttribute('aria-label', t.tuning + ': ' + tuningName(M.tuningOf(score)));
+      button.setAttribute('aria-haspopup', 'dialog');
+      button.setAttribute('aria-controls', tuningPopup.id);
+      button.setAttribute('aria-expanded', 'false');
+      button.addEventListener('pointerdown', event => event.stopPropagation());
+      button.addEventListener('click', () => openTuning(button));
+      stage.appendChild(button);
+    }
   }
 
   function mountTabs() {
@@ -1123,7 +1211,7 @@
     const minStep = Math.round(font * 1.4); // para que no se pisen los trastes de dos cifras
     const origin = stage.getBoundingClientRect();
     const all = M.attacks(score);
-    const fingered = window.ScoreFingering.assign(all.map((attack) => attack.midis));
+    const fingered = window.ScoreFingering.assign(all.map((attack) => attack.midis), M.tuningOf(score).opens);
     const auto = {};
     all.forEach((attack, i) => { auto[attack.key] = window.ScoreFingering.toColumn(fingered[i]); });
     tabColumns = Object.assign({}, auto, score.tabs);
@@ -1146,7 +1234,8 @@
       const width = Math.max(last.right - head.left, (positions.length ? positions[positions.length - 1] : 0) + 12);
       const tabs = document.createElement('ascii-tabs');
       tabs.className = 'score-tab';
-      tabs.setAttribute('labels', 'none');
+      tabs.setAttribute('labels', row === 0 ? 'notes' : 'none');
+      tabs.setAttribute('tuning', M.tuningLabels(score).join(' '));
       tabs.setAttribute('variant', 'flat');
       tabs.setAttribute('theme', 'light');
       tabs.setAttribute('lang', document.documentElement.lang);
@@ -1155,7 +1244,7 @@
       tabs.style.left = head.left + 'px';
       // Measure the whole engraved row, including low heads, stems and ledger lines.
       const system = stage.querySelectorAll('g.system')[row];
-      const boxes = [...system.querySelectorAll('g.layer, g.fermata, g.slur, g.tie')]
+      const boxes = [...system.querySelectorAll('g.layer, g.fermata, g.slur, g.tie, g.hairpin, g.dynam')]
         .map(node => node.getBoundingClientRect()).filter(box => box.width || box.height);
       const contentBottom = Math.max(last.lines[4], ...boxes.map(box => box.bottom - origin.top));
       const offset = Math.max(TAB_CLEF_CLEARANCE, contentBottom - last.lines[4] + TAB_GAP);
@@ -1167,7 +1256,7 @@
       stage.appendChild(tabs);
       mounted.push({ tabs, keys, positions, width, start, size, head, offset });
     });
-    customElements.whenDefined('ascii-tabs').then(() => {
+    loadAsciiTabs().then(() => customElements.whenDefined('ascii-tabs')).then(() => {
       if (!mounted.length || !mounted[0].tabs.isConnected) return;
       mounted.forEach(({ tabs, keys, positions, width, start, size, head }, row) => {
         const value = keys.map((key) => (score.tabs && score.tabs[key]) || auto[key]);
@@ -1178,6 +1267,11 @@
         } catch (error) {
           tabs.setDocument({ value: [value] });
         }
+        // Native labels take a gutter before the string coordinates. Move only
+        // that gutter outside the system so frets still align with the staff.
+        const gutter = tabs.querySelector('.ascii-tabs-label')?.getBoundingClientRect().width || 0;
+        tabs.style.left = (head.left - gutter) + 'px';
+        tabs.style.width = (layout[start + size - 1].right - head.left + gutter) + 'px';
         decorateTab(tabs, row, start, size, head, font);
         tabs.addEventListener('change', (event) => {
           const columns = event.detail.value[0];
@@ -1473,6 +1567,305 @@
     focusBarre = null;
   }
 
+  // ---- reguladores (crescendo y diminuendo) -------------------------------------
+  // Un regulador elegido muestra dos asas (debajo de sus extremos) para ensancharlo y, a cada lado, la dinamica de ese extremo:
+  // la escrita o, si falta, un placeholder con la sugerida (p -> f en crescendo, f -> p en diminuendo).
+  // Las dinamicas escritas se pueden editar tambien sin elegir antes el regulador.
+
+  const DYNAMIC_SUGGESTED = { cresc: { start: 'p', end: 'f' }, dim: { start: 'f', end: 'p' } };
+
+  const dynamicsPopup = document.createElement('div');
+  dynamicsPopup.id = 'scoreDynamicsPopup';
+  dynamicsPopup.className = 'score-meter-popup score-dynamics-popup';
+  dynamicsPopup.setAttribute('popover', 'auto');
+  dynamicsPopup.setAttribute('role', 'dialog');
+  dynamicsPopup.setAttribute('aria-label', t.dynamic);
+  const dynamicsTitle = document.createElement('p');
+  dynamicsPopup.appendChild(dynamicsTitle);
+  const dynamicsOptions = document.createElement('div');
+  dynamicsOptions.className = 'score-dynamics-options';
+  dynamicsPopup.appendChild(dynamicsOptions);
+  document.querySelector('.score-page').appendChild(dynamicsPopup);
+  let dynamicsTarget = null; // { mi, at, side } del extremo cuya dinamica se esta eligiendo
+
+  function chooseDynamic(value) {
+    const target = dynamicsTarget;
+    dynamicsPopup.hidePopover();
+    const h = target && M.findHairpin(score, target.mi, target.at);
+    if (!h || (h[target.side === 'start' ? 'startDyn' : 'endDyn'] || null) === value) return;
+    change(() => M.setHairpinDynamic(score, target.mi, h, target.side, value));
+    stage.focus({ preventScroll: true });
+  }
+
+  M.DYNAMICS.forEach((value) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.dynamic = value;
+    button.textContent = value;
+    button.setAttribute('aria-label', value);
+    button.addEventListener('click', () => chooseDynamic(value));
+    dynamicsOptions.appendChild(button);
+  });
+  const dynamicsNone = document.createElement('button');
+  dynamicsNone.type = 'button';
+  dynamicsNone.className = 'score-dynamics-none';
+  dynamicsNone.innerHTML = '<span></span>';
+  dynamicsNone.firstChild.textContent = t.dynamicNone;
+  dynamicsNone.addEventListener('click', () => chooseDynamic(null));
+  dynamicsOptions.appendChild(dynamicsNone);
+
+  function openDynamicsPopup(anchor, mi, at, side) {
+    if (dynamicsPopup.matches(':popover-open')) { dynamicsPopup.hidePopover(); return; }
+    const h = M.findHairpin(score, mi, at);
+    if (!h) return;
+    dynamicsTarget = { mi, at, side };
+    const current = side === 'start' ? h.startDyn : h.endDyn;
+    dynamicsTitle.textContent = side === 'start' ? t.dynamicStart : t.dynamicEnd;
+    [...dynamicsOptions.querySelectorAll('[data-dynamic]')].forEach((option) => option.setAttribute('aria-pressed', String(option.dataset.dynamic === current)));
+    dynamicsNone.setAttribute('aria-pressed', String(!current));
+    dynamicsPopup.showPopover();
+    const box = anchor.getBoundingClientRect();
+    const popup = dynamicsPopup.getBoundingClientRect();
+    dynamicsPopup.style.left = Math.max(8, Math.min(box.left, window.innerWidth - popup.width - 8)) + 'px';
+    dynamicsPopup.style.top = Math.max(8, Math.min(box.bottom + 6, window.innerHeight - popup.height - 8)) + 'px';
+    (dynamicsOptions.querySelector('[aria-pressed="true"]') || dynamicsOptions.firstElementChild).focus({ preventScroll: true });
+  }
+
+  // Los g.hairpin de un compas, de izquierda a derecha: el orden de su lista, porque no se pisan.
+  function hairpinNodes(mi) {
+    const measure = stage.querySelector('[id="m' + mi + '"]');
+    return measure ? [...measure.querySelectorAll('g.hairpin')].sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left) : [];
+  }
+
+  // Final del regulador como tiempo desde el inicio de su compas (puede pasar a compases siguientes).
+  function hairpinEnd(h, mi) {
+    const last = mi + (h.span || 0);
+    return measureOffset(mi, last) + (h.to || M.capacity(score, last));
+  }
+
+  // El regulador `h` con un extremo movido a `time` (desde el inicio de su compas).
+  function hairpinWith(h, mi, side, time) {
+    if (side === 'start') return Object.assign({}, h, { at: time });
+    const point = barrePoint(mi, time);
+    return Object.assign({}, h, { span: point.mi - mi, to: point.at });
+  }
+
+  // Tiempos validos de un extremo: inicios (comienzo) o finales (fin) de figura y bordes de compas, sin pisar a otro regulador.
+  // El comienzo se queda en su compas; el fin puede pasar a los siguientes de la misma fila.
+  function hairpinTimes(mi, h, side) {
+    const all = M.measures(score);
+    const lastMeasure = side === 'start' ? mi : Math.min(M.rowOf(score, mi).last, all.length - 1);
+    const times = new Set(side === 'start' ? [0] : []);
+    for (let k = mi; k <= lastMeasure; k += 1) {
+      const starts = M.onsets(all[k]);
+      if (side === 'end') times.add(measureOffset(mi, k + 1));
+      all[k].forEach((ev, i) => times.add(measureOffset(mi, k) + (side === 'start' ? starts[i] : Math.min(M.capacity(score, k), starts[i] + M.length(ev)))));
+      // Y cada semicorchea, para ajustarlo con fineza y tambien en compases sin figuras; no dentro de una figura, donde
+      // MusicXML no puede anclar el extremo.
+      for (let step = M.GRID; step < M.capacity(score, k); step += M.GRID) {
+        if (!all[k].some((ev, i) => starts[i] < step && step < starts[i] + M.length(ev))) times.add(measureOffset(mi, k) + step);
+      }
+    }
+    return [...times].filter((time) => M.hairpinFits(score, mi, hairpinWith(h, mi, side, time), h)).sort((a, b) => a - b);
+  }
+
+  function resizeHairpin(mi, h, side, time) {
+    const candidate = hairpinWith(h, mi, side, time);
+    if (candidate.at === h.at && hairpinEnd(candidate, mi) === hairpinEnd(h, mi)) return;
+    change(() => {
+      const saved = M.setHairpin(score, mi, candidate, h);
+      if (saved) selectedHairpin = { mi, at: saved.at };
+      return saved;
+    });
+  }
+
+  let hairpinResize = null;
+  function beginHairpinResize(event, mi, h, side, line) {
+    event.preventDefault();
+    event.stopPropagation();
+    clearHoverGhost();
+    const origin = stage.getBoundingClientRect();
+    const times = hairpinTimes(mi, h, side);
+    if (!times.length) return;
+    const anchors = new Map();
+    // Tiempo desde el inicio del compas del regulador -> x, usando el compas donde cae.
+    const xAt = (time) => {
+      const point = barrePoint(mi, time);
+      if (!anchors.has(point.mi)) anchors.set(point.mi, { starts: M.onsets(M.measures(score)[point.mi]), centers: eventNodes(point.mi).map((node) => centerX(node, origin)) });
+      const { starts, centers } = anchors.get(point.mi);
+      return xAtTime(point.at, layout[point.mi], starts, centers);
+    };
+    // El regulador se redibuja en vivo: el original se oculta y una copia cambia de ancho con el puntero.
+    const node = hairpinNodes(mi)[score.hairpins[mi].indexOf(h)];
+    const poly = node && node.querySelector('polyline');
+    const width = poly ? parseFloat(poly.getAttribute('stroke-width')) * (poly.getScreenCTM()?.a || 0.06) : 1.5;
+    const top = line.top - origin.top, bottom = line.bottom - origin.top, middle = (top + bottom) / 2;
+    const fixed = (side === 'end' ? line.left : line.right) - origin.left;
+    const live = document.createElementNS(SVG_NS, 'svg');
+    live.setAttribute('class', 'score-hairpin-ui score-hairpin-live');
+    live.setAttribute('width', stage.clientWidth);
+    live.setAttribute('height', stage.clientHeight);
+    const shape = document.createElementNS(SVG_NS, 'polyline');
+    shape.setAttribute('fill', 'none');
+    shape.setAttribute('stroke-width', width);
+    live.appendChild(shape);
+    stage.appendChild(live);
+    if (node) node.style.visibility = 'hidden';
+    const moving = [stage.querySelector('.score-hairpin-grip[data-side="' + side + '"]'), stage.querySelector('.score-hairpin-dyn[data-side="' + side + '"]')]
+      .filter(Boolean).map((el) => ({ el, left: parseFloat(el.style.left) }));
+    const place = (x) => {
+      // El vertice queda del lado que cierra el regulador y la boca del lado que abre.
+      const left = Math.min(fixed, x), right = Math.max(fixed, x);
+      const tip = h.kind === 'cresc' ? left : right, mouth = h.kind === 'cresc' ? right : left;
+      shape.setAttribute('points', mouth + ',' + top + ' ' + tip + ',' + middle + ' ' + mouth + ',' + bottom);
+      const edge = (side === 'end' ? line.right : line.left) - origin.left;
+      moving.forEach((item) => { item.el.style.left = item.left + x - edge + 'px'; });
+    };
+    hairpinResize = {
+      id: event.pointerId,
+      move(e) {
+        const x = e.clientX - origin.left;
+        let best = null;
+        times.forEach((time) => {
+          const tx = xAt(time);
+          if (!best || Math.abs(tx - x) < Math.abs(best.x - x)) best = { time, x: tx };
+        });
+        this.pick = best.time;
+        place(best.x);
+      },
+      finish(commit) {
+        live.remove();
+        if (node) node.style.visibility = '';
+        hairpinResize = null;
+        if (commit && this.pick !== undefined) resizeHairpin(mi, h, side, this.pick);
+      },
+    };
+    hairpinResize.move(event);
+  }
+
+  document.addEventListener('pointermove', (event) => {
+    if (hairpinResize && event.pointerId === hairpinResize.id) hairpinResize.move(event);
+  });
+  document.addEventListener('pointerup', (event) => {
+    if (hairpinResize && event.pointerId === hairpinResize.id) hairpinResize.finish(true);
+  });
+  document.addEventListener('pointercancel', (event) => {
+    if (hairpinResize && event.pointerId === hairpinResize.id) hairpinResize.finish(false);
+  });
+
+  function selectHairpin(mi, at) {
+    deactivateTool();
+    setPicks([]);
+    clearBarSelection();
+    selectedHairpin = { mi, at };
+    stage.focus({ preventScroll: true });
+    markSelected();
+  }
+
+  // Una zona transparente sobre cada regulador lo hace facil de elegir (las lineas son finas); el elegido ademas lleva sus asas.
+  function mountHairpinControls() {
+    stage.querySelectorAll('.score-hairpin-ui').forEach((node) => node.remove());
+    const origin = stage.getBoundingClientRect();
+    Object.keys(score.hairpins || {}).forEach((key) => {
+      const mi = Number(key);
+      const nodes = hairpinNodes(mi);
+      score.hairpins[mi].forEach((h, i) => {
+        const node = nodes[i];
+        if (!node) return;
+        const box = node.getBoundingClientRect();
+        const picked = !!selectedHairpin && selectedHairpin.mi === mi && selectedHairpin.at === h.at;
+        const hit = document.createElement('button');
+        hit.type = 'button';
+        hit.tabIndex = -1;
+        hit.className = 'score-hairpin-ui score-hairpin-hit';
+        hit.setAttribute('aria-label', h.kind === 'cresc' ? t.hairpinCresc : t.hairpinDim);
+        hit.setAttribute('aria-pressed', String(picked));
+        hit.style.left = (box.left - origin.left - 4) + 'px';
+        hit.style.top = (box.top - origin.top - 6) + 'px';
+        hit.style.width = (box.width + 8) + 'px';
+        hit.style.height = (box.height + 12) + 'px';
+        hit.addEventListener('pointerdown', (event) => {
+          if (event.button !== 0) return;
+          event.preventDefault();
+          event.stopPropagation();
+          selectHairpin(mi, h.at);
+        });
+        stage.appendChild(hit);
+        if (picked) {
+          node.classList.add('is-selected');
+          mountHairpinHandles(mi, h, box, origin);
+        }
+        mountHairpinDynamics(mi, h, box, origin, picked);
+      });
+    });
+  }
+
+  function mountHairpinHandles(mi, h, box, origin) {
+    [['start', box.left], ['end', box.right]].forEach(([side, edge]) => {
+      const x = edge - origin.left;
+      const grip = document.createElement('button');
+      grip.type = 'button';
+      grip.className = 'score-hairpin-ui score-hairpin-grip';
+      grip.dataset.side = side;
+      grip.setAttribute('aria-label', side === 'start' ? t.hairpinStart : t.hairpinEnd);
+      grip.innerHTML = lucide('move-horizontal');
+      grip.style.left = x + 'px';
+      grip.style.top = (box.bottom - origin.top + 8) + 'px';
+      grip.addEventListener('pointerdown', (event) => beginHairpinResize(event, mi, h, side, box));
+      grip.addEventListener('keydown', (event) => {
+        const step = event.key === 'ArrowLeft' ? -1 : event.key === 'ArrowRight' ? 1 : 0;
+        if (!step) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const times = hairpinTimes(mi, h, side);
+        const next = times[times.indexOf(side === 'start' ? h.at : hairpinEnd(h, mi)) + step];
+        if (next === undefined) return;
+        resizeHairpin(mi, h, side, next);
+        stage.querySelector('.score-hairpin-grip[data-side="' + side + '"]')?.focus({ preventScroll: true });
+      });
+      stage.appendChild(grip);
+    });
+  }
+
+  function mountHairpinDynamics(mi, h, box, origin, picked) {
+    const reach = 3 * (layout[mi].lines[4] - layout[mi].lines[0]) / 4; // hasta donde una dinamica dibujada cuenta como de este extremo
+    const middle = (box.top + box.bottom) / 2;
+    [['start', box.left], ['end', box.right]].forEach(([side, edge]) => {
+      const value = side === 'start' ? h.startDyn : h.endDyn;
+      if (!picked && !value) return;
+      const x = edge - origin.left;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'score-hairpin-ui score-hairpin-dyn';
+      button.dataset.side = side;
+      button.setAttribute('aria-label', side === 'start' ? t.dynamicStart : t.dynamicEnd);
+      button.setAttribute('aria-haspopup', 'dialog');
+      // Con dinamica escrita el boton cubre la que dibujo Verovio, junto a este extremo; sin ella, un placeholder con la sugerida.
+      let drawn = null;
+      if (value) {
+        stage.querySelectorAll('g.dynam').forEach((node) => {
+          const r = node.getBoundingClientRect();
+          const gap = Math.abs((side === 'start' ? r.right - box.left : r.left - box.right));
+          if (gap < reach && Math.abs((r.top + r.bottom) / 2 - middle) < reach && (!drawn || gap < drawn.gap)) drawn = { gap, r };
+        });
+      }
+      if (drawn) {
+        button.classList.add('has-value');
+        button.style.left = (drawn.r.left - origin.left - 3) + 'px';
+        button.style.top = (drawn.r.top - origin.top - 3) + 'px';
+        button.style.width = (drawn.r.width + 6) + 'px';
+        button.style.height = (drawn.r.height + 6) + 'px';
+      } else {
+        button.classList.add('is-empty');
+        button.textContent = value || DYNAMIC_SUGGESTED[h.kind][side];
+        button.style.left = (x + (side === 'start' ? -6 : 6)) + 'px';
+        button.style.top = (middle - origin.top) + 'px';
+      }
+      button.addEventListener('click', () => openDynamicsPopup(button, mi, h.at, side));
+      stage.appendChild(button);
+    });
+  }
+
   function mountNavigationMarks() {
     const mount = (node, first, last, mark) => {
       if (!node) return;
@@ -1540,6 +1933,8 @@
       if (selectedNavigation.some((pick) => pick.first === Number(node.dataset.navigationFirst) && pick.mark === node.dataset.navigationMark)) node.classList.add('is-selected');
     });
     if (selectedBeam && !selectedBeam.node.isConnected) selectedBeam = null;
+    if (selectedHairpin && !M.findHairpin(score, selectedHairpin.mi, selectedHairpin.at)) selectedHairpin = null;
+    mountHairpinControls();
     // Highlight a connection only when all its figures are selected, or when
     // the beam itself was picked. This does not change what Delete acts on.
     stage.querySelectorAll('g.beam').forEach((beam) => {
@@ -1710,7 +2105,7 @@
     const x = item?.kind === 'navigation' ? layout[hit.mi][['dc', 'ds'].includes(item.mark) ? 'right' : 'left']
       : item && item.kind === 'bar' && item.bar !== 'double' ? layout[hit.mi][item.bar === 'start' ? 'left' : 'right']
       : item && item.kind === 'bar' && item.bar === 'double' ? hit.rawX
-      : item && item.kind === 'barre' && !hit.onNote ? layout[hit.mi].left : hit.x;
+      : item && (item.kind === 'barre' || item.kind === 'hairpin') && !hit.onNote ? layout[hit.mi].left : hit.x;
     line.style.left = x + 'px';
     line.style.top = hit.top - hit.space * 2 + 'px';
     line.style.height = (hit.bottom - hit.top) + hit.space * 4 + 'px';
@@ -1795,7 +2190,7 @@
     const raw = hoverPoint;
     const point = raw && aimed(raw);
     const over = point && document.elementFromPoint(point.clientX, point.clientY);
-    const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-insert-measure, .score-barre-field, .score-barre-span, .score-selection-menu');
+    const overStage = over && stage.contains(over) && !over.closest('.score-barline-trigger, .score-insert-measure, .score-barre-field, .score-barre-span, .score-hairpin-ui, .score-selection-menu');
     const hit = activeItem && !shiftMeasures && !measureDrag && !drag && overStage && locate(point.clientX, point.clientY);
     if (!hit) { clearHoverGhost(); return; }
     if (!hoverGhost) {
@@ -1926,7 +2321,7 @@
       selectNavigation(navigation, event);
       return;
     }
-    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-key-trigger, .score-barline-trigger, .score-insert-measure, .score-barre-field, .score-barre-span, .score-selection-menu')) return;
+    if (event.target.closest('.score-meter-trigger, .score-clef-trigger, .score-key-trigger, .score-barline-trigger, .score-insert-measure, .score-barre-field, .score-barre-span, .score-hairpin-ui, .score-selection-menu')) return;
     // Las cabezas graves pueden quedar dentro de TAB: la partitura recibe
     // el gesto antes de que el componente enfoque y redibuje su celda.
     const overTab = event.target.closest('.score-tab');
@@ -2185,7 +2580,7 @@
   document.addEventListener('pointerdown', (event) => {
     if (!(event.target instanceof Element)) return;
     // Los campos del titulo y el autor tambien quedan fuera de la seleccion musical.
-    if ((picks().length || selectedNavigation.length || selectedBeam) && !event.target.closest('.score-stage, .score-palette, .score-toolbar, .score-side-actions, .score-doc-tab, [popover]')) setPicks([]);
+    if ((picks().length || selectedNavigation.length || selectedBeam || selectedHairpin) && !event.target.closest('.score-stage, .score-palette, .score-toolbar, .score-side-actions, .score-doc-tab, [popover]')) setPicks([]);
     if (!activeItem) return;
     if (event.target.closest('.score-stage, .score-palette, .score-toolbar, .score-side-actions, .score-doc-tab, [popover], button, a, input, select, textarea')) return;
     deactivateTool();
@@ -2206,7 +2601,7 @@
       if (!event.repeat) duplicateSelected();
       return;
     }
-    if (!event.metaKey && !event.ctrlKey && !event.altKey && !meterPopup.matches(':popover-open') && !clefPopup.matches(':popover-open')) {
+    if (!event.metaKey && !event.ctrlKey && !event.altKey && !meterPopup.matches(':popover-open') && !clefPopup.matches(':popover-open') && !dynamicsPopup.matches(':popover-open') && !tuningPopup.matches(':popover-open')) {
       if (event.key.toLowerCase() === 'a') {
         event.preventDefault();
         deactivateTool();
@@ -2271,6 +2666,51 @@
     }, M.captureTabReferences(trial));
     stage.focus({ preventScroll: true });
   });
+
+  const tuningName = tuning => tuning.id === 'standard' ? t.standardTuning : tuning.name;
+  const tuningPopup = document.createElement('div');
+  tuningPopup.id = 'scoreTuningPopup';
+  tuningPopup.className = 'score-meter-popup score-tuning-popup';
+  tuningPopup.setAttribute('popover', 'auto');
+  tuningPopup.setAttribute('role', 'dialog');
+  tuningPopup.setAttribute('aria-label', t.tuning);
+  const tuningTitle = document.createElement('p');
+  tuningTitle.textContent = t.tuning;
+  tuningPopup.appendChild(tuningTitle);
+  M.TUNINGS.forEach(tuning => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.tuning = tuning.id;
+    const name = document.createElement('strong');
+    name.textContent = tuningName(tuning);
+    const strings = document.createElement('span');
+    strings.textContent = M.tuningLabels({ tuning: tuning.id }).slice().reverse().join(' ');
+    button.append(name, strings);
+    button.addEventListener('click', () => {
+      tuningPopup.hidePopover();
+      if (M.tuningOf(score).id !== tuning.id) {
+        change(() => { score.tuning = tuning.id; delete score.tabs; }, []);
+      }
+      requestAnimationFrame(() => stage.querySelector('.score-tuning-trigger')?.focus({ preventScroll: true }));
+    });
+    tuningPopup.appendChild(button);
+  });
+  document.querySelector('.score-page').appendChild(tuningPopup);
+  tuningPopup.addEventListener('toggle', event => {
+    stage.querySelector('.score-tuning-trigger')?.setAttribute('aria-expanded', String(event.newState === 'open'));
+  });
+  function openTuning(trigger) {
+    if (tuningPopup.matches(':popover-open')) { tuningPopup.hidePopover(); return; }
+    tuningPopup.querySelectorAll('button').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.tuning === M.tuningOf(score).id));
+    });
+    tuningPopup.showPopover();
+    const anchor = trigger.getBoundingClientRect();
+    const box = tuningPopup.getBoundingClientRect();
+    tuningPopup.style.left = Math.max(8, Math.min(anchor.left, innerWidth - box.width - 8)) + 'px';
+    tuningPopup.style.top = Math.max(8, Math.min(anchor.bottom + 6, innerHeight - box.height - 8)) + 'px';
+    tuningPopup.querySelector('[aria-pressed="true"]').focus({ preventScroll: true });
+  }
 
   // ---- selector de compas -------------------------------------------------
 
@@ -2590,8 +3030,11 @@
     triplet: '<path d="M3 19v-5h6M21 19v-5h-6"/><path d="M10 7.500c.5-1 4-1.500 4 .500 0 1.200-1.500 1.800-2 1.800.600 0 2.200.400 2.200 2 0 2-3.700 1.800-4.200.700" stroke-width="1.700"/>',
     untriplet: '<path d="M3 19v-5h6M21 19v-5h-6"/><path d="M10 7.500c.5-1 4-1.500 4 .500 0 1.200-1.500 1.800-2 1.800.600 0 2.200.400 2.200 2 0 2-3.700 1.800-4.200.700" stroke-width="1.700"/><path d="M4 4l16 12"/>',
     unbeam: '<circle cx="6" cy="18" r="3"/><path d="M9 18V4"/><circle cx="18" cy="16" r="3"/><path d="M21 16V2"/>',
+    'move-horizontal': '<path d="m18 8 4 4-4 4"/><path d="M2 12h20"/><path d="m6 8-4 4 4 4"/>',
     'arrow-left': '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
     'arrow-right': '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+    upload: '<path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>',
+    'file-music': '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9 18v-6l5-1v6"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="12.5" cy="17" r="1.5"/>',
     download: '<path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>',
   };
 
@@ -2631,6 +3074,9 @@
     'nav:segno': '<path transform="translate(5 29) scale(.049 -.049)" d="M108 474c-22 0 -38 -30 -38 -56c0 -54 73 -85 140 -116l138 205h41l-146 -221c41 -21 73 -44 96 -67c28 -29 42 -62 42 -97c0 -68 -54 -122 -124 -122c-40 0 -76 33 -76 73c0 22 21 38 43 38c23 0 34 -17 39 -38c6 -23 16 -34 31 -34c27 0 42 23 42 54c0 13 -3 23 -8 32c-9 17 -33 36 -72 57l-60 30l-134 -208h-40l141 223c-49 23 -85 50 -109 80c-21 27 -32 55 -32 84c0 47 25 80 54 102c17 13 37 20 58 20c46 0 91 -32 91 -77c0 -22 -23 -36 -45 -36c-19 0 -30 8 -35 25l-7 23c-5 17 -15 26 -30 26zM75 192c0 -21 -16 -38 -36 -38c-23 0 -39 13 -39 35c0 21 15 39 36 39c22 0 39 -15 39 -36zM337 322c0 24 16 38 37 38c23 0 37 -19 37 -37c0 -23 -17 -37 -37 -37c-23 0 -37 17 -37 36z"/>',
     'nav:first': '<path d="M4 25V7h23" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="8" y="22" font-size="14" font-family="serif">1.</text>',
     'nav:second': '<path d="M4 25V7h23" stroke="currentColor" stroke-width="1.5" fill="none"/><text x="8" y="22" font-size="14" font-family="serif">2.</text>',
+    // Reguladores: las dos lineas que se abren (crescendo) o se cierran (diminuendo).
+    'hairpin:cresc': '<path d="M8 16l14-4M8 16l14 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>',
+    'hairpin:dim': '<path d="M8 12l14 4M8 20l14-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>',
     'bar:double': '<path d="M10 4v24M15 4v24" stroke="currentColor" stroke-width="1.6"/>',
     'bar:start': '<path d="M10 4v24" stroke="currentColor" stroke-width="3.5"/><path d="M15 4v24" stroke="currentColor" stroke-width="1.6"/><circle cx="21" cy="12" r="1.8"/><circle cx="21" cy="20" r="1.8"/>',
     'bar:end': '<path d="M15 4v24" stroke="currentColor" stroke-width="1.6"/><path d="M20 4v24" stroke="currentColor" stroke-width="3.5"/><circle cx="9" cy="12" r="1.8"/><circle cx="9" cy="20" r="1.8"/>',
@@ -2646,6 +3092,7 @@
     if (item.kind === 'navigation') return 'nav:' + item.mark;
     if (item.kind === 'bar') return 'bar:' + item.bar;
     if (item.kind === 'barre') return 'barre';
+    if (item.kind === 'hairpin') return 'hairpin:' + item.hairpin;
     if (item.dead) return 'dead';
     if (item.kind === 'note' || item.kind === 'rest') return item.kind + ':' + item.d;
     return item.kind === 'dot' ? 'dot' : 'acc:' + item.acc;
@@ -2696,6 +3143,8 @@
     { kind: 'bar', bar: 'end', label: t.barRepeatEnd },
     { kind: 'bar', bar: 'double', label: t.barDouble },
     ...['dc', 'ds', 'segno', 'first', 'second'].map((mark) => ({ kind: 'navigation', mark, label: t['nav' + mark] })),
+    { kind: 'hairpin', hairpin: 'cresc', label: t.hairpinCresc },
+    { kind: 'hairpin', hairpin: 'dim', label: t.hairpinDim },
   ];
 
   ITEMS.concat(BARS).forEach((item) => {
@@ -2711,6 +3160,9 @@
     button.setAttribute('aria-label', item.label);
     button.dataset.tooltip = item.label;
     button.appendChild(glyphFor(item));
+    // The accessible name must contain the text the button shows (WCAG 2.5.3, "label in name"): D.C., D.S., 1., 2.
+    const shown = button.textContent.trim();
+    if (shown && !item.label.toLowerCase().includes(shown.toLowerCase())) button.setAttribute('aria-label', shown + ': ' + item.label);
     button.setAttribute('aria-pressed', 'false');
     if (item.kind === 'bar') {
       button.dataset.barline = item.bar;
@@ -2720,6 +3172,10 @@
     }
     if (item.kind === 'navigation') {
       button.dataset.navigation = item.mark;
+      button.addEventListener('click', (event) => { if (event.detail === 0) activateTool(item); });
+    }
+    if (item.kind === 'hairpin') {
+      button.dataset.hairpin = item.hairpin;
       button.addEventListener('click', (event) => { if (event.detail === 0) activateTool(item); });
     }
     if (item.kind === 'barre') {
@@ -2745,7 +3201,7 @@
       event.preventDefault();
       beginDrag(event, { item, kind: item.kind, glyph: glyphFor(item) });
     });
-    (item.kind === 'bar' || item.kind === 'barre' || item.kind === 'navigation' ? barlines : palette).appendChild(button);
+    (item.kind === 'bar' || item.kind === 'barre' || item.kind === 'navigation' || item.kind === 'hairpin' ? barlines : palette).appendChild(button);
   });
 
   // TAB: muestra u oculta una tablatura bajo cada renglon.
@@ -2754,7 +3210,7 @@
   tabToggle.id = 'scoreTabToggle';
   tabToggle.className = 'score-palette-item score-tab-toggle tooltip';
   tabToggle.textContent = 'TAB';
-  tabToggle.setAttribute('aria-label', t.tabToggle);
+  tabToggle.setAttribute('aria-label', 'TAB: ' + t.tabToggle);
   tabToggle.dataset.tooltip = t.tabToggle;
   tabToggle.addEventListener('click', () => {
     if (score.showTabs) delete score.showTabs; else score.showTabs = true;
@@ -2801,6 +3257,40 @@
     button.focus();
   });
 
+  addRow.addEventListener('click', () => change(() => { score.rows.push(M.emptyRow()); }));
+  removeRow.addEventListener('click', () => change(removeLastRow));
+
+  // ---- menu del sitio: cargar y exportar ----------------------------------
+
+  // Una partitura cargada se abre en una pestana nueva, sin tocar la actual.
+  function openScore(loaded) {
+    docs[active] = score;
+    histories[active] = history;
+    docs.push(loaded);
+    histories.push([]);
+    enteringTab = docs.length - 1;
+    switchTo(docs.length - 1);
+  }
+
+  // Importar y exportar viven en otro modulo (con el PDF y MIDI): se baja la primera vez que se usa alguno.
+  let exporterReady = null;
+  function exporter() {
+    return (exporterReady = exporterReady || Promise.all(['score-io.js', 'score-export.js'].map(file => loadScript(new URL(file, script.src).href))).then(() => window.createScoreExporter({
+      M, t, say, SCALE, defaultTitle, openScore, newToolkit, loadScript, vendorUrl, score: () => score,
+    })));
+  }
+  function withExporter(action, onError) {
+    return async (event) => {
+      const target = event.currentTarget;
+      try {
+        await action(await exporter(), target);
+      } catch (e) {
+        exporterReady = null;
+        say(onError);
+      }
+    };
+  }
+
   const downloads = document.getElementById('scoreDownloads');
   const downloadToggle = document.getElementById('scoreDownloadToggle');
   const downloadOptions = document.getElementById('scoreDownloadOptions');
@@ -2829,197 +3319,16 @@
     }
   });
 
-  addRow.addEventListener('click', () => change(() => { score.rows.push(M.emptyRow()); }));
-  removeRow.addEventListener('click', () => change(removeLastRow));
-
-  function download(blob, name) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
-
-  function downloadFilename(exportScore, extension) {
-    const filenameTitle = exportScore.title.trim() || 'partitura';
-    const filenameAuthor = (exportScore.author || '').trim();
-    return filenameTitle + (filenameAuthor ? ' - ' + filenameAuthor : '') + '.' + extension;
-  }
-
-  document.getElementById('scoreDownloadXml').addEventListener('click', () => {
-    download(new Blob([M.toMusicXml(score)], { type: 'application/vnd.recordare.musicxml+xml' }), downloadFilename(score, 'musicxml'));
-  });
-
-  // Verovio numera el primer compas de cada renglon; en una partitura de uso personal sobran.
-  function withoutMeasureNumbers(markup) {
-    const doc = new DOMParser().parseFromString(markup, 'image/svg+xml');
-    doc.querySelectorAll('g.mNum').forEach((node) => node.remove());
-    return new XMLSerializer().serializeToString(doc);
-  }
-
-  // Draw TAB in the export SVG, using the PDF's own note positions (not the
-  // responsive editor geometry). The extra layout spacing keeps it on its page.
-  function pdfPageSvg(markup, exportScore, columns) {
-    if (!exportScore.showTabs) return withoutMeasureNumbers(markup);
-    const host = document.createElement('div');
-    host.style.cssText = 'position:absolute;left:-100000px;top:0;visibility:hidden';
-    host.innerHTML = markup;
-    document.body.appendChild(host);
-    try {
-      const svg = host.querySelector('svg');
-      svg.querySelectorAll('g.mNum').forEach((node) => node.remove());
-      const ns = 'http://www.w3.org/2000/svg';
-      const attacks = M.attacks(exportScore);
-      svg.querySelectorAll('g.system').forEach((system) => {
-        const measures = [...system.querySelectorAll('g.measure')];
-        const first = measures[0]?.querySelector('g.staff > path');
-        const last = measures[measures.length - 1]?.querySelector('g.staff > path');
-        if (!first || !last) return;
-        const staffLines = [...measures[0].querySelectorAll('g.staff > path')].slice(0, 5);
-        const top = staffLines[0].getBBox().y;
-        const bottom = staffLines[4].getBBox().y;
-        const space = (bottom - top) / 4;
-        const left = first.getBBox().x;
-        const right = last.getBBox().x + last.getBBox().width;
-        const content = system.getBBox();
-        // Frets extend half a font above their string; leave a staff space clear.
-        const y = Math.max(bottom + space * 3.5, content.y + content.height + space * 2);
-        const step = space * 2.5;
-        const font = space * 2;
-        const group = document.createElementNS(ns, 'g');
-        group.setAttribute('class', 'pdf-tab');
-        function add(tag, attrs, text) {
-          const node = document.createElementNS(ns, tag);
-          Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
-          if (text !== undefined) node.textContent = text;
-          group.appendChild(node);
-        }
-        for (let string = 0; string < 6; string += 1) {
-          add('line', { x1: left, x2: right, y1: y + step * string, y2: y + step * string, stroke: '#000', 'stroke-width': 12 });
-        }
-        add('line', { x1: left, x2: left, y1: top, y2: y + 5 * step, stroke: '#000', 'stroke-width': 18 });
-        measures.forEach((measure) => {
-          const line = measure.querySelector('g.staff > path').getBBox();
-          add('line', { x1: line.x + line.width, x2: line.x + line.width, y1: y, y2: y + step * 5, stroke: '#000', 'stroke-width': 18 });
-          const mi = Number(measure.id.slice(1));
-          attacks.filter(attack => attack.mi === mi).forEach((attack) => {
-            const events = M.measures(exportScore)[mi];
-            const onsets = M.onsets(events);
-            const heads = events.flatMap((event, i) => {
-              const node = measure.querySelector('[id="e' + mi + '-' + i + '"] .notehead');
-              return !event.rest && onsets[i] === attack.at && node ? [node] : [];
-            });
-            if (!heads.length) return;
-            const x = heads.reduce((sum, head) => {
-              const box = head.getBBox();
-              const point = svg.createSVGPoint();
-              point.x = box.x + box.width / 2;
-              return sum + point.matrixTransform(system.getCTM().inverse().multiply(head.getCTM())).x;
-            }, 0) / heads.length;
-            (columns[attack.key] || []).forEach((fret, string) => {
-              if (!Number.isInteger(fret)) return;
-              add('text', { x, y: y + step * string, 'font-family': 'Arial, sans-serif', 'font-size': font,
-                'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#000', stroke: '#fff',
-                'stroke-width': font * 0.18, 'paint-order': 'stroke' }, String(fret));
-            });
-          });
-        });
-        const clef = system.querySelector('g.clef');
-        const clefBox = clef?.getBBox();
-        const clefX = clefBox ? clefBox.x + clefBox.width / 2 : left + space;
-        'TAB'.split('').forEach((letter, i) => add('text', { x: clefX, y: y + step * (1.5 + i),
-          'font-family': 'Arial, sans-serif', 'font-size': font, 'font-weight': 'bold',
-          'text-anchor': 'middle', 'dominant-baseline': 'central' }, letter));
-        system.appendChild(group);
-      });
-      return new XMLSerializer().serializeToString(svg);
-    } finally {
-      host.remove();
-    }
-  }
-
-  function rasterize(svgMarkup, pixelWidth, pixelHeight) {
-    return new Promise((resolve, reject) => {
-      const url = URL.createObjectURL(new Blob([svgMarkup], { type: 'image/svg+xml' }));
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = pixelWidth;
-        canvas.height = pixelHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(0, 0, pixelWidth, pixelHeight);
-        ctx.drawImage(img, 0, 0, pixelWidth, pixelHeight);
-        URL.revokeObjectURL(url);
-        resolve(canvas.toDataURL('image/jpeg', 0.95));
-      };
-      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('rasterize failed')); };
-      img.src = url;
-    });
-  }
-
-  document.getElementById('scoreDownloadPdf').addEventListener('click', async (event) => {
-    const button = event.currentTarget;
-    button.disabled = true;
-    try {
-      if (!(window.jspdf && window.jspdf.jsPDF)) await loadScript(vendorUrl('jspdf.umd.min.js'));
-      // A4 a 200 ppp. El ancho de pagina esta en unidades de Verovio (como en pantalla) para que el pentagrama
-      // conserve su proporcion; el alto sigue la relacion de A4 y se rasteriza a 1654 x 2339.
-      const exportScore = JSON.parse(JSON.stringify(score));
-      const attacks = M.attacks(exportScore);
-      const fingered = window.ScoreFingering.assign(attacks.map(attack => attack.midis));
-      const columns = Object.assign(Object.fromEntries(attacks.map((attack, i) =>
-        [attack.key, window.ScoreFingering.toColumn(fingered[i])])), exportScore.tabs);
-      const pdfWidth = 2400;
-      const pdfToolkit = newToolkit();
-      pdfToolkit.setOptions({
-        scale: SCALE,
-        pageWidth: pdfWidth,
-        pageHeight: Math.round(pdfWidth * 297 / 210),
-        adjustPageHeight: false,
-        breaks: exportScore.showTabs ? 'line' : 'encoded',
-        header: 'none',
-        footer: 'none',
-        svgViewBox: true,
-        pageMarginLeft: 100,
-        pageMarginRight: 100,
-        pageMarginTop: exportScore.title || exportScore.author ? 230 : 150,
-        pageMarginBottom: exportScore.showTabs ? 450 : 150,
-        ...(exportScore.showTabs ? { spacingSystem: 48 } : {}),
-        justifyVertically: false,
-        minLastJustification: 0,
-        mnumInterval: 0,
-      });
-      pdfToolkit.loadData(M.toMusicXml(exportScore));
-      const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
-      for (let page = 1; page <= pdfToolkit.getPageCount(); page += 1) {
-        const image = await rasterize(pdfPageSvg(pdfToolkit.renderToSVG(page), exportScore, columns), 1654, 2339);
-        if (page > 1) pdf.addPage();
-        pdf.addImage(image, 'JPEG', 0, 0, 210, 297);
-        if (page === 1 && exportScore.author) {
-          pdf.setFont('times', 'normal');
-          pdf.setFontSize(11);
-          pdf.setTextColor(120);
-          pdf.text(exportScore.author, 201.25, 10, { align: 'right' });
-          pdf.setTextColor(0);
-        }
-        if (page === 1 && exportScore.title) {
-          pdf.setFont('times', 'bold');
-          pdf.setFontSize(18);
-          pdf.setFontSize(Math.min(18, 18 * 192 / pdf.getTextWidth(exportScore.title)));
-          pdf.text(exportScore.title, 8.75, 15);
-        }
-      }
-      pdf.save(downloadFilename(exportScore, 'pdf'));
-    } catch (e) {
-      say(t.pdfError);
-    } finally {
-      button.disabled = false;
-    }
-  });
+  const fileInput = document.getElementById('scoreImportFile');
+  document.getElementById('scoreImport').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', withExporter(tools => {
+    const [file] = fileInput.files;
+    fileInput.value = '';
+    return file && tools.loadFile(file);
+  }, t.importFailed));
+  document.getElementById('scoreDownloadXml').addEventListener('click', withExporter(tools => tools.exportMusicXml(), t.loadError));
+  document.getElementById('scoreDownloadMidi').addEventListener('click', withExporter(tools => tools.exportMidi(), t.loadError));
+  document.getElementById('scoreDownloadPdf').addEventListener('click', withExporter((tools, button) => tools.exportPdf(button), t.pdfError));
 
   // ---- arranque -----------------------------------------------------------
 
@@ -3033,8 +3342,10 @@
   loadVerovio().then(() => {
     stage.removeAttribute('aria-busy');
     render();
+    stage.classList.remove('is-loading');
   }, () => {
     stage.removeAttribute('aria-busy');
+    stage.classList.remove('is-loading');
     say(t.loadError);
   });
 
@@ -3049,4 +3360,7 @@
   }
 
   window.scoreEditor = { get score() { return score; }, render, fix, get ghostOffset() { return ghostOffset; }, set ghostOffset(value) { ghostOffset = value; } };
-})();
+})().catch(error => {
+  document.getElementById('scoreStage').removeAttribute('aria-busy');
+  console.error('Score editor could not start', error);
+});

@@ -43,7 +43,6 @@
           >%%wordmark%%<small>%%wordmarkSmall%%</small></span
         >
       </a>
-      <span class="beta-badge">Beta</span>
     </header>
 
     <main class="score-page">
@@ -66,10 +65,13 @@
           <div id="scoreBarlines" class="score-barlines" role="toolbar" aria-label="%%scoreBarlines%%" aria-orientation="vertical"></div>
           <div class="score-side-actions">
             <button id="scoreClear" class="score-download tooltip" type="button" data-icon="trash" aria-label="%%scoreClear%%" data-tooltip="%%scoreClear%%"></button>
+            <button id="scoreImport" class="score-download tooltip" type="button" data-icon="upload" aria-label="%%scoreImport%%" data-tooltip="%%scoreImport%%"></button>
+            <input id="scoreImportFile" type="file" accept=".musicxml,.xml,.mid,.midi,audio/midi,application/xml,text/xml" hidden />
             <div id="scoreDownloads" class="score-downloads">
               <button id="scoreDownloadToggle" class="score-download tooltip" type="button" data-icon="download" aria-label="%%partDownloadsHeading%%" data-tooltip="%%partDownloadsHeading%%" aria-expanded="false" aria-controls="scoreDownloadOptions"></button>
               <div id="scoreDownloadOptions" class="score-download-options" hidden>
                 <button id="scoreDownloadPdf" class="score-download" type="button" data-icon="file-text">PDF</button>
+                <button id="scoreDownloadMidi" class="score-download" type="button" data-icon="file-music">MIDI</button>
                 <button id="scoreDownloadXml" class="score-download" type="button" data-icon="file-code">MusicXML</button>
               </div>
             </div>
@@ -101,6 +103,12 @@
       </section>
     </main>
 
+    <button type="button" class="beta-badge" id="betaOpen" aria-expanded="false" aria-controls="betaPopover">Beta</button>
+    <div class="beta-popover" id="betaPopover" role="region" aria-label="Beta" hidden>
+      <p>%%scoreBetaP1%%</p><p>%%scoreBetaP2%%</p><p>%%scoreBetaP3%%</p><p>%%scoreBetaP4%%</p>
+    </div>
+    <script src="%%ASSETS_PREFIX%%score-beta.js"></script>
+    <script src="%%ASSETS_PREFIX%%score-storage.js"></script>
     <script type="application/json" id="scoreStrings">%%SCORE_STRINGS%%</script>
     <script type="module" src="%%ASSETS_PREFIX%%vendor/ascii-tabs.js"></script>
     <script src="%%ASSETS_PREFIX%%score-confirm.js"></script>

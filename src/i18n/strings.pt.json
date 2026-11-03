@@ -766,6 +766,24 @@
     "beam": "Agrupar",
     "unbeam": "Separar",
     "pdfError": "Não foi possível gerar o PDF.",
-    "loadError": "Não foi possível carregar o motor de notação."
-  }
+    "loadError": "Não foi possível carregar o motor de notação.",
+    "hairpinCresc": "Crescendo",
+    "hairpinDim": "Diminuendo",
+    "hairpinStart": "Início do regulador",
+    "hairpinEnd": "Fim do regulador",
+    "hairpinTaken": "Já existe um regulador neste lugar",
+    "dynamic": "Dinâmica",
+    "dynamicStart": "Dinâmica inicial",
+    "dynamicEnd": "Dinâmica final",
+    "dynamicNone": "Sem dinâmica",
+    "importFailed": "Não foi possível ler o arquivo. Tente um MusicXML (.musicxml, .xml) ou um MIDI (.mid).",
+    "importDone": "Partitura carregada.",
+    "tuning": "Afinação",
+    "standardTuning": "Padrão"
+  },
+  "scoreImport": "Carregar arquivo…",
+  "scoreBetaP1": "Um software Beta continua em experimentação. Está disponível para uso, embora algumas coisas possam não funcionar bem.",
+  "scoreBetaP2": "Não temos planos de cobrar por estas funcionalidades.",
+  "scoreBetaP3": "Projetamos uma interface minimalista. Ela não tem todas as ferramentas profissionais de outros editores, mas nos esforçamos para que seja fácil de usar.",
+  "scoreBetaP4": "Você pode criar seus rascunhos aqui e exportá-los para um software mais poderoso para continuar."
 }

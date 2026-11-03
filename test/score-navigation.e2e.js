@@ -1,4 +1,5 @@
 'use strict';
+const { clearScoreStorage } = require('./score-storage-helpers');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const { chromium } = require('playwright');
@@ -49,7 +50,7 @@ async function checkHiddenBarlineEndings(page) {
     await page.keyboard.press('Delete');
     assert.equal(await page.locator('g.ending').count(), 0);
   }
-  await page.evaluate(() => localStorage.clear());
+  await clearScoreStorage(page);
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
 }
@@ -122,7 +123,7 @@ async function checkNavigationRegressions(page) {
   await page.keyboard.press('Backspace');
   assert.equal(await page.locator('g.ending').count(), 0);
   assert.equal(await page.evaluate(() => scoreEditor.score.navigation), undefined);
-  await page.evaluate(() => localStorage.clear());
+  await clearScoreStorage(page);
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
 }

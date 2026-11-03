@@ -1,5 +1,6 @@
 /* Editor privado /partitura. Ejecutar despues de npm run build:site. */
 'use strict';
+const { clearScoreStorage } = require('./score-storage-helpers');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
@@ -50,7 +51,7 @@ async function checkInteriorDoubleBar(page) {
 }
 
 async function checkSplitKeepsRows(page) {
-  await page.evaluate(() => localStorage.clear());
+  await clearScoreStorage(page);
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
   await page.evaluate(() => {
@@ -167,7 +168,7 @@ async function checkMeasureWidths(page) {
 }
 
 async function checkBarlines(page) {
-  await page.evaluate(() => localStorage.clear());
+  await clearScoreStorage(page);
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
   assert.equal(await page.locator('#scoreTrash').count(), 0);
@@ -300,7 +301,7 @@ async function checkBarlines(page) {
 }
 
 async function checkKeyChanges(page) {
-  await page.evaluate(() => localStorage.clear());
+  await clearScoreStorage(page);
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
   const keys = () => page.evaluate(() => [scoreEditor.score.fifths, scoreEditor.score.keys || null]);
@@ -356,7 +357,7 @@ async function checkKeyChanges(page) {
 }
 
 async function checkRowMeasureTools(page) {
-  await page.evaluate(() => localStorage.clear());
+  await clearScoreStorage(page);
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
   const sizes = () => page.evaluate(() => scoreEditor.score.rows.map((row) => row.length));
@@ -398,7 +399,7 @@ async function checkRowMeasureTools(page) {
 }
 
 async function checkBarre(page) {
-  await page.evaluate(() => localStorage.clear());
+  await clearScoreStorage(page);
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
   await page.evaluate(() => {
@@ -726,7 +727,7 @@ async function checkDoubleClick(page) {
   assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].dot), true, 'dot is saved');
   // 6/8: bajo en blanca con una voz superior (negra con puntillo y negra). Las voces salen del registro y se cuentan en orden:
   // el bajo puntillado sigue en 0, la negra sigue a la negra con puntillo (36) y las voces quedan fijas al puntillar.
-  await page.evaluate(() => localStorage.clear());
+  await clearScoreStorage(page);
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
   await page.evaluate(() => {
@@ -782,7 +783,7 @@ async function checkDoubleClick(page) {
 
 // Varias partituras: el titulo es la pestana activa y el + abre una partitura independiente.
 async function checkTabs(page) {
-  await page.evaluate(() => localStorage.clear());
+  await clearScoreStorage(page);
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
   assert.ok(await page.evaluate(() => document.querySelector('.score-doc-tabs').compareDocumentPosition(document.querySelector('.score-toolbar')) & Node.DOCUMENT_POSITION_FOLLOWING), 'las pestanas van antes de la barra de herramientas');
@@ -906,7 +907,7 @@ async function checkClear(page) {
     assert.equal(tip.opacity, '1', id + ' shows its tooltip on hover');
   }
   await page.locator('#scoreDownloadToggle').click();
-  assert.equal(await page.locator('#scoreDownloadOptions button svg.lucide').count(), 2, 'each download option has a Lucide icon');
+  assert.equal(await page.locator('#scoreDownloadOptions button svg.lucide').count(), 3, 'each download option has a Lucide icon');
   assert.match(await page.locator('#scoreDownloadOptions').evaluate(el => getComputedStyle(el).fontFamily), /sans|Helvetica|Arial|system-ui/i, 'download popup uses the sans font');
   await page.locator('#scoreDownloadToggle').click();
   await page.mouse.move(0, 0);
@@ -987,7 +988,7 @@ async function checkStartAndLedgers(page) {
 }
 
 async function checkRestWithTool(page) {
-  await page.evaluate(() => localStorage.clear());
+  await clearScoreStorage(page);
   await page.reload();
   await page.waitForSelector('#scoreStage g.measure');
   await page.evaluate(() => {

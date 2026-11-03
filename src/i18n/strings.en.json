@@ -766,6 +766,24 @@
     "beam": "Beam",
     "unbeam": "Separate",
     "pdfError": "Could not generate the PDF.",
-    "loadError": "Could not load the notation engine."
-  }
+    "loadError": "Could not load the notation engine.",
+    "hairpinCresc": "Crescendo",
+    "hairpinDim": "Diminuendo",
+    "hairpinStart": "Hairpin start",
+    "hairpinEnd": "Hairpin end",
+    "hairpinTaken": "There is already a hairpin there",
+    "dynamic": "Dynamic",
+    "dynamicStart": "Starting dynamic",
+    "dynamicEnd": "Ending dynamic",
+    "dynamicNone": "No dynamic",
+    "importFailed": "The file could not be read. Try a MusicXML (.musicxml, .xml) or a MIDI (.mid) file.",
+    "importDone": "Score loaded.",
+    "tuning": "Tuning",
+    "standardTuning": "Standard"
+  },
+  "scoreImport": "Load file…",
+  "scoreBetaP1": "Beta software is still under experimentation. It is available to use, although some things may not work properly.",
+  "scoreBetaP2": "We have no plans to charge for these features.",
+  "scoreBetaP3": "We designed a minimalist interface. It does not have all the professional tools of other editors, but we work hard to make it easy to use.",
+  "scoreBetaP4": "You can create your drafts here, and export them to more powerful software to continue."
 }

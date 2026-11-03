@@ -1,4 +1,5 @@
 'use strict';
+const { clearScoreStorage } = require('./score-storage-helpers');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const { chromium } = require('playwright');
@@ -36,7 +37,7 @@ const M = require('../src/site/score-model');
     assert.equal(await page.locator('#m2 g.keyAccid').count(), 2);
     await page.reload(); await page.waitForSelector('#m2');
     assert.equal(await page.evaluate(() => scoreEditor.score.meters[2]), '6/8');
-    await page.evaluate(() => localStorage.clear()); await page.reload(); await page.waitForSelector('#m2');
+    await clearScoreStorage(page); await page.reload(); await page.waitForSelector('#m2');
     await paste(true);
     assert.equal(await page.evaluate(() => scoreEditor.score.meters), undefined);
     assert.equal(await page.evaluate(() => scoreEditor.score.keys), undefined);

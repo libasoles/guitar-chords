@@ -1401,3 +1401,230 @@ body.score-moving-measure, body.score-moving-measure * { cursor: grabbing !impor
   pointer-events: none;
   z-index: 10;
 }
+
+/* Reguladores: una zona transparente para elegirlos y, ya elegidos, asas debajo de sus extremos y la dinamica de cada lado. */
+.score-hairpin-hit {
+  position: absolute;
+  z-index: 1;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.score-stage.has-tool .score-hairpin-hit {
+  pointer-events: none;
+}
+
+/* Las lineas finas se pixelan con el halo de los demas elementos elegidos: aqui solo cambian de color. */
+.score-stage g.hairpin.is-selected {
+  filter: none;
+}
+
+.score-stage g.hairpin.is-selected * {
+  fill: none;
+  stroke: var(--note-selected);
+}
+
+.score-hairpin-live {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  stroke: var(--note-selected);
+}
+
+.score-hairpin-grip {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: #fff;
+  color: #d92d20;
+  cursor: ew-resize;
+  touch-action: none;
+  transform: translateX(-50%);
+}
+
+.score-hairpin-grip svg {
+  width: 100%;
+  height: 100%;
+}
+
+.score-hairpin-dyn {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  padding: 0 0.3rem;
+  border: 0;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 85%);
+  color: var(--blue-france);
+  font: italic 700 1.2rem/1 serif;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.score-hairpin-dyn[data-side="start"] {
+  transform: translate(-100%, -50%);
+}
+
+.score-hairpin-dyn.is-empty {
+  opacity: 0.8;
+}
+
+/* Con la dinamica ya dibujada, el boton solo la enmarca. */
+.score-hairpin-dyn.has-value {
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  transform: none;
+}
+
+.score-hairpin-dyn:hover,
+.score-hairpin-dyn:focus-visible {
+  opacity: 1;
+}
+
+.score-hairpin-dyn:focus-visible,
+.score-hairpin-grip:focus-visible {
+  outline: 0;
+}
+
+.score-dynamics-options {
+  display: grid;
+  grid-template-columns: repeat(4, 3.25rem);
+  gap: 0.25rem;
+}
+
+.score-dynamics-options button {
+  min-height: 44px;
+  padding: 0.25rem;
+  border: 0;
+  border-radius: 6px;
+  color: var(--ink);
+  background: transparent;
+  font: italic 700 1.4rem/1 serif;
+  cursor: pointer;
+}
+
+.score-dynamics-options button:hover {
+  color: var(--blue-france);
+}
+
+.score-dynamics-options button[aria-pressed="true"] {
+  color: var(--accent-brand);
+}
+
+.score-dynamics-options button.score-dynamics-none {
+  grid-column: 1 / -1;
+  min-height: 36px;
+  padding: 0.25rem 0.75rem;
+  color: var(--blue-france);
+  outline: 0;
+  font: 0.85rem/1 var(--sans);
+  text-align: left;
+}
+
+
+/* A new tab grows in from nothing instead of popping into the bar. */
+@media (prefers-reduced-motion: no-preference) {
+  .score-doc-tab.is-entering {
+    animation: doc-tab-in 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  @keyframes doc-tab-in {
+    from { max-width: 0; padding-inline: 0; opacity: 0; transform: translateY(0.4rem); }
+    to { max-width: 18ch; padding-inline: 0.9rem; opacity: 1; transform: none; }
+  }
+}
+
+.score-tuning-trigger {
+  position: absolute;
+  z-index: 2;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.score-tab .ascii-tabs-label {
+  display: flex;
+  align-items: center;
+  font-size: 0.8em;
+  line-height: 1;
+  color: #8a8a8a;
+}
+.score-stage:has(> .score-tuning-trigger:hover) .ascii-tabs-label,
+.score-stage:has(> .score-tuning-trigger:focus-visible) .ascii-tabs-label { color: var(--blue-france); }
+.score-tuning-trigger:focus-visible { outline: 2px solid var(--blue-france); }
+.score-tuning-popup button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.score-tuning-popup button:hover, .score-tuning-popup button:focus-visible { background: var(--rule); }
+.score-tuning-popup button span { text-align: right; white-space: nowrap; }
+.score-tuning-popup button[aria-pressed="true"] { color: var(--blue-france); }
+
+/* Compact string spacing; keep the line, cell and positioned area in sync. */
+.score-tab .ascii-tabs-fret {
+  font-weight: 400;
+}
+.score-tab .ascii-tabs-line,
+.score-tab .ascii-tabs-cell,
+.score-tab .ascii-tabs-area {
+  height: 1.1em;
+  line-height: 1.1em;
+}
+
+
+#betaOpen {
+  position: fixed;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 20;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--ink-soft);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink-soft);
+  font: 600 0.75rem/1.4 var(--sans);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+#betaOpen:hover { color: var(--ink); border-color: var(--ink); }
+
+#betaPopover {
+  position: fixed;
+  left: 1rem;
+  bottom: 3.25rem;
+  z-index: 20;
+  width: min(22rem, calc(100vw - 2rem));
+  padding: 1rem 1.1rem 0.4rem;
+  border: 1px solid var(--ink-soft);
+  border-radius: 0.75rem;
+  background: var(--paper);
+  color: var(--ink);
+  font: 0.85rem/1.5 var(--sans);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.15);
+}
+#betaPopover[hidden] { display: none; }
+#betaPopover p { margin: 0 0 0.75rem; }

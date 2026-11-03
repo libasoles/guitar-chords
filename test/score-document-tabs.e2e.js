@@ -1,5 +1,6 @@
 /* Document tab dragging. Run after npm run build:site. */
 'use strict';
+const { readScoreStorage } = require('./score-storage-helpers');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
@@ -15,7 +16,7 @@ async function run() {
     await page.goto('http://localhost:' + server.address().port + '/partitura');
     await page.waitForSelector('#scoreStage g.measure');
     const order = () => page.locator('.score-doc-tab').evaluateAll(tabs => tabs.map(tab => tab.querySelector('input')?.value ?? tab.textContent));
-    const stored = () => page.evaluate(() => JSON.parse(localStorage.getItem('scoreEditor.tabs.v1')));
+    const stored = () => readScoreStorage(page);
     const rows = () => page.evaluate(() => scoreEditor.score.rows.length);
     const drag = async (from, to, after = false, cancel = false) => {
       const source = await page.locator('.score-doc-tab').nth(from).boundingBox();

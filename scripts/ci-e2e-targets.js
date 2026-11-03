@@ -87,6 +87,13 @@ const SUITES = {
       /^test\/score-editor\./,
     ],
   },
+  'score-migration': {
+    build: 'site',
+    paths: [
+      /^src\/site\/score-(editor|model|fingering|io|export|storage|beta)\./,
+      /^test\/score-(migration|storage-helpers)\./,
+    ],
+  },
   'score-beam-selection': {
     build: 'site',
     paths: [

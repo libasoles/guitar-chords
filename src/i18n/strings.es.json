@@ -766,6 +766,24 @@
     "beam": "Barrar",
     "unbeam": "Separar",
     "pdfError": "No se pudo generar el PDF.",
-    "loadError": "No se pudo cargar el motor de notación."
-  }
+    "loadError": "No se pudo cargar el motor de notación.",
+    "hairpinCresc": "Crescendo",
+    "hairpinDim": "Diminuendo",
+    "hairpinStart": "Inicio del regulador",
+    "hairpinEnd": "Fin del regulador",
+    "hairpinTaken": "Ya hay un regulador en ese lugar",
+    "dynamic": "Dinámica",
+    "dynamicStart": "Dinámica inicial",
+    "dynamicEnd": "Dinámica final",
+    "dynamicNone": "Sin dinámica",
+    "importFailed": "No se pudo leer el archivo. Probá con un MusicXML (.musicxml, .xml) o un MIDI (.mid).",
+    "importDone": "Partitura cargada.",
+    "tuning": "Afinación",
+    "standardTuning": "Estándar"
+  },
+  "scoreImport": "Cargar archivo…",
+  "scoreBetaP1": "Un software Beta sigue bajo experimentación. Está disponible para usarlo, aunque algunas cosas pueden funcionar mal.",
+  "scoreBetaP2": "No tenemos plan de cobrar por estas funcionalidades.",
+  "scoreBetaP3": "Diseñamos una interfaz minimalista. No tiene todas las herramientas profesionales de otros editores, pero nos esforzamos en que sea fácil de usar.",
+  "scoreBetaP4": "Podés crear tus borradores acá, y exportarlos a software más potente para continuar."
 }

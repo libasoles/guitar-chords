@@ -1202,7 +1202,7 @@ function renderScoreEditorPage(template, strings, locale) {
   Object.keys(strings).forEach(function (key) {
     if (key.indexOf("toast") === 0) toastStrings[key] = strings[key];
   });
-  ["scoreTitleLabel", "scoreAuthorLabel", "scoreAuthorPlaceholder", "scoreToolbar", "scoreBarlines", "scoreLabel", "scoreAddRow", "scoreRemoveRow", "scoreTabs", "scoreNewTab", "scoreClear", "partDownloadsHeading"].forEach(
+  ["scoreImport", "scoreBetaP1", "scoreBetaP2", "scoreBetaP3", "scoreBetaP4", "scoreTitleLabel", "scoreAuthorLabel", "scoreAuthorPlaceholder", "scoreToolbar", "scoreBarlines", "scoreLabel", "scoreAddRow", "scoreRemoveRow", "scoreTabs", "scoreNewTab", "scoreClear", "partDownloadsHeading"].forEach(
     function (key) {
       html = html.split("%%" + key + "%%").join(escapeHtml(strings[key] || ""));
     },
@@ -2052,7 +2052,7 @@ copyFile(
   );
 }
 // Private score editor (/partitura): Verovio draws the staff, jsPDF exports it.
-["score-model.js", "score-fingering.js", "score-editor.js", "score-editor.css"].forEach(function (f) {
+["score-model.js", "score-fingering.js", "score-editor.js", "score-editor.css", "score-storage.js", "score-beta.js", "score-io.js", "score-export.js"].forEach(function (f) {
   copyFile(path.join(SRC_SITE, f), path.join(ASSETS_DIST, f));
 });
 require("esbuild").buildSync({

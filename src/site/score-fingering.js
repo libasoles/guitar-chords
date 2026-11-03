@@ -32,7 +32,7 @@
   };
 
   // Todas las formas de tocar estas notas a la vez: cada una en su cuerda, las graves abajo, en una posicion.
-  function shapes(midis) {
+  function shapes(midis, opens) {
     const notes = midis.slice().sort((a, b) => b - a);
     const found = [];
     (function place(i, from, cells) {
@@ -41,8 +41,8 @@
         if (!fretted.length || Math.max(...fretted) - Math.min(...fretted) <= MAX_SPAN) found.push(cells);
         return;
       }
-      for (let s = from; s < OPENS.length; s += 1) {
-        const fret = notes[i] - OPENS[s];
+      for (let s = from; s < opens.length; s += 1) {
+        const fret = notes[i] - opens[s];
         if (fret >= 0 && fret <= MAX_FRET) place(i + 1, s + 1, cells.concat([[s, fret]]));
       }
     })(0, 0, []);
@@ -50,12 +50,12 @@
   }
 
   const single = (option) => (option.length === 1 ? option[0] : null);
-  const pitch = (cell) => OPENS[cell[0]] + cell[1];
 
   // `columns`: por columna, los MIDI que suenan juntos. Devuelve por columna las celdas elegidas ([] si no hay forma).
-  function assign(columns) {
+  function assign(columns, opens = OPENS) {
+    const pitch = (cell) => opens[cell[0]] + cell[1];
     const layers = columns.map((midis) => {
-      const options = midis.length ? shapes(midis) : [];
+      const options = midis.length ? shapes(midis, opens) : [];
       return options.length ? options : [[]];
     });
     if (!layers.length) return [];

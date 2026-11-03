@@ -3,8 +3,8 @@
    Sin DOM: el navegador lo carga como script clasico y los tests lo requieren.
 
    Duraciones en divisiones de negra = 24 (el tresillo de corchea, 8, y la corchea
-   con puntillo, 18, entran exactos). El MusicXML baja las alturas una octava para
-   conservar la altura sonora al cambiar de clave (sol de guitarra por defecto).
+   con puntillo, 18, entran exactos). El MusicXML aplica la transposicion de octava
+   de la clave elegida para conservar la altura sonora (sol de guitarra por defecto).
 
    Campos de una figura:
    - `d`: valor base: w redonda (96), h blanca (48), q negra (24), e corchea (12), s semicorchea (6), f fusa (3).
@@ -317,11 +317,11 @@
     const tabs = attacks(score, true).filter((attack) => columns[attack.key]).map((attack) => {
       const notes = attack.events.flatMap((ev, i) => positions.has(ev) ? [{ ...positions.get(ev), midi: attack.midis[i] }] : []);
       const column = columns[attack.key].map((fret, string) =>
-        notes.length === attack.events.length || notes.some((note) => TAB_OPENS[string] + fret === note.midi) ? fret : null);
+        notes.length === attack.events.length || notes.some((note) => tuningOf(score).opens[string] + fret === note.midi) ? fret : null);
       return { notes, column };
     }).filter((entry) => entry.notes.length);
     const signatures = fragment.map((_, offset) => ({ meter: meterAt(score, first + offset), fifths: keyAt(score, first + offset) }));
-    return { pitches, tabs, type: 'guitar-score-selection', version: 1, ...signatures[0], signatures, measures: fragment };
+    return { pitches, tabs, tuning: tuningOf(score).id, type: 'guitar-score-selection', version: 1, ...signatures[0], signatures, measures: fragment };
   }
 
   // Duplica las figuras elegidas justo despues de la ultima de ellas, conservando su ritmo relativo. Lo que no entra
@@ -459,7 +459,7 @@
       });
       if (!notes.length) return;
       const column = columns[attack.key].map((fret, string) =>
-        notes.length === attack.events.length || notes.some((note) => TAB_OPENS[string] + fret === note.midi) ? fret : null);
+        notes.length === attack.events.length || notes.some((note) => tuningOf(score).opens[string] + fret === note.midi) ? fret : null);
       savedTabs.push({ refs: notes.map((note) => tabReference(note.target)), midis: notes.map((note) => note.midi), column });
     });
     restoreTabReferences(trial, savedTabs);
@@ -487,7 +487,7 @@
     if (clean.some((m, i) => m.length !== fragment.measures[i].length) || !clean.some((m) => m.length)) return null;
     const savedTabs = captureTabReferences(score);
     // El portapapeles usa indices serializables; al pegar se les da una identidad nueva.
-    if (Array.isArray(fragment.tabs)) fragment.tabs.forEach((entry) => {
+    if (tuningOf(fragment).id === tuningOf(score).id && Array.isArray(fragment.tabs)) fragment.tabs.forEach((entry) => {
       if (!entry || !Array.isArray(entry.notes) || !entry.notes.length || !Array.isArray(entry.column)) return;
       const notes = entry.notes.map((note) => note && Number.isInteger(note.mi) && Number.isInteger(note.i) &&
         Number.isInteger(note.midi) && clean[note.mi]?.[note.i] && !clean[note.mi][note.i].rest ? note : null);
@@ -647,7 +647,7 @@
   function addMeasure(score, row) {
     if (!Number.isInteger(row) || row < 0 || row >= score.rows.length || score.rows[row].length >= PER_ROW) return false;
     const at = rowStarts(score)[row] + score.rows[row].length;
-    ['navigation', 'barlines', 'keys', 'clefs', 'meters', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => { if (score[name]) score[name] = shiftKeys(score[name], at, 1); });
+    ['navigation', 'barlines', 'keys', 'clefs', 'meters', 'barres', 'hairpins', 'measureDurations', 'measureWidths'].forEach((name) => { if (score[name]) score[name] = shiftKeys(score[name], at, 1); });
     score.rows[row].push([]);
     return true;
   }
@@ -669,7 +669,14 @@
         if (!barre.span) delete barre.span;
       }
     });
-    ['navigation', 'barlines', 'keys', 'clefs', 'meters', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => {
+    hairpinList(score).forEach(({ mi: m, h }) => {
+      if (m < at && hairpinLast(h, m) >= at) {
+        h.span = at - 1 - m;
+        delete h.to;
+        if (!h.span) delete h.span;
+      }
+    });
+    ['navigation', 'barlines', 'keys', 'clefs', 'meters', 'barres', 'hairpins', 'measureDurations', 'measureWidths'].forEach((name) => {
       if (score[name]) score[name] = shiftKeys(score[name], at, 1);
     });
     if (score.tabs) score.tabs = Object.fromEntries(Object.entries(score.tabs).map(([key, value]) => {
@@ -704,7 +711,15 @@
         if (!barre.span) delete barre.span;
       }
     });
-    ['navigation', 'barlines', 'keys', 'clefs', 'meters', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => {
+    hairpinList(score).forEach(({ mi: m, h }) => {
+      if (m === at) removeHairpin(score, m, h);
+      else if (m < at && hairpinLast(h, m) >= at) {
+        h.span -= 1;
+        if (hairpinLast(h, m) === at - 1) delete h.to;
+        if (!h.span) delete h.span;
+      }
+    });
+    ['navigation', 'barlines', 'keys', 'clefs', 'meters', 'barres', 'hairpins', 'measureDurations', 'measureWidths'].forEach((name) => {
       if (!score[name]) return;
       delete score[name][at];
       score[name] = shiftKeys(score[name], at, -1);
@@ -744,16 +759,16 @@
     const order = all.map((_, mi) => mi);
     order.splice(target, 0, order.splice(from, 1)[0]);
     const positions = new Map(order.map((old, mi) => [old, mi]));
-    ['navigation', 'barlines', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => {
+    ['navigation', 'barlines', 'barres', 'hairpins', 'measureDurations', 'measureWidths'].forEach((name) => {
       if (!score[name]) return;
       const moved = {};
+      // Una cejilla o un regulador que cruza compases solo sigue unido si esos compases se mueven juntos.
+      const intact = (value, old, mi) => Array.from({ length: (value.span || 0) + 1 }, (_, i) => positions.get(+old + i) === mi + i).every(Boolean);
+      const detach = (value) => { value = { ...value }; delete value.span; delete value.to; return value; };
       Object.entries(score[name]).forEach(([old, value]) => {
         const mi = positions.get(+old);
-        if (name === 'barres' && value.span) {
-          const end = barreLast(value, +old);
-          const intact = Array.from({ length: end - old + 1 }, (_, i) => positions.get(+old + i) === mi + i).every(Boolean);
-          if (!intact) { value = { ...value }; delete value.span; delete value.to; }
-        }
+        if (name === 'barres' && value.span && !intact(value, old, mi)) value = detach(value);
+        if (name === 'hairpins') value = value.map((h) => (h.span && !intact(h, old, mi) ? detach(h) : h));
         moved[mi] = value;
       });
       score[name] = moved;
@@ -931,9 +946,28 @@
         }
       }
     });
-    ['navigation', 'barlines', 'keys', 'clefs', 'meters', 'barres', 'measureDurations', 'measureWidths'].forEach((name) => {
+    // Lo mismo para los reguladores: los que empiezan despues del corte pasan al compas nuevo.
+    const movedHairpins = [];
+    hairpinList(score).forEach(({ mi: m, h }) => {
+      const last = hairpinLast(h, m);
+      if (m > mi || last < mi) return;
+      if (m === mi && h.at >= at) {
+        removeHairpin(score, m, h);
+        if (Number.isInteger(h.to) && last === mi) h.to -= at;
+        h.at -= at;
+        movedHairpins.push(h);
+      } else if (last > mi || (last === mi && (h.to || end) > at)) {
+        h.span = (h.span || 0) + 1;
+        if (last === mi && Number.isInteger(h.to)) h.to -= at;
+      }
+    });
+    ['navigation', 'barlines', 'keys', 'clefs', 'meters', 'barres', 'hairpins', 'measureDurations', 'measureWidths'].forEach((name) => {
       if (score[name]) score[name] = shiftKeys(score[name], mi + 1, 1);
     });
+    if (movedHairpins.length) {
+      if (!score.hairpins) score.hairpins = {};
+      score.hairpins[mi + 1] = movedHairpins;
+    }
     const nav = score.navigation?.[mi];
     if (nav) {
       const rightNav = Object.assign({}, nav);
@@ -995,6 +1029,96 @@
     if (!score.barres || !score.barres[mi]) return false;
     delete score.barres[mi];
     if (!Object.keys(score.barres).length) delete score.barres;
+    return true;
+  }
+
+  // Reguladores: crescendo ('cresc') y diminuendo ('dim'). Como la cejilla, van de `at` a `to` (por defecto el final del compas)
+  // y con `span` > 0 siguen por compases de la misma fila. Un compas admite varios mientras no se pisen: `score.hairpins[mi]` es la
+  // lista, ordenada por `at`, de los que empiezan en `mi`. `startDyn` y `endDyn` son las dinamicas escritas en cada extremo.
+  const HAIRPINS = ['cresc', 'dim'];
+  const DYNAMICS = ['ppp', 'pp', 'p', 'mp', 'mf', 'f', 'ff', 'fff'];
+
+  function hairpinList(score) {
+    return Object.keys(score.hairpins || {}).flatMap((key) => score.hairpins[key].map((h) => ({ mi: +key, h })));
+  }
+
+  function hairpinLast(h, mi) {
+    return mi + (h.span || 0);
+  }
+
+  function measureStart(score, mi) {
+    let time = 0;
+    for (let k = 0; k < mi; k += 1) time += capacity(score, k);
+    return time;
+  }
+
+  // Tiempo, contado desde el primer compas, donde empieza y donde termina el regulador que arranca en `mi`.
+  function hairpinBegin(score, mi, h) {
+    return measureStart(score, mi) + h.at;
+  }
+
+  function hairpinStop(score, mi, h) {
+    const last = hairpinLast(h, mi);
+    return measureStart(score, last) + (Number.isInteger(h.to) ? h.to : capacity(score, last));
+  }
+
+  // `skip` es el regulador que se esta reemplazando: no cuenta como obstaculo.
+  function hairpinFits(score, mi, h, skip) {
+    if (!HAIRPINS.includes(h.kind) || !Number.isInteger(mi) || mi < 0 || mi >= measures(score).length) return false;
+    const span = h.span || 0;
+    if (!Number.isInteger(span) || span < 0 || mi + span > rowOf(score, mi).last) return false;
+    if (!Number.isInteger(h.at) || h.at < 0 || h.at >= capacity(score, mi)) return false;
+    const stop = capacity(score, mi + span);
+    const to = h.to === undefined ? stop : h.to;
+    if (!Number.isInteger(to) || to > stop || (span === 0 ? to <= h.at : to <= 0)) return false;
+    if ([h.startDyn, h.endDyn].some((dyn) => dyn !== undefined && !DYNAMICS.includes(dyn))) return false;
+    const begin = hairpinBegin(score, mi, h), end = measureStart(score, mi + span) + to;
+    return !hairpinList(score).some((other) => other.h !== skip && hairpinBegin(score, other.mi, other.h) < end && begin < hairpinStop(score, other.mi, other.h));
+  }
+
+  function findHairpin(score, mi, at) {
+    return ((score.hairpins && score.hairpins[mi]) || []).find((h) => h.at === at);
+  }
+
+  // Agrega `h` o, con `replace`, lo cambia por el regulador que ya estaba. Devuelve el regulador guardado.
+  function setHairpin(score, mi, h, replace) {
+    if (!hairpinFits(score, mi, h, replace)) return false;
+    const span = h.span || 0;
+    const saved = { kind: h.kind, at: h.at };
+    if (span) saved.span = span;
+    if (Number.isInteger(h.to) && h.to < capacity(score, mi + span)) saved.to = h.to;
+    if (h.startDyn) saved.startDyn = h.startDyn;
+    if (h.endDyn) saved.endDyn = h.endDyn;
+    const list = ((score.hairpins && score.hairpins[mi]) || []).filter((other) => other !== replace);
+    list.push(saved);
+    list.sort((a, b) => a.at - b.at);
+    if (!score.hairpins) score.hairpins = {};
+    score.hairpins[mi] = list;
+    return saved;
+  }
+
+  function removeHairpin(score, mi, h) {
+    const list = score.hairpins && score.hairpins[mi];
+    const index = list ? list.indexOf(h) : -1;
+    if (index < 0) return false;
+    list.splice(index, 1);
+    if (!list.length) delete score.hairpins[mi];
+    if (!Object.keys(score.hairpins).length) delete score.hairpins;
+    return true;
+  }
+
+  // Dinamica de un extremo (`side`: 'start' | 'end'); sin `value` se quita. Donde un regulador termina justo donde empieza
+  // otro comparten la dinamica, asi que se escribe en los dos.
+  function setHairpinDynamic(score, mi, h, side, value) {
+    if (value && !DYNAMICS.includes(value)) return false;
+    const write = (target, field) => { if (value) target[field] = value; else delete target[field]; };
+    write(h, side === 'start' ? 'startDyn' : 'endDyn');
+    const edge = side === 'start' ? hairpinBegin(score, mi, h) : hairpinStop(score, mi, h);
+    hairpinList(score).forEach((other) => {
+      if (other.h === h) return;
+      if (side === 'start' && hairpinStop(score, other.mi, other.h) === edge) write(other.h, 'endDyn');
+      else if (side === 'end' && hairpinBegin(score, other.mi, other.h) === edge) write(other.h, 'startDyn');
+    });
     return true;
   }
 
@@ -1135,7 +1259,12 @@
       const barre = score.barres[mi];
       if (barre.at >= capacity(score)) removeBarre(score, mi);
       else if (barre.to >= capacity(score)) delete barre.to;
-    });    return true;
+    });
+    hairpinList(score).forEach(({ mi, h }) => {
+      if (h.at >= capacity(score)) removeHairpin(score, mi, h);
+      else if (h.to >= capacity(score)) delete h.to;
+    });
+    return true;
   }
 
   function fits(measure, ev, ignore, score) {
@@ -1230,7 +1359,17 @@
     return result;
   }
 
-  const TAB_OPENS = [64, 59, 55, 50, 45, 40];
+  // Open strings, highest first. IDs are persisted with the score.
+  const TUNINGS = [
+    { id: 'standard', name: 'Standard', opens: [64, 59, 55, 50, 45, 40] },
+    { id: 'drop-d', name: 'Drop D', opens: [64, 59, 55, 50, 45, 38] },
+    { id: 'double-drop-d', name: 'Double Drop D', opens: [62, 59, 55, 50, 45, 38] },
+    { id: 'dadgad', name: 'DADGAD', opens: [62, 57, 55, 50, 45, 38] },
+    { id: 'open-d', name: 'Open D', opens: [62, 57, 54, 50, 45, 38] },
+    { id: 'open-g', name: 'Open G', opens: [62, 59, 55, 50, 43, 38] },
+  ];
+  const tuningOf = (score) => TUNINGS.find(tuning => tuning.id === score.tuning) || TUNINGS[0];
+  const tuningLabels = (score) => tuningOf(score).opens.map(midi => ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][midi % 12]);
 
   // Captura lo que se ve antes de editar, asociado a las figuras y su altura real.
   function captureTabReferences(score, columns = score.tabs || {}) {
@@ -1257,7 +1396,7 @@
       // Al partir o reunir un acorde, cada nota conserva su cuerda si siguen siendo compatibles.
       const column = new Array(TAB_STRINGS).fill(null);
       for (const { entry, midi } of entries) {
-        const string = entry.column.findIndex((fret, s) => fret !== null && TAB_OPENS[s] + fret === midi && column[s] === null);
+        const string = entry.column.findIndex((fret, s) => fret !== null && tuningOf(score).opens[s] + fret === midi && column[s] === null);
         if (string < 0) return;
         column[string] = entry.column[string];
       }
@@ -1363,12 +1502,25 @@
       const size = duration * factor;
       if (/^(0|[1-9]\d*)$/.test(index) && +index < total && Number.isInteger(size) && size > 0 && size < capacity(meterContext, +index) && measureLength(rows.flat()[+index]) <= size) measureDurations[index] = size;
     });
+    const hairpinContext = Object.assign({}, meterContext, { measureDurations, hairpins: {} });
+    Object.entries(data.hairpins || {}).forEach(([index, list]) => {
+      if (!/^(0|[1-9]\d*)$/.test(index) || +index >= total || !Array.isArray(list)) return;
+      list.forEach((h) => {
+        if (!h || typeof h !== 'object') return;
+        const candidate = { kind: h.kind, at: h.at * factor };
+        if (h.span) candidate.span = h.span;
+        if (h.to !== undefined) candidate.to = h.to * factor;
+        ['startDyn', 'endDyn'].forEach((field) => { if (DYNAMICS.includes(h[field])) candidate[field] = h[field]; });
+        setHairpin(hairpinContext, +index, candidate);
+      });
+    });
+    const hairpins = hairpinContext.hairpins;
     const measureWidths = {};
     Object.entries(data.measureWidths || {}).forEach(([index, width]) => {
       if (/^(0|[1-9]\d*)$/.test(index) && +index < total && Number.isFinite(width) && width > 0 && width <= 1) measureWidths[index] = width;
     });
     const tabs = sanitizeTabs(data.tabs, rows.reduce((sum, row) => sum + row.length, 0));
-    return Object.assign(Object.keys(navigation).length ? { navigation } : {}, Object.keys(meters).length ? { meters } : {}, Object.keys(measureWidths).length ? { measureWidths } : {}, Object.keys(measureDurations).length ? { measureDurations } : {}, Object.keys(barlines).length ? { barlines } : {}, Object.keys(keys).length ? { keys } : {}, Object.keys(clefs).length ? { clefs } : {}, Object.keys(barres).length ? { barres } : {}, data.showTabs === true ? { showTabs: true } : {}, Object.keys(tabs).length ? { tabs } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
+    return Object.assign(Object.keys(navigation).length ? { navigation } : {}, Object.keys(meters).length ? { meters } : {}, Object.keys(measureWidths).length ? { measureWidths } : {}, Object.keys(measureDurations).length ? { measureDurations } : {}, Object.keys(barlines).length ? { barlines } : {}, Object.keys(keys).length ? { keys } : {}, Object.keys(clefs).length ? { clefs } : {}, Object.keys(barres).length ? { barres } : {}, Object.keys(hairpins).length ? { hairpins } : {}, TUNINGS.some(tuning => tuning.id === data.tuning) ? { tuning: data.tuning } : {}, data.showTabs === true ? { showTabs: true } : {}, Object.keys(tabs).length ? { tabs } : {}, { meter, clef: clefOf(data), fifths: fifthsOf(data), rows }, typeof data.title === 'string' ? { title: data.title } : {}, typeof data.author === 'string' && data.author ? { author: data.author } : {});
   }
 
   // Rellena huecos con silencios ocultos: el final del compas y el espacio entre figuras sueltas.
@@ -1777,6 +1929,28 @@
   // Con varias voces las plicas se separan por convencion: las agudas hacia arriba y la mas grave hacia abajo.
   const stemOf = (voice, count) => (count < 2 ? null : voice < count - 1 ? 'up' : 'down');
 
+  // Reguladores en el compas `mi`: su inicio (con la dinamica de partida) y su fin (con la dinamica de llegada), por tiempo.
+  // Si otro empieza justo donde este termina, la dinamica del empalme se escribe una vez, al empezar el siguiente.
+  function hairpinMarks(score, mi) {
+    const dynamic = (value) => (value ? `<direction placement="below"><direction-type><dynamics><${value}/></dynamics></direction-type></direction>` : '');
+    const wedge = (type) => `<direction placement="below"><direction-type><wedge type="${type}" number="1"/></direction-type></direction>`;
+    const all = hairpinList(score);
+    const marks = [];
+    all.forEach(({ mi: first, h }) => {
+      const begin = hairpinBegin(score, first, h), end = hairpinStop(score, first, h);
+      const last = hairpinLast(h, first);
+      const next = all.find((other) => other.h !== h && hairpinBegin(score, other.mi, other.h) === end);
+      const previous = all.find((other) => other.h !== h && hairpinStop(score, other.mi, other.h) === begin);
+      let opening;
+      if (first === mi) {
+        opening = { wedge: true, t: h.at, xml: dynamic(h.startDyn || (previous && previous.h.endDyn)) + wedge(h.kind === 'cresc' ? 'crescendo' : 'diminuendo') };
+        marks.push(opening);
+      }
+      if (last === mi) marks.push({ wedge: true, stop: true, begin: opening, t: Number.isInteger(h.to) ? h.to : capacity(score, mi), xml: wedge('stop') + (next ? '' : dynamic(h.endDyn)) });
+    });
+    return marks;
+  }
+
   function toMusicXml(score) {
     const all = measures(score);
     const clef = CLEFS[clefOf(score)];
@@ -1830,17 +2004,19 @@
         if (!ev.rest && ev.acc) accidentals.set(ev.n, ACCIDENTALS[ev.acc].alter);
         alters[i] = accidentals.has(ev.n) ? accidentals.get(ev.n) : keyAlter(ev.n, score, mi);
       });
+      const wedges = hairpinMarks(score, mi);
       const barre = score.barres && score.barres[mi];
       // Una cejilla que viene de compases anteriores solo cierra aqui.
       const origin = Object.keys(score.barres || {}).map(Number).find((key) => key < mi && barreLast(score.barres[key], key) === mi);
       const closing = origin === undefined ? null : score.barres[origin];
       const stop = (time) => ({ t: time, xml: '<direction placement="above"><direction-type><bracket type="stop" number="1" line-end="none"/></direction-type></direction>' });
-      const marks = barre ? [
+      const barreMarks = barre ? [
         { t: barre.at, start: true, xml: `<direction placement="above"><direction-type><words>C ${barre.fret}</words></direction-type></direction>` +
           '<direction placement="above"><direction-type><bracket type="start" number="1" line-end="none" line-type="dashed"/></direction-type></direction>' },
         ...(barre.span ? [] : [stop(Number.isInteger(barre.to) ? barre.to : capacity(score, mi))]),
       ] : closing ? [stop(Number.isInteger(closing.to) ? closing.to : capacity(score, mi))] : [];
-      const stopXml = !barre && closing ? marks[0].xml : marks.length > 1 ? marks[1].xml : '';
+      const stopXml = !barre && closing ? barreMarks[0].xml : barreMarks.length > 1 ? barreMarks[1].xml : '';
+      const marks = barreMarks.concat(wedges).sort((a, b) => a.t - b.t);
       let barreOpen = !barre && Boolean(closing);
       let barreClosed = false;
       voices(measure).forEach((voice, vi, all) => {
@@ -1857,11 +2033,12 @@
         const hidden = (from, to) => {
           let at = from;
           marks.forEach((mark) => {
-            if (mark.done || mark.t < at || mark.t > to || (!mark.start && !barreOpen)) return;
+            if (mark.done || mark.t < at || mark.t > to || (mark.wedge ? mark.begin && !mark.begin.done : !mark.start && !barreOpen)) return;
             pad(at, mark.t);
             xml += mark.xml;
             at = mark.t;
             mark.done = true;
+            if (mark.wedge) return;
             if (mark.start) barreOpen = true;
             else barreClosed = true;
           });
@@ -1886,6 +2063,8 @@
         });
         hidden(cursor, capacity(score, mi));
         if (barreOpen && !barreClosed && vi === all.length - 1) xml += stopXml;
+        // Un regulador abierto se cierra al final aunque su fin no caiga en un hueco de ninguna voz.
+        if (vi === all.length - 1) wedges.filter((mark) => mark.stop && !mark.done && (!mark.begin || mark.begin.done)).forEach((mark) => { xml += mark.xml; });
       });
       if (nav.dc || nav.ds) xml += `<direction id="nav-jump-${mi}" placement="above"><direction-type><words justify="right">${nav.dc ? 'D.C.' : 'D.S.'}</words></direction-type><sound ${nav.dc ? 'dacapo="yes"' : 'dalsegno="segno"'}/></direction>`;
       if (bar?.end || bar?.hidden || bar?.double || endingStop) xml += '<barline location="right">' +
@@ -1956,7 +2135,7 @@
   return {
     voicesText, TUPLETS, tupletSize, DIVISIONS, MEASURE, METERS, CLEFS, GRID, PER_ROW, MIN_ROWS, BOTTOM_LINE, LOWEST, HIGHEST, VALUES, ACCIDENTALS,
     captureTabReferences, restoreTabReferences, copySelection, pasteSelection, duplicateSelection, length, gridOf, hints, onsets, settle, placement, insertAt, insertMany, placeRest, insertNote, restPitch, settleVoices, mergeVoices, voices, measureLength, clampPitch, emptyRow, emptyScore, clone, measures, rowStarts, rowOf, moveMeasure, addMeasure, insertMeasure, removeMeasure, removeMeasureAt, fits, canDot, dotStart, dotPlan,
-    meterOf, meterAt, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setNavigation, removeNavigation, navigationEndings, setBarline, removeBarline, setBarre, removeBarre, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
+    TUNINGS, tuningOf, tuningLabels, meterOf, meterAt, clefOf, clefAt, setClef, fifthsOf, bottomLine, keyAt, setKey, pruneKeys, keyAlter, capacity, setMeter, setNavigation, removeNavigation, navigationEndings, setBarline, removeBarline, setBarre, removeBarre, HAIRPINS, DYNAMICS, hairpinFits, findHairpin, setHairpin, removeHairpin, setHairpinDynamic, MAX_FRET, sanitize, sanitizeTabs, attacks, toMusicXml,
     links, selectionActions, applySelection, sequence,
   };
 });

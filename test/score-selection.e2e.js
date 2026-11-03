@@ -1,5 +1,6 @@
 /* Seleccion multiple en /partitura: menu contextual, marco y arrastre en grupo. Ejecutar despues de npm run build:site. */
 'use strict';
+const { clearScoreStorage } = require('./score-storage-helpers');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
@@ -49,8 +50,8 @@ async function run() {
     await page.waitForSelector('#scoreStage g.measure');
 
     // Partituras guardadas con 8 divisiones por negra se reescalan; el hueco antes de la primera figura no cuenta.
+    await clearScoreStorage(page);
     await page.evaluate(() => {
-      localStorage.clear();
       localStorage.setItem('scoreEditor.v1', JSON.stringify({ rows: [[[], [], [{ d: 'q', n: 30, at: 0 }, { d: 'e', n: 31, at: 8 }], []]] }));
     });
     await page.reload();
@@ -68,7 +69,7 @@ async function run() {
       await shiftSelect(page, ['e0-0', 'e0-1']);
       assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 2);
       const box = await page.locator(target).boundingBox();
-      await page.locator(target).click({ position: { x: box.width - 2, y: 2 } });
+      await page.locator(target).click({ position: { x: box.width - 2, y: target === '.site-header' ? box.height - 2 : 2 } });
       assert.equal(await page.locator('#scoreStage :is(g.note, g.rest).is-selected').count(), 0, target + ' deselecciona las figuras');
       assert.equal(await page.locator('.score-selection-menu').count(), 0, 'se oculta el menu de seleccion');
     }
