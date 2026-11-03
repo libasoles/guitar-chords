@@ -53,3 +53,10 @@ The user marks some scores with editor marks (their own picks) and will ask for 
 - No inferir una única voz porque dos notas coincidan en inicio y duración. Conservar la continuidad de las líneas y las voces explícitas, incluidos cruces de registro.
 - Formar un acorde de notación es una decisión explícita; no equivale a analizar las voces contrapuntísticas del acorde.
 - Recalcular voces no debe fusionarlas para hacerlas caber ni cambiar los inicios o las duraciones. Verificar homorritmia, cruces, independencia del bajo y persistencia.
+
+## Editor compartido con Partitura
+
+- La implementación del editor de `/partitura` viene de la dependencia de build `partitura`, fijada a un commit de GitHub. Los fixes del motor se hacen en libasoles/partitura y luego se actualizan `package.json` y `package-lock.json` aquí.
+- `src/site/score-editor.js` solo adapta los controles de la barra lateral. El HTML, CSS y traducciones son locales; conservar esa presentación y los defaults de clave de guitarra y guardado inmediato.
+- No reintroducir copias de modelo, digitación, persistencia o importación/exportación. Los pequeños adaptadores CommonJS de `src/site/score-{model,fingering,io}.js` delegan a la dependencia para builds y tests.
+- El build empaqueta y publica todos los módulos, chunks y vendors localmente. No agregar dependencias de GitHub/CDN en el navegador para el editor.

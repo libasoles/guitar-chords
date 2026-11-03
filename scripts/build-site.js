@@ -2058,18 +2058,12 @@ copyFile(
     "utf8",
   );
 }
-// Private score editor (/partitura): Verovio draws the staff, jsPDF exports it.
-["score-model.js", "score-fingering.js", "score-editor.js", "score-editor.css", "score-storage.js", "score-beta.js", "score-io.js", "score-export.js"].forEach(function (f) {
+// Shared editor is compiled locally from the pinned Git dependency.
+["score-editor.css", "score-beta.js"].forEach(function (f) {
   copyFile(path.join(SRC_SITE, f), path.join(ASSETS_DIST, f));
 });
-require("esbuild").buildSync({
-  entryPoints: [path.join(SRC_SITE, "score-confirm.js")],
-  outfile: path.join(ASSETS_DIST, "score-confirm.js"),
-  bundle: true,
-  minify: true,
-  format: "iife",
-  define: { "process.env.NODE_ENV": '"production"' },
-});
+const { buildEditor } = await import("partitura/build");
+await buildEditor({ entryPoint: path.join(SRC_SITE, "score-editor.js"), outdir: ASSETS_DIST });
 require("esbuild").buildSync({
   entryPoints: [path.join(SRC_SITE, "toast.js")],
   outfile: path.join(ASSETS_DIST, "toast.js"),

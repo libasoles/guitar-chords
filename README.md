@@ -133,3 +133,22 @@ Quick steps:
 ## Roadmap
 
 See [ROADMAP.md](ROADMAP.md).
+
+## Editor de partituras compartido
+
+La lógica de `/partitura` se mantiene en [libasoles/partitura](https://github.com/libasoles/partitura), instalado como dependencia de desarrollo y fijado a un commit de GitHub. El build compila el editor y publica sus módulos, Verovio/WASM y jsPDF en los assets del sitio; los visitantes no descargan el editor desde GitHub.
+
+`src/site/score-editor.js` conecta las herramientas de la barra lateral con las acciones compartidas. El HTML, CSS y textos siguen siendo propios de este sitio. Se conserva la clave de guitarra por defecto, el guardado inmediato y el formato de las partituras existentes.
+
+Para incorporar un fix, una vez publicado en Partitura:
+
+```sh
+npm install --save-dev 'git+https://github.com/libasoles/partitura.git#<commit-completo>'
+npm run build:site
+npm run test:unit
+node test/score-editor.e2e.js
+node test/score-loading.e2e.js
+node test/score-migration.e2e.js
+```
+
+Versionar `package.json` y `package-lock.json` y desplegar el sitio. No mantener copias de la lógica del editor aquí. La documentación de la API está en `node_modules/partitura/docs/shared-editor.md` y en el repositorio de Partitura.

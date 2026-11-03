@@ -54,7 +54,7 @@ const M = require('../src/site/score-model');
       });
       await page.goto(base + pagePath('partitura', fallback ? 'en' : 'es'), { waitUntil: 'domcontentloaded' });
       const wasmUrl = (await wasmRequested).url();
-      assert.match(wasmUrl, /\/assets\/vendor\/verovio-toolkit\.[a-f0-9]{10}\.wasm$/);
+      assert.match(wasmUrl, /\/assets\/vendor\/verovio-6\.4\.0\.[a-f0-9]{10}\.wasm$/);
       assert.equal(await page.locator('#scoreStage[aria-busy="true"] g.measure').count(), 12, 'static score remains visible while WASM downloads');
       assert.equal(await page.locator('#scoreStage.is-loading').count(), fallback ? 1 : 0);
       await page.evaluate(() => { window.initialScoreSvg = document.querySelector('#scoreStage svg'); });

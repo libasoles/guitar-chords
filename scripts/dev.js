@@ -47,6 +47,8 @@ const ASSETS_DIST = path.join(DIST_SITE, 'assets');
    it unchanged (same basename already present there). Returns false when the
    change needs a full build. */
 function fastCopy(file) {
+  // This entry imports the shared package and needs bundling.
+  if (path.basename(file) === 'score-editor.js') return false;
   const ext = path.extname(file);
   if (ext !== '.js' && ext !== '.css') return false;
   const rel = path.relative(path.join(ROOT, 'src', 'site', 'css'), file);

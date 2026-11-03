@@ -218,7 +218,11 @@ test('explicit chord grouping supports undo and survives reload', async ({ page 
 test('MusicXML preserves explicit single-voice chords and separate homorhythmic parts', async ({ page }) => {
   await page.goto(baseUrl + '/partitura');
   await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
-  await page.addScriptTag({ content: require('node:fs').readFileSync(path.join(__dirname, '../src/site/score-io.js'), 'utf8') });
+  const parser = require('esbuild').buildSync({
+    stdin: { contents: 'import IO from "partitura/io"; window.ScoreIO = IO;', resolveDir: path.join(__dirname, '..') },
+    bundle: true, write: false, format: 'iife',
+  });
+  await page.addScriptTag({ content: parser.outputFiles[0].text });
   const result = await page.evaluate(() => {
     const M = ScoreModel;
     const score = M.emptyScore();
