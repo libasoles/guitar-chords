@@ -19,6 +19,13 @@ async function run() {
     const stored = () => readScoreStorage(page);
     const rows = () => page.evaluate(() => scoreEditor.score.rows.length);
     const drag = async (from, to, after = false, cancel = false) => {
+      // Use settled, visible tabs: focusing a clipped input scrolls the page
+      // on pointerdown and invalidates the drag's viewport coordinates.
+      await page.locator('#scoreTabs').evaluate(async strip => {
+        await document.fonts.ready;
+        await Promise.allSettled(strip.getAnimations({ subtree: true }).map(animation => animation.finished));
+        strip.scrollIntoView({ block: 'center' });
+      });
       const source = await page.locator('.score-doc-tab').nth(from).boundingBox();
       const target = await page.locator('.score-doc-tab').nth(to).boundingBox();
       await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2);
@@ -72,6 +79,7 @@ async function run() {
     await page.keyboard.press('ControlOrMeta+z');
     assert.equal(await rows(), initialRows + 1);
     await page.locator('.score-doc-tab-input').fill('Dos editado');
+    assert.equal((await stored()).scores[2].title, 'Dos editado');
     await page.reload();
     await page.waitForSelector('#scoreStage:not([aria-busy]) g.measure');
     assert.deepEqual(await order(), ['Tres', 'Uno', 'Dos editado']);

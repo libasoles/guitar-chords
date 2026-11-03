@@ -4,6 +4,7 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
 const { serveStatic } = require('../scripts/lib/static-server');
+const { readScoreStorage } = require('./score-storage-helpers');
 
 (async () => {
   const server = await serveStatic(path.join(__dirname, '..', 'dist/site'), 0);
@@ -50,6 +51,8 @@ const { serveStatic } = require('../scripts/lib/static-server');
     assert.deepEqual(await column(), [null, null, null, null, 7, null],
       'Shift+Down restores A-string 7');
     await page.keyboard.press('Shift+ArrowUp');
+    assert.deepEqual((await readScoreStorage(page)).scores[0].tabs['0:0'], [null, null, null, 2, null, null],
+      'the new fingering is committed to IndexedDB before navigating away');
     await page.reload();
     await cell(3).waitFor();
     assert.deepEqual(await column(), [null, null, null, 2, null, null],
