@@ -17,7 +17,7 @@ test('building Chords preserves sibling outputs and packages its complete runtim
   assert.equal(fs.readFileSync(path.join(output, 'other.zip'), 'utf8'), 'other archive');
   const extension = path.join(output, 'chords');
   const manifest = JSON.parse(fs.readFileSync(path.join(extension, 'manifest.json')));
-  assert.equal(manifest.version, '0.3.4');
+  assert.equal(manifest.version, '0.3.5');
   assert.equal(manifest.default_locale, 'en');
   assert.deepEqual(manifest.permissions, []);
   assert.equal(JSON.parse(fs.readFileSync(path.join(extension, '_locales/en/messages.json'))).appName.message, 'Guitar Chords');
