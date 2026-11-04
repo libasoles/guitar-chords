@@ -7,6 +7,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   # Picks the e2e suites a PR needs from its changed files (see
@@ -156,12 +157,39 @@ jobs:
             case "$r" in success|skipped) ;; *) echo "A required job ended as $r"; exit 1 ;; esac
           done
 
+  # Only the bot's dependency branch is eligible, after every CI job succeeded.
+  merge-partitura-update:
+    needs: ci-ok
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/automation/update-partitura' &&
+      needs.ci-ok.result == 'success'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: partitura-update
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+      - name: Merge only the tested dependency update and dispatch deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/merge-partitura-update.js
+
   deploy:
     needs: [changes, test-and-build, e2e]
     runs-on: ubuntu-latest
     # e2e is skipped when no suite is affected, which would skip this job too.
     if: >-
-      !cancelled() && github.ref == 'refs/heads/main' && github.event_name == 'push' &&
+      !cancelled() && github.ref == 'refs/heads/main' && contains(fromJSON('["push","workflow_dispatch"]'), github.event_name) &&
       needs.changes.result == 'success' &&
       needs.test-and-build.result == 'success' && contains(fromJSON('["success","skipped"]'), needs.e2e.result)
     concurrency:

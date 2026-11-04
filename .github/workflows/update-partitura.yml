@@ -1,0 +1,33 @@
+name: Update Partitura
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+# Shared with the merge job: never rewrite its branch while it is merging.
+concurrency:
+  group: partitura-update
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  update:
+    if: github.repository == 'libasoles/guitar-chords'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+      - name: Update the pinned editor and dispatch CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/update-partitura.js

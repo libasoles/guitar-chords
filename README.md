@@ -152,3 +152,11 @@ node test/score-migration.e2e.js
 ```
 
 Versionar `package.json` y `package-lock.json` y desplegar el sitio. No mantener copias de la lógica del editor aquí. La documentación de la API está en `node_modules/partitura/docs/shared-editor.md` y en el repositorio de Partitura.
+
+### Actualización automática
+
+El workflow **Update Partitura** revisa `libasoles/partitura/main` aproximadamente cada 15 minutos. Abre o actualiza un único PR en `automation/update-partitura`, actualiza el commit fijado y dispara explícitamente la CI completa. No necesita tokens personales ni secretos entre repositorios.
+
+La CI solo mergea ese PR si pasan el build, las pruebas unitarias y todas las suites de navegador, y el PR sigue apuntando exactamente al commit probado. También comprueba que el autor sea el bot, que solo cambien los dos manifests de dependencias y que no se modifique otra dependencia declarada. Si falla una prueba o `main` avanzó, el PR permanece abierto; el siguiente ciclo lo refresca cuando corresponde.
+
+Después del merge se dispara explícitamente la CI de `main` y su despliegue: las operaciones hechas con `GITHUB_TOKEN` no disparan los workflows normales de push. Se puede ejecutar **Update Partitura** manualmente desde Actions para comprobar novedades o reintentar un fallo. Una revisión que falla no se reintenta indefinidamente cada 15 minutos.

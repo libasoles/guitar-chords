@@ -60,3 +60,5 @@ The user marks some scores with editor marks (their own picks) and will ask for 
 - `src/site/score-editor.js` solo adapta los controles de la barra lateral. El HTML, CSS y traducciones son locales; conservar esa presentación y los defaults de clave de guitarra y guardado inmediato.
 - No reintroducir copias de modelo, digitación, persistencia o importación/exportación. Los pequeños adaptadores CommonJS de `src/site/score-{model,fingering,io}.js` delegan a la dependencia para builds y tests.
 - El build empaqueta y publica todos los módulos, chunks y vendors localmente. No agregar dependencias de GitHub/CDN en el navegador para el editor.
+
+- `update-partitura.yml` detecta revisiones nuevas cada 15 minutos. La CI completa se dispara explícitamente y `merge-partitura-update` solo integra el PR del bot, con cambios limitados a los manifests y sobre el mismo commit que pasó todos los controles. Conservar estas condiciones al modificar la automatización.
