@@ -879,3 +879,6 @@
     fingers: [[6,'x'],[5,2,'1'],[4,5,'4'],[3,4,'3'],[2,4,'3'],[1,3,'2']] },
 
 ];
+
+/* Los bundlers del navegador también ven `window`: exportar igualmente. */
+if (typeof module !== 'undefined' && module.exports && typeof window !== 'undefined') module.exports.CHORDS = window.CHORDS;
