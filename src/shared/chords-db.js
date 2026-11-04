@@ -435,8 +435,12 @@ window.CHORDS = [
 
   // ----- NOVENAS DE DOMINANTE (9) -----
   { name: 'C9', families: ['dom9'], aliases: ['C7(9)'],
-    notes: 'C E B♭ D',
-    fingers: [[6,'x'],[5,3,'2'],[4,2,'1'],[3,3,'4'],[2,3,'3'],[1,'x']] },
+    notes: 'C E B♭ D E',
+    alternatePositions: [{
+      fingers: [[6,'x'],[5,3,'2'],[4,2,'1'],[3,3,'4'],[2,3,'3'],[1,'x']],
+      barres: [], position: 1, hasBarre: false, kind: 'open',
+    }],
+    fingers: [[6,'x'],[5,3,'2'],[4,2,'1'],[3,3,'3'],[2,3,'4'],[1,'o']] },
   { name: 'D9', families: ['dom9'], aliases: ['D7(9)'], position: 4,
     notes: 'D F♯ C E',
     fingers: [[6,'x'],[5,5,'2'],[4,4,'1'],[3,5,'4'],[2,5,'3'],[1,'x']] },
@@ -794,6 +798,12 @@ window.CHORDS = [
   { name: 'Caug', families: ['otros'], aliases: ['C+','C(#5)','aumentado'],
     notes: 'C E G♯ C E',
     fingers: [[6,'x'],[5,3,'4'],[4,2,'3'],[3,1,'1'],[2,1,'2'],[1,'o']] },
+  { name: 'Cadd9', families: ['otros'], aliases: ['C(add9)','C2'],
+    notes: 'C E G D G',
+    fingers: [[6,'x'],[5,3,'2'],[4,2,'1'],[3,'o'],[2,3,'3'],[1,3,'4']] },
+  { name: 'Gadd9', families: ['otros'], aliases: ['G(add9)'],
+    notes: 'G B D A B G',
+    fingers: [[6,3,'3'],[5,2,'1'],[4,'o'],[3,2,'2'],[2,'o'],[1,3,'4']] },
   { name: 'Em(add9)', families: ['otros'], aliases: ['Em9 (sin 7)'],
     notes: 'E B E G B F♯',
     fingers: [[6,'o'],[5,2,'2'],[4,2,'3'],[3,'o'],[2,'o'],[1,2,'4']] },
