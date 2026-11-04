@@ -1092,7 +1092,17 @@ async function run() {
     // El resto de pruebas sueltan justo bajo el puntero; el desplazamiento se prueba aparte.
     const newPage = async (options) => {
       const created = await browser.newPage(options);
-      created.on('load', () => created.evaluate(() => { scoreEditor.ghostOffset = 0; }).catch(() => {}));
+      // IndexedDB restoration can finish after load. Configure the API at the
+      // moment the editor installs it, including after reloads.
+      await created.addInitScript(() => {
+        Object.defineProperty(window, 'scoreEditor', {
+          configurable: true,
+          set(editor) {
+            editor.ghostOffset = 0;
+            Object.defineProperty(window, 'scoreEditor', { value: editor, writable: true, configurable: true, enumerable: true });
+          },
+        });
+      });
       return created;
     };
     const page = await newPage({ reducedMotion: 'reduce' });

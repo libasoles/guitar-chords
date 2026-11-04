@@ -22,15 +22,19 @@ const { serveStatic } = require('../scripts/lib/static-server');
         scoreEditor.render();
       }, dense);
     };
-    const box = async (mi) => page.locator(`#m${mi} > g.staff > path`).first().boundingBox();
+    const box = async (mi) => {
+      const lines = page.locator(`#m${mi} > g.staff > path`);
+      const [top, bottom] = await Promise.all([lines.first().boundingBox(), lines.nth(4).boundingBox()]);
+      return { ...top, height: bottom.y + bottom.height - top.y };
+    };
     const order = () => page.evaluate(() => scoreEditor.score.rows.flat().map((m) => m[0].n - 28));
     const drag = async (from, to, end = false, cancel = false) => {
       const a = await box(from), b = await box(to);
       await page.keyboard.down('Shift');
-      await page.mouse.move(a.x + a.width / 2, a.y + 12);
+      await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
       assert.equal(await page.locator(`#m${from} > g.staff > path`).first().evaluate((el) => getComputedStyle(el).cursor), 'pointer');
       await page.mouse.down();
-      await page.mouse.move(end ? b.x + b.width + 4 : b.x + b.width * 0.15, b.y + 12, { steps: 8 });
+      await page.mouse.move(end ? b.x + b.width + 4 : b.x + b.width * 0.15, b.y + b.height / 2, { steps: 8 });
       assert.equal(await page.locator('.score-measure-guide').count(), 1);
       if (cancel) await page.keyboard.press('Escape');
       await page.mouse.up();
