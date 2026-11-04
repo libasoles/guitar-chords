@@ -2,6 +2,12 @@
   "name": "guitar-chords",
   "private": true,
   "description": "Guitar tools — public site + Chrome extensions",
+  "main": "src/shared/chords-db.js",
+  "types": "src/shared/chords-db.d.ts",
+  "files": [
+    "src/shared/chords-db.js",
+    "src/shared/chords-db.d.ts"
+  ],
   "engines": {
     "node": ">=22"
   },

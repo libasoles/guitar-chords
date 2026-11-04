@@ -12,7 +12,8 @@
    `barres` (opcional) = [{ fromString, toString, fret }, ...] para cejillas.
    `families` is used by filter pills. `aliases` powers search. */
 
-window.CHORDS = [
+/* En el navegador define window.CHORDS; en Node (require('guitar-chords')) exporta { CHORDS }. */
+(typeof window !== 'undefined' ? window : module.exports).CHORDS = [
   // ----- MAYORES -----
   { name: 'C', families: ['major'], aliases: ['CM','Cmaj'],
     notes: 'C E G',
