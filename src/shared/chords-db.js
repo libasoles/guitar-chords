@@ -773,8 +773,8 @@
   { name: 'F13', families: ['otros'], aliases: ['F7(13)'],
     notes: 'F E♭ A D', position: 1,
     alternatePositions: [
-      { fingers: [[5,3,'3'],[3,2,'2'],[2,3,'4']],
-        barres: [{fromString:6,toString:1,fret:1}], position: 1 },
+      { fingers: [[6,1,'1'],[5,'x'],[4,1,'1'],[3,2,'2'],[2,3,'3'],[1,1,'1']],
+        barres: [], position: 1 },
       { fingers: [[6,'x'],[5,8,'3'],[4,7,'1'],[3,8,'2'],[2,10,'4'],[1,10,'4']],
         barres: [{fromString:2,toString:1,fret:10}], position: 7 },
     ],
