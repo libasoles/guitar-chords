@@ -1,6 +1,6 @@
 # Primeras lecciones de Sagreras (libro 1 de *Las lecciones de guitarra*)
 
-Página: `/articulos/primeras-lecciones-de-sagreras`. Una tarjeta por lección (1–86), con vista previa, partitura completa
+Página: `/partituras/primeras-lecciones-de-sagreras`. Una tarjeta por lección (1–86), con vista previa, partitura completa
 con TAB en un modal y descarga en PDF.
 
 ## De dónde salen las notas

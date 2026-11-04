@@ -1,6 +1,6 @@
 # Valses del Op. 59 de Carcassi
 
-Página `/articulos/valses-de-carcassi`: los valses de la Tercera parte del *Método completo para guitarra*, Op. 59
+Página `/partituras/valses-de-carcassi`: los valses de la Tercera parte del *Método completo para guitarra*, Op. 59
 (numeración del libro, ver `resources/Libro Carcassi - Metodo.pdf`, pdf 87+). Carcassi murió en 1853: la obra es de
 dominio público.
 

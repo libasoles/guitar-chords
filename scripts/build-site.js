@@ -65,8 +65,9 @@ const { renderArticleLinks } = require("./lib/article-link");
 const {
   pagePath,
   pageFile,
+  slugFor,
   keyForFile,
-  legacyEnglishRedirects,
+  allRedirects,
   lastmodRenames,
   redirectHtml,
 } = require("./lib/slugs");
@@ -332,6 +333,13 @@ function altLangHref(locale, outputMode) {
   if (locale === "es") return "en";
   if (locale === "pt") return "/en";
   return outputMode === "clean" ? "./" : "../";
+}
+
+// Assets prefix of a tool page: pages in a folder (recursos/x, en/resources/x)
+// load them from the domain root, the others relative to their own folder.
+function toolAssetsPrefix(locale, key) {
+  if (slugFor(key, locale).indexOf("/") !== -1) return "/assets/";
+  return locale === "es" ? "assets/" : "../assets/";
 }
 
 function canonicalUrl(locale) {
@@ -788,7 +796,7 @@ function renderV7Page(template, strings, locale, page) {
 // string and their root, third and fifth (computed client-side by the page's
 // data script).
 function renderCirclePage(template, strings, locale, page) {
-  const resolvedAssetsPrefix = locale === "es" ? "assets/" : "../assets/";
+  const resolvedAssetsPrefix = toolAssetsPrefix(locale, page.slug);
   const ogImage = socialImage(v7CanonicalUrl(locale, page.slug));
   let html = template;
 
@@ -926,7 +934,7 @@ function renderDimPage(template, strings, locale) {
 // note picker filters chords-db.js client-side (see src/site/note-finder.js
 // and src/shared/note-match.js).
 function renderNoteFinderPage(template, strings, locale) {
-  const resolvedAssetsPrefix = locale === "es" ? "assets/" : "../assets/";
+  const resolvedAssetsPrefix = toolAssetsPrefix(locale, NOTE_FINDER_SLUG);
   const ogImage = socialImage(v7CanonicalUrl(locale, NOTE_FINDER_SLUG));
   let html = template;
 
@@ -1002,7 +1010,7 @@ function renderNoteFinderPage(template, strings, locale) {
 
 // Render the tab editor page (src/site/tab-editor.html) for one locale.
 function renderTabEditorPage(template, strings, locale) {
-  const resolvedAssetsPrefix = locale === "es" ? "assets/" : "../assets/";
+  const resolvedAssetsPrefix = toolAssetsPrefix(locale, TAB_EDITOR_SLUG);
   const ogImage = socialImage(v7CanonicalUrl(locale, TAB_EDITOR_SLUG));
   let html = template;
 
@@ -2308,7 +2316,8 @@ LOCALES.forEach(function (locale) {
         locale,
         page,
       );
-      const circleOutFile = path.join(DIST_SITE, page.slug + ".html");
+      const circleOutFile = path.join(DIST_SITE, pageFile(page.slug, locale));
+      ensureDir(path.dirname(circleOutFile));
       fs.writeFileSync(circleOutFile, circleHtml, "utf8");
       say(path.relative(ROOT, circleOutFile));
     });
@@ -2328,8 +2337,9 @@ LOCALES.forEach(function (locale) {
       );
       const noteFinderOutFile = path.join(
         DIST_SITE,
-        NOTE_FINDER_SLUG + ".html",
+        pageFile(NOTE_FINDER_SLUG, locale),
       );
+      ensureDir(path.dirname(noteFinderOutFile));
       fs.writeFileSync(noteFinderOutFile, noteFinderHtml, "utf8");
       say(path.relative(ROOT, noteFinderOutFile));
     }
@@ -2340,7 +2350,8 @@ LOCALES.forEach(function (locale) {
         strings,
         locale,
       );
-      const tabEditorOutFile = path.join(DIST_SITE, TAB_EDITOR_SLUG + ".html");
+      const tabEditorOutFile = path.join(DIST_SITE, pageFile(TAB_EDITOR_SLUG, locale));
+      ensureDir(path.dirname(tabEditorOutFile));
       fs.writeFileSync(tabEditorOutFile, tabEditorHtml, "utf8");
       say(path.relative(ROOT, tabEditorOutFile));
     }
@@ -2426,6 +2437,7 @@ LOCALES.forEach(function (locale) {
       page,
     );
     const circleOutFile = path.join(DIST_SITE, pageFile(page.slug, locale));
+    ensureDir(path.dirname(circleOutFile));
     fs.writeFileSync(circleOutFile, circleHtml, "utf8");
     say(path.relative(ROOT, circleOutFile));
   });
@@ -2444,6 +2456,7 @@ LOCALES.forEach(function (locale) {
       locale,
     );
     const noteFinderOutFile = path.join(DIST_SITE, pageFile(NOTE_FINDER_SLUG, locale));
+    ensureDir(path.dirname(noteFinderOutFile));
     fs.writeFileSync(noteFinderOutFile, noteFinderHtml, "utf8");
     say(path.relative(ROOT, noteFinderOutFile));
   }
@@ -2455,6 +2468,7 @@ LOCALES.forEach(function (locale) {
       locale,
     );
     const tabEditorOutFile = path.join(DIST_SITE, pageFile(TAB_EDITOR_SLUG, locale));
+    ensureDir(path.dirname(tabEditorOutFile));
     fs.writeFileSync(tabEditorOutFile, tabEditorHtml, "utf8");
     say(path.relative(ROOT, tabEditorOutFile));
   }
@@ -2554,8 +2568,7 @@ function siteMenu(strings, locale, file) {
   items.push(link(pagePath("circulo-de-quintas", locale), strings.menuFifths));
   if (isTranslated(ARTICLE_ARPEGGIOS_SLUG, locale))
     items.push(link(pagePath(ARTICLE_ARPEGGIOS_SLUG, locale), strings.artArpeggiosH1));
-  const articles = [
-    [ARTICLE_CARCASSI_SLUG, strings.artCarcH1],
+  const scores = [
     [ARTICLE_PRELUDES_SLUG, strings.artPreludesH1],
     [ARTICLE_SANTISTEBAN_SLUG, strings.artSantistebanH1],
     [ARTICLE_WALTZES_SLUG, strings.artWaltzesH1],
@@ -2568,14 +2581,18 @@ function siteMenu(strings, locale, file) {
     [ARTICLE_GIULIANI_SLUG, strings.artGiulianiH1],
     [ARTICLE_GIULIANI_ARPEGIOS_SLUG, strings.artGiulianiArpegiosH1],
   ];
-  const articleLinks = articles
-    .filter(function (a) {
-      return isTranslated(a[0], locale);
-    })
-    .map(function (a) {
-      return link(pagePath(a[0], locale), a[1]);
-    })
-    .join("");
+  const menuLinks = function (pages) {
+    return pages
+      .filter(function (a) {
+        return isTranslated(a[0], locale);
+      })
+      .map(function (a) {
+        return link(pagePath(a[0], locale), a[1]);
+      })
+      .join("");
+  };
+  const articleLinks = menuLinks([[ARTICLE_CARCASSI_SLUG, strings.artCarcH1]]);
+  const scoreLinks = menuLinks(scores);
   return (
     '<details class="site-menu"><summary aria-label="' +
     escapeHtml(strings.menuButtonLabel) +
@@ -2587,12 +2604,18 @@ function siteMenu(strings, locale, file) {
     escapeHtml(strings.menuResources) +
     "</p>" +
     items.join("") +
-    "</div>" +
     (articleLinks
-      ? '<div class="site-menu-col"><p class="site-menu-heading">' +
+      ? '<p class="site-menu-heading">' +
         escapeHtml(strings.menuArticles) +
         "</p>" +
-        articleLinks +
+        articleLinks
+      : "") +
+    "</div>" +
+    (scoreLinks
+      ? '<div class="site-menu-col"><p class="site-menu-heading">' +
+        escapeHtml(strings.menuScores) +
+        "</p>" +
+        scoreLinks +
         "</div>"
       : "") +
     '<div class="site-menu-wide"><p class="site-menu-heading">' +
@@ -2722,16 +2745,17 @@ console.log("==> Embedding the Portuguese 404 page...");
   fs.writeFileSync(file, esHtml.slice(0, headEnd) + swap + esHtml.slice(headEnd), "utf8");
 }
 
-// ---- Redirects for the old English URLs (Spanish slugs under /en/) ---------
+// ---- Redirects for the old URLs (Spanish slugs under /en/, moved folders) ----
 // GitHub Pages has no server redirects: minimal HTML with canonical, meta
 // refresh and noindex. Not in the sitemap. See docs/adr/0003.
 
-console.log("==> Writing redirects for the old English URLs...");
-legacyEnglishRedirects().forEach(function (redirect) {
+console.log("==> Writing redirects for the old URLs...");
+allRedirects().forEach(function (redirect) {
   // The old Partitura URL never existed unless the tool is published.
   if (!PARTITURA_ENABLED && redirect.file === "en/" + PARTITURA_SLUG + ".html")
     return;
   const redirectFile = path.join(DIST_SITE, redirect.file);
+  ensureDir(path.dirname(redirectFile));
   fs.writeFileSync(redirectFile, redirectHtml(SITE_BASE_URL, redirect.to), "utf8");
   say(path.relative(ROOT, redirectFile));
 });

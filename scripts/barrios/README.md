@@ -1,6 +1,6 @@
 # Partituras de Barrios (piezas didácticas)
 
-Página: `/articulos/partituras-de-barrios`. Estudios, minuetos y preludios de Agustín Barrios Mangoré, con partitura y
+Página: `/partituras/partituras-de-barrios`. Estudios, minuetos y preludios de Agustín Barrios Mangoré, con partitura y
 tablatura. `pieces.json` es el catálogo: la clave es el orden en la página; `title` es el título de Barrios (en español en
 las dos lenguas), `en` solo traduce la tonalidad, `pdf` el archivo de `resources/barrios/imslp/`, `imslp` la página de la
 edición y `year` el año de Apke para el crédito del PDF.

@@ -1,6 +1,6 @@
 # Estudios de Giuliani (24 Esercizi, Op. 48)
 
-Página: `/articulos/estudios-de-giuliani`. Cada estudio es una pieza (`pieces.json`: clave = número del estudio, `title` en
+Página: `/partituras/estudios-de-giuliani`. Cada estudio es una pieza (`pieces.json`: clave = número del estudio, `title` en
 español, `en` en inglés). Opciones por pieza, las mismas que en Barrios: `short`, `eighth_triplets`, `fifths`, `time`,
 `key_changes`, `fine`, `tuning`.
 

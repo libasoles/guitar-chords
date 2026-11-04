@@ -32,6 +32,6 @@ test('registrar una pagina sin slug pt rompe el build', () => {
 test('los slugs portugueses son unicos y las rutas llevan el prefijo /pt', () => {
   const pt = Object.values(SLUGS).map((s) => s.pt);
   assert.equal(new Set(pt).size, pt.length);
-  assert.equal(pagePath('circulo-de-quintas', 'pt'), '/pt/circulo-das-quintas');
+  assert.equal(pagePath('circulo-de-quintas', 'pt'), '/pt/recursos/circulo-das-quintas');
   assert.equal(pageFile('articulos', 'pt'), 'pt/artigos.html');
 });

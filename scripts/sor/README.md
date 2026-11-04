@@ -5,8 +5,8 @@ Dos páginas, las dos desde los archivos LilyPond de [Mutopia](https://www.mutop
 
 | Colección | Página | Catálogo | Fuentes | Salida |
 |---|---|---|---|---|
-| `lecciones` | `/articulos/lecciones-progresivas-de-sor` (Op. 60, 13 de las 25) | `pieces.json` | `sources/sor_op60-NN.ly` | `downloads/sor/`, `src/site/articles/sor/` |
-| `estudios` | `/articulos/estudios-de-sor` (Op. 6 y Op. 35) | `estudios.json` | `sources/estudios/*.ly` | `downloads/sor-estudios/`, `src/site/articles/sor-estudios/` |
+| `lecciones` | `/partituras/lecciones-progresivas-de-sor` (Op. 60, 13 de las 25) | `pieces.json` | `sources/sor_op60-NN.ly` | `downloads/sor/`, `src/site/articles/sor/` |
+| `estudios` | `/partituras/estudios-de-sor` (Op. 6 y Op. 35) | `estudios.json` | `sources/estudios/*.ly` | `downloads/sor-estudios/`, `src/site/articles/sor-estudios/` |
 
 La clave del catálogo es el número de la lección; en los estudios, opus × 100 + número (601 = Op. 6 n.º 1, 3524 = Op. 35
 n.º 24). `form`/`es` son la tonalidad, `editor` y `license` los de la edición de Mutopia; `tuning: "dropd"` pone la sexta

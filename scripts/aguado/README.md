@@ -1,6 +1,6 @@
 # Partituras de Aguado (Nuevo método para guitarra, 1843)
 
-Página: `/articulos/partituras-de-aguado`. Lecciones con ejemplo musical, ejercicios de mano derecha y estudios de la
+Página: `/partituras/partituras-de-aguado`. Lecciones con ejemplo musical, ejercicios de mano derecha y estudios de la
 sección tercera del *Nuevo método para guitarra* (Madrid, 1843). `pieces.json` es el catálogo: la clave es el orden
 en la página, `kind`/`n` dan el nombre del libro (`Lesson 14`, `Study 9`) y `form`/`es` el nombre de la forma.
 

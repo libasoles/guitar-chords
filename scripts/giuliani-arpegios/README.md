@@ -1,6 +1,6 @@
 # Los 120 arpegios de Giuliani (Op. 1, parte 1)
 
-Página: `/articulos/120-arpegios-de-giuliani`. Una tarjeta por ejercicio (1–120), con vista previa, partitura completa
+Página: `/partituras/120-arpegios-de-giuliani`. Una tarjeta por ejercicio (1–120), con vista previa, partitura completa
 con TAB en un modal y descarga en PDF. Es una página independiente de la de Giuliani Op. 48 (`scripts/giuliani/`).
 
 Cada ejercicio tiene tres compases: el arpegio sobre do mayor, el arpegio sobre sol con séptima (con el si en el

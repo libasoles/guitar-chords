@@ -2,9 +2,9 @@
 
 El sitio publica los mismos 16 números en dos colecciones independientes:
 
-- **Carcassi**: `/articulos/preludios-de-carcassi`, transcrito del ejemplar anterior
+- **Carcassi**: `/partituras/preludios-de-carcassi`, transcrito del ejemplar anterior
   a Santisteban que aportó el usuario. Entradas: `corrected/prelude-NN.musicxml`.
-- **Santisteban**: `/articulos/preludios-de-carcassi-santisteban`, revisión de 1906
+- **Santisteban**: `/partituras/preludios-de-carcassi-santisteban`, revisión de 1906
   según Mutopia. Entradas: `santisteban/prelude-NN.musicxml`.
 
 [Fuentes, páginas y convenciones de transcripción](sources/README.md).

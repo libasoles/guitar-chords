@@ -3,7 +3,7 @@ name: partituras-con-tablatura
 description: Build a site page of public-domain guitar scores with notation and generated tablature, as done for Carcassi's preludes and waltzes. Use when adding a new collection of pieces, sourcing the originals, extracting notes from a score PDF, or publishing pieces one by one (one commit per processed score).
 ---
 
-Una **colección** es una página del sitio (`/articulos/...`) con una tarjeta por pieza: vista previa con TAB, modal con
+Una **colección** es una página del sitio (`/partituras/...`) con una tarjeta por pieza: vista previa con TAB, modal con
 la partitura completa y descarga en PDF. Ya existen preludios de Carcassi (dos ediciones) y valses del Op. 59.
 Si el pedido es solo descargar un libro o separar sus partituras en `resources/`, entrega esos recursos y su índice;
 la conversión musical y la publicación de una colección corresponden a pedidos que las incluyan.

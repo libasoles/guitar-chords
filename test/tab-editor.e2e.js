@@ -18,7 +18,7 @@ async function run() {
   const page = await browser.newPage();
   try {
     // A first visit starts with three empty Tabs, like the previous editor.
-    await page.goto(base + '/crear-tablaturas-de-guitarra');
+    await page.goto(base + pagePath('crear-tablaturas-de-guitarra', 'es'));
     await page.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
     const fresh = await page.evaluate(() => document.querySelector('ascii-tabs').value);
     assert.deepStrictEqual(fresh, [[], [], []]);
@@ -202,13 +202,13 @@ async function run() {
     // permits only local scripts: defaults, display controls and tutorial
     // opening cannot depend on inline executable scripts.
     const restricted = await browser.newPage();
-    await restricted.route('**/crear-tablaturas-de-guitarra?*', async route => {
+    await restricted.route('**' + pagePath('crear-tablaturas-de-guitarra', 'es') + '?*', async route => {
       const response = await route.fetch();
       await route.fulfill({ response, headers: {
         ...response.headers(), 'content-security-policy': "script-src 'self'",
       } });
     });
-    await restricted.goto(base + '/crear-tablaturas-de-guitarra?tutorial');
+    await restricted.goto(base + pagePath('crear-tablaturas-de-guitarra', 'es') + '?tutorial');
     await restricted.waitForFunction(() => customElements.get('ascii-tabs') !== undefined);
     assert.deepStrictEqual(await restricted.locator('ascii-tabs').evaluate(el => el.value), [[], [], []]);
     assert.strictEqual(await restricted.locator('.tab-tutorial').evaluate(el => el.open), true);

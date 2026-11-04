@@ -1,6 +1,6 @@
 # Piezas progresivas de Carcassi (Tercera Parte del Método, Op. 59)
 
-Página: `/articulos/piezas-progresivas-de-carcassi`. Son las piezas de la **Tercera Parte** de *New and Improved
+Página: `/partituras/piezas-progresivas-de-carcassi`. Son las piezas de la **Tercera Parte** de *New and Improved
 Method for the Guitar* (Oliver Ditson & Co., Boston; escaneo en `resources/Libro Carcassi - Metodo.pdf`,
 Internet Archive `newimprovedmethOOcarc`): «50 Exercises Progressing in Difficulty» / «Cinquante morceaux
 progressifs», páginas impresas 77–110 (pdf 87+). El libro las numera 1–50 y la colección conserva esos
@@ -24,7 +24,7 @@ descripción: un PDF con TAB y su archivo MuseScore (`.mscz`). Se usa el MuseSco
    (`full/`). Reutiliza el grabado de los preludios (`scripts/carcassi-preludios/extract.py`).
 
 Los valses (las piezas con `"key"` en `pieces.json`: 2, 5, 7, 10, 15, 26, 34 y 36) se muestran solo en la página de valses
-(`/articulos/valses-de-carcassi`), no en la de piezas progresivas, pero sus archivos viven aquí; no tienen build propio (ver `scripts/carcassi-valses/README.md`).
+(`/partituras/valses-de-carcassi`), no en la de piezas progresivas, pero sus archivos viven aquí; no tienen build propio (ver `scripts/carcassi-valses/README.md`).
 Para ellos `build.py` activa `arpeggio="auto"` (detección de pasajes del motor, §8.1 de `docs/criterios-de-digitacion.md`)
 y aplica `extract.waltz_voicing`, las digitaciones pedidas que mantienen la mano en una posición.
 
