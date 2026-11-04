@@ -22,7 +22,7 @@
   "devDependencies": {
     "esbuild": "^0.28.2",
     "lighthouse": "^13.5.0",
-    "partitura": "github:libasoles/partitura#673928c3b14c48016fb4f180c3938d369c510233",
+    "partitura": "github:libasoles/partitura#b2fa5e996ed887cc53ef31beccb2b6b6997ccf26",
     "playwright": "^1.61.1"
   },
   "dependencies": {
