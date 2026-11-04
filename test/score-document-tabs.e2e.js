@@ -68,12 +68,12 @@ async function run() {
     assert.deepEqual(await order(), ['Tres', 'Uno', 'Dos']);
 
     // Each moved document retains its own undo stack.
-    await page.getByRole('tab', { name: 'Uno', exact: true }).click();
+    await page.getByRole('button', { name: 'Uno', exact: true }).click();
     assert.equal(await rows(), initialRows + 1);
     await page.locator('#scoreStage').focus();
     await page.keyboard.press('ControlOrMeta+z');
     assert.equal(await rows(), initialRows);
-    await page.getByRole('tab', { name: 'Dos', exact: true }).click();
+    await page.getByRole('button', { name: 'Dos', exact: true }).click();
     assert.equal(await rows(), initialRows + 2);
     await page.locator('#scoreStage').focus();
     await page.keyboard.press('ControlOrMeta+z');
