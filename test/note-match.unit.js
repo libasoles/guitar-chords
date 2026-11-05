@@ -137,3 +137,34 @@ test('Mi–Sol♯–Si–La encuentra E(add11) como coincidencia exacta', () => 
   assert.equal(results[0].chord.name, 'E(add11)');
   assert.equal(results[0].positions[0].notes, 'E A E G♯ B E');
 });
+
+for (const [quality, intervals] of [
+  ['m7b5', [0, 3, 6, 10]],
+  ['add9', [0, 2, 4, 7]],
+  ['m(add9)', [0, 2, 3, 7]],
+]) {
+  test(`${quality}: doce fundamentales y posiciones con todas las notas de la fórmula`, () => {
+    const chords = CHORDS.filter((c) => c.name.replace(/^[A-G][♭♯]?/, '') === quality);
+    assert.equal(chords.length, 12);
+    const roots = new Set();
+    for (const chord of chords) {
+      const root = pitchClass(chord.name.match(/^[A-G][♭♯]?/)[0]);
+      roots.add(root);
+      const expected = toMask(intervals.map((i) => (root + i) % 12));
+      for (const position of getPositions(chord)) {
+        assert.equal(toMask(voicingNotes(chord, position).map((n) => n.pc)), expected, chord.name);
+      }
+    }
+    assert.equal(roots.size, 12);
+  });
+}
+
+test('cada familia del catálogo tiene las doce fundamentales', () => {
+  for (const quality of ['', 'm', '7', 'm7', 'maj7', 'mMaj7', 'sus2', 'sus4',
+    '6', 'm6', 'maj9', '9', 'm9', '7♭9', '11', 'm11', 'maj11', '(add11)',
+    '13', 'm7b5', 'aug', 'add9', 'm(add9)', 'dim7']) {
+    const roots = CHORDS.filter((c) => c.name.replace(/^[A-G][♭♯]?/, '') === quality)
+      .map((c) => pitchClass(c.name.match(/^[A-G][♭♯]?/)[0]));
+    assert.equal(new Set(roots).size, 12, quality || 'mayor');
+  }
+});
