@@ -1638,38 +1638,25 @@ body.score-moving-measure, body.score-moving-measure * { cursor: grabbing !impor
 }
 
 .score-partitura-promo {
-  display: block;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
   margin: 3rem 0 3rem 36px;
-  padding-top: 2rem;
-  border-top: 1px solid var(--rule);
-  color: var(--ink);
-  text-decoration: none;
   font-family: var(--sans);
 }
 .score-partitura-heading {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 1rem;
 }
 .score-partitura-logo {
   flex: none;
   width: 2.5rem;
   height: 3.25rem;
 }
-.score-partitura-promo:hover .score-partitura-heading span {
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-.score-partitura-promo:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 6px;
-}
 .score-partitura-preview {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-top: 1rem;
+  min-width: 0;
 }
 .score-partitura-voices {
   display: grid;
@@ -1696,9 +1683,15 @@ body.score-moving-measure, body.score-moving-measure * { cursor: grabbing !impor
 .score-partitura-example > svg {
   display: block;
   width: 100%;
-  min-width: 640px;
   height: auto;
 }
 @media (max-width: 600px) {
-  .score-partitura-promo { margin-left: 0; }
+  .score-partitura-promo {
+    grid-template-columns: minmax(0, 1fr);
+    margin-left: 0;
+    gap: 1rem;
+  }
+  .score-partitura-heading { justify-content: center; }
+  .score-partitura-promo .part-promo-copy { text-align: center; }
+  .score-partitura-preview { width: 100%; gap: 0.5rem; }
 }
