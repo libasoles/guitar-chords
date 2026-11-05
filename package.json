@@ -6,7 +6,10 @@
   "types": "src/shared/chords-db.d.ts",
   "files": [
     "src/shared/chords-db.js",
-    "src/shared/chords-db.d.ts"
+    "src/shared/chords-db.d.ts",
+    "src/shared/chord-search.js",
+    "src/shared/chord-search.d.ts",
+    "vendor/fuzzysort.js"
   ],
   "engines": {
     "node": ">=22"
