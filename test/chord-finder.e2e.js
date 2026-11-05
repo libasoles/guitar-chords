@@ -2,6 +2,8 @@
 'use strict';
 
 const path = require('path');
+const fs = require('fs/promises');
+const os = require('os');
 const assert = require('assert');
 const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
@@ -326,7 +328,29 @@ async function run() {
     assert.strictEqual(download.suggestedFilename(), 'acordes-pineados.pdf');
     assert.ok(jspdfRequests.length >= 2, 'jsPDF requested on export');
     assert.strictEqual(await pdfEval((sr) => sr.querySelector('.pinned-export-status').textContent), '');
-    console.log('OK: jsPDF loads only on PDF export, with error/retry handling.');
+    const pdfDir = await fs.mkdtemp(path.join(os.tmpdir(), 'chord-pdf-'));
+    try {
+      const singlePath = path.join(pdfDir, 'single.pdf');
+      await download.saveAs(singlePath);
+      const single = await fs.readFile(singlePath, 'latin1');
+      assert.ok(!/\(1-1\) Tj/.test(single), 'single-page PDF has no page number');
+
+      await pdfEval((sr) => sr.querySelector('.pinned-export').click());
+      await pdfPage.waitForFunction(() => document.querySelector('#pin').shadowRoot.querySelector('.export-confirm'));
+      await pdfEval((sr) => { sr.querySelector('textarea').value = Array(70).fill('Notes').join('\n'); });
+      const [multiDownload] = await Promise.all([
+        pdfPage.waitForEvent('download'),
+        pdfEval((sr) => sr.querySelector('.export-confirm').click()),
+      ]);
+      const multiPath = path.join(pdfDir, 'multi.pdf');
+      await multiDownload.saveAs(multiPath);
+      const multi = await fs.readFile(multiPath, 'latin1');
+      assert.ok(/\(1-2\) Tj/.test(multi), 'first page has current and total');
+      assert.ok(/\(2-2\) Tj/.test(multi), 'last page has current and total');
+    } finally {
+      await fs.rm(pdfDir, { recursive: true, force: true });
+    }
+    console.log('OK: PDF lazy loading, retry and multi-page numbering.');
     await pdfPage.close();
 
     // svguitar is fetched lazily: the finder UI mounts first, and diagrams are

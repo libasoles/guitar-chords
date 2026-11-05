@@ -200,3 +200,14 @@ def barre_above_line(svg):
 def engrave(svg):
     """Todos los ajustes, en el orden que no se estorban: silencios, tresillos y cejillas."""
     return barre_above_line(clear_triplets(clear_rests(svg)))
+
+
+def page_number(svg, page, total):
+    """Numeracion discreta al pie de las hojas A4, solo para PDF de varias paginas."""
+    if total < 2:
+        return svg
+    footer = (f'<svg x="0" y="0" width="100%" height="100%" viewBox="0 0 210 297" '
+              f'preserveAspectRatio="none"><text x="105" y="290" text-anchor="middle" '
+              f'font-family="sans-serif" font-size="2.8222" fill="#666">{page}-{total}</text></svg>')
+    head, tail = svg.rsplit('</svg>', 1)
+    return head + footer + '</svg>' + tail

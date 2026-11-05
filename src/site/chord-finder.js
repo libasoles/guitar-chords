@@ -1487,6 +1487,16 @@
         });
       }
 
+      var totalPages = doc.getNumberOfPages();
+      if (totalPages > 1) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(102);
+        for (var page = 1; page <= totalPages; page += 1) {
+          doc.setPage(page);
+          doc.text(page + '-' + totalPages, pageWidth / 2, pageHeight - 7, { align: 'center' });
+        }
+      }
       doc.save('acordes-pineados.pdf');
     });
   };
