@@ -1169,10 +1169,14 @@ function linkifyEmails(text) {
 
 // Render once during the build; GitHub Pages serves this as static SVG.
 const initialStaff = await renderEmptyStaff();
+const partituraPromoStaff = await require("./lib/score-partitura-promo").renderPartituraPromo();
 
 // Render the score editor page (src/site/score-editor.html).
 function renderScoreEditorPage(template, strings, locale) {
-  let html = fillPageChrome(template, strings, locale, SCORE_EDITOR_SLUG).split("%%SCORE_INITIAL_STAFF%%").join(initialStaff);
+  let html = fillPageChrome(template, strings, locale, SCORE_EDITOR_SLUG).split("%%SCORE_INITIAL_STAFF%%").join(initialStaff)
+    .split("%%SCORE_PARTITURA_EXAMPLE%%").join(partituraPromoStaff)
+    .split("%%scorePartituraLink%%").join(escapeHtml(strings.scorePartituraLink))
+    .split("%%scorePartituraExample%%").join(escapeHtml(strings.scorePartituraExample));
   const sheetToTabHref = PARTITURA_ENABLED ? v7PageHref(locale, PARTITURA_SLUG) : "";
   // Without the sheet-to-tab page the link would be dead: keep its text only.
   const faq = (strings.scoreFaq || []).map(function (item) {

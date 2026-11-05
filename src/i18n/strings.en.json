@@ -593,6 +593,8 @@
   "scoreMetaDescription": "Free online sheet music editor: write notes, rests, measures, clef and key signature on the staff, with no sign-up and nothing to install, and download your score as PDF or MusicXML.",
   "scoreH1": "Sheet music",
   "scoreSeoH1": "Free online sheet music editor",
+  "scorePartituraLink": "Try the editor with more features at partitura.com.ar",
+  "scorePartituraExample": "Example in 6/8 with two voices in color",
   "scoreAboutLead": "Write your score straight onto the staff: pick a note value, click where the note goes, done. It is free, runs in your browser and needs no account or install.",
   "scoreShortcutsH2": "Keyboard shortcuts and gestures",
   "scoreShortcutsIntro": "Press a figure’s key to pick it, then click on the staff to place it. Press A to deselect the current tool. With figures selected, Shift+D duplicates them right after the last selected one, carrying on into the following measures. These are the keys:",

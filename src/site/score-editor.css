@@ -1636,3 +1636,69 @@ body.score-moving-measure, body.score-moving-measure * { cursor: grabbing !impor
 @media (prefers-reduced-motion: reduce) {
   .score-stage.is-loading::after { animation-duration: 2.4s; }
 }
+
+.score-partitura-promo {
+  display: block;
+  margin: 3rem 0 3rem 36px;
+  padding-top: 2rem;
+  border-top: 1px solid var(--rule);
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--sans);
+}
+.score-partitura-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+}
+.score-partitura-logo {
+  flex: none;
+  width: 2.5rem;
+  height: 3.25rem;
+}
+.score-partitura-promo:hover .score-partitura-heading span {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.score-partitura-promo:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 6px;
+}
+.score-partitura-preview {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.score-partitura-voices {
+  display: grid;
+  gap: 0.5rem;
+}
+.score-partitura-voices span {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: #ad4d33;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.score-partitura-voices span + span { background: #bd913b; }
+.score-partitura-example {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+}
+.score-partitura-example > svg {
+  display: block;
+  width: 100%;
+  min-width: 640px;
+  height: auto;
+}
+@media (max-width: 600px) {
+  .score-partitura-promo { margin-left: 0; }
+}

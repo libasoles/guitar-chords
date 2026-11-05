@@ -593,6 +593,8 @@
   "scoreMetaDescription": "Editor de partituras online e grátis: escreva notas, pausas, compassos, clave e armadura de clave na pauta, sem se cadastrar nem instalar nada, e baixe sua partitura em PDF ou MusicXML.",
   "scoreH1": "Partitura",
   "scoreSeoH1": "Editor de partituras online grátis",
+  "scorePartituraLink": "Experimente o editor com mais funcionalidades em partitura.com.ar",
+  "scorePartituraExample": "Exemplo em 6/8 com duas vozes em cores",
   "scoreAboutLead": "Arraste uma figura direto para a pauta, ou escolha a figura, clique onde a nota vai e pronto. É grátis, funciona no navegador e não pede para criar usuário nem instalar nada.",
   "scoreShortcutsH2": "Atalhos de teclado e gestos",
   "scoreShortcutsIntro": "Aperte a tecla de uma figura para escolhê-la e clique na pauta para colocá-la. Aperte A para desmarcar a ferramenta atual. Com figuras selecionadas, Shift+D as duplica logo depois da última selecionada, seguindo pelos compassos seguintes. Estas são as teclas de cada uma:",
