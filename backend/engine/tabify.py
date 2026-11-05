@@ -1366,13 +1366,15 @@ def build_output(score, part, measures, tuning, title, out_base, header=None):
         raise RuntimeError("Verovio no pudo leer el MusicXML con tablatura")
     with tempfile.TemporaryDirectory() as tmp:
         pages = []
-        for page in range(1, toolkit.getPageCount() + 1):
+        total_pages = toolkit.getPageCount()
+        for page in range(1, total_pages + 1):
             svg = engraving.engrave(toolkit.renderToSVG(page))
             if page == 1:
                 svg = add_string_names(svg, string_names(tuning))
                 svg = style_header(svg)
             svg = mark_harmonic_frets(drop_brace(draw_tab_clef(drop_tab_meter(svg))))
             svg = svg.replace("</svg>", HIDE_TAB_RHYTHM + "</svg>", 1)
+            svg = engraving.page_number(svg, page, total_pages)
             path = os.path.join(tmp, f"page-{page:03d}.svg")
             with open(path, "w", encoding="utf-8") as f:
                 f.write(svg)

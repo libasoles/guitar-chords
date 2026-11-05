@@ -20,6 +20,26 @@ def note(duration, kind="half", extra=""):
             f'<duration>{duration}</duration><type>{kind}</type>{extra}</note>')
 
 
+class PdfPageNumberTests(unittest.TestCase):
+    def test_single_page_has_no_number(self):
+        svg = '<svg width="945px" height="1337px"><svg><g/></svg></svg>'
+        self.assertEqual(tabify.engraving.page_number(svg, 1, 1), svg)
+
+    def test_every_page_has_current_and_total_in_small_sans(self):
+        from xml.etree import ElementTree as ET
+        svg = '<svg xmlns="http://www.w3.org/2000/svg" width="945px" height="1337px"><svg><g/></svg></svg>'
+        for page in range(1, 4):
+            root = ET.fromstring(tabify.engraving.page_number(svg, page, 3))
+            footer = root[-1]
+            text = footer[0]
+            self.assertEqual(text.text, f'{page}-3')
+            self.assertEqual(text.get('font-family'), 'sans-serif')
+            self.assertAlmostEqual(float(text.get('font-size')) * 72 / 25.4, 8, places=3)
+            self.assertEqual(text.get('text-anchor'), 'middle')
+            self.assertEqual(footer.get('viewBox'), '0 0 210 297')
+            self.assertEqual(len(root[0]), 1)  # el pie queda fuera del SVG del grabado
+
+
 class ScoreImportTests(unittest.TestCase):
     def test_misread_key_signature_is_replaced_by_the_one_the_notes_fit(self):
         def note(step, octave, alter=""):
