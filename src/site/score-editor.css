@@ -1652,6 +1652,16 @@ body.score-moving-measure, body.score-moving-measure * { cursor: grabbing !impor
   width: 2.5rem;
   height: 3.25rem;
 }
+.score-partitura-figure {
+  min-width: 0;
+  margin: 0;
+}
+.score-partitura-figure figcaption {
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
 .score-partitura-preview {
   display: flex;
   align-items: center;

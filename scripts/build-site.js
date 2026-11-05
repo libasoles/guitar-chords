@@ -1177,7 +1177,8 @@ function renderScoreEditorPage(template, strings, locale) {
     .split("%%SCORE_PARTITURA_EXAMPLE%%").join(partituraPromoStaff)
     .split("%%scorePartituraLink%%").join(escapeHtml(strings.scorePartituraLink))
     .split("%%partPromoCta%%").join(escapeHtml(strings.partPromoCta))
-    .split("%%scorePartituraExample%%").join(escapeHtml(strings.scorePartituraExample));
+    .split("%%scorePartituraExample%%").join(escapeHtml(strings.scorePartituraExample))
+    .split("%%scorePartituraCaption%%").join(escapeHtml(strings.scorePartituraCaption));
   const sheetToTabHref = PARTITURA_ENABLED ? v7PageHref(locale, PARTITURA_SLUG) : "";
   // Without the sheet-to-tab page the link would be dead: keep its text only.
   const faq = (strings.scoreFaq || []).map(function (item) {
