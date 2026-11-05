@@ -80,19 +80,31 @@ async function eventually(read, description) {
   assert.fail(description);
 }
 
+async function openNativePopup(launcher, cdp, url) {
+  const origin = url.slice(0, url.lastIndexOf('/'));
+  const before = new Set((await cdp.send('Target.getTargets')).targetInfos.map(target => target.targetId));
+  await launcher.evaluate(() => chrome.action.openPopup());
+  return eventually(async () => (await cdp.send('Target.getTargets')).targetInfos.find(target =>
+    !before.has(target.targetId) && target.type === 'page' && target.url.startsWith(origin + '/')), 'Chrome action creates a native popup target');
+}
+
+async function closeNativePopup(cdp, targetId) {
+  await cdp.send('Target.closeTarget', { targetId });
+  // closeTarget acknowledges the request before the native popup is gone.
+  // Reopening while Chromium still owns that popup can reject openPopup().
+  await eventually(async () => !(await cdp.send('Target.getTargets')).targetInfos.some(target =>
+    target.targetId === targetId), 'native popup closes before reopening');
+}
+
 // Playwright does not expose Chromium's toolbar action popup as a Page.
 // Attach to its real target and send browser input/inspect public DOM over CDP.
 async function nativePopup(context, url) {
   const launcher = await openEditor(context, url);
   const cdp = await context.browser().newBrowserCDPSession();
-  const origin = url.slice(0, url.lastIndexOf('/'));
   let commandId = 0;
   try {
     for (const reopened of [false, true]) {
-      const before = new Set((await cdp.send('Target.getTargets')).targetInfos.map(target => target.targetId));
-      await launcher.evaluate(() => chrome.action.openPopup());
-      const target = await eventually(async () => (await cdp.send('Target.getTargets')).targetInfos.find(item =>
-        !before.has(item.targetId) && item.type === 'page' && item.url.startsWith(origin + '/')), 'Chrome action creates a native popup target');
+      const target = await openNativePopup(launcher, cdp, url);
       const { sessionId } = await cdp.send('Target.attachToTarget', { targetId: target.targetId, flatten: false });
       const send = (method, params = {}) => new Promise((resolve, reject) => {
         const id = ++commandId;
@@ -128,8 +140,14 @@ async function nativePopup(context, url) {
           assert.deepEqual(await evaluate('document.querySelector("ascii-tabs").value'), [[[8, null, null, null, null, null]], [], []], 'native popup accepts keyboard editing');
         }
       } finally {
-        await cdp.send('Target.closeTarget', { targetId: target.targetId });
+        await closeNativePopup(cdp, target.targetId);
       }
+    }
+    // Exercise the close/reopen boundary without DOM work between cycles.
+    // Slow editing assertions above can otherwise hide a native-popup race.
+    for (let cycle = 0; cycle < 10; cycle++) {
+      const target = await openNativePopup(launcher, cdp, url);
+      await closeNativePopup(cdp, target.targetId);
     }
   } finally {
     await cdp.detach();
