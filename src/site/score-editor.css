@@ -1653,19 +1653,21 @@ body.score-moving-measure, body.score-moving-measure * { cursor: grabbing !impor
   height: 3.25rem;
 }
 .score-partitura-figure {
+  --voice-gap: 1rem;
   min-width: 0;
   margin: 0;
 }
 .score-partitura-figure figcaption {
   margin-top: 0.75rem;
-  text-align: center;
+  padding-left: calc(1.5rem + var(--voice-gap));
+  text-align: left;
   font-size: 0.82rem;
   color: var(--ink-soft);
 }
 .score-partitura-preview {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--voice-gap);
   min-width: 0;
 }
 .score-partitura-voices {
@@ -1703,5 +1705,6 @@ body.score-moving-measure, body.score-moving-measure * { cursor: grabbing !impor
   }
   .score-partitura-heading { justify-content: center; }
   .score-partitura-promo .part-promo-copy { text-align: center; }
-  .score-partitura-preview { width: 100%; gap: 0.5rem; }
+  .score-partitura-figure { --voice-gap: 0.5rem; }
+  .score-partitura-preview { width: 100%; }
 }
