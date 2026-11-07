@@ -195,6 +195,10 @@ const notFoundTemplate = fs.readFileSync(
   path.join(SRC_SITE, "404.html"),
   "utf8",
 );
+const arpeggioPromoTemplate = fs.readFileSync(
+  path.join(SRC_SITE, "arpeggio-promo.html"),
+  "utf8",
+);
 const noteFinderPromoTemplate = fs.readFileSync(
   path.join(SRC_SITE, "note-finder-promo.html"),
   "utf8",
@@ -308,6 +312,21 @@ function tabsExtensionCta(strings) {
     '<div class="ext-body"><p class="ext-heading">' + escapeHtml(strings.tabsExtensionHeading) +
     '</p><p class="ext-desc">' + escapeHtml(strings.menuTabsExtensionDescription) + '</p>' +
     ctaButton(strings, tabsExtensionStoreUrl()) + '</div></div>';
+}
+
+// Compact list of both extensions, as in the site menu.
+function extensionsList(strings) {
+  function row(url, name, description, icon) {
+    return '<a class="footer-ext" href="' + escapeHtml(url) +
+      '" target="_blank" rel="noopener"><span><strong>' + escapeHtml(name) +
+      "</strong><small>" + escapeHtml(description) + '</small></span><img src="/assets/' +
+      icon + '" alt="" width="48" height="48"></a>';
+  }
+  return '<div class="footer-exts"><p class="footer-exts-heading">' +
+    escapeHtml(strings.menuExtensions) + "</p>" +
+    row(tabsExtensionStoreUrl(), "Guitar Tabs", strings.menuTabsExtensionDescription, "guitar-tabs.svg") +
+    row(extensionStoreUrl(), strings.menuChordFinder, strings.extensionDescription, "guitar-player-cubist-left-head.svg") +
+    "</div>";
 }
 
 function tabsExtensionFooter(strings) {
@@ -606,6 +625,22 @@ function tabEditorPromo(strings, locale) {
   return html
     .split("%%TAB_EDITOR_PAGE_HREF%%")
     .join(v7PageHref(locale, TAB_EDITOR_SLUG));
+}
+
+// Banner for the arpeggio finder page (404 page).
+function arpeggioPromo(strings, locale) {
+  let html = arpeggioPromoTemplate.trim();
+  [
+    "arpPromoKicker",
+    "arpPromoTitle",
+    "arpPromoDescription",
+    "arpPromoCta",
+  ].forEach(function (key) {
+    html = html.split("%%" + key + "%%").join(strings[key] || "");
+  });
+  return html
+    .split("%%ARPEGGIO_PAGE_HREF%%")
+    .join(v7PageHref(locale, ARTICLE_ARPEGGIOS_SLUG));
 }
 
 // Home banner for Partitura y tablatura; empty when the page is not generated.
@@ -1917,12 +1952,14 @@ function render404Page(template, strings, locale = "es") {
   html = html
     .split("%%NOTE_FINDER_PROMO%%")
     .join(noteFinderPromo(strings, locale))
+    .split("%%ARPEGGIO_PROMO%%")
+    .join(arpeggioPromo(strings, locale))
     .split("%%TAB_EDITOR_PROMO%%")
     .join(tabEditorPromo(strings, locale))
     .split("%%PARTITURA_PROMO%%")
     .join(partituraPromo(strings, locale, resolvedAssetsPrefix))
-    .split("%%TABS_EXTENSION_CTA%%")
-    .join(tabsExtensionCta(strings));
+    .split("%%EXTENSIONS_LIST%%")
+    .join(extensionsList(strings));
 
   html = html.replace(
     '<html lang="es">',

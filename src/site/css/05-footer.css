@@ -94,3 +94,41 @@ footer {
   }
 }
 
+
+/* Compact extension list (404 page), same look as the site menu. */
+.footer-exts-heading {
+  margin: 0 0 0.6rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+.footer-ext {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: none;
+}
+.footer-ext > span {
+  flex: 1;
+  min-width: 0;
+}
+.footer-ext strong {
+  font-size: 1rem;
+}
+.footer-ext small {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+.footer-ext > img {
+  flex-shrink: 0;
+}
+.footer-ext:hover strong {
+  text-decoration: underline;
+}

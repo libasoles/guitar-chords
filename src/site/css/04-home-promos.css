@@ -271,3 +271,49 @@
   }
 }
 
+
+/* ----- Arpeggio finder promotion (404 page) ----- */
+
+.arp-promo-sheet {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.8rem 1rem;
+  font-family: var(--mono);
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+.arp-promo-strings {
+  display: flex;
+  gap: 0.25rem;
+}
+.arp-promo-strings span {
+  width: 1.6rem;
+  padding: 0.25rem 0;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+}
+.arp-promo-arrow {
+  color: #b3ada1;
+  flex: none;
+}
+.arp-promo-chord {
+  font-family: var(--sans);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.arp-promo-desc {
+  margin: 0.4rem 0 0;
+  font-size: 0.95rem;
+}
+@media (max-width: 560px) {
+  .arp-promo-sheet {
+    justify-content: center;
+  }
+}
