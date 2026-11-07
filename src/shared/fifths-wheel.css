@@ -10,14 +10,14 @@
 .fifths-degree { font-size: 13px; fill: #315b62; pointer-events: none; }
 .fifths-key.is-tonic text { fill: white; }
 /* Related keys float above the wheel: zoomed, with a shadow, as if lifted off it. Hovering
-   previews each key lifted on its own; a pin scales the whole region radially from the
-   wheel's center, so the six arcs grow together and none of them hides another. */
-.fifths-lift { pointer-events: none; transform-box: view-box; transform-origin: 50% 50%; transition: transform 220ms ease-out, filter 220ms ease-out; }
-.fifths-lift.is-pinned { transform: scale(1.18); filter: drop-shadow(0 16px 12px rgba(0, 0, 0, .4)); }
+   previews each key lifted on its own; a pin extends the whole region outward from the
+   center circle (the geometry is laid out in fifths-wheel.js), so the six arcs grow together. */
+.fifths-lift { pointer-events: none; transition: filter 220ms ease-out; }
+.fifths-lift.is-pinned { filter: drop-shadow(0 16px 12px rgba(0, 0, 0, .4)); }
 .fifths-lifted path { fill: #c5dce0; stroke: var(--paper); stroke-width: 2; }
 .fifths-lifted.is-tonic path { fill: var(--note-selected); }
 .fifths-lifted.is-tonic text { fill: white; }
-.fifths-lifted { transform-box: fill-box; transform-origin: center; transform: scale(1.07); filter: drop-shadow(0 7px 6px rgba(0, 0, 0, .3)); animation: fifths-lift 160ms ease-out; transition: transform 220ms ease-out, filter 220ms ease-out; }
+.fifths-lifted { transform-box: fill-box; transform-origin: center; transform: scale(1.07); filter: drop-shadow(0 7px 6px rgba(0, 0, 0, .3)); animation: fifths-lift 160ms ease-out; transition: transform 220ms linear, filter 220ms ease-out; }
 .fifths-lifted.is-tonic { transform: scale(1.12); filter: drop-shadow(0 10px 8px rgba(0, 0, 0, .4)); }
 .fifths-lift.is-pinned .fifths-lifted { transform: none; filter: none; }
 /* Where the pinned region was lifted out, the wheel shows an empty recess. */
