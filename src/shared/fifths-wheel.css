@@ -9,6 +9,14 @@
 .fifths-chord-name { font-size: 26px; fill: var(--ink); pointer-events: none; }
 .fifths-degree { font-size: 13px; fill: #315b62; pointer-events: none; }
 .fifths-key.is-tonic text { fill: white; }
+/* Related keys float above the wheel: zoomed, with a shadow, as if lifted off it. */
+.fifths-lift { pointer-events: none; }
+.fifths-lifted path { fill: #c5dce0; stroke: var(--paper); stroke-width: 2; }
+.fifths-lifted.is-tonic path { fill: var(--note-selected); }
+.fifths-lifted.is-tonic text { fill: white; }
+.fifths-lifted { transform-box: fill-box; transform-origin: center; transform: scale(1.07); filter: drop-shadow(0 7px 6px rgba(0, 0, 0, .3)); animation: fifths-lift 160ms ease-out; }
+.fifths-lifted.is-tonic { transform: scale(1.12); filter: drop-shadow(0 10px 8px rgba(0, 0, 0, .4)); }
+@keyframes fifths-lift { from { transform: scale(1); filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0)); } }
 .fifths-center { fill: var(--paper); }
 .fifths-center-name { font-size: 24px; font-family: var(--serif); font-weight: 600; }
 .fifths-diminished { font-size: 20px; fill: var(--note-selected); }
@@ -29,5 +37,5 @@
   .fifths-signature .fifths-staff { width: 150px; height: 70px; overflow: visible; }
   .fifths-svg { width: calc(100% + 2rem); max-width: none; margin-left: -1rem; }
 }
-@media (prefers-reduced-motion: reduce) { .fifths-key path { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .fifths-key path { transition: none; } .fifths-lifted { animation: none; } }
 

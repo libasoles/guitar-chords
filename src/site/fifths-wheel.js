@@ -108,6 +108,10 @@
     });
     wheel.appendChild(group);
   });
+  // Related keys are cloned onto a layer above the wheel so they can stand out
+  // (zoom and shadow) without reordering the interactive sectors, which would drop focus.
+  var lift = svg('g', { class: 'fifths-lift', 'aria-hidden': 'true' });
+  wheel.appendChild(lift);
   wheel.appendChild(svg('circle', { cx: 430, cy: 430, r: 117, class: 'fifths-center' }));
   var centerName = svg('text', { x: 430, y: 414, 'text-anchor': 'middle', class: 'fifths-center-name' });
   var diminished = svg('text', { x: 430, y: 453, 'text-anchor': 'middle', class: 'fifths-diminished' });
@@ -127,6 +131,15 @@
       button.degree.textContent = match < 0 ? '' : degrees[match];
       button.label.textContent = match < 0 ? name(scale(button.index)[button.minor ? 5 : 0]) + button.quality : name(chords[match].note) + button.quality;
     });
+    lift.replaceChildren();
+    buttons.filter(function (button) { return button.el.classList.contains('is-related'); })
+      .sort(function (a, b) { return a.el.classList.contains('is-tonic') - b.el.classList.contains('is-tonic'); })
+      .forEach(function (button) {
+        var clone = button.el.cloneNode(true);
+        ['tabindex', 'role', 'aria-label', 'aria-pressed'].forEach(function (attr) { clone.removeAttribute(attr); });
+        clone.setAttribute('class', 'fifths-lifted' + (button.el.classList.contains('is-tonic') ? ' is-tonic' : ''));
+        lift.appendChild(clone);
+      });
     var title = name(chords[0].note) + (minor ? (es ? ' menor' : pt ? ' menor' : ' minor') : (es ? ' mayor' : pt ? ' maior' : ' major'));
     centerName.textContent = title;
     var dimIndex = minor ? 1 : 6;
