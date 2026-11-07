@@ -32,7 +32,7 @@ const { pagePath } = require('../scripts/lib/slugs');
       assert.deepEqual(await chords(), es ? ['Sol', 'Lam', 'Sim', 'Do', 'Re', 'Mim', 'Fa♯°'] : ['G', 'Am', 'Bm', 'C', 'D', 'Em', 'F♯°']);
       await page.locator('h1').hover();
       await settled();
-      assert.equal(await page.locator('#fifths-key').textContent(), es ? 'Do mayor' : 'C major');
+      assert.equal(await page.locator('#fifths-key').textContent(), es ? 'Sol mayor' : 'G major', 'leaving a key keeps its selection');
       await key(es ? 'La menor' : 'A minor').click();
       await page.locator('h1').hover();
       await settled();

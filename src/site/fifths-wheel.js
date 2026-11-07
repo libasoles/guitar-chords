@@ -70,27 +70,24 @@
     var c = polar(inner, angle + 15), d = polar(inner, angle - 15);
     return 'M' + a + ' A' + outer + ',' + outer + ' 0 0 1 ' + b + ' L' + c + ' A' + inner + ',' + inner + ' 0 0 0 ' + d + ' Z';
   }
-  // Hovering or focusing a key previews it. Clicking pins its region, and while one is pinned
-  // pointer and focus movement change nothing; only a click releases it (see click()).
+  // Hovering or focusing a key selects it, and leaving it keeps that selection. Clicking pins its
+  // region; while one is pinned, pointer and focus movement change nothing and only a click
+  // releases it (see click()).
   function restore() { show(selected.index, selected.minor); }
-  function preview(index, minor) { if (!pinned) show(index, minor); }
+  function preview(index, minor) {
+    if (pinned) return;
+    selected = { index: index, minor: minor };
+    restore();
+  }
   function click(index, minor, button) {
-    if (pinned && (!button || button.el.classList.contains('is-related'))) {
-      pinned = false;
-      selected = { index: 0, minor: false };
-      if (button && button.el.matches(':hover')) { preview(index, minor); return; }
-    } else {
-      pinned = true;
-      selected = { index: index, minor: minor };
-    }
+    if (pinned && (!button || button.el.classList.contains('is-related'))) pinned = false;
+    else { pinned = true; selected = { index: index, minor: minor }; }
     restore();
   }
   function interact(el, index, minor) {
     var button = function () { return buttons.find(function (b) { return b.el === el; }); };
     el.addEventListener('mouseenter', function () { preview(index, minor); });
-    el.addEventListener('mouseleave', function () { if (!pinned) restore(); });
     el.addEventListener('focus', function () { preview(index, minor); });
-    el.addEventListener('blur', function () { if (!pinned) restore(); });
     el.addEventListener('click', function () { click(index, minor, button()); });
     el.addEventListener('keydown', function (event) {
       if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); click(index, minor, button()); }
