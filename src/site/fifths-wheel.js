@@ -178,6 +178,10 @@
         .forEach(function (button) {
           var clone = button.el.cloneNode(true);
           ['tabindex', 'role', 'aria-label', 'aria-pressed'].forEach(function (attr) { clone.removeAttribute(attr); });
+          // Major arcs (outer ring) also slide outward along their radius when pinned.
+          var radians = button.index * 30 * Math.PI / 180;
+          clone.style.setProperty('--dx', button.minor ? 0 : Math.sin(radians).toFixed(3));
+          clone.style.setProperty('--dy', button.minor ? 0 : (-Math.cos(radians)).toFixed(3));
           clone.setAttribute('class', 'fifths-lifted' + (button.el.classList.contains('is-tonic') ? ' is-tonic' : ''));
           lift.appendChild(clone);
         });

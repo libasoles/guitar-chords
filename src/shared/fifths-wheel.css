@@ -16,10 +16,10 @@
 .fifths-lifted path { fill: #c5dce0; stroke: var(--paper); stroke-width: 2; }
 .fifths-lifted.is-tonic path { fill: var(--note-selected); }
 .fifths-lifted.is-tonic text { fill: white; }
-.fifths-lifted { transform-box: fill-box; transform-origin: center; transform: scale(1.07); filter: drop-shadow(0 7px 6px rgba(0, 0, 0, .3)); animation: fifths-lift 160ms ease-out; transition: transform 220ms linear, filter 220ms ease-out; }
-.fifths-lifted.is-tonic { transform: scale(1.12); filter: drop-shadow(0 10px 8px rgba(0, 0, 0, .4)); }
-.fifths-lift.is-pinned .fifths-lifted { transform: scale(1.2); filter: drop-shadow(0 14px 10px rgba(0, 0, 0, .36)); }
-.fifths-lift.is-pinned .fifths-lifted.is-tonic { transform: scale(1.27); filter: drop-shadow(0 20px 14px rgba(0, 0, 0, .45)); }
+.fifths-lifted { transform-box: fill-box; transform-origin: center; transform: translate(0, 0) scale(1.07); filter: drop-shadow(0 7px 6px rgba(0, 0, 0, .3)); animation: fifths-lift 160ms ease-out; transition: transform 220ms linear, filter 220ms ease-out; }
+.fifths-lifted.is-tonic { transform: translate(0, 0) scale(1.12); filter: drop-shadow(0 10px 8px rgba(0, 0, 0, .4)); }
+.fifths-lift.is-pinned .fifths-lifted { transform: translate(calc(var(--dx) * 18px), calc(var(--dy) * 18px)) scale(1.2); filter: drop-shadow(0 14px 10px rgba(0, 0, 0, .36)); }
+.fifths-lift.is-pinned .fifths-lifted.is-tonic { transform: translate(calc(var(--dx) * 18px), calc(var(--dy) * 18px)) scale(1.27); filter: drop-shadow(0 20px 14px rgba(0, 0, 0, .45)); }
 /* Where the pinned region was lifted out, the wheel shows an empty recess. */
 .fifths-svg.is-pinned .fifths-key.is-related path { fill: #e1dbcd; }
 .fifths-svg.is-pinned .fifths-key.is-related text { opacity: 0; }
