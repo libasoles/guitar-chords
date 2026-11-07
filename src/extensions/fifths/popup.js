@@ -8,6 +8,6 @@ document.title = message('appName');
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('wordmark').textContent = message('appName');
   const link = document.getElementById('site-link');
-  link.textContent = message('siteLabel');
+  document.getElementById('site-link-label').textContent = message('siteLabel');
   link.href = message('siteUrl');
 });
