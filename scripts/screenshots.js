@@ -5,7 +5,7 @@
      store/chords/screenshots/01-search.png   (1280×800)
      store/chords/screenshots/02-pinned.png   (1280×800)
      src/site/og-image.png             (1200×630)
-   Usage: node scripts/screenshots.js  (requires dist/extensions/chords/ to be built first) */
+   Usage: node scripts/screenshots.js  (requires the site and dist/extensions/chords/ to be built first) */
 
 const path = require('path');
 const fs   = require('fs');
@@ -15,10 +15,9 @@ const { playwrightExecutablePath } = require('./lib/chrome-path');
 const ROOT   = path.join(__dirname, '..');
 const POPUP  = 'file://' + path.join(ROOT, 'dist', 'extensions', 'chords', 'popup.html');
 const STORE  = path.join(ROOT, 'store', 'chords', 'screenshots');
-const SITE   = path.join(ROOT, 'src', 'site');
+const { run: captureSite } = require('./screenshot');
 
 fs.mkdirSync(STORE, { recursive: true });
-fs.mkdirSync(SITE,  { recursive: true });
 
 async function waitForCards(page) {
   await page.waitForFunction(() => document.querySelectorAll('#results .card').length > 0);
@@ -110,30 +109,7 @@ async function run() {
     await browser.close();
   }
 
-  // ── og-image.png  (1200×630) ────────────────────────────────────────
-  {
-    const browser = await chromium.launch({ executablePath: playwrightExecutablePath() });
-    const ctx  = await browser.newContext({ viewport: { width: 1200, height: 630 } });
-    const page = await ctx.newPage();
-    await page.goto(POPUP);
-    await page.waitForLoadState('domcontentloaded');
-    await applyBackground(page, 1200, 630);
-
-    const input = page.locator('#q');
-    await input.fill('G');
-    await waitForCards(page);
-    await pinFirst(page);
-
-    await input.fill('D7');
-    await waitForCards(page);
-    await pinFirst(page);
-
-    await input.fill('C');
-    await waitForCards(page);
-
-    await capture(page, path.join(SITE, 'og-image.png'));
-    await browser.close();
-  }
+  await captureSite();
 
   console.log('\nDone. 3 files written.');
 }

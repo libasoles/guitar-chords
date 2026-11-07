@@ -1,62 +1,40 @@
 #!/usr/bin/env node
 'use strict';
-/* screenshot.js — Captures a popup screenshot for og:image / social sharing.
-   Output: src/site/og-image.png
-   Usage: node scripts/screenshot.js  (requires dist/extensions/chords/ to be built first) */
+/* screenshot.js — Captures the website home page for social sharing and README.
+   Output: src/site/og-image.png (1200×630)
+   Usage: node scripts/screenshot.js (run npm run build:site first) */
 
 const path = require('path');
 const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('./lib/chrome-path');
+const { serveStatic } = require('./lib/static-server');
 
-const POPUP = 'file://' + path.join(__dirname, '..', 'dist', 'extensions', 'chords', 'popup.html');
-const OUT   = path.join(__dirname, '..', 'src', 'site', 'og-image.png');
-
-async function waitForCards(page) {
-  await page.waitForFunction(() => {
-    const cards = document.querySelectorAll('#results .card');
-    return cards.length > 0;
-  });
-}
-
-async function pinFirst(page) {
-  await page.locator('#results .card .pin-button').first().click();
-  await page.waitForFunction(() => document.querySelector('#pinned-shell:not([hidden])'));
-}
+const ROOT = path.join(__dirname, '..');
 
 async function run() {
-  const browser = await chromium.launch({ executablePath: playwrightExecutablePath() });
-  const context = await browser.newContext({ viewport: { width: 380, height: 620 } });
-  const page    = await context.newPage();
-
-  await page.goto(POPUP);
-  await page.waitForLoadState('domcontentloaded');
-
-  const input = page.locator('#q');
-
-  // Pin G
-  await input.fill('G');
-  await waitForCards(page);
-  await pinFirst(page);
-
-  // Pin D7
-  await input.fill('D7');
-  await waitForCards(page);
-  await pinFirst(page);
-
-  // Show C in the search results (mirrors the reference screenshot)
-  await input.fill('C');
-  await waitForCards(page);
-
-  // Let svguitar finish rendering SVGs
-  await page.waitForTimeout(600);
-
-  await page.screenshot({ path: OUT });
-  console.log('og:image saved → ' + path.relative(path.join(__dirname, '..'), OUT));
-
-  await browser.close();
+  const server = await serveStatic(path.join(ROOT, 'dist', 'site'), 0);
+  let browser;
+  try {
+    browser = await chromium.launch({ executablePath: playwrightExecutablePath() });
+    const page = await browser.newPage({
+      viewport: { width: 1200, height: 630 },
+      deviceScaleFactor: 1,
+      locale: 'es-AR',
+      reducedMotion: 'reduce',
+    });
+    await page.goto(`http://localhost:${server.address().port}/`, { waitUntil: 'networkidle' });
+    await page.locator('chord-finder .card:not(.hidden) svg').first().waitFor();
+    await page.evaluate(() => document.fonts.ready);
+    await page.screenshot({ path: path.join(ROOT, 'src', 'site', 'og-image.png') });
+    console.log('saved → src/site/og-image.png (1200×630)');
+  } finally {
+    if (browser) await browser.close();
+    await new Promise(resolve => server.close(resolve));
+  }
 }
 
-run().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (require.main === module) {
+  run().catch(err => { console.error(err); process.exitCode = 1; });
+}
+
+module.exports = { run };

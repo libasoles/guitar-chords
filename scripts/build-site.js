@@ -508,7 +508,7 @@ const INTERVALS_PAGE = {
 };
 const ALL_PICKING_PAGES = [INTERVALS_PAGE];
 
-// Reserve the extension screenshot for the home page. Other pages share
+// Reserve the website screenshot for the home page. Other pages share
 // raster previews of the existing notation + TAB examples (social crawlers
 // do not reliably display SVG images).
 function socialImage(url) {

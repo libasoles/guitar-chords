@@ -82,9 +82,9 @@ npm run build:ext:tabs   # → dist/extensions/tabs/ + dist/extensions/tabs.zip
 
 ### OG / social image
 
-Place your screenshot at `src/site/og-image.png` before building.
-The build script copies it to `dist/site/assets/og-image.png` automatically.
-Recommended size: **1200 × 630 px**.
+Run `npm run build:site` and then `node scripts/screenshot.js` to capture the
+website home page at **1200 × 630 px** in `src/site/og-image.png`. The README
+uses the same image. Rebuild the site to copy it to `dist/site/assets/og-image.png`.
 
 ---
 
@@ -103,9 +103,13 @@ GitHub Actions CI (`.github/workflows/ci.yml`) runs tests on every push.
 
 ## Chrome extensions
 
-| Search | Pinned chords |
-|:---:|:---:|
-| ![Search](store/chords/screenshots/01-search.png) | ![Pinned chords](store/chords/screenshots/02-pinned.png) |
+**Search**
+
+![Search](store/chords/screenshots/01-search.png)
+
+**Pinned chords**
+
+![Pinned chords](store/chords/screenshots/02-pinned.png)
 
 ### Load unpacked (development)
 
