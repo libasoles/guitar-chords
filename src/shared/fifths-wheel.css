@@ -26,6 +26,8 @@
 .fifths-accidental-names { font-size: 14px; fill: var(--ink-soft); }
 .fifths-detail { border-top: 1px solid var(--rule); padding-top: 1.2rem; text-align: center; }
 .fifths-detail h2 { margin: 0; }
+.fifths-detail h2, .fifths-signature, .fifths-chords { transition: opacity 160ms ease; }
+.fifths-detail.is-changing h2, .fifths-detail.is-changing .fifths-signature, .fifths-detail.is-changing .fifths-chords { opacity: 0; transition-duration: 120ms; }
 .fifths-signature { display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap; margin: .4rem 0 1rem; font-family: var(--sans); font-size: 1rem; }
 .fifths-staff { flex: none; }
 .fifths-chords { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .35rem; }
@@ -40,5 +42,5 @@
   .fifths-signature .fifths-staff { width: 150px; height: 70px; overflow: visible; }
   .fifths-svg { width: calc(100% + 2rem); max-width: none; margin-left: -1rem; }
 }
-@media (prefers-reduced-motion: reduce) { .fifths-key path { transition: none; } .fifths-lifted { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .fifths-key path, .fifths-detail h2, .fifths-signature, .fifths-chords { transition: none; } .fifths-lifted { animation: none; } }
 

@@ -117,6 +117,24 @@
   var diminished = svg('text', { x: 430, y: 453, 'text-anchor': 'middle', class: 'fifths-diminished' });
   wheel.appendChild(centerName); wheel.appendChild(diminished);
   host.appendChild(wheel);
+  // The sidebar trails the wheel: a short debounce skips keys the pointer only crosses,
+  // and the content fades out and back in rather than switching abruptly.
+  var detail = document.querySelector('.fifths-detail');
+  var detailKey = null;
+  var detailTimer = 0;
+  function queueDetail(key, render) {
+    clearTimeout(detailTimer);
+    if (key === detailKey) { detail.classList.remove('is-changing'); return; }
+    if (detailKey === null) { render(); detailKey = key; return; }
+    detailTimer = setTimeout(function () {
+      detail.classList.add('is-changing');
+      detailTimer = setTimeout(function () {
+        render();
+        detailKey = key;
+        detail.classList.remove('is-changing');
+      }, 120);
+    }, 70);
+  }
   function show(index, minor) {
     var notes = scale(index);
     var chords = notes.map(function (n, i) { return { note: n, quality: qualities[i] }; });
@@ -145,19 +163,21 @@
     centerName.textContent = title;
     var dimIndex = minor ? 1 : 6;
     diminished.textContent = degrees[dimIndex] + ' · ' + name(chords[dimIndex].note) + '°';
-    document.getElementById('fifths-key').textContent = title;
-    var signatureEl = document.getElementById('fifths-signature');
-    signatureEl.replaceChildren(staff(index, 180, 84));
-    var text = document.createElement('span');
-    text.textContent = signature(index).map(name).join(' · ') || (es ? 'Sin alteraciones' : pt ? 'Sem alterações' : 'No accidentals');
-    signatureEl.appendChild(text);
-    var chordList = document.getElementById('fifths-chords');
-    chordList.replaceChildren();
-    chords.forEach(function (chord, i) {
-      var item = document.createElement('div'); item.className = 'fifths-chord';
-      var degree = document.createElement('small'); degree.textContent = degrees[i];
-      var label = document.createElement('strong'); label.textContent = name(chord.note) + chord.quality;
-      item.append(degree, label); chordList.appendChild(item);
+    queueDetail(index + (minor ? 'm' : 'M'), function () {
+      document.getElementById('fifths-key').textContent = title;
+      var signatureEl = document.getElementById('fifths-signature');
+      signatureEl.replaceChildren(staff(index, 180, 84));
+      var text = document.createElement('span');
+      text.textContent = signature(index).map(name).join(' · ') || (es ? 'Sin alteraciones' : pt ? 'Sem alterações' : 'No accidentals');
+      signatureEl.appendChild(text);
+      var chordList = document.getElementById('fifths-chords');
+      chordList.replaceChildren();
+      chords.forEach(function (chord, i) {
+        var item = document.createElement('div'); item.className = 'fifths-chord';
+        var degree = document.createElement('small'); degree.textContent = degrees[i];
+        var label = document.createElement('strong'); label.textContent = name(chord.note) + chord.quality;
+        item.append(degree, label); chordList.appendChild(item);
+      });
     });
   }
   restore();
