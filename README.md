@@ -103,6 +103,8 @@ GitHub Actions CI (`.github/workflows/ci.yml`) runs tests on every push.
 
 ## Chrome extensions
 
+### Guitar Chords
+
 **Search**
 
 ![Search](store/chords/screenshots/01-search.png)
@@ -110,6 +112,20 @@ GitHub Actions CI (`.github/workflows/ci.yml`) runs tests on every push.
 **Pinned chords**
 
 ![Pinned chords](store/chords/screenshots/02-pinned.png)
+
+### Guitar Tabs
+
+**Tablature editor**
+
+![Guitar Tabs tablature editor](store/tabs/screenshots/01-editor.png)
+
+**Multiple tabs and note labels**
+
+![Guitar Tabs with multiple tabs and note labels](store/tabs/screenshots/02-tabs.png)
+
+**Gestures and keyboard shortcuts**
+
+![Guitar Tabs tutorial with gestures and keyboard shortcuts](store/tabs/screenshots/03-tutorial.png)
 
 ### Load unpacked (development)
 
