@@ -83,6 +83,12 @@ test('Circle of Fifths builds independently and packages the shared wheel locall
   assert.deepEqual(manifest.permissions, []);
   assert.equal(JSON.parse(fs.readFileSync(path.join(extension, '_locales/en/messages.json'))).appName.message, 'Circle of Fifths');
   assert.equal(JSON.parse(fs.readFileSync(path.join(extension, '_locales/es/messages.json'))).appName.message, 'Círculo de quintas');
+  // The site links must match the real page paths, English ones carrying the /en prefix.
+  const { pagePath } = require('../scripts/lib/slugs');
+  for (const locale of ['en', 'es']) {
+    const messages = JSON.parse(fs.readFileSync(path.join(extension, '_locales', locale, 'messages.json')));
+    assert.equal(messages.siteUrl.message, 'https://acordesdeguitarra.com.ar' + pagePath('circulo-de-quintas', locale));
+  }
   for (const file of ['popup.html', 'popup.js', 'popup.css', 'fifths-wheel.js', 'fifths-wheel.css', 'base.css', 'icon.svg', ...Object.values(manifest.icons)]) {
     assert.ok(fs.statSync(path.join(extension, file)).size > 0, file);
   }
