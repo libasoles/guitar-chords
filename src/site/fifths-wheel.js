@@ -131,13 +131,14 @@
       button.degree.textContent = match < 0 ? '' : degrees[match];
       button.label.textContent = match < 0 ? name(scale(button.index)[button.minor ? 5 : 0]) + button.quality : name(chords[match].note) + button.quality;
     });
+    var pinned = index === selected.index && minor === selected.minor;
     lift.replaceChildren();
     buttons.filter(function (button) { return button.el.classList.contains('is-related'); })
       .sort(function (a, b) { return a.el.classList.contains('is-tonic') - b.el.classList.contains('is-tonic'); })
       .forEach(function (button) {
         var clone = button.el.cloneNode(true);
         ['tabindex', 'role', 'aria-label', 'aria-pressed'].forEach(function (attr) { clone.removeAttribute(attr); });
-        clone.setAttribute('class', 'fifths-lifted' + (button.el.classList.contains('is-tonic') ? ' is-tonic' : ''));
+        clone.setAttribute('class', 'fifths-lifted' + (button.el.classList.contains('is-tonic') ? ' is-tonic' : '') + (pinned ? ' is-pinned' : ''));
         lift.appendChild(clone);
       });
     var title = name(chords[0].note) + (minor ? (es ? ' menor' : pt ? ' menor' : ' minor') : (es ? ' mayor' : pt ? ' maior' : ' major'));
