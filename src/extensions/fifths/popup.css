@@ -90,6 +90,9 @@ body {
 }
 
 .site-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   margin-top: auto;
   font-family: var(--sans);
   font-size: 0.75rem;

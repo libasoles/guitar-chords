@@ -302,12 +302,16 @@ function tabsExtensionStoreUrl() {
   return "https://chromewebstore.google.com/detail/guitar-tabs/ikhfhclkbcienaofdjjjnaalcigehkhk?authuser=0&hl=es-419";
 }
 
-function tabsExtensionFooter(strings) {
-  return '<footer><div class="extension-cta extension-cta-tabs">' +
+function tabsExtensionCta(strings) {
+  return '<div class="extension-cta extension-cta-tabs">' +
     '<img class="ext-icon" src="/assets/guitar-tabs.svg" alt="" width="64" height="64">' +
     '<div class="ext-body"><p class="ext-heading">' + escapeHtml(strings.tabsExtensionHeading) +
     '</p><p class="ext-desc">' + escapeHtml(strings.menuTabsExtensionDescription) + '</p>' +
-    ctaButton(strings, tabsExtensionStoreUrl()) + '</div></div></footer>';
+    ctaButton(strings, tabsExtensionStoreUrl()) + '</div></div>';
+}
+
+function tabsExtensionFooter(strings) {
+  return "<footer>" + tabsExtensionCta(strings) + "</footer>";
 }
 
 // Build the extension CTA button.
@@ -1912,7 +1916,13 @@ function render404Page(template, strings, locale = "es") {
   html = html.split("%%PAGE_LEAD%%").join(strings.notFoundLead || "");
   html = html
     .split("%%NOTE_FINDER_PROMO%%")
-    .join(noteFinderPromo(strings, locale));
+    .join(noteFinderPromo(strings, locale))
+    .split("%%TAB_EDITOR_PROMO%%")
+    .join(tabEditorPromo(strings, locale))
+    .split("%%PARTITURA_PROMO%%")
+    .join(partituraPromo(strings, locale, resolvedAssetsPrefix))
+    .split("%%TABS_EXTENSION_CTA%%")
+    .join(tabsExtensionCta(strings));
 
   html = html.replace(
     '<html lang="es">',
