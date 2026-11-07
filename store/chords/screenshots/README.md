@@ -22,3 +22,10 @@ Recommended shots (5 max in the store):
 
 Also save a **1200×630** screenshot as `src/site/og-image.png` — the build script
 copies it to `dist/site/assets/og-image.png` for og:image / Twitter card.
+
+## README promotion
+
+`promo-readme.png` combines fresh captures of the built popup: chord search
+and pinned favorites. Regenerate with `npm run build:ext:chords` followed by
+`node scripts/promo-chords-readme.js`. The captures are composed in memory;
+only the final 1400 × 820 image is saved.
