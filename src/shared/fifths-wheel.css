@@ -9,16 +9,20 @@
 .fifths-chord-name { font-size: 26px; fill: var(--ink); pointer-events: none; }
 .fifths-degree { font-size: 13px; fill: #315b62; pointer-events: none; }
 .fifths-key.is-tonic text { fill: white; }
-/* Related keys float above the wheel: zoomed, with a shadow, as if lifted off it. */
-.fifths-lift { pointer-events: none; }
+/* Related keys float above the wheel: zoomed, with a shadow, as if lifted off it. Hovering
+   previews each key lifted on its own; a pin scales the whole region radially from the
+   wheel's center, so the six arcs grow together and none of them hides another. */
+.fifths-lift { pointer-events: none; transform-box: view-box; transform-origin: 50% 50%; transition: transform 220ms ease-out, filter 220ms ease-out; }
+.fifths-lift.is-pinned { transform: scale(1.18); filter: drop-shadow(0 16px 12px rgba(0, 0, 0, .4)); }
 .fifths-lifted path { fill: #c5dce0; stroke: var(--paper); stroke-width: 2; }
 .fifths-lifted.is-tonic path { fill: var(--note-selected); }
 .fifths-lifted.is-tonic text { fill: white; }
-.fifths-lifted { transform-box: fill-box; transform-origin: center; transform: scale(1.07); filter: drop-shadow(0 7px 6px rgba(0, 0, 0, .3)); animation: fifths-lift 160ms ease-out; }
+.fifths-lifted { transform-box: fill-box; transform-origin: center; transform: scale(1.07); filter: drop-shadow(0 7px 6px rgba(0, 0, 0, .3)); animation: fifths-lift 160ms ease-out; transition: transform 220ms ease-out, filter 220ms ease-out; }
 .fifths-lifted.is-tonic { transform: scale(1.12); filter: drop-shadow(0 10px 8px rgba(0, 0, 0, .4)); }
-/* A key pinned by clicking brings all six related keys much closer than the hover preview. */
-.fifths-lifted.is-pinned { transform: scale(1.26); filter: drop-shadow(0 18px 12px rgba(0, 0, 0, .38)); animation-duration: 240ms; animation-timing-function: cubic-bezier(.2, 1.3, .4, 1); }
-.fifths-lifted.is-pinned.is-tonic { transform: scale(1.42); filter: drop-shadow(0 24px 18px rgba(0, 0, 0, .5)); }
+.fifths-lift.is-pinned .fifths-lifted { transform: none; filter: none; }
+/* Where the pinned region was lifted out, the wheel shows an empty recess. */
+.fifths-svg.is-pinned .fifths-key.is-related path { fill: #e1dbcd; }
+.fifths-svg.is-pinned .fifths-key.is-related text { opacity: 0; }
 @keyframes fifths-lift { from { transform: scale(1); filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0)); } }
 .fifths-center { fill: var(--paper); }
 .fifths-center-name { font-size: 24px; font-family: var(--serif); font-weight: 600; }
@@ -26,8 +30,9 @@
 .fifths-accidental-names { font-size: 14px; fill: var(--ink-soft); }
 .fifths-detail { border-top: 1px solid var(--rule); padding-top: 1.2rem; text-align: center; }
 .fifths-detail h2 { margin: 0; }
-.fifths-detail h2, .fifths-signature, .fifths-chords { transition: opacity 160ms ease; }
-.fifths-detail.is-changing h2, .fifths-detail.is-changing .fifths-signature, .fifths-detail.is-changing .fifths-chords { opacity: 0; transition-duration: 120ms; }
+/* Only the text and accidentals fade between keys; the staff, clef and tiles stay visible. */
+.fifths-detail h2, .fifths-signature span, .fifths-accidentals, .fifths-chord small, .fifths-chord strong { transition: opacity 160ms ease; }
+.fifths-detail.is-changing h2, .fifths-detail.is-changing .fifths-signature span, .fifths-detail.is-changing .fifths-accidentals, .fifths-detail.is-changing .fifths-chord small, .fifths-detail.is-changing .fifths-chord strong { opacity: 0; transition-duration: 120ms; }
 .fifths-signature { display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap; margin: .4rem 0 1rem; font-family: var(--sans); font-size: 1rem; }
 .fifths-staff { flex: none; }
 .fifths-chords { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .35rem; }
@@ -42,5 +47,5 @@
   .fifths-signature .fifths-staff { width: 150px; height: 70px; overflow: visible; }
   .fifths-svg { width: calc(100% + 2rem); max-width: none; margin-left: -1rem; }
 }
-@media (prefers-reduced-motion: reduce) { .fifths-key path, .fifths-detail h2, .fifths-signature, .fifths-chords { transition: none; } .fifths-lifted { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .fifths-key path, .fifths-detail h2, .fifths-signature span, .fifths-accidentals, .fifths-chord small, .fifths-chord strong, .fifths-lift, .fifths-lifted { transition: none; } .fifths-lifted { animation: none; } }
 

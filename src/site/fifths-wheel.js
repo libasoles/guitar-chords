@@ -45,15 +45,20 @@
   function pc(note) {
     return (natural[letters.indexOf(note[0])] + (note.includes('♯') ? 1 : note.includes('♭') ? -1 : 0) + 12) % 12;
   }
+  function accidentals(index) {
+    var group = svg('g', { class: 'fifths-accidentals' });
+    // Treble-clef positions: F5 C5 G5 D5 A4 E5 B4; flats: B4 E5 A4 D5 G4 C5 F4.
+    var positions = counts[index] < 0 ? [35, 23, 39, 27, 43, 31, 47] : [19, 31, 15, 27, 39, 23, 35];
+    signature(index).forEach(function (note, i) {
+      group.appendChild(svg('text', { x: 39 + i * 14, y: positions[i], 'font-size': 23, 'dominant-baseline': 'central', 'font-family': 'serif' }, note[1]));
+    });
+    return group;
+  }
   function staff(index, width, height) {
     var staffSvg = svg('svg', { viewBox: '0 0 150 70', width: width, height: height, 'aria-hidden': 'true', class: 'fifths-staff' });
     for (var y = 19; y <= 51; y += 8) staffSvg.appendChild(svg('line', { x1: 4, x2: 146, y1: y, y2: y, stroke: 'currentColor', 'stroke-width': 0.8 }));
     staffSvg.appendChild(svg('text', { x: 6, y: 51, 'font-size': 46, 'font-family': 'serif' }, '𝄞'));
-    // Treble-clef positions: F5 C5 G5 D5 A4 E5 B4; flats: B4 E5 A4 D5 G4 C5 F4.
-    var positions = counts[index] < 0 ? [35, 23, 39, 27, 43, 31, 47] : [19, 31, 15, 27, 39, 23, 35];
-    signature(index).forEach(function (note, i) {
-      staffSvg.appendChild(svg('text', { x: 39 + i * 14, y: positions[i], 'font-size': 23, 'dominant-baseline': 'central', 'font-family': 'serif' }, note[1]));
-    });
+    staffSvg.appendChild(accidentals(index));
     return staffSvg;
   }
   function polar(radius, degrees) {
@@ -165,33 +170,51 @@
       button.degree.textContent = match < 0 ? '' : degrees[match];
       button.label.textContent = match < 0 ? name(scale(button.index)[button.minor ? 5 : 0]) + button.quality : name(chords[match].note) + button.quality;
     });
-    lift.replaceChildren();
-    buttons.filter(function (button) { return button.el.classList.contains('is-related'); })
-      .sort(function (a, b) { return a.el.classList.contains('is-tonic') - b.el.classList.contains('is-tonic'); })
-      .forEach(function (button) {
-        var clone = button.el.cloneNode(true);
-        ['tabindex', 'role', 'aria-label', 'aria-pressed'].forEach(function (attr) { clone.removeAttribute(attr); });
-        clone.setAttribute('class', 'fifths-lifted' + (button.el.classList.contains('is-tonic') ? ' is-tonic' : '') + (pinned ? ' is-pinned' : ''));
-        lift.appendChild(clone);
-      });
+    // Rebuilding the clones would restart their animation, so a pin on the key already
+    // shown only changes the layer's state.
+    var liftKey = index + (minor ? 'm' : 'M');
+    if (liftKey !== lift.getAttribute('data-key')) {
+      lift.setAttribute('data-key', liftKey);
+      lift.replaceChildren();
+      buttons.filter(function (button) { return button.el.classList.contains('is-related'); })
+        .sort(function (a, b) { return a.el.classList.contains('is-tonic') - b.el.classList.contains('is-tonic'); })
+        .forEach(function (button) {
+          var clone = button.el.cloneNode(true);
+          ['tabindex', 'role', 'aria-label', 'aria-pressed'].forEach(function (attr) { clone.removeAttribute(attr); });
+          clone.setAttribute('class', 'fifths-lifted' + (button.el.classList.contains('is-tonic') ? ' is-tonic' : ''));
+          lift.appendChild(clone);
+        });
+    }
+    lift.classList.toggle('is-pinned', pinned);
+    wheel.classList.toggle('is-pinned', pinned);
     var title = name(chords[0].note) + (minor ? (es ? ' menor' : pt ? ' menor' : ' minor') : (es ? ' mayor' : pt ? ' maior' : ' major'));
     centerName.textContent = title;
     var dimIndex = minor ? 1 : 6;
     diminished.textContent = degrees[dimIndex] + ' · ' + name(chords[dimIndex].note) + '°';
     queueDetail(index + (minor ? 'm' : 'M'), function () {
       document.getElementById('fifths-key').textContent = title;
+      // Only the text and the accidentals change; the staff, clef and chord tiles stay put.
       var signatureEl = document.getElementById('fifths-signature');
-      signatureEl.replaceChildren(staff(index, 180, 84));
-      var text = document.createElement('span');
+      var staffEl = signatureEl.querySelector('.fifths-staff');
+      var text = signatureEl.querySelector('span');
+      if (!staffEl) {
+        signatureEl.append(staff(index, 180, 84));
+        text = document.createElement('span');
+        signatureEl.appendChild(text);
+      } else {
+        staffEl.querySelector('.fifths-accidentals').replaceWith(accidentals(index));
+      }
       text.textContent = signature(index).map(name).join(' · ') || (es ? 'Sin alteraciones' : pt ? 'Sem alterações' : 'No accidentals');
-      signatureEl.appendChild(text);
       var chordList = document.getElementById('fifths-chords');
-      chordList.replaceChildren();
       chords.forEach(function (chord, i) {
-        var item = document.createElement('div'); item.className = 'fifths-chord';
-        var degree = document.createElement('small'); degree.textContent = degrees[i];
-        var label = document.createElement('strong'); label.textContent = name(chord.note) + chord.quality;
-        item.append(degree, label); chordList.appendChild(item);
+        var item = chordList.children[i];
+        if (!item) {
+          item = document.createElement('div'); item.className = 'fifths-chord';
+          item.append(document.createElement('small'), document.createElement('strong'));
+          chordList.appendChild(item);
+        }
+        item.children[0].textContent = degrees[i];
+        item.children[1].textContent = name(chord.note) + chord.quality;
       });
     });
   }

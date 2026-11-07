@@ -41,7 +41,7 @@ const { pagePath } = require('../scripts/lib/slugs');
       await key(es ? 'Fa♯ mayor' : 'F♯ major').hover();
       await settled();
       assert.equal(await page.locator('#fifths-key').textContent(), es ? 'La menor' : 'A minor');
-      assert.equal(await page.locator('.fifths-lifted.is-pinned').count(), 6);
+      assert.equal(await page.locator('.fifths-lift.is-pinned .fifths-lifted').count(), 6);
       await page.locator('h1').click();
       await key(es ? 'Fa♯ mayor' : 'F♯ major').focus();
       await settled();
