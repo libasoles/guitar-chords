@@ -20,7 +20,7 @@
 .fifths-chords { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .35rem; }
 .fifths-chord { padding: .65rem .15rem; background: #e3edef; border-radius: 4px; }
 .fifths-chord small, .fifths-chord strong { display: block; }
-.fifths-chord small { font: .75rem var(--sans); color: #315b62; margin-bottom: .3rem; }
+.fifths-chord small { font: 700 1rem var(--sans); color: #1f4a52; margin-bottom: .3rem; }
 .fifths-chord strong { font-size: 1.1rem; font-weight: 500; }
 @media (max-width: 520px) {
   .fifths-chord strong { font-size: .85rem; }
