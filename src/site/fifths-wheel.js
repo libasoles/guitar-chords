@@ -138,36 +138,6 @@
   var diminished = svg('text', { x: 430, y: 453, 'text-anchor': 'middle', class: 'fifths-diminished' });
   wheel.appendChild(centerName); wheel.appendChild(diminished);
   host.appendChild(wheel);
-  // A pinned region grows outward only: radii map to INNER + (r - INNER) * k, so the
-  // inner edge stays against the center circle and the arcs keep their angular width.
-  var INNER = 118;
-  var PIN_SCALE = 1.25;
-  var liftItems = [];
-  var liftScale = 1;
-  var liftFrame = 0;
-  function layoutLift(k) {
-    liftScale = k;
-    var mapRadius = function (r) { return INNER + (r - INNER) * k; };
-    liftItems.forEach(function (item) {
-      var angle = item.button.index * 30;
-      var minor = item.button.minor;
-      item.path.setAttribute('d', sector(mapRadius(minor ? 186 : 254), mapRadius(minor ? 118 : 186), angle));
-      var pos = polar(mapRadius(minor ? 152 : 220), angle);
-      item.label.setAttribute('x', pos[0]); item.label.setAttribute('y', pos[1]);
-      item.degree.setAttribute('x', pos[0]); item.degree.setAttribute('y', pos[1] + 25);
-    });
-  }
-  function setLiftScale(target, immediate) {
-    cancelAnimationFrame(liftFrame);
-    if (immediate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { layoutLift(target); return; }
-    var from = liftScale;
-    var start = performance.now();
-    (function step(now) {
-      var t = Math.min(1, (now - start) / 220);
-      layoutLift(from + (target - from) * t);
-      if (t < 1) liftFrame = requestAnimationFrame(step);
-    })(start);
-  }
   // The sidebar trails the wheel: a short debounce skips keys the pointer only crosses,
   // and the content fades out and back in rather than switching abruptly.
   var detail = document.querySelector('.fifths-detail');
@@ -206,7 +176,6 @@
     if (liftKey !== lift.getAttribute('data-key')) {
       lift.setAttribute('data-key', liftKey);
       lift.replaceChildren();
-      liftItems = [];
       buttons.filter(function (button) { return button.el.classList.contains('is-related'); })
         .sort(function (a, b) { return a.el.classList.contains('is-tonic') - b.el.classList.contains('is-tonic'); })
         .forEach(function (button) {
@@ -214,11 +183,7 @@
           ['tabindex', 'role', 'aria-label', 'aria-pressed'].forEach(function (attr) { clone.removeAttribute(attr); });
           clone.setAttribute('class', 'fifths-lifted' + (button.el.classList.contains('is-tonic') ? ' is-tonic' : ''));
           lift.appendChild(clone);
-          liftItems.push({ button: button, path: clone.querySelector('path'), label: clone.querySelector('.fifths-chord-name'), degree: clone.querySelector('.fifths-degree') });
         });
-      setLiftScale(pinned ? PIN_SCALE : 1, true);
-    } else {
-      setLiftScale(pinned ? PIN_SCALE : 1, false);
     }
     lift.classList.toggle('is-pinned', pinned);
     wheel.classList.toggle('is-pinned', pinned);
