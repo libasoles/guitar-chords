@@ -105,13 +105,9 @@ GitHub Actions CI (`.github/workflows/ci.yml`) runs tests on every push.
 
 ### Guitar Chords
 
-**Search**
+![Guitar Chords — instant chord diagrams, search and favorites, fully offline](store/chords/screenshots/promo-marquee-1400x560.png)
 
-![Search](store/chords/screenshots/01-search.png)
-
-**Pinned chords**
-
-![Pinned chords](store/chords/screenshots/02-pinned.png)
+![Guitar Chords — instant chord diagrams](store/chords/screenshots/promo-small-440x280.png)
 
 ### Guitar Tabs
 
