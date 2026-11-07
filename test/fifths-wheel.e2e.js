@@ -37,6 +37,12 @@ const { pagePath } = require('../scripts/lib/slugs');
       await page.locator('h1').hover();
       await settled();
       assert.deepEqual(await chords(), es ? ['Lam', 'Si°', 'Do', 'Rem', 'Mim', 'Fa', 'Sol'] : ['Am', 'B°', 'C', 'Dm', 'Em', 'F', 'G']);
+      // While a key is pinned, pointer and focus changes do nothing until a click releases it.
+      await key(es ? 'Fa♯ mayor' : 'F♯ major').hover();
+      await settled();
+      assert.equal(await page.locator('#fifths-key').textContent(), es ? 'La menor' : 'A minor');
+      assert.equal(await page.locator('.fifths-lifted.is-pinned').count(), 6);
+      await page.locator('h1').click();
       await key(es ? 'Fa♯ mayor' : 'F♯ major').focus();
       await settled();
       assert.deepEqual(await chords(), es ? ['Fa♯', 'Sol♯m', 'La♯m', 'Si', 'Do♯', 'Re♯m', 'Mi♯°'] : ['F♯', 'G♯m', 'A♯m', 'B', 'C♯', 'D♯m', 'E♯°']);

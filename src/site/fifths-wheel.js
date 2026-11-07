@@ -16,6 +16,7 @@
   var minorDegrees = ['i', 'ii°', 'III', 'iv', 'v', 'VI', 'VII'];
   var ns = 'http://www.w3.org/2000/svg';
   var selected = { index: 0, minor: false };
+  var pinned = false;
   var buttons = [];
   var host = document.getElementById('fifths-wheel');
   function svg(tag, attrs, content) {
@@ -64,16 +65,31 @@
     var c = polar(inner, angle + 15), d = polar(inner, angle - 15);
     return 'M' + a + ' A' + outer + ',' + outer + ' 0 0 1 ' + b + ' L' + c + ' A' + inner + ',' + inner + ' 0 0 0 ' + d + ' Z';
   }
+  // Hovering or focusing a key previews it. Clicking pins its region, and while one is pinned
+  // pointer and focus movement change nothing; only a click releases it (see click()).
   function restore() { show(selected.index, selected.minor); }
+  function preview(index, minor) { if (!pinned) show(index, minor); }
+  function click(index, minor, button) {
+    if (pinned && (!button || button.el.classList.contains('is-related'))) {
+      pinned = false;
+      selected = { index: 0, minor: false };
+      if (button && button.el.matches(':hover')) { preview(index, minor); return; }
+    } else {
+      pinned = true;
+      selected = { index: index, minor: minor };
+    }
+    restore();
+  }
   function interact(el, index, minor) {
-    el.addEventListener('mouseenter', function () { show(index, minor); });
-    el.addEventListener('mouseleave', restore);
-    el.addEventListener('focus', function () { show(index, minor); });
-    el.addEventListener('blur', restore);
-    el.addEventListener('click', function () { selected = { index: index, minor: minor }; restore(); });
+    var button = function () { return buttons.find(function (b) { return b.el === el; }); };
+    el.addEventListener('mouseenter', function () { preview(index, minor); });
+    el.addEventListener('mouseleave', function () { if (!pinned) restore(); });
+    el.addEventListener('focus', function () { preview(index, minor); });
+    el.addEventListener('blur', function () { if (!pinned) restore(); });
+    el.addEventListener('click', function () { click(index, minor, button()); });
     el.addEventListener('keydown', function (event) {
-      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selected = { index: index, minor: minor }; restore(); }
-      if (event.key === 'Escape') { el.blur(); restore(); }
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); click(index, minor, button()); }
+      if (event.key === 'Escape') { el.blur(); if (pinned) click(index, minor, null); }
       if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
         event.preventDefault();
         var next = (index + (event.key === 'ArrowRight' ? 1 : 11)) % 12;
@@ -145,11 +161,10 @@
       var tonic = button.index === index && button.minor === minor;
       button.el.classList.toggle('is-related', match !== -1);
       button.el.classList.toggle('is-tonic', tonic);
-      button.el.setAttribute('aria-pressed', String(button.index === selected.index && button.minor === selected.minor));
+      button.el.setAttribute('aria-pressed', String(pinned && button.index === selected.index && button.minor === selected.minor));
       button.degree.textContent = match < 0 ? '' : degrees[match];
       button.label.textContent = match < 0 ? name(scale(button.index)[button.minor ? 5 : 0]) + button.quality : name(chords[match].note) + button.quality;
     });
-    var pinned = index === selected.index && minor === selected.minor;
     lift.replaceChildren();
     buttons.filter(function (button) { return button.el.classList.contains('is-related'); })
       .sort(function (a, b) { return a.el.classList.contains('is-tonic') - b.el.classList.contains('is-tonic'); })
@@ -180,5 +195,8 @@
       });
     });
   }
+  document.addEventListener('click', function (event) {
+    if (pinned && !event.target.closest('.fifths-key, .fifths-detail')) click(0, false, null);
+  });
   restore();
 })();
