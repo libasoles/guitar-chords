@@ -44,4 +44,15 @@ module.exports = {
       }
     },
   },
+  fifths: {
+    source: 'src/extensions/fifths',
+    files: ['manifest.json', 'popup.html', 'popup.js', 'popup.css', '_locales'],
+    resources: [
+      { from: 'src/site/fifths-wheel.js', to: 'fifths-wheel.js' },
+      { from: 'src/shared/fifths-wheel.css', to: 'fifths-wheel.css' },
+      { from: 'src/site/css/01-base.css', to: 'base.css' },
+      { from: 'src/extensions/fifths/icon.svg', to: 'icon.svg' },
+    ],
+    icons: { source: 'src/extensions/fifths/icon.svg', fallback: require('./fifths-icon').drawFifthsIcon },
+  },
 };

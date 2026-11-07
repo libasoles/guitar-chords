@@ -1,0 +1,18 @@
+{
+  "appName": {
+    "message": "Círculo de quintas",
+    "description": "Nombre de la extensión en el toolbar y el Web Store"
+  },
+  "appDescription": {
+    "message": "Círculo de quintas interactivo: tonalidades mayores y menores, armaduras y acordes diatónicos a un clic.",
+    "description": "Descripción de la extensión en el Web Store"
+  },
+  "siteLabel": {
+    "message": "Abrir en el sitio",
+    "description": "Enlace del pie a la página completa del sitio"
+  },
+  "siteUrl": {
+    "message": "https://acordesdeguitarra.com.ar/recursos/circulo-de-quintas",
+    "description": "URL de la página del círculo de quintas en español"
+  }
+}

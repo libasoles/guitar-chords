@@ -1,0 +1,18 @@
+{
+  "appName": {
+    "message": "Circle of Fifths",
+    "description": "Extension name shown in the Chrome toolbar and Web Store"
+  },
+  "appDescription": {
+    "message": "Interactive circle of fifths: major and minor keys, key signatures and diatonic chords, one click away.",
+    "description": "Extension description in the Web Store"
+  },
+  "siteLabel": {
+    "message": "Open on the website",
+    "description": "Footer link to the full page on the website"
+  },
+  "siteUrl": {
+    "message": "https://acordesdeguitarra.com.ar/resources/circle-of-fifths",
+    "description": "URL of the circle of fifths page in English"
+  }
+}

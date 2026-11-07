@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Circle of Fifths</title>
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="fifths-wheel.css">
+  <link rel="stylesheet" href="popup.css">
+  <script src="popup.js"></script>
+</head>
+<body>
+  <main id="fifths-tool" class="fifths-tool">
+    <div id="fifths-wheel"></div>
+    <section class="fifths-detail" aria-labelledby="fifths-key">
+      <header class="popup-header">
+        <span class="logo" aria-hidden="true"></span>
+        <span class="wordmark" id="wordmark">Circle of Fifths</span>
+      </header>
+      <h2 id="fifths-key"></h2>
+      <div class="fifths-signature" id="fifths-signature"></div>
+      <div id="fifths-chords" class="fifths-chords"></div>
+      <a class="site-link" id="site-link" target="_blank" rel="noopener"></a>
+    </section>
+  </main>
+  <script src="fifths-wheel.js"></script>
+</body>
+</html>

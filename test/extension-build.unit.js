@@ -72,3 +72,20 @@ test('both products build independently and Tabs packages its local editor resou
   assert.deepEqual(packaged, files);
   for (const file of files) assert.deepEqual(execFileSync('unzip', ['-p', path.join(output, 'tabs.zip'), file]), fs.readFileSync(path.join(extension, file)), file);
 });
+
+test('Circle of Fifths builds independently and packages the shared wheel locally', t => {
+  const output = fs.mkdtempSync(path.join(os.tmpdir(), 'extension-fifths-'));
+  t.after(() => fs.rmSync(output, { recursive: true, force: true }));
+  execFileSync(process.execPath, ['scripts/build-ext.js', 'fifths', '--out-dir', output], { cwd: ROOT, stdio: 'pipe' });
+  const extension = path.join(output, 'fifths');
+  const manifest = JSON.parse(fs.readFileSync(path.join(extension, 'manifest.json')));
+  assert.equal(manifest.manifest_version, 3);
+  assert.deepEqual(manifest.permissions, []);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(extension, '_locales/en/messages.json'))).appName.message, 'Circle of Fifths');
+  assert.equal(JSON.parse(fs.readFileSync(path.join(extension, '_locales/es/messages.json'))).appName.message, 'Círculo de quintas');
+  for (const file of ['popup.html', 'popup.js', 'popup.css', 'fifths-wheel.js', 'fifths-wheel.css', 'base.css', 'icon.svg', ...Object.values(manifest.icons)]) {
+    assert.ok(fs.statSync(path.join(extension, file)).size > 0, file);
+  }
+  assert.ok(fs.statSync(path.join(output, 'fifths.zip')).size > 0);
+  assert.doesNotMatch(fs.readFileSync(path.join(extension, 'popup.html'), 'utf8'), /https?:/);
+});

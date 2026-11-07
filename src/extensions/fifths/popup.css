@@ -1,0 +1,104 @@
+html {
+  width: 780px;
+  height: 580px;
+  overflow: hidden;
+  background: #fdfaf5;
+}
+
+body {
+  box-sizing: border-box;
+  width: 780px;
+  height: 580px;
+  max-width: none;
+  margin: 0;
+  padding: 14px 18px;
+  overflow: hidden;
+  font-size: 16px;
+}
+
+.fifths-tool {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 100%;
+  margin: 0;
+}
+
+#fifths-wheel {
+  flex: none;
+  width: 540px;
+}
+
+/* The wheel is scaled down from its 860-unit canvas; enlarge the smallest text. */
+.fifths-accidental-names { font-size: 17px; }
+.fifths-degree { font-size: 15px; }
+
+.fifths-detail {
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  border-top: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-family: var(--sans);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.popup-header .logo {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  background: url("icon.svg") center / contain no-repeat;
+}
+
+.fifths-detail h2 {
+  font-size: 1.5rem;
+}
+
+.fifths-signature {
+  justify-content: flex-start;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.fifths-chords {
+  grid-template-columns: 1fr;
+  gap: 0.25rem;
+}
+
+.fifths-chord {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.35rem 0.7rem;
+}
+
+.fifths-chord small {
+  width: 2.8rem;
+  margin: 0;
+}
+
+.site-link {
+  margin-top: auto;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  color: #888;
+  border-bottom: none;
+  text-decoration: none;
+}
+
+.site-link:focus-visible {
+  outline: 2px solid var(--ink-soft);
+  outline-offset: 3px;
+}

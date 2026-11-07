@@ -180,8 +180,9 @@ const SUITES = {
     paths: [
       /^src\/extensions\//,
       /^src\/shared\//,
+      /^src\/site\/fifths-wheel\.js$/,
       /^scripts\/build-ext\.js$/,
-      /^scripts\/lib\/(extension-products|icon-png)\.js$/,
+      /^scripts\/lib\/(extension-products|icon-png|fifths-icon|tab-icon)\.js$/,
       /^test\/extensions\./,
     ],
   },

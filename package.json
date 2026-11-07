@@ -26,7 +26,8 @@
     "test": "npm run test:unit && npm run test:e2e",
     "lighthouse": "node scripts/lighthouse.js",
     "build:ext:chords": "node scripts/build-ext.js chords",
-    "build:ext:tabs": "node scripts/build-ext.js tabs"
+    "build:ext:tabs": "node scripts/build-ext.js tabs",
+    "build:ext:fifths": "node scripts/build-ext.js fifths"
   },
   "devDependencies": {
     "@radix-ui/react-alert-dialog": "^1.2.1",

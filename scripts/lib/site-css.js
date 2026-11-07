@@ -22,8 +22,9 @@ function readParts(names) {
   return names.map((name) => {
     if (name === '07b-tab-demo') return fs.readFileSync(path.join(shared, 'tab-demo.css'), 'utf8');
     const css = fs.readFileSync(path.join(CSS_DIR, name + '.css'), 'utf8');
+    // The fifths wheel styles are shared with the Circle of Fifths extension.
     return name === '07-tab-editor'
-      ? fs.readFileSync(path.join(shared, 'tab-editor.css'), 'utf8') + css
+      ? fs.readFileSync(path.join(shared, 'tab-editor.css'), 'utf8') + css + fs.readFileSync(path.join(shared, 'fifths-wheel.css'), 'utf8')
       : css;
   }).join('');
 }

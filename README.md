@@ -17,7 +17,7 @@ Built with vanilla JS, no framework, no build step beyond a Node.js assembly scr
 src/
   shared/          # Chord DB, diagram renderer, search — used by both site and extension
   site/            # Web app: template.html, chord-finder component, css/ (site.css parts)
-  extensions/      # Independent Chrome extensions: chords/ and tabs/
+  extensions/      # Independent Chrome extensions: chords/, tabs/ and fifths/
   i18n/            # Strings for the site (strings.es.json, strings.en.json)
 vendor/            # Bundled third-party libs (svguitar, fuzzysort, jsPDF, ascii-tabs)
 scripts/
@@ -67,6 +67,7 @@ npm run build:site  # → dist/site/
 npm run build:ext   # → all products under dist/extensions/
 npm run build:ext:chords # → dist/extensions/chords/ + dist/extensions/chords.zip
 npm run build:ext:tabs   # → dist/extensions/tabs/ + dist/extensions/tabs.zip
+npm run build:ext:fifths # → dist/extensions/fifths/ + dist/extensions/fifths.zip
 ```
 
 ### Environment variables
@@ -123,11 +124,15 @@ GitHub Actions CI (`.github/workflows/ci.yml`) runs tests on every push.
 
 ![Guitar Tabs tutorial with gestures and keyboard shortcuts](store/tabs/screenshots/03-tutorial.png)
 
+### Circle of Fifths
+
+The interactive circle of fifths from [`/circulo-de-quintas`](https://acordesdeguitarra.com.ar/recursos/circulo-de-quintas) in a 780 × 580 popup: major and minor keys, key signatures and diatonic chords. It reuses the website's wheel (`src/site/fifths-wheel.js`, `src/shared/fifths-wheel.css`), works offline and follows the browser language.
+
 ### Load unpacked (development)
 
-1. `npm run build:ext` builds Guitar Chords and Guitar Tabs.
+1. `npm run build:ext` builds Guitar Chords, Guitar Tabs and Circle of Fifths.
 2. Open `chrome://extensions` → enable **Developer mode** → **Load unpacked**.
-3. Select `dist/extensions/chords/` for Guitar Chords or `dist/extensions/tabs/` for Guitar Tabs; load each directory to use both.
+3. Select `dist/extensions/chords/` for Guitar Chords, `dist/extensions/tabs/` for Guitar Tabs or `dist/extensions/fifths/` for Circle of Fifths; load each directory to use both.
 
 Guitar Tabs opens the shared tablature editor in a 780 × 580 popup. It works offline, saves edits locally between openings, and uses Spanish or English according to the browser language. Its data is separate from the website and Guitar Chords.
 
