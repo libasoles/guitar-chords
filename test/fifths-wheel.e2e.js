@@ -55,6 +55,14 @@ const { pagePath } = require('../scripts/lib/slugs');
       await settled();
       assert.equal(await page.locator('#fifths-key').textContent(), es ? 'Re♭ mayor' : 'D♭ major');
       assert.deepEqual(await chords(), es ? ['Re♭', 'Mi♭m', 'Fam', 'Sol♭', 'La♭', 'Si♭m', 'Do°'] : ['D♭', 'E♭m', 'Fm', 'G♭', 'A♭', 'B♭m', 'C°']);
+      // Arrows work with nothing focused, and up or down swap a major key for its relative minor.
+      await page.evaluate(() => document.activeElement.blur());
+      await page.keyboard.press('ArrowDown');
+      await settled();
+      assert.equal(await page.locator('#fifths-key').textContent(), es ? 'Si♭ menor' : 'B♭ minor');
+      await page.keyboard.press('ArrowUp');
+      await settled();
+      assert.equal(await page.locator('#fifths-key').textContent(), es ? 'Re♭ mayor' : 'D♭ major');
       await page.keyboard.press('Enter');
       await page.keyboard.press('Tab');
       await page.locator('h1').hover();

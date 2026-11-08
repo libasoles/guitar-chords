@@ -100,11 +100,6 @@
     el.addEventListener('keydown', function (event) {
       if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); click(index, minor, button()); }
       if (event.key === 'Escape') { el.blur(); if (pinned) click(index, minor, null); }
-      if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
-        event.preventDefault();
-        var next = (index + (event.key === 'ArrowRight' ? 1 : 11)) % 12;
-        buttons.find(function (b) { return b.index === next && b.minor === minor; }).el.focus();
-      }
     });
   }
   var wheel = svg('svg', { viewBox: '0 0 860 860', class: 'fifths-svg', role: 'group', 'aria-label': es ? 'Tonalidades y armaduras' : pt ? 'Tonalidades e armaduras de clave' : 'Keys and key signatures' });
@@ -259,6 +254,16 @@
       });
     });
   }
+  // Arrows work wherever the focus is, so the page never needs a pinned key first: left and right
+  // walk the circle, up and down swap between a major key and its relative minor.
+  document.addEventListener('keydown', function (event) {
+    var steps = { ArrowRight: [1, 0], ArrowLeft: [11, 0], ArrowUp: [0, 1], ArrowDown: [0, 1] }[event.key];
+    if (!steps || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    var current = buttons.find(function (b) { return b.el === document.activeElement; }) || selected;
+    event.preventDefault();
+    var index = (current.index + steps[0]) % 12, minor = steps[1] ? !current.minor : current.minor;
+    buttons.find(function (b) { return b.index === index && b.minor === minor; }).el.focus();
+  });
   document.addEventListener('click', function (event) {
     if (pinned && !event.target.closest('.fifths-key, .fifths-detail')) click(0, false, null);
   });
