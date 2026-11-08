@@ -203,8 +203,8 @@
           // When the tonic is a minor arc, the minor arcs beside it move their text away from it,
           // out of the tonic's shadow: along the ring's tangent, away from the tonic.
           var side = minor && button.minor && button.el.classList.contains('is-related') ? ((button.index - index + 12) % 12 === 1 ? 1 : (index - button.index + 12) % 12 === 1 ? -1 : 0) : 0;
-          clone.style.setProperty('--tx', (side * Math.cos(radians) * 9).toFixed(1) + 'px');
-          clone.style.setProperty('--ty', (side * Math.sin(radians) * 9).toFixed(1) + 'px');
+          clone.style.setProperty('--tx', (side * Math.cos(radians) * 6).toFixed(1) + 'px');
+          clone.style.setProperty('--ty', (side * Math.sin(radians) * 6).toFixed(1) + 'px');
           clone.setAttribute('class', 'fifths-lifted' + (button.el.classList.contains('is-tonic') ? ' is-tonic' : '') + (button.el.classList.contains('is-diminished') ? ' is-diminished' : '') + (side ? ' is-flank' : ''));
           lift.appendChild(clone);
         });
