@@ -134,9 +134,8 @@
   var lift = svg('g', { class: 'fifths-lift', 'aria-hidden': 'true' });
   wheel.appendChild(lift);
   wheel.appendChild(svg('circle', { cx: 430, cy: 430, r: 117, class: 'fifths-center' }));
-  var centerName = svg('text', { x: 430, y: 414, 'text-anchor': 'middle', class: 'fifths-center-name' });
-  var diminished = svg('text', { x: 430, y: 453, 'text-anchor': 'middle', class: 'fifths-diminished' });
-  wheel.appendChild(centerName); wheel.appendChild(diminished);
+  var centerName = svg('text', { x: 430, y: 430, 'text-anchor': 'middle', 'dominant-baseline': 'central', class: 'fifths-center-name' });
+  wheel.appendChild(centerName);
   host.appendChild(wheel);
   // The sidebar trails the wheel: a short debounce skips keys the pointer only crosses, and each
   // piece of text crossfades with its replacement, so there is never a moment without text.
@@ -167,14 +166,20 @@
     var chords = notes.map(function (n, i) { return { note: n, quality: qualities[i] }; });
     if (minor) chords = chords.slice(5).concat(chords.slice(0, 5));
     var degrees = minor ? minorDegrees : majorDegrees;
+    var dimIndex = minor ? 1 : 6;
+    var dimNote = chords[dimIndex].note;
     buttons.forEach(function (button) {
       var match = chords.findIndex(function (c) { return pc(c.note) === button.pc && c.quality === button.quality; });
       var tonic = button.index === index && button.minor === minor;
       button.el.classList.toggle('is-related', match !== -1);
       button.el.classList.toggle('is-tonic', tonic);
       button.el.setAttribute('aria-pressed', String(pinned && button.index === selected.index && button.minor === selected.minor));
-      button.degree.textContent = match < 0 ? '' : degrees[match];
-      button.label.textContent = match < 0 ? name(scale(button.index)[button.minor ? 5 : 0]) + button.quality : name(chords[match].note) + button.quality;
+      // The key's diminished chord has no region of its own, so it takes over the minor
+      // region with the same root, which is shown as diminished while this key is selected.
+      var diminished = match < 0 && button.minor && button.pc === pc(dimNote);
+      button.el.classList.toggle('is-diminished', diminished);
+      button.degree.textContent = match >= 0 ? degrees[match] : diminished ? degrees[dimIndex] : '';
+      button.label.textContent = diminished ? name(dimNote) + '°' : match < 0 ? name(scale(button.index)[button.minor ? 5 : 0]) + button.quality : name(chords[match].note) + button.quality;
     });
     // Rebuilding the clones would restart their animation, so a pin on the key already
     // shown only changes the layer's state.
@@ -198,9 +203,12 @@
     lift.classList.toggle('is-pinned', pinned);
     wheel.classList.toggle('is-pinned', pinned);
     var title = name(chords[0].note) + (minor ? (es ? ' menor' : pt ? ' menor' : ' minor') : (es ? ' mayor' : pt ? ' maior' : ' major'));
-    centerName.textContent = title;
-    var dimIndex = minor ? 1 : 6;
-    diminished.textContent = degrees[dimIndex] + ' · ' + name(chords[dimIndex].note) + '°';
+    // The accidental sits close to its note: the glyph's own advance leaves a visible gap.
+    var root = name(chords[0].note);
+    var accidental = /[♭♯]$/.test(root) ? root.slice(-1) : '';
+    centerName.replaceChildren(document.createTextNode(root.slice(0, root.length - accidental.length)));
+    if (accidental) centerName.appendChild(svg('tspan', { dx: -3 }, accidental));
+    centerName.appendChild(document.createTextNode(title.slice(root.length)));
     queueDetail(index + (minor ? 'm' : 'M'), function () {
       crossfade(document.getElementById('fifths-key'), title);
       // Only the text and the accidentals change; the staff, clef and chord tiles stay put.
