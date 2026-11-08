@@ -65,7 +65,7 @@
   function staff(index, width, labelSize) {
     var staffSvg = svg('svg', { viewBox: '0 0 150 104', width: width, height: width * 104 / 150, 'aria-hidden': 'true', class: 'fifths-staff' });
     for (var y = 19; y <= 51; y += 8) staffSvg.appendChild(svg('line', { x1: 4, x2: 146, y1: y, y2: y, stroke: 'currentColor', 'stroke-width': 0.8 }));
-    staffSvg.appendChild(svg('text', { x: 5, y: 52, 'font-size': 52, 'font-family': 'serif' }, '𝄞'));
+    staffSvg.appendChild(svg('text', { x: 3, y: 56, 'font-size': 80, 'font-family': 'serif' }, '𝄞'));
     staffSvg.appendChild(accidentals(index, labelSize));
     return staffSvg;
   }
