@@ -187,7 +187,7 @@
     if (liftKey !== lift.getAttribute('data-key')) {
       lift.setAttribute('data-key', liftKey);
       lift.replaceChildren();
-      buttons.filter(function (button) { return button.el.classList.contains('is-related'); })
+      buttons.filter(function (button) { return button.el.classList.contains('is-related') || button.el.classList.contains('is-diminished'); })
         .sort(function (a, b) { return a.el.classList.contains('is-tonic') - b.el.classList.contains('is-tonic'); })
         .forEach(function (button) {
           var clone = button.el.cloneNode(true);
@@ -196,7 +196,7 @@
           var radians = button.index * 30 * Math.PI / 180;
           clone.style.setProperty('--dx', button.minor ? 0 : Math.sin(radians).toFixed(3));
           clone.style.setProperty('--dy', button.minor ? 0 : (-Math.cos(radians)).toFixed(3));
-          clone.setAttribute('class', 'fifths-lifted' + (button.el.classList.contains('is-tonic') ? ' is-tonic' : ''));
+          clone.setAttribute('class', 'fifths-lifted' + (button.el.classList.contains('is-tonic') ? ' is-tonic' : '') + (button.el.classList.contains('is-diminished') ? ' is-diminished' : ''));
           lift.appendChild(clone);
         });
     }
