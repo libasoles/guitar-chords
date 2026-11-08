@@ -29,9 +29,9 @@
    the inner arcs (three minors and the diminished) of a pinned major key. */
 .fifths-lifted.is-flank .fifths-chord-name { font-size: 23px; }
 .fifths-lift.is-pinned.is-major-key .fifths-lifted.is-inner .fifths-chord-name { font-size: 22px; }
-.fifths-lifted { transform-box: view-box; transform-origin: var(--ox) var(--oy); transform: translate(0, 0) scale(1.07); animation: fifths-lift 160ms ease-out; transition: transform 220ms linear, filter 220ms ease-out; }
+.fifths-lifted { transform-box: view-box; transform-origin: var(--ox) var(--oy); transform: translate(calc(var(--lx) * 3px), calc(var(--ly) * 3px)) scale(1.07); animation: fifths-lift 160ms ease-out; transition: transform 220ms linear, filter 220ms ease-out; }
 .fifths-lifted.is-tonic { transform: translate(0, 0) scale(1.12); filter: drop-shadow(0 10px 8px rgba(0, 0, 0, .4)); }
-.fifths-lift.is-pinned .fifths-lifted { transform: translate(calc(var(--dx) * 10px), calc(var(--dy) * 10px)) scale(1.2); }
+.fifths-lift.is-pinned .fifths-lifted { transform: translate(calc((var(--dx) * 10 + var(--lx) * 9) * 1px), calc((var(--dy) * 10 + var(--ly) * 9) * 1px)) scale(1.2); }
 .fifths-lift.is-pinned .fifths-lifted.is-tonic { transform: translate(calc(var(--dx) * 10px), calc(var(--dy) * 10px)) scale(1.27); filter: drop-shadow(0 20px 14px rgba(0, 0, 0, .45)); }
 /* Where the pinned region was lifted out, the wheel shows an empty recess. */
 .fifths-svg.is-pinned .fifths-key.is-related path, .fifths-svg.is-pinned .fifths-key.is-diminished path { fill: #e1dbcd; }

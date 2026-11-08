@@ -188,6 +188,11 @@
       lift.setAttribute('data-key', liftKey);
       lift.replaceChildren();
       var base = svg('g', { class: 'fifths-lift-base' });
+      // The inner arcs form one run around the ring. Its two ends slide sideways, away from the
+      // run, so that, scaled up, they do not cover the unselected arcs beside them.
+      var innerIndexes = buttons.filter(function (b) { return b.minor && (b.el.classList.contains('is-related') || b.el.classList.contains('is-diminished')); })
+        .map(function (b) { return b.index; });
+      var has = function (i) { return innerIndexes.indexOf((i + 12) % 12) !== -1; };
       lift.appendChild(base);
       buttons.filter(function (button) { return button.el.classList.contains('is-related') || button.el.classList.contains('is-diminished'); })
         .sort(function (a, b) { return a.el.classList.contains('is-tonic') - b.el.classList.contains('is-tonic'); })
@@ -200,6 +205,9 @@
           var anchor = polar(button.minor ? 152 : 220, button.index * 30);
           clone.style.setProperty('--ox', anchor[0].toFixed(1) + 'px');
           clone.style.setProperty('--oy', anchor[1].toFixed(1) + 'px');
+          var end = button.minor ? (has(button.index + 1) ? 0 : 1) - (has(button.index - 1) ? 0 : 1) : 0;
+          clone.style.setProperty('--lx', (end * Math.cos(radians)).toFixed(3));
+          clone.style.setProperty('--ly', (end * Math.sin(radians)).toFixed(3));
           clone.style.setProperty('--dx', button.minor ? 0 : Math.sin(radians).toFixed(3));
           clone.style.setProperty('--dy', button.minor ? 0 : (-Math.cos(radians)).toFixed(3));
           // When the tonic is a minor arc, the minor arcs beside it move their text away from it,
