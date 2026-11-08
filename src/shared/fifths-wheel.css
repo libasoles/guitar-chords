@@ -27,7 +27,7 @@
 .fifths-center { fill: var(--paper); }
 .fifths-center-name { font-size: 24px; font-family: var(--serif); font-weight: 600; }
 .fifths-diminished { font-size: 20px; fill: var(--note-selected); }
-.fifths-accidental-names { font-size: 14px; fill: var(--ink-soft); }
+.fifths-accidental-names { font-size: 16px; fill: var(--ink-soft); }
 .fifths-detail { border-top: 1px solid var(--rule); padding-top: 1.2rem; text-align: center; }
 .fifths-detail h2 { margin: 0; }
 /* Text changes crossfade: the new layer is stacked over the old one, so neither leaves a gap. */

@@ -117,12 +117,12 @@
       wheel.appendChild(g);
     });
     var p = polar(340, index * 30);
-    var group = svg('g', { transform: 'translate(' + (p[0] - 66) + ' ' + (p[1] - 43) + ')', class: 'fifths-outer-signature' });
-    group.appendChild(staff(index, 132, 62));
+    var group = svg('g', { transform: 'translate(' + (p[0] - 82) + ' ' + (p[1] - 54) + ')', class: 'fifths-outer-signature' });
+    group.appendChild(staff(index, 165, 77));
     var accidentals = signature(index).map(name);
     var chunks = accidentals.length ? [accidentals.slice(0, 3).join(' · '), accidentals.slice(3).join(' · ')] : [es ? 'Sin alteraciones' : pt ? 'Sem alterações' : 'No accidentals'];
     chunks.forEach(function (text, i) {
-      group.appendChild(svg('text', { x: 66, y: 72 + i * 17, 'text-anchor': 'middle', class: 'fifths-accidental-names' }, text));
+      group.appendChild(svg('text', { x: 82, y: 90 + i * 19, 'text-anchor': 'middle', class: 'fifths-accidental-names' }, text));
     });
     wheel.appendChild(group);
   });
