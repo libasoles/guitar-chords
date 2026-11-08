@@ -30,14 +30,15 @@
 .fifths-accidental-names { font-size: 16px; fill: var(--ink-soft); }
 .fifths-detail { border-top: 1px solid var(--rule); padding-top: 1.2rem; text-align: center; }
 .fifths-detail h2 { margin: 0; }
-/* Text changes crossfade: the new layer is stacked over the old one, so neither leaves a gap. */
+/* Text changes crossfade: the new layer is stacked over the old one, which stays fully opaque
+   until the new one has finished fading in, so the text never dims or disappears midway. */
 .fifths-detail h2, .fifths-signature span, .fifths-chord small, .fifths-chord strong { display: grid; }
 .fifths-detail h2 { justify-items: center; }
 .fifths-layer { grid-area: 1 / 1; font-style: normal; }
-.fifths-layer.is-entering, .fifths-accidentals.is-entering { animation: fifths-fade-in 200ms ease both; }
-.fifths-layer.is-leaving, .fifths-accidentals.is-leaving { animation: fifths-fade-out 200ms ease both; pointer-events: none; }
+.fifths-layer.is-entering, .fifths-accidentals.is-entering { animation: fifths-fade-in 360ms ease-in-out both; }
+.fifths-layer.is-leaving, .fifths-accidentals.is-leaving { animation: fifths-hold 360ms linear both; pointer-events: none; }
 @keyframes fifths-fade-in { from { opacity: 0; } }
-@keyframes fifths-fade-out { to { opacity: 0; } }
+@keyframes fifths-hold { 99% { opacity: 1; } 100% { opacity: 0; } }
 .fifths-signature { display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap; margin: .4rem 0 1rem; font-family: var(--sans); font-size: 1rem; }
 .fifths-staff { flex: none; }
 .fifths-chords { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .35rem; }

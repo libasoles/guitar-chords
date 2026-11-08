@@ -19,8 +19,8 @@ const { pagePath } = require('../scripts/lib/slugs');
       await page.goto(base + pagePath('circulo-de-quintas', locale ? 'en' : 'es'));
       const key = label => page.getByRole('button', { name: label, exact: true });
       const es = !locale;
-      // The sidebar updates after a short debounce and fade.
-      const settled = () => page.waitForTimeout(400);
+      // The sidebar updates after a short debounce and crossfade.
+      const settled = () => page.waitForTimeout(600);
       const chords = () => page.locator('.fifths-chord strong').allTextContents();
       assert.equal(await page.locator('.fifths-key').count(), 24);
       assert.equal(await page.locator('.fifths-outer-signature svg').count(), 12);

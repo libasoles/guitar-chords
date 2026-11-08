@@ -148,7 +148,7 @@
   // Stacks the new content over the old in the same cell; the old layer fades out and is removed.
   function retire(layer) {
     layer.classList.add('is-leaving');
-    setTimeout(function () { layer.remove(); }, 260);
+    setTimeout(function () { layer.remove(); }, 380);
   }
   function crossfade(el, text) {
     var current = el.querySelector('.fifths-layer:not(.is-leaving)');
