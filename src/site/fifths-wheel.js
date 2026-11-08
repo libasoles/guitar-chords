@@ -194,6 +194,10 @@
           ['tabindex', 'role', 'aria-label', 'aria-pressed'].forEach(function (attr) { clone.removeAttribute(attr); });
           // Major arcs (outer ring) also slide outward along their radius when pinned.
           var radians = button.index * 30 * Math.PI / 180;
+          // Scaling about the label (not the arc's bounding box) lifts every arc the same way wherever it sits.
+          var anchor = polar(button.minor ? 152 : 220, button.index * 30);
+          clone.style.setProperty('--ox', anchor[0].toFixed(1) + 'px');
+          clone.style.setProperty('--oy', anchor[1].toFixed(1) + 'px');
           clone.style.setProperty('--dx', button.minor ? 0 : Math.sin(radians).toFixed(3));
           clone.style.setProperty('--dy', button.minor ? 0 : (-Math.cos(radians)).toFixed(3));
           clone.setAttribute('class', 'fifths-lifted' + (button.el.classList.contains('is-tonic') ? ' is-tonic' : '') + (button.el.classList.contains('is-diminished') ? ' is-diminished' : ''));
