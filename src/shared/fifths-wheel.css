@@ -27,18 +27,20 @@
 .fifths-center { fill: var(--paper); }
 .fifths-center-name { font-size: 24px; font-family: var(--serif); font-weight: 600; }
 .fifths-diminished { font-size: 20px; fill: var(--note-selected); }
-.fifths-accidental-names { font-size: 16px; fill: var(--ink-soft); }
+.fifths-accidental-names { fill: var(--ink-soft); font-family: var(--sans); }
 .fifths-detail { border-top: 1px solid var(--rule); padding-top: 1.2rem; text-align: center; }
 .fifths-detail h2 { margin: 0; }
-/* Text changes crossfade: the new layer is stacked over the old one, which stays fully opaque
-   until the new one has finished fading in, so the text never dims or disappears midway. */
-.fifths-detail h2, .fifths-signature span, .fifths-chord small, .fifths-chord strong { display: grid; }
+/* Text changes crossfade: the old layer fades out while the new one, stacked over it, starts to
+   fade in a little later, so the two overlap only briefly and the text never goes missing. */
+.fifths-detail h2, .fifths-chord small, .fifths-chord strong { display: grid; }
 .fifths-detail h2 { justify-items: center; }
 .fifths-layer { grid-area: 1 / 1; font-style: normal; }
-.fifths-layer.is-entering, .fifths-accidentals.is-entering { animation: fifths-fade-in 360ms ease-in-out both; }
-.fifths-layer.is-leaving, .fifths-accidentals.is-leaving { animation: fifths-hold 360ms linear both; pointer-events: none; }
+.fifths-layer.is-entering, .fifths-accidentals.is-entering { animation: fifths-fade-in 240ms ease-out 120ms both; }
+.fifths-layer.is-leaving, .fifths-accidentals.is-leaving { animation: fifths-fade-out 200ms ease-in both; pointer-events: none; }
 @keyframes fifths-fade-in { from { opacity: 0; } }
-@keyframes fifths-hold { 99% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes fifths-fade-out { to { opacity: 0; } }
+/* The names of the accidentals are drawn on the staff; this text stays for assistive technology. */
+.fifths-signature span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .fifths-signature { display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap; margin: .4rem 0 1rem; font-family: var(--sans); font-size: 1rem; }
 .fifths-staff { flex: none; }
 .fifths-chords { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .35rem; }
@@ -49,7 +51,7 @@
   .fifths-chord strong { font-size: .85rem; }
   .fifths-chords { gap: .2rem; }
   .fifths-signature { gap: .25rem; }
-  .fifths-signature .fifths-staff { width: 150px; height: 70px; overflow: visible; }
+  .fifths-signature .fifths-staff { width: 150px; height: 104px; overflow: visible; }
   .fifths-svg { width: calc(100% + 2rem); max-width: none; margin-left: -1rem; }
 }
 @media (prefers-reduced-motion: reduce) { .fifths-key path, .fifths-lifted { transition: none; } .fifths-lifted, .fifths-layer, .fifths-accidentals { animation: none; } }

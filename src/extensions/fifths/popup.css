@@ -30,7 +30,6 @@ body {
 }
 
 /* The wheel is scaled down from its 860-unit canvas; enlarge the smallest text. */
-.fifths-accidental-names { font-size: 17px; }
 .fifths-degree { font-size: 15px; }
 
 .fifths-detail {

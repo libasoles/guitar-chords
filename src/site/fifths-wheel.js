@@ -45,20 +45,28 @@
   function pc(note) {
     return (natural[letters.indexOf(note[0])] + (note.includes('♯') ? 1 : note.includes('♭') ? -1 : 0) + 12) % 12;
   }
-  function accidentals(index) {
+  // The accidentals and their names share a group so they crossfade together. Each name sits under
+  // its accidental, dropped by the same zigzag offset the accidentals follow on the staff.
+  function accidentals(index, labelSize) {
     var group = svg('g', { class: 'fifths-accidentals' });
     // Treble-clef positions: F5 C5 G5 D5 A4 E5 B4; flats: B4 E5 A4 D5 G4 C5 F4.
     var positions = counts[index] < 0 ? [35, 23, 39, 27, 43, 31, 47] : [19, 31, 15, 27, 39, 23, 35];
+    var top = counts[index] < 0 ? 23 : 15;
     signature(index).forEach(function (note, i) {
-      group.appendChild(svg('text', { x: 39 + i * 14, y: positions[i], 'font-size': 23, 'dominant-baseline': 'central', 'font-family': 'serif' }, note[1]));
+      var x = 44 + i * 14;
+      group.appendChild(svg('text', { x: x, y: positions[i], 'font-size': 21, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-family': 'serif' }, note[1]));
+      group.appendChild(svg('text', { x: x, y: 66 + (positions[i] - top) * 1.2, 'font-size': labelSize, 'text-anchor': 'middle', class: 'fifths-accidental-names' }, name(note)));
     });
+    if (!counts[index]) {
+      group.appendChild(svg('text', { x: 75, y: 78, 'font-size': labelSize, 'text-anchor': 'middle', class: 'fifths-accidental-names' }, es ? 'Sin alteraciones' : pt ? 'Sem alterações' : 'No accidentals'));
+    }
     return group;
   }
-  function staff(index, width, height) {
-    var staffSvg = svg('svg', { viewBox: '0 0 150 70', width: width, height: height, 'aria-hidden': 'true', class: 'fifths-staff' });
+  function staff(index, width, labelSize) {
+    var staffSvg = svg('svg', { viewBox: '0 0 150 104', width: width, height: width * 104 / 150, 'aria-hidden': 'true', class: 'fifths-staff' });
     for (var y = 19; y <= 51; y += 8) staffSvg.appendChild(svg('line', { x1: 4, x2: 146, y1: y, y2: y, stroke: 'currentColor', 'stroke-width': 0.8 }));
-    staffSvg.appendChild(svg('text', { x: 6, y: 51, 'font-size': 46, 'font-family': 'serif' }, '𝄞'));
-    staffSvg.appendChild(accidentals(index));
+    staffSvg.appendChild(svg('text', { x: 5, y: 52, 'font-size': 52, 'font-family': 'serif' }, '𝄞'));
+    staffSvg.appendChild(accidentals(index, labelSize));
     return staffSvg;
   }
   function polar(radius, degrees) {
@@ -117,13 +125,8 @@
       wheel.appendChild(g);
     });
     var p = polar(340, index * 30);
-    var group = svg('g', { transform: 'translate(' + (p[0] - 82) + ' ' + (p[1] - 54) + ')', class: 'fifths-outer-signature' });
-    group.appendChild(staff(index, 165, 77));
-    var accidentals = signature(index).map(name);
-    var chunks = accidentals.length ? [accidentals.slice(0, 3).join(' · '), accidentals.slice(3).join(' · ')] : [es ? 'Sin alteraciones' : pt ? 'Sem alterações' : 'No accidentals'];
-    chunks.forEach(function (text, i) {
-      group.appendChild(svg('text', { x: 82, y: 90 + i * 19, 'text-anchor': 'middle', class: 'fifths-accidental-names' }, text));
-    });
+    var group = svg('g', { transform: 'translate(' + (p[0] - 82) + ' ' + (p[1] - 57) + ')', class: 'fifths-outer-signature' });
+    group.appendChild(staff(index, 165, 16));
     wheel.appendChild(group);
   });
   // Related keys are cloned onto a layer above the wheel so they can stand out
@@ -205,16 +208,16 @@
       var staffEl = signatureEl.querySelector('.fifths-staff');
       var text = signatureEl.querySelector('span');
       if (!staffEl) {
-        signatureEl.append(staff(index, 180, 84));
+        signatureEl.append(staff(index, 180, 12.5));
         text = document.createElement('span');
         signatureEl.appendChild(text);
       } else {
-        var fresh = accidentals(index);
+        var fresh = accidentals(index, 12.5);
         fresh.classList.add('is-entering');
         staffEl.querySelectorAll('.fifths-accidentals:not(.is-leaving)').forEach(retire);
         staffEl.appendChild(fresh);
       }
-      crossfade(text, signature(index).map(name).join(' · ') || (es ? 'Sin alteraciones' : pt ? 'Sem alterações' : 'No accidentals'));
+      text.textContent = (signature(index).map(name).join(' · ') || (es ? 'Sin alteraciones' : pt ? 'Sem alterações' : 'No accidentals'));
       var chordList = document.getElementById('fifths-chords');
       chords.forEach(function (chord, i) {
         var item = chordList.children[i];
