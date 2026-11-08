@@ -5,7 +5,7 @@
 .fifths-key path { fill: #eee9df; stroke: var(--paper); stroke-width: 2; transition: fill 140ms ease; }
 .fifths-key.is-related path { fill: #c5dce0; }
 .fifths-key.is-tonic path { fill: var(--note-selected); }
-.fifths-key.is-diminished path { fill: #f4ebbd; }
+.fifths-key.is-diminished path { fill: #d9e0d0; }
 .fifths-key:focus-visible path { stroke: var(--accent); stroke-width: 4; }
 .fifths-chord-name { font-size: 26px; fill: var(--ink); pointer-events: none; }
 .fifths-degree { font-size: 13px; fill: #315b62; pointer-events: none; }
@@ -16,7 +16,7 @@
 .fifths-lift { pointer-events: none; }
 .fifths-lifted path { fill: #c5dce0; stroke: var(--paper); stroke-width: 2; }
 .fifths-lifted.is-tonic path { fill: var(--note-selected); }
-.fifths-lifted.is-diminished path { fill: #f4ebbd; }
+.fifths-lifted.is-diminished path { fill: #d9e0d0; }
 .fifths-lifted.is-tonic text { fill: white; }
 .fifths-lifted { transform-box: fill-box; transform-origin: center; transform: translate(0, 0) scale(1.07); filter: drop-shadow(0 7px 6px rgba(0, 0, 0, .3)); animation: fifths-lift 160ms ease-out; transition: transform 220ms linear, filter 220ms ease-out; }
 .fifths-lifted.is-tonic { transform: translate(0, 0) scale(1.12); filter: drop-shadow(0 10px 8px rgba(0, 0, 0, .4)); }
