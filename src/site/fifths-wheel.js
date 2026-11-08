@@ -187,6 +187,8 @@
     if (liftKey !== lift.getAttribute('data-key')) {
       lift.setAttribute('data-key', liftKey);
       lift.replaceChildren();
+      var base = svg('g', { class: 'fifths-lift-base' });
+      lift.appendChild(base);
       buttons.filter(function (button) { return button.el.classList.contains('is-related') || button.el.classList.contains('is-diminished'); })
         .sort(function (a, b) { return a.el.classList.contains('is-tonic') - b.el.classList.contains('is-tonic'); })
         .forEach(function (button) {
@@ -205,11 +207,12 @@
           var side = minor && button.minor && button.el.classList.contains('is-related') ? ((button.index - index + 12) % 12 === 1 ? 1 : (index - button.index + 12) % 12 === 1 ? -1 : 0) : 0;
           clone.style.setProperty('--tx', (side * Math.cos(radians) * 6).toFixed(1) + 'px');
           clone.style.setProperty('--ty', (side * Math.sin(radians) * 6).toFixed(1) + 'px');
-          clone.setAttribute('class', 'fifths-lifted' + (button.el.classList.contains('is-tonic') ? ' is-tonic' : '') + (button.el.classList.contains('is-diminished') ? ' is-diminished' : '') + (side ? ' is-flank' : ''));
-          lift.appendChild(clone);
+          clone.setAttribute('class', 'fifths-lifted' + (button.el.classList.contains('is-tonic') ? ' is-tonic' : '') + (button.el.classList.contains('is-diminished') ? ' is-diminished' : '') + (side ? ' is-flank' : '') + (button.minor ? ' is-inner' : ''));
+          (button.el.classList.contains('is-tonic') ? lift : base).appendChild(clone);
         });
     }
     lift.classList.toggle('is-pinned', pinned);
+    lift.classList.toggle('is-major-key', !minor);
     wheel.classList.toggle('is-pinned', pinned);
     var title = name(chords[0].note) + (minor ? (es ? ' menor' : pt ? ' menor' : ' minor') : (es ? ' mayor' : pt ? ' maior' : ' major'));
     // The accidental sits close to its note: the glyph's own advance leaves a visible gap.
