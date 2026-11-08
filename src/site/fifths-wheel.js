@@ -135,23 +135,29 @@
   var diminished = svg('text', { x: 430, y: 453, 'text-anchor': 'middle', class: 'fifths-diminished' });
   wheel.appendChild(centerName); wheel.appendChild(diminished);
   host.appendChild(wheel);
-  // The sidebar trails the wheel: a short debounce skips keys the pointer only crosses,
-  // and the content fades out and back in rather than switching abruptly.
-  var detail = document.querySelector('.fifths-detail');
+  // The sidebar trails the wheel: a short debounce skips keys the pointer only crosses, and each
+  // piece of text crossfades with its replacement, so there is never a moment without text.
   var detailKey = null;
   var detailTimer = 0;
   function queueDetail(key, render) {
     clearTimeout(detailTimer);
-    if (key === detailKey) { detail.classList.remove('is-changing'); return; }
+    if (key === detailKey) return;
     if (detailKey === null) { render(); detailKey = key; return; }
-    detailTimer = setTimeout(function () {
-      detail.classList.add('is-changing');
-      detailTimer = setTimeout(function () {
-        render();
-        detailKey = key;
-        detail.classList.remove('is-changing');
-      }, 120);
-    }, 70);
+    detailTimer = setTimeout(function () { render(); detailKey = key; }, 70);
+  }
+  // Stacks the new content over the old in the same cell; the old layer fades out and is removed.
+  function retire(layer) {
+    layer.classList.add('is-leaving');
+    setTimeout(function () { layer.remove(); }, 260);
+  }
+  function crossfade(el, text) {
+    var current = el.querySelector('.fifths-layer:not(.is-leaving)');
+    if (current && current.textContent === text) return;
+    var layer = document.createElement('i');
+    layer.className = 'fifths-layer';
+    layer.textContent = text;
+    if (current) { retire(current); layer.classList.add('is-entering'); }
+    el.appendChild(layer);
   }
   function show(index, minor) {
     var notes = scale(index);
@@ -193,7 +199,7 @@
     var dimIndex = minor ? 1 : 6;
     diminished.textContent = degrees[dimIndex] + ' · ' + name(chords[dimIndex].note) + '°';
     queueDetail(index + (minor ? 'm' : 'M'), function () {
-      document.getElementById('fifths-key').textContent = title;
+      crossfade(document.getElementById('fifths-key'), title);
       // Only the text and the accidentals change; the staff, clef and chord tiles stay put.
       var signatureEl = document.getElementById('fifths-signature');
       var staffEl = signatureEl.querySelector('.fifths-staff');
@@ -203,9 +209,12 @@
         text = document.createElement('span');
         signatureEl.appendChild(text);
       } else {
-        staffEl.querySelector('.fifths-accidentals').replaceWith(accidentals(index));
+        var fresh = accidentals(index);
+        fresh.classList.add('is-entering');
+        staffEl.querySelectorAll('.fifths-accidentals:not(.is-leaving)').forEach(retire);
+        staffEl.appendChild(fresh);
       }
-      text.textContent = signature(index).map(name).join(' · ') || (es ? 'Sin alteraciones' : pt ? 'Sem alterações' : 'No accidentals');
+      crossfade(text, signature(index).map(name).join(' · ') || (es ? 'Sin alteraciones' : pt ? 'Sem alterações' : 'No accidentals'));
       var chordList = document.getElementById('fifths-chords');
       chords.forEach(function (chord, i) {
         var item = chordList.children[i];
@@ -214,8 +223,8 @@
           item.append(document.createElement('small'), document.createElement('strong'));
           chordList.appendChild(item);
         }
-        item.children[0].textContent = degrees[i];
-        item.children[1].textContent = name(chord.note) + chord.quality;
+        crossfade(item.children[0], degrees[i]);
+        crossfade(item.children[1], name(chord.note) + chord.quality);
       });
     });
   }
