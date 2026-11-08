@@ -128,6 +128,10 @@ GitHub Actions CI (`.github/workflows/ci.yml`) runs tests on every push.
 
 The interactive circle of fifths from [`/circulo-de-quintas`](https://acordesdeguitarra.com.ar/recursos/circulo-de-quintas) in a 780 × 580 popup: major and minor keys, key signatures and diatonic chords. It reuses the website's wheel (`src/site/fifths-wheel.js`, `src/shared/fifths-wheel.css`), works offline and follows the browser language.
 
+![Circle of Fifths — keys, key signatures and diatonic chords, fully offline](store/fifths/screenshots/promo-marquee-1400x560.png)
+
+![Circle of Fifths with a key pinned and its chords lifted off the wheel](store/fifths/screenshots/02-pinned.png)
+
 ### Load unpacked (development)
 
 1. `npm run build:ext` builds Guitar Chords, Guitar Tabs and Circle of Fifths.
@@ -138,7 +142,7 @@ Guitar Tabs opens the shared tablature editor in a 780 × 580 popup. It works of
 
 ### Publish to Chrome Web Store
 
-See [`store/chords/PUBLISHING.md`](store/chords/PUBLISHING.md) for Guitar Chords and [`store/tabs/PUBLISHING.md`](store/tabs/PUBLISHING.md) for Guitar Tabs. Each product has its own listing and graphics.
+See [`store/chords/PUBLISHING.md`](store/chords/PUBLISHING.md) for Guitar Chords and [`store/tabs/PUBLISHING.md`](store/tabs/PUBLISHING.md) for Guitar Tabs and [`store/fifths/PUBLISHING.md`](store/fifths/PUBLISHING.md) for Circle of Fifths. Each product has its own listing and graphics.
 
 Quick steps:
 1. `npm run build:ext:chords` — produces `dist/extensions/chords.zip`

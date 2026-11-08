@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Circle of Fifths — store images</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --ink-soft: #555;
+    --paper: #fdfaf5;
+    --rule: #d8d2c4;
+    --accent: #1f5c66;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); font-family: var(--serif); color: var(--ink); overflow: hidden; }
+  body { display: flex; align-items: center; }
+  .brand { display: flex; align-items: center; gap: 18px; }
+  .brand img { display: block; }
+  .brand h1 { margin: 0; font-weight: 400; letter-spacing: -0.01em; }
+  .tagline { font-family: var(--sans); color: var(--ink-soft); line-height: 1.5; margin: 0; }
+  .tagline strong { color: var(--accent); font-weight: 700; }
+  .chips { display: flex; gap: 10px; flex-wrap: wrap; }
+  .chip { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; background: #efe9db; border: 1px solid var(--rule); border-radius: 7px; color: var(--ink); }
+  .shot { background: #fff; border-radius: 14px; box-shadow: 0 14px 36px rgba(0,0,0,.16), 0 3px 10px rgba(0,0,0,.08); overflow: hidden; border: 1px solid var(--rule); }
+  .shot img { display: block; width: 100%; }
+
+  /* 1280x800 screenshot: caption left, framed capture right */
+  body.shot-page { width: 1280px; height: 800px; padding: 0 60px; gap: 50px; }
+  .shot-page .copy { flex: 0 0 280px; }
+  .shot-page h2 { font-weight: 400; font-size: 44px; line-height: 1.15; margin: 0 0 22px; letter-spacing: -0.01em; }
+  .shot-page .tagline { font-size: 20px; }
+  .shot-page .shot { flex: 0 0 auto; width: 830px; }
+
+  /* 1400x560 marquee */
+  body.marquee { width: 1400px; height: 560px; padding: 0 90px; }
+  .marquee .left { flex: 0 0 650px; }
+  .marquee .brand { margin-bottom: 26px; }
+  .marquee .brand img { width: 76px; height: 76px; }
+  .marquee .brand h1 { font-size: 56px; }
+  .marquee .tagline { font-size: 22px; max-width: 600px; margin-bottom: 24px; }
+  .marquee .chip { font-size: 16px; padding: 8px 14px; }
+  .marquee .right { flex: 1 1 auto; position: relative; height: 480px; }
+  .marquee .shot { position: absolute; width: 400px; }
+  .marquee .back { top: 160px; right: -40px; transform: rotate(3deg); }
+  .marquee .front { top: 20px; right: 150px; transform: rotate(-2deg); }
+
+  /* 440x280 small tile */
+  body.tile { width: 440px; height: 280px; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  .tile .brand { flex-direction: column; gap: 12px; }
+  .tile .brand img { width: 84px; height: 84px; }
+  .tile .brand h1 { font-size: 32px; }
+  .tile .tagline { font-size: 15px; margin-top: 18px; }
+</style>
+</head>
+<body>
+<script>
+  const q = new URLSearchParams(location.search);
+  const mode = q.get('mode');
+  const icon = '../src/extensions/fifths/icon.svg';
+  const es = q.get('lang') === 'es';
+  const shots = [1, 2, 3].map(n => '../store/fifths/screenshots/' + (es ? 'es/' : '') + 'capture-' + n + '.png');
+  const copy = es ? {
+    1: ['Todas las tonalidades a un clic', 'Pasá el cursor por una tonalidad mayor o menor y mirá su armadura y sus acordes.'],
+    2: ['Fijá una tonalidad y mirá sus acordes', 'Con un clic, los acordes de la tonalidad se elevan de la rueda, con el disminuido incluido.'],
+    3: ['Menores y sus relativas mayores', 'Elegí una tonalidad menor y compará su armadura con la de su relativa mayor.'],
+  } : {
+    1: ['Every key, one click away', 'Hover any major or minor key to see its key signature and diatonic chords.'],
+    2: ['Pin a key to lift its chords', 'Click a key and its chords rise off the wheel, diminished chord included.'],
+    3: ['Minor keys and their relative majors', 'Pick a minor key and compare its signature with its relative major.'],
+  };
+  const text = es ? {
+    name: 'Círculo de quintas',
+    tagline: 'Tonalidades, armaduras y acordes diatónicos.<br>Funciona <strong>100% sin conexión</strong>.',
+    chips: ['Armaduras', 'Acordes diatónicos', 'Relativas menores'],
+    tile: 'Tonalidades · Armaduras · Acordes diatónicos',
+  } : {
+    name: 'Circle of Fifths',
+    tagline: 'Major and minor keys, signatures and diatonic chords.<br>Works <strong>100% offline</strong>.',
+    chips: ['Key signatures', 'Diatonic chords', 'Relative minors'],
+    tile: 'Keys · Signatures · Diatonic chords',
+  };
+  document.body.className = mode === 'shot' ? 'shot-page' : mode;
+  if (mode === 'shot') {
+    const n = +q.get('n');
+    document.body.innerHTML = `<div class="copy"><h2>${copy[n][0]}</h2><p class="tagline">${copy[n][1]}</p></div><div class="shot"><img src="${shots[n - 1]}"></div>`;
+  } else if (mode === 'marquee') {
+    document.body.innerHTML = `
+      <div class="left">
+        <div class="brand"><img src="${icon}"><h1>${text.name}</h1></div>
+        <p class="tagline">${text.tagline}</p>
+        <div class="chips">${text.chips.map(c => `<span class="chip">${c}</span>`).join('')}</div>
+      </div>
+      <div class="right">
+        <div class="shot back"><img src="${shots[2]}"></div>
+        <div class="shot front"><img src="${shots[1]}"></div>
+      </div>`;
+  } else {
+    document.body.innerHTML = `<div class="brand"><img src="${icon}"><h1>${text.name}</h1></div><p class="tagline">${text.tile}</p>`;
+  }
+</script>
+</body>
+</html>
