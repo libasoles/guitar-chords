@@ -307,6 +307,14 @@
 .note-finder-empty {
   color: var(--ink-soft);
   padding: 1rem 0;
+  max-width: 100%;
+}
+.note-finder-empty-image {
+  display: block;
+  width: 240px;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 0.75rem;
 }
 
 @media (max-width: 600px) {

@@ -2175,7 +2175,7 @@ if (PARTITURA_ENABLED) {
     path.join(ASSETS_DIST, "og-score-" + name + ".png"),
   );
 });
-["og-tab-editor.png", "og-note-finder-es.png", "og-note-finder-en.png",
+["note-finder-empty.png", "og-tab-editor.png", "og-note-finder-es.png", "og-note-finder-en.png",
   "og-fifths-es.png", "og-fifths-en.png"].forEach(function (name) {
   copyFile(path.join(SRC_SITE, name), path.join(ASSETS_DIST, name));
 });

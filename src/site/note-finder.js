@@ -305,7 +305,16 @@
     function renderEmpty(message) {
       var empty = document.createElement('div');
       empty.className = 'note-finder-empty';
-      empty.textContent = message;
+      var image = document.createElement('img');
+      image.className = 'note-finder-empty-image';
+      image.src = '/assets/note-finder-empty.png';
+      image.alt = '';
+      image.width = 1301;
+      image.height = 1209;
+      empty.appendChild(image);
+      var text = document.createElement('div');
+      text.textContent = message;
+      empty.appendChild(text);
       grid.appendChild(empty);
     }
 
