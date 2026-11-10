@@ -447,6 +447,9 @@ const CIRCLE_SLUG = "acordes-mayores-y-sus-notas";
 // page (no locale-agnostic pairing like V7/circle) with three movable dim7
 // shapes grouped by root string (6th, 5th, 4th).
 const DIM_SLUG = "acordes-disminuidos";
+const NINTH_SLUG = "acordes-de-novena";
+const NINTH_GROUPS = ["major", "minor", "dominant", "flat", "diminished", "add", "minorAdd"];
+const ninthTemplate = fs.readFileSync(path.join(SRC_SITE, "ninth-guide.html"), "utf8");
 
 // "Identify chords from notes" page, rendered from src/site/note-finder.html.
 // Single page (no locale-agnostic pairing like V7/circle): a piano-style note
@@ -691,6 +694,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     "circleNavLabel",
     "fifthsH1",
     "dimNavLabel",
+    "ninthNavLabel",
     "tabNavLabel",
     "sixthsH1",
   ];
@@ -732,6 +736,7 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
     .join(v7PageHref(locale, "circulo-de-quintas"))
     .split("%%CIRCLE_PAGE_HREF%%")
     .join(v7PageHref(locale, CIRCLE_SLUG));
+  html = html.split("%%NINTH_PAGE_HREF%%").join(v7PageHref(locale, NINTH_SLUG));
   html = html.split("%%DIM_PAGE_HREF%%").join(v7PageHref(locale, DIM_SLUG));
   html = html
     .split("%%SIXTHS_PAGE_HREF%%")
@@ -903,10 +908,12 @@ function renderCirclePage(template, strings, locale, page) {
   );
 }
 
-// Render the diminished-chords page (src/site/dim-guide.html) for one
-// locale. Single static page (no major/minor pairing) with three grids of
-// dim7 diagrams, grouped by which string carries the root.
-function renderDimPage(template, strings, locale) {
+// Render chord catalogues with the shared guide shell and localized metadata.
+// Defaults preserve the diminished guide; the ninth guide supplies its own
+// translation prefix, slug and data script.
+function renderDimPage(template, strings, locale, page = {}) {
+  const slug = page.slug || DIM_SLUG;
+  const prefix = page.prefix || "dim";
   const resolvedAssetsPrefix = locale === "es" ? "assets/" : "../assets/";
   const ogImage = socialImage();
   let html = template;
@@ -929,28 +936,28 @@ function renderDimPage(template, strings, locale) {
     html = html.split("%%" + key + "%%").join(strings[key] || "");
   });
 
-  html = html.split("%%PAGE_TITLE%%").join(strings.dimPageTitle || "");
+  html = html.split("%%PAGE_TITLE%%").join(strings[prefix + "PageTitle"] || "");
   html = html
     .split("%%PAGE_META_DESCRIPTION%%")
-    .join(strings.dimMetaDescription || "");
-  html = html.split("%%PAGE_H1%%").join(strings.dimH1 || "");
-  html = html.split("%%PAGE_LEAD%%").join(strings.dimLead || "");
-  html = html.split("%%PAGE_LEAD_FORMS%%").join(strings.dimLeadForms || "");
+    .join(strings[prefix + "MetaDescription"] || "");
+  html = html.split("%%PAGE_H1%%").join(strings[prefix + "H1"] || "");
+  html = html.split("%%PAGE_LEAD%%").join(strings[prefix + "Lead"] || "");
+  html = html.split("%%PAGE_LEAD_FORMS%%").join(strings[prefix + "LeadForms"] || "");
   html = html
     .split("%%PAGE_SCRIPT%%")
-    .join(resolvedAssetsPrefix + "dim-guide.js");
+    .join(resolvedAssetsPrefix + (page.script || "dim-guide.js"));
 
   html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
   html = html.split("%%homeHref%%").join(homeHref(locale));
   html = html
     .split("%%altLangHref%%")
     .join(
-      v7PageHref(altLocale(locale), DIM_SLUG),
+      v7PageHref(altLocale(locale), slug),
     );
-  html = html.split("%%canonicalUrl%%").join(v7CanonicalUrl(locale, DIM_SLUG));
+  html = html.split("%%canonicalUrl%%").join(v7CanonicalUrl(locale, slug));
   html = html
     .split("%%hreflangLinks%%")
-    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, DIM_SLUG); }, localesFor(DIM_SLUG)));
+    .join(hreflangLinks(function (loc) { return SITE_BASE_URL + v7PageHref(loc, slug); }, localesFor(slug)));
   html = html.split("%%ogImage%%").join(ogImage);
   html = html.split("%%EXTENSION_CTA_BUTTON%%").join(ctaButton(strings));
   html = html
@@ -962,9 +969,9 @@ function renderDimPage(template, strings, locale) {
     html,
     strings,
     locale,
-    DIM_SLUG,
-    "dimPageTitle",
-    "dimMetaDescription",
+    slug,
+    prefix + "PageTitle",
+    prefix + "MetaDescription",
   );
 }
 
@@ -2050,6 +2057,10 @@ copyFile(
   path.join(ASSETS_DIST, "circle-render.js"),
 );
 copyFile(
+  path.join(SRC_SITE, "ninth-guide.js"),
+  path.join(ASSETS_DIST, "ninth-guide.js"),
+);
+copyFile(
   path.join(SRC_SITE, "dim-guide.js"),
   path.join(ASSETS_DIST, "dim-guide.js"),
 );
@@ -2287,6 +2298,7 @@ const precacheUrls = [
   "/assets/circle-fifths.js",
   "/assets/circle-fifths-minor.js",
   "/assets/dim-guide.js",
+  "/assets/ninth-guide.js",
   "/assets/dim-page-render.js",
   "/assets/note-match.js",
   "/assets/note-finder.js",
@@ -2349,6 +2361,17 @@ LOCALES.forEach(function (locale) {
   const strings = JSON.parse(fs.readFileSync(stringsPath, "utf8"));
 
   writeManifest(locale, strings);
+
+  {
+    const sections = NINTH_GROUPS.map(function (group) {
+      return `<section aria-labelledby="ninth-${group}"><h2 id="ninth-${group}">${strings["ninth" + group + "Title"]}</h2><p class="dim-section-lead">${strings["ninth" + group + "Lead"]}</p><div class="dim-grid ninth-grid" id="ninthGrid-${group}"></div></section>`;
+    }).join("\n");
+    const html = renderDimPage(ninthTemplate.replace("%%NINTH_SECTIONS%%", sections), strings, locale, { slug: NINTH_SLUG, prefix: "ninth", script: "ninth-guide.js" });
+    const outFile = path.join(DIST_SITE, pageFile(NINTH_SLUG, locale));
+    ensureDir(path.dirname(outFile));
+    fs.writeFileSync(outFile, html, "utf8");
+    say(path.relative(ROOT, outFile));
+  }
 
   if (locale === "es") {
     const html = render(template, strings, locale, "assets/", "root");
@@ -2893,7 +2916,7 @@ addSlugPages(
     return page.slug;
   }),
 );
-addSlugPages([DIM_SLUG, NOTE_FINDER_SLUG, SIXTHS_SLUG]);
+addSlugPages([NINTH_SLUG, DIM_SLUG, NOTE_FINDER_SLUG, SIXTHS_SLUG]);
 addSlugPages([TAB_EDITOR_SLUG], ["0.7", "0.6"]);
 addSlugPages([SCORE_EDITOR_SLUG], ["0.8", "0.7"]);
 addSlugPages([PRIVACY_SLUG], ["0.3", "0.3"]);

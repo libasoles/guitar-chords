@@ -67,7 +67,8 @@
         var chords = group.chords.map(resolveChord);
         if (chords.some(function (c) { return !c; })) return;
 
-        buildRows(chords).forEach(function (chordsInRow) {
+        var rows = group.chromatic ? [chords.slice(0, 4), chords.slice(4, 8), chords.slice(8, 12)] : buildRows(chords);
+        rows.forEach(function (chordsInRow) {
           var row = document.createElement('div');
           row.className = 'dim-row';
           chordsInRow.forEach(function (chord) {

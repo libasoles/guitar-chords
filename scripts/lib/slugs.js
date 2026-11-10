@@ -13,6 +13,7 @@ const SLUGS = {
   'circulo-de-quintas': { es: 'recursos/circulo-de-quintas', en: 'resources/circle-of-fifths', pt: 'recursos/circulo-das-quintas', was: { es: 'circulo-de-quintas', en: 'circle-of-fifths', pt: 'circulo-das-quintas' } },
   'acordes-mayores-y-sus-notas': { es: 'acordes-mayores-y-sus-notas', en: 'major-chords-and-their-notes', pt: 'acordes-maiores-e-suas-notas' },
   'acordes-menores-y-sus-notas': { es: 'acordes-menores-y-sus-notas', en: 'minor-chords-and-their-notes', pt: 'acordes-menores-e-suas-notas' },
+  'acordes-de-novena': { es: 'acordes-de-novena', en: 'ninth-chords', pt: 'acordes-de-nona', isNew: true },
   'acordes-disminuidos': { es: 'acordes-disminuidos', en: 'diminished-chords', pt: 'acordes-diminutos' },
   'identificar-acordes-por-notas': { es: 'recursos/identificar-acordes-por-notas', en: 'resources/identify-chords-by-notes', pt: 'recursos/identificar-acordes-pelas-notas', was: { es: 'identificar-acordes-por-notas', en: 'identify-chords-by-notes', pt: 'identificar-acordes-pelas-notas' } },
   'crear-tablaturas-de-guitarra': { es: 'recursos/crear-tablaturas-de-guitarra', en: 'resources/create-guitar-tabs', pt: 'recursos/criar-tablaturas-de-violao', was: { es: 'crear-tablaturas-de-guitarra', en: 'create-guitar-tabs', pt: 'criar-tablaturas-de-violao' } },

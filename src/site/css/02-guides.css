@@ -426,3 +426,10 @@
   }
 }
 
+
+/* Longer ninth-chord symbols need two columns on narrow screens. */
+@media (max-width: 640px) {
+  .ninth-grid .dim-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

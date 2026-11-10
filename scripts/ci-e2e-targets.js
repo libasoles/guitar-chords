@@ -71,6 +71,14 @@ const SUITES = {
     build: 'site',
     paths: [/^src\/site\/picking-/, /^test\/picking-intervals\./],
   },
+  'ninth-guide': {
+    build: 'site',
+    paths: [
+      /^src\/site\/(ninth-guide|dim-guide)\./,
+      /^src\/shared\/(dim-page-render|chords-db|chord-diagram)\.js$/,
+      /^test\/ninth-guide\./,
+    ],
+  },
   'fifths-wheel': {
     build: 'site',
     paths: [
