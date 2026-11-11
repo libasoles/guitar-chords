@@ -418,6 +418,14 @@ body {
 
 /* ----- Estado sin coincidencias ----- */
 
+.empty-image {
+  display: block;
+  width: 240px;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto 0.75rem;
+}
+
 .msg {
   font-family: var(--sans);
   font-size: 0.9rem;

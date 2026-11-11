@@ -282,6 +282,10 @@
     '  grid-column: 1 / -1; text-align: center;',
     '  color: var(--ink-soft, #555); padding: 2rem 1rem;',
     '}',
+    '.empty-image {',
+    '  display: block; width: 240px; max-width: 100%; height: auto;',
+    '  margin: 0 auto 0.75rem;',
+    '}',
     '.load-more {',
     '  display: flex; justify-content: center; margin: 1.5rem 0 0.5rem;',
     '}',
@@ -1060,7 +1064,16 @@
       if (!empty) {
         empty = document.createElement('div');
         empty.className = 'empty';
-        empty.textContent = t('cfEmpty', 'No hay acordes que coincidan.');
+        var image = document.createElement('img');
+        image.className = 'empty-image';
+        image.src = '/assets/note-finder-empty.png';
+        image.alt = '';
+        image.width = 1301;
+        image.height = 1209;
+        empty.appendChild(image);
+        var text = document.createElement('div');
+        text.textContent = t('cfEmpty', 'No hay acordes que coincidan.');
+        empty.appendChild(text);
         this._grid.appendChild(empty);
       }
     } else if (empty) {

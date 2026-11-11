@@ -338,7 +338,16 @@
     if (matches.length === 0) {
       const msg = document.createElement('div');
       msg.className = 'msg';
-      msg.textContent = i18n('noResults', 'No matching chords.');
+      const image = document.createElement('img');
+      image.className = 'empty-image';
+      image.src = 'note-finder-empty.png';
+      image.alt = '';
+      image.width = 1301;
+      image.height = 1209;
+      msg.appendChild(image);
+      const text = document.createElement('div');
+      text.textContent = i18n('noResults', 'No matching chords.');
+      msg.appendChild(text);
       results.appendChild(msg);
       return;
     }

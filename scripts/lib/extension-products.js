@@ -9,6 +9,7 @@ module.exports = {
     resources: [
       ...['chords-db.js', 'chord-diagram.js', 'chord-positions.js', 'chord-search.js', 'note-names.js'].map(file => ({ from: 'src/shared/' + file, to: file })),
       { from: 'src/site/guitar-player-cubist-left-head.svg', to: 'guitar-player-cubist-left-head.svg' },
+      { from: 'src/site/note-finder-empty.png', to: 'note-finder-empty.png' },
       { from: 'vendor/svguitar.umd.js', to: 'vendor/svguitar.umd.js' },
       { from: 'vendor/fuzzysort.js', to: 'vendor/fuzzysort.js' },
     ],
