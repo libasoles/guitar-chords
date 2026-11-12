@@ -56,4 +56,22 @@ module.exports = {
     ],
     icons: { source: 'src/extensions/fifths/icon.svg', fallback: require('./fifths-icon').drawFifthsIcon },
   },
+  identifier: {
+    source: 'src/extensions/identifier',
+    files: ['manifest.json', 'popup.html', 'popup.js', 'popup.css', 'icon.svg', '_locales'],
+    resources: [
+      ...['chord-diagram.js', 'chord-card.js', 'note-names.js'].map(file => ({ from: 'src/shared/' + file, to: file })),
+      { from: 'src/site/note-finder-empty.png', to: 'note-finder-empty.png' },
+      { from: 'vendor/svguitar.umd.js', to: 'vendor/svguitar.umd.js' },
+      { from: 'vendor/ascii-tabs.js', to: 'vendor/ascii-tabs.js' },
+    ],
+    icons: { source: 'src/extensions/identifier/icon.svg', fallback: require('./identifier-icon').drawIdentifierIcon },
+    // The positions are the arpeggio page's, with their diagrams, as one script.
+    prepare({ output }) {
+      const fs = require('fs');
+      const path = require('path');
+      const { extensionChords } = require('./article-arpeggios');
+      fs.writeFileSync(path.join(output, 'arpeggio-data.js'), 'window.ARPEGGIO_ROOTS = ' + JSON.stringify(extensionChords()) + ';\n');
+    },
+  },
 };

@@ -17,7 +17,7 @@ Built with vanilla JS, no framework, no build step beyond a Node.js assembly scr
 src/
   shared/          # Chord DB, diagram renderer, search — used by both site and extension
   site/            # Web app: template.html, chord-finder component, css/ (site.css parts)
-  extensions/      # Independent Chrome extensions: chords/, tabs/ and fifths/
+  extensions/      # Independent Chrome extensions: chords/, tabs/, fifths/ and identifier/
   i18n/            # Strings for the site (strings.es.json, strings.en.json)
 vendor/            # Bundled third-party libs (svguitar, fuzzysort, jsPDF, ascii-tabs)
 scripts/
@@ -68,6 +68,7 @@ npm run build:ext   # → all products under dist/extensions/
 npm run build:ext:chords # → dist/extensions/chords/ + dist/extensions/chords.zip
 npm run build:ext:tabs   # → dist/extensions/tabs/ + dist/extensions/tabs.zip
 npm run build:ext:fifths # → dist/extensions/fifths/ + dist/extensions/fifths.zip
+npm run build:ext:identifier # → dist/extensions/identifier/ + dist/extensions/identifier.zip
 ```
 
 ### Environment variables
@@ -132,11 +133,15 @@ The interactive circle of fifths from [`/circulo-de-quintas`](https://acordesdeg
 
 ![Circle of Fifths with a key pinned and its chords lifted off the wheel](store/fifths/screenshots/02-pinned.png)
 
+### Chord Identifier
+
+A 360 px popup built on the note search of [`/recursos/tablaturas-para-arpegios`](https://acordesdeguitarra.com.ar/recursos/tablaturas-para-arpegios): write the frets you know in a narrow one-column tab and it lists every arpeggio position that contains them, grouped by root, as tablature. A visible button switches the results to chord diagrams, and the C / Do toggle changes the notation. The position data is generated at build time from `scripts/lib/article-arpeggios.js` (`extensionChords()`), so the extension and the page never diverge. Works offline and follows the browser language.
+
 ### Load unpacked (development)
 
-1. `npm run build:ext` builds Guitar Chords, Guitar Tabs and Circle of Fifths.
+1. `npm run build:ext` builds Guitar Chords, Guitar Tabs, Circle of Fifths and Chord Identifier.
 2. Open `chrome://extensions` → enable **Developer mode** → **Load unpacked**.
-3. Select `dist/extensions/chords/` for Guitar Chords, `dist/extensions/tabs/` for Guitar Tabs or `dist/extensions/fifths/` for Circle of Fifths; load each directory to use both.
+3. Select `dist/extensions/chords/` for Guitar Chords, `dist/extensions/tabs/` for Guitar Tabs `dist/extensions/fifths/` for Circle of Fifths or `dist/extensions/identifier/` for Chord Identifier; load each directory to use several.
 
 Guitar Tabs opens the shared tablature editor in a 780 × 580 popup. It works offline, saves edits locally between openings, and uses Spanish or English according to the browser language. Its data is separate from the website and Guitar Chords.
 

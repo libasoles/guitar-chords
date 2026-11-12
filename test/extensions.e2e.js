@@ -23,7 +23,7 @@ async function installedExtensions(context) {
 }
 
 async function withExtensions(locale, run) {
-  const directories = ['tabs', 'chords'].map(id => path.join(DIST, id));
+  const directories = ['tabs', 'chords', 'identifier'].map(id => path.join(DIST, id));
   for (const directory of directories) await fs.access(path.join(directory, 'manifest.json'));
   const profile = await fs.mkdtemp(path.join(os.tmpdir(), 'guitar-extensions-'));
   let context;
@@ -37,7 +37,7 @@ async function withExtensions(locale, run) {
     });
     const installed = await installedExtensions(context);
     const urls = {};
-    for (const [id, name] of [['tabs', 'Guitar Tabs'], ['chords', 'Guitar Chords']]) {
+    for (const [id, name] of [['tabs', 'Guitar Tabs'], ['chords', 'Guitar Chords'], ['identifier', 'Chord Identifier']]) {
       const extension = installed.find(item => item.name === name);
       assert.ok(extension, `${name} is loaded by Chromium`);
       urls[id] = `chrome-extension://${extension.id}/popup.html`;
@@ -296,6 +296,39 @@ async function chords(context, url) {
   assert.equal(await page.locator('.pinned-card').count(), 0);
 }
 
+async function identifier(context, url) {
+  const page = await context.newPage();
+  await page.goto(url);
+  await page.waitForFunction(() => customElements.get('ascii-tabs') && document.querySelector('#query .ascii-tabs-cell'));
+  const cell = string => page.locator(`#query .ascii-tabs-cell[data-c="0"][data-s="${string}"]`);
+  assert.equal(await page.locator('.root-group').count(), 0, 'nothing is listed before typing');
+  await cell(0).click();
+  await page.keyboard.type('0');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.type('1');
+  await page.waitForSelector('.results-tab .ascii-tabs-cell');
+  assert.equal(await page.locator('.root-group .root-title').first().textContent(), 'C');
+  const first = await page.locator('.results-tab').first().evaluate(tab => tab.value[0][0].map(note => (note !== null && typeof note === 'object' ? note.fret : note)));
+  assert.deepEqual(first, [0, 1, 0, null, 3, null], 'results are tablature by default');
+  assert.ok((await page.locator('.root-group').count()) > 1, 'matches are grouped by root');
+  await page.getByRole('button', { name: 'Diagrams' }).click();
+  await page.waitForSelector('.diagrams .finder-card svg');
+  assert.equal(await page.locator('.results-tab').count(), 0, 'diagram mode replaces the tablature');
+  await page.getByRole('button', { name: 'Tablature' }).click();
+  await page.waitForSelector('.results-tab .ascii-tabs-cell');
+  await page.locator('#notation-spanish').click();
+  assert.equal(await page.locator('.root-group .root-title').first().textContent(), 'Do');
+  await page.locator('#clear').click();
+  assert.equal(await page.locator('.root-group').count(), 0, 'clearing empties the results');
+  await cell(0).click();
+  await page.keyboard.type('2');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.type('9');
+  await page.waitForSelector('.msg');
+  assert.equal(await page.locator('.root-group').count(), 0, 'impossible notes list no chords');
+  await page.close();
+}
+
 async function run() {
   await withExtensions('en-US', (context, urls) => nativePopup(context, urls.tabs));
   await withExtensions('en-US', async (context, urls) => {
@@ -309,6 +342,7 @@ async function run() {
     const reopened = await openEditor(context, urls.tabs);
     assert.deepEqual(await value(reopened), saved, 'closing and reopening on the same profile preserves edits');
     await chords(context, urls.chords);
+    await identifier(context, urls.identifier);
     await layoutAndTools(reopened);
   });
   await withExtensions('es-AR', async (context, urls) => {

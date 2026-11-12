@@ -27,7 +27,8 @@
     "lighthouse": "node scripts/lighthouse.js",
     "build:ext:chords": "node scripts/build-ext.js chords",
     "build:ext:tabs": "node scripts/build-ext.js tabs",
-    "build:ext:fifths": "node scripts/build-ext.js fifths"
+    "build:ext:fifths": "node scripts/build-ext.js fifths",
+    "build:ext:identifier": "node scripts/build-ext.js identifier"
   },
   "devDependencies": {
     "@radix-ui/react-alert-dialog": "^1.2.1",

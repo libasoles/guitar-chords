@@ -1,0 +1,283 @@
+/* popup.css — paper/ink/burgundy theme of the site, copied into the extension
+   (it cannot depend on site assets at runtime). The tab rules mirror the
+   arpeggio page's flat read-only tabs, scaled down to a 360px popup. */
+
+:root {
+  --ink: #1a1a1a;
+  --ink-soft: #555;
+  --paper: #fdfaf5;
+  --rule: #d8d2c4;
+  --accent: #8b0000;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  width: 360px;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  max-height: 600px;
+  padding: 12px 14px 10px;
+  font-family: var(--serif);
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.5;
+}
+
+/* ----- Header ----- */
+
+.site-header,
+.search,
+.panel-footer { flex: none; }
+
+.site-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding-bottom: 0.7rem;
+  margin-bottom: 0.8rem;
+  border-bottom: 1px solid var(--rule);
+}
+.site-header .logo {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  background: url("icon.svg") center / contain no-repeat;
+}
+.site-header .wordmark {
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.notation-group,
+.view-group {
+  display: inline-flex;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--paper);
+  overflow: hidden;
+}
+.notation-group { margin-left: auto; flex: none; }
+.notation-option,
+.view-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  min-height: 1.8rem;
+  padding: 0.3rem 0.55rem;
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.notation-option {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.view-option {
+  flex: 1;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.notation-option:hover,
+.view-option:hover { color: var(--ink); }
+.notation-option:focus-visible,
+.view-option:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.notation-option[aria-pressed="true"],
+.view-option[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ----- Search: a narrow vertical tab beside its controls ----- */
+
+.search {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+}
+.search-side {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+}
+.hint {
+  margin: 0;
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+.view-group {
+  display: flex;
+  flex: none;
+  margin-top: 0.8rem;
+}
+.clear {
+  align-self: flex-start;
+  padding: 0.15rem 0.25rem;
+  border: 0;
+  background: none;
+  color: #8a8a8a;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.clear:hover,
+.clear:focus-visible { color: #555; }
+.clear:focus-visible { outline: 2px solid var(--accent); }
+
+/* A single column of frets: the other columns never show. */
+.query-tab {
+  display: block;
+  flex: none;
+  /* The tab only lays out its cells once it is wide enough for a staff. */
+  width: calc(12ch + 42px);
+  --ascii-tabs-font: var(--mono);
+  --ascii-tabs-font-size: 15px;
+  font-family: var(--mono);
+  font-size: 15px;
+}
+.query-tab .ascii-tabs-cell:not([data-c="0"]) { display: none; }
+
+/* ----- Results ----- */
+
+.results-shell {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  margin-top: 0.8rem;
+}
+.results {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+}
+.results:empty { display: none; }
+
+.root-group { margin: 0 0 1.1rem; }
+.root-title {
+  margin: 0 0 0.5rem;
+  font-family: var(--mono);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.results-tab {
+  --tab-size: 14px;
+  --chars: 31;
+  --ascii-tabs-font: var(--mono);
+  --ascii-tabs-font-size: var(--tab-size);
+  display: block;
+  box-sizing: border-box;
+  width: calc(var(--chars) * 1ch + 42px);
+  max-width: 100%;
+  margin: 0 0 0.4rem;
+  padding-inline: 21px;
+  font-family: var(--mono);
+  font-size: var(--tab-size);
+}
+/* The paper sits behind the strings only, so chord names stay on the page. */
+.results-tab .ascii-tabs-staff {
+  position: relative;
+  isolation: isolate;
+  padding-bottom: 21px;
+}
+.results-tab .ascii-tabs-staff::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: auto -21px 0;
+  height: calc(9em + 42px);
+  background: var(--ascii-tabs-sheet);
+  border: 1px solid var(--ascii-tabs-line);
+  border-radius: 8px;
+}
+.results-tab .ascii-tabs-annotations { margin-bottom: 21px; }
+.results-tab .ascii-tabs-cell {
+  font-size: 0.9em;
+  height: calc(1.5em / 0.9);
+}
+/* Centre each name over its fret column. */
+.results-tab .ascii-tabs-annotation {
+  transform: translateX(calc(-50% + .1875em));
+  white-space: nowrap;
+  font-size: .8em;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.diagrams {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.diagrams .finder-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: calc((100% - 0.6rem) / 2);
+  min-height: 11rem;
+  padding: 0.6rem 0.4rem 0.4rem;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  text-align: center;
+}
+.diagrams .finder-card .diagram { width: 100%; max-width: 150px; }
+.diagrams .finder-card .diagram svg { display: block; width: 100%; height: auto; }
+.diagrams .finder-card .name {
+  margin-top: 0.3rem;
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.msg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0.5rem;
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* ----- Footer ----- */
+
+.panel-footer {
+  padding-top: 0.6rem;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+}
+.panel-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #888;
+  text-decoration: none;
+}
+.panel-footer a:focus-visible {
+  outline: 2px solid var(--ink-soft);
+  outline-offset: 3px;
+}

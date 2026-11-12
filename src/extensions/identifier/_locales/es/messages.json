@@ -1,0 +1,54 @@
+{
+  "appName": {
+    "message": "Identificador de acordes",
+    "description": "Nombre de la extensión en el toolbar y el Web Store"
+  },
+  "appDescription": {
+    "message": "Escribí unas notas en un tab y encontrá las formas de arpegio que las contienen, como tablatura o diagramas de acordes.",
+    "description": "Descripción de la extensión en el Web Store"
+  },
+  "inputLabel": {
+    "message": "Notas a buscar",
+    "description": "Etiqueta accesible del tab de una columna donde se escriben los trastes"
+  },
+  "hint": {
+    "message": "Escribí los trastes de las notas que conocés, uno por cuerda.",
+    "description": "Pista junto al tab de búsqueda vacío"
+  },
+  "clearLabel": {
+    "message": "Borrar",
+    "description": "Botón que vacía el tab de búsqueda"
+  },
+  "showTabs": {
+    "message": "Tablatura",
+    "description": "Botón de vista que muestra los resultados como tablatura"
+  },
+  "showDiagrams": {
+    "message": "Diagramas",
+    "description": "Botón de vista que muestra los resultados como diagramas de acordes"
+  },
+  "resultsLabel": {
+    "message": "Resultados de la búsqueda",
+    "description": "Etiqueta accesible de la región de resultados"
+  },
+  "noResults": {
+    "message": "Ningún acorde coincide con esas notas.",
+    "description": "Mensaje cuando ningún acorde tiene todos los trastes escritos"
+  },
+  "notationAmerican": {
+    "message": "Cifrado americano (C D E)",
+    "description": "Tooltip del botón C"
+  },
+  "notationSpanish": {
+    "message": "Cifrado latino (Do Re Mi)",
+    "description": "Tooltip del botón Do"
+  },
+  "siteLabel": {
+    "message": "Todas las tablaturas de arpegios",
+    "description": "Enlace del pie a la página de tablaturas para arpegios del sitio"
+  },
+  "siteUrl": {
+    "message": "https://acordesdeguitarra.com.ar/recursos/tablaturas-para-arpegios",
+    "description": "URL de la página de tablaturas para arpegios en español"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "appName": {
+    "message": "Chord Identifier",
+    "description": "Extension name shown in the Chrome toolbar and Web Store"
+  },
+  "appDescription": {
+    "message": "Write a few notes on a tab and find the arpeggio chord shapes that contain them, as tablature or chord diagrams.",
+    "description": "Extension description in the Web Store"
+  },
+  "inputLabel": {
+    "message": "Notes to search",
+    "description": "Accessible label of the one-column tab where the user writes frets"
+  },
+  "hint": {
+    "message": "Type the frets of the notes you know, one per string.",
+    "description": "Hint beside the empty search tab"
+  },
+  "clearLabel": {
+    "message": "Clear",
+    "description": "Button that empties the search tab"
+  },
+  "showTabs": {
+    "message": "Tablature",
+    "description": "Label of the view button that shows results as tablature"
+  },
+  "showDiagrams": {
+    "message": "Diagrams",
+    "description": "Label of the view button that shows results as chord diagrams"
+  },
+  "resultsLabel": {
+    "message": "Search results",
+    "description": "Accessible label of the results region"
+  },
+  "noResults": {
+    "message": "No chord matches those notes.",
+    "description": "Message when no chord has all the typed frets"
+  },
+  "notationAmerican": {
+    "message": "American notation (C D E)",
+    "description": "Tooltip of the C button"
+  },
+  "notationSpanish": {
+    "message": "Spanish notation (Do Re Mi)",
+    "description": "Tooltip of the Do button"
+  },
+  "siteLabel": {
+    "message": "All arpeggio tabs",
+    "description": "Footer link to the arpeggio tabs page on the website"
+  },
+  "siteUrl": {
+    "message": "https://acordesdeguitarra.com.ar/en/resources/tabs-for-arpeggios",
+    "description": "URL of the arpeggio tabs page in English"
+  }
+}

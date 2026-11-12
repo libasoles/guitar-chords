@@ -95,3 +95,28 @@ test('Circle of Fifths builds independently and packages the shared wheel locall
   assert.ok(fs.statSync(path.join(output, 'fifths.zip')).size > 0);
   assert.doesNotMatch(fs.readFileSync(path.join(extension, 'popup.html'), 'utf8'), /https?:/);
 });
+
+test('Chord Identifier builds independently with the arpeggio positions and its tab and diagram libraries', t => {
+  const output = fs.mkdtempSync(path.join(os.tmpdir(), 'extension-identifier-'));
+  t.after(() => fs.rmSync(output, { recursive: true, force: true }));
+  execFileSync(process.execPath, ['scripts/build-ext.js', 'identifier', '--out-dir', output], { cwd: ROOT, stdio: 'pipe' });
+  const extension = path.join(output, 'identifier');
+  const manifest = JSON.parse(fs.readFileSync(path.join(extension, 'manifest.json')));
+  assert.equal(manifest.manifest_version, 3);
+  assert.deepEqual(manifest.permissions || [], []);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(extension, '_locales/en/messages.json'))).appName.message, 'Chord Identifier');
+  assert.equal(JSON.parse(fs.readFileSync(path.join(extension, '_locales/es/messages.json'))).appName.message, 'Identificador de acordes');
+  for (const file of ['popup.html', 'popup.js', 'popup.css', 'arpeggio-data.js', 'chord-diagram.js', 'chord-card.js', 'note-names.js', 'vendor/svguitar.umd.js', 'vendor/ascii-tabs.js', ...Object.values(manifest.icons)]) {
+    assert.ok(fs.statSync(path.join(extension, file)).size > 0, file);
+  }
+  const sandbox = { window: {} };
+  require('node:vm').runInNewContext(fs.readFileSync(path.join(extension, 'arpeggio-data.js'), 'utf8'), sandbox);
+  const roots = sandbox.window.ARPEGGIO_ROOTS;
+  assert.equal(roots[0].root, 'C');
+  assert.equal(JSON.stringify(roots[0].chords[0].form), '[0,1,0,null,3,null]');
+  assert.equal(roots[0].chords[0].card.name, 'C');
+  assert.ok(roots.every(root => root.chords.every(chord => chord.form.length === 6 && chord.card.fingers.length === 6)));
+  const packaged = execFileSync('unzip', ['-Z1', path.join(output, 'identifier.zip')], { encoding: 'utf8' }).trim().split('\n').filter(name => !name.endsWith('/')).sort();
+  const files = fs.readdirSync(extension, { recursive: true }).filter(file => fs.statSync(path.join(extension, file)).isFile()).sort();
+  assert.deepEqual(packaged, files);
+});

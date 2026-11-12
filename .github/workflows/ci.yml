@@ -103,6 +103,12 @@ jobs:
           name: circle-of-fifths-extension
           path: dist/extensions/fifths.zip
 
+      - name: Upload Chord Identifier artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: chord-identifier-extension
+          path: dist/extensions/identifier.zip
+
   e2e:
     needs: changes
     if: needs.changes.outputs.any == 'true'

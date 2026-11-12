@@ -606,15 +606,20 @@ function stringNotes(name, form) {
   return form.map((fret, string) => fret === null ? '' : spellings.get((open[string] + fret) % 12));
 }
 
-function chordPopover(id, name, form, strings, exactFingering) {
+// Diagram data of one position: the fingering comes from the exact form, then from the chord name.
+function chordCardData(name, form, exactFingering) {
   const fingering = exactFingering || FINGERINGS[form.map((fret) => fret === null ? 'x' : fret).join(' ')] || FINGERINGS[name];
   const fingers = form.map(function (fret, string) {
     return [string + 1, fret === null ? 'x' : fret === 0 ? 'o' : fret, fret > 0 ? Number(fingering[string]) || undefined : undefined];
   });
+  return { name, fingers, barres: [], position: 1, stringNotes: stringNotes(name, form) };
+}
+
+function chordPopover(id, name, form, strings, exactFingering) {
   const label = strings.artChordDiagramLabel + ' ' + name;
   return modal({
     id, label, closeLabel: strings.artArpeggiosClose, className: 'chord-popover arpeggio-popover',
-    content: chordCard({ name, fingers, barres: [], position: 1, stringNotes: stringNotes(name, form) }, label),
+    content: chordCard(chordCardData(name, form, exactFingering), label),
   });
 }
 
@@ -979,4 +984,16 @@ function cardImage() {
   };
 }
 
-module.exports = { renderBody, cardImage, searchControl, GROUPS };
+// Every position per root in page order, with its diagram, for the extension's note search.
+function extensionChords() {
+  const roots = new Map();
+  GROUPS.forEach(function ([, en, , names, forms, fingerings]) {
+    if (!roots.has(en)) roots.set(en, { root: en, chords: [] });
+    names.forEach(function (name, i) {
+      roots.get(en).chords.push({ name, form: forms[i], card: chordCardData(name, forms[i], fingerings && fingerings[i]) });
+    });
+  });
+  return orderedRoots(roots).map(([, root]) => root);
+}
+
+module.exports = { renderBody, cardImage, searchControl, GROUPS, extensionChords };

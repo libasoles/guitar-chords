@@ -190,7 +190,7 @@ const SUITES = {
       /^src\/shared\//,
       /^src\/site\/fifths-wheel\.js$/,
       /^scripts\/build-ext\.js$/,
-      /^scripts\/lib\/(extension-products|icon-png|fifths-icon|tab-icon)\.js$/,
+      /^scripts\/lib\/(extension-products|icon-png|fifths-icon|tab-icon|identifier-icon|article-arpeggios)\.js$/,
       /^test\/extensions\./,
     ],
   },

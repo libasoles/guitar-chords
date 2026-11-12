@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Tablatura vertical con una lupa</title>
+  <rect width="128" height="128" rx="24" fill="#fdfaf5"/>
+  <g stroke="#1a1a1a" stroke-width="4" stroke-linecap="round">
+    <path d="M30 24h44M30 40h44M30 56h44M30 72h44M30 88h44M30 104h44" opacity=".55"/>
+  </g>
+  <g fill="#fdfaf5" stroke="none">
+    <rect x="46" y="34" width="12" height="12"/><rect x="38" y="66" width="12" height="12"/><rect x="54" y="82" width="12" height="12"/>
+  </g>
+  <g font-family="ui-monospace, Menlo, monospace" font-size="15" font-weight="700" fill="#1a1a1a" text-anchor="middle">
+    <text x="52" y="45">0</text><text x="44" y="77">2</text><text x="60" y="93">3</text>
+  </g>
+  <g fill="none" stroke="#8b0000" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="82" cy="78" r="22" fill="#fdfaf5" fill-opacity=".85"/><path d="m99 95 18 18"/>
+  </g>
+</svg>
