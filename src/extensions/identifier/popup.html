@@ -10,36 +10,30 @@
   <header class="site-header">
     <span class="logo" aria-hidden="true"></span>
     <span class="wordmark" id="wordmark">Chord Identifier</span>
-    <div class="notation-group" role="group">
-      <button type="button" id="notation-american" class="notation-option" aria-pressed="true">C</button>
-      <button type="button" id="notation-spanish" class="notation-option" aria-pressed="false">Do</button>
-    </div>
   </header>
 
-  <section class="search">
-    <ascii-tabs id="query" class="query-tab" theme="light" labels="notes" spacing="3"><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>
-    <div class="search-side">
-      <p id="hint" class="hint"></p>
-      <button type="button" id="clear" class="clear"></button>
+  <main class="layout">
+    <div class="results-shell">
+      <div id="results" class="results" role="region" aria-live="polite"></div>
     </div>
-  </section>
-
-  <div class="view-group" id="view-group" role="group">
-    <button type="button" id="view-tabs" class="view-option" aria-pressed="true">
-      <!-- Lucide: align-justify -->
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
-      <span id="view-tabs-label">Tablature</span>
-    </button>
-    <button type="button" id="view-diagrams" class="view-option" aria-pressed="false">
-      <!-- Lucide: grid-3x3 -->
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
-      <span id="view-diagrams-label">Diagrams</span>
-    </button>
-  </div>
-
-  <div class="results-shell">
-    <div id="results" class="results" role="region" aria-live="polite"></div>
-  </div>
+    <aside class="search">
+      <ascii-tabs id="query" class="query-tab" theme="light" labels="notes" spacing="3"><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>
+      <p id="hint" class="hint"></p>
+      <div class="view-group" id="view-group" role="group">
+        <button type="button" id="view-tabs" class="view-option" aria-pressed="true">
+          <!-- Lucide: align-justify -->
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+          <span id="view-tabs-label">Tablature</span>
+        </button>
+        <button type="button" id="view-diagrams" class="view-option" aria-pressed="false">
+          <!-- Lucide: grid-3x3 -->
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
+          <span id="view-diagrams-label">Diagrams</span>
+        </button>
+      </div>
+      <button type="button" id="clear" class="clear"></button>
+    </aside>
+  </main>
 
   <footer class="panel-footer">
     <a id="site-link" href="https://acordesdeguitarra.com.ar/en/resources/tabs-for-arpeggios" target="_blank" rel="noopener noreferrer">

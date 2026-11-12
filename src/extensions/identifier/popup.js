@@ -7,9 +7,8 @@
   'use strict';
 
   const STRINGS = 6;
-  const CHORDS_PER_STAFF = 4;
-  const NOTATION_KEY = 'chordNotation';
-  const EMPTY_COLUMN = [null, null, null, null, null, null];
+  const CHORDS_PER_STAFF = 5;
+    const EMPTY_COLUMN = [null, null, null, null, null, null];
 
   // chrome.i18n is available in extension context; fall back to English elsewhere.
   function i18n(key, fallback) {
@@ -22,8 +21,6 @@
 
   const query = document.getElementById('query');
   const results = document.getElementById('results');
-  const notationAmerican = document.getElementById('notation-american');
-  const notationSpanish = document.getElementById('notation-spanish');
   const viewTabs = document.getElementById('view-tabs');
   const viewDiagrams = document.getElementById('view-diagrams');
   const clear = document.getElementById('clear');
@@ -39,22 +36,9 @@
   query.setAttribute('aria-label', i18n('inputLabel', 'Notes to search'));
   document.getElementById('site-label').textContent = i18n('siteLabel', 'All arpeggio tabs');
   document.getElementById('site-link').href = i18n('siteUrl', 'https://acordesdeguitarra.com.ar/en/resources/tabs-for-arpeggios');
-  notationAmerican.title = i18n('notationAmerican', 'American notation (C D E)');
-  notationSpanish.title = i18n('notationSpanish', 'Spanish notation (Do Re Mi)');
-  notationAmerican.setAttribute('aria-label', notationAmerican.title);
-  notationSpanish.setAttribute('aria-label', notationSpanish.title);
 
-  function loadNotation() {
-    try {
-      const stored = window.localStorage.getItem(NOTATION_KEY);
-      if (stored) return stored === 'es' ? 'es' : 'en';
-    } catch (e) {
-      // localStorage may be unavailable; fall through to the browser language.
-    }
-    return /^es/i.test(typeof chrome !== 'undefined' && chrome.i18n ? chrome.i18n.getUILanguage() : '') ? 'es' : 'en';
-  }
-
-  let notation = loadNotation();
+  // Note names follow the browser language: no switch.
+  const notation = /^es/i.test(typeof chrome !== 'undefined' && chrome.i18n ? chrome.i18n.getUILanguage() : '') ? 'es' : 'en';
   let diagrams = false;
   let frets = new Array(STRINGS).fill(null);
   let version = 0;
@@ -129,8 +113,8 @@
     const image = document.createElement('img');
     image.src = 'note-finder-empty.png';
     image.alt = '';
-    image.width = 130;
-    image.height = 121;
+    image.width = 160;
+    image.height = 149;
     message.appendChild(image);
     const text = document.createElement('div');
     text.textContent = i18n('noResults', 'No chord matches those notes.');
@@ -193,19 +177,6 @@
     scheduleRender(true);
   }
 
-  function selectNotation(next) {
-    if (notation === next) return;
-    notation = next;
-    try { window.localStorage.setItem(NOTATION_KEY, notation); } catch (e) { /* ignore */ }
-    syncNotation();
-    scheduleRender(true);
-  }
-
-  function syncNotation() {
-    notationAmerican.setAttribute('aria-pressed', String(!spanish()));
-    notationSpanish.setAttribute('aria-pressed', String(spanish()));
-  }
-
   // Focus is given by replaying a press on the first cell, which has no real pointer to capture.
   query.setPointerCapture = function () {};
 
@@ -247,14 +218,21 @@
     requestAnimationFrame(focusFirstCell);
   });
 
-  notationAmerican.addEventListener('click', () => selectNotation('en'));
-  notationSpanish.addEventListener('click', () => selectNotation('es'));
   viewTabs.addEventListener('click', () => selectView(false));
   viewDiagrams.addEventListener('click', () => selectView(true));
-  syncNotation();
+
+  // A toolbar popup can first measure the tab at zero size and, with a fixed width, never get
+  // a resize to lay it out again: nudge the width until its cells exist.
+  let layoutTries = 0;
+  function ensureLaidOut() {
+    if (query.querySelector('.ascii-tabs-cell') || layoutTries++ > 60) return;
+    query.style.width = layoutTries % 2 ? 'calc(12ch + 43px)' : '';
+    requestAnimationFrame(ensureLaidOut);
+  }
 
   customElements.whenDefined('ascii-tabs').then(() => {
     resetQuery();
+    ensureLaidOut();
     requestAnimationFrame(focusFirstCell);
   });
 })();

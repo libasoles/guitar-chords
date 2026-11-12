@@ -316,8 +316,7 @@ async function identifier(context, url) {
   assert.equal(await page.locator('.results-tab').count(), 0, 'diagram mode replaces the tablature');
   await page.getByRole('button', { name: 'Tablature' }).click();
   await page.waitForSelector('.results-tab .ascii-tabs-cell');
-  await page.locator('#notation-spanish').click();
-  assert.equal(await page.locator('.root-group .root-title').first().textContent(), 'Do');
+  assert.equal(await page.locator('#notation-spanish').count(), 0, 'there is no notation switch');
   await page.locator('#clear').click();
   assert.equal(await page.locator('.root-group').count(), 0, 'clearing empties the results');
   await cell(0).click();
