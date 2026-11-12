@@ -815,10 +815,12 @@ body:has(.modal-full:popover-open) {
 .arpeggio-group.is-filtering [role="tabpanel"] {
   display: none;
 }
-/* The tab only lays out its cells once it has a width, and the popup sizes itself to the tab. */
+/* ascii-tabs lays out its cells only once it measures a non-empty sheet: the minimum width gives
+   it that first measure, then the popup shrinks to the single visible column. */
 .arpeggio-search-popup .article-tab {
   --tab-size: 20px;
-  width: calc(11ch + 42px);
+  width: max-content;
+  min-width: 50px;
 }
 /* The search tab is a single column. */
 .arpeggio-search-popup .ascii-tabs-cell:not([data-c="0"]) {

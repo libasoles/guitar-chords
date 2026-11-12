@@ -137,8 +137,10 @@ body {
 .query-tab {
   display: block;
   flex: none;
-  /* The tab only lays out its cells once it is wide enough for a staff. */
-  width: calc(12ch + 42px);
+  /* ascii-tabs lays out its cells only once it measures a non-empty sheet: the minimum width gives
+     it that first measure, then it shrinks to the single visible column. */
+  width: max-content;
+  min-width: 50px;
   --ascii-tabs-font: var(--mono);
   --ascii-tabs-font-size: 15px;
   font-family: var(--mono);

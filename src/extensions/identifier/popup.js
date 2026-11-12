@@ -224,12 +224,12 @@
   viewDiagrams.addEventListener('click', () => selectView(true));
 
   // A toolbar popup can first measure the tab at zero size and, with a fixed width, never get
-  // a resize to lay it out again: nudge the width until its cells exist.
+  // a resize to lay it out again: nudge the minimum width until its cells exist.
   function ensureLaidOut() {
     let tries = 0;
     const timer = setInterval(() => {
       if (query.querySelector('.ascii-tabs-cell') || tries++ > 100) return clearInterval(timer);
-      query.style.width = tries % 2 ? 'calc(12ch + 43px)' : '';
+      query.style.minWidth = tries % 2 ? '51px' : '';
     }, 50);
   }
 
