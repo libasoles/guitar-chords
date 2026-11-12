@@ -28,7 +28,6 @@
 
   document.title = i18n('appName', 'Chord Identifier');
   document.getElementById('wordmark').textContent = document.title;
-  document.getElementById('hint').textContent = i18n('hint', 'Type the frets of the notes you know, one per string.');
   document.getElementById('view-tabs-label').textContent = i18n('showTabs', 'Tablature');
   document.getElementById('view-diagrams-label').textContent = i18n('showDiagrams', 'Diagrams');
   clear.textContent = i18n('clearLabel', 'Clear');
@@ -107,7 +106,7 @@
     return row;
   }
 
-  function noResults() {
+  function message(key, fallback) {
     const message = document.createElement('div');
     message.className = 'msg';
     const image = document.createElement('img');
@@ -117,7 +116,7 @@
     image.height = 149;
     message.appendChild(image);
     const text = document.createElement('div');
-    text.textContent = i18n('noResults', 'No chord matches those notes.');
+    text.textContent = i18n(key, fallback);
     message.appendChild(text);
     return message;
   }
@@ -132,7 +131,10 @@
     const current = ++version;
     lazyCards.disconnect();
     results.textContent = '';
-    if (!active()) return;
+    if (!active()) {
+      results.appendChild(message('hint', 'Type the frets of the notes you know, one per string.'));
+      return;
+    }
     let found = false;
     for (const root of roots) {
       // Let pending typing run between roots: each tab is costly to lay out.
@@ -159,7 +161,7 @@
         tab.setDocument(value);
       }
     }
-    if (!found) results.appendChild(noResults());
+    if (!found) results.appendChild(message('noResults', 'No chord matches those notes.'));
   }
 
   let timer;
@@ -223,13 +225,15 @@
 
   // A toolbar popup can first measure the tab at zero size and, with a fixed width, never get
   // a resize to lay it out again: nudge the width until its cells exist.
-  let layoutTries = 0;
   function ensureLaidOut() {
-    if (query.querySelector('.ascii-tabs-cell') || layoutTries++ > 60) return;
-    query.style.width = layoutTries % 2 ? 'calc(12ch + 43px)' : '';
-    requestAnimationFrame(ensureLaidOut);
+    let tries = 0;
+    const timer = setInterval(() => {
+      if (query.querySelector('.ascii-tabs-cell') || tries++ > 100) return clearInterval(timer);
+      query.style.width = tries % 2 ? 'calc(12ch + 43px)' : '';
+    }, 50);
   }
 
+  render();
   customElements.whenDefined('ascii-tabs').then(() => {
     resetQuery();
     ensureLaidOut();

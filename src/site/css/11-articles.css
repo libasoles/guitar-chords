@@ -815,6 +815,11 @@ body:has(.modal-full:popover-open) {
 .arpeggio-group.is-filtering [role="tabpanel"] {
   display: none;
 }
+/* The tab only lays out its cells once it has a width, and the popup sizes itself to the tab. */
+.arpeggio-search-popup .article-tab {
+  --tab-size: 20px;
+  width: calc(11ch + 42px);
+}
 /* The search tab is a single column. */
 .arpeggio-search-popup .ascii-tabs-cell:not([data-c="0"]) {
   display: none;

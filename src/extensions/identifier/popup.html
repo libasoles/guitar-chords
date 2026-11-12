@@ -13,24 +13,25 @@
   </header>
 
   <main class="layout">
-    <div class="results-shell">
-      <div id="results" class="results" role="region" aria-live="polite"></div>
+    <div class="results-column">
+    <div class="view-group" id="view-group" role="group">
+      <button type="button" id="view-tabs" class="view-option" aria-pressed="true">
+        <!-- Lucide: align-justify -->
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+        <span id="view-tabs-label">Tablature</span>
+      </button>
+      <button type="button" id="view-diagrams" class="view-option" aria-pressed="false">
+        <!-- Lucide: grid-3x3 -->
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
+        <span id="view-diagrams-label">Diagrams</span>
+      </button>
+    </div>
+      <div class="results-shell">
+        <div id="results" class="results" role="region" aria-live="polite"></div>
+      </div>
     </div>
     <aside class="search">
       <ascii-tabs id="query" class="query-tab" theme="light" labels="notes" spacing="3"><ascii-tabs-sheet></ascii-tabs-sheet></ascii-tabs>
-      <p id="hint" class="hint"></p>
-      <div class="view-group" id="view-group" role="group">
-        <button type="button" id="view-tabs" class="view-option" aria-pressed="true">
-          <!-- Lucide: align-justify -->
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
-          <span id="view-tabs-label">Tablature</span>
-        </button>
-        <button type="button" id="view-diagrams" class="view-option" aria-pressed="false">
-          <!-- Lucide: grid-3x3 -->
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
-          <span id="view-diagrams-label">Diagrams</span>
-        </button>
-      </div>
       <button type="button" id="clear" class="clear"></button>
     </aside>
   </main>
