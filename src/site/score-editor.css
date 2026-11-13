@@ -10,11 +10,12 @@ body.score-body {
   max-width: 1200px;
 }
 
-/* The editor places the play button at -(width + 16)px, left of the first staff, and the page margin is a few px short of
-   that. The workspace shifts right by 0.5rem into the body's right padding (so the sheet keeps its width and the body is
-   untouched), and the sheet clips everything but the button's strip. */
+/* The editor places the play button at -(width + 16)px, left of the first staff, and the page margin can be shorter than
+   that (a classic scrollbar narrows it further). The workspace gets a 1.5rem gutter, so the staff starts at least 48px from
+   the page edge, and takes the same amount from the body's right padding, so the sheet keeps its width and the body is
+   untouched. The sheet clips everything but the button's strip. */
 @media (min-width: 900px) {
-  .score-workspace { padding-left: 0.5rem; margin-right: -0.5rem; }
+  .score-workspace { padding-left: 1.5rem; margin-right: -1.5rem; }
   .score-main .score-sheet { overflow: clip; overflow-clip-margin: 3rem; }
 }
 
@@ -56,14 +57,14 @@ body.score-body {
 }
 
 /* The sidebar hugs the right edge, so its tooltips open to the left instead of centered above. */
-.score-side-actions .tooltip::after {
+.score-side .tooltip::after {
   right: calc(100% + 0.6rem);
   bottom: 50%;
   left: auto;
   transform: translateY(50%);
 }
 
-.score-side-actions .tooltip::before {
+.score-side .tooltip::before {
   right: calc(100% + 0.35rem);
   bottom: 50%;
   left: auto;
