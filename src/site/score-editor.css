@@ -10,16 +10,11 @@ body.score-body {
   max-width: 1200px;
 }
 
-/* The editor places the play button at -(width + 16)px, left of the first staff. The page margin is a few px short of that,
-   so the workspace gains a small gutter (the page grows by the same amount, keeping the sheet's width) and the sheet clips
-   everything but the button's strip. */
+/* The editor places the play button at -(width + 16)px, left of the first staff, and the page margin is a few px short of
+   that. The workspace shifts right by 0.5rem into the body's right padding (so the sheet keeps its width and the body is
+   untouched), and the sheet clips everything but the button's strip. */
 @media (min-width: 900px) {
-  body.score-body {
-    max-width: calc(1200px + 0.5rem);
-    margin-left: max(0px, calc(50vw - 624px));
-    margin-right: auto;
-  }
-  .score-workspace { padding-left: 0.5rem; }
+  .score-workspace { padding-left: 0.5rem; margin-right: -0.5rem; }
   .score-main .score-sheet { overflow: clip; overflow-clip-margin: 3rem; }
 }
 
@@ -1765,4 +1760,10 @@ body.score-moving-measure, body.score-moving-measure * { cursor: grabbing !impor
   opacity: 0.8;
   pointer-events: none;
   z-index: 2;
+}
+
+/* The button sits at the page's left edge, so its tooltip opens to the right instead of centered (it would be cut off). */
+.score-playback.tooltip::after {
+  left: 0;
+  transform: none;
 }
