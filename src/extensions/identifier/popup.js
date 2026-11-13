@@ -7,9 +7,9 @@
   'use strict';
 
   const STRINGS = 6;
-  const CHORDS_PER_STAFF = 6;
+  const CHORDS_PER_STAFF = 5;
   const HIGHLIGHT = '#c62828';
-  const TAB_CHARS = 47;
+  const TAB_CHARS = 39;
     const EMPTY_COLUMN = [null, null, null, null, null, null];
 
   // chrome.i18n is available in extension context; fall back to English elsewhere.
@@ -40,6 +40,7 @@
   clear.textContent = i18n('clearLabel', 'Clear');
   optionsButton.title = i18n('optionsLabel', 'Options');
   optionsButton.setAttribute('aria-label', optionsButton.title);
+  document.getElementById('popover-close').setAttribute('aria-label', i18n('closeLabel', 'Close'));
   document.getElementById('opt-highlight-label').textContent = i18n('highlightNotes', 'Highlight notes');
   results.setAttribute('aria-label', i18n('resultsLabel', 'Search results'));
   query.setAttribute('aria-label', i18n('inputLabel', 'Notes to search'));
@@ -97,7 +98,12 @@
       const columns = staves[staves.length - 1];
       // A blank column separates the chords.
       if (columns.length) columns.push(EMPTY_COLUMN.slice());
-      annotations[annotations.length - 1].push({ column: columns.length, text: display(chord.name) });
+      const label = display(chord.name);
+      annotations[annotations.length - 1].push({
+        column: columns.length, text: label,
+        html: '<button type="button" class="chord-name" data-index="' + nameChords.length + '">' + escapeHtml(label) + '</button>',
+      });
+      nameChords.push(chord);
       // A note is highlighted (colored and bold) only at the string and fret written in the search, not by pitch.
       columns.push(chord.form.map((fret, s) => {
         if (fret === null) return null;
@@ -127,29 +133,58 @@
     });
   }, { root: results, rootMargin: '200px' });
 
+  // Diagram of a position, with the searched notes highlighted when the option is on.
+  function cardData(chord) {
+    const card = { ...chord.card, name: display(chord.name) };
+    if (highlight) {
+      card.fingers = card.fingers.map(([string, fret, finger]) => {
+        if (frets[string - 1] === null || chord.form[string - 1] !== frets[string - 1]) return [string, fret, finger];
+        const marker = { color: HIGHLIGHT, strokeColor: HIGHLIGHT, textColor: '#fff' };
+        return [string, fret, fret === 'o' ? marker : { ...marker, text: finger ? String(finger) : '' }];
+      });
+    }
+    if (spanish()) card.stringNotes = card.stringNotes.map((note) => window.NoteNames.toSpanishName(note));
+    return card;
+  }
+
+  function cardSlot(chord) {
+    const card = cardData(chord);
+    const slot = document.createElement('div');
+    slot.setAttribute('data-chord-card', '');
+    slot.dataset.chord = JSON.stringify(card);
+    slot.setAttribute('role', 'img');
+    slot.setAttribute('aria-label', card.name);
+    return slot;
+  }
+
   function diagramsFor(chords) {
     const row = document.createElement('div');
     row.className = 'diagrams';
     chords.forEach((chord) => {
-      const card = { ...chord.card, name: display(chord.name) };
-      if (highlight) {
-        card.fingers = card.fingers.map(([string, fret, finger]) => {
-          if (frets[string - 1] === null || chord.form[string - 1] !== frets[string - 1]) return [string, fret, finger];
-          const marker = { color: HIGHLIGHT, strokeColor: HIGHLIGHT, textColor: '#fff' };
-          return [string, fret, fret === 'o' ? marker : { ...marker, text: finger ? String(finger) : '' }];
-        });
-      }
-      if (spanish()) card.stringNotes = card.stringNotes.map((note) => window.NoteNames.toSpanishName(note));
-      const slot = document.createElement('div');
-      slot.setAttribute('data-chord-card', '');
-      slot.dataset.chord = JSON.stringify(card);
-      slot.setAttribute('role', 'img');
-      slot.setAttribute('aria-label', card.name);
+      const slot = cardSlot(chord);
       row.appendChild(slot);
       lazyCards.observe(slot);
     });
     return row;
   }
+
+  // Each chord name over a tablature opens its diagram, as on the website.
+  let nameChords = [];
+  function escapeHtml(text) {
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  const popover = document.getElementById('chord-popover');
+  const popoverCard = document.getElementById('chord-popover-card');
+  results.addEventListener('click', (event) => {
+    const button = event.target.closest('.chord-name');
+    if (!button) return;
+    const slot = cardSlot(nameChords[Number(button.dataset.index)]);
+    popoverCard.replaceChildren(slot);
+    popover.showPopover();
+    window.ChordCard.render(slot);
+    window.ChordCard.positionPopover(popover, button);
+  });
 
   function message(key, fallback) {
     const message = document.createElement('div');
@@ -234,6 +269,7 @@
     lazyCards.disconnect();
     alignObserver.disconnect();
     results.textContent = '';
+    nameChords = [];
     const searching = active();
     let found = false;
     for (const root of roots) {
@@ -371,7 +407,7 @@
   function fitTabs() {
     let size = parseFloat(window.getComputedStyle(document.documentElement).getPropertyValue('--tab-size')) || 18;
     for (let pass = 0; pass < 4; pass++) {
-      const next = Math.max(12, Math.min(26, Math.floor(((results.clientWidth - 44) / (TAB_CHARS * 0.6)) * 2) / 2));
+      const next = Math.max(12, Math.min(24, Math.floor(((results.clientWidth - 44) / (TAB_CHARS * 0.6)) * 2) / 2));
       if (next === size) break;
       size = next;
       document.documentElement.style.setProperty('--tab-size', size + 'px');

@@ -43,6 +43,10 @@
     "message": "Highlight notes",
     "description": "Option that colors the notes matching the search, in tablature and diagrams"
   },
+  "closeLabel": {
+    "message": "Close",
+    "description": "Close button of the chord diagram popup"
+  },
   "siteLabel": {
     "message": "All arpeggio tabs",
     "description": "Footer link to the arpeggio tabs page on the website"

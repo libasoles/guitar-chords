@@ -43,6 +43,10 @@
     "message": "Resaltar notas",
     "description": "Option that colors the notes matching the search, in tablature and diagrams"
   },
+  "closeLabel": {
+    "message": "Cerrar",
+    "description": "Close button of the chord diagram popup"
+  },
   "siteLabel": {
     "message": "Todas las tablaturas de arpegios",
     "description": "Enlace del pie a la página de tablaturas para arpegios del sitio"

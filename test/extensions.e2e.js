@@ -317,7 +317,14 @@ async function identifier(context, url) {
   const colored = await page.locator('.results-tab').first().evaluate(tab => [...tab.querySelectorAll('.ascii-tabs-cell')]
     .filter(cell => cell.querySelector('.ascii-tabs-fret')?.style.color).map(cell => cell.dataset.s));
   assert.ok(colored.length > 0 && colored.every(string => string === '0' || string === '1'), 'only the notes at the searched strings and frets are highlighted');
+  await page.locator('.chord-name').first().click();
+  await page.waitForSelector('#chord-popover:popover-open svg');
+  await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Diagrams' }).click();
+  const card = page.locator('.diagrams > *').first();
+  const box = await card.boundingBox();
+  await page.waitForSelector('.diagrams .finder-card svg');
+  assert.deepEqual(await card.boundingBox(), box, 'diagram cards do not shift when they render');
   await page.waitForSelector('.diagrams .finder-card svg');
   assert.equal(await page.locator('.results-tab').count(), 0, 'diagram mode replaces the tablature');
   await page.close();
