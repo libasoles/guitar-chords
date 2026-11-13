@@ -54,8 +54,7 @@ function bindActions(actions) {
 }
 
 startEditor({
-  defaultClef: 'guitar', saveDelay: 0,
-  vendorBase: new URL('./vendor/', import.meta.url).href,
+  defaultClef: 'guitar', saveDelay: 0, tools: { playback: true },  vendorBase: new URL('./vendor/', import.meta.url).href,
   bindActions,
 }).catch((error) => {
   const stage = document.getElementById('scoreStage');

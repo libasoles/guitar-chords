@@ -10,6 +10,19 @@ body.score-body {
   max-width: 1200px;
 }
 
+/* The editor places the play button at -(width + 16)px, left of the first staff. The page margin is a few px short of that,
+   so the workspace gains a small gutter (the page grows by the same amount, keeping the sheet's width) and the sheet clips
+   everything but the button's strip. */
+@media (min-width: 900px) {
+  body.score-body {
+    max-width: calc(1200px + 0.5rem);
+    margin-left: max(0px, calc(50vw - 624px));
+    margin-right: auto;
+  }
+  .score-workspace { padding-left: 0.5rem; }
+  .score-main .score-sheet { overflow: clip; overflow-clip-margin: 3rem; }
+}
+
 .score-body .site-header {
   border-bottom: 0;
 }
@@ -1728,4 +1741,28 @@ body.score-moving-measure, body.score-moving-measure * { cursor: grabbing !impor
   .score-partitura-promo .part-promo-copy { text-align: center; }
   .score-partitura-figure { --voice-gap: 0.5rem; }
   .score-partitura-preview { width: 100%; }
+}
+
+/* Play/pause: the editor positions it to the left of the first staff; the cursor and hint follow playback. */
+.score-playback svg { display: block; margin: auto; }
+.score-playback {
+  position: absolute;
+  width: 1.875rem;
+  height: 1.875rem;
+  min-width: 1.875rem;
+  min-height: 1.875rem;
+  padding: 0;
+  cursor: pointer;
+}
+.score-playback[aria-busy="true"] { opacity: 0.5; cursor: progress; }
+.score-playback-cursor,
+.score-playback-hint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  background: var(--accent-brand);
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 2;
 }

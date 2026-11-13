@@ -276,6 +276,10 @@ async function run() {
     const url = 'http://localhost:' + server.address().port + '/partitura';
     await page.goto(url);
     await page.waitForSelector('.score-clef-trigger');
+    // The host enables playback; the engine puts the button in a gutter left of the staff, which must stay on screen.
+    const play = await page.locator('#scorePlayback').boundingBox();
+    assert.ok(play && play.x >= 0 && play.width > 0, 'el boton de reproduccion esta visible dentro de la pagina');
+    assert.equal(await page.locator('#scoreSettingsToggle').count(), 0, 'Ajustes no se monta solo por habilitar la reproduccion');
     await checkUndoShortcuts(page);
     assert.equal(await page.locator('.score-clef-trigger').count(), 3);
     await page.evaluate(() => { scoreEditor.ghostOffset = 0; });
