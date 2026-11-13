@@ -1,6 +1,7 @@
 /* Editor privado /partitura. Ejecutar despues de npm run build:site. */
 'use strict';
 const { clearScoreStorage } = require('./score-storage-helpers');
+const { waitForStableStage } = require('./score-stage-helpers');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
@@ -276,6 +277,7 @@ async function run() {
     const url = 'http://localhost:' + server.address().port + '/partitura';
     await page.goto(url);
     await page.waitForSelector('.score-clef-trigger');
+    await waitForStableStage(page);
     // The host enables playback; the engine puts the button in a gutter left of the staff, which must stay on screen.
     const play = await page.locator('#scorePlayback').boundingBox();
     assert.ok(play && play.x >= 0 && play.width > 0, 'el boton de reproduccion esta visible dentro de la pagina');
@@ -348,6 +350,7 @@ async function run() {
     assert.deepEqual(await page.evaluate(() => [scoreEditor.score.clef, scoreEditor.score.fifths]), ['bass', -3]);
     await page.reload();
     await page.waitForSelector('.score-clef-trigger');
+    await waitForStableStage(page);
     assert.deepEqual(await page.evaluate(() => [scoreEditor.score.clef, scoreEditor.score.fifths]), ['bass', -3]);
     assert.deepEqual(await page.evaluate(() => scoreEditor.score.rows), before);
 
@@ -364,6 +367,7 @@ async function run() {
 
     await page.goto('http://localhost:' + server.address().port + '/en/sheet-music-editor');
     await page.waitForSelector('.score-clef-trigger');
+    await waitForStableStage(page);
     await page.locator('.score-clef-trigger').first().click();
     assert.equal(await page.getByRole('dialog', { name: 'Clef and key signature', exact: true }).isVisible(), true);
     await page.keyboard.press('Escape');

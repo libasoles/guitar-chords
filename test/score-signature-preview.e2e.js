@@ -5,6 +5,7 @@ const { chromium } = require('playwright');
 const { playwrightExecutablePath } = require('../scripts/lib/chrome-path');
 const { serveStatic } = require('../scripts/lib/static-server');
 const M = require('../src/site/score-model');
+const { waitForStableStage } = require('./score-stage-helpers');
 
 // The previews are rendered lazily after the popup opens, so measure until they settle instead of once.
 async function expectFramed(page, selector, count) {
@@ -30,17 +31,6 @@ async function expectFramed(page, selector, count) {
   assert.equal(boxes.length, count);
   for (const box of boxes) {
     assert.ok(box.width > 0 && box.height > 0 && box.inside, JSON.stringify(box));
-  }
-}
-
-// The editor re-renders once the page settles (a debounced resize), which closes any open popup. Open them only after that.
-async function waitForStableStage(page) {
-  let previous = '', stable = 0;
-  for (let i = 0; i < 100 && stable < 4; i++) {
-    const current = await page.evaluate(() => document.getElementById('scoreStage').clientWidth + ':' + document.getElementById('scoreStage').innerHTML.length);
-    stable = current === previous ? stable + 1 : 0;
-    previous = current;
-    await page.waitForTimeout(100);
   }
 }
 
