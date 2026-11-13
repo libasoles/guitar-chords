@@ -65,7 +65,7 @@ const IO = require('../src/site/score-io');
     await page.keyboard.press('Escape');
     await page.locator('.score-hairpin-hit').click();
     await page.locator('.score-hairpin-dyn[data-side="start"]').click();
-    await page.locator('[data-dynamic="pp"]').click();
+    await page.locator('[data-dynamic="pp"]:not(.score-palette-item)').click();
     assert.equal(await page.evaluate(() => scoreEditor.score.hairpins[0][0].startDyn), 'pp');
     await page.locator('.score-hairpin-grip[data-side="end"]').focus();
     await page.keyboard.press('ArrowLeft');
