@@ -311,6 +311,9 @@ async function identifier(context, url) {
   const first = await page.locator('.results-tab').first().evaluate(tab => tab.value[0][0].map(note => (note !== null && typeof note === 'object' ? note.fret : note)));
   assert.deepEqual(first, [0, 1, 0, null, 3, null], 'results are tablature by default');
   assert.ok((await page.locator('.root-group').count()) > 1, 'matches are grouped by root');
+  const colored = await page.locator('.results-tab').first().evaluate(tab => [...tab.querySelectorAll('.ascii-tabs-cell')]
+    .filter(cell => cell.querySelector('.ascii-tabs-fret')?.style.color).map(cell => cell.dataset.s));
+  assert.ok(colored.length > 0 && colored.every(string => string === '0' || string === '1'), 'only the notes at the searched strings and frets are highlighted');
   await page.getByRole('button', { name: 'Diagrams' }).click();
   await page.waitForSelector('.diagrams .finder-card svg');
   assert.equal(await page.locator('.results-tab').count(), 0, 'diagram mode replaces the tablature');

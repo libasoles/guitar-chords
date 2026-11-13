@@ -7,7 +7,8 @@
   'use strict';
 
   const STRINGS = 6;
-  const CHORDS_PER_STAFF = 5;
+  const CHORDS_PER_STAFF = 6;
+  const HIGHLIGHT = '#c62828';
     const EMPTY_COLUMN = [null, null, null, null, null, null];
 
   // chrome.i18n is available in extension context; fall back to English elsewhere.
@@ -24,6 +25,9 @@
   const viewTabs = document.getElementById('view-tabs');
   const viewDiagrams = document.getElementById('view-diagrams');
   const clear = document.getElementById('clear');
+  const optionsButton = document.getElementById('options-button');
+  const optionsPanel = document.getElementById('options-panel');
+  const highlightOption = document.getElementById('opt-highlight');
   const roots = window.ARPEGGIO_ROOTS;
 
   document.title = i18n('appName', 'Chord Identifier');
@@ -31,6 +35,9 @@
   document.getElementById('view-tabs-label').textContent = i18n('showTabs', 'Tablature');
   document.getElementById('view-diagrams-label').textContent = i18n('showDiagrams', 'Diagrams');
   clear.textContent = i18n('clearLabel', 'Clear');
+  optionsButton.title = i18n('optionsLabel', 'Options');
+  optionsButton.setAttribute('aria-label', optionsButton.title);
+  document.getElementById('opt-highlight-label').textContent = i18n('highlightNotes', 'Highlight notes');
   results.setAttribute('aria-label', i18n('resultsLabel', 'Search results'));
   query.setAttribute('aria-label', i18n('inputLabel', 'Notes to search'));
   document.getElementById('site-label').textContent = i18n('siteLabel', 'All arpeggio tabs');
@@ -45,15 +52,15 @@
       const saved = JSON.parse(window.localStorage.getItem(STATE_KEY));
       const valid = saved && Array.isArray(saved.frets) && saved.frets.length === STRINGS &&
         saved.frets.every((fret) => fret === null || Number.isInteger(fret));
-      if (valid) return { frets: saved.frets, diagrams: saved.diagrams === true };
+      if (valid) return { frets: saved.frets, diagrams: saved.diagrams === true, highlight: saved.highlight !== false };
     } catch (e) {
       // localStorage may be unavailable or hold something else; start empty.
     }
-    return { frets: new Array(STRINGS).fill(null), diagrams: false };
+    return { frets: new Array(STRINGS).fill(null), diagrams: false, highlight: true };
   }
   function saveState() {
     try {
-      window.localStorage.setItem(STATE_KEY, JSON.stringify({ frets, diagrams }));
+      window.localStorage.setItem(STATE_KEY, JSON.stringify({ frets, diagrams, highlight }));
     } catch (e) {
       // localStorage may be unavailable; ignore.
     }
@@ -62,6 +69,7 @@
   const saved = loadState();
   let diagrams = saved.diagrams;
   let frets = saved.frets;
+  let highlight = saved.highlight;
   let version = 0;
 
   const spanish = () => notation === 'es';
@@ -88,7 +96,13 @@
       if (columns.length) columns.push(EMPTY_COLUMN.slice());
       annotations[annotations.length - 1].push({ column: columns.length, text: display(chord.name) });
       const last = chord.form.findLastIndex((fret) => fret !== null);
-      columns.push(chord.form.map((fret, s) => (fret === null ? null : { fret, bold: s === last })));
+      // A note is highlighted only at the string and fret written in the search, not by pitch.
+      columns.push(chord.form.map((fret, s) => {
+        if (fret === null) return null;
+        const note = { fret, bold: s === last };
+        if (highlight && frets[s] === fret) note.color = HIGHLIGHT;
+        return note;
+      }));
     });
     const tab = document.createElement('ascii-tabs');
     tab.className = 'results-tab';
@@ -116,6 +130,13 @@
     row.className = 'diagrams';
     chords.forEach((chord) => {
       const card = { ...chord.card, name: display(chord.name) };
+      if (highlight) {
+        card.fingers = card.fingers.map(([string, fret, finger]) => {
+          if (frets[string - 1] === null || chord.form[string - 1] !== frets[string - 1]) return [string, fret, finger];
+          const marker = { color: HIGHLIGHT, strokeColor: HIGHLIGHT, textColor: '#fff' };
+          return [string, fret, fret === 'o' ? marker : { ...marker, text: finger ? String(finger) : '' }];
+        });
+      }
       if (spanish()) card.stringNotes = card.stringNotes.map((note) => window.NoteNames.toSpanishName(note));
       const slot = document.createElement('div');
       slot.setAttribute('data-chord-card', '');
@@ -247,6 +268,25 @@
     showQuery();
     scheduleRender(true);
     requestAnimationFrame(focusFirstCell);
+  });
+
+  highlightOption.checked = highlight;
+  highlightOption.addEventListener('change', () => {
+    highlight = highlightOption.checked;
+    saveState();
+    scheduleRender(true);
+  });
+
+  function toggleOptions(open) {
+    optionsPanel.hidden = !open;
+    optionsButton.setAttribute('aria-expanded', String(open));
+  }
+  optionsButton.addEventListener('click', () => toggleOptions(optionsPanel.hidden));
+  document.addEventListener('pointerdown', (event) => {
+    if (!optionsPanel.hidden && !event.target.closest('.options')) toggleOptions(false);
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !optionsPanel.hidden) { toggleOptions(false); optionsButton.focus(); }
   });
 
   viewTabs.addEventListener('click', () => selectView(false));

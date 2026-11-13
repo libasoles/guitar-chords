@@ -35,6 +35,14 @@
     "message": "No chord matches those notes.",
     "description": "Message when no chord has all the typed frets"
   },
+  "optionsLabel": {
+    "message": "Options",
+    "description": "Accessible name of the cog button that opens the options"
+  },
+  "highlightNotes": {
+    "message": "Highlight notes",
+    "description": "Option that colors the notes matching the search, in tablature and diagrams"
+  },
   "siteLabel": {
     "message": "All arpeggio tabs",
     "description": "Footer link to the arpeggio tabs page on the website"

@@ -35,6 +35,14 @@
     "message": "Ningún acorde coincide con esas notas.",
     "description": "Mensaje cuando ningún acorde tiene todos los trastes escritos"
   },
+  "optionsLabel": {
+    "message": "Opciones",
+    "description": "Accessible name of the cog button that opens the options"
+  },
+  "highlightNotes": {
+    "message": "Resaltar notas",
+    "description": "Option that colors the notes matching the search, in tablature and diagrams"
+  },
   "siteLabel": {
     "message": "Todas las tablaturas de arpegios",
     "description": "Enlace del pie a la página de tablaturas para arpegios del sitio"
