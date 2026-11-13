@@ -9,6 +9,7 @@
   const STRINGS = 6;
   const CHORDS_PER_STAFF = 6;
   const HIGHLIGHT = '#c62828';
+  const TAB_CHARS = 47;
     const EMPTY_COLUMN = [null, null, null, null, null, null];
 
   // chrome.i18n is available in extension context; fall back to English elsewhere.
@@ -359,9 +360,22 @@
   function ensureLaidOut() {
     let tries = 0;
     const timer = setInterval(() => {
-      if (query.querySelector('.ascii-tabs-cell') || tries++ > 100) return clearInterval(timer);
+      if (query.querySelector('.ascii-tabs-cell')) { fitTabs(); alignSearch(); return clearInterval(timer); }
+      if (tries++ > 100) return clearInterval(timer);
       query.style.minWidth = tries % 2 ? '51px' : '';
     }, 50);
+  }
+
+  // Grow the digits of every tab, the search one included, until the results fill their column.
+  // The search column widens with them, so settle in a few passes.
+  function fitTabs() {
+    let size = parseFloat(window.getComputedStyle(document.documentElement).getPropertyValue('--tab-size')) || 18;
+    for (let pass = 0; pass < 4; pass++) {
+      const next = Math.max(12, Math.min(26, Math.floor(((results.clientWidth - 44) / (TAB_CHARS * 0.6)) * 2) / 2));
+      if (next === size) break;
+      size = next;
+      document.documentElement.style.setProperty('--tab-size', size + 'px');
+    }
   }
 
   syncView();

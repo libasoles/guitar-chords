@@ -3,6 +3,8 @@
    arpeggio page's flat read-only tabs, scaled down to a 360px popup. */
 
 :root {
+  /* Digit size of every tab: the script grows it so the results fill their column. */
+  --tab-size: 18px;
   --ink: #1a1a1a;
   --ink-soft: #555;
   --paper: #fdfaf5;
@@ -167,16 +169,13 @@ body {
 
 /* A single column of frets: the other columns never show. */
 .query-tab {
-  display: block;
   flex: none;
   /* ascii-tabs lays out its cells only once it measures a non-empty sheet: the minimum width gives
      it that first measure, then it shrinks to the single visible column. */
   width: max-content;
   min-width: 50px;
-  --ascii-tabs-font: var(--mono);
-  --ascii-tabs-font-size: 15px;
-  font-family: var(--mono);
-  font-size: 15px;
+  /* The paper reaches 21px above the strings, as in the results, which have their names there. */
+  padding-top: 21px;
 }
 .query-tab .ascii-tabs-cell:not([data-c="0"]) { display: none; }
 
@@ -189,6 +188,7 @@ body {
   display: flex;
 }
 .results {
+  scrollbar-gutter: stable;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -237,27 +237,31 @@ body {
   font-weight: 600;
 }
 
-.results-tab {
-  --tab-size: 18px;
+.results-tab,
+.query-tab {
   --chars: 47;
   --ascii-tabs-font: var(--mono);
   --ascii-tabs-font-size: var(--tab-size);
   display: block;
   box-sizing: border-box;
-  width: calc(var(--chars) * 1ch + 42px);
-  max-width: 100%;
-  margin: 0 0 0.4rem;
   padding-inline: 21px;
   font-family: var(--mono);
   font-size: var(--tab-size);
 }
+.results-tab {
+  width: calc(var(--chars) * 1ch + 42px);
+  max-width: 100%;
+  margin: 0 0 0.4rem;
+}
 /* The paper sits behind the strings only, so chord names stay on the page. */
-.results-tab .ascii-tabs-staff {
+.results-tab .ascii-tabs-staff,
+.query-tab .ascii-tabs-staff {
   position: relative;
   isolation: isolate;
   padding-bottom: 21px;
 }
-.results-tab .ascii-tabs-staff::before {
+.results-tab .ascii-tabs-staff::before,
+.query-tab .ascii-tabs-staff::before {
   content: "";
   position: absolute;
   z-index: -1;
@@ -268,7 +272,8 @@ body {
   border-radius: 8px;
 }
 .results-tab .ascii-tabs-annotations { margin-bottom: 21px; }
-.results-tab .ascii-tabs-cell {
+.results-tab .ascii-tabs-cell,
+.query-tab .ascii-tabs-cell {
   font-size: 0.9em;
   height: calc(1.5em / 0.9);
 }
