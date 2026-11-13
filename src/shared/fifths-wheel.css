@@ -48,7 +48,7 @@
 .fifths-center-name { font-size: 24px; font-family: var(--serif); font-weight: 600; }
 .fifths-accidental-names { fill: var(--ink-soft); font-family: var(--sans); }
 .fifths-detail { border-top: 1px solid var(--rule); padding-top: 1.2rem; text-align: center; }
-.fifths-detail h2 { margin: 0; }
+.fifths-detail h2 { margin: 0; padding-bottom: 0; border-bottom: 0; }
 /* Text changes crossfade: the old layer fades out while the new one, stacked over it, starts to
    fade in a little later, so the two overlap only briefly and the text never goes missing. */
 .fifths-detail h2, .fifths-chord small, .fifths-chord strong { display: grid; }
