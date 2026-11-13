@@ -97,6 +97,11 @@ body.score-body {
   gap: 0.25rem;
 }
 
+/* The sidebar offers only the crescendo and diminuendo hairpins; each end's intensity is picked from its popup. */
+.score-intensities [data-dynamic] {
+  display: none;
+}
+
 /* The editor adds a voice legend even without the Voices tool; this site has no voices. */
 .score-voice-legend {
   display: none;
