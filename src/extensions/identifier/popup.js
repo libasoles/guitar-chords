@@ -38,8 +38,30 @@
 
   // Note names follow the browser language: no switch.
   const notation = /^es/i.test(typeof chrome !== 'undefined' && chrome.i18n ? chrome.i18n.getUILanguage() : '') ? 'es' : 'en';
-  let diagrams = false;
-  let frets = new Array(STRINGS).fill(null);
+  // The search and the view survive closing the popup.
+  const STATE_KEY = 'identifierSearch';
+  function loadState() {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(STATE_KEY));
+      const valid = saved && Array.isArray(saved.frets) && saved.frets.length === STRINGS &&
+        saved.frets.every((fret) => fret === null || Number.isInteger(fret));
+      if (valid) return { frets: saved.frets, diagrams: saved.diagrams === true };
+    } catch (e) {
+      // localStorage may be unavailable or hold something else; start empty.
+    }
+    return { frets: new Array(STRINGS).fill(null), diagrams: false };
+  }
+  function saveState() {
+    try {
+      window.localStorage.setItem(STATE_KEY, JSON.stringify({ frets, diagrams }));
+    } catch (e) {
+      // localStorage may be unavailable; ignore.
+    }
+  }
+
+  const saved = loadState();
+  let diagrams = saved.diagrams;
+  let frets = saved.frets;
   let version = 0;
 
   const spanish = () => notation === 'es';
@@ -174,9 +196,14 @@
   function selectView(next) {
     if (diagrams === next) return;
     diagrams = next;
+    syncView();
+    saveState();
+    scheduleRender(true);
+  }
+
+  function syncView() {
     viewTabs.setAttribute('aria-pressed', String(!diagrams));
     viewDiagrams.setAttribute('aria-pressed', String(diagrams));
-    scheduleRender(true);
   }
 
   // Focus is given by replaying a press on the first cell, which has no real pointer to capture.
@@ -191,8 +218,8 @@
     document.dispatchEvent(new PointerEvent('pointerup', { pointerType: 'touch' }));
   }
 
-  function resetQuery() {
-    query.setDocument({ value: [[EMPTY_COLUMN.slice()]] });
+  function showQuery() {
+    query.setDocument({ value: [[frets.slice()]] });
   }
 
   // One column only: sideways keys never reach the tab.
@@ -205,6 +232,7 @@
   query.addEventListener('change', (event) => {
     const tab = event.detail.value[0] || [];
     frets = (tab[0] || EMPTY_COLUMN).map((note) => (note === null ? null : fretOf(note)));
+    saveState();
     scheduleRender(!active());
     if (tab.length > 1) {
       // Keep the first column only.
@@ -215,7 +243,8 @@
 
   clear.addEventListener('click', () => {
     frets = new Array(STRINGS).fill(null);
-    resetQuery();
+    saveState();
+    showQuery();
     scheduleRender(true);
     requestAnimationFrame(focusFirstCell);
   });
@@ -233,9 +262,10 @@
     }, 50);
   }
 
+  syncView();
   render();
   customElements.whenDefined('ascii-tabs').then(() => {
-    resetQuery();
+    showQuery();
     ensureLaidOut();
     requestAnimationFrame(focusFirstCell);
   });

@@ -314,8 +314,18 @@ async function identifier(context, url) {
   await page.getByRole('button', { name: 'Diagrams' }).click();
   await page.waitForSelector('.diagrams .finder-card svg');
   assert.equal(await page.locator('.results-tab').count(), 0, 'diagram mode replaces the tablature');
-  await page.getByRole('button', { name: 'Tablature' }).click();
-  await page.waitForSelector('.results-tab .ascii-tabs-cell');
+  await page.close();
+  const reopened = await context.newPage();
+  await reopened.goto(url);
+  await reopened.waitForSelector('.diagrams .finder-card svg');
+  assert.deepEqual(await reopened.locator('#query').evaluate(tab => tab.value[0][0].map(note => (note !== null && typeof note === 'object' ? note.fret : note))), [0, 1, null, null, null, null], 'the search survives reopening');
+  await reopened.getByRole('button', { name: 'Tablature' }).click();
+  await reopened.waitForSelector('.results-tab .ascii-tabs-cell');
+  return identifierEnd(reopened);
+}
+
+async function identifierEnd(page) {
+  const cell = string => page.locator(`#query .ascii-tabs-cell[data-c="0"][data-s="${string}"]`);
   assert.equal(await page.locator('#notation-spanish').count(), 0, 'there is no notation switch');
   await page.locator('#clear').click();
   assert.equal(await page.locator('.root-group').count(), 0, 'clearing empties the results');
@@ -323,7 +333,7 @@ async function identifier(context, url) {
   await page.keyboard.type('2');
   await page.keyboard.press('ArrowDown');
   await page.keyboard.type('9');
-  await page.waitForSelector('.msg');
+  await page.getByText('No chord matches those notes.').waitFor();
   assert.equal(await page.locator('.root-group').count(), 0, 'impossible notes list no chords');
   await page.close();
 }

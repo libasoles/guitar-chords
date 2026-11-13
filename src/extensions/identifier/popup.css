@@ -16,7 +16,7 @@
 * { box-sizing: border-box; }
 
 html, body {
-  width: 680px;
+  width: 600px;
   margin: 0;
 }
 
@@ -41,9 +41,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding-bottom: 0.7rem;
-  margin-bottom: 0.8rem;
-  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.5rem;
 }
 .site-header .logo {
   width: 44px;
@@ -108,7 +106,7 @@ body {
   flex: none;
   flex-direction: column;
   gap: 0.7rem;
-  width: 236px;
+  width: max-content;
   padding-left: 1.1rem;
   border-left: 1px solid var(--rule);
 }
@@ -181,7 +179,7 @@ body {
 }
 
 .results-tab {
-  --tab-size: 14px;
+  --tab-size: 16px;
   --chars: 39;
   --ascii-tabs-font: var(--mono);
   --ascii-tabs-font-size: var(--tab-size);
