@@ -67,11 +67,13 @@ module.exports = {
     ],
     icons: { source: 'src/extensions/identifier/icon.svg', fallback: require('./identifier-icon').drawIdentifierIcon },
     // The positions are the arpeggio page's, with their diagrams, as one script.
-    prepare({ output }) {
+    prepare({ root, output }) {
       const fs = require('fs');
       const path = require('path');
       const { extensionChords } = require('./article-arpeggios');
-      fs.writeFileSync(path.join(output, 'arpeggio-data.js'), 'window.ARPEGGIO_ROOTS = ' + JSON.stringify(extensionChords()) + ';\n');
+      const strings = Object.fromEntries(['en', 'es'].map(locale =>
+        [locale, JSON.parse(fs.readFileSync(path.join(root, 'src/i18n/strings.' + locale + '.json'), 'utf8'))]));
+      fs.writeFileSync(path.join(output, 'arpeggio-data.js'), 'window.ARPEGGIO_ROOTS = ' + JSON.stringify(extensionChords(strings)) + ';\n');
     },
   },
 };

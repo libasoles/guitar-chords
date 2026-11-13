@@ -113,9 +113,10 @@ test('Chord Identifier builds independently with the arpeggio positions and its 
   require('node:vm').runInNewContext(fs.readFileSync(path.join(extension, 'arpeggio-data.js'), 'utf8'), sandbox);
   const roots = sandbox.window.ARPEGGIO_ROOTS;
   assert.equal(roots[0].root, 'C');
-  assert.equal(JSON.stringify(roots[0].chords[0].form), '[0,1,0,null,3,null]');
-  assert.equal(roots[0].chords[0].card.name, 'C');
-  assert.ok(roots.every(root => root.chords.every(chord => chord.form.length === 6 && chord.card.fingers.length === 6)));
+  assert.equal(roots[0].variants[0].label.es, 'mayor');
+  assert.equal(JSON.stringify(roots[0].variants[0].chords[0].form), '[0,1,0,null,3,null]');
+  assert.equal(roots[0].variants[0].chords[0].card.name, 'C');
+  assert.ok(roots.every(root => root.variants.every(variant => variant.chords.every(chord => chord.form.length === 6 && chord.card.fingers.length === 6))));
   const packaged = execFileSync('unzip', ['-Z1', path.join(output, 'identifier.zip')], { encoding: 'utf8' }).trim().split('\n').filter(name => !name.endsWith('/')).sort();
   const files = fs.readdirSync(extension, { recursive: true }).filter(file => fs.statSync(path.join(extension, file)).isFile()).sort();
   assert.deepEqual(packaged, files);

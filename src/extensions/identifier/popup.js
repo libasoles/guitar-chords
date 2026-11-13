@@ -28,7 +28,9 @@
   const optionsButton = document.getElementById('options-button');
   const optionsPanel = document.getElementById('options-panel');
   const highlightOption = document.getElementById('opt-highlight');
-  const roots = window.ARPEGGIO_ROOTS;
+  const roots = window.ARPEGGIO_ROOTS.map((root) => ({ ...root, chords: root.variants.flatMap((variant) => variant.chords) }));
+  const lang = /^es/i.test(typeof chrome !== 'undefined' && chrome.i18n ? chrome.i18n.getUILanguage() : '') ? 'es' : 'en';
+  const variantIndex = new Map();
 
   document.title = i18n('appName', 'Chord Identifier');
   document.getElementById('wordmark').textContent = document.title;
@@ -95,12 +97,11 @@
       // A blank column separates the chords.
       if (columns.length) columns.push(EMPTY_COLUMN.slice());
       annotations[annotations.length - 1].push({ column: columns.length, text: display(chord.name) });
-      const last = chord.form.findLastIndex((fret) => fret !== null);
-      // A note is highlighted only at the string and fret written in the search, not by pitch.
+      // A note is highlighted (colored and bold) only at the string and fret written in the search, not by pitch.
       columns.push(chord.form.map((fret, s) => {
         if (fret === null) return null;
-        const note = { fret, bold: s === last };
-        if (highlight && frets[s] === fret) note.color = HIGHLIGHT;
+        const note = { fret, bold: false };
+        if (highlight && frets[s] === fret) { note.color = HIGHLIGHT; note.bold = true; }
         return note;
       }));
     });
@@ -170,41 +171,102 @@
       : new Promise((resolve) => setTimeout(resolve, 0));
   }
 
+  // The search starts level with the first tablature (or diagram) of the results.
+  const search = document.querySelector('.search');
+  const alignObserver = new ResizeObserver(alignSearch);
+  function alignSearch() {
+    const first = results.querySelector('.results-tab .ascii-tabs-staff, .diagrams > *');
+    let offset = 0;
+    if (first) {
+      const box = first.getBoundingClientRect();
+      // The tab's paper is drawn behind the strings, anchored to the bottom of the staff.
+      const top = first.classList.contains('ascii-tabs-staff')
+        ? box.bottom - parseFloat(window.getComputedStyle(first, '::before').height)
+        : box.top;
+      offset = top - results.getBoundingClientRect().top + results.scrollTop;
+    }
+    search.style.paddingTop = Math.max(0, Math.round(offset)) + 'px';
+  }
+
+  // Fills a container with the chords as tablature or as diagrams.
+  async function fill(container, chords, current) {
+    container.textContent = '';
+    if (diagrams) {
+      container.appendChild(diagramsFor(chords));
+      return;
+    }
+    const { tab, document: value } = tabFor(chords);
+    container.appendChild(tab);
+    await customElements.whenDefined('ascii-tabs');
+    if (current !== version) return;
+    tab.setDocument(value);
+  }
+
+  // Without a search every root shows its quality tabs, as on the website.
+  function qualityTabs(root, panel, current) {
+    const list = document.createElement('div');
+    list.className = 'quality-tabs';
+    list.setAttribute('role', 'tablist');
+    const buttons = root.variants.map((variant, i) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.setAttribute('role', 'tab');
+      button.textContent = variant.label[lang] || variant.label.en;
+      button.addEventListener('click', () => {
+        variantIndex.set(root.root, i);
+        sync();
+        fill(panel, variant.chords, version).then(alignSearch);
+      });
+      list.appendChild(button);
+      return button;
+    });
+    function sync() {
+      const selected = variantIndex.get(root.root) || 0;
+      buttons.forEach((button, i) => button.setAttribute('aria-selected', String(i === selected)));
+    }
+    sync();
+    return list;
+  }
+
   async function render() {
     const current = ++version;
     lazyCards.disconnect();
+    alignObserver.disconnect();
     results.textContent = '';
-    if (!active()) {
-      results.appendChild(message('hint', 'Type the frets of the notes you know, one per string.'));
-      return;
-    }
+    const searching = active();
     let found = false;
     for (const root of roots) {
       // Let pending typing run between roots: each tab is costly to lay out.
       await yieldToInput();
       if (current !== version) return;
-      const chords = matches(root);
+      const chords = searching ? matches(root) : root.chords;
       if (!chords.length) continue;
       found = true;
       const group = document.createElement('section');
       group.className = 'root-group';
+      const header = document.createElement('div');
+      header.className = 'root-header';
       const title = document.createElement('h2');
       title.className = 'root-title';
       title.textContent = rootTitle(root);
-      group.appendChild(title);
-      if (diagrams) {
-        group.appendChild(diagramsFor(chords));
-        results.appendChild(group);
-      } else {
-        const { tab, document: value } = tabFor(chords);
-        group.appendChild(tab);
-        results.appendChild(group);
-        await customElements.whenDefined('ascii-tabs');
-        if (current !== version) return;
-        tab.setDocument(value);
+      header.appendChild(title);
+      const panel = document.createElement('div');
+      let shown = chords;
+      if (!searching) {
+        header.appendChild(qualityTabs(root, panel, current));
+        shown = root.variants[variantIndex.get(root.root) || 0].chords;
       }
+      group.appendChild(header);
+      group.appendChild(panel);
+      results.appendChild(group);
+      if (group === results.firstElementChild) alignObserver.observe(group);
+      await fill(panel, shown, current);
+      if (group === results.firstElementChild) alignSearch();
     }
-    if (!found) results.appendChild(message('noResults', 'No chord matches those notes.'));
+    if (!found) {
+      results.appendChild(message('noResults', 'No chord matches those notes.'));
+      alignSearch();
+    }
   }
 
   let timer;

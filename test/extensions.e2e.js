@@ -301,13 +301,16 @@ async function identifier(context, url) {
   await page.goto(url);
   await page.waitForFunction(() => customElements.get('ascii-tabs') && document.querySelector('#query .ascii-tabs-cell'));
   const cell = string => page.locator(`#query .ascii-tabs-cell[data-c="0"][data-s="${string}"]`);
-  assert.equal(await page.locator('.root-group').count(), 0, 'nothing is listed before typing');
+  await page.waitForSelector('.results-tab .ascii-tabs-cell');
+  assert.equal(await page.locator('.root-group').count(), 13, 'every root is listed before typing, with its quality tabs');
+  assert.ok(await page.locator('.quality-tabs button').count() > 13);
   await cell(0).click();
   await page.keyboard.type('0');
   await page.keyboard.press('ArrowDown');
   await page.keyboard.type('1');
-  await page.waitForSelector('.results-tab .ascii-tabs-cell');
+  await page.waitForFunction(() => !document.querySelector('.quality-tabs') && document.querySelector('.results-tab .ascii-tabs-cell'));
   assert.equal(await page.locator('.root-group .root-title').first().textContent(), 'C');
+  assert.equal(await page.locator('.quality-tabs').count(), 0, 'search results have no quality tabs');
   const first = await page.locator('.results-tab').first().evaluate(tab => tab.value[0][0].map(note => (note !== null && typeof note === 'object' ? note.fret : note)));
   assert.deepEqual(first, [0, 1, 0, null, 3, null], 'results are tablature by default');
   assert.ok((await page.locator('.root-group').count()) > 1, 'matches are grouped by root');
@@ -331,13 +334,17 @@ async function identifierEnd(page) {
   const cell = string => page.locator(`#query .ascii-tabs-cell[data-c="0"][data-s="${string}"]`);
   assert.equal(await page.locator('#notation-spanish').count(), 0, 'there is no notation switch');
   await page.locator('#clear').click();
-  assert.equal(await page.locator('.root-group').count(), 0, 'clearing empties the results');
+  await page.waitForSelector('.quality-tabs');
+  assert.equal(await page.locator('.root-group').count(), 13, 'clearing lists every root again');
   await cell(0).click();
   await page.keyboard.type('2');
   await page.keyboard.press('ArrowDown');
   await page.keyboard.type('9');
   await page.getByText('No chord matches those notes.').waitFor();
   assert.equal(await page.locator('.root-group').count(), 0, 'impossible notes list no chords');
+  const image = await page.locator('.msg img').boundingBox();
+  const shell = await page.locator('#results').boundingBox();
+  assert.ok(Math.abs((image.y + image.height / 2) - (shell.y + shell.height / 2)) < shell.height * 0.2, 'the not-found message is vertically centered');
   await page.close();
 }
 

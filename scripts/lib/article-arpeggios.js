@@ -984,13 +984,26 @@ function cardImage() {
   };
 }
 
-// Every position per root in page order, with its diagram, for the extension's note search.
-function extensionChords() {
+// Every position per root in page order, grouped in the page's quality tabs and with its diagram, for the
+// extension. `strings` maps each locale to its site strings, for the tab labels.
+function extensionChords(strings) {
   const roots = new Map();
-  GROUPS.forEach(function ([, en, , names, forms, fingerings]) {
-    if (!roots.has(en)) roots.set(en, { root: en, chords: [] });
+  GROUPS.forEach(function ([, en, quality, names, forms, fingerings]) {
+    if (!roots.has(en)) roots.set(en, { root: en, variants: [] });
+    // As on the page, the sevenths without fifth share the seventh tab.
+    const tabQuality = quality === 'SeventhNoFifth' ? 'Seventh' : quality;
+    const variants = roots.get(en).variants;
+    let variant = variants.find((item) => item.quality === tabQuality);
+    if (!variant) {
+      variant = {
+        quality: tabQuality,
+        label: Object.fromEntries(Object.entries(strings).map(([locale, localized]) => [locale, qualityLabel(tabQuality, localized)])),
+        chords: [],
+      };
+      variants.push(variant);
+    }
     names.forEach(function (name, i) {
-      roots.get(en).chords.push({ name, form: forms[i], card: chordCardData(name, forms[i], fingerings && fingerings[i]) });
+      variant.chords.push({ name, form: forms[i], card: chordCardData(name, forms[i], fingerings && fingerings[i]) });
     });
   });
   return orderedRoots(roots).map(([, root]) => root);
