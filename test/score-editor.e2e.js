@@ -364,7 +364,9 @@ async function run() {
     assert.equal(await page.getByRole('dialog', { name: 'Clef and key signature', exact: true }).isVisible(), true);
     await page.keyboard.press('Escape');
     await page.locator('.score-key-trigger').first().click();
-    assert.equal(await page.getByRole('group', { name: 'Key signature', exact: true }).locator('button').count(), 15);
+    const keyButtons = page.getByRole('group', { name: 'Key signature', exact: true }).locator('button');
+    await keyButtons.first().waitFor();
+    assert.equal(await keyButtons.count(), 15);
     assert.deepEqual(errors, []);
     const widthsPage = await newPage({ reducedMotion: 'reduce' });
     await widthsPage.goto(url);
