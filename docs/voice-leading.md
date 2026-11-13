@@ -48,4 +48,4 @@ Las reglas estilísticas de composición (por ejemplo, el tratamiento de paralel
 
 ## Verificación
 
-`test/score-voice-leading.unit.js` cubre homorritmia a cuatro partes, continuidad sin cortes fijos de registro, asignación conjunta, cruces explícitos, anclas futuras, saltos monofónicos, el compás reportado, seis notas simultáneas, persistencia, agrupación explícita y copia/pegado. Las pruebas de navegador en `test/score-voice-insertion.e2e.js` verifican plicas, barrado, acciones, deshacer e importación MusicXML. Las fuentes dan principios musicales; los resultados concretos de la heurística se justifican con esos casos, no atribuyéndolos a los autores.
+`test/score-voice-leading.unit.js` cubre homorritmia a cuatro partes, continuidad sin cortes fijos de registro, asignación conjunta, cruces explícitos, anclas futuras, saltos monofónicos, el compás reportado, seis notas simultáneas, persistencia, agrupación explícita y copia/pegado. Las fuentes dan principios musicales; los resultados concretos de la heurística se justifican con esos casos, no atribuyéndolos a los autores.
