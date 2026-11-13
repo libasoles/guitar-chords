@@ -59,6 +59,8 @@ const IO = require('../src/site/score-io');
 
     // Place a crescendo through the same palette action as a visitor.
     await page.locator('[data-hairpin="cresc"]').press('Enter');
+    // The tall side palette scrolls the page when its button takes focus; bring the staff back before measuring it.
+    await page.locator('#m0 g.staff > path').first().scrollIntoViewIfNeeded();
     const staff = await page.locator('#m0 g.staff > path').first().boundingBox();
     await page.mouse.click(staff.x + staff.width * 0.5, staff.y + 12);
     await page.waitForSelector('.score-hairpin-hit');
