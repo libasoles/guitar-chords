@@ -145,22 +145,35 @@
     '<circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="8" x2="14" y1="11" y2="11"/>'];
   var zoomBar = document.createElement('div');
   zoomBar.className = 'fifths-zoom';
+  function stepZoom(dir) {
+    zoomIndex = Math.max(0, Math.min(zoomLevels.length - 1, zoomIndex + dir));
+    wheel.style.setProperty('--zoom', zoomLevels[zoomIndex]);
+    zoomButtons[0].disabled = zoomIndex === zoomLevels.length - 1;
+    zoomButtons[1].disabled = zoomIndex === 0;
+  }
   var zoomButtons = [1, -1].map(function (dir, i) {
     var button = document.createElement('button');
     button.type = 'button';
     button.setAttribute('aria-label', zoomLabels[i]);
     button.title = zoomLabels[i];
     button.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + zoomIcons[i] + '</svg>';
-    button.addEventListener('click', function () {
-      zoomIndex = Math.max(0, Math.min(zoomLevels.length - 1, zoomIndex + dir));
-      wheel.style.setProperty('--zoom', zoomLevels[zoomIndex]);
-      zoomButtons[0].disabled = zoomIndex === zoomLevels.length - 1;
-      zoomButtons[1].disabled = zoomIndex === 0;
-    });
+    button.addEventListener('click', function () { stepZoom(dir); });
     zoomBar.appendChild(button);
     return button;
   });
   zoomButtons[1].disabled = true;
+  // Mouse wheel and trackpad scroll/pinch zoom the wheel; small trackpad deltas accumulate into steps.
+  var wheelDelta = 0;
+  var wheelReset = 0;
+  host.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    clearTimeout(wheelReset);
+    wheelReset = setTimeout(function () { wheelDelta = 0; }, 150);
+    wheelDelta += e.deltaMode === 0 ? e.deltaY : e.deltaY * 30;
+    if (Math.abs(wheelDelta) < 40) return;
+    stepZoom(wheelDelta < 0 ? 1 : -1);
+    wheelDelta = 0;
+  }, { passive: false });
   host.appendChild(zoomBar);
   // The sidebar trails the wheel: a short debounce skips keys the pointer only crosses, and each
   // piece of text crossfades with its replacement, so there is never a moment without text.

@@ -2,7 +2,7 @@
 #fifths-wheel { position: relative; }
 .fifths-ring { transform-box: view-box; transform-origin: 430px 430px; transform: scale(var(--zoom, 1)); transition: transform 200ms ease-out; }
 .fifths-zoom { position: absolute; top: 0; left: 0; display: flex; gap: .25rem; }
-.fifths-zoom button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); color: var(--ink-soft); cursor: pointer; }
+.fifths-zoom button { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: var(--ink-soft); cursor: pointer; }
 .fifths-zoom button:hover:not(:disabled) { color: var(--ink); background: #eee9df; }
 .fifths-zoom button:disabled { opacity: .4; cursor: default; }
 .fifths-zoom button:focus-visible { outline: 2px solid var(--ink-soft); outline-offset: 2px; }
