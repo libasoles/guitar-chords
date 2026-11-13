@@ -37,15 +37,15 @@ test('pegar conserva la TAB del destino al reunir notas en un acorde', () => {
   assert.deepEqual(s.tabs['1:24'], [null, 0, null, null, null, null]);
 });
 
-test('pegar sin espacio tampoco modifica las tablaturas', () => {
+test('pegar sin espacio desborda el compas y conserva las tablaturas existentes', () => {
   const s = M.emptyScore();
   s.rows[0][0] = [{ d: 'w', n: 37, at: 0 }];
   s.rows[0][1] = [{ d: 'q', n: 35, at: 0 }];
   s.tabs = { '0:0': column };
   s.measureDurations = { 1: 48 };
-  const before = M.clone(s);
-  assert.equal(M.pasteSelection(s, copy(s, [{ mi: 0, i: 0 }]), 1), null);
-  assert.deepEqual(s, before);
+  assert.ok(M.pasteSelection(s, copy(s, [{ mi: 0, i: 0 }]), 1));
+  assert.deepEqual(s.tabs['0:0'], column);
+  assert.equal(M.problems(s).length, 1);
 });
 
 test('los fragmentos anteriores y las entradas TAB invalidas se pueden pegar', () => {

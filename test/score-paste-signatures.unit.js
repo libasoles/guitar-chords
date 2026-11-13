@@ -38,7 +38,7 @@ test('los cambios internos del fragmento y los compases largos sobreviven al gua
 test('un pegado rechazado no modifica las firmas', () => {
   const s = M.emptyScore(); s.rows[0][2] = [{ d: 'w', n: 30 }];
   const before = M.clone(s);
-  assert.equal(M.pasteSelection(s, fragment(), 2), null); assert.deepEqual(s, before);
+  assert.equal(M.pasteSelection(s, { ...fragment(), measures: [[{ d: 'invalid' }]] }, 2), null); assert.deepEqual(s, before);
 });
 
 test('el pegado deja intactos los cambios posteriores del destino', () => {
@@ -69,5 +69,6 @@ test('pasting onto the measure it was copied from follows the existing figures',
   assert.ok(M.pasteSelection(s, fragment, 0));
   assert.deepEqual(M.measures(s)[0].map((ev) => ev.at), [0, 0, 36, 36]);
   assert.equal(M.measureLength(M.measures(s)[0]), M.capacity(s, 0));
-  assert.equal(M.pasteSelection(s, fragment, 0), null);
+  assert.ok(M.pasteSelection(s, fragment, 0), 'un tercer pegado sigue al anterior aunque desborde el compas');
+  assert.equal(M.problems(s).length, 1);
 });
