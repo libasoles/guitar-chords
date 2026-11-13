@@ -78,14 +78,21 @@ body {
 
 .fifths-chord {
   display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
+  align-items: stretch;
+  padding: 0;
+}
+
+.fifths-chord small,
+.fifths-chord strong {
   padding: 0.35rem 0.7rem;
 }
 
+/* White rule between the degree column and the chord column. */
 .fifths-chord small {
-  width: 3.2rem;
+  box-sizing: content-box;
+  width: 2rem;
   margin: 0;
+  border-right: 2px solid #fff;
 }
 
 .site-link {

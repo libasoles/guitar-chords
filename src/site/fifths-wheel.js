@@ -103,6 +103,11 @@
     });
   }
   var wheel = svg('svg', { viewBox: '0 0 860 860', class: 'fifths-svg', role: 'group', 'aria-label': es ? 'Tonalidades y armaduras' : pt ? 'Tonalidades e armaduras de clave' : 'Keys and key signatures' });
+  // The staves stay put behind the ring, which is the only part the zoom scales.
+  var staves = svg('g', { class: 'fifths-staves' });
+  var ring = svg('g', { class: 'fifths-ring' });
+  wheel.appendChild(staves);
+  wheel.appendChild(ring);
   keys.forEach(function (_, index) {
     var notes = scale(index);
     [false, true].forEach(function (minor) {
@@ -117,21 +122,46 @@
       g.appendChild(degree);
       buttons.push({ el: g, label: label, degree: degree, index: index, minor: minor, pc: pc(chord), quality: minor ? 'm' : '' });
       interact(g, index, minor);
-      wheel.appendChild(g);
+      ring.appendChild(g);
     });
     var p = polar(340, index * 30);
     var group = svg('g', { transform: 'translate(' + (p[0] - 82) + ' ' + (p[1] - 57) + ')', class: 'fifths-outer-signature' });
     group.appendChild(staff(index, 165, 16));
-    wheel.appendChild(group);
+    staves.appendChild(group);
   });
   // Related keys are cloned onto a layer above the wheel so they can stand out
   // (zoom and shadow) without reordering the interactive sectors, which would drop focus.
   var lift = svg('g', { class: 'fifths-lift', 'aria-hidden': 'true' });
-  wheel.appendChild(lift);
-  wheel.appendChild(svg('circle', { cx: 430, cy: 430, r: 117, class: 'fifths-center' }));
+  ring.appendChild(lift);
+  ring.appendChild(svg('circle', { cx: 430, cy: 430, r: 117, class: 'fifths-center' }));
   var centerName = svg('text', { x: 430, y: 430, 'text-anchor': 'middle', 'dominant-baseline': 'central', class: 'fifths-center-name' });
-  wheel.appendChild(centerName);
+  ring.appendChild(centerName);
   host.appendChild(wheel);
+  // Zoom controls: the ring grows in steps so the degree names can be read.
+  var zoomLevels = [1, 1.15, 1.3, 1.45];
+  var zoomIndex = 0;
+  var zoomLabels = es ? ['Acercar la rueda', 'Alejar la rueda'] : pt ? ['Aproximar a roda', 'Afastar a roda'] : ['Zoom in', 'Zoom out'];
+  var zoomIcons = ['<circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="11" x2="11" y1="8" y2="14"/><line x1="8" x2="14" y1="11" y2="11"/>',
+    '<circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="8" x2="14" y1="11" y2="11"/>'];
+  var zoomBar = document.createElement('div');
+  zoomBar.className = 'fifths-zoom';
+  var zoomButtons = [1, -1].map(function (dir, i) {
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.setAttribute('aria-label', zoomLabels[i]);
+    button.title = zoomLabels[i];
+    button.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + zoomIcons[i] + '</svg>';
+    button.addEventListener('click', function () {
+      zoomIndex = Math.max(0, Math.min(zoomLevels.length - 1, zoomIndex + dir));
+      wheel.style.setProperty('--zoom', zoomLevels[zoomIndex]);
+      zoomButtons[0].disabled = zoomIndex === zoomLevels.length - 1;
+      zoomButtons[1].disabled = zoomIndex === 0;
+    });
+    zoomBar.appendChild(button);
+    return button;
+  });
+  zoomButtons[1].disabled = true;
+  host.appendChild(zoomBar);
   // The sidebar trails the wheel: a short debounce skips keys the pointer only crosses, and each
   // piece of text crossfades with its replacement, so there is never a moment without text.
   var detailKey = null;
