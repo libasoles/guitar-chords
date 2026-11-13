@@ -10,16 +10,20 @@ const { serveStatic } = require('../scripts/lib/static-server');
 async function checkUndoShortcuts(page) {
   const rowCount = () => page.evaluate(() => scoreEditor.score.rows.length);
   const initial = await rowCount();
-  for (const shortcut of ['Meta+Shift+z', 'Meta+z', 'Control+Shift+z', 'Control+z']) {
+  for (const [undo, redo] of [['Meta+z', 'Meta+Shift+z'], ['Control+z', 'Control+Shift+z'], ['Control+z', 'Control+y']]) {
     await page.locator('#scoreAddRow').click();
     assert.equal(await rowCount(), initial + 1);
-    await page.keyboard.press(shortcut);
-    assert.equal(await rowCount(), initial, shortcut + ' deshace la edicion');
+    await page.keyboard.press(undo);
+    assert.equal(await rowCount(), initial, undo + ' deshace la edicion');
+    await page.keyboard.press(redo);
+    assert.equal(await rowCount(), initial + 1, redo + ' la rehace');
+    await page.keyboard.press(undo);
+    assert.equal(await rowCount(), initial);
   }
   // Los campos conservan su propio historial de texto.
   await page.locator('#scoreAddRow').click();
   await page.locator('#scoreTitle').focus();
-  await page.keyboard.press('Meta+Shift+z');
+  await page.keyboard.press('Meta+z');
   assert.equal(await rowCount(), initial + 1, 'editar texto no deshace la partitura');
   await page.locator('#scoreStage').focus();
   await page.keyboard.press('Meta+z');
@@ -1151,7 +1155,7 @@ async function run() {
     await page.mouse.down();
     await page.mouse.move(line.x + line.width * 0.6, line.y + line.height / 2, { steps: 8 });
     await page.mouse.up();
-    assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0][0].n), 25);
+    assert.equal(await page.evaluate(() => scoreEditor.score.rows[0][0].find((ev) => !ev.rest).n), 25, 'una nota sola en un compas vacio supone silencios antes');
     // Con el desplazamiento activo la figura queda arriba a la izquierda del puntero y se suelta donde esta la figura.
     await page.evaluate(() => { scoreEditor.ghostOffset = 2; });
     await page.mouse.move(palette.x + palette.width / 2, palette.y + palette.height / 2);

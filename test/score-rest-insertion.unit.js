@@ -29,9 +29,11 @@ for (const bassDuration of ['e', 'q']) {
   }
 }
 
-test('prepending still rejects a voice that is already full without mutating it', () => {
+test('prepending to a voice that is already full overfills the measure without mutating the original', () => {
   const measure = Array.from({ length: 6 }, (_, i) => ({ d: 'e', n: 28 + i, v: 1, at: i * 12 }));
   const original = structuredClone(measure);
-  assert.deepEqual(M.placeRest(measure, { d: 'e', rest: true }, 0, 28, { meter: '6/8' }, 0, true), { full: true });
+  const placed = M.placeRest(measure, { d: 'e', rest: true }, 0, 28, { meter: '6/8' }, 0, true);
+  assert.equal(placed.full, undefined);
+  assert.equal(M.measureLength(placed.measure), 84);
   assert.deepEqual(measure, original);
 });

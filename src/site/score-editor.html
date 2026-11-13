@@ -46,6 +46,7 @@
     </header>
 
     <main class="score-page">
+      <section id="editor" class="score-editor">
       <div class="score-workspace">
         <div class="score-main">
           <div id="scoreTabs" class="score-doc-tabs" role="group" aria-label="%%scoreTabs%%" data-default-title="%%PAGE_H1%%">
@@ -65,6 +66,7 @@
           <div id="scoreBarlines" class="score-barlines" role="toolbar" aria-label="%%scoreBarlines%%" aria-orientation="vertical"></div>
           <div class="score-side-actions">
             <button id="scoreClear" class="score-download tooltip" type="button" data-icon="trash" aria-label="%%scoreClear%%" data-tooltip="%%scoreClear%%"></button>
+            <button id="scoreDuplicate" class="score-download" type="button" hidden></button>
             <button id="scoreImport" class="score-download tooltip" type="button" data-icon="upload" aria-label="%%scoreImport%%" data-tooltip="%%scoreImport%%"></button>
             <input id="scoreImportFile" type="file" accept=".musicxml,.xml,.mid,.midi,audio/midi,application/xml,text/xml" hidden />
             <div id="scoreDownloads" class="score-downloads">
@@ -82,6 +84,7 @@
         <button id="scoreAddRow" class="score-tool" type="button" aria-label="%%scoreAddRow%%" title="%%scoreAddRow%%"></button>
         <button id="scoreRemoveRow" class="score-tool" type="button" aria-label="%%scoreRemoveRow%%" title="%%scoreRemoveRow%%" hidden></button>
       </div>
+      </section>
       <section class="score-about" aria-label="%%scoreSeoH1%%">
         <p class="score-about-lead">%%scoreAboutLead%%</p>
         <details class="score-about-item">
