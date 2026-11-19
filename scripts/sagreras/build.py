@@ -57,6 +57,11 @@ ENGRAVING_FIXES = {49: clear_triplets, 55: clear_triplets, 53: separate_rests, 5
 # reduccion y se queda con el primer nivel que ocupa menos paginas.
 SCALES = [45, 41, 38, 35]  # la escala de Verovio es entera; 45 es la del motor; con menos de 35 lo impreso es ilegible
 
+# Mas aire entre figuras (spacingLinear / spacingNonLinear de Verovio) en piezas con fusas con doble puntillo,
+# cuyos puntillos rozan la plica de la figura siguiente con el espaciado normal (39).
+SPACING = {39: {'spacingLinear': 0.3, 'spacingNonLinear': 0.7}}
+
+
 def zoom_options(scale):
     return {'scale': scale, 'pageWidth': round(2100 * 45 / scale), 'pageHeight': round(2970 * 45 / scale)}
 
@@ -135,6 +140,7 @@ def build(number):
     import tabify
 
     select()
+    extract.PREVIEW_EXTRA = SPACING.get(number, {})
     source = os.path.join(SOURCES, f'{number:02d}.musicxml')
     if not os.path.exists(source):
         raise SystemExit(f'falta la fuente: {source}')
@@ -158,6 +164,7 @@ def build(number):
         for level in ([PDF_OVERRIDES[number]] if number in PDF_OVERRIDES else [zoom_options(sc) for sc in SCALES]):
             if number in {69, 70}:
                 level = {**level, 'pageMarginTop': 160}  # margen para el titulo con grabado compacto
+            level = {**level, **SPACING.get(number, {})}
             tabify.PDF_OPTIONS = {**base_options, **level}
             exported = os.path.join(tmp, f"export-{level['scale']}")
             tabify.export(os.path.join(prepared, tabify.NORMALIZED_NAME), os.path.join(prepared, tabify.SUGGESTION_NAME),

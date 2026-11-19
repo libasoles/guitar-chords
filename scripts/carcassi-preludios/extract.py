@@ -150,6 +150,10 @@ def name_of(number):
 
 
 
+# Opciones extra de Verovio para la vista previa (la edicion que lo necesite las fija antes de llamar).
+PREVIEW_EXTRA = {}
+
+
 def write_preview(number, prepared, exported):
     """Opening measures with notation and the same TAB fingering as the downloadable PDF."""
     import tabify
@@ -158,7 +162,7 @@ def write_preview(number, prepared, exported):
         first_row = json.load(f)["rows"][0]
     with open(os.path.join(exported, "score.musicxml"), encoding="utf-8") as f:
         xml = f.read()
-    toolkit = tabify.new_toolkit({**tabify.PREVIEW_OPTIONS, "spacingStaff": 9})
+    toolkit = tabify.new_toolkit({**tabify.PREVIEW_OPTIONS, "spacingStaff": 9, **PREVIEW_EXTRA})
     if not toolkit.loadData(xml):
         raise RuntimeError("Verovio no pudo leer el MusicXML con tablatura")
     last = PREVIEW_MEASURES.get(EDITION, {}).get(number, first_row['last'] + 1)
