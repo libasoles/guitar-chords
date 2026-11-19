@@ -17,15 +17,19 @@ run('articles-carcassi', async ({ base, page, tmp, BASE_URL }) => {
 
     // Index: one card per article, linking to it.
     await page.goto(base + index);
-    assert.equal(await page.locator('.article-card').count(), 13);
+    assert.equal(await page.locator('.article-card').count(), 2);
     assert.equal(await page.locator('.article-card').first().getAttribute('href'), article);
-    assert.equal(await page.locator('.article-card').nth(1).getAttribute('href'), pagePath('articulo-preludios-carcassi', locale));
+    assert.equal(await page.locator('.article-card').nth(1).getAttribute('href'), pagePath('articulo-tablaturas-arpegios', locale));
     assert.match(await page.locator('.article-card p').first().textContent(), /Carcassi/);
-    const arpeggiosImage = page.locator('.article-card').nth(2).locator('img');
+    const arpeggiosImage = page.locator('.article-card').nth(1).locator('img');
     assert.match(await arpeggiosImage.getAttribute('src'), /^\/assets\/articles\/arpeggios\/preview(?:\.[a-f0-9]+)?\.svg$/);
     await arpeggiosImage.evaluate((img) => img.decode());
-    // No text link in the list besides the cards (the banner is the link).
-    assert.equal(await page.locator('main a[href*="preludios"], main a[href*="preludes"]').count(), 2);
+
+    // Scores index: the preludes card comes first, with no text link besides it (the banner is the link).
+    await page.goto(base + pagePath('partituras', locale));
+    assert.equal(await page.locator('.article-card').count(), 11);
+    assert.equal(await page.locator('.article-card').first().getAttribute('href'), pagePath('articulo-preludios-carcassi', locale));
+    assert.equal(await page.locator('main a[href="' + pagePath('articulo-preludios-carcassi', locale) + '"]').count(), 1);
 
     // Article: static examples, no horizontal scroll on mobile.
     await page.goto(base + article);
