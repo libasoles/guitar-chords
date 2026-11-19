@@ -179,7 +179,8 @@ def originals():
 
 
 # Cejillas que la edición original no imprime pero que fijan la digitación (ver README, «Cejillas»).
-BARRES = {10: [{'bar': 1, 'at': 0.0, 'fret': 4, 'strings': 6, 'end_bar': 2, 'end_at': 0.0},
+BARRES = {13: [{'bar': 2, 'at': 0.0, 'fret': 3, 'strings': 6, 'end_bar': 3, 'end_at': 0.0}],
+          10: [{'bar': 1, 'at': 0.0, 'fret': 4, 'strings': 6, 'end_bar': 2, 'end_at': 0.0},
               {'bar': 2, 'at': 0.0, 'fret': 5, 'strings': 6, 'end_bar': 3, 'end_at': 0.0}],
           8: [{'bar': 4, 'at': 0.0, 'fret': 4, 'strings': 6, 'end_bar': 5, 'end_at': 0.0}]}
 
