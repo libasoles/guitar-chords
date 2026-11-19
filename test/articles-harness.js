@@ -85,7 +85,7 @@ async function checkCollection(env, spec) {
     assert.equal(titles.length, expected.length);
     titles.forEach((title, i) => (expected[i] instanceof RegExp ? assert.match(title, expected[i]) : assert.equal(title, expected[i])));
     assert.equal(await cards.locator('svg.score-svg').count(), published.length);
-    assert.equal(await page.locator('.article-back a[href="' + pagePath('articulos', locale) + '"]').count(), 1);
+    assert.equal(await page.locator('.article-back a[href="' + pagePath('partituras', locale) + '"]').count(), 1);
     if (spec.extra) await spec.extra(page, locale);
     await cards.first().click();
     const modal = page.locator('.modal-full:popover-open');

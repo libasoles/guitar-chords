@@ -23,6 +23,7 @@ const SLUGS = {
   'politica-de-privacidad': { es: 'politica-de-privacidad', en: 'privacy-policy', pt: 'politica-de-privacidade' },
   'partitura': { es: 'partitura', en: 'sheet-music-editor', pt: 'editor-de-partitura', isNew: true },
   'articulos': { es: 'articulos', en: 'articles', pt: 'artigos', isNew: true },
+  'partituras': { es: 'partituras', en: 'sheet-music', pt: 'partituras', isNew: true },
   'articulo-carcassi': { es: 'articulos/descomposicion-de-acordes-en-carcassi', en: 'articles/chord-decomposition-in-carcassi', pt: 'artigos/decomposicao-de-acordes-em-carcassi', isNew: true },
   'articulo-tablaturas-arpegios': { es: 'recursos/tablaturas-para-arpegios', en: 'resources/tabs-for-arpeggios', pt: 'recursos/tablaturas-para-arpejos', isNew: true, was: { es: 'articulos/tablaturas-para-arpegios', en: 'articles/tabs-for-arpeggios', pt: 'artigos/tablaturas-para-arpejos' } },
   'articulo-preludios-santisteban': { es: 'partituras/preludios-de-carcassi-santisteban', en: 'sheet-music/carcassi-preludes-santisteban', pt: 'partituras/preludios-de-carcassi-santisteban', isNew: true, was: { es: 'articulos/preludios-de-carcassi-santisteban', en: 'articles/carcassi-preludes-santisteban', pt: 'artigos/preludios-de-carcassi-santisteban' } },

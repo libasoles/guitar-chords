@@ -480,6 +480,7 @@ const SCORE_EDITOR_SLUG = "partitura";
 // Articles section (src/site/article.html): an index and one article, found
 // only through the sitemap — no link from the home page or the footer.
 const ARTICLES_SLUG = "articulos";
+const SCORES_SLUG = "partituras";
 const ARTICLE_CARCASSI_SLUG = "articulo-carcassi";
 const ARTICLE_ARPEGGIOS_SLUG = "articulo-tablaturas-arpegios";
 const ARTICLE_PRELUDES_SLUG = "articulo-preludios-carcassi";
@@ -1415,20 +1416,37 @@ function renderArticlesIndex(strings, locale) {
       strings.artCarcCardSummary,
     ) +
     articleCard(
-      ARTICLE_PRELUDES_SLUG,
-      locale,
-      articlePreludes.cardImage().url,
-      [684, 204],
-      strings.artPreludesH1,
-      strings.artPreludesCardSummary,
-    ) +
-    articleCard(
       ARTICLE_ARPEGGIOS_SLUG,
       locale,
       articleArpeggios.cardImage().url,
       [684, 240],
       strings.artArpeggiosH1,
       strings.artArpeggiosIntro,
+    );
+  return renderArticlePage(
+    strings,
+    locale,
+    ARTICLES_SLUG,
+    {
+      title: "artIndexPageTitle",
+      meta: "artIndexMetaDescription",
+      h1: "artIndexH1",
+      lead: "artIndexLead",
+    },
+    card,
+    "",
+  );
+}
+
+function renderScoresIndex(strings, locale) {
+  const card =
+    articleCard(
+      ARTICLE_PRELUDES_SLUG,
+      locale,
+      articlePreludes.cardImage().url,
+      [684, 204],
+      strings.artPreludesH1,
+      strings.artPreludesCardSummary,
     ) +
     articleCard(ARTICLE_SANTISTEBAN_SLUG, locale, articlePreludes.santisteban.cardImage().url, [684, 204], strings.artSantistebanH1, strings.artSantistebanCardSummary) +
     articleCard(ARTICLE_WALTZES_SLUG, locale, articlePreludes.waltzes.cardImage().url, articlePreludes.waltzes.cardImage().size, strings.artWaltzesH1, strings.artWaltzesCardSummary) +
@@ -1443,12 +1461,12 @@ function renderArticlesIndex(strings, locale) {
   return renderArticlePage(
     strings,
     locale,
-    ARTICLES_SLUG,
+    SCORES_SLUG,
     {
-      title: "artIndexPageTitle",
-      meta: "artIndexMetaDescription",
-      h1: "artIndexH1",
-      lead: "artIndexLead",
+      title: "scoresIndexPageTitle",
+      meta: "scoresIndexMetaDescription",
+      h1: "scoresIndexH1",
+      lead: "scoresIndexLead",
     },
     card,
     "",
@@ -1499,9 +1517,9 @@ function renderArpeggiosArticle(strings, locale) {
 function renderWaltzesArticle(strings, locale) {
   const back =
     '<p class="article-back"><a href="' +
-    pagePath(ARTICLES_SLUG, locale) +
+    pagePath(SCORES_SLUG, locale) +
     '">' +
-    escapeHtml(strings.artBackToIndex) +
+    escapeHtml(strings.artBackToScores) +
     "</a></p>";
   return renderArticlePage(
     strings,
@@ -1521,9 +1539,9 @@ function renderPreludesArticle(strings, locale, santisteban = false) {
   const crossLink = '<p class="article-back"><a href="' + pagePath(other, locale) + '">' + escapeHtml(otherLabel) + '</a></p>';
   const back =
     '<p class="article-back"><a href="' +
-    pagePath(ARTICLES_SLUG, locale) +
+    pagePath(SCORES_SLUG, locale) +
     '">' +
-    escapeHtml(strings.artBackToIndex) +
+    escapeHtml(strings.artBackToScores) +
     "</a></p>";
   return renderArticlePage(
     strings,
@@ -1543,9 +1561,9 @@ function renderPreludesArticle(strings, locale, santisteban = false) {
 function renderProgressiveArticle(strings, locale) {
   const back =
     '<p class="article-back"><a href="' +
-    pagePath(ARTICLES_SLUG, locale) +
+    pagePath(SCORES_SLUG, locale) +
     '">' +
-    escapeHtml(strings.artBackToIndex) +
+    escapeHtml(strings.artBackToScores) +
     "</a></p>";
   return renderArticlePage(
     strings,
@@ -1566,9 +1584,9 @@ function renderProgressiveArticle(strings, locale) {
 function renderAguadoArticle(strings, locale) {
   const back =
     '<p class="article-back"><a href="' +
-    pagePath(ARTICLES_SLUG, locale) +
+    pagePath(SCORES_SLUG, locale) +
     '">' +
-    escapeHtml(strings.artBackToIndex) +
+    escapeHtml(strings.artBackToScores) +
     "</a></p>";
   return renderArticlePage(
     strings,
@@ -1588,9 +1606,9 @@ function renderAguadoArticle(strings, locale) {
 function renderSagrerasArticle(strings, locale) {
   const back =
     '<p class="article-back"><a href="' +
-    pagePath(ARTICLES_SLUG, locale) +
+    pagePath(SCORES_SLUG, locale) +
     '">' +
-    escapeHtml(strings.artBackToIndex) +
+    escapeHtml(strings.artBackToScores) +
     "</a></p>";
   return renderArticlePage(
     strings,
@@ -1610,9 +1628,9 @@ function renderSagrerasArticle(strings, locale) {
 function renderSorArticle(strings, locale) {
   const back =
     '<p class="article-back"><a href="' +
-    pagePath(ARTICLES_SLUG, locale) +
+    pagePath(SCORES_SLUG, locale) +
     '">' +
-    escapeHtml(strings.artBackToIndex) +
+    escapeHtml(strings.artBackToScores) +
     "</a></p>";
   return renderArticlePage(
     strings,
@@ -1632,9 +1650,9 @@ function renderSorArticle(strings, locale) {
 function renderSorEstudiosArticle(strings, locale) {
   const back =
     '<p class="article-back"><a href="' +
-    pagePath(ARTICLES_SLUG, locale) +
+    pagePath(SCORES_SLUG, locale) +
     '">' +
-    escapeHtml(strings.artBackToIndex) +
+    escapeHtml(strings.artBackToScores) +
     "</a></p>";
   return renderArticlePage(
     strings,
@@ -1654,9 +1672,9 @@ function renderSorEstudiosArticle(strings, locale) {
 function renderGiulianiArpegiosArticle(strings, locale) {
   const back =
     '<p class="article-back"><a href="' +
-    pagePath(ARTICLES_SLUG, locale) +
+    pagePath(SCORES_SLUG, locale) +
     '">' +
-    escapeHtml(strings.artBackToIndex) +
+    escapeHtml(strings.artBackToScores) +
     "</a></p>";
   return renderArticlePage(
     strings,
@@ -1676,9 +1694,9 @@ function renderGiulianiArpegiosArticle(strings, locale) {
 function renderBarriosArticle(strings, locale) {
   const back =
     '<p class="article-back"><a href="' +
-    pagePath(ARTICLES_SLUG, locale) +
+    pagePath(SCORES_SLUG, locale) +
     '">' +
-    escapeHtml(strings.artBackToIndex) +
+    escapeHtml(strings.artBackToScores) +
     "</a></p>";
   return renderArticlePage(
     strings,
@@ -1718,9 +1736,9 @@ function renderFavoritesArticle(strings, locale) {
 function renderGiulianiArticle(strings, locale) {
   const back =
     '<p class="article-back"><a href="' +
-    pagePath(ARTICLES_SLUG, locale) +
+    pagePath(SCORES_SLUG, locale) +
     '">' +
-    escapeHtml(strings.artBackToIndex) +
+    escapeHtml(strings.artBackToScores) +
     "</a></p>";
   return renderArticlePage(
     strings,
@@ -1740,6 +1758,7 @@ function renderGiulianiArticle(strings, locale) {
 function writeArticlePages(strings, locale) {
   [
     [ARTICLES_SLUG, renderArticlesIndex],
+    [SCORES_SLUG, renderScoresIndex],
     [ARTICLE_CARCASSI_SLUG, renderCarcassiArticle],
     [ARTICLE_PRELUDES_SLUG, renderPreludesArticle],
     [ARTICLE_SANTISTEBAN_SLUG, (strings, locale) => renderPreludesArticle(strings, locale, true)],
@@ -2920,7 +2939,7 @@ addSlugPages([NINTH_SLUG, DIM_SLUG, NOTE_FINDER_SLUG, SIXTHS_SLUG]);
 addSlugPages([TAB_EDITOR_SLUG], ["0.7", "0.6"]);
 addSlugPages([SCORE_EDITOR_SLUG], ["0.8", "0.7"]);
 addSlugPages([PRIVACY_SLUG], ["0.3", "0.3"]);
-addSlugPages([ARTICLES_SLUG, ARTICLE_CARCASSI_SLUG, ARTICLE_PRELUDES_SLUG, ARTICLE_SANTISTEBAN_SLUG, ARTICLE_WALTZES_SLUG, ARTICLE_PROGRESSIVE_SLUG, ARTICLE_AGUADO_SLUG, ARTICLE_SAGRERAS_SLUG, ARTICLE_SOR_SLUG, ARTICLE_SOR_ESTUDIOS_SLUG, ARTICLE_BARRIOS_SLUG, ARTICLE_GIULIANI_SLUG, ARTICLE_GIULIANI_ARPEGIOS_SLUG, ARTICLE_ARPEGGIOS_SLUG]);
+addSlugPages([ARTICLES_SLUG, SCORES_SLUG, ARTICLE_CARCASSI_SLUG, ARTICLE_PRELUDES_SLUG, ARTICLE_SANTISTEBAN_SLUG, ARTICLE_WALTZES_SLUG, ARTICLE_PROGRESSIVE_SLUG, ARTICLE_AGUADO_SLUG, ARTICLE_SAGRERAS_SLUG, ARTICLE_SOR_SLUG, ARTICLE_SOR_ESTUDIOS_SLUG, ARTICLE_BARRIOS_SLUG, ARTICLE_GIULIANI_SLUG, ARTICLE_GIULIANI_ARPEGIOS_SLUG, ARTICLE_ARPEGGIOS_SLUG]);
 if (PARTITURA_ENABLED) addSlugPages([PARTITURA_SLUG], ["0.7", "0.6"]);
 addSlugPages(
   ALL_PICKING_PAGES.map(function (page) {

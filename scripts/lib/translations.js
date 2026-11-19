@@ -10,7 +10,7 @@ const { PUBLISHED_LOCALES, publishedLocales } = require('./locales');
 
 /* Claves de slug (scripts/lib/slugs.js) de cada coleccion de articulos. */
 const COLLECTIONS = {
-  indice: ['articulos', 'articulo-favoritas'],
+  indice: ['articulos', 'partituras', 'articulo-favoritas'],
   carcassi: ['articulo-carcassi', 'articulo-preludios-carcassi', 'articulo-preludios-santisteban', 'articulo-valses-carcassi', 'articulo-piezas-progresivas-carcassi'],
   sor: ['articulo-lecciones-sor', 'articulo-estudios-sor'],
   aguado: ['articulo-partituras-aguado'],

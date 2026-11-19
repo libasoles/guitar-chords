@@ -16,7 +16,7 @@ run('articles-site', async ({ DIST, BASE_URL }) => {
     assert.ok(!/href="[^"]*(articulo|article)/.test(outsideMenu), file + ' enlaza a los articulos fuera del menu');
   }
   const sitemap = fs.readFileSync(path.join(DIST, 'sitemap.xml'), 'utf8');
-  ['articulos', 'articulo-carcassi', 'articulo-preludios-carcassi', 'articulo-preludios-santisteban', 'articulo-tablaturas-arpegios'].forEach((key) => ['es', 'en'].forEach((locale) => {
+  ['articulos', 'partituras', 'articulo-carcassi', 'articulo-preludios-carcassi', 'articulo-preludios-santisteban', 'articulo-tablaturas-arpegios'].forEach((key) => ['es', 'en'].forEach((locale) => {
     assert.ok(sitemap.includes('<loc>' + BASE_URL + pagePath(key, locale) + '</loc>'), key + ' ' + locale);
   }));
 
