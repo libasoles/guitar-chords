@@ -178,11 +178,16 @@ def originals():
     return scores
 
 
+# Cejillas que la edición original no imprime pero que fijan la digitación (ver README, «Cejillas»).
+BARRES = {8: [{'bar': 4, 'at': 0.0, 'fret': 4, 'strings': 6, 'end_bar': 5, 'end_at': 0.0}]}
+
+
 def main():
     times = {4:(6,8),6:(3,4),7:(6,8),8:(3,4),9:(2,4),10:(12,8),11:(6,8),13:(12,8),14:(12,8),16:(3,4)}
     for number, measures in originals().items():
         path = HERE / 'corrected' / f'prelude-{number:02d}.musicxml'
-        write(str(path), f'Prelude {number} in {KEYS[number-1]}', FIFTHS[number-1], measures, time=times.get(number,(4,4)), group={1:8,9:8,10:12,12:8,13:12,14:12}.get(number))
+        write(str(path), f'Prelude {number} in {KEYS[number-1]}', FIFTHS[number-1], measures, time=times.get(number,(4,4)), group={1:8,9:8,10:12,12:8,13:12,14:12}.get(number),
+              barres=BARRES.get(number))
         xml = ET.parse(path)
         if number == 9:
             # Preserve the source's printed common-time sign and underfull bars.
