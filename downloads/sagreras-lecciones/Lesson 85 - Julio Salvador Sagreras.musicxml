@@ -1179,6 +1179,12 @@
         <dot />
         <stem>down</stem>
         <staff>1</staff>
+        <notations>
+          <technical>
+            <string>5</string>
+            <fret>0</fret>
+          </technical>
+        </notations>
       </note>
       <backup>
         <duration>30240</duration>
@@ -1301,7 +1307,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>6</string><fret>5</fret>
+            <string>5</string><fret>0</fret>
           </technical>
         </notations>
       </note>
@@ -3362,6 +3368,12 @@
         <stem>down</stem>
         <staff>1</staff>
         <beam number="1">end</beam>
+        <notations>
+          <technical>
+            <string>2</string>
+            <fret>6</fret>
+          </technical>
+        </notations>
       </note>
       <note>
         <rest />
@@ -3393,6 +3405,12 @@
         <stem>down</stem>
         <staff>1</staff>
         <beam number="1">end</beam>
+        <notations>
+          <technical>
+            <string>2</string>
+            <fret>6</fret>
+          </technical>
+        </notations>
       </note>
       <backup>
         <duration>30240</duration>
@@ -3489,7 +3507,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>1</fret>
+            <string>2</string><fret>6</fret>
           </technical>
         </notations>
       </note>
@@ -3566,6 +3584,8 @@
         <notations>
           <technical>
             <fingering alternate="no" substitution="no">4</fingering>
+            <string>2</string>
+            <fret>8</fret>
           </technical>
         </notations>
       </note>
@@ -3583,6 +3603,8 @@
         <notations>
           <technical>
             <fingering alternate="no" substitution="no">1</fingering>
+            <string>1</string>
+            <fret>1</fret>
           </technical>
         </notations>
       </note>
@@ -3678,7 +3700,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>1</string><fret>3</fret>
+            <string>2</string><fret>8</fret>
           </technical>
         </notations>
       </note>

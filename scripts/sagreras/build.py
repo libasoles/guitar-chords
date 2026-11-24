@@ -166,6 +166,13 @@ def build(number):
             column = next(i for i, c in enumerate(suggestion['columns'][bar]) if c['offset'] == 2)
             tabs[bar][column][2] = 0
             tabs[bar][column][3] = None
+        if number == 85:
+            # Mantener el do de paso del compas 15 en su casilla publicada:
+            # los cambios del compas 14 no deben desplazarlo a tercera, traste 5.
+            bar = suggestion['measure_numbers'].index(15)
+            column = next(i for i, c in enumerate(suggestion['columns'][bar]) if c['offset'] == 0.5)
+            tabs[bar][column][1] = 1
+            tabs[bar][column][2] = None
         # El primer nivel (el menos compacto) con el que el PDF ocupa menos paginas.
         best = None
         for level in ([PDF_OVERRIDES[number]] if number in PDF_OVERRIDES else [zoom_options(sc) for sc in SCALES]):
