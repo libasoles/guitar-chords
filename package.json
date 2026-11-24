@@ -35,7 +35,7 @@
     "@radix-ui/react-toast": "^1.3.1",
     "esbuild": "^0.28.2",
     "lighthouse": "^13.5.0",
-    "partitura": "github:libasoles/partitura#eb12a7a16505cfdbcd016cb8319471c8515e2a6b",
+    "partitura": "github:libasoles/partitura#bd51e12cad7ede013c959dfafd9a3d6738df458e",
     "playwright": "^1.61.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
