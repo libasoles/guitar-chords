@@ -159,6 +159,13 @@ def build(number):
         with open(os.path.join(prepared, tabify.SUGGESTION_NAME), encoding='utf-8') as f:
             suggestion = json.load(f)
         tabs = suggestion['tabs']
+        if number == 76:
+            # El motor pierde la pista de cuerda del sol dentro del acorde la-sol.
+            # Conservar tercera al aire en el tercer tiempo del compas 7.
+            bar = suggestion['measure_numbers'].index(7)
+            column = next(i for i, c in enumerate(suggestion['columns'][bar]) if c['offset'] == 2)
+            tabs[bar][column][2] = 0
+            tabs[bar][column][3] = None
         # El primer nivel (el menos compacto) con el que el PDF ocupa menos paginas.
         best = None
         for level in ([PDF_OVERRIDES[number]] if number in PDF_OVERRIDES else [zoom_options(sc) for sc in SCALES]):
