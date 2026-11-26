@@ -307,7 +307,6 @@ test('treceavas: nombres y alias enarmónicos se encuentran en el buscador', () 
   }
 });
 
-
 test('semidisminuidos: nombres canónicos, familia y aliases para las doce raíces', () => {
   const roots = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B'];
   const enharmonics = { 'D♭': 'C♯', 'E♭': 'D♯', 'F♯': 'G♭', 'A♭': 'G♯', 'B♭': 'A♯' };

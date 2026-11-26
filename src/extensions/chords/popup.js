@@ -40,7 +40,12 @@
     try {
       const stored = window.localStorage.getItem(PINNED_STORAGE_KEY);
       const parsed = stored ? JSON.parse(stored) : [];
-      return parsed.map((entry) => (typeof entry === 'string' ? { name: entry, positionIndex: 0 } : entry));
+      return parsed.map((entry) => {
+        const pinned = typeof entry === 'string' ? { name: entry, positionIndex: 0 } : entry;
+        const chord = window.CHORDS.find((c) => c.name === pinned.name) ||
+          window.CHORDS.find((c) => (c.aliases || []).includes(pinned.name));
+        return chord ? { ...pinned, name: chord.name } : pinned;
+      });
     } catch (e) {
       return [];
     }

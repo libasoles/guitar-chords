@@ -537,7 +537,10 @@
       var stored = window.localStorage.getItem(PINNED_STORAGE_KEY);
       var parsed = stored ? JSON.parse(stored) : [];
       return parsed.map(function (entry) {
-        return typeof entry === 'string' ? { name: entry, positionIndex: 0 } : entry;
+        var pinned = typeof entry === 'string' ? { name: entry, positionIndex: 0 } : entry;
+        var chord = window.CHORDS.find(function (c) { return c.name === pinned.name; }) ||
+          window.CHORDS.find(function (c) { return (c.aliases || []).indexOf(pinned.name) !== -1; });
+        return chord ? Object.assign({}, pinned, { name: chord.name }) : pinned;
       });
     } catch (e) {
       return [];

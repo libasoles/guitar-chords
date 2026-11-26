@@ -37,6 +37,19 @@ const ARTICLE_SUITES = {
 };
 
 const SUITES = {
+  'chord-pinned-migration': {
+    build: false,
+    paths: [
+      /^src\/site\/chord-finder\.js$/,
+      /^src\/extensions\/chords\//,
+      /^src\/shared\//,
+      /^test\/chord-pinned-migration\./,
+      /^test\/chord-finder\.fixture\.html$/,
+      /^scripts\/build-ext\.js$/,
+      /^scripts\/lib\/extension-products\.js$/,
+      /^vendor\//,
+    ],
+  },
   'chord-finder': {
     build: false,
     paths: [
