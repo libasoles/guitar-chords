@@ -79,8 +79,8 @@ test('prefijo "C" no arrastra acordes que sólo lo tienen como alias interno', (
   assert.ok(!r.includes('Am'));
 });
 
-test('alias "amin" → Am', () => {
-  assert.deepEqual(names('amin'), ['Am']);
+test('alias "amin" → Am y derivados', () => {
+  assert.deepEqual(names('amin'), ['Am', 'Am13']);
 });
 
 test('alias "a-" → Am (y sus derivados por prefijo de alias)', () => {
@@ -298,6 +298,9 @@ test('oncenas: nombres y alias enarmónicos se encuentran en el buscador', () =>
 
 test('treceavas: nombres y alias enarmónicos se encuentran en el buscador', () => {
   for (const [query, name] of [
+    ['Cm13', 'Cm13'], ['Cmin13', 'Cm13'], ['C#-13', 'D♭m13'],
+    ['Cmaj13', 'Cmaj13'], ['CΔ13', 'Cmaj13'], ['C#M13', 'D♭maj13'],
+    ['Mi m13', 'Em13'], ['Sol maj13', 'Gmaj13'],
     ['F13', 'F13'], ['F7(13)', 'F13'], ['A13', 'A13'], ['C#13', 'D♭13'], ['Bb13', 'B♭13'],
   ]) {
     assert.ok(names(query).includes(name), `${query} → ${name}`);

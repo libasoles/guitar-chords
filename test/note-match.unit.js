@@ -109,6 +109,8 @@ const eleventhVoicings = {
   'm11': [0, 2, 3, 5, 10], // Sin quinta.
   'maj11': [0, 4, 5, 7, 11], // Sin novena.
   '(add11)': [0, 4, 5, 7], // Sin séptima ni novena.
+  'm13': [0, 3, 9, 10], // Sin quinta, novena ni oncena.
+  'maj13': [0, 4, 9, 11], // Sin quinta, novena ni oncena.
   '13': [0, 4, 9, 10], // Sin quinta ni novena.
 };
 
@@ -119,6 +121,7 @@ for (const [suffix, intervals] of Object.entries(eleventhVoicings)) {
       const chord = chordsByName[name];
       assert.ok(chord, `Falta ${name}`);
       const expected = intervals.map((i) => (pitchClass(root) + i) % 12).sort((a, b) => a - b);
+      assert.deepEqual([...chordPitchClasses(chord)].sort((a, b) => a - b), expected, `${name}: notas declaradas`);
       const positions = getPositions(chord);
       for (const position of positions) {
         const actual = [...new Set(voicingNotes(chord, position).map((n) => n.pc))].sort((a, b) => a - b);
@@ -162,7 +165,7 @@ for (const [quality, intervals] of [
 test('cada familia del catálogo tiene las doce fundamentales', () => {
   for (const quality of ['', 'm', '7', 'm7', 'maj7', 'mMaj7', 'sus2', 'sus4',
     '6', 'm6', 'maj9', '9', 'm9', '7♭9', '11', 'm11', 'maj11', '(add11)',
-    '13', 'm7b5', 'aug', 'add9', 'm(add9)', 'dim7']) {
+    '13', 'm13', 'maj13', 'm7b5', 'aug', 'add9', 'm(add9)', 'dim7']) {
     const roots = CHORDS.filter((c) => c.name.replace(/^[A-G][♭♯]?/, '') === quality)
       .map((c) => pitchClass(c.name.match(/^[A-G][♭♯]?/)[0]));
     assert.equal(new Set(roots).size, 12, quality || 'mayor');
