@@ -142,7 +142,13 @@ test('Mi–Sol♯–Si–La encuentra E(add11) como coincidencia exacta', () => 
 });
 
 for (const [quality, intervals] of [
-  ['m7b5', [0, 3, 6, 10]],
+  ['maj7', [0, 4, 7, 11]],
+  ['7', [0, 4, 10]],
+  ['m7', [0, 3, 7, 10]],
+  ['maj9', [0, 2, 4, 11]], // Voicings sin quinta.
+  ['9', [0, 2, 4, 10]],
+  ['m9', [0, 2, 3, 10]],
+  ['m7♭5', [0, 3, 6, 10]],
   ['add9', [0, 2, 4, 7]],
   ['m(add9)', [0, 2, 3, 7]],
 ]) {
@@ -154,8 +160,11 @@ for (const [quality, intervals] of [
       const root = pitchClass(chord.name.match(/^[A-G][♭♯]?/)[0]);
       roots.add(root);
       const expected = toMask(intervals.map((i) => (root + i) % 12));
+      // Las séptimas dominantes pueden omitir la quinta (p. ej. C7).
+      const optionalFifth = quality === '7' ? toMask([(root + 7) % 12]) : 0;
+      assert.equal(toMask([...chordPitchClasses(chord)]) & ~optionalFifth, expected, `${chord.name}: notas declaradas`);
       for (const position of getPositions(chord)) {
-        assert.equal(toMask(voicingNotes(chord, position).map((n) => n.pc)), expected, chord.name);
+        assert.equal(toMask(voicingNotes(chord, position).map((n) => n.pc)) & ~optionalFifth, expected, chord.name);
       }
     }
     assert.equal(roots.size, 12);
@@ -165,7 +174,7 @@ for (const [quality, intervals] of [
 test('cada familia del catálogo tiene las doce fundamentales', () => {
   for (const quality of ['', 'm', '7', 'm7', 'maj7', 'mMaj7', 'sus2', 'sus4',
     '6', 'm6', 'maj9', '9', 'm9', '7♭9', '11', 'm11', 'maj11', '(add11)',
-    '13', 'm13', 'maj13', 'm7b5', 'aug', 'add9', 'm(add9)', 'dim7']) {
+    '13', 'm13', 'maj13', 'm7♭5', 'aug', 'add9', 'm(add9)', 'dim7']) {
     const roots = CHORDS.filter((c) => c.name.replace(/^[A-G][♭♯]?/, '') === quality)
       .map((c) => pitchClass(c.name.match(/^[A-G][♭♯]?/)[0]));
     assert.equal(new Set(roots).size, 12, quality || 'mayor');

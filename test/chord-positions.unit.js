@@ -29,11 +29,11 @@ test('dim7 expone las tres formas movibles de la guía', () => {
 });
 
 // La forma se escribe de primera a sexta cuerda, como en la interfaz.
-test('10200x está disponible para Dm6 y Bm7b5 con La en el bajo', () => {
+test('10200x está disponible para Dm6 y Bm7♭5 con La en el bajo', () => {
   const { CHORDS } = require('../src/shared/chords-db.js');
   const { soundingFrets, voicingNotes, toMask } = require('../src/shared/note-match.js');
   const { getPositions } = loadPositions();
-  for (const name of ['Dm6', 'Bm7b5']) {
+  for (const name of ['Dm6', 'Bm7♭5']) {
     const chord = CHORDS.find((c) => c.name === name);
     const position = getPositions(chord).find((p) => {
       const frets = soundingFrets(p.fingers, p.barres);

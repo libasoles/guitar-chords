@@ -96,9 +96,9 @@ test('"cΔ" y "cmaj7" → Cmaj7 (match exacto primero; CmMaj7 puede aparecer des
   assert.ok(r.every((n) => n === 'Cmaj7' || n === 'CmMaj7'));
 });
 
-test('"bø" y "bm7b5" → Bm7b5', () => {
-  assert.deepEqual(names('bø'), ['Bm7b5']);
-  assert.deepEqual(names('bm7b5'), ['Bm7b5']);
+test('"bø" y "bm7b5" → Bm7♭5', () => {
+  assert.deepEqual(names('bø'), ['Bm7♭5']);
+  assert.deepEqual(names('bm7b5'), ['Bm7♭5']);
 });
 
 test('"d/f♯" → D/F#', () => {
@@ -304,5 +304,25 @@ test('treceavas: nombres y alias enarmónicos se encuentran en el buscador', () 
     ['F13', 'F13'], ['F7(13)', 'F13'], ['A13', 'A13'], ['C#13', 'D♭13'], ['Bb13', 'B♭13'],
   ]) {
     assert.ok(names(query).includes(name), `${query} → ${name}`);
+  }
+});
+
+
+test('semidisminuidos: nombres canónicos, familia y aliases para las doce raíces', () => {
+  const roots = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B'];
+  const enharmonics = { 'D♭': 'C♯', 'E♭': 'D♯', 'F♯': 'G♭', 'A♭': 'G♯', 'B♭': 'A♯' };
+  for (const root of roots) {
+    const name = root + 'm7♭5';
+    const chord = CHORDS.find((c) => c.name === name);
+    assert.ok(chord, name);
+    assert.ok(chord.families.includes('m7b5'), name);
+    assert.ok(chord.aliases.includes(root + 'm7b5'), name);
+    assert.ok(chord.aliases.includes(root + 'ø7'), name);
+    for (const spelling of [root, enharmonics[root]].filter(Boolean)) {
+      for (const suffix of ['m7♭5', 'm7b5', 'ø7', 'ø']) {
+        const query = spelling + suffix;
+        assert.equal(names(query)[0], name, query);
+      }
+    }
   }
 });

@@ -3,7 +3,7 @@
    la consume el buscador web (reference/chord-finder.html) y la extensión de Chrome.
 
    Cobertura: para las 12 fundamentales — mayor, menor, 7, m7, maj7, 6, maj9, 9,
-   m9, 7♭9, sus2, sus4, 11, m11, maj11, add11, 13, m13, maj13, m7b5, add9, m(add9),
+   m9, 7♭9, sus2, sus4, 11, m11, maj11, add11, 13, m13, maj13, m7♭5, add9, m(add9),
    dim7 y aug — más slash y tensiones comunes.
    Posiciones abiertas donde existen; formas movibles con cejilla para el resto.
 
@@ -601,7 +601,7 @@
   { name: 'Am/G', families: ['slash'], aliases: [],
     notes: 'G A E A C E',
     fingers: [[6,3,'4'],[5,'o'],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,'o']] },
-  { name: 'Am/F#', families: ['slash'], aliases: ['Am/F♯','F♯m7♭5'],
+  { name: 'Am/F#', families: ['slash'], aliases: ['Am/F♯'],
     notes: 'F♯ A E A C E',
     fingers: [[6,2,'2'],[5,'o'],[4,2,'3'],[3,2,'4'],[2,1,'1'],[1,'o']] },
   { name: 'D/C', families: ['slash'], aliases: [],
@@ -881,7 +881,7 @@
     fingers: [[6,'x'],[5,2,'3'],[4,1,'1'],[3,2,'2'],[2,4,'4'],[1,4,'4']] },
 
   // ----- OTROS (dim7, aug, semidisminuido, tensiones) -----
-  { name: 'Bm7b5', families: ['otros'], aliases: ['Bø','Bm7(♭5)','B-7b5'],
+  { name: 'Bm7♭5', families: ['m7b5','otros'], aliases: ['Bm7b5','Bø7','Bø','Bm7(♭5)','B-7b5'],
     notes: 'B F A D',
     fingers: [[6,'x'],[5,2,'1'],[4,3,'3'],[3,2,'2'],[2,3,'4'],[1,'x']],
     alternatePositions: [{
@@ -901,38 +901,38 @@
   { name: 'Em(add9)', families: ['otros'], aliases: ['Em9 (sin 7)'],
     notes: 'E B E G B F♯',
     fingers: [[6,'o'],[5,2,'2'],[4,2,'3'],[3,'o'],[2,'o'],[1,2,'4']] },
-  // m7b5: completar las doce fundamentales con formas movibles.
-  { name: 'Cm7b5', families: ['otros'], aliases: ['Cø','Cm7(♭5)','C-7b5'],
+  // Semidisminuidos (m7♭5): formas movibles para las doce fundamentales.
+  { name: 'Cm7♭5', families: ['m7b5','otros'], aliases: ['Cm7b5','Cø7','Cø','Cm7(♭5)','C-7b5'],
     notes: 'C G♭ B♭ E♭', position: 3,
     fingers: [[6,'x'],[5,3,'1'],[4,4,'3'],[3,3,'2'],[2,4,'4'],[1,'x']] },
-  { name: 'D♭m7b5', families: ['otros'], aliases: ['D♭ø','D♭m7(♭5)','D♭-7b5','C♯m7b5'],
+  { name: 'D♭m7♭5', families: ['m7b5','otros'], aliases: ['D♭m7b5','D♭ø7','D♭ø','D♭m7(♭5)','D♭-7b5','C♯m7b5','C♯m7♭5','C♯ø7','C♯ø'],
     notes: 'D♭ G C♭ F♭', position: 4,
     fingers: [[6,'x'],[5,4,'1'],[4,5,'3'],[3,4,'2'],[2,5,'4'],[1,'x']] },
-  { name: 'Dm7b5', families: ['otros'], aliases: ['Dø','Dm7(♭5)','D-7b5'],
+  { name: 'Dm7♭5', families: ['m7b5','otros'], aliases: ['Dm7b5','Dø7','Dø','Dm7(♭5)','D-7b5'],
     notes: 'D A♭ C F', position: 5,
     fingers: [[6,'x'],[5,5,'1'],[4,6,'3'],[3,5,'2'],[2,6,'4'],[1,'x']] },
-  { name: 'E♭m7b5', families: ['otros'], aliases: ['E♭ø','E♭m7(♭5)','E♭-7b5','D♯m7b5'],
+  { name: 'E♭m7♭5', families: ['m7b5','otros'], aliases: ['E♭m7b5','E♭ø7','E♭ø','E♭m7(♭5)','E♭-7b5','D♯m7b5','D♯m7♭5','D♯ø7','D♯ø'],
     notes: 'E♭ A D♭ G♭', position: 6,
     fingers: [[6,'x'],[5,6,'1'],[4,7,'3'],[3,6,'2'],[2,7,'4'],[1,'x']] },
-  { name: 'Em7b5', families: ['otros'], aliases: ['Eø','Em7(♭5)','E-7b5'],
+  { name: 'Em7♭5', families: ['m7b5','otros'], aliases: ['Em7b5','Eø7','Eø','Em7(♭5)','E-7b5'],
     notes: 'E B♭ D G', position: 7,
     fingers: [[6,'x'],[5,7,'1'],[4,8,'3'],[3,7,'2'],[2,8,'4'],[1,'x']] },
-  { name: 'Fm7b5', families: ['otros'], aliases: ['Fø','Fm7(♭5)','F-7b5'],
+  { name: 'Fm7♭5', families: ['m7b5','otros'], aliases: ['Fm7b5','Fø7','Fø','Fm7(♭5)','F-7b5'],
     notes: 'F C♭ E♭ A♭', position: 8,
     fingers: [[6,'x'],[5,8,'1'],[4,9,'3'],[3,8,'2'],[2,9,'4'],[1,'x']] },
-  { name: 'F♯m7b5', families: ['otros'], aliases: ['F♯ø','F♯m7(♭5)','F♯-7b5','G♭m7b5'],
+  { name: 'F♯m7♭5', families: ['m7b5','otros'], aliases: ['F♯m7b5','F♯ø7','F♯ø','F♯m7(♭5)','F♯-7b5','G♭m7b5','G♭m7♭5','G♭ø7','G♭ø'],
     notes: 'F♯ C E A', position: 9,
     fingers: [[6,'x'],[5,9,'1'],[4,10,'3'],[3,9,'2'],[2,10,'4'],[1,'x']] },
-  { name: 'Gm7b5', families: ['otros'], aliases: ['Gø','Gm7(♭5)','G-7b5'],
+  { name: 'Gm7♭5', families: ['m7b5','otros'], aliases: ['Gm7b5','Gø7','Gø','Gm7(♭5)','G-7b5'],
     notes: 'G D♭ F B♭', position: 10,
     fingers: [[6,'x'],[5,10,'1'],[4,11,'3'],[3,10,'2'],[2,11,'4'],[1,'x']] },
-  { name: 'A♭m7b5', families: ['otros'], aliases: ['A♭ø','A♭m7(♭5)','A♭-7b5','G♯m7b5'],
+  { name: 'A♭m7♭5', families: ['m7b5','otros'], aliases: ['A♭m7b5','A♭ø7','A♭ø','A♭m7(♭5)','A♭-7b5','G♯m7b5','G♯m7♭5','G♯ø7','G♯ø'],
     notes: 'A♭ D G♭ C♭', position: 11,
     fingers: [[6,'x'],[5,11,'1'],[4,12,'3'],[3,11,'2'],[2,12,'4'],[1,'x']] },
-  { name: 'Am7b5', families: ['otros'], aliases: ['Aø','Am7(♭5)','A-7b5'],
+  { name: 'Am7♭5', families: ['m7b5','otros'], aliases: ['Am7b5','Aø7','Aø','Am7(♭5)','A-7b5'],
     notes: 'A E♭ G C', position: 12,
     fingers: [[6,'x'],[5,12,'1'],[4,13,'3'],[3,12,'2'],[2,13,'4'],[1,'x']] },
-  { name: 'B♭m7b5', families: ['otros'], aliases: ['B♭ø','B♭m7(♭5)','B♭-7b5','A♯m7b5'],
+  { name: 'B♭m7♭5', families: ['m7b5','otros'], aliases: ['B♭m7b5','B♭ø7','B♭ø','B♭m7(♭5)','B♭-7b5','A♯m7b5','A♯m7♭5','A♯ø7','A♯ø'],
     notes: 'B♭ F♭ A♭ D♭', position: 1,
     fingers: [[6,'x'],[5,1,'1'],[4,2,'3'],[3,1,'2'],[2,2,'4'],[1,'x']] },
   // add9: completar las doce fundamentales con formas movibles.
