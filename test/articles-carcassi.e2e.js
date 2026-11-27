@@ -27,7 +27,7 @@ run('articles-carcassi', async ({ base, page, tmp, BASE_URL }) => {
 
     // Scores index: the preludes card comes first, with no text link besides it (the banner is the link).
     await page.goto(base + pagePath('partituras', locale));
-    assert.equal(await page.locator('.article-card').count(), 11);
+    assert.equal(await page.locator('.article-card').count(), 12);
     assert.equal(await page.locator('.article-card').first().getAttribute('href'), pagePath('articulo-preludios-carcassi', locale));
     assert.equal(await page.locator('main a[href="' + pagePath('articulo-preludios-carcassi', locale) + '"]').count(), 1);
 
