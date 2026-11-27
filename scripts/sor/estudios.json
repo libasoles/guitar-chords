@@ -1,5 +1,5 @@
 {
-  "601": {"opus": 6, "n": "1", "form": "D Major", "es": "Re mayor", "pt": "Ré maior", "source": "sorf-op6n01.ly", "editor": "Glen Larsen", "license": "4.0"},
+  "601": {"opus": 6, "n": "1", "form": "D Major", "es": "Re mayor", "pt": "Ré maior", "source": "sorf-op6n01.ly", "editor": "Glen Larsen", "license": "4.0", "tab_fixes": {"5": [[null, null, null, 4, null, null], [2, 3, null, null, null, null], [null, null, null, 0, null, null], [2, 3, null, null, null, null], [null, null, 4, null, null, null], [2, 3, null, null, null, null], [null, null, 2, null, null, null], [2, 3, null, null, null, null]]}},
   "602": {"opus": 6, "n": "2", "form": "A Major", "es": "La mayor", "pt": "Lá maior", "source": "sorf-op6n02.ly", "editor": "Glen Larsen", "license": "4.0"},
   "603": {"opus": 6, "n": "3", "form": "E Major", "es": "Mi mayor", "pt": "Mi maior", "source": "sorf-op6n03.ly", "editor": "Glen Larsen", "license": "4.0"},
   "604": {"opus": 6, "n": "4", "form": "G Major", "es": "Sol mayor", "pt": "Sol maior", "source": "sorf-op6n04.ly", "editor": "Glen Larsen", "license": "4.0"},
