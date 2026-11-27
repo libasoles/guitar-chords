@@ -29,6 +29,7 @@ const ARTICLE_SUITES = {
   'articles-aguado': articleSuite(/^src\/site\/articles\/aguado\//, /^scripts\/aguado\//, /^scripts\/lib\/article-aguado\.js$/, /^test\/articles-aguado\./),
   'articles-sagreras': articleSuite(/^src\/site\/articles\/sagreras-lecciones\//, /^scripts\/sagreras\//, /^scripts\/lib\/article-sagreras\.js$/, /^test\/articles-sagreras\./),
   'articles-sor': articleSuite(/^src\/site\/articles\/sor\//, /^scripts\/sor\//, /^scripts\/lib\/article-sor(-collection)?\.js$/, /^test\/articles-sor\./),
+  'articles-sor-op44': articleSuite(/^src\/site\/articles\/sor-op44\//, /^scripts\/sor\//, /^scripts\/lib\/article-sor(-collection|-op44)\.js$/, /^test\/articles-sor-op44\./),
   'articles-sor-estudios': articleSuite(/^src\/site\/articles\/sor-(estudios|op6)\//, /^scripts\/sor\//, /^scripts\/lib\/article-sor(-collection|-estudios|-op6)\.js$/, /^test\/articles-sor-estudios\./),
   'articles-barrios': articleSuite(/^src\/site\/articles\/barrios\//, /^scripts\/barrios\//, /^scripts\/lib\/article-barrios\.js$/, /^test\/articles-barrios\./),
   'articles-giuliani': articleSuite(/^src\/site\/articles\/giuliani\//, /^scripts\/giuliani\//, /^scripts\/lib\/article-giuliani\.js$/, /^test\/articles-giuliani\./),

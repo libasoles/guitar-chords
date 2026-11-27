@@ -1,4 +1,4 @@
-"""Partituras de Sor (lecciones del Op. 60, estudios de los Op. 6 y Op. 35): del LilyPond de Mutopia a MusicXML, PDF y
+"""Partituras de Sor (Op. 60, Op. 44, estudios de los Op. 6 y Op. 35): del LilyPond curado a MusicXML, PDF y
 vistas del sitio.
 
     python scripts/sor/build.py [coleccion] N [N ...]    # sources/NN.musicxml -> downloads/ + vistas
@@ -6,6 +6,7 @@ vistas del sitio.
 
 La coleccion es `lecciones` (por defecto; N = numero de la leccion) o `estudios` (N = opus * 100 + numero: 601 es el
 Op. 6 n.º 1, 3524 el Op. 35 n.º 24).
+`opus44` usa claves 4401–4424 y su propio catálogo y carpeta de fuentes.
 
 Usa el motor y las rutinas de grabado de los preludios de Carcassi (scripts/carcassi-preludios/extract.py).
 """
@@ -41,13 +42,17 @@ def footer_lines(number):
             lines += [[('Armonicos naturales: diamantes = sonidos; TAB = trastes de contacto (sin pisar).', None)],
                       [('3: rozar por debajo del tercer traste, hacia el puente (aprox. 3,16).', None)]]
         return lines
-    return [credit, [('CC BY-SA ' + piece['license'], 'https://creativecommons.org/licenses/by-sa/%s/' % piece['license'])]]
+    family = piece.get('license_family', 'by-sa')
+    label = 'CC BY ' if family == 'by' else 'CC BY-SA '
+    return [credit, [(label + piece['license'], 'https://creativecommons.org/licenses/%s/%s/' % (family, piece['license']))]]
 
 
 COLLECTIONS = {
     'lecciones': {'catalog': 'pieces.json', 'sources': 'sources', 'out': 'sor', 'prefix': 'sor-'},
     'estudios': {'catalog': 'estudios.json', 'sources': os.path.join('sources', 'estudios'), 'out': 'sor-estudios',
                  'prefix': 'sor-est-'},
+    'opus44': {'catalog': 'opus44.json', 'sources': os.path.join('sources', 'opus44'), 'out': 'sor-op44',
+               'prefix': 'sor-op44-'},
 }
 COLLECTION = 'lecciones'
 SOURCES = OUT_DIR = PREVIEW_DIR = PREFIX = PIECES = None
@@ -78,7 +83,7 @@ PDF_OVERRIDES[18] = {'scale': 41, 'pageWidth': 2305, 'pageHeight': 3260}
 SCALES = [45, 41, 38, 35]  # la escala de Verovio es entera; 45 es la del motor; con menos de 35 lo impreso es ilegible
 # Escala minima de los estudios: por debajo el PDF mete demasiados compases por renglon y la TAB queda apretada, asi que
 # se prefieren mas paginas. `min_scale` en el catalogo la baja o la sube para una pieza.
-MIN_SCALE = {'lecciones': 0, 'estudios': 45}
+MIN_SCALE = {'lecciones': 0, 'estudios': 45, 'opus44': 0}
 
 
 def zoom_options(scale):
@@ -97,7 +102,7 @@ def select():
 def name_of(number):
     """(en, es) del titulo: «Lesson 4: E-flat Major» / «Lección 4: Mi bemol mayor» o «Op. 35 No. 4: G Major»."""
     piece = PIECES[number]
-    if COLLECTION == 'estudios':
+    if COLLECTION in ('estudios', 'opus44'):
         return (f"Op. {piece['opus']} No. {piece['n']}: {piece['form']}",
                 f"Op. {piece['opus']} n.º {piece['n']}: {piece['es']}")
     return f"Lesson {piece['n']}: {piece['form']}", f"Lección {piece['n']}: {piece['es']}"
@@ -105,7 +110,7 @@ def name_of(number):
 
 def title_of(number):
     # Las lecciones se graban en español, tanto en el visor como en el PDF.
-    return name_of(number)[1 if COLLECTION == 'lecciones' else 0]
+    return name_of(number)[0 if COLLECTION == 'estudios' else 1]
 
 
 def file_base(number):

@@ -36,11 +36,12 @@ test('each article asset, source and test runs only its own suite', () => {
     'articles-arpeggios': ['test/articles-arpeggios.e2e.js'],
     'articles-arpeggio-layout': ['test/articles-arpeggio-layout.e2e.js'],
     'articles-site': ['test/articles-site.e2e.js'],
+    'articles-sor-op44': ['src/site/articles/sor-op44/body.es.html', 'scripts/lib/article-sor-op44.js', 'test/articles-sor-op44.e2e.js'],
   };
   for (const [suite, files] of Object.entries(cases)) {
     for (const file of files) assert.deepEqual(targets([file]), [suite], file);
   }
-  assert.deepEqual(targets(['scripts/sor/pieces.json']).sort(), ['articles-sor', 'articles-sor-estudios']);
+  assert.deepEqual(targets(['scripts/sor/pieces.json']).sort(), ['articles-sor', 'articles-sor-estudios', 'articles-sor-op44']);
   for (const file of ['src/site/articles/arpeggios/preview.svg', 'scripts/lib/article-arpeggio-positions.js']) {
     assert.deepEqual(targets([file]).sort(), ['articles-arpeggio-layout', 'articles-arpeggios'], file);
   }

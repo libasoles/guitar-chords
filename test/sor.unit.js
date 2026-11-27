@@ -44,6 +44,7 @@ const COLLECTIONS = [
   ['lecciones', require('../scripts/lib/article-sor'), MEASURES_LECCIONES],
   ['estudios', require('../scripts/lib/article-sor-estudios'), MEASURES_ESTUDIOS],
   ['opus6', require('../scripts/lib/article-sor-op6'), MEASURES_ESTUDIOS],
+  ['opus44', require('../scripts/lib/article-sor-op44'), { 4401: 33, 4402: 32 }],
 ];
 
 function suite(collection, catalog, MEASURES) {
@@ -56,7 +57,8 @@ function suite(collection, catalog, MEASURES) {
   });
 
   for (const piece of pieces) {
-    const label = catalog.pieceName(piece, collection === 'lecciones' ? 'es' : 'en');
+    const spanishScore = collection === 'lecciones' || collection === 'opus44';
+    const label = catalog.pieceName(piece, spanishScore ? 'es' : 'en');
 
     test(label + ': PDF y MusicXML con el nombre de pieces.json', () => {
       assert.ok(fs.existsSync(path.join(DOWNLOADS_DIR, piece.base + '.pdf')));
@@ -90,18 +92,18 @@ function suite(collection, catalog, MEASURES) {
       for (const trace of SOURCE_TRACES) assert.doesNotMatch(xml, trace, 'MusicXML: ' + trace);
       const transcribed = /\(Transcripcion a partir de la edicion de [^)]+ en IMSLP\)/.test(text);
       if (!transcribed) assert.match(text, /\(Con modificaciones a partir de la edicion de [^)]+ en Mutopia\)/);
-      assert.match(text, /\((?:CC BY-SA \d\.\d|Dominio publico)\)/);
+      assert.match(text, /\((?:CC BY(?:-SA)? \d\.\d|Dominio publico)\)/);
       const uris = [...text.matchAll(/\/URI\s*\(((?:\\.|[^\\)])*)\)/g)]
         .map((m) => m[1].replace(/\\(\d{3})/g, (_, octal) => String.fromCharCode(parseInt(octal, 8))));
       if (transcribed) assert.ok(uris.some((uri) => /^https:\/\/imslp\.org\/wiki\//.test(uri)), 'enlace a la edicion de origen');
       else assert.ok(uris.includes('https://www.mutopiaproject.org/cgibin/make-table.cgi?Composer=SorF'), 'enlace a la edicion de origen');
-      if (!/Dominio publico/.test(text)) assert.ok(uris.some((uri) => /^https:\/\/creativecommons\.org\/licenses\/by-sa\/\d\.\d\/$/.test(uri)), 'enlace a la licencia');
+      if (!/Dominio publico/.test(text)) assert.ok(uris.some((uri) => /^https:\/\/creativecommons\.org\/licenses\/by(?:-sa)?\/\d\.\d\/$/.test(uri)), 'enlace a la licencia');
       const info = text.match(/\/Title\s*\(((?:\\.|[^\\)])*)\)/);
       assert.ok(info, 'el PDF declara /Title');
       // El PDF escapa algunos caracteres (p. ej. : como \072).
       assert.equal(info[1].replace(/\\(\d{3})/g, (_, octal) => String.fromCharCode(parseInt(octal, 8))).replace(/\\([()\\])/g, '$1'), label);
       assert.ok(xml.includes('<work-title>' + label + '</work-title>'));
-      if (collection === 'lecciones') {
+      if (spanishScore) {
         const svg = fs.readFileSync(path.join(PREVIEW_DIR, 'full', SCORE_PREFIX + String(piece.number).padStart(2, '0') + '-p1.svg'), 'utf8');
         assert.ok(svg.includes('>' + label + '</tspan>'), 'titulo en español dentro del visor');
         assert.doesNotMatch(svg, /Lesson \d+:/);

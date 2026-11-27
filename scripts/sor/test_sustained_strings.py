@@ -76,6 +76,12 @@ def check(file):
 
 class SustainedStrings(unittest.TestCase):
 
+    def test_opus44_sustained_notes(self):
+        folder = Path(__file__).resolve().parents[2] / 'downloads' / 'sor-op44'
+        for file in folder.glob('*.musicxml'):
+            with self.subTest(piece=file.name):
+                self.assertEqual(check(file), [])
+
     def test_independent_voices_do_not_cut_sustained_notes(self):
         root = Path(__file__).resolve().parents[2]
         catalog = json.loads((root / 'scripts/sor/pieces.json').read_text())

@@ -1,17 +1,19 @@
 # Partituras de Sor
 
-Tres páginas, desde los archivos LilyPond de [Mutopia](https://www.mutopiaproject.org/cgibin/make-table.cgi?Composer=SorF)
+Cuatro páginas, desde los archivos LilyPond de [Mutopia](https://www.mutopiaproject.org/cgibin/make-table.cgi?Composer=SorF)
 (CC BY-SA 2.5, 3.0 o 4.0 según la pieza; el Op. 35 n.º 14 es de dominio público) y transcripciones de impresos históricos de dominio público:
 
 | Colección | Página | Catálogo | Fuentes | Salida |
 |---|---|---|---|---|
 | `lecciones` | `/partituras/lecciones-progresivas-de-sor` (Op. 60, 25 lecciones) | `pieces.json` | `sources/sor_op60-NN.ly` | `downloads/sor/`, `src/site/articles/sor/` |
 | `estudios` | `/partituras/estudios-de-sor` (Op. 35) | `estudios.json` | `sources/estudios/*.ly` | `downloads/sor-estudios/`, `src/site/articles/sor-estudios/` |
+| `opus44` | `/partituras/piezas-progresivas-opus-44-de-sor` | `opus44.json` | `sources/opus44/sor_op44-NN.ly` | `downloads/sor-op44/`, `src/site/articles/sor-op44/` |
 
 El Op. 6 se publica por separado en `/partituras/estudios-de-sor-opus-6`, con los mismos archivos de `estudios.json` filtrados por opus. Sus doce estudios tienen revisión pendiente.
 
 La clave del catálogo es el número de la lección; en los estudios, opus × 100 + número (601 = Op. 6 n.º 1, 3524 = Op. 35
-n.º 24). `form`/`es` son la tonalidad, `editor` y `license` los de la edición de Mutopia; `tuning: "dropd"` pone la sexta
+n.º 24; también 4401 = Op. 44 n.º 1). `form`/`es` son la tonalidad, `editor` y `license` los de la edición de Mutopia;
+`license_family: "by"` distingue CC BY de la licencia BY-SA predeterminada; `tuning: "dropd"` pone la sexta
 cuerda en Re (Op. 6 n.º 7 y 9) y `"lowf"` en Fa (Op. 35 n.º 12); `patches` son correcciones de erratas del `.ly` (ver abajo). `string_hints: true` hace que el conversor lea `\3` tras una nota como cuerda fija en la TAB (en el Op. 35 n.º 24, compás 19, `c,\3`: el do en la 3.ª cuerda, traste 5, en vez de la 2.ª al 1).
 
 ```sh
@@ -27,6 +29,11 @@ Los originales (con su `.mid` y `.rdf`) están en `resources/sor/mutopia/` (no v
 Las lecciones del Op. 60 llevan el título en español («Lección 1: Do mayor») dentro del PDF, sus metadatos,
 el MusicXML y las páginas del visor. Los nombres de archivo se conservan en inglés para mantener las URL de descarga.
 Las tarjetas y la navegación siguen el idioma de la página.
+
+El Op. 44 tiene una página y un catálogo propios; sus títulos del PDF y del visor también están en español,
+con nombres de archivo en inglés. La colección se inicia con su primera pieza y conserva los originales
+completos para continuarla. Fuentes, cotejos y alcance en [la nota de procedencia](../../docs/sor-op44-procedencia.md).
+No se confunde con el Op. 44 bis para dos guitarras.
 
 ## El conversor
 
