@@ -10,5 +10,16 @@
     "license": "public-domain",
     "credit": "Transcripcion a partir de la edicion de Paris, chez l'auteur et Pacini, en IMSLP",
     "credit_url": "https://imslp.org/wiki/Special:ImagefromIndex/837753"
+  },
+  "4402": {
+    "n": "2",
+    "opus": 44,
+    "form": "C Major",
+    "es": "Do mayor",
+    "pt": "Dó maior",
+    "source": "sor_op44-02.ly",
+    "editor": "Louie van Bommel",
+    "license": "3.0",
+    "license_family": "by"
   }
 }

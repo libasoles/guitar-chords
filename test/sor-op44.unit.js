@@ -29,3 +29,14 @@ test('Op. 44 n.º 1: anacrusa, voces separadas y adorno final del impreso', () =
   assert.match(xml, /<voice>2<\/voice>/);
   assert.match(xml, /<grace/);
 });
+
+test('Op. 44 n.º 2: Do ligado entre 11–12 y atribución CC BY 3.0', () => {
+  const xml = fs.readFileSync(path.join(__dirname, '../scripts/sor/sources/opus44/4402.musicxml'), 'utf8');
+  const bar = (number) => xml.match(new RegExp('<measure\\b[^>]*number="' + number + '"[^>]*>([\\s\\S]*?)<\\/measure>'))[1];
+  assert.match(bar(11), /<tie type="start"/);
+  assert.match(bar(12), /<tie type="stop"/);
+  assert.equal(op44.PIECES[4402].license_family, 'by');
+  const pdf = fs.readFileSync(path.join(op44.DOWNLOADS_DIR, op44.publishedPieces().find((p) => p.number === 4402).pdf), 'latin1');
+  assert.match(pdf, /\(CC BY 3\.0\)/);
+  assert.doesNotMatch(pdf, /CC BY-SA/);
+});

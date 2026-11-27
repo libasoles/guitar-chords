@@ -20,7 +20,7 @@ identifica 24 piezas, primera publicación en París en 1831, dedicadas a Roland
 
 ## Publicación
 
-La página se inicia con la pieza **1**. Esto no significa que las otras 23 ya estén transcritas.
+La página se inicia con las piezas **1 y 2**. Esto no significa que las otras 22 ya estén transcritas.
 Cada incorporación tiene su propio commit con fuente, MusicXML, PDF, vista previa y páginas del visor.
 El catálogo `scripts/sor/opus44.json` usa claves 4401, 4402…; `n` conserva el número impreso.
 Se generan mediante `scripts/sor/build.py opus44 convert 4401` y `scripts/sor/build.py opus44 4401`.
@@ -37,6 +37,14 @@ Como ayuda de lectura se consultó el PDF moderno de Classical Guitar Shed
 `cgs-reading-reference.pdf`, solo local). No se reproduce su tipografía, TAB, digitación, marcas de estudio
 ni simplificaciones de la notación; decide el impreso de Sor. La consulta de la guía de la Universidad
 de Chihuahua no produjo una descarga utilizable y no se usa como fuente.
+
+### N.º 2: Allegretto en Do mayor
+
+32 compases, 2/4. Fuente editable de Louie van Bommel en Mutopia, CC BY 3.0 (no BY-SA).
+Se conservan el original descargado y su atribución. Se coteja con #837753, p. 2, y #470296, p. 3.
+Se restituye «Allegretto» frente al «Moderato» con metrónomo de Eggers; se omiten sus dedos y acentos.
+El Do bajo entre 11 y 12 permanece ligado como en París. Dos voces independientes; sin fusión por
+coincidencia rítmica. PDF de una página y visor revisados; TAB sin conflictos de cuerdas sostenidas.
 
 ## Verificación
 
