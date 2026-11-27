@@ -24,7 +24,7 @@ upper = \fixed c {
   <e c'>4 r4 c16 c'16 e'16 c'16 g4 | % 18
   b,16 d'16 g'16 d'16 g4 bes,16 d'16 g'16 d'16 g4 | % 19
   a,16 cis'16 g'16 cis'16 a4 d16 d'16 f'16 d'16 a4 | % 20
-  g16 d'16 e'16 d'16 bes4 a16 cis'16 e'16 cis'16 a,8 e'8 | % 21
+  g16\4 d'16 e'16 d'16 bes4 a16 cis'16 e'16 cis'16 a,8 e'8 | % 21
   g'4 f'4 d16 d'16 f'16 d'16 a4 | % 22
   e16 d'16 e'16 d'16 gis4 gis,16 d'16 e'16 d'16 b4 | % 23
   a,16 c'16 e'16 c'16 a4 g,16 cis'16 e'16 cis'16 a4 | % 24
@@ -96,7 +96,7 @@ bass = \fixed c {
   c4 s4 c2 | % 18
   b,2 bes,2 | % 19
   a,2 d2 | % 20
-  g2 a2 | % 21
+  g2\4 a2 | % 21
   d2 d2 | % 22
   e2 gis,2 | % 23
   a,2 g,2 | % 24
