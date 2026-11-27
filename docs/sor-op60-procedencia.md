@@ -79,7 +79,7 @@ los compases 38 y 46 tienen barras parciales: no se interpretan como grupos irre
 PDF generado de dos páginas y páginas del visor revisados contra el impreso. La TAB conserva las alturas;
 las posiciones las propone el motor. No hay correcciones editoriales de alturas o duraciones en esta lección.
 
-Las lecciones 20–25 y la revisión del parche del bajo de la lección 5 siguen pendientes. La descarga y su
+Las lecciones 21–25 y la revisión del parche del bajo de la lección 5 siguen pendientes. La descarga y su
 integridad no equivalen al cotejo musical ni a la publicación de esas lecciones.
 
 ### Lección 17
@@ -104,3 +104,13 @@ Se conservan las casillas 1.ª (compases 6–8) y 2.ª (9–11), el Fine en el 1
 explicitado como «D.S.». Se mantienen separados melodía, bajos y voz intermedia, incluidos los silencios
 y la ligadura de Re entre los compases 6–7. PDF de una página y vista completa revisados; sin correcciones
 de alturas o duraciones.
+
+### Lección 20
+
+48 compases, Si menor, 2/4. Fuente #836891, pp. 14–15; cotejo con #43477, pp. 1–2, y #470312, pp. 23–24.
+Se conservan los silencios y las duraciones de las voces sostenidas frente a las semicorcheas,
+las ligaduras del Fa sostenido (compases 3–4 y 14–15), el Re grave (17–19), Fine en el 8 y regreso
+al signo desde el 48. Se mantiene mi sostenido en el compás 43. El texto «D.S.» explicita el signo de regreso.
+PDF de dos páginas y páginas del visor revisados; ajuste de márgenes exclusivo de esta lección para separar
+la TAB del crédito y dejar completas las plicas del primer sistema de la segunda página. Sin correcciones
+editoriales de alturas o duraciones.

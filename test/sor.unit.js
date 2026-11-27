@@ -12,7 +12,7 @@ const fs = require('fs');
 const path = require('path');
 
 /* Compases de cada pieza (clave: numero de la leccion, u opus * 100 + numero en los estudios), contados sobre la fuente curada (la partitura del libro; la anacrusa cuenta como compas). */
-const MEASURES_LECCIONES = { 1: 16, 2: 40, 3: 24, 4: 26, 5: 40, 6: 36, 7: 44, 8: 16, 9: 16, 10: 17, 11: 32, 12: 27, 13: 24, 14: 25, 15: 24, 16: 52, 17: 28, 18: 34, 19: 27 };
+const MEASURES_LECCIONES = { 1: 16, 2: 40, 3: 24, 4: 26, 5: 40, 6: 36, 7: 44, 8: 16, 9: 16, 10: 17, 11: 32, 12: 27, 13: 24, 14: 25, 15: 24, 16: 52, 17: 28, 18: 34, 19: 27, 20: 48 };
 
 /* Cadenas del archivo de origen: programa, rutas y textos de la cabecera de LilyPond. */
 const SOURCE_TRACES = [/LilyPond/i, /\.ly\b/i, /fernandosor\.free\.fr/i, /mutopiatitle/i];
@@ -116,7 +116,7 @@ function suite(collection, catalog, MEASURES) {
 
 for (const [collection, catalog, measures] of COLLECTIONS) suite(collection, catalog, measures);
 
-test('Op. 6 y Op. 35 se publican por separado; solo Op. 6 tiene revision pendiente', () => {
+test('Op. 6 y Op. 35 se publican por separado; ambos tienen revision pendiente', () => {
   const op6 = require('../scripts/lib/article-sor-op6');
   const op35 = require('../scripts/lib/article-sor-estudios');
   const strings = require('../src/i18n/strings.es.json');
@@ -125,7 +125,7 @@ test('Op. 6 y Op. 35 se publican por separado; solo Op. 6 tiene revision pendien
   for (const [collection, opus] of [[op6, 6], [op35, 35]]) {
     assert.ok(collection.publishedPieces().every((p) => p.opus === opus));
     const html = collection.renderBody('es', strings);
-    assert.equal((html.match(/editor-mark-pending /g) || []).length, opus === 6 ? 24 : 0);
+    assert.equal((html.match(/editor-mark-pending /g) || []).length, collection.publishedPieces().length * 2);
     assert.doesNotMatch(html, new RegExp('Op\\. ' + (opus === 6 ? 35 : 6) + ' n'));
   }
 });
