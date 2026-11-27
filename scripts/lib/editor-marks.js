@@ -33,7 +33,7 @@ const MARKS = {
 
 const PIECES = {
   sor: { favorite: [5], effort: [1] },
-  'sor-estudios': { pending: Array.from({ length: 12 }, (_, i) => i + 601) },
+  'sor-estudios': { pending: [...Array.from({ length: 12 }, (_, i) => i + 601), ...Array.from({ length: 24 }, (_, i) => i + 3501)] },
   'carcassi-preludios': { favorite: [2, 4], insightful: [9], effort: [10], pending: [11, 13, 14, 15, 16] },
   'carcassi-progresivas': { favorite: [1, 12] },
   /* Numeros del libro: los valses salen de las piezas progresivas (2, 5, 7, 10, 15, 26, 34 y 36) pero solo se muestran en su pagina. */
