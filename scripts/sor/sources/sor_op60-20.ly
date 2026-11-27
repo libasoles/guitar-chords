@@ -11,36 +11,36 @@ upper = \fixed c {
   b16( d'8) d'16 cis'16 e'16 ais16 cis'16 | % 5
   b16( d'8) d'16 cis'16 e'16 ais16 cis'16 | % 6
   b16 d'16 g16 b16 e16 cis'16 fis16 ais16 | % 7
-  b16 d'16 fis16 b16 b,8 \mark "Fine" r8 | % 8
+  b16\3 d'16 fis16 b16\3 b,8 \mark "Fine" r8 | % 8
   ais16 cis'16 fis16 cis'16 fis16 cis'16 ais16 cis'16 | % 9
-  b16 d'16 fis16 d'16 fis16 d'16 b16 d'16 | % 10
-  cis'16 e'16 ais16 cis'16 b16 d'16 fis16 d'16 | % 11
-  b16 d'16 fis16 d'16 ais16 cis'16 fis16 cis'16 | % 12
+  b16\3 d'16 fis16 d'16 fis16 d'16 b16\3 d'16 | % 10
+  cis'16 e'16 ais16 cis'16 b16\3 d'16 fis16 d'16 | % 11
+  b16\3 d'16 fis16 d'16 ais16 cis'16 fis16 cis'16 | % 12
   ais16 cis'16 fis16 cis'16 fis16 cis'16 ais16 cis'16 | % 13
-  b16 d'16 fis16 d'16 fis16 d'16 b16 d'16 | % 14
-  cis'16 e'16 ais16 cis'16 b16 d'16 g16 e'16 | % 15
+  b16\3 d'16 fis16 d'16 fis16 d'16 b16\3 d'16 | % 14
+  cis'16 e'16 ais16 cis'16 b16\3 d'16 g16 e'16 | % 15
   fis16 fis'16 ais16 fis'16 fis8 fis'8 | % 16
   a16 fis'16 d'16 fis'16 a16 fis'16 d'16 fis'16 | % 17
   e'16 g'16 b16 g'16 g16 g'16 b16 g'16 | % 18
-  e'16 g'16 cis'16 g'16 a16 g'16 cis'16 g'16 | % 19
+  e'16\2 g'16 cis'16\3 g'16 a16 g'16 cis'16 g'16 | % 19
   cis'16 g'16 d'16 fis'16 a16 fis'16 d'16 fis'16 | % 20
   g16 e'16 a16 cis'16 g16 e'16 a16 cis'16 | % 21
   fis16 d'16 a16 d'16 fis16 d'16 a16 d'16 | % 22
   g16 e'16 a16 cis'16 g16 e'16 a16 cis'16 | % 23
   fis16 d'16 a16 d'16 fis16 d'16 d16 d'16 | % 24
-  g16 d'16 d16 d'16 b16 d'16 g16 d'16 | % 25
+  g16 d'16 d16 d'16 b16\3 d'16 g16 d'16 | % 25
   fis16 d'16 a16 d'16 fis16 d'16 d16 d'16 | % 26
-  g16 d'16 d16 d'16 b16 d'16 g16 d'16 | % 27
+  g16 d'16 d16 d'16 b16\3 d'16 g16 d'16 | % 27
   fis16 d'16 a16 d'16 fis16 d'16 d16 d'16 | % 28
   g16 d'16 e'16 d'16 gis16 d'16 e'16 d'16 | % 29
   a16 d'16 e'16 d'16 ais16 d'16 e'16 d'16 | % 30
-  b16 d'16 e'16 d'16 a16 d'16 e'16 d'16 | % 31
+  b16\3 d'16 e'16 d'16 a16 d'16 e'16 d'16 | % 31
   gis16 d'16 e'16 d'16 fis'16 d'16 e'16 d'16 | % 32
-  g16 cis'16 e'16 cis'16 a'16 cis'16 a'16 cis'16 | % 33
-  fis16 d'16 a'16 d'16 b16 d'16 fis'16 d'16 | % 34
+  g16\4 cis'16 e'16 cis'16 a'16 cis'16 a'16 cis'16 | % 33
+  fis16 d'16 a'16 d'16 b16\3 d'16 fis'16 d'16 | % 34
   g16 e'16 g'16 e'16 a16 cis'16 e'16 cis'16 | % 35
   d'16 fis'16 a16 d'16 d8 r8 | % 36
-  d'16 fis'16 c'16 e'16 b16 dis'16 a16 b16 | % 37
+  d'16 fis'16 c'16 e'16 b16\3 dis'16 a16\4 b16\3 | % 37
   g16 e'16 b16 e'16 e16 g'16 b16 g'16 | % 38
   dis16 fis'16 b16 fis'16 fis16 a'16 b16 a'16 | % 39
   fis16 a'16 b16 a'16 e16 g'16 b16 g'16 | % 40
@@ -67,12 +67,12 @@ inner = \fixed c {
   s2 | % 11
   s2 | % 12
   s8 fis8 fis4 | % 13
-  s8 fis8 s8 b8 | % 14
-  cis'8 ais8 b8 g8 | % 15
+  s8 fis8 s8 b8\3 | % 14
+  cis'8 ais8 b8\3 g8 | % 15
   s2 | % 16
   a4 d'4 | % 17
   r8 b8 g8 b8 | % 18
-  e'4 cis'8 a8 | % 19
+  e'4\2 cis'8 a8 | % 19
   cis'8 d'8 a4 | % 20
   s2 | % 21
   s2 | % 22
@@ -111,13 +111,13 @@ bass = \fixed c {
   r8 fis4. | % 5
   r8 fis4. | % 6
   r8 g8 e8 fis8 | % 7
-  b8 fis8 s4 | % 8
+  b8\3 fis8 s4 | % 8
   ais4. ais8 | % 9
-  b4. b8 | % 10
-  cis'8 ais8 b8 fis8 | % 11
-  b4 ais4 | % 12
+  b4.\3 b8\3 | % 10
+  cis'8 ais8 b8\3 fis8 | % 11
+  b4\3 ais4 | % 12
   ais4. ais8 | % 13
-  b4 fis4~ | % 14
+  b4\3 fis4~ | % 14
   fis2 | % 15
   fis4 fis4 | % 16
   d2~ | % 17
@@ -128,19 +128,19 @@ bass = \fixed c {
   fis8 a8 fis8 a8 | % 22
   g8 a8 g8 a8 | % 23
   fis8 a8 fis8 d8 | % 24
-  g8 d8 b8 g8 | % 25
+  g8 d8 b8\3 g8 | % 25
   fis8 a8 fis8 d8 | % 26
-  g8 d8 b8 g8 | % 27
+  g8 d8 b8\3 g8 | % 27
   fis8 a8 fis8 d8 | % 28
   g4 gis4 | % 29
   a4 ais4 | % 30
-  b4 a4 | % 31
+  b4\3 a4 | % 31
   gis2 | % 32
-  g2 | % 33
-  fis4 b4 | % 34
+  g2\4 | % 33
+  fis4 b4\3 | % 34
   g4 a4 | % 35
   d'8 a8 s4 | % 36
-  d'8 c'8 b8 a8 | % 37
+  d'8 c'8 b8\3 a8\4 | % 37
   g4 e4 | % 38
   dis4 fis4 | % 39
   fis4 e4 | % 40
