@@ -180,15 +180,6 @@ const SUITES = {
       /^test\/score-tab-pdf\./,
     ],
   },
-  partitura: {
-    build: 'site',
-    paths: [
-      /^src\/site\/partitura/,
-      /^scripts\/(og-partitura\.js|partitura-example\/)/,
-      /^docs\/partitura-api\.md$/,
-      /^test\/partitura\./,
-    ],
-  },
   extensions: {
     build: 'ext',
     paths: [
@@ -219,7 +210,6 @@ const IRRELEVANT = [
   /^(docs|store|backend|infra|downloads)\//,
   /\.md$/,
   /^test\/.*\.unit\.js$/,
-  /^\.github\/workflows\/backend\.yml$/,
 ];
 
 const claimedBy = (file) => Object.keys(SUITES).filter((n) => SUITES[n].paths.some((re) => re.test(file)));

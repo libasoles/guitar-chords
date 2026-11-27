@@ -13,8 +13,7 @@ const DIST = path.join(ROOT, 'dist', 'site');
 const BASE = 'https://acordesdeguitarra.com.ar';
 const read = (file) => fs.readFileSync(path.join(DIST, file), 'utf8');
 
-const PARTITURA_PUBLISHED = fs.existsSync(path.join(DIST, pageFile('partitura-y-tablatura', 'es')));
-const optionalKeys = new Set(PARTITURA_PUBLISHED ? [] : ['partitura-y-tablatura']);
+const optionalKeys = new Set();
 /* Paginas ocultas: noindex y fuera del sitemap. */
 const hiddenKeys = new Set(['articulo-favoritas']);
 /* Paginas de herramientas (no articulos) que existen en es. */

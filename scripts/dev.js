@@ -22,10 +22,7 @@ function say(msg) { process.stdout.write('[dev] ' + msg + '\n'); }
 
 function build() {
   say('building site...');
-  // Without an API URL the Partitura y tablatura page is not generated; this
-  // placeholder shows it locally (processing a score needs a real backend).
-  const env = { PARTITURA_API_URL: 'https://api.partitura.test', ...process.env };
-  const result = spawnSync('node', [path.join(__dirname, 'build-site.js'), '--local-ascii-tabs', '--dev'], { cwd: ROOT, stdio: 'inherit', env });
+  const result = spawnSync('node', [path.join(__dirname, 'build-site.js'), '--local-ascii-tabs', '--dev'], { cwd: ROOT, stdio: 'inherit' });
   if (result.status !== 0) {
     say('build failed');
   } else {

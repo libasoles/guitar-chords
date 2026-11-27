@@ -9,7 +9,6 @@
   "menuChordFinder": "Buscador de acordes",
   "menuCreateTabs": "Criar tablaturas",
   "menuIdentifyChords": "Identificar acordes",
-  "menuAddTabs": "Partituras com tablatura",
   "menuScoreEditor": "Escrever partituras",
   "menuFifths": "Círculo das quintas",
   "menuResources": "Recursos",
@@ -332,7 +331,7 @@
   "intervalsFig4": "Décimas · cordas 2 e 5",
   "privNavLabel": "Política de privacidade",
   "privPageTitle": "Política de privacidade · Acordes de violão",
-  "privMetaDescription": "Quais dados o acordesdeguitarra.com.ar coleta: Google Analytics, arquivos enviados para Partitura e tablatura, IPs para limites de uso e Cloudflare Turnstile.",
+  "privMetaDescription": "Quais dados o acordesdeguitarra.com.ar coleta: Google Analytics, notas salvas no seu navegador e seus direitos sobre dados pessoais.",
   "privH1": "Política de privacidade",
   "privLead": "Este site é gratuito e não tem contas de usuário. Aqui explicamos quais dados são coletados e o que acontece com eles.",
   "privSections": [
@@ -350,127 +349,13 @@
       ]
     },
     {
-      "h": "Partitura e tablatura: arquivos enviados",
-      "p": [
-        "Se você usa a ferramenta Partitura e tablatura, seu arquivo (PDF ou MusicXML) é guardado em um armazenamento privado, apenas para processá-lo e gerar os resultados (PDF, MusicXML e JSON).",
-        "O link do seu trabalho contém um identificador aleatório e longo que funciona como segredo: quem tiver o link pode ver o resultado. Todos os arquivos, originais e gerados, são apagados automaticamente após 24 horas.",
-        "As edições que você faz no editor também são guardadas no seu navegador (armazenamento local) para não se perderem ao recarregar a página; você pode apagá-las limpando os dados do site."
-      ]
-    },
-    {
-      "h": "Endereços IP e limites de uso",
-      "p": [
-        "Para evitar abusos, guardamos seu endereço IP junto com um contador diário de trabalhos criados. Esses registros são apagados automaticamente e não são usados para nenhum outro fim."
-      ]
-    },
-    {
-      "h": "Cloudflare Turnstile",
-      "p": [
-        "Para verificar que quem cria um trabalho é uma pessoa, usamos o Cloudflare Turnstile, que só é carregado na página de Partitura e tablatura. O Turnstile pode receber dados técnicos do seu navegador de acordo com a política de privacidade da Cloudflare."
-      ]
-    },
-    {
-      "h": "Direitos autorais",
-      "p": [
-        "Envie apenas partituras que você tenha direito de usar. Você é responsável pelo conteúdo que envia. Se você é titular de direitos e quer que removamos uma obra, escreva para hola@acordesdeguitarra.com.ar informando o link do trabalho."
-      ]
-    },
-    {
       "h": "Seus direitos sobre dados pessoais",
       "p": [
         "De acordo com a Lei 25.326 de Proteção de Dados Pessoais da Argentina, você pode acessar, retificar e excluir seus dados pessoais. A Agência de Acesso à Informação Pública é o órgão de controle dessa lei. Para exercer seus direitos, escreva para hola@acordesdeguitarra.com.ar."
       ]
     }
   ],
-  "partPromoKicker": "Novo",
-  "partPromoTitle": "Transforme uma partitura em tablatura",
-  "partPromoDescription": "Envie um PDF ou MusicXML e receba a tablatura.",
   "partPromoCta": "Experimentar →",
-  "partPromoAlt": "Violão clássico ilustrado com partituras",
-  "partPageTitle": "Partitura para tablatura de violão online e grátis · Partitura e tablatura",
-  "partMetaDescription": "Envie uma partitura em PDF ou MusicXML e receba a mesma partitura com a tablatura de violão adicionada embaixo de cada pauta. Digitação automática, editor e download em PDF, MusicXML e JSON.",
-  "partH1": "Tablatura para partituras",
-  "partLead": "Envie uma partitura em PDF ou MusicXML e devolvemos ela do jeito que está, com a tablatura de violão adicionada embaixo de cada pauta.",
-  "partExampleTitle": "Compassos de exemplo",
-  "partExampleCaption": "Ao enviar o PDF, a tablatura é adicionada embaixo da pauta.",
-  "partExampleAlt": "Compassos 6 a 9 de uma partitura para violão e sua tablatura em afinação padrão. Os números indicam os trastes e o 0, uma corda solta.",
-  "partHowH2": "Como a tablatura é adicionada à partitura",
-  "partHow1Title": "Envie sua partitura",
-  "partHow1Body": "Um PDF ou um arquivo MusicXML.",
-  "partHow2Title": "Calculamos a digitação",
-  "partHow2Body": "Cada nota é colocada na corda e no traste mais confortáveis do violão. Depois você pode editar a tablatura para corrigi-la como preferir.",
-  "partHow2Learn": "Saiba como aqui.",
-  "partHow3Title": "Baixe a partitura com tablatura",
-  "partFaqH2": "Perguntas frequentes",
-  "partFaq1Q": "O que é uma tablatura e qual é a diferença para uma partitura?",
-  "partFaq1A": "A partitura diz qual nota tocar e quanto ela dura. A tablatura só diz em qual corda e em qual traste do violão tocá-la, sem a duração. É uma notação simplificada.",
-  "partFaq2Q": "Quais arquivos posso enviar?",
-  "partFaq2A": "Partituras em PDF ou em MusicXML (.mxl, .musicxml, .xml). O MusicXML dá o resultado mais preciso, porque é um formato feito para máquinas.",
-  "partFaq3Q": "É grátis? Preciso criar uma conta?",
-  "partFaq3A": "É grátis e não precisa se cadastrar. Envie apenas partituras que você tenha direito de usar.",
-  "partFaq4Q": "Posso corrigir a tablatura?",
-  "partFaq4A": "Sim. A tablatura pode ser editada compasso por compasso.",
-  "partRightsLabel": "Tenho direito de usar as partituras que envio e sou responsável pelo conteúdo delas.",
-  "partDropTitle": "Selecione um arquivo",
-  "partFileLabel": "PDF, MusicXML, MXL; até 20 MB",
-  "partTuningLabel": "Afinação",
-  "partTuningAuto": "Automática",
-  "partTuningStandard": "Padrão",
-  "partTuningDropD": "Drop D",
-  "partSubmit": "Processar partitura",
-  "partVerifying": "Verificando se você é uma pessoa…",
-  "partUploading": "Enviando o arquivo…",
-  "partQueued": "Trabalho criado, aguardando…",
-  "partStageOcr": "Reconhecendo a partitura",
-  "partStagePreparing": "Calculando a digitação…",
-  "partStageExporting": "Gerando os arquivos…",
-  "partElapsed": "Tempo decorrido: {s} s",
-  "partDurationHint": "Pode levar vários minutos",
-  "partResumeHint": "Você pode fechar esta página e voltar pelo mesmo link: o trabalho fica guardado por 24 horas.",
-  "partLoadingAlt": "Processando",
-  "partNewJob": "Começar um novo trabalho",
-  "partPreviewDialog": "Pré-visualização da partitura",
-  "partPreviewClose": "Fechar pré-visualização",
-  "partToolbarLabel": "Ferramentas da tablatura",
-  "partTitleLabel": "Título",
-  "partAuthorLabel": "Intérprete / autor",
-  "partNotationNames": "Mostrar os nomes das notas",
-  "partConfirm": "Confirmar e exportar",
-  "partExporting": "Exportando…",
-  "partPdfDownloaded": "PDF baixado.",
-  "partLowQualityScan": "A leitura deste escaneamento pode ter erros. Seria bom procurar uma partitura de melhor qualidade.",
-  "partUnevenMeasure": "O ritmo deste compasso não fecha; revise as notas.",
-  "partDropped": "Notas descartadas (não há posição possível no violão):",
-  "partDroppedItem": "compasso {m}: {p}",
-  "partNoteTabEdit": "Editar a tablatura não corrige erros da notação. Se a partitura tiver erros de reconhecimento, baixe o MusicXML intermediário, corrija-o em um editor de partituras e envie de novo.",
-  "partDownloadsHeading": "Downloads",
-  "partDlPdf": "PDF (notação + tablatura)",
-  "partDlMusicxml": "MusicXML final",
-  "partDlJson": "JSON das tablaturas",
-  "partDlIntermediate": "MusicXML intermediário (resultado do reconhecimento)",
-  "partMobileReady": "Pronto. O PDF com a digitação sugerida foi baixado. Se não começou, use o link.",
-  "partMobileNote": "A pré-visualização e o editor estão disponíveis em telas de 768 px ou mais.",
-  "partPrivacySummary": "O que acontece com meus arquivos?",
-  "partPrivacyBody": "Seu arquivo é privado, é usado apenas para gerar as tablaturas e é apagado automaticamente após 24 horas.",
-  "partErrDefault": "Ocorreu um erro inesperado. Tente de novo em alguns minutos.",
-  "partErrNetwork": "Não conseguimos conectar ao serviço. Verifique sua conexão e tente de novo.",
-  "partErrBadType": "Formato não suportado. Envie um PDF, MusicXML (.musicxml, .xml) ou .mxl.",
-  "partErrNoFile": "Escolha um arquivo para continuar.",
-  "partErrRights": "Marque a caixa para confirmar que você tem direito de usar o arquivo.",
-  "partErr_rate_limited": "Você atingiu o limite de trabalhos por hora. Tente de novo em uma hora.",
-  "partErr_busy": "O sistema está ocupado processando outras partituras. Tente de novo em alguns minutos.",
-  "partErr_budget_paused": "O serviço está pausado temporariamente. Tente novamente mais tarde.",
-  "partErr_turnstile_failed": "Não conseguimos verificar que você é uma pessoa. Recarregue a página e tente de novo.",
-  "partErr_too_large": "O arquivo é grande demais (máximo de 20 MB).",
-  "partErr_omr_failed": "Não foi possível reconhecer a partitura. Tente com um PDF mais nítido ou envie um MusicXML.",
-  "partErr_no_notes": "Nenhuma nota foi encontrada na partitura.",
-  "partErr_timeout": "O processamento demorou demais e foi cancelado. Tente de novo.",
-  "partErr_export_limit": "Você atingiu o limite de exportações deste trabalho.",
-  "partErr_expired": "Este trabalho expirou (os arquivos são apagados após 24 horas). Comece um novo.",
-  "partErr_invalid_score": "Não foi possível ler a partitura. Verifique se o MusicXML é válido ou tente com outro arquivo.",
-  "partErr_export_failed": "Não foi possível gerar os arquivos. Tente de novo.",
-  "partErr_internal_error": "Erro interno do serviço. Tente de novo em alguns minutos.",
-  "partErr_not_found": "Não encontramos este trabalho. Comece um novo.",
   "toastLabel": "Notificação",
   "toastViewportLabel": "Notificações ({hotkey})",
   "toastClose": "Fechar notificação",
@@ -654,7 +539,7 @@
     ],
     [
       "Serve para violão?",
-      "Sim. Inclui a clave de Sol de violão (uma oitava abaixo), barras de repetição e pestanas. Se você já tem uma partitura e quer a tablatura, experimente <a href=\"%%SHEET_TO_TAB_HREF%%\">Partitura para tablatura</a>."
+      "Sim. Inclui a clave de Sol de violão (uma oitava abaixo), barras de repetição e pestanas."
     ]
   ],
   "scoreTitleLabel": "Título da partitura",

@@ -9,7 +9,6 @@
   "menuChordFinder": "Chord finder",
   "menuCreateTabs": "Create tabs",
   "menuIdentifyChords": "Identify chords",
-  "menuAddTabs": "Sheet music to tab",
   "menuScoreEditor": "Write sheet music",
   "menuFifths": "Circle of fifths",
   "menuResources": "Resources",
@@ -332,7 +331,7 @@
   "intervalsFig4": "Tenths · strings 2 and 5",
   "privNavLabel": "Privacy policy",
   "privPageTitle": "Privacy policy · Guitar Chords",
-  "privMetaDescription": "What data acordesdeguitarra.com.ar collects: Google Analytics, files uploaded to Score to tab, IP addresses for usage limits and Cloudflare Turnstile.",
+  "privMetaDescription": "What data acordesdeguitarra.com.ar collects: Google Analytics, notes saved in your browser and your rights over personal data.",
   "privH1": "Privacy policy",
   "privLead": "This site is free and has no user accounts. Here is what data is collected and what happens to it.",
   "privSections": [
@@ -350,127 +349,13 @@
       ]
     },
     {
-      "h": "Score to tab: uploaded files",
-      "p": [
-        "If you use the Score to tab tool, your file (PDF or MusicXML) is stored in private storage, only to process it and produce the results (PDF, MusicXML and JSON).",
-        "Your job link contains a long random identifier that works as a secret: anyone with the link can see the result. All files, original and generated, are deleted automatically after 24 hours.",
-        "Your edits in the editor are also kept in your browser (local storage) so they survive a reload; you can remove them by clearing the site data."
-      ]
-    },
-    {
-      "h": "IP addresses and usage limits",
-      "p": [
-        "To prevent abuse we store your IP address along with a daily count of jobs created. These records are deleted automatically and are not used for anything else."
-      ]
-    },
-    {
-      "h": "Cloudflare Turnstile",
-      "p": [
-        "To check that a person is creating a job, we use Cloudflare Turnstile, which loads only on the Score to tab page. Turnstile may receive technical data from your browser under Cloudflare's privacy policy."
-      ]
-    },
-    {
-      "h": "Copyright",
-      "p": [
-        "Upload only scores you have the right to use. You are responsible for the content you upload. If you are a rights holder and want a work removed, write to hola@acordesdeguitarra.com.ar with the job link."
-      ]
-    },
-    {
       "h": "Your rights over personal data",
       "p": [
         "Under Argentina's Personal Data Protection Law 25.326 you may access, correct and delete your personal data. The Agency for Access to Public Information is the supervisory body for this law. To exercise your rights, write to hola@acordesdeguitarra.com.ar."
       ]
     }
   ],
-  "partPromoKicker": "New",
-  "partPromoTitle": "From sheet music to tab",
-  "partPromoDescription": "Upload a PDF or MusicXML and get the score with an aligned guitar tab.",
   "partPromoCta": "Try Score to tab →",
-  "partPromoAlt": "Illustrated classical guitar with sheet music",
-  "partPageTitle": "Add Guitar Tab to Sheet Music Online, Free · Score to Tab",
-  "partMetaDescription": "Upload a PDF or MusicXML score and get the same sheet music with guitar tablature added under every measure. Automatic fingering, a tab editor and downloads as PDF, MusicXML and JSON.",
-  "partH1": "Tabs for sheet music",
-  "partLead": "Upload a PDF or MusicXML score and we give it back as it is, with the guitar tab added under every measure.",
-  "partExampleTitle": "Example measures",
-  "partExampleCaption": "When you upload the PDF, the tab is added below the staff.",
-  "partExampleAlt": "Measures 6 to 9 of a guitar score with their tab in standard tuning. Numbers indicate frets; 0 means an open string.",
-  "partHowH2": "How tab is added to your sheet music",
-  "partHow1Title": "Upload your score",
-  "partHow1Body": "A PDF or a MusicXML file.",
-  "partHow2Title": "We work out the fingering",
-  "partHow2Body": "Each note is placed on the most comfortable string and fret of the guitar. Then you can edit the tab to correct it as you see fit.",
-  "partHow2Learn": "Learn how here.",
-  "partHow3Title": "Download the score with tab",
-  "partFaqH2": "Frequently asked questions",
-  "partFaq1Q": "What is tablature and how is it different from sheet music?",
-  "partFaq1A": "Sheet music says which note to play and for how long. Tablature only says which string and fret of the guitar to play it on, not its duration. It is a simplified notation.",
-  "partFaq2Q": "Which files can I upload?",
-  "partFaq2A": "Scores as PDF or MusicXML (.mxl, .musicxml, .xml). MusicXML gives the most accurate result because it is a machine-readable format.",
-  "partFaq3Q": "Is it free? Do I need an account?",
-  "partFaq3A": "It is free and needs no sign-up. Only upload scores you have the right to use.",
-  "partFaq4Q": "Can I correct the tab?",
-  "partFaq4A": "Yes. The tab can be edited measure by measure.",
-  "partRightsLabel": "I have the right to use the scores I upload and I am responsible for their content.",
-  "partDropTitle": "Select a file",
-  "partFileLabel": "PDF, MusicXML, MXL; up to 20 MB",
-  "partTuningLabel": "Tuning",
-  "partTuningAuto": "Automatic",
-  "partTuningStandard": "Standard",
-  "partTuningDropD": "Drop D",
-  "partSubmit": "Process score",
-  "partVerifying": "Checking that you are a person…",
-  "partUploading": "Uploading the file…",
-  "partQueued": "Job created, waiting…",
-  "partStageOcr": "Recognizing the score",
-  "partStagePreparing": "Computing the fingering…",
-  "partStageExporting": "Generating the files…",
-  "partElapsed": "Elapsed time: {s} s",
-  "partDurationHint": "This can take several minutes",
-  "partResumeHint": "You can close this page and come back with the same link: the job is kept for 24 hours.",
-  "partLoadingAlt": "Processing",
-  "partNewJob": "Start a new job",
-  "partPreviewDialog": "Score preview",
-  "partPreviewClose": "Close preview",
-  "partToolbarLabel": "Tab tools",
-  "partTitleLabel": "Title",
-  "partAuthorLabel": "Performer / author",
-  "partNotationNames": "Show note names",
-  "partConfirm": "Confirm and export",
-  "partExporting": "Exporting…",
-  "partPdfDownloaded": "PDF downloaded.",
-  "partLowQualityScan": "This scan may have been misread. It would be best to look for a better-quality score.",
-  "partUnevenMeasure": "This measure's rhythm doesn't add up; check the notes.",
-  "partDropped": "Dropped notes (no possible position on the guitar):",
-  "partDroppedItem": "measure {m}: {p}",
-  "partNoteTabEdit": "Editing the tab does not fix errors in the notation. If the score has recognition errors, download the intermediate MusicXML, fix it in a notation editor and upload it again.",
-  "partDownloadsHeading": "Downloads",
-  "partDlPdf": "PDF (notation + tab)",
-  "partDlMusicxml": "Final MusicXML",
-  "partDlJson": "Tabs JSON",
-  "partDlIntermediate": "Intermediate MusicXML (recognition output)",
-  "partMobileReady": "Done. The PDF with the suggested fingering was downloaded. If it did not start, use the link.",
-  "partMobileNote": "The preview and the editor are available on screens 768 px wide or more.",
-  "partPrivacySummary": "What happens to my files?",
-  "partPrivacyBody": "Your file is private, used only to generate the tablatures and deleted automatically after 24 hours.",
-  "partErrDefault": "An unexpected error occurred. Try again in a few minutes.",
-  "partErrNetwork": "We could not reach the service. Check your connection and try again.",
-  "partErrBadType": "Unsupported format. Upload a PDF, MusicXML (.musicxml, .xml) or .mxl file.",
-  "partErrNoFile": "Choose a file to continue.",
-  "partErrRights": "Tick the box to confirm you have the right to use the file.",
-  "partErr_rate_limited": "You reached the hourly job limit. Try again in an hour.",
-  "partErr_busy": "The system is busy processing other scores. Try again in a few minutes.",
-  "partErr_budget_paused": "The service is temporarily paused. Please try again later.",
-  "partErr_turnstile_failed": "We could not verify that you are a person. Reload the page and try again.",
-  "partErr_too_large": "The file is too large (20 MB maximum).",
-  "partErr_omr_failed": "The score could not be recognized. Try a sharper PDF or upload a MusicXML.",
-  "partErr_no_notes": "No notes were found in the score.",
-  "partErr_timeout": "Processing took too long and was cancelled. Try again.",
-  "partErr_export_limit": "You reached the export limit for this job.",
-  "partErr_expired": "This job expired (files are deleted after 24 hours). Start a new one.",
-  "partErr_invalid_score": "The score could not be read. Check that the MusicXML is valid or try another file.",
-  "partErr_export_failed": "The files could not be generated. Try again.",
-  "partErr_internal_error": "Internal service error. Try again in a few minutes.",
-  "partErr_not_found": "We could not find this job. Start a new one.",
   "toastLabel": "Notification",
   "toastViewportLabel": "Notifications ({hotkey})",
   "toastClose": "Dismiss notification",
@@ -654,7 +539,7 @@
     ],
     [
       "Is it good for guitar?",
-      "Yes. It includes the guitar treble clef (an octave lower), repeat signs and barre marks. If you already have a score and want the tab, try <a href=\"%%SHEET_TO_TAB_HREF%%\">Sheet music to tab</a>."
+      "Yes. It includes the guitar treble clef (an octave lower), repeat signs and barre marks."
     ]
   ],
   "scoreTitleLabel": "Score title",

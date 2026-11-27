@@ -18,7 +18,6 @@ const SLUGS = {
   'identificar-acordes-por-notas': { es: 'recursos/identificar-acordes-por-notas', en: 'resources/identify-chords-by-notes', pt: 'recursos/identificar-acordes-pelas-notas', was: { es: 'identificar-acordes-por-notas', en: 'identify-chords-by-notes', pt: 'identificar-acordes-pelas-notas' } },
   'crear-tablaturas-de-guitarra': { es: 'recursos/crear-tablaturas-de-guitarra', en: 'resources/create-guitar-tabs', pt: 'recursos/criar-tablaturas-de-violao', was: { es: 'crear-tablaturas-de-guitarra', en: 'create-guitar-tabs', pt: 'criar-tablaturas-de-violao' } },
   'ejercicio-de-sextas': { es: 'ejercicio-de-sextas', en: 'sixths-exercise', pt: 'exercicio-de-sextas' },
-  'partitura-y-tablatura': { es: 'partitura-y-tablatura', en: 'sheet-music-to-tab', pt: 'partitura-e-tablatura' },
   'punteo-terceras-sextas-decimas': { es: 'punteo-terceras-sextas-decimas', en: 'picking-thirds-sixths-tenths', pt: 'dedilhado-terceiras-sextas-decimas' },
   'politica-de-privacidad': { es: 'politica-de-privacidad', en: 'privacy-policy', pt: 'politica-de-privacidade' },
   'partitura': { es: 'partitura', en: 'sheet-music-editor', pt: 'editor-de-partitura', isNew: true },

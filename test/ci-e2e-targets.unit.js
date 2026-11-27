@@ -76,7 +76,7 @@ test('on main each suite is diffed against its own last green commit', () => {
   assert.deepEqual(targetsSinceGreen(green, changedSince), []);
   assert.deepEqual(targetsSinceGreen({ ...green, 'picking-intervals': 'aaa' }, changedSince), ['picking-intervals']);
   // never green, or its commit is gone: run it.
-  assert.deepEqual(targetsSinceGreen({ ...green, 'note-finder': null, partitura: 'zzz' }, changedSince), ['note-finder', 'partitura']);
+  assert.deepEqual(targetsSinceGreen({ ...green, 'note-finder': null, 'score-editor': 'zzz' }, changedSince), ['note-finder', 'score-editor']);
 });
 
 test('last green takes the newest successful run of each suite', async () => {

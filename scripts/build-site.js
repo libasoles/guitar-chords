@@ -10,10 +10,7 @@
    Env vars:
      SITE_BASE_URL         Base URL without trailing slash (default: https://acordesdeguitarra.com.ar)
      EXTENSION_STORE_URL   Chrome Web Store URL — enables the "Add to Chrome" button
-     PARTITURA_API_URL     Base URL of the Partitura y tablatura API. The tool page
-                           (and its home banner/links) is only generated when set.
      SITE_OUT_DIR          Output directory (default: dist/site)
-     TURNSTILE_SITE_KEY    Cloudflare Turnstile public site key for that page
 */
 
 (async function buildSite() {
@@ -33,7 +30,7 @@ const { fingerprintAssets } = require("./lib/fingerprint");
 const { writeVerovioBrowser } = require("./lib/verovio-browser");
 const { renderEmptyStaff } = require("./lib/score-initial-staff");
 const { minifyAssets } = require("./lib/minify-assets");
-const { readSiteCss, readPartituraCss } = require("./lib/site-css");
+const { readSiteCss } = require("./lib/site-css");
 const { renderScoreTutorial } = require("./lib/score-tutorial");
 const { normalizeScoreDirections } = require("./lib/score-svg");
 const {
@@ -89,16 +86,6 @@ const SITE_BASE_URL = (
   process.env.SITE_BASE_URL || "https://acordesdeguitarra.com.ar"
 ).replace(/\/$/, "");
 const SITE_HOSTNAME = new URL(SITE_BASE_URL).hostname;
-
-// Partitura y tablatura is generated only when its API URL is configured, so
-// merging to main does not publish the page before the backend is deployed.
-const PARTITURA_API_URL = (process.env.PARTITURA_API_URL || "").replace(
-  /\/+$/,
-  "",
-);
-const TURNSTILE_SITE_KEY =
-  process.env.TURNSTILE_SITE_KEY || "0x4AAAAAAFX8ivpyYAAvr-8D";
-const PARTITURA_ENABLED = Boolean(PARTITURA_API_URL && TURNSTILE_SITE_KEY);
 
 // ---- helpers ---------------------------------------------------------------
 
@@ -217,14 +204,6 @@ const scoreEditorTemplate = fs.readFileSync(
 );
 const articleTemplate = fs.readFileSync(
   path.join(SRC_SITE, "article.html"),
-  "utf8",
-);
-const partituraTemplate = fs.readFileSync(
-  path.join(SRC_SITE, "partitura.html"),
-  "utf8",
-);
-const partituraPromoTemplate = fs.readFileSync(
-  path.join(SRC_SITE, "partitura-promo.html"),
   "utf8",
 );
 const LOCALES = publishedLocales().map(function (l) {
@@ -468,9 +447,7 @@ const TAB_EDITOR_SLUG = "crear-tablaturas-de-guitarra";
 // staff instead of wrapping.
 const SIXTHS_SLUG = "ejercicio-de-sextas";
 
-// Partitura y tablatura tool (src/site/partitura.html, src/site/partitura.js)
-// and the site-wide privacy policy (src/site/privacy.html).
-const PARTITURA_SLUG = "partitura-y-tablatura";
+// Site-wide privacy policy (src/site/privacy.html).
 const PRIVACY_SLUG = "politica-de-privacidad";
 
 // Editor minimo de partituras (src/site/score-editor.html). Pagina indexable:
@@ -647,26 +624,6 @@ function arpeggioPromo(strings, locale) {
     .join(v7PageHref(locale, ARTICLE_ARPEGGIOS_SLUG));
 }
 
-// Home banner for Partitura y tablatura; empty when the page is not generated.
-function partituraPromo(strings, locale, assetsPrefix) {
-  if (!PARTITURA_ENABLED) return "";
-  let html = partituraPromoTemplate.trim();
-  [
-    "partPromoKicker",
-    "partPromoTitle",
-    "partPromoDescription",
-    "partPromoCta",
-    "partPromoAlt",
-  ].forEach(function (key) {
-    html = html.split("%%" + key + "%%").join(strings[key] || "");
-  });
-  return html
-    .split("%%PARTITURA_PAGE_HREF%%")
-    .join(v7PageHref(locale, PARTITURA_SLUG))
-    .split("%%ASSETS_PREFIX%%")
-    .join(assetsPrefix);
-}
-
 function render(template, strings, locale, assetsPrefix, outputMode) {
   const resolvedAssetsPrefix =
     assetsPrefix || (locale === "es" ? "assets/" : "../assets/");
@@ -712,9 +669,6 @@ function render(template, strings, locale, assetsPrefix, outputMode) {
   html = html
     .split("%%TAB_EDITOR_PROMO%%")
     .join(tabEditorPromo(strings, locale));
-  html = html
-    .split("%%PARTITURA_PROMO%%")
-    .join(partituraPromo(strings, locale, resolvedAssetsPrefix));
   html = html.split("%%ASSETS_PREFIX%%").join(resolvedAssetsPrefix);
   html = html.split("%%altLangHref%%").join(altLangHref(locale, outputMode));
   html = html.split("%%canonicalUrl%%").join(canonicalUrl(locale));
@@ -1227,14 +1181,11 @@ function renderScoreEditorPage(template, strings, locale) {
     .split("%%partPromoCta%%").join(escapeHtml(strings.partPromoCta))
     .split("%%scorePartituraExample%%").join(escapeHtml(strings.scorePartituraExample))
     .split("%%scorePartituraCaption%%").join(escapeHtml(strings.scorePartituraCaption));
-  const sheetToTabHref = PARTITURA_ENABLED ? v7PageHref(locale, PARTITURA_SLUG) : "";
-  // Without the sheet-to-tab page the link would be dead: keep its text only.
+  // The sheet-to-tab page no longer exists: keep the link text only.
   const faq = (strings.scoreFaq || []).map(function (item) {
     return {
       q: item[0],
-      a: sheetToTabHref
-        ? item[1].split("%%SHEET_TO_TAB_HREF%%").join(sheetToTabHref)
-        : item[1].replace(/<a [^>]*>(.*?)<\/a>/g, "$1"),
+      a: item[1].replace(/<a [^>]*>(.*?)<\/a>/g, "$1"),
     };
   });
   const list = function (items) {
@@ -1782,104 +1733,6 @@ function writeArticlePages(strings, locale) {
   });
 }
 
-// Render the Partitura y tablatura tool page (src/site/partitura.html). The
-// client script reads window.PARTITURA_CONFIG: API base URL, Turnstile site
-// key and every part* and toast* string for the locale.
-function renderPartituraPage(template, strings, locale) {
-  const i18n = {};
-  Object.keys(strings).forEach(function (key) {
-    if (key.indexOf("part") === 0 || key.indexOf("toast") === 0) i18n[key] = strings[key];
-  });
-  const config = {
-    apiUrl: PARTITURA_API_URL,
-    turnstileSiteKey: TURNSTILE_SITE_KEY,
-    locale: locale,
-    example: JSON.parse(fs.readFileSync(path.join(SRC_SITE, "partitura-example.json"), "utf8")),
-    privacyHref: v7PageHref(locale, PRIVACY_SLUG),
-    strings: i18n,
-  };
-  // Link previews (og:/twitter:) reuse the home banner: its image, kicker-less
-  // title and description, rendered by scripts/og-partitura.js.
-  let html = fillPageChrome(
-    template,
-    strings,
-    locale,
-    PARTITURA_SLUG,
-    SITE_BASE_URL + "/assets/og-partitura-" + ogImageLocale(locale) + ".png",
-  );
-  [
-    "partPromoAlt",
-    "partHowH2",
-    "partHow1Title",
-    "partHow1Body",
-    "partHow2Title",
-    "partHow2Body",
-    "partHow2Learn",
-    "partHow3Title",
-    "partFaqH2",
-    "partFaq1Q",
-    "partFaq1A",
-    "partFaq2Q",
-    "partFaq2A",
-    "partFaq3Q",
-    "partFaq3A",
-    "partFaq4Q",
-    "partFaq4A",
-    "partRightsLabel",
-    "partFileLabel",
-    "partDropTitle",
-    "partExampleTitle",
-    "partExampleCaption",
-    "partExampleAlt",
-    "partTuningLabel",
-    "partTuningAuto",
-    "partTuningStandard",
-    "partTuningDropD",
-    "partSubmit",
-    "partDurationHint",
-    "partResumeHint",
-    "partLoadingAlt",
-    "partPrivacySummary",
-    "partPrivacyBody",
-    "partPrivacyLink",
-  ].forEach(function (key) {
-    html = html.split("%%" + key + "%%").join(escapeHtml(strings[key] || ""));
-  });
-  html = html
-    .split("%%PAGE_TITLE%%")
-    .join(strings.partPageTitle || "")
-    .split("%%PAGE_META_DESCRIPTION%%")
-    .join(strings.partMetaDescription || "")
-    .split("%%PAGE_H1%%")
-    .join(strings.partH1 || "")
-    .split("%%PAGE_LEAD%%")
-    .join(strings.partLead || "")
-    .split("%%OG_TITLE%%")
-    .join(escapeHtml(strings.partPromoTitle || ""))
-    .split("%%OG_DESCRIPTION%%")
-    .join(escapeHtml(strings.partPromoDescription || ""))
-    .split("%%ogLocale%%")
-    .join(localeConfig(locale).ogLocale)
-    .split("%%PRIVACY_HREF%%")
-    .join(v7PageHref(locale, PRIVACY_SLUG))
-    .split("%%TAB_EDITOR_PAGE_HREF%%")
-    .join(v7PageHref(locale, TAB_EDITOR_SLUG))
-    .split("%%PARTITURA_CONFIG%%")
-    .join(JSON.stringify(config).replace(/</g, "\\u003c"));
-  const faq = [1, 2, 3, 4].map(function (n) {
-    return { q: strings["partFaq" + n + "Q"], a: strings["partFaq" + n + "A"] };
-  });
-  const opts = structuredDataOpts(
-    locale,
-    v7CanonicalUrl(locale, PARTITURA_SLUG),
-    strings.partPageTitle || "",
-    strings.partMetaDescription || "",
-  );
-  opts.ogImage = SITE_BASE_URL + "/assets/og-partitura-" + ogImageLocale(locale) + ".png";
-  opts.faq = faq;
-  return injectJsonLd(html, toolJsonLd(opts));
-}
-
 // Render the intervals lesson page (src/site/picking-intervals.html) for one
 // locale. Fretboard diagrams are computed client-side by
 // src/site/picking-render.js; no client-side data script.
@@ -1982,8 +1835,6 @@ function render404Page(template, strings, locale = "es") {
     .join(arpeggioPromo(strings, locale))
     .split("%%TAB_EDITOR_PROMO%%")
     .join(tabEditorPromo(strings, locale))
-    .split("%%PARTITURA_PROMO%%")
-    .join(partituraPromo(strings, locale, resolvedAssetsPrefix))
     .split("%%EXTENSIONS_LIST%%")
     .join(extensionsList(strings));
 
@@ -2165,28 +2016,6 @@ require("esbuild").buildSync({
   define: { "process.env.NODE_ENV": '"production"' },
 });
 writeVerovioBrowser(path.join(SRC_VENDOR, "verovio-toolkit-wasm.js"), VENDOR_DIST);
-if (PARTITURA_ENABLED) {
-  copyFile(
-    path.join(SRC_SITE, "partitura.js"),
-    path.join(ASSETS_DIST, "partitura.js"),
-  );
-  // The tool page loads only the styles it uses, not the whole site.css.
-  fs.writeFileSync(
-    path.join(ASSETS_DIST, "partitura.css"),
-    readPartituraCss(),
-    "utf8",
-  );
-  copyFile(
-    path.join(SRC_SITE, "partitura-banner.webp"),
-    path.join(ASSETS_DIST, "partitura-banner.webp"),
-  );
-  ["es", "en"].forEach(function (loc) {
-    copyFile(
-      path.join(SRC_SITE, "og-partitura-" + loc + ".png"),
-      path.join(ASSETS_DIST, "og-partitura-" + loc + ".png"),
-    );
-  });
-}
 // Raster score previews used by article and guide link cards.
 ["carcassi", "preludes", "arpeggios"].forEach(function (name) {
   copyFile(
@@ -2481,16 +2310,6 @@ LOCALES.forEach(function (locale) {
       say(path.relative(ROOT, scoreOutFile));
     }
 
-    if (PARTITURA_ENABLED) {
-      const partOutFile = path.join(DIST_SITE, PARTITURA_SLUG + ".html");
-      fs.writeFileSync(
-        partOutFile,
-        renderPartituraPage(partituraTemplate, strings, locale),
-        "utf8",
-      );
-      say(path.relative(ROOT, partOutFile));
-    }
-
     ALL_PICKING_PAGES.forEach(function (page) {
       const pickingHtml = renderPickingPage(
         intervalsTemplate,
@@ -2598,16 +2417,6 @@ LOCALES.forEach(function (locale) {
     say(path.relative(ROOT, scoreOutFile));
   }
 
-  if (PARTITURA_ENABLED) {
-    const partOutFile = path.join(DIST_SITE, pageFile(PARTITURA_SLUG, locale));
-    fs.writeFileSync(
-      partOutFile,
-      renderPartituraPage(partituraTemplate, strings, locale),
-      "utf8",
-    );
-    say(path.relative(ROOT, partOutFile));
-  }
-
   ALL_PICKING_PAGES.forEach(function (page) {
     const pickingHtml = renderPickingPage(
       intervalsTemplate,
@@ -2659,8 +2468,6 @@ function siteMenu(strings, locale, file) {
     link(pagePath("identificar-acordes-por-notas", locale), strings.menuIdentifyChords),
   ];
   items.push(link(pagePath(SCORE_EDITOR_SLUG, locale), strings.menuScoreEditor, true, true));
-  if (PARTITURA_ENABLED)
-    items.push(link(pagePath(PARTITURA_SLUG, locale), strings.menuAddTabs, true));
   items.push(link(pagePath("circulo-de-quintas", locale), strings.menuFifths));
   if (isTranslated(ARTICLE_ARPEGGIOS_SLUG, locale))
     items.push(link(pagePath(ARTICLE_ARPEGGIOS_SLUG, locale), strings.artArpeggiosH1));
@@ -2847,9 +2654,6 @@ console.log("==> Embedding the Portuguese 404 page...");
 
 console.log("==> Writing redirects for the old URLs...");
 allRedirects().forEach(function (redirect) {
-  // The old Partitura URL never existed unless the tool is published.
-  if (!PARTITURA_ENABLED && redirect.file === "en/" + PARTITURA_SLUG + ".html")
-    return;
   const redirectFile = path.join(DIST_SITE, redirect.file);
   ensureDir(path.dirname(redirectFile));
   fs.writeFileSync(redirectFile, redirectHtml(SITE_BASE_URL, redirect.to), "utf8");
@@ -2940,7 +2744,6 @@ addSlugPages([TAB_EDITOR_SLUG], ["0.7", "0.6"]);
 addSlugPages([SCORE_EDITOR_SLUG], ["0.8", "0.7"]);
 addSlugPages([PRIVACY_SLUG], ["0.3", "0.3"]);
 addSlugPages([ARTICLES_SLUG, SCORES_SLUG, ARTICLE_CARCASSI_SLUG, ARTICLE_PRELUDES_SLUG, ARTICLE_SANTISTEBAN_SLUG, ARTICLE_WALTZES_SLUG, ARTICLE_PROGRESSIVE_SLUG, ARTICLE_AGUADO_SLUG, ARTICLE_SAGRERAS_SLUG, ARTICLE_SOR_SLUG, ARTICLE_SOR_ESTUDIOS_SLUG, ARTICLE_BARRIOS_SLUG, ARTICLE_GIULIANI_SLUG, ARTICLE_GIULIANI_ARPEGIOS_SLUG, ARTICLE_ARPEGGIOS_SLUG]);
-if (PARTITURA_ENABLED) addSlugPages([PARTITURA_SLUG], ["0.7", "0.6"]);
 addSlugPages(
   ALL_PICKING_PAGES.map(function (page) {
     return page.slug;
