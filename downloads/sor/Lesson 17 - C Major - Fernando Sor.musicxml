@@ -349,28 +349,28 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -380,7 +380,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>20160</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -686,28 +686,28 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -717,7 +717,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>20160</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -1006,21 +1006,21 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -1267,14 +1267,14 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>2520</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>16th</type>
         <staff>2</staff>
       </note>
@@ -1284,7 +1284,7 @@
           <octave>3</octave>
         </pitch>
         <duration>2520</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>16th</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1300,7 +1300,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1613,28 +1613,28 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -1644,7 +1644,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>20160</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -1950,28 +1950,28 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -1981,7 +1981,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>20160</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -2279,28 +2279,28 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -2507,21 +2507,21 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -2820,28 +2820,28 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -3127,21 +3127,21 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -3440,28 +3440,28 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -3734,14 +3734,14 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -4047,21 +4047,21 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -4071,7 +4071,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -4079,7 +4079,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -4356,14 +4356,14 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -4653,21 +4653,21 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -4893,21 +4893,21 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -5213,21 +5213,21 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -5237,7 +5237,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -5245,7 +5245,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -5551,21 +5551,21 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -5575,7 +5575,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -5583,7 +5583,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -5889,21 +5889,21 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -5913,7 +5913,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -5921,7 +5921,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -6227,21 +6227,21 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -6251,7 +6251,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -6259,7 +6259,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -6572,21 +6572,21 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -6596,7 +6596,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -6604,7 +6604,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -6917,21 +6917,21 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -6941,7 +6941,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -6949,7 +6949,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -6994,6 +6994,11 @@
         <staff>1</staff>
         <beam number="1">continue</beam>
         <beam number="2">continue</beam>
+        <notations>
+          <technical>
+            <string>3</string>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-249">
         <pitch>
@@ -7020,6 +7025,11 @@
         <staff>1</staff>
         <beam number="1">begin</beam>
         <beam number="2">begin</beam>
+        <notations>
+          <technical>
+            <string>3</string>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-251">
         <pitch>
@@ -7080,6 +7090,11 @@
         <type>eighth</type>
         <stem>down</stem>
         <staff>1</staff>
+        <notations>
+          <technical>
+            <string>3</string>
+          </technical>
+        </notations>
       </note>
       <note id="tab-note-255">
         <pitch>
@@ -7091,6 +7106,11 @@
         <type>quarter</type>
         <stem>down</stem>
         <staff>1</staff>
+        <notations>
+          <technical>
+            <string>3</string>
+          </technical>
+        </notations>
       </note>
       <backup>
         <duration>20160</duration>
@@ -7165,7 +7185,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -7197,7 +7217,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>2</string><fret>0</fret>
+            <string>3</string><fret>4</fret>
           </technical>
         </notations>
       </note>
@@ -7255,21 +7275,21 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -7279,7 +7299,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -7287,7 +7307,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -7586,28 +7606,28 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -7913,21 +7933,21 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -7937,7 +7957,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -7945,7 +7965,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -8251,21 +8271,21 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -8275,7 +8295,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -8283,7 +8303,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -8590,28 +8610,28 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -8621,7 +8641,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>20160</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -8814,14 +8834,14 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>

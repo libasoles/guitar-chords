@@ -141,3 +141,5 @@ de alturas o duraciones.
 ### Lección 24
 
 28 compases, Re menor, Allegro moderato, compás de cuatro tiempos. Fuente #836891, p. 18; cotejo con #43445 y París #470312, p. 29. Se conservan Fine en el 16 y regreso al signo desde el 28. Las notas ligadas del arpegio mantienen su duración mientras entra otra línea, representada en una voz independiente. Se mantienen los bajos y las alteraciones del impreso. PDF de dos páginas, TAB y páginas completas revisados. Comprobación de cuerdas sostenidas sin interrupciones; sin correcciones editoriales de alturas o duraciones.
+
+Revisión de TAB de la lección 17: se fija el Si del compás 23 en la tercera cuerda (traste 4), para sostenerlo mientras se toca el Re en la segunda. No cambia la altura ni la duración. PDF y alineación de voces revisados de nuevo.
