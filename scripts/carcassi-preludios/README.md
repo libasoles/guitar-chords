@@ -63,9 +63,7 @@ innecesarios a la misma cuerda. El visor y la descarga usan la misma digitación
 ## Criterio de revisión de plaqués
 
 La colección Carcassi se transcribe manualmente: regenerar sus artefactos con
-Music21 y Verovio no ejecuta homr ni valida la lectura del impreso. El conversor
-de subidas usa `backend/ocr/run.py`: homr primero para escaneos y Audiveris
-primero para PDF vectorial, con un segundo intento si la lectura es dudosa.
+Music21 y Verovio no valida la lectura del impreso.
 
 Al cotejar un compás, identificar primero las plicas y las cabezas que conectan
 con cada una. En intervalos de segunda, las cabezas pueden quedar a ambos lados
@@ -90,9 +88,9 @@ quince compases de este preludio repiten el patrón de bajo de blanca y tres
 acordes de corchea; el cierre es distinto. Las pruebas del MusicXML protegen
 esta transcripción, pero no certifican el OCR. Investigación pendiente: #43.
 
-## Herramientas anteriores de OCR
+## Herramientas anteriores
 
-`extract.py crop N` y `ocr N`, `detect_notes.py`, `bass_strips.py` y los informes
+`extract.py crop N` y los informes
 históricos de `reports/` trabajan sobre la fuente de **Santisteban**
 `resources/CarcassiMethodPreludes-a4.pdf` (o `$CARCASSI_SOURCE_PDF`). Los informes
 no son una certificación de las nuevas entradas originales. Los scripts

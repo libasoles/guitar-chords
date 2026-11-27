@@ -7,7 +7,7 @@ const { SUITES, targets } = require('../scripts/ci-e2e-targets');
 const ALL = Object.keys(SUITES);
 
 test('docs, backend and unit test changes need no e2e suite', () => {
-  assert.deepEqual(targets(['README.md', 'docs/ocr-evaluacion.md', 'backend/api/app.py', 'infra/stack.py', 'test/slugs.unit.js']), []);
+  assert.deepEqual(targets(['README.md', 'docs/voice-leading.md', 'backend/engine/tabify.py', 'infra/stack.py', 'test/slugs.unit.js']), []);
 });
 
 test('a tool-specific change runs only its suite', () => {

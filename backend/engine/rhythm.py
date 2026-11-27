@@ -334,7 +334,7 @@ def _same_stem(previous, event):
 
 def _stack_same_x(events):
     """Chord heads read as consecutive notes at one x. Not done for heads displaced to the other side of the stem (a second): their
-    x differs by one head and a stepwise run of 16ths is spaced the same, only the stem tells them apart (see docs/heuristicas-plaques.md)."""
+    x differs by one head and a stepwise run of 16ths is spaced the same, only the stem tells them apart."""
     changed = False
     for own in list(_by_voice(events).values()):
         stacked = [e for p, e in zip(own, own[1:]) if _same_stem(p, e)]

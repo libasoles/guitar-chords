@@ -1,7 +1,6 @@
 """Extracts one Carcassi prelude from the local source PDF (not versioned).
 
     python scripts/carcassi-preludios/extract.py crop 1      # PNG of the prelude, cropped by position
-    python scripts/carcassi-preludios/extract.py ocr 1       # + MusicXML intermedio via local Docker
 
 See scripts/carcassi-preludios/README.md. The source PDF is read from $CARCASSI_SOURCE_PDF or
 resources/CarcassiMethodPreludes-a4.pdf.
@@ -20,7 +19,6 @@ import fingering  # noqa: E402
 DEFAULT_SOURCE = os.path.join(ROOT, "resources", "CarcassiMethodPreludes-a4.pdf")
 WORK = os.path.join(ROOT, ".work", "carcassi-preludios")
 DPI = 400
-IMAGE = "guitar-chords-ocr"
 FOOTER_MARGIN = 6  # pt above the footer text
 
 
@@ -95,15 +93,6 @@ def crop(number):
     sheet.save(out)
     print("recorte:", out, sheet.size)
     return out
-
-
-def ocr(number):
-    png = crop(number)
-    out = os.path.join(WORK, f"omr-{number:02d}")
-    subprocess.run(["docker", "run", "--rm", "-v", f"{WORK}:/work", "-v", f"{ROOT}/backend/ocr:/opt/ocr:ro",
-                    "--entrypoint", "python3", IMAGE, "/opt/ocr/local_run.py",
-                    f"/work/{os.path.basename(png)}", f"/work/omr-{number:02d}"], check=True)
-    print("MusicXML intermedio (no se commitea):", out)
 
 
 OUT_DIR = os.path.join(ROOT, "downloads", "carcassi-preludios")
@@ -401,9 +390,9 @@ def build(number):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=["crop", "ocr", "build", "pages"])
+    parser.add_argument("command", choices=["crop", "build", "pages"])
     parser.add_argument("number", type=int, choices=range(1, 17))
     parser.add_argument("--edition", choices=["carcassi", "santisteban"], default="carcassi")
     args = parser.parse_args()
     select_edition(args.edition)
-    {"crop": crop, "ocr": ocr, "build": build, "pages": pages}[args.command](args.number)
+    {"crop": crop, "build": build, "pages": pages}[args.command](args.number)

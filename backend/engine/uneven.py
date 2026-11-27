@@ -2,7 +2,7 @@
 
 The most common measure length is taken as the real one (no time signature needed). A measure is uneven
 when a voice is longer than that, or no voice reaches it. A pickup (first measure) and the closing measure
-(last) may legitimately be short. Same idea as `backend/ocr/quality.py`, which runs in the OCR image.
+(last) may legitimately be short.
 """
 
 import collections

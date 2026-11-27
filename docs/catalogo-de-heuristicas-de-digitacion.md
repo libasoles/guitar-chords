@@ -8,8 +8,7 @@ código, no aquí.
 
 Procedencia y verificación de las fuentes: `docs/criterios-de-digitacion.md`. Lo que no se pudo comprobar en la
 fuente primaria está marcado **[no verificado]**; las citas de Carcassi y Aguado vienen de OCR y hay que cotejarlas
-con la imagen antes de citar páginas. Arpegios y plaqués tienen su propio documento
-(`docs/heuristicas-plaques.md` para el reconocimiento de acordes).
+con la imagen antes de citar páginas. Arpegios y plaqués se documentan en este mismo catálogo.
 
 «Casilla» = celda (cuerda, traste). Estados: **Implementada** (con su símbolo), **Parcial**, **No implementada**.
 

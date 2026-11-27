@@ -1,11 +1,11 @@
 """MusicXML score -> guitar tablature, as ascii-tabs columns and as an engraved PDF.
 
 Pure operations on artifacts (no sessions): `prepare` and `export`, at the end
-of this module. OMR (Audiveris) is not part of this module: it runs in its own
-container (backend/ocr) and its MusicXML output is this module's input.
+of this module. Optical music recognition is not part of this module: its
+input is a MusicXML file.
 
 Pipeline:
-  1. (Elsewhere) Audiveris turns the PDF into MusicXML.
+  1. The MusicXML comes from the collection's build script.
   2. music21 reads the first part; every onset of a measure (all voices
      together) becomes one tab Column. Tied continuations are not re-plucked.
   3. A Viterbi search picks string/fret for every Column (chords included),
@@ -1451,7 +1451,7 @@ def prepare(input_path, kind, tuning, out_dir, per_row=4, arpeggio="auto"):
     """Input score -> normalized MusicXML + suggested fingering + preview.
 
     `input_path` is one MusicXML/MXL file or a list of them (OCR movements).
-    `kind` is 'musicxml' or 'pdf-ocr-output' (the MusicXML Audiveris wrote);
+    `kind` is 'musicxml' or 'pdf-ocr-output' (MusicXML written by an OMR tool);
     both are read the same way. `tuning` is 'auto', 'standard' or 'dropd'.
     `arpeggio` is 'auto' (detect arpeggio measures), True or False: see `assign_frets`.
     Writes normalized.musicxml, suggestion.json, preview.json and
