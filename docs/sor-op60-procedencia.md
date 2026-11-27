@@ -79,7 +79,7 @@ los compases 38 y 46 tienen barras parciales: no se interpretan como grupos irre
 PDF generado de dos páginas y páginas del visor revisados contra el impreso. La TAB conserva las alturas;
 las posiciones las propone el motor. No hay correcciones editoriales de alturas o duraciones en esta lección.
 
-Las lecciones 24–25 y la revisión del parche del bajo de la lección 5 siguen pendientes. La descarga y su
+La lección 25 y la revisión del parche del bajo de la lección 5 siguen pendientes. La descarga y su
 integridad no equivalen al cotejo musical ni a la publicación de esas lecciones.
 
 ### Lección 17
@@ -137,3 +137,7 @@ de alturas o duraciones.
 ### Lección 23
 
 33 compases, La mayor, Andantino, 2/4. Fuente #836891, p. 17; cotejo con #43479 y París #470312, p. 28. Se conservan los bajos Mi ligados, las voces independientes y la ortografía de si sostenido y mi sostenido. La TAB sitúa el sol sostenido del compás 30 en la segunda cuerda para conservar el La prolongado de la melodía. PDF de una página y vista completa revisados; sin correcciones editoriales de alturas o duraciones.
+
+### Lección 24
+
+28 compases, Re menor, Allegro moderato, compás de cuatro tiempos. Fuente #836891, p. 18; cotejo con #43445 y París #470312, p. 29. Se conservan Fine en el 16 y regreso al signo desde el 28. Las notas ligadas del arpegio mantienen su duración mientras entra otra línea, representada en una voz independiente. Se mantienen los bajos y las alteraciones del impreso. PDF de dos páginas, TAB y páginas completas revisados. Comprobación de cuerdas sostenidas sin interrupciones; sin correcciones editoriales de alturas o duraciones.
