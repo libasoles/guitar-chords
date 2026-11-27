@@ -65,8 +65,9 @@ use('lecciones')
 
 PER_ROW = {}
 ARPEGGIO = set()
-# Dejar sitio al crédito: el último sistema de la lección 20 rozaba el pie en A4.
-PDF_OVERRIDES = {20: {'scale': 41, 'pageWidth': 2305, 'pageHeight': 3260, 'pageMarginTop': 160, 'pageMarginBottom': 220}}
+# Dejar sitio al crédito: los últimos sistemas de las lecciones 20 y 22 rozaban el pie.
+PDF_OVERRIDES = {n: {'scale': 41, 'pageWidth': 2305, 'pageHeight': 3260, 'pageMarginTop': 160, 'pageMarginBottom': 220}
+                 for n in (20, 22)}
 SCALES = [45, 41, 38, 35]  # la escala de Verovio es entera; 45 es la del motor; con menos de 35 lo impreso es ilegible
 # Escala minima de los estudios: por debajo el PDF mete demasiados compases por renglon y la TAB queda apretada, asi que
 # se prefieren mas paginas. `min_scale` en el catalogo la baja o la sube para una pieza.
