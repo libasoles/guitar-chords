@@ -203,6 +203,7 @@ jobs:
       cancel-in-progress: false
 
     permissions:
+      actions: read
       contents: read
       pages: write
       id-token: write
@@ -236,6 +237,23 @@ jobs:
           # A rerun keeps older uploads in the same workflow run.
           name: github-pages-${{ github.run_attempt }}
           path: dist/site
+
+      - name: Wait for Pages artifact metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_NAME: github-pages-${{ github.run_attempt }}
+        run: |
+          for attempt in $(seq 1 15); do
+            if gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts" \
+              --jq '.artifacts[].name' | grep -Fxq "$ARTIFACT_NAME"; then
+              echo "Pages artifact $ARTIFACT_NAME is visible to the Actions API."
+              exit 0
+            fi
+            echo "Pages artifact $ARTIFACT_NAME is not visible yet (attempt $attempt/15)."
+            sleep 2
+          done
+          echo "Pages artifact $ARTIFACT_NAME was not visible after 30 seconds."
+          exit 1
 
       - name: Deploy to GitHub Pages
         id: deployment
