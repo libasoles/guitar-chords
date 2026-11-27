@@ -125,6 +125,7 @@ def build(number):
         raise SystemExit(f'falta la fuente: {source}')
     base_options = dict(tabify.PDF_OPTIONS)
     tabify.KEEP_TEXT = True  # tempo, Fine y D.C. se imprimen
+    tabify.ALIGN_TAB_VOICES = True  # el bajo de tres voces no se corre a la derecha en la TAB
     tabify.MERGE_UNISONS = True  # la misma altura en dos voces a la vez es una sola nota en la TAB
     with tempfile.TemporaryDirectory() as tmp:
         extract.patch_engine(tabify)

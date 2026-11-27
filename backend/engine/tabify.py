@@ -71,6 +71,11 @@ HARMONICS = False
 # `prepare` turns it on for uploads (their suggestion is persisted, so `export` does not need it).
 SUSTAIN = False
 
+# Verovio shifts the third layer of a staff to the right when three voices sound together, so a bass in voice 3 prints
+# its fret a notehead to the right of the chord it belongs to (the notation staff keeps them aligned). Swapping voices 2
+# and 3 on the TAB staff only avoids that shift. Off by default: it changes the published output of other collections.
+ALIGN_TAB_VOICES = False
+
 PREVIEW_OPTIONS = {
     "pageWidth": 2100, "pageHeight": 60000, "scale": 40, "adjustPageHeight": True,
     "breaks": "none", "pageMarginLeft": 60, "pageMarginRight": 20,  # left: string names
@@ -1160,6 +1165,19 @@ def extract_header(score):
     return title, [text for _, _, text in sorted(nearby)]
 
 
+def swap_tab_voices(xml):
+    """Voices 2 and 3 swap places on the TAB staff (second staff); see ALIGN_TAB_VOICES."""
+    swap = {"2": "3", "3": "2"}
+
+    def note(match):
+        text = match.group(0)
+        if "<staff>2</staff>" not in text:
+            return text
+        return re.sub(r"<voice>(\d)</voice>", lambda v: f"<voice>{swap.get(v.group(1), v.group(1))}</voice>", text)
+
+    return re.sub(r"<note[ >].*?</note>", note, xml, flags=re.S)
+
+
 def fix_technical(xml):
     return re.sub(r"<fingering[^>]*>(\d+)/(\d+)</fingering>", r"<string>\1</string><fret>\2</fret>", xml)
 
@@ -1356,6 +1374,8 @@ def build_output(score, part, measures, tuning, title, out_base, header=None):
     if subtitles:
         out.metadata.composer = " · ".join(subtitles)
     xml = inject_endings(add_staff_tuning(fix_technical(to_musicxml(out)), tuning), part)
+    if ALIGN_TAB_VOICES:
+        xml = swap_tab_voices(xml)
     xml = add_credits(clean_labels(xml), out.metadata.title, subtitles)
     xml_path = out_base + ".musicxml"
     with open(xml_path, "w", encoding="utf-8") as f:
