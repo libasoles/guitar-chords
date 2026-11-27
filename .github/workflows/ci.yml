@@ -243,16 +243,24 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ARTIFACT_NAME: github-pages-${{ github.run_attempt }}
         run: |
-          for attempt in $(seq 1 15); do
+          stable=0
+          for attempt in $(seq 1 30); do
             if gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts" \
               --jq '.artifacts[].name' | grep -Fxq "$ARTIFACT_NAME"; then
-              echo "Pages artifact $ARTIFACT_NAME is visible to the Actions API."
-              exit 0
+              stable=$((stable + 1))
+              echo "Pages artifact $ARTIFACT_NAME is visible to the Actions API (stable check $stable/3)."
+              if [ "$stable" -ge 3 ]; then
+                sleep 10
+                echo "Pages artifact $ARTIFACT_NAME is ready to deploy."
+                exit 0
+              fi
+            else
+              stable=0
+              echo "Pages artifact $ARTIFACT_NAME is not visible yet (attempt $attempt/30)."
             fi
-            echo "Pages artifact $ARTIFACT_NAME is not visible yet (attempt $attempt/15)."
             sleep 2
           done
-          echo "Pages artifact $ARTIFACT_NAME was not visible after 30 seconds."
+          echo "Pages artifact $ARTIFACT_NAME was not consistently visible after 60 seconds."
           exit 1
 
       - name: Deploy to GitHub Pages
