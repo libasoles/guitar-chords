@@ -43,6 +43,7 @@ const MEASURES_ESTUDIOS = { 601: 44, 602: 18, 603: 41, 604: 48, 605: 48, 606: 13
 const COLLECTIONS = [
   ['lecciones', require('../scripts/lib/article-sor'), MEASURES_LECCIONES],
   ['estudios', require('../scripts/lib/article-sor-estudios'), MEASURES_ESTUDIOS],
+  ['opus6', require('../scripts/lib/article-sor-op6'), MEASURES_ESTUDIOS],
 ];
 
 function suite(collection, catalog, MEASURES) {
@@ -114,3 +115,17 @@ function suite(collection, catalog, MEASURES) {
 }
 
 for (const [collection, catalog, measures] of COLLECTIONS) suite(collection, catalog, measures);
+
+test('Op. 6 y Op. 35 se publican por separado; solo Op. 6 tiene revision pendiente', () => {
+  const op6 = require('../scripts/lib/article-sor-op6');
+  const op35 = require('../scripts/lib/article-sor-estudios');
+  const strings = require('../src/i18n/strings.es.json');
+  assert.equal(op6.publishedPieces().length, 12);
+  assert.equal(op35.publishedPieces().length, 24);
+  for (const [collection, opus] of [[op6, 6], [op35, 35]]) {
+    assert.ok(collection.publishedPieces().every((p) => p.opus === opus));
+    const html = collection.renderBody('es', strings);
+    assert.equal((html.match(/editor-mark-pending /g) || []).length, opus === 6 ? 24 : 0);
+    assert.doesNotMatch(html, new RegExp('Op\\. ' + (opus === 6 ? 35 : 6) + ' n'));
+  }
+});

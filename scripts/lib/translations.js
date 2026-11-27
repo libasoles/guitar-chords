@@ -12,7 +12,7 @@ const { PUBLISHED_LOCALES, publishedLocales } = require('./locales');
 const COLLECTIONS = {
   indice: ['articulos', 'partituras', 'articulo-favoritas'],
   carcassi: ['articulo-carcassi', 'articulo-preludios-carcassi', 'articulo-preludios-santisteban', 'articulo-valses-carcassi', 'articulo-piezas-progresivas-carcassi'],
-  sor: ['articulo-lecciones-sor', 'articulo-estudios-sor'],
+  sor: ['articulo-lecciones-sor', 'articulo-estudios-sor', 'articulo-estudios-sor-op6'],
   aguado: ['articulo-partituras-aguado'],
   sagreras: ['articulo-lecciones-sagreras'],
   giuliani: ['articulo-estudios-giuliani', 'articulo-arpegios-giuliani'],

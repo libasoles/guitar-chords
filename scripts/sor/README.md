@@ -1,12 +1,14 @@
 # Partituras de Sor
 
-Dos páginas, las dos desde los archivos LilyPond de [Mutopia](https://www.mutopiaproject.org/cgibin/make-table.cgi?Composer=SorF)
+Tres páginas, todas desde los archivos LilyPond de [Mutopia](https://www.mutopiaproject.org/cgibin/make-table.cgi?Composer=SorF)
 (CC BY-SA 2.5, 3.0 o 4.0 según la pieza; el Op. 35 n.º 14 es de dominio público):
 
 | Colección | Página | Catálogo | Fuentes | Salida |
 |---|---|---|---|---|
-| `lecciones` | `/partituras/lecciones-progresivas-de-sor` (Op. 60, 13 de las 25) | `pieces.json` | `sources/sor_op60-NN.ly` | `downloads/sor/`, `src/site/articles/sor/` |
-| `estudios` | `/partituras/estudios-de-sor` (Op. 6 y Op. 35) | `estudios.json` | `sources/estudios/*.ly` | `downloads/sor-estudios/`, `src/site/articles/sor-estudios/` |
+| `lecciones` | `/partituras/lecciones-progresivas-de-sor` (Op. 60, 15 de las 25) | `pieces.json` | `sources/sor_op60-NN.ly` | `downloads/sor/`, `src/site/articles/sor/` |
+| `estudios` | `/partituras/estudios-de-sor` (Op. 35) | `estudios.json` | `sources/estudios/*.ly` | `downloads/sor-estudios/`, `src/site/articles/sor-estudios/` |
+
+El Op. 6 se publica por separado en `/partituras/estudios-de-sor-opus-6`, con los mismos archivos de `estudios.json` filtrados por opus. Sus doce estudios tienen revisión pendiente.
 
 La clave del catálogo es el número de la lección; en los estudios, opus × 100 + número (601 = Op. 6 n.º 1, 3524 = Op. 35
 n.º 24). `form`/`es` son la tonalidad, `editor` y `license` los de la edición de Mutopia; `tuning: "dropd"` pone la sexta
@@ -93,6 +95,6 @@ sustituyen al crédito a Mutopia del pie.
 ## Pendiente
 
 - Cotejar con un escaneo del Op. 60, Op. 6 y Op. 35 de IMSLP.
-- Las lecciones 15 a 25 del Op. 60 no están en Mutopia: se transcriben de IMSLP (ver abajo).
+- Las lecciones 16 a 25 del Op. 60 no están en Mutopia: se transcriben de IMSLP (ver abajo).
 - En Op. 35 n.º 6, 8, 16 y 21 el MIDI de Mutopia se desfasa (`\partial` dentro de repeticiones, `Timing.measureLength`): se
   publicaron por el PDF (mismos compases y notas) y el recuento de alturas.

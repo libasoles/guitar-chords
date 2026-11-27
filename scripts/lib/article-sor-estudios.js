@@ -1,5 +1,5 @@
 'use strict';
-/* article-sor-estudios.js — Pagina «Estudios de Sor» (Op. 6 y Op. 35).
+/* article-sor-estudios.js — Pagina «Estudios de Sor» (Op. 35).
    Los archivos salen de scripts/sor/build.py (coleccion «estudios»); ver article-sor-collection.js. */
 
 const { createSorCollection } = require('./article-sor-collection');
@@ -12,4 +12,4 @@ function pieceName(piece, locale) {
   throw new Error('article-sor-estudios: idioma sin nombre de pieza: ' + locale);
 }
 
-module.exports = createSorCollection({ folder: 'sor-estudios', catalog: 'estudios.json', prefix: 'sor-est-', pieceName });
+module.exports = createSorCollection({ folder: 'sor-estudios', catalog: 'estudios.json', prefix: 'sor-est-', pieceName, opus: 35 });

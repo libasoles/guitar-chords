@@ -16,8 +16,9 @@ const ROOT = path.join(__dirname, '..', '..');
 const AUTHOR = 'Fernando Sor';
 
 /* options: folder (downloads, vistas y assets), catalog (JSON de scripts/sor), prefix (de los archivos de vista),
+   opus: filtro opcional del catalogo; bodyFolder: prosa independiente con los mismos assets.
    pieceName(piece, locale): titulo de la pieza en cada idioma (el ingles fija los nombres de archivo). */
-function createSorCollection({ folder, catalog, prefix, pieceName }) {
+function createSorCollection({ folder, catalog, prefix, pieceName, opus, bodyFolder = folder }) {
   const DOWNLOADS_DIR = path.join(ROOT, 'downloads', folder);
   const PREVIEW_DIR = path.join(ROOT, 'src', 'site', 'articles', folder);
   const ASSETS_URL = '/assets/articles/' + folder + '/';
@@ -37,6 +38,7 @@ function createSorCollection({ folder, catalog, prefix, pieceName }) {
   function publishedPieces() {
     return Object.keys(PIECES)
       .map((key) => ({ number: Number(key), ...PIECES[key] }))
+      .filter((piece) => opus === undefined || piece.opus === opus)
       .map((piece) => ({ ...piece, base: fileBase(piece), pdf: fileBase(piece) + '.pdf' }))
       .filter((p) => fs.existsSync(path.join(DOWNLOADS_DIR, p.pdf)) && fs.existsSync(path.join(DOWNLOADS_DIR, p.base + '.musicxml')) &&
         fs.existsSync(path.join(PREVIEW_DIR, previewFile(p.number))))
@@ -92,7 +94,7 @@ function createSorCollection({ folder, catalog, prefix, pieceName }) {
   }
 
   function renderBody(locale, strings) {
-    const prose = fs.readFileSync(path.join(PREVIEW_DIR, 'body.' + locale + '.html'), 'utf8');
+    const prose = fs.readFileSync(path.join(ROOT, 'src', 'site', 'articles', bodyFolder, 'body.' + locale + '.html'), 'utf8');
     const sharedGlyphs = new Map();
     const pieces = publishedPieces();
     const cards = pieces.map((p) => card(p, locale, strings, sharedGlyphs, pieces)).join('');
