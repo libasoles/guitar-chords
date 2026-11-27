@@ -79,7 +79,7 @@ los compases 38 y 46 tienen barras parciales: no se interpretan como grupos irre
 PDF generado de dos páginas y páginas del visor revisados contra el impreso. La TAB conserva las alturas;
 las posiciones las propone el motor. No hay correcciones editoriales de alturas o duraciones en esta lección.
 
-Las lecciones 19–25 y la revisión del parche del bajo de la lección 5 siguen pendientes. La descarga y su
+Las lecciones 20–25 y la revisión del parche del bajo de la lección 5 siguen pendientes. La descarga y su
 integridad no equivalen al cotejo musical ni a la publicación de esas lecciones.
 
 ### Lección 17
@@ -96,3 +96,11 @@ cotejo con #43476, p. 1, y París #470312, pp. 20–21. Se conservan las anacrus
 el cierre complementario, Fine y la vuelta al signo. Los bajos Mi de los compases 26–29 y 30–33
 permanecen ligados; no se convierten en ataques en cada barra. Se explicita «D.S.» para el signo de regreso
 del impreso. PDF de dos páginas y vistas completas revisados; sin correcciones de alturas o duraciones.
+
+### Lección 19
+
+27 compases escritos, Sol mayor, 6/8. Fuente #836891, p. 13; cotejo con #43476, p. 2, y #470312, p. 22.
+Se conservan las casillas 1.ª (compases 6–8) y 2.ª (9–11), el Fine en el 11 y el regreso al signo desde el 27,
+explicitado como «D.S.». Se mantienen separados melodía, bajos y voz intermedia, incluidos los silencios
+y la ligadura de Re entre los compases 6–7. PDF de una página y vista completa revisados; sin correcciones
+de alturas o duraciones.
