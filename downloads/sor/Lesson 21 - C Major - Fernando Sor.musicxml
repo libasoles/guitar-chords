@@ -266,7 +266,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -282,7 +282,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -298,7 +298,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -314,7 +314,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -330,7 +330,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -346,7 +346,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -365,7 +365,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -378,7 +378,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -388,7 +388,7 @@
           <octave>2</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -401,7 +401,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -616,7 +616,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -632,7 +632,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -648,7 +648,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -664,7 +664,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -680,7 +680,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -696,7 +696,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -715,7 +715,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -728,7 +728,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -738,7 +738,7 @@
           <octave>2</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -751,7 +751,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -966,7 +966,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -982,7 +982,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -998,7 +998,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1014,7 +1014,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1030,7 +1030,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1046,7 +1046,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1065,7 +1065,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1078,7 +1078,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -1088,7 +1088,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1101,7 +1101,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -1319,7 +1319,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1335,7 +1335,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1351,7 +1351,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1364,14 +1364,14 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -1384,7 +1384,7 @@
           <octave>2</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <stem>none</stem>
@@ -1401,7 +1401,7 @@
           <octave>3</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <stem>none</stem>
@@ -1623,7 +1623,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1639,7 +1639,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1655,7 +1655,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1671,7 +1671,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1687,7 +1687,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1703,7 +1703,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1722,7 +1722,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1735,7 +1735,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -1745,7 +1745,7 @@
           <octave>2</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1758,7 +1758,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -1973,7 +1973,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1989,7 +1989,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2005,7 +2005,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2021,7 +2021,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2037,7 +2037,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2053,7 +2053,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2072,7 +2072,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2085,7 +2085,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -2095,7 +2095,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2108,7 +2108,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -2323,7 +2323,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2339,7 +2339,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2355,7 +2355,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2371,7 +2371,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2387,7 +2387,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2403,7 +2403,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2419,14 +2419,14 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -2436,7 +2436,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2449,7 +2449,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -2711,7 +2711,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2724,21 +2724,21 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -2953,7 +2953,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2969,7 +2969,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -2985,7 +2985,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3001,7 +3001,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3017,7 +3017,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3033,7 +3033,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3052,7 +3052,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3065,7 +3065,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -3075,7 +3075,7 @@
           <octave>2</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3088,7 +3088,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -3303,7 +3303,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3319,7 +3319,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3335,7 +3335,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3351,7 +3351,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3367,7 +3367,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3383,7 +3383,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3402,7 +3402,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3415,7 +3415,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -3425,7 +3425,7 @@
           <octave>2</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3438,7 +3438,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -3653,7 +3653,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3669,7 +3669,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3685,7 +3685,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3701,7 +3701,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3717,7 +3717,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3733,7 +3733,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3752,7 +3752,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3765,7 +3765,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -3775,7 +3775,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -3788,7 +3788,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -4005,7 +4005,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -4021,7 +4021,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -4037,7 +4037,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -4050,14 +4050,14 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -4070,7 +4070,7 @@
           <octave>2</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <stem>none</stem>
@@ -4087,7 +4087,7 @@
           <octave>3</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <stem>none</stem>
@@ -4275,7 +4275,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -4285,7 +4285,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -4301,7 +4301,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -4314,7 +4314,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -4324,7 +4324,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -4340,7 +4340,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -4359,7 +4359,7 @@
           <octave>3</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <stem>none</stem>
@@ -4377,7 +4377,7 @@
           <octave>3</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <accidental>flat</accidental>
@@ -4396,7 +4396,7 @@
           <octave>3</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -4627,7 +4627,7 @@
           <octave>3</octave>
         </pitch>
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>half</type>
         <dot />
         <stem>none</stem>
@@ -4647,7 +4647,7 @@
           <octave>3</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <stem>none</stem>
@@ -4661,7 +4661,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -4671,7 +4671,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -4687,7 +4687,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -4961,7 +4961,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>20160</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>half</type>
         <staff>2</staff>
       </note>
@@ -4971,7 +4971,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -4984,7 +4984,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -4994,7 +4994,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -5004,7 +5004,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -5020,7 +5020,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -5036,7 +5036,7 @@
           <octave>3</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <stem>none</stem>
@@ -5054,7 +5054,7 @@
           <octave>2</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -5284,7 +5284,7 @@
           <octave>3</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <stem>none</stem>
@@ -5302,7 +5302,7 @@
           <octave>3</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -5315,14 +5315,14 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>10080</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <staff>2</staff>
       </note>
@@ -5510,7 +5510,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -5526,7 +5526,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -5542,7 +5542,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -5559,7 +5559,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <accidental>flat</accidental>
         <stem>none</stem>
@@ -5576,7 +5576,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -5592,7 +5592,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -5762,7 +5762,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -5778,7 +5778,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -5794,7 +5794,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -5807,7 +5807,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -5817,7 +5817,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -5833,7 +5833,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6019,7 +6019,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6035,7 +6035,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6051,7 +6051,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6067,7 +6067,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6083,7 +6083,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6099,7 +6099,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6269,7 +6269,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6285,7 +6285,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6301,7 +6301,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6314,7 +6314,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -6324,7 +6324,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6340,7 +6340,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6498,7 +6498,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6514,7 +6514,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6530,7 +6530,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6546,7 +6546,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6562,7 +6562,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6578,7 +6578,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6736,7 +6736,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6752,7 +6752,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6768,7 +6768,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6784,7 +6784,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6800,7 +6800,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6816,7 +6816,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6974,7 +6974,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -6990,7 +6990,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7006,7 +7006,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7022,7 +7022,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7038,7 +7038,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7054,7 +7054,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7254,7 +7254,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -7264,23 +7264,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
-        <type>eighth</type>
-        <stem>none</stem>
-        <staff>2</staff>
-        <notations>
-          <technical>
-            <string>3</string><fret>0</fret>
-          </technical>
-        </notations>
-      </note>
-      <note>
-        <pitch>
-          <step>G</step>
-          <octave>3</octave>
-        </pitch>
-        <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7296,7 +7280,23 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
+        <type>eighth</type>
+        <stem>none</stem>
+        <staff>2</staff>
+        <notations>
+          <technical>
+            <string>3</string><fret>0</fret>
+          </technical>
+        </notations>
+      </note>
+      <note>
+        <pitch>
+          <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>5040</duration>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7312,7 +7312,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7328,7 +7328,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7488,7 +7488,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7504,7 +7504,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7520,7 +7520,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7537,7 +7537,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <accidental>sharp</accidental>
         <stem>none</stem>
@@ -7554,7 +7554,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7570,7 +7570,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7734,7 +7734,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7750,7 +7750,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7766,7 +7766,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7783,7 +7783,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <accidental>flat</accidental>
         <stem>none</stem>
@@ -7800,7 +7800,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7816,7 +7816,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7978,7 +7978,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -7994,7 +7994,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8010,7 +8010,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8026,7 +8026,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8042,7 +8042,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8058,7 +8058,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8220,7 +8220,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8236,7 +8236,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8252,7 +8252,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8268,7 +8268,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8284,7 +8284,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8300,7 +8300,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8458,7 +8458,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8474,7 +8474,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8490,7 +8490,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8506,7 +8506,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8522,7 +8522,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8538,7 +8538,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8743,7 +8743,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -8753,7 +8753,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8769,7 +8769,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8782,7 +8782,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -8792,7 +8792,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -8808,7 +8808,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -9054,7 +9054,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -9064,7 +9064,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -9080,7 +9080,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -9096,7 +9096,7 @@
           <octave>4</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <stem>none</stem>
@@ -9114,7 +9114,7 @@
           <octave>3</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -9330,7 +9330,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -9338,7 +9338,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -9348,7 +9348,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -9364,7 +9364,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>3</voice>
+        <voice>2</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
