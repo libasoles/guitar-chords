@@ -79,7 +79,7 @@ los compases 38 y 46 tienen barras parciales: no se interpretan como grupos irre
 PDF generado de dos páginas y páginas del visor revisados contra el impreso. La TAB conserva las alturas;
 las posiciones las propone el motor. No hay correcciones editoriales de alturas o duraciones en esta lección.
 
-Las lecciones 23–25 y la revisión del parche del bajo de la lección 5 siguen pendientes. La descarga y su
+Las lecciones 24–25 y la revisión del parche del bajo de la lección 5 siguen pendientes. La descarga y su
 integridad no equivalen al cotejo musical ni a la publicación de esas lecciones.
 
 ### Lección 17
@@ -133,3 +133,7 @@ cruce de líneas y los silencios escritos. PDF de tres páginas y todas las pág
 se amplían los márgenes para dejar el crédito fuera de la TAB y las plicas completas. La posición alta
 del bajo del compás 24 permite sostenerlo durante la subida al Si agudo. Sin correcciones editoriales
 de alturas o duraciones.
+
+### Lección 23
+
+33 compases, La mayor, Andantino, 2/4. Fuente #836891, p. 17; cotejo con #43479 y París #470312, p. 28. Se conservan los bajos Mi ligados, las voces independientes y la ortografía de si sostenido y mi sostenido. La TAB sitúa el sol sostenido del compás 30 en la segunda cuerda para conservar el La prolongado de la melodía. PDF de una página y vista completa revisados; sin correcciones editoriales de alturas o duraciones.
