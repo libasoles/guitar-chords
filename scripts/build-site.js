@@ -2483,20 +2483,26 @@ function siteMenu(strings, locale, file) {
   items.push(link(pagePath("circulo-de-quintas", locale), strings.menuFifths));
   if (isTranslated(ARTICLE_ARPEGGIOS_SLUG, locale))
     items.push(link(pagePath(ARTICLE_ARPEGGIOS_SLUG, locale), strings.artArpeggiosH1));
-  const scores = [
+  const carcassiScores = [
     [ARTICLE_PRELUDES_SLUG, strings.artPreludesH1],
     [ARTICLE_SANTISTEBAN_SLUG, strings.artSantistebanH1],
     [ARTICLE_WALTZES_SLUG, strings.artWaltzesH1],
     [ARTICLE_PROGRESSIVE_SLUG, strings.artProgressiveH1],
-    [ARTICLE_AGUADO_SLUG, strings.artAguadoH1],
-    [ARTICLE_SAGRERAS_SLUG, strings.artSagrerasH1],
+  ];
+  const sorScores = [
     [ARTICLE_SOR_SLUG, strings.artSorH1],
     [ARTICLE_SOR_OP44_SLUG, strings.artSorOp44H1],
     [ARTICLE_SOR_ESTUDIOS_SLUG, strings.artSorEstudiosH1],
     [ARTICLE_SOR_OP6_SLUG, strings.artSorOp6H1],
-    [ARTICLE_BARRIOS_SLUG, strings.artBarriosH1],
+  ];
+  const giulianiScores = [
     [ARTICLE_GIULIANI_SLUG, strings.artGiulianiH1],
     [ARTICLE_GIULIANI_ARPEGIOS_SLUG, strings.artGiulianiArpegiosH1],
+  ];
+  const otherScores = [
+    [ARTICLE_AGUADO_SLUG, strings.artAguadoH1],
+    [ARTICLE_SAGRERAS_SLUG, strings.artSagrerasH1],
+    [ARTICLE_BARRIOS_SLUG, strings.artBarriosH1],
   ];
   const menuLinks = function (pages) {
     return pages
@@ -2508,8 +2514,21 @@ function siteMenu(strings, locale, file) {
       })
       .join("");
   };
+  const scoreGroup = function (label, pages) {
+    const links = menuLinks(pages);
+    return links
+      ? '<p class="site-menu-heading site-menu-score-heading">' +
+        escapeHtml(label) +
+        "</p>" +
+        links
+      : "";
+  };
   const articleLinks = menuLinks([[ARTICLE_CARCASSI_SLUG, strings.artCarcH1]]);
-  const scoreLinks = menuLinks(scores);
+  const scoreLinks =
+    scoreGroup(strings.menuScoresCarcassi, carcassiScores) +
+    scoreGroup(strings.menuScoresSor, sorScores) +
+    scoreGroup(strings.menuScoresGiuliani, giulianiScores) +
+    scoreGroup(strings.menuScoresOther, otherScores);
   return (
     '<details class="site-menu"><summary aria-label="' +
     escapeHtml(strings.menuButtonLabel) +

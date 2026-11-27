@@ -197,6 +197,11 @@ body {
   letter-spacing: 0.08em;
   color: var(--ink-soft);
 }
+.site-menu-panel .site-menu-score-heading {
+  margin-top: 0.65rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(65, 59, 50, 0.12);
+}
 .site-menu-panel .site-menu-ext {
   display: flex;
   align-items: center;

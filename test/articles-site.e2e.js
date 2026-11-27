@@ -14,6 +14,13 @@ run('articles-site', async ({ DIST, BASE_URL }) => {
     const outsideMenu = html.replace(/<details class="site-menu">[\s\S]*?<\/details>/, '');
     assert.ok(html.includes('href="' + pagePath('articulo-carcassi', locale) + '"'), file + ' no enlaza a los articulos desde el menu');
     assert.ok(!/href="[^"]*(articulo|article)/.test(outsideMenu), file + ' enlaza a los articulos fuera del menu');
+    const menu = html.match(/<details class="site-menu">[\s\S]*?<\/details>/)?.[0] || '';
+    const scoreLabels = locale === 'en'
+      ? ['Carcassi', 'Sor', 'Giuliani', 'Other methods']
+      : ['Carcassi', 'Sor', 'Giuliani', 'Otros métodos'];
+    scoreLabels.forEach((label) => {
+      assert.ok(menu.includes('>' + label + '</p>'), file + ' no incluye el separador "' + label + '"');
+    });
   }
   const sitemap = fs.readFileSync(path.join(DIST, 'sitemap.xml'), 'utf8');
   ['articulos', 'partituras', 'articulo-carcassi', 'articulo-preludios-carcassi', 'articulo-preludios-santisteban', 'articulo-tablaturas-arpegios'].forEach((key) => ['es', 'en'].forEach((locale) => {
