@@ -23,6 +23,7 @@ sys.path.insert(0, os.path.join(ROOT, 'backend', 'engine'))
 import extract  # noqa: E402  (rutinas de grabado compartidas con los preludios)
 import ly_to_musicxml  # noqa: E402
 import pdf_footer  # noqa: E402
+import harmonics  # noqa: E402
 
 AUTHOR = 'Fernando Sor'
 MUTOPIA = 'https://www.mutopiaproject.org/cgibin/make-table.cgi?Composer=SorF'
@@ -35,7 +36,11 @@ def footer_lines(number):
     if 'credit' in piece:  # transcrita a mano de un escaneo de dominio publico (IMSLP)
         credit = [(piece['credit'], piece['credit_url'])]
     if piece['license'] == 'public-domain':
-        return [credit, [('Dominio publico', None)]]
+        lines = [credit, [('Dominio publico', None)]]
+        if piece.get('harmonics'):
+            lines += [[('Armonicos naturales: diamantes = sonidos; TAB = trastes de contacto (sin pisar).', None)],
+                      [('3: rozar por debajo del tercer traste, hacia el puente (aprox. 3,16).', None)]]
+        return lines
     return [credit, [('CC BY-SA ' + piece['license'], 'https://creativecommons.org/licenses/by-sa/%s/' % piece['license'])]]
 
 
@@ -68,6 +73,8 @@ ARPEGGIO = set()
 # Dejar sitio al crédito: los últimos sistemas de las lecciones 20 y 22 rozaban el pie.
 PDF_OVERRIDES = {n: {'scale': 41, 'pageWidth': 2305, 'pageHeight': 3260, 'pageMarginTop': 160, 'pageMarginBottom': 220}
                  for n in (20, 22)}
+PDF_OVERRIDES[25] = {'scale': 41, 'pageWidth': 2305, 'pageHeight': 3260, 'pageMarginTop': 220, 'pageMarginBottom': 260}
+PDF_OVERRIDES[18] = {'scale': 41, 'pageWidth': 2305, 'pageHeight': 3260}
 SCALES = [45, 41, 38, 35]  # la escala de Verovio es entera; 45 es la del motor; con menos de 35 lo impreso es ilegible
 # Escala minima de los estudios: por debajo el PDF mete demasiados compases por renglon y la TAB queda apretada, asi que
 # se prefieren mas paginas. `min_scale` en el catalogo la baja o la sube para una pieza.
@@ -109,6 +116,8 @@ def convert(number):
     piece = PIECES[number]
     source = os.path.join(SOURCES, piece['source'])
     xml = ly_to_musicxml.convert(source, title_of(number), AUTHOR, words=piece.get('words'), patches=piece.get('patches', ()), tie_dirs=piece.get('tie_dirs', False), string_hints=piece.get('string_hints', False))
+    if piece.get('harmonics'):
+        xml = harmonics.mark(xml, piece['harmonics'])
     target = os.path.join(SOURCES, f'{number:02d}.musicxml')
     with open(target, 'w', encoding='utf-8') as f:
         f.write(xml)
@@ -128,6 +137,9 @@ def build(number):
     tabify.KEEP_TEXT = True  # tempo, Fine y D.C. se imprimen
     tabify.ALIGN_TAB_VOICES = True  # el bajo de tres voces no se corre a la derecha en la TAB
     tabify.MERGE_UNISONS = True  # la misma altura en dos voces a la vez es una sola nota en la TAB
+    # Los sonidos agudos de los armónicos se sustituyen por sus contactos del
+    # catálogo. No descartarlos por superar el registro habitual de notas pisadas.
+    tabify.MAX_FRET = 24 if PIECES[number].get('harmonics') else 19
     with tempfile.TemporaryDirectory() as tmp:
         extract.patch_engine(tabify)
         prepared = os.path.join(tmp, 'prepared')
@@ -137,6 +149,7 @@ def build(number):
         with open(os.path.join(prepared, tabify.SUGGESTION_NAME), encoding='utf-8') as f:
             suggestion = json.load(f)
         tabs = suggestion['tabs']
+        harmonics.contacts(tabs, suggestion['columns'], PIECES[number].get('harmonics', {}))
         # `tab_fixes` del catalogo: compas (desde 1) -> columnas de la TAB que se conservan en vez de las del motor.
         for bar, columns in PIECES[number].get('tab_fixes', {}).items():
             tabs[int(bar) - 1] = columns
@@ -159,6 +172,8 @@ def build(number):
         with open(os.path.join(exported, 'score.musicxml'), encoding='utf-8') as f:
             xml = f.read()
         extract.write_pages(number, xml)
+        if PIECES[number].get('harmonics'):
+            xml = harmonics.mark(xml, PIECES[number]['harmonics'], exported=True)
         os.makedirs(OUT_DIR, exist_ok=True)
         base = os.path.join(OUT_DIR, file_base(number))
         # Sin bloque de codificacion: ni programa, ni fechas, ni notas del procesado intermedio.

@@ -72,7 +72,7 @@ async function assertFirstCardDownloads({ context, base }, url, pdf) {
 async function checkCollection(env, spec) {
   const { base, page } = env;
   const { slug, published } = spec;
-  for (const locale of ['es', 'en']) {
+  for (const locale of spec.locales || ['es', 'en']) {
     const url = pagePath(slug, locale);
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(base + url);
@@ -123,8 +123,8 @@ async function checkCollection(env, spec) {
 }
 
 /* Lateral desktop navigation of the score modal, including sparse publication lists. */
-async function checkLateralNav({ base, context, page }, slug) {
-  for (const locale of ['es', 'en']) {
+async function checkLateralNav({ base, context, page }, slug, locales = ['es', 'en']) {
+  for (const locale of locales) {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(base + pagePath(slug, locale));
     const ids = await page.locator('.prelude-card .modal-full').evaluateAll((els) => els.map((el) => el.id));

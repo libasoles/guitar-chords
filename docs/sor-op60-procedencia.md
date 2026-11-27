@@ -79,7 +79,7 @@ los compases 38 y 46 tienen barras parciales: no se interpretan como grupos irre
 PDF generado de dos páginas y páginas del visor revisados contra el impreso. La TAB conserva las alturas;
 las posiciones las propone el motor. No hay correcciones editoriales de alturas o duraciones en esta lección.
 
-La lección 25 y la revisión del parche del bajo de la lección 5 siguen pendientes. La descarga y su
+La revisión del parche del bajo de la lección 5 sigue pendiente. La descarga y su
 integridad no equivalen al cotejo musical ni a la publicación de esas lecciones.
 
 ### Lección 17
@@ -143,3 +143,9 @@ de alturas o duraciones.
 28 compases, Re menor, Allegro moderato, compás de cuatro tiempos. Fuente #836891, p. 18; cotejo con #43445 y París #470312, p. 29. Se conservan Fine en el 16 y regreso al signo desde el 28. Las notas ligadas del arpegio mantienen su duración mientras entra otra línea, representada en una voz independiente. Se mantienen los bajos y las alteraciones del impreso. PDF de dos páginas, TAB y páginas completas revisados. Comprobación de cuerdas sostenidas sin interrupciones; sin correcciones editoriales de alturas o duraciones.
 
 Revisión de TAB de la lección 17: se fija el Si del compás 23 en la tercera cuerda (traste 4), para sostenerlo mientras se toca el Re en la segunda. No cambia la altura ni la duración. PDF y alineación de voces revisados de nuevo.
+
+### Lección 25
+
+16 compases, Re mayor, Andante cantabile, 6/8; sexta cuerda en Re. Fuente #836891, p. 19; cotejo con París #470312, p. 30. Se conservan las dos secciones repetidas (1–8 y 9–16). Las notas inferiores de los pasajes armónicos del original explican la operación, no son una segunda voz sonora. Se transcriben los 54 sonidos resultantes con diamantes, explicitando la octava que el impreso abrevia; la TAB indica las cuerdas y los nodos de contacto originales. El 3 especial corresponde al sexto parcial, ligeramente más allá del tercer traste hacia el puente (aprox. 3,16), no a una nota pisada en el traste 3. El contacto 9 del compás 8 se hace en la quinta cuerda. El MusicXML conserva la altura resultante también en la TAB; la indicación de armónico natural está en la notación, pues Verovio falla al duplicarla en el pentagrama TAB. La leyenda se incluye en la página y el pie del PDF. PDF de una página y visor revisados, con las voces normales y sus silencios conservados. Comprobación independiente de las alturas contra los parciales de las cuerdas en Drop D.
+
+Revisión final de TAB: las lecciones 16–22 incorporan la alineación de voces del motor. En la 18, compás 21, el Sol se fija en la cuarta cuerda para sostenerlo bajo el Si bemol. En la 20 se separan en cuerdas distintas los Si prolongados y los Re móviles; también Mi del compás 19, Sol del 33 y La del 37. Las alturas, duraciones y voces se conservan. Las pruebas de cuerdas sostenidas comprueban las lecciones 16–25 completas.

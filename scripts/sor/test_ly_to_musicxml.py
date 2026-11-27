@@ -209,6 +209,8 @@ class PublishedSourcesAreFresh(unittest.TestCase):
                     continue
                 expected = L.convert(lilypond, build.title_of(number), build.AUTHOR, words=piece.get('words'),
                                      patches=piece.get('patches', ()), tie_dirs=piece.get('tie_dirs', False), string_hints=piece.get('string_hints', False))
+                if piece.get('harmonics'):
+                    expected = build.harmonics.mark(expected, piece['harmonics'])
                 with open(committed, encoding='utf-8') as f:
                     self.assertEqual(f.read(), expected, '%s %s: reconstruir con build.py' % (collection, number))
                 checked += 1
