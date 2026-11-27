@@ -79,7 +79,7 @@ los compases 38 y 46 tienen barras parciales: no se interpretan como grupos irre
 PDF generado de dos páginas y páginas del visor revisados contra el impreso. La TAB conserva las alturas;
 las posiciones las propone el motor. No hay correcciones editoriales de alturas o duraciones en esta lección.
 
-Las lecciones 22–25 y la revisión del parche del bajo de la lección 5 siguen pendientes. La descarga y su
+Las lecciones 23–25 y la revisión del parche del bajo de la lección 5 siguen pendientes. La descarga y su
 integridad no equivalen al cotejo musical ni a la publicación de esas lecciones.
 
 ### Lección 17
@@ -123,3 +123,13 @@ Se conservan las dos secciones repetidas, Fine en el 16 y vuelta al comienzo des
 La prolongada mientras se mueve la línea intermedia, sin convertirlas en una sola voz. Se conserva la apoyatura
 del compás 24 y las ligaduras. PDF de una página, TAB y página del visor revisados junto al impreso;
 sin correcciones editoriales de alturas o duraciones.
+
+### Lección 22
+
+48 compases, Mi menor, Allegretto moderato, 2/4. Fuente #836891, pp. 16–17; cotejo con #43478 y
+París #470312, pp. 26–27. Se conservan la melodía punteada y la voz móvil bajo ella, las ligaduras y
+los pedales Mi grave de los compases 1–2, 9–10, 25–26 y 33–34. Los últimos compases mantienen el
+cruce de líneas y los silencios escritos. PDF de tres páginas y todas las páginas del visor revisados;
+se amplían los márgenes para dejar el crédito fuera de la TAB y las plicas completas. La posición alta
+del bajo del compás 24 permite sostenerlo durante la subida al Si agudo. Sin correcciones editoriales
+de alturas o duraciones.
