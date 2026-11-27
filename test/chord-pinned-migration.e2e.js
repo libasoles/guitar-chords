@@ -23,7 +23,9 @@ const ROOT = path.resolve(__dirname, '..');
       const context = await browser.newContext();
       const page = await context.newPage();
       await page.addInitScript(() => {
-        if (!localStorage.getItem('pinnedChords')) {
+        // Sembrar solo en la primera carga de la pestaña: sessionStorage sobrevive al reload.
+        if (!sessionStorage.getItem('seeded')) {
+          sessionStorage.setItem('seeded', '1');
           localStorage.setItem('pinnedChords', JSON.stringify([{ name: 'Bm7b5', positionIndex: 1 }, 'Cm7b5']));
         }
         localStorage.setItem('chordNotation', 'en');
