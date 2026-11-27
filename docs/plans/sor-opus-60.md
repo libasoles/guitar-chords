@@ -1,6 +1,8 @@
 # Completar las lecciones de Sor, Op. 60
 
-Plan revisado el 27 de noviembre de 2026. Esta tarea queda planificada; no se han descargado ni publicado piezas nuevas como parte de la separación de los Op. 6 y 35.
+Plan implementado el 27 de noviembre de 2026. Las lecciones 16–25 están publicadas en la página existente, con el título «Lecciones progresivas Op. 60 de Sor». Se conserva su URL.
+
+Las descargas y los cotejos están documentados en [la nota de procedencia](../sor-op60-procedencia.md). Se retiró el parche del bajo de la lección 5 para recuperar el Sol de los impresos de París. Las pruebas verifican compases, armónicos y cuerdas sostenidas; la prueba de la página verifica las 25 tarjetas, PDF, visores y navegación en español, inglés y portugués.
 
 ## Punto de partida
 
@@ -35,4 +37,4 @@ Conservar las fuentes editables existentes de [Mutopia](https://www.mutopiaproje
 
 ## Criterio de finalización
 
-La página existente contiene las 25 lecciones, cada una cotejada con un impreso identificable, con PDF y TAB revisados y procedencia documentada. La descarga de fuentes y la transcripción permanecen pendientes hasta ejecutar este plan.
+La página existente contiene las 25 lecciones, con las diez incorporaciones cotejadas con impresos identificables, PDF y TAB revisados y procedencia documentada. Las lecciones anteriores conservan sus fuentes y licencias; esta tarea no afirma haber cotejado íntegramente las primeras quince con París.

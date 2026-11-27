@@ -259,7 +259,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -472,7 +472,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -528,7 +528,7 @@
       </note>
       <note id="tab-note-17">
         <pitch>
-          <step>E</step>
+          <step>G</step>
           <octave>2</octave>
         </pitch>
         <duration>5040</duration>
@@ -584,7 +584,7 @@
       </note>
       <note id="tab-note-21">
         <pitch>
-          <step>E</step>
+          <step>G</step>
           <octave>2</octave>
         </pitch>
         <duration>15120</duration>
@@ -649,7 +649,7 @@
       </note>
       <note>
         <pitch>
-          <step>E</step>
+          <step>G</step>
           <octave>2</octave>
         </pitch>
         <duration>5040</duration>
@@ -659,7 +659,7 @@
         <staff>2</staff>
         <notations>
           <technical>
-            <string>6</string><fret>0</fret>
+            <string>6</string><fret>3</fret>
           </technical>
         </notations>
       </note>
@@ -701,7 +701,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -709,7 +709,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -926,7 +926,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -1139,7 +1139,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -1352,7 +1352,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -1579,7 +1579,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -1646,7 +1646,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1663,7 +1663,7 @@
           <octave>3</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <accidental>sharp</accidental>
         <stem>none</stem>
@@ -1680,7 +1680,7 @@
           <octave>4</octave>
         </pitch>
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1696,7 +1696,7 @@
           <octave>2</octave>
         </pitch>
         <duration>10080</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <stem>none</stem>
         <staff>2</staff>
@@ -1709,7 +1709,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>5040</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>eighth</type>
         <staff>2</staff>
       </note>
@@ -1937,7 +1937,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -2154,7 +2154,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -2366,7 +2366,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -2579,7 +2579,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -2794,7 +2794,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -2802,7 +2802,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -3029,7 +3029,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -3037,7 +3037,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -3266,7 +3266,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -3274,7 +3274,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -3449,7 +3449,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -3457,7 +3457,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -3632,7 +3632,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -3788,7 +3788,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -4007,7 +4007,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -4236,7 +4236,7 @@
           <octave>2</octave>
         </pitch>
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>half</type>
         <dot />
         <stem>none</stem>
@@ -4400,7 +4400,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -4556,7 +4556,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -4780,7 +4780,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -4956,7 +4956,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -4964,7 +4964,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>
@@ -5128,7 +5128,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -5284,7 +5284,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -5510,7 +5510,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -5752,7 +5752,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -5908,7 +5908,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -6063,7 +6063,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -6294,7 +6294,7 @@
           <octave>2</octave>
         </pitch>
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>half</type>
         <dot />
         <stem>none</stem>
@@ -6533,7 +6533,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -6694,7 +6694,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -6850,7 +6850,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -7069,7 +7069,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -7301,7 +7301,7 @@
           <octave>2</octave>
         </pitch>
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>half</type>
         <dot />
         <stem>none</stem>
@@ -7469,7 +7469,7 @@
       <note print-object="no" print-spacing="yes">
         <rest measure="yes" />
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <staff>2</staff>
       </note>
     </measure>
@@ -7630,7 +7630,7 @@
           <octave>3</octave>
         </pitch>
         <duration>30240</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>half</type>
         <dot />
         <stem>none</stem>
@@ -7857,7 +7857,7 @@
           <octave>3</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <dot />
         <stem>none</stem>
@@ -7874,7 +7874,7 @@
           <octave>2</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <dot />
         <stem>none</stem>
@@ -8073,7 +8073,7 @@
           <octave>2</octave>
         </pitch>
         <duration>15120</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <dot />
         <stem>none</stem>
@@ -8087,7 +8087,7 @@
       <note print-object="no" print-spacing="yes">
         <rest />
         <duration>15120</duration>
-        <voice>2</voice>
+        <voice>3</voice>
         <type>quarter</type>
         <dot />
         <staff>2</staff>

@@ -79,8 +79,7 @@ los compases 38 y 46 tienen barras parciales: no se interpretan como grupos irre
 PDF generado de dos páginas y páginas del visor revisados contra el impreso. La TAB conserva las alturas;
 las posiciones las propone el motor. No hay correcciones editoriales de alturas o duraciones en esta lección.
 
-La revisión del parche del bajo de la lección 5 sigue pendiente. La descarga y su
-integridad no equivalen al cotejo musical ni a la publicación de esas lecciones.
+La descarga e integridad de los archivos se comprobaron antes del cotejo musical y la publicación.
 
 ### Lección 17
 
@@ -149,3 +148,7 @@ Revisión de TAB de la lección 17: se fija el Si del compás 23 en la tercera c
 16 compases, Re mayor, Andante cantabile, 6/8; sexta cuerda en Re. Fuente #836891, p. 19; cotejo con París #470312, p. 30. Se conservan las dos secciones repetidas (1–8 y 9–16). Las notas inferiores de los pasajes armónicos del original explican la operación, no son una segunda voz sonora. Se transcriben los 54 sonidos resultantes con diamantes, explicitando la octava que el impreso abrevia; la TAB indica las cuerdas y los nodos de contacto originales. El 3 especial corresponde al sexto parcial, ligeramente más allá del tercer traste hacia el puente (aprox. 3,16), no a una nota pisada en el traste 3. El contacto 9 del compás 8 se hace en la quinta cuerda. El MusicXML conserva la altura resultante también en la TAB; la indicación de armónico natural está en la notación, pues Verovio falla al duplicarla en el pentagrama TAB. La leyenda se incluye en la página y el pie del PDF. PDF de una página y visor revisados, con las voces normales y sus silencios conservados. Comprobación independiente de las alturas contra los parciales de las cuerdas en Drop D.
 
 Revisión final de TAB: las lecciones 16–22 incorporan la alineación de voces del motor. En la 18, compás 21, el Sol se fija en la cuarta cuerda para sostenerlo bajo el Si bemol. En la 20 se separan en cuerdas distintas los Si prolongados y los Re móviles; también Mi del compás 19, Sol del 33 y La del 37. Las alturas, duraciones y voces se conservan. Las pruebas de cuerdas sostenidas comprueban las lecciones 16–25 completas.
+
+### Lección 5: revisión del parche existente
+
+En el compás 3, segundo bajo, París #836891 p. 4 y París #470312 p. 6 escriben Sol (Sol grave sonante). Coincide con Mutopia y su facsímil. Se retiran los dos reemplazos a Mi de la voz principal y el bajo, que seguían la edición moderna de Stefan Nesyba. Se conserva la fuente de Mutopia y su licencia BY-SA 3.0; no se afirma que el Sol del original sea una errata. Se regeneran MusicXML, PDF y vistas con la lectura del impreso.

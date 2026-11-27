@@ -1,11 +1,11 @@
 # Partituras de Sor
 
-Tres páginas, todas desde los archivos LilyPond de [Mutopia](https://www.mutopiaproject.org/cgibin/make-table.cgi?Composer=SorF)
-(CC BY-SA 2.5, 3.0 o 4.0 según la pieza; el Op. 35 n.º 14 es de dominio público):
+Tres páginas, desde los archivos LilyPond de [Mutopia](https://www.mutopiaproject.org/cgibin/make-table.cgi?Composer=SorF)
+(CC BY-SA 2.5, 3.0 o 4.0 según la pieza; el Op. 35 n.º 14 es de dominio público) y transcripciones de impresos históricos de dominio público:
 
 | Colección | Página | Catálogo | Fuentes | Salida |
 |---|---|---|---|---|
-| `lecciones` | `/partituras/lecciones-progresivas-de-sor` (Op. 60, 15 de las 25) | `pieces.json` | `sources/sor_op60-NN.ly` | `downloads/sor/`, `src/site/articles/sor/` |
+| `lecciones` | `/partituras/lecciones-progresivas-de-sor` (Op. 60, 25 lecciones) | `pieces.json` | `sources/sor_op60-NN.ly` | `downloads/sor/`, `src/site/articles/sor/` |
 | `estudios` | `/partituras/estudios-de-sor` (Op. 35) | `estudios.json` | `sources/estudios/*.ly` | `downloads/sor-estudios/`, `src/site/articles/sor-estudios/` |
 
 El Op. 6 se publica por separado en `/partituras/estudios-de-sor-opus-6`, con los mismos archivos de `estudios.json` filtrados por opus. Sus doce estudios tienen revisión pendiente.
@@ -57,16 +57,17 @@ Si se cambia el conversor hay que **reconstruir y revisar** todas las piezas: `t
    una negra: ahí decide el PDF de Mutopia.
 2. Vista del PDF generado junto al PDF de Mutopia.
 
-No se cotejó con el impreso: Mutopia parte de escaneos.
+Las lecciones 16–25 y el bajo del compás 3 de la lección 5 se cotejaron con los impresos de París.
+La procedencia, páginas y decisiones están en [la nota del Op. 60](../../docs/sor-op60-procedencia.md).
+Esto no da por revisadas las demás piezas de Mutopia contra esos impresos.
 
 ## Diferencias con la edición de Mutopia
 
 - Op. 35 n.º 13, compás 27: el archivo escribe `g,16` en la voz interna mientras el bajo toca `gis,2`; la figura es un
   sol♯ (y el sol natural más el sol♯ no se pueden tocar a la vez). Se corrige con `patches` a `gis,16`.
-- Op. 60 n.º 5, compás 3, segundo bajo: se cambia sol por mi grave en ambas voces, siguiendo la edición de
-  [Stefan Nesyba en IMSLP](https://s9.imslp.org/files/imglnks/usimg/7/71/IMSLP606871-PMLP93616-Etude_a-Moll_op._60_Nr._5.mscz.pdf),
-  que coincide con la versión con TAB cotejada. El LilyPond de Mutopia y su facsímil escriben sol; se conserva
-  el archivo original y se aplica la corrección editorial con `patches`.
+- Op. 60 n.º 5, compás 3, segundo bajo: se restaura Sol grave. Los impresos de París #836891 (p. 4) y
+  #470312 (p. 6), Mutopia y su facsímil escriben Sol. Se retira el antiguo parche a Mi, que seguía la edición
+  moderna de Stefan Nesyba; no se considera una errata demostrada del original.
 - Op. 60 n.º 5 empieza en la menor y pasa a La mayor en el compás 17: título «A Minor and A Major».
 - Op. 60 n.º 7, compás 6: los dos mi se tocan en la primera cuerda al aire. Mutopia indica dedo 4 en el segundo;
   el motor interpreta esa indicación junto al do con dedo 1 como posición pisada y asigna ambos mi al traste 5 de
@@ -75,15 +76,13 @@ No se cotejó con el impreso: Mutopia parte de escaneos.
 
 ## Lecciones del Op. 60 transcritas de IMSLP (14 en adelante)
 
-Mutopia solo publica 13 de las 25; el resto no existe como LilyPond, MusicXML ni MIDI en ninguna fuente libre. Se
-transcriben a mano de los escaneos de dominio público de
-[IMSLP](https://imslp.org/wiki/Introduction_%C3%A0_l%27%C3%A9tude_de_la_guitare,_Op.60_(Sor,_Fernando)) (la descarga
-tiene captcha: se bajan a mano a `resources/sor/imslp/`, no versionado):
+Mutopia publica las primeras 13. Las lecciones 14–25 se transcriben a mano de los escaneos de dominio público de
+[IMSLP](https://imslp.org/wiki/Introduction_%C3%A0_l%27%C3%A9tude_de_la_guitare,_Op.60_(Sor,_Fernando)),
+conservados intactos en `resources/sor/imslp/` (no versionado):
 
-- Gitarrefreund, Múnich 1915-17 (la misma edición de la que parten las lecciones 6 a 13 de Mutopia): `Sor_-_Op.60_No.13-16.pdf`,
-  `No.17-19`, `No.20-21`, `No.22`, `No.23`, `No.24`. Es la fuente principal.
-- Edición de París (`Sor_op.60.pdf`, una lección por página, la única con la 25): se usa para resolver lo que el escaneo
-  de Gitarrefreund deja dudoso (alteraciones, puntillos, ligaduras).
+- Gitarrefreund, Múnich 1915-17: fuente de las lecciones 14–15 y cotejo de 16–24.
+- París, chez l'auteur, ca. 1837, #836891: fuente principal de 16–25.
+- París, l'Editeur et Auteur, #470312: segundo testimonio completo; Dunst #120240 como cotejo adicional.
 
 Se escribe `sources/sor_op60-NN.ly` a mano con `\fixed c` (alturas que suenan: la escrita menos una octava), una voz de
 `\score` por voz de la partitura (`upper`, `inner`, `bass`; `s` para el hueco que el grabado no dibuja) y `\repeat volta`
@@ -92,9 +91,15 @@ cada voz, lo que atrapa los errores de duración, pero no los de altura: esos se
 el escaneo compás a compás. En `pieces.json` llevan `"license": "public-domain"` y `credit`/`credit_url`, que
 sustituyen al crédito a Mutopia del pie.
 
+La lección 25 usa Drop D y armónicos naturales. El `.ly` contiene los sonidos resultantes; las notas auxiliares de
+operación del original no se convierten en otra voz. `harmonics` en el catálogo fija los contactos (cuerda y traste,
+inicio en negras). `harmonics.py` añade diamantes y metadatos de armónico natural, aplica esos contactos a la TAB y
+conserva las alturas sonoras en el MusicXML exportado. El 3 especial de Sor es el nodo del sexto parcial, cerca de
+3,16, hacia el puente. `test_harmonics.py` contrasta cada contacto con la afinación y su parcial;
+`test_sustained_strings.py` impide cortar las notas prolongadas de 16–25 al cambiar de altura en la misma cuerda.
+
 ## Pendiente
 
-- Cotejar con un escaneo del Op. 60, Op. 6 y Op. 35 de IMSLP.
-- Las lecciones 16 a 25 del Op. 60 no están en Mutopia: se transcriben de IMSLP (ver abajo).
+- Cotejar las lecciones 1–15 restantes y los Op. 6 y Op. 35 con los impresos históricos.
 - En Op. 35 n.º 6, 8, 16 y 21 el MIDI de Mutopia se desfasa (`\partial` dentro de repeticiones, `Timing.measureLength`): se
   publicaron por el PDF (mismos compases y notas) y el recuento de alturas.
