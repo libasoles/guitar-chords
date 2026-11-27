@@ -79,5 +79,12 @@ los compases 38 y 46 tienen barras parciales: no se interpretan como grupos irre
 PDF generado de dos páginas y páginas del visor revisados contra el impreso. La TAB conserva las alturas;
 las posiciones las propone el motor. No hay correcciones editoriales de alturas o duraciones en esta lección.
 
-Las lecciones 17–25 y la revisión del parche del bajo de la lección 5 siguen pendientes. La descarga y su
+Las lecciones 18–25 y la revisión del parche del bajo de la lección 5 siguen pendientes. La descarga y su
 integridad no equivalen al cotejo musical ni a la publicación de esas lecciones.
+
+### Lección 17
+
+28 compases, Do mayor, Allegro moderato, 2/4. Fuente #836891, p. 11; cotejo con #43476, p. 1,
+y #470312, p. 19. Se conservan los bajos sostenidos y las entradas de la voz intermedia del arpegio.
+Las plicas compartidas se representan con voces independientes; los unísonos se tocan una sola vez en la TAB.
+PDF de una página y página del visor revisados junto al original; sin correcciones editoriales de alturas o duraciones.
