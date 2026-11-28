@@ -20,7 +20,7 @@ identifica 24 piezas, primera publicación en París en 1831, dedicadas a Roland
 
 ## Publicación
 
-La página incluye las piezas **1 a 4 y 6**.
+La página incluye las piezas **1 a 4, 6 y 7**.
 Cada incorporación tiene su propio commit con fuente, MusicXML, PDF, vista previa y páginas del visor.
 El catálogo `scripts/sor/opus44.json` usa claves 4401, 4402…; `n` conserva el número impreso.
 Se generan mediante `scripts/sor/build.py opus44 convert 4401` y `scripts/sor/build.py opus44 4401`.
@@ -70,6 +70,15 @@ Se conservan los bajos y notas con plicas independientes, las alteraciones de pa
 que precede a la repetición final. La TAB se genera en afinación estándar. Se consultó la
 [transcripción de Weed](https://www.wussu.com/guitar/sor_op44_24_pieces_progressives_no06_moderato_in_g.txt)
 para contrastar las alturas de los pasajes con líneas adicionales y las notas sostenidas.
+
+### N.º 7: Andante Allegro en Sol mayor
+
+20 compases escritos y dos anacrusas de corchea en 2/4. Fuente #837753, p. 5, cotejada con
+#470296, p. 8. Se conservan las dos repeticiones, las figuras con puntillo y las dos ligaduras del
+compás 7: la de prolongación entre los dos Re y la de expresión del segundo Re al Do sostenido.
+La TAB se genera en afinación estándar. Se consultó la
+[transcripción de Weed](https://www.wussu.com/guitar/sor_op44_24_pieces_progressives_no07_andante_allegro_in_g.txt)
+como referencia adicional de alturas.
 
 ## Verificación
 
