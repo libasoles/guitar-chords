@@ -1,70 +1,8 @@
 // Host adapter: the editor logic comes from Partitura; controls stay in the sidebar.
 import { startEditor } from 'partitura/editor';
 
-// The published MusicXML carries the tablature as a second staff (clef TAB) repeating the notation's notes. The
-// editor has one guitar staff and would pour those notes into it, doubling every note, so drop that staff first.
-function withoutTabStaff(xml) {
-  const doc = new DOMParser().parseFromString(xml, 'application/xml');
-  if (doc.querySelector('parsererror')) return xml;
-  const tab = Array.from(doc.getElementsByTagName('clef')).find((clef) => clef.getElementsByTagName('sign')[0]?.textContent.trim() === 'TAB');
-  const staff = tab?.getAttribute('number');
-  if (!staff) return xml;
-  doc.querySelectorAll('measure').forEach((measure) => {
-    Array.from(measure.children).forEach((node) => {
-      if (!['note', 'forward', 'direction', 'harmony'].includes(node.tagName) || node.getElementsByTagName('staff')[0]?.textContent.trim() !== staff) return;
-      // The <backup> that rewinds to the start of the measure before the tablature's notes goes too.
-      const before = node.previousElementSibling;
-      if (node.tagName === 'note' && before?.tagName === 'backup') before.remove();
-      node.remove();
-    });
-  });
-  return new XMLSerializer().serializeToString(doc);
-}
-
-// The tablature the published MusicXML carries (second staff, clef TAB) as the editor's own `tabs` map:
-// { 'measure:onset': [fret per string, string 1 first] }, so the original fingering comes along instead of
-// being recalculated from the notes. Onsets use the editor's 24 divisions per quarter, like its importer.
-const EDITOR_DIVISIONS = 24;
-function originalTabs(xml) {
-  const doc = new DOMParser().parseFromString(xml, 'application/xml');
-  if (doc.querySelector('parsererror')) return {};
-  const clef = Array.from(doc.getElementsByTagName('clef')).find((node) => node.getElementsByTagName('sign')[0]?.textContent.trim() === 'TAB');
-  const staff = clef?.getAttribute('number');
-  const part = doc.getElementsByTagName('part')[0];
-  if (!staff || !part) return {};
-  const tabs = {};
-  let divisions = 1;
-  Array.from(part.children).filter((node) => node.tagName === 'measure').forEach((measure, mi) => {
-    let cursor = 0;
-    let last = 0;
-    Array.from(measure.children).forEach((node) => {
-      const duration = parseInt(node.getElementsByTagName('duration')[0]?.textContent, 10) || 0;
-      if (node.tagName === 'attributes') {
-        const value = parseInt(node.getElementsByTagName('divisions')[0]?.textContent, 10);
-        if (value > 0) divisions = value;
-      } else if (node.tagName === 'backup') cursor -= duration;
-      else if (node.tagName === 'forward') cursor += duration;
-      else if (node.tagName === 'note') {
-        const chord = !!node.getElementsByTagName('chord')[0];
-        const grace = !!node.getElementsByTagName('grace')[0];
-        const start = chord ? last : cursor;
-        if (!chord) last = cursor;
-        if (!chord && !grace) cursor += duration;
-        if (node.getElementsByTagName('staff')[0]?.textContent.trim() !== staff) return;
-        const string = parseInt(node.getElementsByTagName('string')[0]?.textContent, 10);
-        const fret = parseInt(node.getElementsByTagName('fret')[0]?.textContent, 10);
-        if (!(string >= 1 && string <= 6) || !(fret >= 0)) return;
-        const key = mi + ':' + Math.round(start * EDITOR_DIVISIONS / divisions);
-        tabs[key] = tabs[key] || Array(6).fill(null);
-        tabs[key][string - 1] = fret;
-      }
-    });
-  });
-  return tabs;
-}
-
-// The score viewer ("I" key in the sheet-music pages) leaves its MusicXML in sessionStorage; open it as a new tab,
-// with its original tablature showing.
+// The score viewer ("I" key in the sheet-music pages) leaves its MusicXML in sessionStorage; open it as a new tab.
+// The editor reads the published TAB staff itself, so the original fingering comes along with TAB showing.
 async function openHandoff(actions) {
   let handoff = null;
   try {
@@ -73,12 +11,7 @@ async function openHandoff(actions) {
   } catch (e) { return; }
   if (!handoff || typeof handoff.xml !== 'string') return;
   await actions.ready;
-  const loaded = await actions.loadFile(new File([withoutTabStaff(handoff.xml)], String(handoff.name || 'score.musicxml'), { type: 'application/vnd.recordare.musicxml+xml' }));
-  const tabs = originalTabs(handoff.xml);
-  if (!loaded || !Object.keys(tabs).length) return;
-  // `loaded` is now the open score: keep the original fingering and let the TAB button show it (it saves and redraws).
-  loaded.tabs = tabs;
-  if (!loaded.showTabs) document.getElementById('scoreTabToggle')?.click();
+  actions.loadFile(new File([handoff.xml], String(handoff.name || 'score.musicxml'), { type: 'application/vnd.recordare.musicxml+xml' }));
 }
 
 function bindActions(actions) {
