@@ -20,7 +20,7 @@ identifica 24 piezas, primera publicación en París en 1831, dedicadas a Roland
 
 ## Publicación
 
-La página incluye las piezas **1 a 4 y 6 a 20**.
+La página incluye las piezas **1 a 4 y 6 a 24**.
 Cada incorporación incluye la fuente, el MusicXML, el PDF, la vista previa y las páginas del visor.
 El catálogo `scripts/sor/opus44.json` usa claves 4401, 4402…; `n` conserva el número impreso.
 Se generan mediante `scripts/sor/build.py opus44 convert 4401` y `scripts/sor/build.py opus44 4401`.
@@ -177,8 +177,36 @@ cuerda, según la indicación de ambos facsímiles.
 la última repetición. Fuente #837753, p. 11, cotejada con #470296, p. 21.
 Se conservan los enlaces cromáticos, las ligaduras y las voces sostenidas.
 
+### N.º 21. Andante en La mayor
+
+24 compases en 3/4. Fuente #837753, p. 11, cotejada con #470296, p. 22. Se
+explicitan los tresillos de corchea en los grupos de tres notas por pulso.
+El Sol grave del compás 20 se lee sostenido por la armadura. En el compás 22,
+el segundo sonido es Si, como figura en los facsímiles. Se conserva el pedal
+grave de Mi de los compases 8 a 16.
+
+### N.º 22. Andantino en La menor
+
+32 compases en 2/4. Fuente #837753, p. 12, cotejada con #470296, p. 23. Se
+conservan las ligaduras entre compases y la repetición de la segunda sección.
+
+### N.º 23. Allegro moderato en La menor y La mayor
+
+32 compases en 6/8. Fuente #837753, p. 12, cotejada con #470296, p. 24. Se
+conservan la repetición de la sección en La menor, el «Fin.» al cierre de
+esa sección y la entrada en La mayor con el La grave ligado. El segno del
+cierre se indica como «D.S. al Fin.».
+
+### N.º 24. Valse en La mayor
+
+56 compases en 3/8 y cuatro anacrusas de corchea. Fuente #837753, p. 13,
+cotejada con #470296, p. 25. Se conservan los tresillos de los compases
+20 a 22 y el pedal de Mi ligado entre los compases 33 y 36. La tablatura usa
+cuerdas distintas para sostener el Re mientras suena el Si y para sostener el
+Si del compás 26 mientras se toca el Re. El vals cierra el Op. 44.
+
 Se consultaron las [transcripciones de Weed](https://www.classtab.org/index_old.htm)
-de los números 15 a 20 como referencia adicional de alturas.
+de los números 15 a 24 como referencia adicional de alturas.
 
 ## Verificación
 
