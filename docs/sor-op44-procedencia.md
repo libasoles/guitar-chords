@@ -119,6 +119,16 @@ Si y tocar el Re sostenido y el Do sostenido de la melodía. Se consultó la
 [transcripción de Weed](https://www.classtab.org/sor_op44_24_pieces_progressives_no12_andantino_in_em.txt)
 para contrastar alturas.
 
+### N.º 13: Allegretto en Mi menor y Mi mayor
+
+25 compases escritos, incluidas las dos casillas. Transcripción de #837753, p. 7,
+cotejada con #470296, p. 14. Se edita en 3/8 porque las figuras escritas suman tres
+corcheas por compás, aunque la cabecera de los facsímiles indica 3/4. Se conservan
+los adornos, las casillas, el segno inicial y el «Fin.» de la segunda casilla. El segno
+invertido al final se escribe «D.S. al Fin.». Se consultó la
+[transcripción de Weed](https://www.wussu.com/guitar/sor_op44_24_pieces_progressives_no13_allegretto_in_em.txt)
+como referencia adicional de alturas y métrica.
+
 ## Verificación
 
 Pruebas de conversión y compases; artefactos, metadatos y licencias por pieza; página, índice,
