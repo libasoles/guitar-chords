@@ -401,6 +401,12 @@ def build(number):
                 if column[4] == 5:
                     column[4] = None
                     column[3] = 0
+        if EDITION == "santisteban" and number == 13:
+            # The second bass of bar 1 is D3: use the open fourth string.
+            for column in tabs[0]:
+                if column[4] == 5 and column[3] is None:
+                    column[4] = None
+                    column[3] = 0
         tabify.export(normalized, os.path.join(prepared, tabify.SUGGESTION_NAME),
                       tabs,
                       "standard", exported, title=title, subtitle=subtitle)
