@@ -1,6 +1,26 @@
 // Host adapter: the editor logic comes from Partitura; controls stay in the sidebar.
 import { startEditor } from 'partitura/editor';
 
+// The published MusicXML carries the tablature as a second staff (clef TAB) repeating the notation's notes. The
+// editor has one guitar staff and would pour those notes into it, doubling every note, so drop that staff first.
+function withoutTabStaff(xml) {
+  const doc = new DOMParser().parseFromString(xml, 'application/xml');
+  if (doc.querySelector('parsererror')) return xml;
+  const tab = Array.from(doc.getElementsByTagName('clef')).find((clef) => clef.getElementsByTagName('sign')[0]?.textContent.trim() === 'TAB');
+  const staff = tab?.getAttribute('number');
+  if (!staff) return xml;
+  doc.querySelectorAll('measure').forEach((measure) => {
+    Array.from(measure.children).forEach((node) => {
+      if (!['note', 'forward', 'direction', 'harmony'].includes(node.tagName) || node.getElementsByTagName('staff')[0]?.textContent.trim() !== staff) return;
+      // The <backup> that rewinds to the start of the measure before the tablature's notes goes too.
+      const before = node.previousElementSibling;
+      if (node.tagName === 'note' && before?.tagName === 'backup') before.remove();
+      node.remove();
+    });
+  });
+  return new XMLSerializer().serializeToString(doc);
+}
+
 // The score viewer ("I" key in the sheet-music pages) leaves its MusicXML in sessionStorage; open it as a new tab.
 async function openHandoff(actions) {
   let handoff = null;
@@ -10,7 +30,7 @@ async function openHandoff(actions) {
   } catch (e) { return; }
   if (!handoff || typeof handoff.xml !== 'string') return;
   await actions.ready;
-  actions.loadFile(new File([handoff.xml], String(handoff.name || 'score.musicxml'), { type: 'application/vnd.recordare.musicxml+xml' }));
+  actions.loadFile(new File([withoutTabStaff(handoff.xml)], String(handoff.name || 'score.musicxml'), { type: 'application/vnd.recordare.musicxml+xml' }));
 }
 
 function bindActions(actions) {
