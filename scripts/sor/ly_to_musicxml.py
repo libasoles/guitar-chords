@@ -667,6 +667,8 @@ class Parser:
                 self.take()
                 if nxt == '\\fermata':
                     event['fermata'] = True
+                if nxt == '\\staccato':
+                    event['staccato'] = True
                 if nxt == '\\rest' and pitches:
                     event['kind'] = 'rest'
                     event['pitches'] = []
@@ -1051,6 +1053,8 @@ class Writer:
                 notations += '<slur type="start" number="%d"/>' % number * e['slur_start']
                 if e.get('fermata'):
                     notations += '<fermata type="upright"/>'
+                if e.get('staccato'):
+                    notations += '<articulations><staccato/></articulations>'
             if p['fingers'] or p.get('string'):
                 notations += '<technical>%s%s</technical>' % (''.join('<fingering>%s</fingering>' % f for f in p['fingers']),
                                                               '<string>%s</string>' % p['string'] if p.get('string') else '')

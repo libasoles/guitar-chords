@@ -33,5 +33,25 @@
     "license": "public-domain",
     "credit": "Transcripcion a partir de la edicion de Paris, chez l'auteur et Pacini, en IMSLP",
     "credit_url": "https://imslp.org/wiki/Special:ImagefromIndex/837753"
+  },
+  "4404": {
+    "n": 4,
+    "opus": 44,
+    "form": "C Major",
+    "es": "Do mayor",
+    "pt": "Dó maior",
+    "source": "sor_op44-04.ly",
+    "editor": "Fernando Sor",
+    "license": "public-domain",
+    "credit": "Transcripcion a partir de la edicion de Paris, chez l'auteur et Pacini, en IMSLP",
+    "credit_url": "https://imslp.org/wiki/Special:ImagefromIndex/837753",
+    "tab_fixes": {
+      "9": [
+        [null, null, 0, null, null, null],
+        [null, null, null, null, null, 3],
+        [null, null, null, 5, null, null],
+        [null, null, 0, null, null, null]
+      ]
+    }
   }
 }

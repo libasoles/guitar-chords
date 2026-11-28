@@ -20,7 +20,7 @@ identifica 24 piezas, primera publicación en París en 1831, dedicadas a Roland
 
 ## Publicación
 
-La página incluye las piezas **1 a 3**.
+La página incluye las piezas **1 a 4**.
 Cada incorporación tiene su propio commit con fuente, MusicXML, PDF, vista previa y páginas del visor.
 El catálogo `scripts/sor/opus44.json` usa claves 4401, 4402…; `n` conserva el número impreso.
 Se generan mediante `scripts/sor/build.py opus44 convert 4401` y `scripts/sor/build.py opus44 4401`.
@@ -51,6 +51,17 @@ coincidencia rítmica. PDF de una página y visor revisados; TAB sin conflictos 
 40 compases, 3/4. Transcripción de #837753, p. 3, cotejada con #470296, p. 4.
 Las dos voces conservan sus duraciones independientes y el Sol agudo se liga entre los compases 21 y 22.
 La TAB se genera en afinación estándar, sin trasladar los números de dedo del impreso.
+
+### N.º 4: Allegretto moderato en Do mayor
+
+25 compases escritos, más la anacrusa de corchea, en 2/4. Transcripción de #837753, p. 3, cotejada
+con #470296, p. 5. La primera repetición retoma el compás 1 tras el Sol que cierra el 8. La segunda
+lleva dos casillas y termina con un compás de 3/8 que completa la anacrusa. Se conservan la ligadura de
+prolongación del compás 15, las dos articulaciones de staccato y la voz interior del compás 10.
+Se consultó la [transcripción de Weed](https://www.wussu.com/guitar/sor_op44_24_pieces_progressives_no04_allegretto_moderato_in_c.txt)
+para confirmar la lectura del Sol con puntillo del compás 9 y el inicio de la repetición. La TAB se genera
+a partir de la transcripción del facsímil en afinación estándar. En el compás 8, el Sol sostenido se
+asigna a la cuarta cuerda para poder volver a atacar esa altura en la tercera.
 
 ## Verificación
 

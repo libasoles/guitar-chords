@@ -51,3 +51,27 @@ test('Op. 44 n.º 3: 40 compases en 3/4 y Sol ligado entre 21–22', () => {
   assert.match(measure(xml, 21), /<step>G<\/step><octave>4<\/octave><\/pitch><duration>480<\/duration><tie type="start"/);
   assert.match(measure(xml, 22), /<step>G<\/step><octave>4<\/octave><\/pitch><duration>480<\/duration><tie type="stop"/);
 });
+
+test('Op. 44 n.º 4: anacrusa, dos repeticiones y casillas en la descarga', () => {
+  const piece = op44.publishedPieces().find((p) => p.number === 4404);
+  const xml = fs.readFileSync(path.join(op44.DOWNLOADS_DIR, piece.pdf.replace(/\.pdf$/, '.musicxml')), 'utf8');
+  assert.equal((xml.match(/<measure\b/g) || []).length, 26);
+  assert.match(xml, /<measure\b[^>]*number="0"/);
+  assert.match(measure(xml, 1), /<repeat direction="forward"/);
+  assert.match(measure(xml, 8), /<repeat direction="backward"/);
+  assert.match(measure(xml, 9), /<repeat direction="forward"/);
+  assert.match(measure(xml, 24), /<ending number="1" type="start"/);
+  assert.match(measure(xml, 24), /<repeat direction="backward"/);
+  assert.match(measure(xml, 25), /<ending number="2" type="start"/);
+  assert.match(measure(xml, 16), /<staccato\s*\/>/);
+  assert.match(measure(xml, 18), /<staccato\s*\/>/);
+});
+
+test('Op. 44 n.º 4: el Sol sostenido del compás 8 y su reataque usan cuerdas distintas', () => {
+  const piece = op44.publishedPieces().find((p) => p.number === 4404);
+  const xml = fs.readFileSync(path.join(op44.DOWNLOADS_DIR, piece.pdf.replace(/\.pdf$/, '.musicxml')), 'utf8');
+  const notes = measure(xml, 8).match(/<note\b[^>]*>[^]*?<\/note>/g);
+  const gNotes = notes.filter((note) => /<step>G<\/step>\s*<octave>3<\/octave>/.test(note) && /<staff>2<\/staff>/.test(note));
+  assert.deepEqual(gNotes.map((note) => [note.match(/<type>(\w+)<\/type>/)[1], note.match(/<string>(\d+)<\/string>/)[1]]),
+    [['eighth', '3'], ['eighth', '3'], ['quarter', '4']]);
+});
