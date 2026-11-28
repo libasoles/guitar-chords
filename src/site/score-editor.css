@@ -1830,3 +1830,31 @@ body.score-moving-measure, body.score-moving-measure * { cursor: grabbing !impor
   font-size: 0.75rem;
   color: var(--ink-soft);
 }
+
+.score-note-info-intervals {
+  display: grid;
+  gap: 0.2rem;
+  max-height: 12rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.score-note-info-intervals li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.75rem;
+}
+
+.score-note-info-between {
+  min-width: 6.5rem;
+  color: var(--ink-soft);
+}
+
+.score-note-info-semitones {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
