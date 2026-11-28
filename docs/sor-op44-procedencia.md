@@ -20,7 +20,7 @@ identifica 24 piezas, primera publicación en París en 1831, dedicadas a Roland
 
 ## Publicación
 
-La página incluye las piezas **1 a 4**.
+La página incluye las piezas **1 a 4 y 6**.
 Cada incorporación tiene su propio commit con fuente, MusicXML, PDF, vista previa y páginas del visor.
 El catálogo `scripts/sor/opus44.json` usa claves 4401, 4402…; `n` conserva el número impreso.
 Se generan mediante `scripts/sor/build.py opus44 convert 4401` y `scripts/sor/build.py opus44 4401`.
@@ -62,6 +62,14 @@ Se consultó la [transcripción de Weed](https://www.wussu.com/guitar/sor_op44_2
 para confirmar la lectura del Sol con puntillo del compás 9 y el inicio de la repetición. La TAB se genera
 a partir de la transcripción del facsímil en afinación estándar. En el compás 8, el Sol sostenido se
 asigna a la cuarta cuerda para poder volver a atacar esa altura en la tercera.
+
+### N.º 6: Moderato en Sol mayor
+
+32 compases y anacrusa de negra en 3/4. Fuente #837753, p. 4, cotejada con #470296, p. 7.
+Se conservan los bajos y notas con plicas independientes, las alteraciones de paso y el silencio de negra
+que precede a la repetición final. La TAB se genera en afinación estándar. Se consultó la
+[transcripción de Weed](https://www.wussu.com/guitar/sor_op44_24_pieces_progressives_no06_moderato_in_g.txt)
+para contrastar las alturas de los pasajes con líneas adicionales y las notas sostenidas.
 
 ## Verificación
 
