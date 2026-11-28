@@ -12,9 +12,8 @@ function measure(xml, number) {
 
 test('Op. 44: colección propia, ordenada, con textos en los tres idiomas', () => {
   const pieces = op44.publishedPieces();
-  assert.ok(pieces.length > 0);
+  assert.deepEqual(pieces.map((p) => Number(p.n)), Array.from({ length: 24 }, (_, index) => index + 1));
   assert.ok(pieces.every((piece) => piece.opus === 44));
-  assert.deepEqual(pieces.map((p) => Number(p.n)), pieces.map((p) => Number(p.n)).sort((a, b) => a - b));
   for (const locale of ['es', 'en', 'pt']) {
     const strings = require('../src/i18n/strings.' + locale + '.json');
     assert.match(strings.artSorOp44H1, /Op\. 44/);

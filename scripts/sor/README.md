@@ -41,9 +41,8 @@ Consulta el catálogo de arriba y la nota de procedencia del opus. Para el Op. 4
 `resources/sor-op44/imslp/` del checkout principal. Los facsímiles se conservan intactos. Las transcripciones
 LilyPond van en `scripts/sor/sources/opus44/` y el build genera las descargas y los SVG.
 
-Por ejemplo, para incorporar la n.º 5, toma como modelo la n.º 1 o la n.º 2. Después de
-localizar la pieza en el facsímil, añade `sor_op44-05.ly` y la entrada `"4405"` con `n: 5` (entero) en
-`opus44.json`. Ejecuta:
+Para regenerar la n.º 5 del Op. 44 a partir de su fuente LilyPond y de la entrada `4405`
+del catálogo, ejecuta:
 
 ```sh
 .venv-carcassi/bin/python scripts/sor/build.py opus44 convert 4405
