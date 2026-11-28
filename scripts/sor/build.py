@@ -38,9 +38,11 @@ def footer_lines(number):
         credit = [(piece['credit'], piece['credit_url'])]
     if piece['license'] == 'public-domain':
         lines = [credit, [('Dominio publico', None)]]
-        if piece.get('harmonics'):
-            lines += [[('Armonicos naturales: diamantes = sonidos; TAB = trastes de contacto (sin pisar).', None)],
-                      [('3: rozar por debajo del tercer traste, hacia el puente (aprox. 3,16).', None)]]
+        passages = piece.get('harmonics', {})
+        if passages:
+            lines.append([('Armonicos naturales: diamantes = sonidos; TAB = trastes de contacto (sin pisar).', None)])
+            if any(fret == 3 for bar in passages.values() for _, cells in bar for _, fret in cells):
+                lines.append([('3: rozar por debajo del tercer traste, hacia el puente (aprox. 3,16).', None)])
         return lines
     family = piece.get('license_family', 'by-sa')
     label = 'CC BY ' if family == 'by' else 'CC BY-SA '
@@ -180,6 +182,7 @@ def build(number):
         extract.write_pages(number, xml)
         if PIECES[number].get('harmonics'):
             xml = harmonics.mark(xml, PIECES[number]['harmonics'], exported=True)
+            xml = re.sub(r'[ \t]+(?=\n)', '', xml)
         os.makedirs(OUT_DIR, exist_ok=True)
         base = os.path.join(OUT_DIR, file_base(number))
         # Sin bloque de codificacion: ni programa, ni fechas, ni notas del procesado intermedio.

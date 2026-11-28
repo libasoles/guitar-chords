@@ -181,5 +181,96 @@
     "license": "public-domain",
     "credit": "Transcripcion a partir de la edicion de Paris, chez l'auteur et Pacini, en IMSLP",
     "credit_url": "https://imslp.org/wiki/Special:ImagefromIndex/837753"
+  },
+  "4415": {
+    "n": 15,
+    "opus": 44,
+    "form": "D Major",
+    "es": "Re mayor",
+    "pt": "Ré maior",
+    "source": "sor_op44-15.ly",
+    "editor": "Fernando Sor",
+    "license": "public-domain",
+    "credit": "Transcripcion a partir de la edicion de Paris, chez l'auteur et Pacini, en IMSLP",
+    "credit_url": "https://imslp.org/wiki/Special:ImagefromIndex/837753",
+    "repair_voices": false
+  },
+  "4416": {
+    "n": 16,
+    "opus": 44,
+    "form": "D Major",
+    "es": "Re mayor",
+    "pt": "Ré maior",
+    "source": "sor_op44-16.ly",
+    "editor": "Fernando Sor",
+    "license": "public-domain",
+    "credit": "Transcripcion a partir de la edicion de Paris, chez l'auteur et Pacini, en IMSLP",
+    "credit_url": "https://imslp.org/wiki/Special:ImagefromIndex/837753",
+    "repair_voices": false
+  },
+  "4417": {
+    "n": 17,
+    "opus": 44,
+    "form": "D Minor",
+    "es": "Re menor",
+    "pt": "Ré menor",
+    "source": "sor_op44-17.ly",
+    "editor": "Fernando Sor",
+    "license": "public-domain",
+    "credit": "Transcripcion a partir de la edicion de Paris, chez l'auteur et Pacini, en IMSLP",
+    "credit_url": "https://imslp.org/wiki/Special:ImagefromIndex/837753",
+    "repair_voices": false
+  },
+  "4418": {
+    "n": 18,
+    "opus": 44,
+    "form": "D Major",
+    "es": "Re mayor",
+    "pt": "Ré maior",
+    "source": "sor_op44-18.ly",
+    "editor": "Fernando Sor",
+    "license": "public-domain",
+    "credit": "Transcripcion a partir de la edicion de Paris, chez l'auteur et Pacini, en IMSLP",
+    "credit_url": "https://imslp.org/wiki/Special:ImagefromIndex/837753",
+    "repair_voices": false,
+    "harmonics": {
+      "2": [[1, [[4, 7]]], [2, [[3, 7]]], [3, [[2, 7]]]],
+      "4": [[1, [[4, 7]]], [2, [[4, 7]]], [3, [[4, 7]]]],
+      "6": [[1, [[4, 7]]], [2, [[3, 7]]], [3, [[2, 7]]]],
+      "8": [[1, [[4, 7]]], [2, [[5, 12]]]],
+      "10": [[1, [[5, 5]]], [1.75, [[5, 4]]], [2, [[5, 3]]]],
+      "13": [[1, [[2, 7]]], [1.75, [[3, 7]]], [2, [[4, 7]]]],
+      "14": [[1, [[5, 3]]], [1.75, [[5, 4]]], [2, [[5, 5]]]],
+      "20": [[2, [[4, 5], [3, 5], [2, 5]]]]
+    }
+  },
+  "4419": {
+    "n": 19,
+    "opus": 44,
+    "form": "D Major",
+    "es": "Re mayor",
+    "pt": "Ré maior",
+    "source": "sor_op44-19.ly",
+    "editor": "Fernando Sor",
+    "license": "public-domain",
+    "credit": "Transcripcion a partir de la edicion de Paris, chez l'auteur et Pacini, en IMSLP",
+    "credit_url": "https://imslp.org/wiki/Special:ImagefromIndex/837753",
+    "repair_voices": false,
+    "harmonics": {
+      "16": [[1.5, [[4, 5]]]]
+    }
+  },
+  "4420": {
+    "n": 20,
+    "opus": 44,
+    "form": "A Major",
+    "es": "La mayor",
+    "pt": "Lá maior",
+    "source": "sor_op44-20.ly",
+    "editor": "Fernando Sor",
+    "license": "public-domain",
+    "credit": "Transcripcion a partir de la edicion de Paris, chez l'auteur et Pacini, en IMSLP",
+    "credit_url": "https://imslp.org/wiki/Special:ImagefromIndex/837753",
+    "repair_voices": false
   }
 }
