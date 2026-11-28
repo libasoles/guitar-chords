@@ -1,6 +1,6 @@
 ---
 name: partituras-con-tablatura
-description: Build a site page of public-domain guitar scores with notation and generated tablature, as done for Carcassi's preludes and waltzes. Use when adding a new collection of pieces, sourcing the originals, extracting notes from a score PDF, or publishing pieces one by one (one commit per processed score).
+description: Agregar partituras de guitarra a una colección existente, publicar una colección nueva, transcribir una partitura o conseguir y recortar los originales de un método.
 ---
 
 Una **colección** es una página del sitio (`/partituras/...`) con una tarjeta por pieza: vista previa con TAB, modal con
@@ -8,11 +8,20 @@ la partitura completa y descarga en PDF. Ya existen preludios de Carcassi (dos e
 Si el pedido es solo descargar un libro o separar sus partituras en `resources/`, entrega esos recursos y su índice;
 la conversión musical y la publicación de una colección corresponden a pedidos que las incluyan.
 
+Si agregas una pieza a una colección existente, comprueba si figura en el catálogo y en la página. Abre el README
+del generador y una pieza publicada del mismo opus. Para Sor, sigue [el flujo de Sor](../../../scripts/sor/README.md#agregar-una-pieza-a-una-colección-existente).
+
+Con herramientas de archivos y terminal, abre las referencias y verifica el resultado en el proyecto. Si solo tienes
+chat, pide los extractos de las guías, el listado de los originales y una pieza de ejemplo. Indica qué queda por
+ejecutar o cotejar.
+
 ## 1. Fuentes y originales
 
 - Fuentes probadas y descartadas: `docs/fuentes-de-partituras.md`. Léelo antes de buscar.
-- **Guarda siempre copia del original en `resources/<colección>/`** (no se versiona) y escribe ahí un `README.md` con
-  la procedencia y las diferencias con el libro. Es la base de toda revisión posterior.
+- **Busca primero en `resources/` del checkout principal.** Git ignora esa carpeta y los worktrees nuevos no
+  la traen. Encuentra el checkout de `main` con `git worktree list` y consulta sus README, índices y manifiestos.
+  Guarda cada original intacto en `resources/<colección>/` y anota edición, licencia y procedencia en su
+  `README.md`. Indica la página solo si la verificaste en el facsímil o en la documentación de procedencia.
 - Si otro agente trabaja sobre una carpeta de `resources/`, trátala como solo lectura.
 - Para descargar un método, buscar formatos editables o separar sus partituras en PDF, lee
   [Descarga y recorte de métodos](references/descarga-y-recorte.md): incluye fuentes verificadas con Sagreras y Aguado,
@@ -105,7 +114,10 @@ El `.mscx` es XML limpio. El conversor (`mscx_to_musicxml.py`, solo biblioteca e
   se leen a ojo al transcribir.
 - Afinaciones especiales (scordatura) no las soporta el motor: dejar la pieza fuera y avisar.
 
-## 4. Registrar la página
+## 4. Integrar la pieza o registrar la página
+
+Para una colección existente, añade la pieza según su catálogo y conserva la página y el slug. Comprueba la
+tarjeta, el visor y las descargas. Para una colección nueva, sigue los pasos de registro.
 
 `AGENTS.md` pide registrar el slug en español e inglés en `scripts/lib/slugs.js` (sin redirección). Además:
 
@@ -121,8 +133,9 @@ El `.mscx` es XML limpio. El conversor (`mscx_to_musicxml.py`, solo biblioteca e
 
 ## 5. Entregar pieza a pieza
 
-1. Extraer, comprobar sumas, generar, **mirar el PDF** y compararlo con el original.
-2. `node scripts/build-site.js`, `node test/articles.e2e.js` y `npm run test:unit`.
+1. Extraer, comprobar sumas, generar y comparar la notación del PDF con el original. Comprueba que la TAB
+   corresponda a las notas y respete las voces sostenidas.
+2. Genera el sitio con `node scripts/build-site.js` y ejecuta las pruebas puntuales según `AGENTS.md`.
 3. **Un commit por cada partitura procesada** (regla fija, sin agrupar varias piezas ni dejar el trabajo sin comitear
    hasta el final), con su TAB, y push tras cada commit. Si el push se rechaza, `git pull --rebase` (otra sesión puede
    estar publicando otra colección en paralelo y tocando `build-site.js`, `slugs.js` y `strings.*.json`: los conflictos

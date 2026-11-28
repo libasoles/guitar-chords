@@ -35,6 +35,25 @@ con nombres de archivo en inglés. La colección se inicia con sus dos primeras 
 completos para continuarla. Fuentes, cotejos y alcance en [la nota de procedencia](../../docs/sor-op44-procedencia.md).
 No se confunde con el Op. 44 bis para dos guitarras.
 
+## Agregar una pieza a una colección existente
+
+Consulta el catálogo de arriba y la nota de procedencia del opus. Para el Op. 44, usa
+[`docs/sor-op44-procedencia.md`](../../docs/sor-op44-procedencia.md) para localizar los facsímiles en
+`resources/sor-op44/imslp/` del checkout principal. Los facsímiles se conservan intactos. Las transcripciones
+LilyPond van en `scripts/sor/sources/opus44/` y el build genera las descargas y los SVG.
+
+Por ejemplo, para incorporar la n.º 3 si aún falta, toma como modelo la n.º 1 o la n.º 2. Después de
+localizar la pieza en el facsímil, añade `sor_op44-03.ly` y la entrada `"4403"` con `n: 3` (entero) en
+`opus44.json`. Ejecuta:
+
+```sh
+.venv-carcassi/bin/python scripts/sor/build.py opus44 convert 4403
+.venv-carcassi/bin/python scripts/sor/build.py opus44 4403
+node --test test/sor.unit.js test/sor-op44.unit.js
+```
+
+Añade la procedencia y el recuento de compases cotejado en los controles de la colección que correspondan.
+
 ## El conversor
 
 LilyPond no está instalado y no exporta MusicXML, así que `ly_to_musicxml.py` lee el `.ly` directamente: modo

@@ -31,13 +31,6 @@ Playwright and Lighthouse are dev dependencies, so `npm ci` is the only install 
 - Resolve test fixtures from the repository. For temporary artifacts, use `os.tmpdir()` with `fs.mkdtemp()` and create output directories before writing; never assume a developer's absolute path exists on the Linux CI runner.
 - Before committing test changes, inspect their file reads and writes for machine-specific paths and leftover review artifacts. Local test success alone does not verify filesystem portability; check the pushed CI result before reporting CI as passing.
 
-## Partituras
-
-Para agregar o publicar partituras, transcribir una pieza, o descargar y recortar un método,
-sigue [el prompt de trabajo](docs/agents/agregar-partituras.md). Abre la skill
-`.agents/skills/partituras-con-tablatura/SKILL.md` como Markdown si tu cliente no carga skills.
-Los originales de `resources/` están en el checkout principal y Git los ignora.
-
 ## New pages
 
 Every new page registers its slug in Spanish and English in `scripts/lib/slugs.js` (see `docs/adr/0003-slugs-por-idioma-y-redireccion-de-urls-viejas.md`). New pages get no redirect.
