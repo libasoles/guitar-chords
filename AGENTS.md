@@ -49,6 +49,7 @@ The user marks some scores with editor marks (their own picks) and will ask for 
 
 ## Voces y conducción
 
+- Cambios de digitación o posición: calcula la altura sonante de cada cuerda y traste propuestos según la afinación de la pieza y comprueba que coincida con la nota original, incluida la octava. Tras regenerar, verifica que la tablatura entregue esas mismas alturas en sus ataques originales.
 - Fundamentación, fuentes, reglas y límites: `docs/voice-leading.md`.
 - No inferir una única voz porque dos notas coincidan en inicio y duración. Conservar la continuidad de las líneas y las voces explícitas, incluidos cruces de registro.
 - Formar un acorde de notación es una decisión explícita; no equivale a analizar las voces contrapuntísticas del acorde.

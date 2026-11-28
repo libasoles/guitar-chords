@@ -357,6 +357,16 @@ def build(number):
                 if column[4] == 8 and column[3] is None:
                     column[4] = None
                     column[3] = 3
+        if EDITION == "santisteban" and number == 9:
+            # Closing bar: B3 and E4 on open strings, G#4 at fret 4 of the first
+            # string, and the closing chord's G#3 at fret 1 of the third.
+            for old_string, old_fret, new_string, new_fret in [
+                (3, 9, 1, 0), (2, 9, 0, 0), (1, 9, 0, 4), (3, 6, 2, 1),
+            ]:
+                for column in tabs[-1]:
+                    if column[old_string] == old_fret:
+                        column[old_string] = None
+                        column[new_string] = new_fret
         if EDITION == "santisteban" and number == 12:
             # Requested TAB voicing: the three D bass quarters of the last bar (m. 12 in the file,
             # shown as 13) all on the open fourth string instead of fret 5 on the fifth.
