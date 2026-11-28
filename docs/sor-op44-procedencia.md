@@ -100,6 +100,14 @@ Se conservan las dos repeticiones, las notas de adorno, el Sol ligado y el ligad
 Se consultó la [transcripción de Weed](https://www.wussu.com/guitar/sor_op44_24_pieces_progressives_no10_allegretto_in_g.txt)
 como referencia adicional de alturas.
 
+### N.º 11: Andante en Mi menor
+
+16 compases en compás común. Transcripción de #837753, p. 6, cotejada con #470296, p. 12.
+Se conservan las dos repeticiones, las ligaduras de expresión y la prolongación del Si entre
+los compases 10 y 11. El Re sostenido y el Fa sostenido del compás 13 se mantienen en la
+tablatura. Se consultó la [transcripción de Weed](https://www.classtab.org/sor_op44_24_pieces_progressives_no11_andante_in_em.txt)
+como referencia adicional de alturas.
+
 ## Verificación
 
 Pruebas de conversión y compases; artefactos, metadatos y licencias por pieza; página, índice,
