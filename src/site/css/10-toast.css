@@ -46,6 +46,8 @@
 .toast-tip-tab { margin: 0; font-family: var(--mono, monospace); font-size: 0.75rem; line-height: 1.25; }
 .toast-tip-tab mark { background: #000; color: #fff; }
 .toast-icon { flex: none; width: 1.5rem; height: 1.5rem; }
+/* The shared editor's toast (partitura/src/client/toast.js) shows the site logo on alerts. */
+.toast-logo { flex: none; width: 3.5rem; height: 4.55rem; margin: -0.5rem 0; }
 .toast-description { flex: 1; }
 .toast-close {
   flex: none;
