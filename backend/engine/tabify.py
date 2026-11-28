@@ -1467,13 +1467,14 @@ def _suggestion(measures, tuning, shifts, title, subtitles, uneven=()):
     }
 
 
-def prepare(input_path, kind, tuning, out_dir, per_row=4, arpeggio="auto"):
+def prepare(input_path, kind, tuning, out_dir, per_row=4, arpeggio="auto", *, repair_voices=True):
     """Input score -> normalized MusicXML + suggested fingering + preview.
 
     `input_path` is one MusicXML/MXL file or a list of them (OCR movements).
     `kind` is 'musicxml' or 'pdf-ocr-output' (MusicXML written by an OMR tool);
     both are read the same way. `tuning` is 'auto', 'standard' or 'dropd'.
     `arpeggio` is 'auto' (detect arpeggio measures), True or False: see `assign_frets`.
+    Set `repair_voices` to False for curated MusicXML with intentionally short measures.
     Writes normalized.musicxml, suggestion.json, preview.json and
     preview-NN.svg into out_dir and returns a dict describing them.
     """
@@ -1484,7 +1485,7 @@ def prepare(input_path, kind, tuning, out_dir, per_row=4, arpeggio="auto"):
     paths = [input_path] if isinstance(input_path, (str, os.PathLike)) else list(input_path)
     os.makedirs(out_dir, exist_ok=True)
 
-    score, part = load_score([str(p) for p in paths], repair_voices=True, harmonics=True)
+    score, part = load_score([str(p) for p in paths], repair_voices=repair_voices, harmonics=True)
     shifts = octave_shifts(list(part.getElementsByClass(m21.stream.Measure)))
     title, subtitles = extract_header(score)
     xml_path = os.path.join(out_dir, NORMALIZED_NAME)

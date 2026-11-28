@@ -870,7 +870,7 @@ class Writer:
                 if not (a <= t < b or (t == b and index == len(measures) - 1)):
                     continue
                 kind = item['kind']
-                if kind == 'repeat_start' and t == a:
+                if t == a and (kind == 'repeat_start' or kind == 'bar' and item['style'] == '.|:'):
                     left += '<repeat direction="forward"/>'
                 elif kind == 'volta' and t == a:
                     left = '<ending number="%d" type="start"/>' % item['n'] + left
