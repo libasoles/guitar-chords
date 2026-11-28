@@ -20,7 +20,7 @@ identifica 24 piezas, primera publicación en París en 1831, dedicadas a Roland
 
 ## Publicación
 
-La página incluye las piezas **1 a 4 y 6 a 24**.
+La página incluye las **24 piezas**.
 Cada incorporación incluye la fuente, el MusicXML, el PDF, la vista previa y las páginas del visor.
 El catálogo `scripts/sor/opus44.json` usa claves 4401, 4402…; `n` conserva el número impreso.
 Se generan mediante `scripts/sor/build.py opus44 convert 4401` y `scripts/sor/build.py opus44 4401`.
@@ -62,6 +62,14 @@ Se consultó la [transcripción de Weed](https://www.wussu.com/guitar/sor_op44_2
 para confirmar la lectura del Sol con puntillo del compás 9 y el inicio de la repetición. La TAB se genera
 a partir de la transcripción del facsímil en afinación estándar. En el compás 8, el Sol sostenido se
 asigna a la cuarta cuerda para poder volver a atacar esa altura en la tercera.
+
+### N.º 5. Andantino en Do mayor
+
+48 compases. Fuente #837753, p. 4, cotejada con #470296, p. 6. Se usa 3/8 porque las
+figuras escritas suman tres corcheas por compás. Se conservan las ligaduras de Do y Si
+en el bajo, los pasajes a tres voces y el Fa sostenido de los compases 23 y 31.
+Se consultó la [transcripción de Weed](https://www.classtab.org/sor_op44_24_pieces_progressives_no05_andantino_in_c.txt)
+como referencia adicional de alturas.
 
 ### N.º 6: Moderato en Sol mayor
 

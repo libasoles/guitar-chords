@@ -54,6 +54,19 @@
       ]
     }
   },
+  "4405": {
+    "n": 5,
+    "opus": 44,
+    "form": "C Major",
+    "es": "Do mayor",
+    "pt": "Dó maior",
+    "source": "sor_op44-05.ly",
+    "editor": "Fernando Sor",
+    "license": "public-domain",
+    "credit": "Transcripcion a partir de la edicion de Paris, chez l'auteur et Pacini, en IMSLP",
+    "credit_url": "https://imslp.org/wiki/Special:ImagefromIndex/837753",
+    "repair_voices": false
+  },
   "4406": {
     "n": 6,
     "opus": 44,

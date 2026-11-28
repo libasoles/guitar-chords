@@ -44,7 +44,7 @@ const COLLECTIONS = [
   ['lecciones', require('../scripts/lib/article-sor'), MEASURES_LECCIONES],
   ['estudios', require('../scripts/lib/article-sor-estudios'), MEASURES_ESTUDIOS],
   ['opus6', require('../scripts/lib/article-sor-op6'), MEASURES_ESTUDIOS],
-  ['opus44', require('../scripts/lib/article-sor-op44'), { 4401: 33, 4402: 32, 4403: 40, 4404: 26, 4406: 33, 4407: 22, 4408: 48, 4409: 18, 4410: 29, 4411: 16, 4412: 53, 4413: 25, 4414: 29, 4415: 34, 4416: 30, 4417: 32, 4418: 24, 4419: 32, 4420: 27, 4421: 24, 4422: 32, 4423: 32, 4424: 60 }],
+  ['opus44', require('../scripts/lib/article-sor-op44'), { 4401: 33, 4402: 32, 4403: 40, 4404: 26, 4405: 48, 4406: 33, 4407: 22, 4408: 48, 4409: 18, 4410: 29, 4411: 16, 4412: 53, 4413: 25, 4414: 29, 4415: 34, 4416: 30, 4417: 32, 4418: 24, 4419: 32, 4420: 27, 4421: 24, 4422: 32, 4423: 32, 4424: 60 }],
 ];
 
 function suite(collection, catalog, MEASURES) {
