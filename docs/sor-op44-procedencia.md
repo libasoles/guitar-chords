@@ -108,6 +108,17 @@ los compases 10 y 11. El Re sostenido y el Fa sostenido del compás 13 se mantie
 tablatura. Se consultó la [transcripción de Weed](https://www.classtab.org/sor_op44_24_pieces_progressives_no11_andante_in_em.txt)
 como referencia adicional de alturas.
 
+### N.º 12: Andantino en Mi menor y Mi mayor
+
+48 compases en 6/8 y cinco anacrusas escritas. Transcripción de #837753, p. 7,
+cotejada con #470296, p. 13. Se mantiene el regreso escrito a Mi menor, incluido el Si
+de enlace anterior a la última anacrusa. El cierre conserva la barra final del facsímil.
+En el Andantino se conservan los compases de cierre abreviados y las voces de sus bajos
+ligados. En los compases 26 y 28, la digitación usa cuerdas diferentes para mantener el
+Si y tocar el Re sostenido y el Do sostenido de la melodía. Se consultó la
+[transcripción de Weed](https://www.classtab.org/sor_op44_24_pieces_progressives_no12_andantino_in_em.txt)
+para contrastar alturas.
+
 ## Verificación
 
 Pruebas de conversión y compases; artefactos, metadatos y licencias por pieza; página, índice,

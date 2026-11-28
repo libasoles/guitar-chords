@@ -148,7 +148,8 @@ def build(number):
     with tempfile.TemporaryDirectory() as tmp:
         extract.patch_engine(tabify)
         prepared = os.path.join(tmp, 'prepared')
-        result = tabify.prepare(source, 'musicxml', PIECES[number].get('tuning', 'standard'), prepared, per_row=PER_ROW.get(number, 4), arpeggio='auto' if number in ARPEGGIO else False)
+        result = tabify.prepare(source, 'musicxml', PIECES[number].get('tuning', 'standard'), prepared, per_row=PER_ROW.get(number, 4), arpeggio='auto' if number in ARPEGGIO else False,
+                                repair_voices=PIECES[number].get('repair_voices', True))
         if result['dropped']:
             raise RuntimeError(f"Notas descartadas en la pieza {number}: {result['dropped']}")
         with open(os.path.join(prepared, tabify.SUGGESTION_NAME), encoding='utf-8') as f:

@@ -75,3 +75,28 @@ test('Op. 44 n.º 4: el Sol sostenido del compás 8 y su reataque usan cuerdas d
   assert.deepEqual(gNotes.map((note) => [note.match(/<type>(\w+)<\/type>/)[1], note.match(/<string>(\d+)<\/string>/)[1]]),
     [['eighth', '3'], ['eighth', '3'], ['quarter', '4']]);
 });
+
+test('Op. 44 n.º 12: las voces del cierre breve conservan sus ataques simultáneos', () => {
+  const piece = op44.publishedPieces().find((p) => p.number === 4412);
+  const xml = fs.readFileSync(path.join(op44.DOWNLOADS_DIR, piece.pdf.replace(/\.pdf$/, '.musicxml')), 'utf8');
+  const firstClosingBar = measure(xml, 8);
+  let cursor = 0;
+  let onset = 0;
+  const firstAttack = [];
+  for (const event of firstClosingBar.matchAll(/<(note|backup|forward)\b[^>]*>([^]*?)<\/\1>/g)) {
+    const [, type, body] = event;
+    const duration = Number(body.match(/<duration>(\d+)<\/duration>/)?.[1] || 0);
+    if (type === 'note') {
+      if (!/<chord\s*\/>/.test(body)) {
+        onset = cursor;
+        cursor += duration;
+      }
+      const step = body.match(/<step>(\w+)<\/step>/)?.[1];
+      if (onset === 0 && step && /<staff>2<\/staff>/.test(body)) firstAttack.push(step);
+    } else {
+      cursor += type === 'backup' ? -duration : duration;
+    }
+  }
+  assert.deepEqual(firstAttack.sort(), ['A', 'E', 'F']);
+  assert.equal((xml.match(/<repeat direction="backward"/g) || []).length, 4);
+});

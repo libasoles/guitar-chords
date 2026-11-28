@@ -47,38 +47,10 @@
     "credit_url": "https://imslp.org/wiki/Special:ImagefromIndex/837753",
     "tab_fixes": {
       "9": [
-        [
-          null,
-          null,
-          0,
-          null,
-          null,
-          null
-        ],
-        [
-          null,
-          null,
-          null,
-          null,
-          null,
-          3
-        ],
-        [
-          null,
-          null,
-          null,
-          5,
-          null,
-          null
-        ],
-        [
-          null,
-          null,
-          0,
-          null,
-          null,
-          null
-        ]
+        [null, null, 0, null, null, null],
+        [null, null, null, null, null, 3],
+        [null, null, null, 5, null, null],
+        [null, null, 0, null, null, null]
       ]
     }
   },
@@ -153,5 +125,37 @@
     "license": "public-domain",
     "credit": "Transcripcion a partir de la edicion de Paris, chez l'auteur et Pacini, en IMSLP",
     "credit_url": "https://imslp.org/wiki/Special:ImagefromIndex/837753"
+  },
+  "4412": {
+    "n": 12,
+    "opus": 44,
+    "form": "E Minor and E Major",
+    "es": "Mi menor y Mi mayor",
+    "pt": "Mi menor e Mi maior",
+    "source": "sor_op44-12.ly",
+    "editor": "Fernando Sor",
+    "license": "public-domain",
+    "credit": "Transcripcion a partir de la edicion de Paris, chez l'auteur et Pacini, en IMSLP",
+    "credit_url": "https://imslp.org/wiki/Special:ImagefromIndex/837753",
+    "repair_voices": false,
+    "tab_fixes": {
+      "30": [
+        [null, 7, null, null, 7, null],
+        [0, 0, null, 6, null, null],
+        [null, null, 8, null, null, null],
+        [null, null, 6, null, null, null],
+        [null, 0, null, null, null, null],
+        [null, null, null, 2, null, null],
+        [null, 0, 1, 2, null, null]
+      ],
+      "32": [
+        [null, 7, null, null, 7, null],
+        [0, 0, null, 6, null, null],
+        [null, null, 8, null, null, null],
+        [null, null, 6, null, null, null],
+        [null, 0, null, null, null, null],
+        [null, null, 1, 2, null, null]
+      ]
+    }
   }
 }
