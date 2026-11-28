@@ -20,7 +20,7 @@ identifica 24 piezas, primera publicación en París en 1831, dedicadas a Roland
 
 ## Publicación
 
-La página incluye las piezas **1 a 4 y 6 a 9**.
+La página incluye las piezas **1 a 4 y 6 a 10**.
 Cada incorporación tiene su propio commit con fuente, MusicXML, PDF, vista previa y páginas del visor.
 El catálogo `scripts/sor/opus44.json` usa claves 4401, 4402…; `n` conserva el número impreso.
 Se generan mediante `scripts/sor/build.py opus44 convert 4401` y `scripts/sor/build.py opus44 4401`.
@@ -91,6 +91,13 @@ Como comprobación adicional de alturas se consultó la [transcripción de Weed]
 18 compases escritos en compás común. Transcripción de #837753, p. 6, cotejada con #470296, p. 10.
 Se conservan las dos parejas de casillas de repetición, la ligadura del Sol de los compases 1 y 2,
 las voces intermedias y las alteraciones de paso. Se consultó la [transcripción de Weed](https://www.wussu.com/guitar/sor_op44_24_pieces_progressives_no09_andantino_in_g_wd.txt)
+como referencia adicional de alturas.
+
+### N.º 10: Allegretto en Sol mayor
+
+26 compases escritos y tres anacrusas en 6/8. Transcripción de #837753, p. 6, cotejada con #470296, p. 11.
+Se conservan las dos repeticiones, las notas de adorno, el Sol ligado y el ligado de Si a Sol.
+Se consultó la [transcripción de Weed](https://www.wussu.com/guitar/sor_op44_24_pieces_progressives_no10_allegretto_in_g.txt)
 como referencia adicional de alturas.
 
 ## Verificación
