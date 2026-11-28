@@ -93,14 +93,14 @@ test('el MusicXML baja una octava y marca un renglon por cada cuatro compases', 
   assert.match(xml, /<clef-octave-change>-1<\/clef-octave-change>/);
 });
 
-test('cada compas del MusicXML suma 96 divisiones, con silencios ocultos de relleno', () => {
+test('cada compas del MusicXML suma 96 divisiones, con <forward> de relleno', () => {
   const score = M.emptyScore();
   score.rows[0][0] = [{ d: 'q', dot: true, n: 30 }, { d: 's', n: 31 }];
   const xml = M.toMusicXml(score);
   const first = xml.split('<measure ')[1];
   const total = [...first.matchAll(/<duration>(\d+)<\/duration>/g)].reduce((sum, m) => sum + Number(m[1]), 0);
   assert.equal(total, 96);
-  assert.match(first, /print-object="no"/);
+  assert.match(first, /<forward><duration>/);
 });
 
 test('las corcheas del mismo pulso se ligan y las de pulsos distintos no', () => {
@@ -122,7 +122,7 @@ test('una negra sola en medio de un compas vacio es un compas de una negra: el h
   const score = M.emptyScore();
   score.rows[0][0] = measure;
   const first = M.toMusicXml(score).split('<measure ')[1];
-  assert.match(first, /^[^]*?<step>E<\/step>[^]*<rest\/><duration>48<\/duration>/, 'la negra va primero; el relleno oculto queda al final');
+  assert.match(first, /^[^]*?<step>E<\/step>[^]*<forward><duration>72<\/duration>/, 'la negra va primero; el relleno queda al final');
   assert.deepEqual(M.sanitize(M.clone(score)).rows[0][0], [{ d: 'q', n: 30, at: 0 }]);
 });
 
@@ -251,10 +251,11 @@ test('la polifonia sobrevive al guardado y exporta tiempos, duraciones y voces i
   let cursor = 0;
   let previous = 0;
   const notes = new Map();
-  for (const match of first.matchAll(/<(note|backup)\b([^>]*)>([^]*?)<\/\1>/g)) {
+  for (const match of first.matchAll(/<(note|backup|forward)\b([^>]*)>([^]*?)<\/\1>/g)) {
     const [, tag, attrs, body] = match;
     const duration = Number(body.match(/<duration>(\d+)<\/duration>/)[1]);
     if (tag === 'backup') { cursor -= duration; continue; }
+    if (tag === 'forward') { cursor += duration; continue; }
     const chord = body.includes('<chord/>');
     const at = chord ? previous : cursor;
     if (!chord) { previous = cursor; cursor += duration; }
@@ -1106,7 +1107,7 @@ test('las voces salen del registro y del orden, no de at: el compas real tiene 2
   const voices = first.split('<backup>');
   assert.equal(voices.length, 2);
   voices.forEach((part) => {
-    const hidden = [...part.matchAll(/<note print-object="no"><rest\/><duration>(\d+)<\/duration>/g)].map((m) => +m[1]);
+    const hidden = [...part.matchAll(/<forward><duration>(\d+)<\/duration>/g)].map((m) => +m[1]);
     assert.deepEqual(hidden, [24], 'solo el relleno del final del compas');
   });
 });
