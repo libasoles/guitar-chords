@@ -20,8 +20,8 @@ identifica 24 piezas, primera publicación en París en 1831, dedicadas a Roland
 
 ## Publicación
 
-La página incluye las piezas **1 a 4 y 6 a 10**.
-Cada incorporación tiene su propio commit con fuente, MusicXML, PDF, vista previa y páginas del visor.
+La página incluye las piezas **1 a 4 y 6 a 20**.
+Cada incorporación incluye la fuente, el MusicXML, el PDF, la vista previa y las páginas del visor.
 El catálogo `scripts/sor/opus44.json` usa claves 4401, 4402…; `n` conserva el número impreso.
 Se generan mediante `scripts/sor/build.py opus44 convert 4401` y `scripts/sor/build.py opus44 4401`.
 
@@ -137,6 +137,48 @@ ligaduras del La grave. En el compás 7 se lee Do sostenido según la armadura y
 27, Fa sostenido, Fa sostenido y Sol en el bajo, conforme al facsímil. Se consultó la
 [transcripción de Weed](https://www.classtab.org/sor_op44_24_pieces_progressives_no14_moderato_in_d.txt)
 como referencia adicional de alturas.
+
+### N.º 15. Andante en Re mayor
+
+32 compases, con dos anacrusas de dos semicorcheas, en 2/4. Fuente #837753, p. 8,
+cotejada con #470296, p. 16. Se conservan el primer cierre abreviado, el adorno
+del compás 20 y el bajo descendente en semicorcheas del 22.
+
+### N.º 16. Andante en Re mayor
+
+28 compases, con dos anacrusas de corchea, en 2/4. Fuente #837753, p. 9, cotejada
+con #470296, p. 17. Se conservan la apoyatura breve, los ritmos con puntillo y
+el La ligado en el bajo del compás 15.
+
+### N.º 17. Cantabile en Re menor
+
+32 compases en 3/4. Fuente #837753, p. 9, cotejada con #470296, p. 18. Se
+transcriben las secciones tal como aparecen escritas, incluidos el La ligado
+del compás 5 y el reataque correspondiente en el compás 13.
+
+### N.º 18. Marche en Re mayor
+
+24 compases en compás común. Fuente #837753, p. 10, cotejada con #470296, p. 19.
+Se conservan las dos repeticiones. Los diamantes indican las alturas sonoras
+de los armónicos y la tablatura indica las cuerdas y los trastes de contacto,
+incluido el acorde de tres armónicos del compás 20.
+
+### N.º 19. Allegretto en Re mayor
+
+32 compases en 6/8. Fuente #837753, p. 10, cotejada con #470296, p. 20. Se
+conservan el segno inicial y las dos indicaciones «Fin.». El segno invertido
+del cierre se indica como «D.S. al Fin.». El armónico del compás 16 se
+transcribe como Re agudo, con contacto en el quinto traste de la cuarta
+cuerda, según la indicación de ambos facsímiles.
+
+### N.º 20. Andantino en La mayor
+
+24 compases en 2/4, dos anacrusas de dos corcheas y un silencio de negra tras
+la última repetición. Fuente #837753, p. 11, cotejada con #470296, p. 21.
+Se conservan los enlaces cromáticos, las ligaduras y las voces sostenidas.
+
+Se consultaron las [transcripciones de Weed](https://www.classtab.org/index_old.htm)
+de los números 15 a 20 como referencia adicional de alturas.
 
 ## Verificación
 
