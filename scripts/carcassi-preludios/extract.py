@@ -309,9 +309,11 @@ def build(number):
     with fixed metadata: no producer, dates, editor or source file name.
     """
     import tempfile
+    from xml.etree import ElementTree as ET
     from pypdf import PdfReader, PdfWriter
     from pypdf.generic import NameObject
     sys.path.insert(0, os.path.join(ROOT, "backend", "engine"))
+    import barres
     import tabify
 
     source = os.path.join(CORRECTED, f"prelude-{number:02d}.musicxml")
@@ -330,7 +332,9 @@ def build(number):
         with open(os.path.join(prepared, tabify.SUGGESTION_NAME), encoding="utf-8") as f:
             suggestion = json.load(f)
         tabs = suggestion["tabs"]
-        tabs = avoid_repeated_strings(tabs, tabify.open_midis(tabify.STANDARD_TUNING), barres=suggestion.get("barres"))
+        opens = tabify.open_midis(tabify.STANDARD_TUNING)
+        tabs = avoid_repeated_strings(tabs, opens, barres=suggestion.get("barres"))
+        normalized = os.path.join(prepared, tabify.NORMALIZED_NAME)
         if EDITION == "carcassi" and number == 9:
             # Requested TAB voicing: play the B bass on the sixth string in m. 15,
             # and play G# on the third string in the closing chord (m. 16).
@@ -367,6 +371,29 @@ def build(number):
                     if column[old_string] == old_fret:
                         column[old_string] = None
                         column[new_string] = new_fret
+        if EDITION == "santisteban" and number == 10:
+            # Use x46654 in bar 1 and retain the published positions in bars 2 and 8.
+            for measure, cells in [
+                (0, [(4, 4), (3, 6), (2, 6), (1, 5)]),
+                (1, [(3, 1)]),
+                (7, [(2, 1), (1, 2), (0, 0)]),
+            ]:
+                by_pitch = {opens[string] + fret: (string, fret) for string, fret in cells}
+                for column in tabs[measure]:
+                    positions = [
+                        by_pitch.get(opens[string] + fret, (string, fret))
+                        for string, fret in enumerate(column) if fret is not None
+                    ]
+                    column[:] = [None] * len(opens)
+                    for string, fret in positions:
+                        column[string] = fret
+            score = ET.parse(normalized)
+            first = score.find("./part/measure")
+            start = list(first).index(first.find("note"))
+            first.insert(start, barres.direction("<words>C 4</words>"))
+            first.insert(start + 1, barres.direction('<dashes type="start" number="1"/>'))
+            first.insert(list(first).index(first.find("backup")), barres.direction('<dashes type="stop" number="1"/>'))
+            score.write(normalized, encoding="utf-8", xml_declaration=True)
         if EDITION == "santisteban" and number == 12:
             # Requested TAB voicing: the three D bass quarters of the last bar (m. 12 in the file,
             # shown as 13) all on the open fourth string instead of fret 5 on the fifth.
@@ -374,7 +401,7 @@ def build(number):
                 if column[4] == 5:
                     column[4] = None
                     column[3] = 0
-        tabify.export(os.path.join(prepared, tabify.NORMALIZED_NAME), os.path.join(prepared, tabify.SUGGESTION_NAME),
+        tabify.export(normalized, os.path.join(prepared, tabify.SUGGESTION_NAME),
                       tabs,
                       "standard", exported, title=title, subtitle=subtitle)
         write_preview(number, prepared, exported)
