@@ -7,6 +7,8 @@
   "files": [
     "src/shared/chords-db.js",
     "src/shared/chords-db.d.ts",
+    "src/shared/broken-chords-db.js",
+    "src/shared/broken-chords-db.d.ts",
     "src/shared/chord-search.js",
     "src/shared/chord-search.d.ts",
     "vendor/fuzzysort.js"

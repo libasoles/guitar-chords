@@ -1009,4 +1009,4 @@ function extensionChords(strings) {
   return orderedRoots(roots).map(([, root]) => root);
 }
 
-module.exports = { renderBody, cardImage, searchControl, GROUPS, extensionChords };
+module.exports = { renderBody, cardImage, searchControl, GROUPS, extensionChords, chordCardData };
