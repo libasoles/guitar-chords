@@ -1773,3 +1773,60 @@ body.score-moving-measure, body.score-moving-measure * { cursor: grabbing !impor
   left: 0;
   transform: none;
 }
+
+/* Informacion de las notas elegidas (tecla I) */
+.score-note-info:not(:popover-open) {
+  display: none;
+}
+
+.score-note-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 11rem;
+  max-width: min(22rem, calc(100vw - 1rem));
+}
+
+.score-note-info h3 {
+  margin: 0 0 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.score-note-info p {
+  margin: 0;
+}
+
+.score-note-info-notes {
+  font-variant-numeric: tabular-nums;
+  word-spacing: 0.15em;
+}
+
+.score-note-info-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.score-note-info-others,
+.score-note-info-context,
+.score-note-info-none {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.score-note-info-diagrams {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.score-note-info-diagrams figure {
+  margin: 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
