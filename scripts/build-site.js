@@ -1290,7 +1290,7 @@ function renderPrivacyPage(template, strings, locale) {
 
 // The score modal (popover.modal-full) is mirrored in the URL hash (#<modal id>), so a reload or a shared link
 // reopens it. Only on desktop: on mobile the cards download the PDF instead of opening the modal.
-const MODAL_HASH_SCRIPT =
+const MODAL_HASH_SCRIPT = (locale) =>
   "<script>(function(){" +
   'var modals=document.querySelectorAll(".modal-full");' +
   'var desktop=window.matchMedia("(min-width: 48.01rem)");' +
@@ -1309,6 +1309,19 @@ const MODAL_HASH_SCRIPT =
   "var target=location.hash&&document.getElementById(location.hash.slice(1));" +
   "if(target&&target.classList.contains('modal-full')&&desktop.matches){" +
   "try{target.showPopover();}catch(e){}}" +
+  // "I" sends the open score to the internal editor: its MusicXML (next to the PDF) travels through sessionStorage
+  // and the editor adapter (src/site/score-editor.js) opens it as a new tab.
+  "document.addEventListener('keydown',function(e){" +
+  "if((e.key!=='i'&&e.key!=='I')||e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;" +
+  "var t=e.target;if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))return;" +
+  "var open=document.querySelector('.modal-full:popover-open');" +
+  "var a=open&&open.querySelector('a.modal-download');if(!a)return;" +
+  "var url=a.getAttribute('href').replace(/\\.pdf$/i,'.musicxml');e.preventDefault();" +
+  "fetch(url).then(function(r){if(!r.ok)throw 0;return r.text();}).then(function(xml){" +
+  "var name=decodeURIComponent(url.split('/').pop());" +
+  "sessionStorage.setItem('partitura.handoff',JSON.stringify({name:name,xml:xml}));" +
+  "location.href=" + JSON.stringify(pagePath("partitura", locale)) + ";" +
+  "}).catch(function(){});});" +
   "})();</script>";
 
 // Render a page of the articles section. These pages live one level deeper
@@ -1337,7 +1350,7 @@ function renderArticlePage(strings, locale, slug, keys, bodyHtml, backHtml, head
     .split("%%ARTICLE_BACK%%")
     .join(backHtml)
     .split("%%ARTICLE_BODY%%")
-    .join(renderArticleLinks(bodyHtml) + (bodyHtml.indexOf("modal-full") === -1 ? "" : MODAL_HASH_SCRIPT));
+    .join(renderArticleLinks(bodyHtml) + (bodyHtml.indexOf("modal-full") === -1 ? "" : MODAL_HASH_SCRIPT(locale)));
   return withGuideJsonLd(html, strings, locale, slug, keys.title, keys.meta);
 }
 
@@ -2061,7 +2074,12 @@ copyFile(
   const folder = path.basename(edition.PREVIEW_DIR);
   const target = path.join(ASSETS_DIST, "articles", folder);
   ensureDir(path.join(target, "full"));
-  edition.pdfFiles().forEach((pdf) => copyFile(pdf.src, path.join(target, pdf.name)));
+  edition.pdfFiles().forEach((pdf) => {
+    copyFile(pdf.src, path.join(target, pdf.name));
+    // The viewer's "I" shortcut opens the score in the editor from its MusicXML, which sits next to the PDF.
+    const xml = pdf.src.replace(/\.pdf$/i, ".musicxml");
+    if (fs.existsSync(xml)) copyFile(xml, path.join(target, pdf.name.replace(/\.pdf$/i, ".musicxml")));
+  });
   const image = edition.cardImage();
   copyFile(image.src, path.join(target, image.name));
   edition.pageSvgFiles().forEach((page) => copyFile(page.src, path.join(target, "full", page.name)));

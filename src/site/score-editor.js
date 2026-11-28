@@ -1,6 +1,18 @@
 // Host adapter: the editor logic comes from Partitura; controls stay in the sidebar.
 import { startEditor } from 'partitura/editor';
 
+// The score viewer ("I" key in the sheet-music pages) leaves its MusicXML in sessionStorage; open it as a new tab.
+async function openHandoff(actions) {
+  let handoff = null;
+  try {
+    handoff = JSON.parse(sessionStorage.getItem('partitura.handoff'));
+    sessionStorage.removeItem('partitura.handoff');
+  } catch (e) { return; }
+  if (!handoff || typeof handoff.xml !== 'string') return;
+  await actions.ready;
+  actions.loadFile(new File([handoff.xml], String(handoff.name || 'score.musicxml'), { type: 'application/vnd.recordare.musicxml+xml' }));
+}
+
 function bindActions(actions) {
   const icons = {
     upload: '<path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>',
@@ -50,6 +62,7 @@ function bindActions(actions) {
   downloadToggle.addEventListener('focus', actions.warm, { once: true });
   document.getElementById('scoreDownloadXml').addEventListener('click', () => actions.exportMusicXml());
   document.getElementById('scoreDownloadMidi').addEventListener('click', () => actions.exportMidi());
+  openHandoff(actions);
   document.getElementById('scoreDownloadPdf').addEventListener('click', (event) => actions.exportPdf(event.currentTarget));
 }
 
