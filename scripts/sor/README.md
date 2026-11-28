@@ -31,8 +31,7 @@ el MusicXML y las páginas del visor. Los nombres de archivo se conservan en ing
 Las tarjetas y la navegación siguen el idioma de la página.
 
 El Op. 44 tiene una página y un catálogo propios; sus títulos del PDF y del visor también están en español,
-con nombres de archivo en inglés. La colección se inicia con sus dos primeras piezas y conserva los originales
-completos para continuarla. Fuentes, cotejos y alcance en [la nota de procedencia](../../docs/sor-op44-procedencia.md).
+con nombres de archivo en inglés. La colección conserva los originales completos para continuarla. Fuentes, cotejos y alcance en [la nota de procedencia](../../docs/sor-op44-procedencia.md).
 No se confunde con el Op. 44 bis para dos guitarras.
 
 ## Agregar una pieza a una colección existente

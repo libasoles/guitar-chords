@@ -6,6 +6,10 @@ const path = require('node:path');
 const op44 = require('../scripts/lib/article-sor-op44');
 const { pagePath } = require('../scripts/lib/slugs');
 
+function measure(xml, number) {
+  return xml.match(new RegExp('<measure\\b[^>]*number="' + number + '"[^>]*>([^]*?)<\\/measure>'))[1];
+}
+
 test('Op. 44: colección propia, ordenada, con textos en los tres idiomas', () => {
   const pieces = op44.publishedPieces();
   assert.ok(pieces.length > 0);
@@ -32,11 +36,18 @@ test('Op. 44 n.º 1: anacrusa, voces separadas y adorno final del impreso', () =
 
 test('Op. 44 n.º 2: Do ligado entre 11–12 y atribución CC BY 3.0', () => {
   const xml = fs.readFileSync(path.join(__dirname, '../scripts/sor/sources/opus44/4402.musicxml'), 'utf8');
-  const bar = (number) => xml.match(new RegExp('<measure\\b[^>]*number="' + number + '"[^>]*>([\\s\\S]*?)<\\/measure>'))[1];
-  assert.match(bar(11), /<tie type="start"/);
-  assert.match(bar(12), /<tie type="stop"/);
+  assert.match(measure(xml, 11), /<tie type="start"/);
+  assert.match(measure(xml, 12), /<tie type="stop"/);
   assert.equal(op44.PIECES[4402].license_family, 'by');
   const pdf = fs.readFileSync(path.join(op44.DOWNLOADS_DIR, op44.publishedPieces().find((p) => p.number === 4402).pdf), 'latin1');
   assert.match(pdf, /\(CC BY 3\.0\)/);
   assert.doesNotMatch(pdf, /CC BY-SA/);
+});
+
+test('Op. 44 n.º 3: 40 compases en 3/4 y Sol ligado entre 21–22', () => {
+  const xml = fs.readFileSync(path.join(__dirname, '../scripts/sor/sources/opus44/4403.musicxml'), 'utf8');
+  assert.equal((xml.match(/<measure\b/g) || []).length, 40);
+  assert.match(xml, /<time><beats>3<\/beats><beat-type>4<\/beat-type><\/time>/);
+  assert.match(measure(xml, 21), /<step>G<\/step><octave>4<\/octave><\/pitch><duration>480<\/duration><tie type="start"/);
+  assert.match(measure(xml, 22), /<step>G<\/step><octave>4<\/octave><\/pitch><duration>480<\/duration><tie type="stop"/);
 });

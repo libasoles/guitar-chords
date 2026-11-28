@@ -20,7 +20,7 @@ identifica 24 piezas, primera publicación en París en 1831, dedicadas a Roland
 
 ## Publicación
 
-La página se inicia con las piezas **1 y 2**. Esto no significa que las otras 22 ya estén transcritas.
+La página incluye las piezas **1 a 3**.
 Cada incorporación tiene su propio commit con fuente, MusicXML, PDF, vista previa y páginas del visor.
 El catálogo `scripts/sor/opus44.json` usa claves 4401, 4402…; `n` conserva el número impreso.
 Se generan mediante `scripts/sor/build.py opus44 convert 4401` y `scripts/sor/build.py opus44 4401`.
@@ -45,6 +45,12 @@ Se conservan el original descargado y su atribución. Se coteja con #837753, p. 
 Se restituye «Allegretto» frente al «Moderato» con metrónomo de Eggers; se omiten sus dedos y acentos.
 El Do bajo entre 11 y 12 permanece ligado como en París. Dos voces independientes; sin fusión por
 coincidencia rítmica. PDF de una página y visor revisados; TAB sin conflictos de cuerdas sostenidas.
+
+### N.º 3: Andantino en Do mayor
+
+40 compases, 3/4. Transcripción de #837753, p. 3, cotejada con #470296, p. 4.
+Las dos voces conservan sus duraciones independientes y el Sol agudo se liga entre los compases 21 y 22.
+La TAB se genera en afinación estándar, sin trasladar los números de dedo del impreso.
 
 ## Verificación
 

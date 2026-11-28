@@ -21,5 +21,17 @@
     "editor": "Louie van Bommel",
     "license": "3.0",
     "license_family": "by"
+  },
+  "4403": {
+    "n": 3,
+    "opus": 44,
+    "form": "C Major",
+    "es": "Do mayor",
+    "pt": "Dó maior",
+    "source": "sor_op44-03.ly",
+    "editor": "Fernando Sor",
+    "license": "public-domain",
+    "credit": "Transcripcion a partir de la edicion de Paris, chez l'auteur et Pacini, en IMSLP",
+    "credit_url": "https://imslp.org/wiki/Special:ImagefromIndex/837753"
   }
 }
