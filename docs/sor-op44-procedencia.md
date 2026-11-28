@@ -129,6 +129,15 @@ invertido al final se escribe «D.S. al Fin.». Se consultó la
 [transcripción de Weed](https://www.wussu.com/guitar/sor_op44_24_pieces_progressives_no13_allegretto_in_em.txt)
 como referencia adicional de alturas y métrica.
 
+### N.º 14: Tempo di minuetto moderato en Re mayor
+
+28 compases en 3/4 y una anacrusa de negra. Transcripción de #837753, p. 8, cotejada
+con #470296, p. 15. Se conservan el adorno del compás 6, el Fa natural del 15 y las
+ligaduras del La grave. En el compás 7 se lee Do sostenido según la armadura y, en el
+27, Fa sostenido, Fa sostenido y Sol en el bajo, conforme al facsímil. Se consultó la
+[transcripción de Weed](https://www.classtab.org/sor_op44_24_pieces_progressives_no14_moderato_in_d.txt)
+como referencia adicional de alturas.
+
 ## Verificación
 
 Pruebas de conversión y compases; artefactos, metadatos y licencias por pieza; página, índice,
